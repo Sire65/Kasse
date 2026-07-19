@@ -1,0 +1,1295 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#07111f">
+  <title>KC MarktKasse V0.29.0 – Sauber konsolidiert</title>
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="stylesheet" href="styles.css">
+  <style id="tablet-critical-css">
+    /* Kritische Tablet-Regeln direkt in index.html: verhindert Layoutsprung auf GitHub Pages. */
+    html,body{min-width:0;min-height:100%;overscroll-behavior:none}
+    button,input,select{touch-action:manipulation}
+    .display-settings-button{min-width:54px;min-height:54px;font-size:24px;border-radius:14px}
+    @media (pointer:coarse){button{min-height:46px}.product-tile{min-height:138px}.category-tabs button{min-height:52px}}
+    @media (max-width:1180px),(max-height:820px){
+      .app-header{position:sticky;top:0;z-index:20}
+      .main-layout{grid-template-columns:minmax(0,1fr) minmax(300px,36vw)}
+      .product-grid{gap:10px}.product-tile{min-height:126px}.mode-strip{overflow-x:auto;white-space:nowrap}
+    }
+    @media (orientation:portrait) and (max-width:900px){
+      .app-header{position:static}.main-layout{grid-template-columns:1fr}.cart-area{min-height:250px}.status-footer{overflow-x:auto}
+    }
+  </style>
+</head>
+<body class="public-beta">
+<div id="app" class="app-shell">
+  <header class="app-header">
+    <button class="brand-block secret-trigger" id="secretTrigger" aria-label="Köcheclub Werne">
+      <img id="clubLogo" src="assets/logo.png" alt="">
+      <span class="brand-text">
+        <strong id="clubName">Köcheclub Werne</strong>
+        <small id="eventName">Weihnachtsmarkt 2026</small>
+      </span>
+    </button>
+
+    <div class="header-info">
+      <div class="info-cell"><span>KASSE</span><strong id="registerName">Kasse 1</strong><small id="operatorName">Bediener: Hans</small></div>
+      <div class="info-cell compact"><span>VERSION</span><strong id="version">V0.29.0</strong></div>
+      <div class="info-cell date-cell"><strong id="dateText">24.12.2026</strong><small id="timeText">16:32</small></div>
+      <div class="operator-mini-dashboard">
+        <span id="shiftStatus">Schicht aktiv</span>
+        <span id="cashStatus">Wechselgeld OK</span>
+        <span id="modeStatus">Normalbetrieb</span>
+      </div>
+    </div>
+
+    <div class="header-status">
+      <button class="menu-button" id="menuBtn">☰<small>MENÜ</small></button>
+    </div>
+  </header>
+
+  <section class="mode-strip">
+    <button id="operatorBtn" class="operator-button"><span>👤 <b id="operatorBtnName">Hans</b></span><small id="operatorConfirmState">aktiv</small></button>
+    <label class="product-search-wrap">🔎 <input id="productSearchInput" placeholder="Artikel suchen"></label>
+    <div class="mode-quick-switches" aria-label="Betriebsmodi">
+      <button id="trainingModeTopBtn" class="mode-quick-button" type="button"><span class="mode-led"></span><span>Trainingsmodus</span></button>
+      <button id="rushModeBtn" class="mode-quick-button" type="button"><span class="mode-led"></span><span>Stoßzeiten</span></button>
+      <button id="happyHourQuickBtn" class="mode-quick-button happy-hour-quick" type="button" hidden><span class="mode-led"></span><span id="happyHourQuickText">Happy Hour</span></button>
+    </div>
+    <button id="screenLockBtn" class="screen-lock-button" type="button" title="Bildschirm sperren" aria-label="Bildschirm sperren">🔒</button>
+    <button id="openingAssistantBtn" class="opening-compact">☀ Öffnen</button>
+    <span id="systemHint" class="system-hint">System bereit</span>
+  </section>
+
+  <main class="main-layout">
+<section class="sales-area">
+      <section id="workspaceModePanel" class="workspace-mode-panel" aria-live="polite" hidden>
+        <div id="workspaceModeText" class="workspace-mode-text"></div>
+      </section>
+      <nav id="categories" class="category-tabs"></nav>
+      <div id="productGrid" class="product-grid"></div>
+      <div class="pager" aria-label="Artikelseiten">
+        <button type="button" id="productPagePrev" aria-label="Vorherige Artikelseite"><span aria-hidden="true">‹</span><b>ZURÜCK</b></button>
+        <div id="productPageDots" class="pager-dots"></div>
+        <button type="button" id="productPageNext" aria-label="Nächste Artikelseite"><b>WEITER</b><span aria-hidden="true">›</span></button>
+      </div>
+    </section>
+
+    <aside class="cart-area">
+      <div id="notificationBar" class="notification-bar cart-notification" aria-live="polite" aria-atomic="true">
+        <span class="cart-notification-icon" aria-hidden="true">ⓘ</span>
+        <span id="cartNotificationText">Einkaufswagen abgerechnet</span>
+      </div>
+      <div class="cart-title">
+        <div class="cart-heading">
+          <span class="cart-heading-icon" aria-label="Einkaufswagen" title="Einkaufswagen">🛒</span>
+          <small id="selectedCartHint">Artikel im Einkaufswagen antippen</small>
+        </div>
+        <div id="cartQuantityBar" class="cart-quantity-bar" aria-label="Menge des markierten Artikels">
+          <span>MENGE</span>
+          <button type="button" data-cart-qty="1">1</button><button type="button" data-cart-qty="2">2</button><button type="button" data-cart-qty="3">3</button><button type="button" data-cart-qty="4">4</button><button type="button" data-cart-qty="5">5</button><button type="button" data-cart-qty="6">6</button><button type="button" data-cart-qty="7">7</button><button type="button" id="moreQuantityBtn" title="Andere Menge">…</button><button type="button" id="undoQuantityBtn" class="undo-quantity-button" title="Letzte Mengenänderung zurücknehmen" aria-label="Letzte Mengenänderung zurücknehmen">↶</button>
+        </div>
+        <button id="voidBonBtn" class="void-bon" title="Offenen Bon verwerfen" aria-label="Offenen Bon verwerfen"><span>BON</span> 🗑</button>
+      </div>
+
+      <div class="cart-column-head" aria-hidden="true">
+        <span>ARTIKEL</span><span>POS. RABATT</span><span>MENGE</span><span>PREIS</span><span></span>
+      </div>
+      <div id="cartList" class="cart-list"></div>
+
+      <div class="cart-summary">
+        <div class="summary-meta">
+          <span id="positionCount">0 POSITIONEN</span>
+          <span class="discount-inline">
+            <button id="discountBtn" class="discount-action cart-discount-button" title="Rabatt festlegen">🏷 RABATT</button>
+            <span id="discountDisplay" class="discount-summary-value">0,00 € Rabatt</span>
+          </span>
+        </div>
+        <div class="grand-total"><span class="grand-total-label">GESAMT <em id="grandTotalTrainingFlag" class="grand-total-training-flag" hidden>TRAININGSMODUS</em></span><strong id="grandTotal">0,00 €</strong></div>
+      </div>
+    </aside>
+  </main>
+
+  <section class="bottom-layout">
+    <div class="scanner-card">
+      <strong><span class="scan-dot">◉</span> SCANNER</strong>
+      <b>Bereit</b>
+      <p>Artikel scannen<br>oder auswählen</p>
+      <button id="undoLastBtn">↶ Letzter Artikel</button>
+    </div>
+
+    <div class="cash-card">
+      <h3>BARZAHLUNG</h3>
+      <div id="banknotes" class="banknote-row"></div>
+      <div id="coins" class="coin-row"></div>
+      <div class="cash-finish-row">
+        <button id="exactCashBtn" class="exact-button" type="button">STIMMT SO ✓</button>
+        <button id="roundUpBtn" class="roundup-button">AUFRUNDEN ⤴</button>
+      </div>
+    </div>
+
+    <div class="change-card">
+      <div class="change-card-head">
+        <span>RÜCKGELD</span>
+        <button type="button" id="undoCashBtn" class="cash-undo" title="Letzte Auswahl eines Scheins oder einer Münze zurücknehmen" aria-label="Letzte Geld-Auswahl zurücknehmen" disabled><b aria-hidden="true">↶</b><small>LETZTE GELDWAHL</small></button>
+      </div>
+      <strong id="changeDisplay">0,00 €</strong>
+      <em id="changePaymentState" class="change-payment-state">Noch kein Zahlbetrag</em>
+      <small>Gegeben: <b id="givenDisplay">0,00 €</b></small>
+      <small>Zu zahlen: <b id="dueDisplay">0,00 €</b></small>
+    </div>
+
+    <button id="cardBtn" class="card-payment card-payment-disabled" disabled aria-disabled="true" title="EC-Kartenzahlung ist noch nicht verfügbar"><b>EC</b><span>EC-KARTE</span><small>DEAKTIVIERT</small></button>
+
+    <div class="keypad-shell" aria-label="Universeller Zahlenblock">
+      <div class="keypad-mode-row">
+        <button type="button" data-keypad-mode="cash" class="active">💶 Bargeld</button>
+        <button type="button" data-keypad-mode="quantity">× Menge</button>
+        <button type="button" data-keypad-mode="discount">% Rabatt</button>
+        <button type="button" data-keypad-mode="article">▦ Artikel</button>
+        <button type="button" data-keypad-mode="bon">🧾 Bon</button>
+        <button type="button" data-keypad-mode="price" class="keypad-manager-mode">€ Preis</button>
+      </div>
+      <div class="keypad-display">
+        <span id="keypadModeLabel">BARGELD EINGEBEN</span>
+        <strong id="keypadDisplay">0,00 €</strong>
+        <small id="keypadHelp">Betrag eingeben. OK übernimmt ihn in die Rückgeldfunktion – der Bon bleibt offen.</small>
+      </div>
+      <div class="keypad">
+        <button data-key="7">7</button><button data-key="8">8</button><button data-key="9">9</button><button data-key="back">⌫</button>
+        <button data-key="4">4</button><button data-key="5">5</button><button data-key="6">6</button><button data-key="clear">C</button>
+        <button data-key="1">1</button><button data-key="2">2</button><button data-key="3">3</button><button data-key="00">00</button>
+        <button data-key=",">,</button><button data-key="0">0</button><button data-key=".">.</button><button data-key="ok" class="ok-key">OK</button>
+      </div>
+    </div>
+
+    <div class="main-actions" aria-label="Schnellfunktionen auf der ersten Kassenseite">
+      <button id="payBtn" class="pay pay-direct" title="Ohne vorherige Geldeingabe wird passend direkt abgerechnet"><span class="pay-label"><b id="payModeTitle">BAR DIREKT</b><small id="payModeDetail">PASSEND ABRECHNEN</small></span><canvas id="checkoutQrMini" class="pay-qr-canvas" width="116" height="116" aria-label="Bezahl-QR CMD-CHECKOUT"></canvas></button>
+      <button id="accountChargeBtn" class="account-charge">📄 AUF KONTO</button>
+      <button id="staffBtn" class="staff">👥 PERSONAL</button>
+      <button id="trainingModeBtn" class="training-action compatibility-mode-button" hidden>🎓 TESTMODUS</button>
+      <button id="depositBtn" class="deposit">♻ PFANDRÜCKGABE</button>
+      <button id="tipBtn" class="tip">💝 TRINKGELD</button>
+      <button id="complaintBtn" class="complaint-action">↩ REKLAMATION</button>
+      <button id="printBonBtn" class="print-bon">🧾 BONDRUCK</button>
+      <button id="moreBtn" class="more">••• MEHR</button>
+    </div>
+  </section>
+
+  <footer class="status-footer">
+    <span id="localStatus">● Kasse bereit</span>
+    <span id="trainingFooter" style="display:none">🎓 <b>TRAINING</b></span>
+    <span id="rushFooter" style="display:none">⚡ <b>STOSSBETRIEB</b></span>
+    <span id="footerClock">09:34:12</span>
+    <button type="button" id="tuvButton" class="tuv-button" title="Internen System-Selbsttest starten">TÜV</button>
+    <span id="panicHotspot" aria-label="Status">●</span>
+  </footer>
+</div>
+
+<dialog id="confirmDialog">
+  <form method="dialog" class="dialog-card">
+    <h2 id="confirmTitle">Bestätigen</h2>
+    <p id="confirmText"></p>
+    <div class="dialog-actions">
+      <button value="cancel">Abbrechen</button>
+      <button id="confirmAction" value="confirm" class="danger-action">Bestätigen</button>
+    </div>
+  </form>
+</dialog>
+
+<dialog id="messageDialog">
+  <form method="dialog" class="dialog-card centered">
+    <h2 id="messageTitle">Hinweis</h2>
+    <div id="messageValue" class="message-value">0,00 €</div>
+    <p id="messageText"></p>
+    <button value="ok" class="primary-action">Fertig</button>
+  </form>
+</dialog>
+
+<dialog id="moreDialog">
+  <form method="dialog" class="dialog-card more-card">
+    <button type="button" id="moreDialogCloseX" class="dialog-close-x" aria-label="Mehr-Fenster schließen" title="Schließen">×</button>
+    <h2>Weitere Funktionen</h2>
+    <div class="more-grid seller-tools-only">
+      <button type="button" data-action="lastbon">🧾 Letzten Bon</button>
+      <button type="button" data-action="operator">👤 Bediener wechseln</button>
+      <button type="button" data-action="tip">Trinkgeld</button>
+      <button type="button" data-action="deposit">Pfandrückgabe</button>
+      <button type="button" data-action="withdraw">Entnahme / Reklamation</button>
+      <button type="button" data-action="opening">Eröffnung</button>
+      <button type="button" data-action="closing">Tagesabschluss</button>
+      <button type="button" data-action="cashdeposit">Bargeldübergabe</button>
+      <button type="button" data-action="rush">Stoßbetrieb</button>
+      <button type="button" data-action="training">Training</button>
+      <button type="button" id="accountBalanceOpen">📊 Kontostände</button>
+      <button type="button" data-action="currency">💱 Währungsrechner</button>
+      <button type="button" data-action="manager">Superadmin</button>
+      <button value="close">Schließen</button>
+    </div>
+  </form>
+</dialog>
+
+
+
+<dialog id="currencyDialog">
+  <form method="dialog" class="dialog-card currency-card">
+    <button type="button" id="currencyDialogCloseX" class="dialog-close-x" aria-label="Währungsrechner schließen" title="Schließen">×</button>
+    <div class="currency-head"><div><span class="info-kicker">CURRENCYCORE · ORIENTIERUNGSWERKZEUG</span><h2>Währungsrechner</h2></div><span id="currencyOnlineState" class="currency-status">Offline-Kursbestand</span></div>
+    <div class="currency-grid">
+      <label>Betrag<input id="currencyAmount" type="number" min="0" step="0.01" value="100"></label>
+      <label>Ausgangswährung<select id="currencyFrom"></select></label>
+      <button type="button" id="currencySwap" class="currency-swap" title="Währungen tauschen">⇄</button>
+      <label>Zielwährung<select id="currencyTo"></select></label>
+    </div>
+    <section class="currency-result" aria-live="polite"><span id="currencyEquation">100,00 EUR</span><strong id="currencyConverted">–</strong><small id="currencyRateText">Kurs wird berechnet</small></section>
+    <div class="currency-meta"><span><b>Quelle:</b> Europäische Zentralbank (ECB)</span><span><b>Kursstand:</b> <span id="currencyRateDate">–</span></span><span><b>Letzter Abruf:</b> <span id="currencyFetchedAt">–</span></span></div>
+    <div class="currency-actions"><button type="button" id="currencyRefresh" class="primary-action">↻ Kurse mit Internet abgleichen</button><button type="button" id="currencyHistoryToggle">Historie anzeigen</button></div>
+    <div id="currencyHistoryPanel" class="currency-history" hidden><h3>Wechselkurshistorie</h3><div class="currency-table-wrap"><table><thead><tr><th>Abruf</th><th>Kursstand</th><th>Quelle</th><th>Währungen</th><th>Status</th></tr></thead><tbody id="currencyHistoryBody"></tbody></table></div><button type="button" id="currencyHistoryClear" class="quiet-danger">Lokale Historie leeren</button></div>
+    <aside class="currency-disclaimer"><b>Hinweis – keine Gewähr:</b> Die angezeigten Wechselkurse dienen ausschließlich der Orientierung. Trotz regelmäßiger Aktualisierung wird keine Gewähr für Richtigkeit, Vollständigkeit oder Aktualität übernommen. Maßgeblich sind die tatsächlich von Banken, Zahlungsdienstleistern oder Wechselstuben verwendeten Kurse. Die ECB veröffentlicht ihre Referenzkurse zu Informationszwecken und rät von ihrer Verwendung für Transaktionen ab.</aside>
+    <div class="dialog-actions"><a class="source-link" href="https://www.ecb.europa.eu/stats/policy_and_exchange_rates/euro_reference_exchange_rates/html/index.en.html" target="_blank" rel="noopener">Offizielle ECB-Quelle öffnen</a><button value="close">Schließen</button></div>
+  </form>
+</dialog>
+
+<dialog id="displaySettingsDialog">
+  <form method="dialog" class="dialog-card display-settings-card">
+    <div class="display-settings-head">
+      <div><span class="info-kicker">KASSENANSICHT</span><h2>Warengruppen und Artikel</h2></div>
+      <button value="cancel" class="icon-close" aria-label="Schließen">×</button>
+    </div>
+    <p class="display-settings-note">Hier wird nur festgelegt, was auf dieser Kasse angezeigt wird. Preise und Stammdaten können hier nicht verändert werden.</p>
+    <div class="display-settings-columns">
+      <section><h3>Warengruppen</h3><div id="displayGroupList" class="display-check-list"></div></section>
+      <section><h3>Artikel</h3><div id="displayArticleList" class="display-check-list article-display-list"></div></section>
+    </div>
+    <div class="dialog-actions">
+      <button value="cancel">Abbrechen</button>
+      <button type="button" id="applyDisplaySettings" class="primary-action">Übernehmen</button>
+    </div>
+  </form>
+</dialog>
+
+<dialog id="optionDialog">
+  <form method="dialog" class="dialog-card option-card">
+    <h2 id="optionTitle">Zusatz wählen</h2>
+    <p id="optionSubtitle" class="option-subtitle"></p>
+    <div id="optionButtons" class="option-grid"></div>
+    <button value="cancel" class="dialog-close">Abbrechen</button>
+  </form>
+</dialog>
+
+
+<dialog id="productInfoDialog">
+  <form method="dialog" class="dialog-card product-info-card">
+    <div class="info-dialog-head">
+      <div>
+        <span class="info-kicker">ARTIKELINFORMATION</span>
+        <h2 id="productInfoTitle">Artikel</h2>
+      </div>
+      <button value="close" class="icon-close" aria-label="Schließen">×</button>
+    </div>
+    <img id="productInfoImage" class="product-info-image" alt="">
+    <div id="productInfoContent" class="product-info-content"></div>
+    <div class="dialog-actions product-info-actions"><button type="button" id="productInfoDetailsBtn" class="primary-action">Vollständige Produktinformationen</button><button value="close" class="dialog-close">Schließen</button></div>
+  </form>
+</dialog>
+
+<dialog id="productDetailsDialog">
+  <form method="dialog" class="dialog-card product-details-card">
+    <div class="info-dialog-head"><div><span class="info-kicker">PRODUKTDATENBLATT</span><h2 id="productDetailsTitle">Artikel</h2></div><button value="close" class="icon-close" aria-label="Schließen">×</button></div>
+    <div id="productDetailsStatus" class="product-data-status"></div>
+    <div id="productDetailsContent" class="product-details-content"></div>
+    <button value="close" class="dialog-close">Schließen</button>
+  </form>
+</dialog>
+
+<dialog id="settingsDialog" data-admin-only="true">
+  <form method="dialog" class="dialog-card settings-card settings-wide">
+    <div class="settings-header">
+      <div>
+        <span class="info-kicker">ADMINBEREICH</span>
+        <h2>Einstellungen</h2>
+      </div>
+      <button value="cancel" class="icon-close" aria-label="Schließen">×</button>
+    </div>
+
+    <div class="settings-tabs" role="tablist">
+      <button type="button" class="active" data-settings-tab="general">Grundeinstellungen</button>
+      <button type="button" data-settings-tab="layout">Artikelbuttons</button>
+      <button type="button" data-settings-tab="deposit">Pfandregeln</button>
+      <button type="button" data-settings-tab="groups">Warengruppen</button>
+      <button type="button" data-settings-tab="articles">Artikel</button>
+      <button type="button" data-settings-tab="packages">📦 Packages</button>
+      <button type="button" data-settings-tab="offers">🏷 Angebote & Happy Hour</button>
+      <button type="button" data-settings-tab="system" class="superadmin-only">System</button>
+      <button type="button" data-settings-tab="transfer" class="superadmin-only">Import / Export</button>
+    </div>
+
+    <section class="settings-panel active" data-settings-panel="general">
+      <h3>Kassenidentität</h3>
+      <label class="setting-line"><span>Kassen-ID</span><input id="registerIdSetting" value="KASSE-01"></label>
+      <label class="setting-line"><span>Kassenname</span><input id="registerNameSetting" value="Kasse 1"></label>
+      <h3>Artikelinformationen</h3>
+      <label class="toggle-setting">
+        <span>
+          <strong>Info-I an Artikelbuttons anzeigen</strong>
+          <small>Nur Artikel mit hinterlegten Informationen erhalten das grüne I.</small>
+        </span>
+        <input id="showInfoToggle" type="checkbox">
+      </label>
+      <label class="toggle-setting">
+        <span>
+          <strong>Allergenhinweis hervorheben</strong>
+          <small>Allergene werden im Informationsfenster besonders deutlich angezeigt.</small>
+        </span>
+        <input id="highlightAllergensToggle" type="checkbox">
+      </label>
+      <h3>Bedienung und sichtbare Kassentasten</h3>
+      <label class="toggle-setting"><span><strong>Bediener vor jedem Verkauf bestätigen</strong><small>Vor dem ersten Artikel Bediener per QR oder Bedienertaste wählen.</small></span><input id="requireOperatorToggle" type="checkbox"></label>
+      <label class="toggle-setting"><span><strong>Taste Personal anzeigen</strong></span><input id="showStaffToggle" type="checkbox"></label>
+      <label class="toggle-setting"><span><strong>Taste Trinkgeld anzeigen</strong></span><input id="showTipToggle" type="checkbox"></label>
+      <label class="toggle-setting"><span><strong>Taste Pfandrückgabe anzeigen</strong></span><input id="showDepositToggle" type="checkbox"></label>
+      <label class="toggle-setting"><span><strong>Taste Bondruck anzeigen</strong></span><input id="showPrintToggle" type="checkbox"></label>
+      <p class="setting-help">
+        Pro Artikel können Zutaten, Allergene, Inhaltsstoffe, Herkunft, Zubereitungshinweise
+        und frei definierte wichtige Hinweise gespeichert werden.
+      </p>
+    </section>
+
+    <section class="settings-panel" data-settings-panel="layout">
+      <h3>Größe und Darstellung</h3>
+      <label class="setting-line"><span>Button-Größe</span>
+        <select id="buttonSizeSelect">
+          <option value="compact">Kompakt – mehr Artikel sichtbar</option>
+          <option value="standard">Standard</option>
+          <option value="large">Groß – besonders leicht zu treffen</option>
+        </select>
+      </label>
+      <label class="setting-line"><span>Darstellungsart</span>
+        <select id="buttonModeSelect">
+          <option value="image">Nur Bild mit Textüberlagerung</option>
+          <option value="mixed">Bild, Farbe und Text</option>
+          <option value="color">Farbige Buttons ohne Bild</option>
+          <option value="text">Nur Text</option>
+        </select>
+      </label>
+      <label class="setting-line"><span>Preis anzeigen</span>
+        <select id="showPriceSelect">
+          <option value="yes">Ja</option>
+          <option value="no">Nein</option>
+        </select>
+      </label>
+      <div class="layout-preview">
+        <span>Vorschau</span>
+        <div id="layoutPreview" class="preview-tile">
+          <div class="preview-image"></div>
+          <strong>Feuerzangenbowle</strong>
+          <b>5,00 €</b>
+          <i>i</i>
+        </div>
+      </div>
+    </section>
+
+    <section class="settings-panel" data-settings-panel="deposit">
+      <h3>Pfandregel</h3>
+      <label class="setting-line"><span>Pfandregel Feuerzangenbowle</span>
+        <select id="depositRuleSelect">
+          <option value="automatic">Pfand automatisch zusätzlich buchen</option>
+          <option value="included">Pfand im angezeigten Gesamtpreis enthalten</option>
+          <option value="manual">Pfand immer manuell buchen</option>
+        </select>
+      </label>
+      <p class="setting-help">
+        Glaspfand 2,00 € und Feuerzangenpfand 2,00 € werden intern immer getrennt geführt.
+      </p>
+    </section>
+
+
+    <section class="settings-panel masterdata-panel" data-settings-panel="groups">
+      <div class="masterdata-head">
+        <div>
+          <h3>Warengruppen</h3>
+          <p>Warengruppen für Artikelbuttons, Auswertungen und Drucklisten verwalten.</p>
+        </div>
+        <span id="groupRecordStatus" class="record-status">Datensatz 1 von 1</span>
+      </div>
+
+      <div class="master-toolbar" id="groupToolbar">
+        <button type="button" data-command="new">＋ Neu</button>
+        <button type="button" data-command="save">💾 Speichern</button>
+        <button type="button" data-command="update">↻ Aktualisieren</button>
+        <button type="button" data-command="edit">✎ Bearbeiten</button>
+        <button type="button" data-command="print">🖨 Drucken</button>
+        <button type="button" data-command="import">⇩ Import</button>
+        <button type="button" data-command="export">⇧ Export</button>
+        <span class="toolbar-separator"></span>
+        <button type="button" data-command="first" title="Erster Datensatz">|‹</button>
+        <button type="button" data-command="prev" title="Vorheriger Datensatz">‹</button>
+        <button type="button" data-command="next" title="Nächster Datensatz">›</button>
+        <button type="button" data-command="last" title="Letzter Datensatz">›|</button>
+      </div>
+
+      <input id="groupImportFile" type="file" accept=".json,.csv" hidden>
+
+      <div class="master-form two-column">
+        <label><span>Warengruppen-Nr. *</span><input id="groupId" maxlength="20"></label>
+        <label><span>Bezeichnung *</span><input id="groupName" maxlength="60"></label>
+        <label><span>Kurzbezeichnung</span><input id="groupShortName" maxlength="24"></label>
+        <label><span>Sortierung</span><input id="groupSortOrder" type="number" min="0" step="1"></label>
+        <label><span>Buttonfarbe</span><input id="groupColor" type="color"></label>
+        <label class="check-field"><span>Aktiv</span><input id="groupActive" type="checkbox"></label>
+        <label class="wide-field"><span>Beschreibung / Freitext</span><textarea id="groupNotes" rows="4"></textarea></label>
+      </div>
+
+      <div class="master-list-wrap">
+        <table class="master-table">
+          <thead><tr><th>Nr.</th><th>Warengruppe</th><th>Kurztext</th><th>Sortierung</th><th>Farbe</th><th>Status</th></tr></thead>
+          <tbody id="groupTableBody"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="settings-panel masterdata-panel" data-settings-panel="articles">
+      <div class="masterdata-head">
+        <div>
+          <h3>Artikelstammdaten</h3>
+          <p>Alle verkaufs-, bon-, pfand-, scanner- und informationsrelevanten Artikeldaten.</p>
+        </div>
+        <span id="articleRecordStatus" class="record-status">Datensatz 1 von 1</span>
+      </div>
+
+      <div class="master-toolbar" id="articleToolbar">
+        <button type="button" data-command="new">＋ Neu</button>
+        <button type="button" data-command="save">💾 Speichern</button>
+        <button type="button" data-command="update">↻ Aktualisieren</button>
+        <button type="button" data-command="edit">✎ Bearbeiten</button>
+        <button type="button" data-command="print">🖨 Drucken</button>
+        <button type="button" data-command="import">⇩ Import</button>
+        <button type="button" data-command="export">⇧ Export</button>
+        <span class="toolbar-separator"></span>
+        <button type="button" data-command="first">|‹</button>
+        <button type="button" data-command="prev">‹</button>
+        <button type="button" data-command="next">›</button>
+        <button type="button" data-command="last">›|</button>
+      </div>
+
+      <input id="articleImportFile" type="file" accept=".json,.csv" hidden>
+
+      <div class="article-subtabs">
+        <button type="button" class="active" data-article-tab="basic">Grunddaten</button>
+        <button type="button" data-article-tab="sale">Verkauf & Bon</button>
+        <button type="button" data-article-tab="deposit">Pfand & Optionen</button>
+        <button type="button" data-article-tab="info">Informationen</button>
+        <button type="button" data-article-tab="display">Darstellung</button>
+      </div>
+
+      <div class="article-panel active" data-article-panel="basic">
+        <div class="master-form three-column">
+          <label><span>Artikel-Nr. *</span><input id="articleId" maxlength="30"></label>
+          <label><span>Artikelbezeichnung *</span><input id="articleName" maxlength="80"></label>
+          <label><span>Warengruppe *</span><select id="articleCategory"></select></label>
+          <label><span>Kurzbezeichnung Button</span><input id="articleShortName" maxlength="30"></label>
+          <label><span>Bontext</span><input id="articleReceiptText" maxlength="48"></label>
+          <label><span>Barcode / EAN / QR-Inhalt</span><input id="articleBarcode" maxlength="80"></label>
+          <label><span>Verkaufseinheit</span><select id="articleUnit"><option>Stück</option><option>Portion</option><option>Becher</option><option>Glas</option><option>Liter</option><option>Kilogramm</option></select></label>
+          <label><span>Menge je Verkauf</span><input id="articleQuantity" type="number" min="0" step="0.001"></label>
+          <label><span>Sortierung</span><input id="articleSortOrder" type="number" min="0" step="1"></label>
+          <label class="check-field"><span>Aktiv</span><input id="articleActive" type="checkbox"></label>
+          <label class="check-field"><span>Favorit</span><input id="articleFavorite" type="checkbox"></label>
+          <label class="check-field"><span>Bestandsführung</span><input id="articleStockManaged" type="checkbox"></label>
+        </div>
+      </div>
+
+      <div class="article-panel" data-article-panel="sale">
+        <div class="master-form three-column">
+          <label><span>Verkaufspreis brutto *</span><input id="articlePrice" type="number" min="-9999" step="0.01"></label>
+          <label><span>Einkaufspreis netto</span><input id="articlePurchasePrice" type="number" min="0" step="0.01"></label>
+          <label><span>Steuersatz</span><select id="articleTaxRate"><option value="0">0 %</option><option value="7">7 %</option><option value="19">19 %</option></select></label>
+          <label><span>Mindestbestand</span><input id="articleMinStock" type="number" min="0" step="0.01"></label>
+          <label><span>Aktueller Bestand</span><input id="articleStock" type="number" min="0" step="0.01"></label>
+          <label><span>Preisgruppe</span><input id="articlePriceGroup" maxlength="30"></label>
+          <label class="check-field"><span>Preisänderung an Kasse erlaubt</span><input id="articleAllowPriceChange" type="checkbox"></label>
+          <label class="check-field"><span>Mengenänderung erlaubt</span><input id="articleAllowQuantityChange" type="checkbox"></label>
+          <label class="check-field"><span>Personalverbrauch erlaubt</span><input id="articleAllowStaff" type="checkbox"></label>
+          <label class="wide-field"><span>Bon-Zusatztext</span><textarea id="articleReceiptNote" rows="3"></textarea></label>
+        </div>
+      </div>
+
+      <div class="article-panel" data-article-panel="deposit">
+        <div class="master-form two-column">
+          <label><span>Pfandregel</span><select id="articleDepositRule"><option value="global">Globale Regel verwenden</option><option value="none">Kein Pfand</option><option value="automatic">Automatisch zusätzlich</option><option value="included">Im Preis enthalten</option><option value="manual">Manuell buchen</option></select></label>
+          <label><span>Optionsgruppe</span><select id="articleOptionGroup"><option value="">Keine</option><option value="shot">Schuss Rum / Amaretto</option><option value="dip">Dip-Auswahl</option></select></label>
+          <label><span>Pfandart 1</span><input id="articleDeposit1Name" maxlength="40"></label>
+          <label><span>Pfandbetrag 1</span><input id="articleDeposit1Price" type="number" min="0" step="0.01"></label>
+          <label><span>Pfandart 2</span><input id="articleDeposit2Name" maxlength="40"></label>
+          <label><span>Pfandbetrag 2</span><input id="articleDeposit2Price" type="number" min="0" step="0.01"></label>
+          <label class="check-field"><span>Teilrückgabe erlaubt</span><input id="articlePartialDepositReturn" type="checkbox"></label>
+          <label class="check-field"><span>Pfand bei Personalverbrauch</span><input id="articleStaffDeposit" type="checkbox"></label>
+        </div>
+      </div>
+
+      <div class="article-panel" data-article-panel="info">
+        <div class="master-form two-column">
+          <label class="wide-field"><span>Zutaten</span><textarea id="articleIngredients" rows="3"></textarea></label>
+          <label class="wide-field"><span>Allergene</span><textarea id="articleAllergens" rows="3"></textarea></label>
+          <label class="wide-field"><span>Inhaltsstoffe</span><textarea id="articleContents" rows="3"></textarea></label>
+          <label class="wide-field"><span>Wichtiger Hinweis</span><textarea id="articleImportant" rows="3"></textarea></label>
+          <label class="wide-field"><span>Freitext / weitere Informationen</span><textarea id="articleNotes" rows="5"></textarea></label>
+        </div>
+      </div>
+
+      <div class="article-panel" data-article-panel="display">
+        <div class="master-form two-column">
+          <label><span>Buttonfarbe</span><input id="articleColor" type="color"></label>
+          <label><span>Bildpfad / Bilddatei</span><input id="articleImage" maxlength="180"></label>
+          <label><span>Individuelle Darstellungsart</span><select id="articleDisplayMode"><option value="global">Globale Einstellung</option><option value="image">Bild</option><option value="mixed">Bild/Farbe/Text</option><option value="color">Farbe</option><option value="text">Text</option></select></label>
+          <label><span>Individuelle Buttongröße</span><select id="articleButtonSize"><option value="global">Globale Einstellung</option><option value="compact">Kompakt</option><option value="standard">Standard</option><option value="large">Groß</option></select></label>
+          <label class="check-field"><span>Info-I anzeigen</span><input id="articleShowInfo" type="checkbox"></label>
+          <label class="check-field"><span>Preis anzeigen</span><input id="articleShowPrice" type="checkbox"></label>
+        </div>
+      </div>
+
+      <div class="master-list-wrap article-list">
+        <table class="master-table">
+          <thead><tr><th>Artikel-Nr.</th><th>Artikel</th><th>Warengruppe</th><th>Bontext</th><th>Preis</th><th>Status</th></tr></thead>
+          <tbody id="articleTableBody"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="settings-panel masterdata-panel" data-settings-panel="packages">
+      <div class="masterdata-head">
+        <div>
+          <h3>SmartPackage Manager</h3>
+          <p>Packages werden hier zentral festgelegt. Die Kasse zeigt ausschließlich freigegebene Packages.</p>
+        </div>
+        <span id="packageAiStatus" class="record-status">Noch nicht analysiert</span>
+      </div>
+
+      <div class="package-manager-actions">
+        <button type="button" id="packageNewBtn">＋ Neues Package</button>
+        <button type="button" id="packageSaveBtn" class="primary-action">💾 Speichern</button>
+        <button type="button" id="packageDeleteBtn">🗑 Löschen</button>
+        <button type="button" id="packageAnalyzeBtn">✨ Verkaufsdaten analysieren</button>
+        <button type="button" id="packageDailyRefreshBtn">↻ Tages-Packages neu erstellen</button>
+      </div>
+
+      <div class="package-manager-grid">
+        <div class="package-editor-card">
+          <h4>Package bearbeiten</h4>
+          <input id="packageId" type="hidden">
+          <label><span>Name *</span><input id="packageName" maxlength="80" placeholder="z. B. Grünkohl + Glühwein"></label>
+          <label><span>Erster Artikel *</span><select id="packageProduct1"></select></label>
+          <label><span>Zweiter Artikel *</span><select id="packageProduct2"></select></label>
+          <label><span>Package-Preis *</span><input id="packagePrice" type="number" min="0" step="0.10"></label>
+          <label><span>Bild / Leitartikel</span><select id="packageImageProduct"></select></label>
+          <div class="master-form two-column">
+            <label class="check-field"><span>Aktiv an Kasse</span><input id="packageActive" type="checkbox" checked></label>
+            <label class="check-field"><span>KI darf täglich aktualisieren</span><input id="packageAutoManaged" type="checkbox"></label>
+          </div>
+          <label><span>Manager-Hinweis</span><textarea id="packageNote" rows="3" placeholder="Begründung, Aktion oder Saisonhinweis"></textarea></label>
+          <div id="packagePriceHint" class="package-price-hint"></div>
+        </div>
+
+        <div class="package-ai-card">
+          <h4>KI-gestützte Vorschläge</h4>
+          <p class="setting-help">Die lokale Analyse erkennt gemeinsam verkaufte Artikel nach Wochentag und Häufigkeit. Es werden keine Daten ins Internet übertragen.</p>
+          <label><span>Analyse-Zeitraum</span>
+            <select id="packageAnalysisDays"><option value="7">7 Tage</option><option value="30" selected>30 Tage</option><option value="90">90 Tage</option><option value="365">1 Jahr</option></select>
+          </label>
+          <label><span>Maximale Tages-Packages</span><select id="packageMaxDaily"><option>2</option><option selected>4</option><option>6</option></select></label>
+          <div id="packageSuggestionList" class="package-suggestion-list"><p>Noch keine Analyse durchgeführt.</p></div>
+        </div>
+      </div>
+
+      <div class="master-list-wrap">
+        <table class="master-table package-table">
+          <thead><tr><th>Package</th><th>Bestandteile</th><th>Einzelpreis</th><th>Packagepreis</th><th>Quelle</th><th>Status</th></tr></thead>
+          <tbody id="packageTableBody"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="settings-panel masterdata-panel" data-settings-panel="offers">
+      <div class="masterdata-head">
+        <div>
+          <h3>Offer & HappyHour Manager</h3>
+          <p>Preisaktionen werden ausschließlich hier im Manager geplant und freigegeben. Die Kasse schaltet Warengruppe und Aktionspreis automatisch.</p>
+        </div>
+        <span id="offerRuntimeStatus" class="record-status">Keine aktive Aktion</span>
+      </div>
+
+      <div class="offer-manager-actions">
+        <button type="button" id="offerNewBtn">＋ Neue Aktion</button>
+        <button type="button" id="offerSaveBtn" class="primary-action">💾 Speichern</button>
+        <button type="button" id="offerDeleteBtn">🗑 Löschen</button>
+        <button type="button" id="offerStartNowBtn">▶ Jetzt starten</button>
+        <button type="button" id="offerStopNowBtn">■ Sofort beenden</button>
+      </div>
+
+      <div class="offer-manager-grid">
+        <div class="offer-editor-card">
+          <h4>Aktion bearbeiten</h4>
+          <input id="offerId" type="hidden">
+          <label><span>Name *</span><input id="offerName" maxlength="80" placeholder="z. B. Happy Hour Glühwein"></label>
+          <label><span>Art der Aktion</span>
+            <select id="offerType">
+              <option value="offer">Angebot</option>
+              <option value="happyhour">Happy Hour</option>
+            </select>
+          </label>
+          <label><span>Artikel *</span><select id="offerProducts" multiple size="7"></select></label>
+          <small class="setting-help">Mehrere Artikel mit Strg/⌘ oder langem Antippen auswählen.</small>
+
+          <div class="master-form two-column">
+            <label><span>Preisregel</span>
+              <select id="offerPriceMode">
+                <option value="percent">Prozentual reduzieren</option>
+                <option value="fixed">Einheitlicher Aktionspreis</option>
+              </select>
+            </label>
+            <label><span>Wert *</span><input id="offerPriceValue" type="number" min="0" step="0.10" value="10"></label>
+          </div>
+
+          <div class="master-form two-column">
+            <label><span>Startdatum</span><input id="offerStartDate" type="date"></label>
+            <label><span>Enddatum</span><input id="offerEndDate" type="date"></label>
+          </div>
+          <div class="master-form two-column">
+            <label><span>Beginn</span><input id="offerStartTime" type="time" value="17:00"></label>
+            <label><span>Ende</span><input id="offerEndTime" type="time" value="18:00"></label>
+          </div>
+
+          <fieldset class="offer-weekdays">
+            <legend>Wochentage</legend>
+            <label><input type="checkbox" data-offer-weekday="1" checked> Mo</label>
+            <label><input type="checkbox" data-offer-weekday="2" checked> Di</label>
+            <label><input type="checkbox" data-offer-weekday="3" checked> Mi</label>
+            <label><input type="checkbox" data-offer-weekday="4" checked> Do</label>
+            <label><input type="checkbox" data-offer-weekday="5" checked> Fr</label>
+            <label><input type="checkbox" data-offer-weekday="6" checked> Sa</label>
+            <label><input type="checkbox" data-offer-weekday="0" checked> So</label>
+          </fieldset>
+
+          <div class="master-form two-column">
+            <label class="check-field"><span>Freigegeben</span><input id="offerActive" type="checkbox" checked></label>
+            <label class="check-field"><span>Starttaste an Kasse erlauben</span><input id="offerManualStart" type="checkbox" checked></label>
+          </div>
+          <label><span>Hinweis</span><textarea id="offerNote" rows="3" placeholder="z. B. Nur heute zum Weihnachtsmarkt"></textarea></label>
+          <div id="offerPreview" class="offer-preview"></div>
+        </div>
+
+        <div class="offer-runtime-card">
+          <h4>Aktionssteuerung</h4>
+          <div id="offerNextSchedule" class="offer-next-schedule">Noch keine Aktion geplant.</div>
+          <p class="setting-help">Eine manuell gestartete Aktion gilt nur bis zum eingestellten Ende. Danach werden automatisch wieder die Normalpreise verwendet.</p>
+          <div class="offer-safety-box">
+            <strong>Sicherheitsregeln</strong>
+            <ul>
+              <li>Bereits gebuchte Bonpositionen behalten ihren Preis.</li>
+              <li>Neue Verkäufe erhalten immer den aktuell gültigen Preis.</li>
+              <li>Nach Ablauf verschwindet die dynamische Warengruppe automatisch.</li>
+              <li>Start, Ende und manuelle Eingriffe werden protokolliert.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <div class="master-list-wrap">
+        <table class="master-table offer-table">
+          <thead><tr><th>Aktion</th><th>Typ</th><th>Artikel</th><th>Preisregel</th><th>Zeit</th><th>Status</th></tr></thead>
+          <tbody id="offerTableBody"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="settings-panel superadmin-only" data-settings-panel="system">
+      <h3>Interner Systemmodus</h3>
+      <p class="setting-help">Dieser Bereich ist nur nach Superadmin-Anmeldung sichtbar und wird in der Verkaufsansicht nicht angezeigt.</p>
+      <label class="setting-line"><span>Fiskalmodus</span>
+        <select id="fiscalModeSelect">
+          <option value="off">Ohne TSE-Anbindung</option>
+          <option value="tse">TSE-Anbindung aktiviert</option>
+        </select>
+      </label>
+      <label class="setting-line"><span>TSE-Anbieter / Adapter</span><input id="tseProviderSetting" placeholder="Noch nicht verbunden"></label>
+      <label class="setting-line"><span>TSE-Seriennummer</span><input id="tseSerialSetting" placeholder="Noch nicht verbunden"></label>
+      <p id="fiscalModeInternalStatus" class="setting-help"></p>
+    </section>
+
+    <section class="settings-panel transfer-panel" data-settings-panel="transfer">
+      <div class="masterdata-head">
+        <div>
+          <h3>Import- und Exportzentrum</h3>
+          <p>Nur für Admin und Superadmin. Datenexport, Auswertungen und vollständige PC-Konfiguration.</p>
+        </div>
+        <span class="record-status">Geschützter Bereich</span>
+      </div>
+
+      <div class="transfer-tabs">
+        <button type="button" class="active" data-transfer-tab="master">Stammdaten</button>
+        <button type="button" data-transfer-tab="sales">Verkäufe / Auswertung</button>
+        <button type="button" data-transfer-tab="config">Konfigurationspaket</button>
+        <button type="button" data-transfer-tab="import">Import</button>
+      </div>
+
+      <div class="transfer-subpanel active" data-transfer-panel="master">
+        <div class="export-card-grid">
+          <article class="export-card">
+            <h4>Artikel exportieren</h4>
+            <label><span>Umfang</span>
+              <select id="exportArticlesScope">
+                <option value="all">Alle Artikel</option>
+                <option value="active">Nur aktive Artikel</option>
+                <option value="group">Nur ausgewählte Warengruppe</option>
+              </select>
+            </label>
+            <label><span>Warengruppe</span><select id="exportArticlesGroup"></select></label>
+            <label class="toggle-setting compact-toggle">
+              <span><strong>Bilder einschließen</strong><small>Nur im Konfigurationspaket; CSV/Excel enthalten Bildpfade.</small></span>
+              <input id="exportArticlesImages" type="checkbox" checked>
+            </label>
+            <div class="export-actions">
+              <button type="button" data-export="articles-csv">CSV</button>
+              <button type="button" data-export="articles-xls">Excel</button>
+              <button type="button" data-export="articles-print">PDF / Drucken</button>
+            </div>
+          </article>
+
+          <article class="export-card">
+            <h4>Warengruppen exportieren</h4>
+            <label><span>Umfang</span>
+              <select id="exportGroupsScope">
+                <option value="all">Alle Warengruppen</option>
+                <option value="active">Nur aktive Warengruppen</option>
+              </select>
+            </label>
+            <div class="export-actions">
+              <button type="button" data-export="groups-csv">CSV</button>
+              <button type="button" data-export="groups-xls">Excel</button>
+              <button type="button" data-export="groups-print">PDF / Drucken</button>
+            </div>
+          </article>
+        </div>
+      </div>
+
+      <div class="transfer-subpanel" data-transfer-panel="sales">
+        <div class="filter-card">
+          <h4>Auswertungsbereich</h4>
+          <div class="filter-grid">
+            <label><span>Zeitraum</span>
+              <select id="salesDateMode">
+                <option value="all">Alle Verkäufe</option>
+                <option value="day">Ein bestimmtes Datum</option>
+                <option value="range">Datum von bis</option>
+              </select>
+            </label>
+            <label><span>Datum</span><input id="salesDateSingle" type="date"></label>
+            <label><span>Datum von</span><input id="salesDateFrom" type="date"></label>
+            <label><span>Datum bis</span><input id="salesDateTo" type="date"></label>
+            <label><span>Warengruppe</span>
+              <select id="salesGroupFilter">
+                <option value="">Alle Warengruppen</option>
+              </select>
+            </label>
+            <label><span>Auswertung</span>
+              <select id="salesReportType">
+                <option value="transactions">Einzelumsätze</option>
+                <option value="articles">Artikelumsätze</option>
+                <option value="groups">Warengruppenauswertung</option>
+              </select>
+            </label>
+          </div>
+          <div class="export-actions">
+            <button type="button" data-export="sales-csv">CSV</button>
+            <button type="button" data-export="sales-xls">Excel</button>
+            <button type="button" data-export="sales-print">PDF / Drucken</button>
+            <button type="button" id="previewSalesReport">Vorschau</button>
+          </div>
+        </div>
+        <div class="report-preview-wrap">
+          <table class="master-table report-preview">
+            <thead id="reportPreviewHead"></thead>
+            <tbody id="reportPreviewBody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="transfer-subpanel" data-transfer-panel="config">
+        <div class="export-card-grid">
+          <article class="export-card">
+            <h4>PC-Konfiguration für Kasse</h4>
+            <p>Enthält alles, was die Kasse zum Betrieb benötigt.</p>
+            <ul>
+              <li>Grundeinstellungen</li>
+              <li>Warengruppen</li>
+              <li>Artikel und Preise</li>
+              <li>Pfandregeln und Optionen</li>
+              <li>Button-Darstellung</li>
+              <li>Barcode- und Info-Daten</li>
+              <li>optional Bilder als eingebettete Dateien</li>
+            </ul>
+            <label class="toggle-setting compact-toggle">
+              <span><strong>Bilder einbetten</strong><small>Erzeugt eine größere, aber vollständige Konfigurationsdatei.</small></span>
+              <input id="configIncludeImages" type="checkbox" checked>
+            </label>
+            <button type="button" id="exportConfigPackage" class="primary-action">Konfiguration exportieren (.kcpos)</button>
+          </article>
+
+          <article class="export-card">
+            <h4>Umsätze für PC Manager</h4>
+            <p>Verschlüsselter Export mit Kassen-ID.</p>
+            <label><span>Dateipasswort</span><input id="salesExportPassword" type="password"></label>
+            <label><span>Admincode</span><input id="salesExportCode" type="password" inputmode="numeric"></label>
+            <label><span>Erster Buchstabe des Namens</span><input id="salesExportInitial" maxlength="1"></label>
+            <button type="button" id="exportEncryptedSales">Verschlüsselte Umsatzdatei (.kcsales)</button>
+          </article>
+
+          
+          <article class="export-card">
+            <h4>KCExchange V1</h4>
+            <p>Standardpaket für Kassen-Manager und Köcheclub-Verwaltung.</p>
+            <button type="button" id="exportKCExchangeSales">Umsatzpaket exportieren</button>
+            <input id="importKCExchangeFile" type="file" accept=".kcconfig,.kcbundle,.kcexchange,.json" hidden>
+            <button type="button" id="selectKCExchangeImport">Konfigurationspaket importieren</button>
+            <div id="kcExchangePosStatus" class="import-summary">Noch kein Paket verarbeitet.</div>
+          </article>
+
+          <article class="export-card change-export-card">
+            <h4>Vor-Ort-Änderungen zurückgeben</h4>
+            <p>Überträgt geänderte Artikel, Warengruppen, Einstellungen und das Superadmin-Protokoll zurück zum PC-Manager.</p>
+            <div id="adminChangeCount" class="import-summary">Keine offenen Änderungen.</div>
+            <button type="button" id="exportAdminChanges" class="primary-action">Änderungsdatei erstellen (.kcchanges)</button>
+          </article>
+
+          <article class="export-card">
+            <h4>Sicherungsdatei</h4>
+            <p>Komplette Sicherung inklusive Stammdaten, Verkäufen und Einstellungen.</p>
+            <button type="button" id="exportFullBackup">Vollständiges Backup (.kcbak)</button>
+          </article>
+        </div>
+      </div>
+
+      <div class="transfer-subpanel" data-transfer-panel="import">
+        <div class="export-card-grid">
+          <article class="export-card">
+            <h4>Konfiguration vom PC importieren</h4>
+            <p>Importiert Artikel, Preise, Warengruppen, Pfandregeln und Einstellungen.</p>
+            <input id="configImportFile" type="file" accept=".kcpos,.json" hidden>
+            <button type="button" id="selectConfigImport">Konfigurationsdatei auswählen</button>
+            <label><span>Dateipasswort</span><input id="configImportPassword" type="password" placeholder="Passwort der .kcpos-Datei"></label>
+            <div id="configImportSummary" class="import-summary">Noch keine Datei ausgewählt.</div>
+            <button type="button" id="applyConfigImport" class="primary-action" disabled>Geprüfte Konfiguration übernehmen</button>
+          </article>
+
+          <article class="export-card">
+            <h4>Backup wiederherstellen</h4>
+            <p>Nur Superadmin. Überschreibt aktuelle lokale Daten nach Sicherheitsabfrage.</p>
+            <input id="backupImportFile" type="file" accept=".kcbak,.json" hidden>
+            <button type="button" id="selectBackupImport">Backupdatei auswählen</button>
+            <button type="button" id="applyBackupImport" class="danger-action" disabled>Backup wiederherstellen</button>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <div class="dialog-actions settings-actions">
+      <button value="cancel">Abbrechen</button>
+      <button id="saveTestSettings" value="save" class="primary-action">Einstellungen speichern</button>
+    </div>
+  </form>
+</dialog>
+
+
+
+<dialog id="bonPrintDialog">
+  <form method="dialog" class="dialog-card bon-print-card">
+    <h2>Bon drucken</h2>
+    <label>Bonnummer suchen<input id="bonSearchInput" inputmode="numeric" placeholder="z. B. 000123"></label>
+    <button type="button" id="bonSearchBtn">Suchen</button>
+    <h3>Letzte fünf Bons</h3>
+    <div id="recentBons" class="recent-bons"></div>
+    <div id="bonSearchResult"></div>
+    <button value="close" class="dialog-close">Schließen</button>
+  </form>
+</dialog>
+
+
+
+
+
+<dialog id="roundUpDialog">
+  <form method="dialog" class="dialog-card roundup-card">
+    <h2>Aufrunden</h2>
+    <p>Zu zahlen: <strong id="roundUpDue">0,00 €</strong></p>
+    <div id="roundUpChoices" class="roundup-grid"></div>
+    <label>Freier Zielbetrag<input id="roundUpCustom" type="number" min="0" step="0.01"></label>
+    <div class="dialog-actions">
+      <button value="cancel">Abbrechen</button>
+      <button type="button" id="applyRoundUpCustom" class="primary-action">Übernehmen</button>
+    </div>
+  </form>
+</dialog>
+
+<dialog id="operatorDialog">
+  <form method="dialog" class="dialog-card operator-card">
+    <h2>Bediener auswählen</h2>
+    <div id="operatorList" class="operator-grid"></div>
+    <button value="close">Schließen</button>
+  </form>
+</dialog>
+
+<dialog id="panicDialog">
+  <form method="dialog" class="dialog-card panic-card">
+    <h2>Sofort zurück zur Kasse</h2>
+    <p>Alle Verwaltungsfenster werden geschlossen.</p>
+    <button id="panicReturnBtn" value="ok" class="primary-action">Zur Kasse</button>
+  </form>
+</dialog>
+
+<dialog id="tipDialog">
+  <form method="dialog" class="dialog-card tip-card">
+    <div class="admin-home-head">
+      <div><span class="info-kicker">TRINKGELD</span><h2>Trinkgeld erfassen</h2></div>
+      <button value="close" class="icon-close">×</button>
+    </div>
+    <p>Ein unten zusammengestellter Geldbetrag wird automatisch als Trinkgeld übernommen.</p>
+    <p id="tipStagedAmount" class="tip-staged-amount" hidden></p>
+    <div class="tip-quick-grid">
+      <button type="button" data-tip="0.5">0,50 €</button>
+      <button type="button" data-tip="1">1,00 €</button>
+      <button type="button" data-tip="2">2,00 €</button>
+      <button type="button" data-tip="5">5,00 €</button>
+      <button type="button" data-tip="10">10,00 €</button>
+      <button type="button" data-tip="20">20,00 €</button>
+    </div>
+    <label>Freier Betrag<input id="tipCustomAmount" type="number" min="0.01" step="0.01"></label>
+    <label>Bonnummer optional<input id="tipBonNumber" inputmode="numeric"></label>
+    <label>Bemerkung optional<input id="tipNote"></label>
+    <div class="dialog-actions">
+      <button value="cancel">Abbrechen</button>
+      <button type="button" id="saveCustomTip" class="primary-action">Trinkgeld speichern</button>
+    </div>
+  </form>
+</dialog>
+
+<dialog id="quantityDialog">
+  <form method="dialog" class="dialog-card quantity-card">
+    <h2>Menge wählen</h2>
+    <p id="quantityArticleName">Artikel</p>
+    <div class="quantity-choice-grid">
+      <button type="button" data-qty="1">1×</button><button type="button" data-qty="2">2×</button><button type="button" data-qty="3">3×</button><button type="button" data-qty="4">4×</button><button type="button" data-qty="5">5×</button><button type="button" data-qty="6">6×</button><button type="button" data-qty="7">7×</button>
+    </div>
+    <label>Andere Menge<input id="customQuantity" type="number" min="1" max="99"></label>
+    <button type="button" id="applyCustomQuantity" class="primary-action">Übernehmen</button>
+    <button value="close">Abbrechen</button>
+  </form>
+</dialog>
+
+<dialog id="workflowDialog">
+  <form method="dialog" class="dialog-card workflow-card">
+    <div class="admin-home-head">
+      <div><span class="info-kicker">TAGESABLAUF</span><h2 id="workflowTitle">Öffnungsassistent</h2></div>
+      <button value="close" class="icon-close">×</button>
+    </div>
+    <div id="workflowSteps" class="workflow-steps"></div>
+    <div class="workflow-footer">
+      <span id="workflowProgressText">0 von 0 erledigt</span>
+      <button type="button" id="finishWorkflow" class="primary-action">Abschließen</button>
+    </div>
+  </form>
+</dialog>
+
+<dialog id="closingDialog">
+  <form method="dialog" class="dialog-card closing-card">
+    <div class="admin-home-head">
+      <div><span class="info-kicker">CLOSINGCORE</span><h2>Tagesabschluss</h2></div>
+      <button value="close" class="icon-close">×</button>
+    </div>
+    <div class="closing-kpis">
+      <article><span>Anfangsbestand + Nachfüllungen</span><strong id="closingCashIn">0,00 €</strong></article>
+      <article><span>Barverkäufe</span><strong id="closingCashSales">0,00 €</strong></article>
+      <article><span>Bar-Trinkgeld / Aufrundung</span><strong id="closingCashTips">0,00 €</strong></article>
+      <article><span>Entnahmen / Auszahlungen</span><strong id="closingCashOut">0,00 €</strong></article>
+      <article><span>Erwarteter Bargeldbestand</span><strong id="closingExpected">0,00 €</strong></article>
+    </div>
+    <label>Abschlussnotiz<textarea id="closingNote" rows="3" placeholder="z. B. Schichtende Weihnachtsmarkt"></textarea></label>
+    <div class="dialog-actions">
+      <button value="cancel">Abbrechen</button>
+      <button type="button" id="createClosingCode" class="primary-action">Abschlusscode erzeugen</button>
+    </div>
+    <textarea id="closingPayload" rows="7" readonly placeholder="Der Abschlusscode erscheint hier."></textarea>
+    <canvas id="closingQrCanvas" class="closing-qr" width="260" height="260" aria-label="QR-Code des Tagesabschlusses"></canvas>
+    <div class="dialog-actions">
+      <button type="button" id="copyClosingCode">Code kopieren</button>
+      <button type="button" id="saveClosingFile">Datei speichern</button>
+      <button type="button" id="printClosingCode">Drucken</button>
+    </div>
+  </form>
+</dialog>
+
+<dialog id="discountDialog">
+  <form method="dialog" class="dialog-card discount-card">
+    <div class="admin-home-head">
+      <div><span id="discountDialogKicker" class="info-kicker">WARENKORB</span><h2 id="discountDialogTitle">Rabatt festlegen</h2></div>
+      <button value="close" class="icon-close" aria-label="Schließen">×</button>
+    </div>
+    <p>Wähle die Artikel aus, für die der Rabatt gelten soll. Pfand und Rückgabeartikel werden nicht rabattiert.</p>
+    <section class="discount-article-picker">
+      <div class="discount-article-toolbar">
+        <label class="discount-search-label">Artikel suchen
+          <input id="discountArticleSearch" type="search" placeholder="Artikelname eingeben">
+        </label>
+        <button type="button" id="discountSelectAllBtn">Alle rabattfähigen</button>
+      </div>
+      <div id="discountCategoryFilters" class="discount-category-filters" aria-label="Warengruppen"></div>
+      <div id="discountArticleList" class="discount-article-list" aria-label="Artikel für Rabatt"></div>
+    </section>
+    <div id="discountQuickButtons" class="discount-quick-grid" aria-label="Gängige Rabattwerte">
+      <button type="button" data-discount-percent="2">2 %</button>
+      <button type="button" data-discount-percent="3">3 %</button>
+      <button type="button" data-discount-percent="5">5 %</button>
+      <button type="button" data-discount-percent="10">10 %</button>
+      <button type="button" data-discount-percent="20">20 %</button>
+      <button type="button" data-discount-percent="50">50 %</button>
+    </div>
+    <label>Freie Eingabe in Prozent<input id="discountCustomPercent" type="number" min="0" max="100" step="0.1" inputmode="decimal" placeholder="z. B. 7,5"></label>
+    <fieldset class="discount-reason-field">
+      <legend>Grund optional</legend>
+      <div id="discountReasonButtons" class="discount-reason-grid">
+        <button type="button" data-discount-reason="Bekannter">BEKANNTER</button>
+        <button type="button" data-discount-reason="Marktbeschicker">MARKTBESCHICKER</button>
+        <button type="button" data-discount-reason="Stammgast">STAMMGAST</button>
+        <button type="button" data-discount-reason="Reklamation">REKLAMATION</button>
+        <button type="button" data-discount-reason="Kulanz">KULANZ</button>
+        <button type="button" data-discount-reason="Sonstiges">SONSTIGES</button>
+      </div>
+    </fieldset>
+    <label>Ergänzung zum Grund<input id="discountReasonNote" maxlength="160" placeholder="optional"></label>
+    <div class="discount-preview"><span>Abzug im Einkaufswagen</span><strong id="discountPreview">0,00 €</strong></div>
+    <div class="dialog-actions"><button type="button" id="clearDiscountBtn">Rabatt entfernen</button><button value="cancel">Abbrechen</button><button type="button" id="applyDiscountBtn" class="primary-action">Rabatt übernehmen</button></div>
+  </form>
+</dialog>
+
+<dialog id="withdrawDialog">
+  <form method="dialog" class="dialog-card withdraw-card">
+    <button type="button" id="withdrawDialogCloseX" class="dialog-close-x" aria-label="Reklamations- und Entnahmefenster schließen" title="Schließen">×</button>
+    <h2>Bargeldentnahme</h2>
+    <p>Jede Entnahme wird mit Zeit, Bediener und Kasse protokolliert.</p>
+    <label>Betrag in Euro<input id="withdrawAmount" type="number" min="0.01" step="0.01" inputmode="decimal"></label>
+    <fieldset class="withdraw-reason-field">
+      <legend>Grund auswählen</legend>
+      <div id="withdrawReasonButtons" class="withdraw-reason-grid">
+        <button type="button" data-withdraw-reason="Einkauf">EINKAUF</button>
+        <button type="button" data-withdraw-reason="Essen Personal">ESSEN PERSONAL</button>
+        <button type="button" data-withdraw-reason="Getränke Personal">GETRÄNKE PERSONAL</button>
+        <button type="button" data-withdraw-reason="Geld zur Hauptkasse">HAUPTKASSE</button>
+        <button type="button" data-withdraw-reason="Reklamation">REKLAMATION</button>
+        <button type="button" data-withdraw-reason="Sonstiges">SONSTIGES</button>
+      </div>
+    </fieldset>
+    <section id="complaintPanel" class="complaint-panel" hidden>
+      <div class="complaint-head"><div><span class="info-kicker">RÜCKGABE</span><h3>Reklamationsauszahlung</h3></div><strong id="complaintArticleTotal">0,00 €</strong></div>
+      <label>Bonnummer / Referenz<input id="complaintBonReference" maxlength="40" placeholder="optional"></label>
+      <fieldset class="complaint-field">
+        <legend>Zurückgegebene Artikel und Menge</legend>
+        <div class="complaint-article-toolbar">
+          <label>Artikel suchen
+            <input id="complaintArticleSearch" type="search" placeholder="Artikelname eingeben">
+          </label>
+          <button type="button" id="complaintClearSelection">Auswahl leeren</button>
+        </div>
+        <div id="complaintCategoryFilters" class="complaint-category-filters" aria-label="Warengruppen"></div>
+        <div id="complaintArticleList" class="complaint-article-list"></div>
+      </fieldset>
+      <fieldset class="complaint-field">
+        <legend>Reklamationsgrund auswählen</legend>
+        <div id="complaintReasonButtons" class="complaint-reason-grid">
+          <button type="button" data-complaint-reason="Verdorben">VERDORBEN</button>
+          <button type="button" data-complaint-reason="Hat nicht geschmeckt">HAT NICHT GESCHMECKT</button>
+          <button type="button" data-complaint-reason="Verbrannt">VERBRANNT</button>
+          <button type="button" data-complaint-reason="Zu kleine Menge">ZU KLEINE MENGE</button>
+          <button type="button" data-complaint-reason="Kalt ausgegeben">KALT</button>
+          <button type="button" data-complaint-reason="Falscher Artikel">FALSCHER ARTIKEL</button>
+          <button type="button" data-complaint-reason="Beschädigt oder verschüttet">BESCHÄDIGT / VERSCHÜTTET</button>
+          <button type="button" data-complaint-reason="Sonstiges">SONSTIGES</button>
+        </div>
+      </fieldset>
+      <p class="complaint-help">Der Artikelwert wird als Auszahlungsbetrag vorgeschlagen. Der Betrag kann bei einer Teilkulanz angepasst werden; die Abweichung wird protokolliert.</p>
+    </section>
+    <label>Zusatz / Notiz<textarea id="withdrawNote" rows="2" placeholder="optional ergänzen"></textarea></label>
+    <button type="button" id="withdrawReceiptToggle" class="withdraw-receipt-toggle" aria-pressed="false">☐ BON / QUITTUNG VORHANDEN</button>
+    <div id="withdrawReceiptActions" class="withdraw-receipt-actions" hidden>
+      <input id="withdrawReceiptFile" type="file" accept="image/*,application/pdf" capture="environment" hidden>
+      <button type="button" id="scanWithdrawalReceipt">📷 BON / QUITTUNG EINSCANNEN</button>
+      <span id="withdrawReceiptStatus">Noch kein Beleg erfasst.</span>
+    </div>
+    <div class="dialog-actions"><button value="cancel">Abbrechen</button><button type="button" id="saveWithdrawal" class="primary-action">Entnahme speichern</button></div>
+  </form>
+</dialog>
+
+
+<dialog id="accountChargeDialog">
+  <form method="dialog" class="dialog-card account-card">
+    <div class="admin-home-head"><div><span class="info-kicker">UNBARE ZAHLUNG</span><h2>Auf Konto buchen</h2></div><button value="close" class="icon-close">×</button></div>
+    <label>Konto suchen<input id="accountSearch" type="search" placeholder="z. B. Stadtmarketing"></label>
+    <div id="accountList" class="account-list"></div>
+    <section id="accountSelectedPanel" class="account-selected" hidden>
+      <h3 id="accountSelectedName"></h3>
+      <div id="accountBalanceInfo"></div>
+      <div id="accountRuleInfo"></div>
+      <div id="accountCartValidation"></div>
+      <label><input id="accountAcknowledge" type="checkbox"> Buchung und Kontenauswahl geprüft</label>
+      <button type="button" id="postToAccountBtn" class="primary-action">AUF KONTO BUCHEN</button>
+    </section>
+    <p class="hint">Konten und Regeln werden ausschließlich im Manager erstellt und freigegeben.</p>
+  </form>
+</dialog>
+
+<dialog id="accountBalanceDialog">
+  <form method="dialog" class="dialog-card account-card">
+    <div class="admin-home-head"><div><span class="info-kicker">KONTOSTANDSABFRAGE</span><h2 id="balanceDialogTitle">Kontostand</h2></div><button value="close" class="icon-close">×</button></div>
+    <div id="balanceDialogBody"></div>
+    <button value="close">Schließen</button>
+  </form>
+</dialog>
+
+<dialog id="accountManagerDialog">
+  <form method="dialog" class="dialog-card account-manager-card">
+    <div class="admin-home-head"><div><span class="info-kicker">MANAGER · SINGLE SOURCE OF TRUTH</span><h2>Konten & Rechnungen</h2></div><button value="close" class="icon-close">×</button></div>
+    <div class="account-manager-grid">
+      <section>
+        <h3>Konto anlegen / bearbeiten</h3>
+        <input id="amId" type="hidden">
+        <label>Name *<input id="amName" required></label>
+        <div class="two-col"><label>Gültig von<input id="amValidFrom" type="date"></label><label>Gültig bis<input id="amValidUntil" type="date"></label></div>
+        <div class="two-col"><label>Höchstbetrag €<input id="amLimit" type="number" min="0" step=".01"></label><label>Status<select id="amStatus"><option value="active">Aktiv</option><option value="blocked">Gesperrt</option></select></label></div>
+        <fieldset><legend>Erlaubte Warengruppen</legend><div id="amGroups" class="rule-chip-grid"></div></fieldset>
+        <label>Explizit erlaubte Artikel-IDs<textarea id="amAllowProducts" rows="2" placeholder="kommagetrennt, optional"></textarea></label>
+        <label>Explizit gesperrte Artikel-IDs<textarea id="amBlockProducts" rows="2" placeholder="kommagetrennt, optional"></textarea></label>
+        <button type="button" id="amSave" class="primary-action">KONTO FREIGEBEN</button>
+      </section>
+      <section>
+        <h3>Freigegebene Konten</h3>
+        <div id="amAccounts" class="account-list"></div>
+        <h3>Abrechnung</h3>
+        <label>Konto<select id="invoiceAccount"></select></label>
+        <div class="two-col"><label>Von<input id="invoiceFrom" type="date"></label><label>Bis<input id="invoiceUntil" type="date"></label></div>
+        <button type="button" id="createInvoiceBtn">Sammelrechnung erzeugen</button>
+        <label>Rechnung<select id="invoiceSelect"></select></label>
+        <button type="button" id="markInvoicePaidBtn" class="primary-action">ZAHLUNGSEINGANG VERBUCHEN</button>
+        <div id="invoiceResult"></div>
+      </section>
+    </div>
+  </form>
+</dialog>
+
+<dialog id="sharedCashManagerDialog">
+  <form method="dialog" class="dialog-card account-card">
+    <div class="admin-home-head"><div><span class="info-kicker">MONEY BUTLER</span><h2>Gemeinsamer Wechselgeldbestand</h2></div><button value="close" class="icon-close">×</button></div>
+    <label><input id="sharedCashEnabled" type="checkbox"> Betrag gilt gemeinsam für mehrere Kassen</label>
+    <label>Bezeichnung<input id="sharedCashName" value="Weihnachtsmarkt 2026"></label>
+    <label>Gesamtbetrag €<input id="sharedCashAmount" type="number" min="0" step=".01" value="1200"></label>
+    <label>Zugehörige Kassen-IDs<input id="sharedCashRegisters" value="KASSE-01,KASSE-02"></label>
+    <label>Einsatzdatum<input id="sharedCashDate" type="date"></label>
+    <button type="button" id="createSharedCashTransfer" class="primary-action">ÜBERGABECODE ERZEUGEN</button>
+    <textarea id="sharedCashPayloadOut" rows="7" readonly></textarea>
+    <div id="sharedCashStatus"></div>
+  </form>
+</dialog>
+
+<dialog id="tuvDialog">
+  <form method="dialog" class="dialog-card tuv-card">
+    <div class="admin-home-head">
+      <div><span class="info-kicker">INTERNER SELBSTTEST</span><h2>Systemprüfung</h2></div>
+      <button value="close" class="icon-close" aria-label="Schließen">×</button>
+    </div>
+    <p class="hint">Technischer KC-Selbsttest. Dies ist keine amtliche Zertifizierung oder Sachverständigenprüfung.</p>
+    <div id="tuvSummary" class="tuv-summary">Test wird vorbereitet …</div>
+    <div id="tuvResults" class="tuv-results"></div>
+    <div class="dialog-actions">
+      <button type="button" id="runTuvAgain">Erneut prüfen</button>
+      <button type="button" id="downloadTuvReport" class="primary-action">Prüfdatei speichern</button>
+      <button value="close">Schließen</button>
+    </div>
+  </form>
+</dialog>
+
+<dialog id="cashDepositDialog">
+  <form method="dialog" class="dialog-card">
+    <h2>Bargeldeinzahlung</h2>
+    <p>QR-Code mit dem HID-Scanner einlesen oder den QR-Inhalt einfügen.</p>
+    <p id="cashTransferTestHint" class="test-phase-transfer-hint" hidden><strong>Testphase:</strong> Übergabecode aus dem Money Butler oder dem geschützten Verwaltungsbereich verwenden. Dieser Hinweis wird für den späteren Kassenbetrieb zentral ausgeblendet.</p>
+    <textarea id="cashDepositPayload" rows="6"></textarea>
+    <button type="button" id="applyCashDeposit" class="primary-action">Bargeldbestand übernehmen</button>
+    <div id="cashDepositResult"></div>
+    <button value="close">Schließen</button>
+  </form>
+</dialog>
+
+
+
+<dialog id="adminHomeDialog">
+  <form method="dialog" class="dialog-card admin-home-card">
+    <div class="admin-home-head">
+      <div>
+        <span class="info-kicker">GESCHÜTZTER BEREICH</span>
+        <h2>Verwaltung</h2>
+      </div>
+      <button value="close" class="icon-close">×</button>
+    </div>
+    <div class="admin-home-grid">
+      <button type="button" data-admin-target="settings">Stammdaten & Einstellungen</button>
+      <button type="button" data-admin-target="devices">Geräte & Bondruck</button>
+      <button type="button" data-admin-target="reversal">Gebuchten Bon stornieren</button>
+      <button type="button" data-admin-target="transfer">Import / Export</button>
+      <button type="button" id="accountManagerOpen">Konten & Rechnungen</button>
+      <button type="button" id="sharedCashManagerOpen">Gemeinsames Wechselgeld</button>
+      <button type="button" data-admin-target="security">Sicherheit</button>
+    </div>
+    <p class="hint">Der Bereich wird beim Schließen sofort wieder verborgen.</p>
+  </form>
+</dialog>
+
+<dialog id="serviceDialog">
+  <form method="dialog" class="dialog-card service-access-card">
+    <h2>Superadmin-Anmeldung</h2>
+    <p>Das Köcheclub-Logo wurde fünf Sekunden gehalten.</p>
+    <label>Vierstellige PIN
+      <input id="servicePin" type="password" inputmode="numeric" pattern="[0-9]{4}" maxlength="4" autocomplete="off" placeholder="••••">
+    </label>
+    <button type="button" id="serviceLogin" class="primary-action">Mit PIN anmelden</button>
+    <div class="service-divider"><span>oder</span></div>
+    <label>Superadmin-QR / Scannercode
+      <input id="serviceQrCode" type="text" autocomplete="off" spellcheck="false" placeholder="QR-Code scannen oder einfügen">
+    </label>
+    <button type="button" id="serviceQrLogin">Per QR-Code anmelden</button>
+    <p class="hint">USB- oder Bluetooth-Scanner: QR-Code scannen. Der Scanner muss mit Enter abschließen.</p>
+    <div id="serviceError" class="service-error" aria-live="polite"></div>
+    <div class="dialog-actions">
+      <button value="cancel">Abbrechen</button>
+    </div>
+  </form>
+</dialog>
+<script src="shared/runtime-flags.js"></script>
+<div id="coachOverlay" class="coach-overlay" hidden>
+  <div class="coach-card"><div class="coach-progress"><span id="coachStepLabel">Schritt 1</span><button id="coachClose" type="button" aria-label="Schulung schließen">×</button></div><h2 id="coachTitle">Willkommen</h2><p id="coachText"></p><div class="coach-actions"><button id="coachBack" type="button">Zurück</button><button id="coachNext" type="button" class="primary-action">Weiter</button></div></div>
+</div>
+<script src="app.js"></script>
+
+  <div id="screenSaver" class="screen-saver" hidden role="button" tabindex="0" aria-label="Bildschirm gesperrt. Zum Entsperren berühren.">
+    <div class="screen-saver-content">
+      <div class="screen-saver-lock">🔒</div>
+      <strong>MarktKasse gesperrt</strong>
+      <span>Bildschirm berühren oder eine Taste drücken</span>
+      <small id="screenSaverTime"></small>
+      <small id="screenSaverCountdown" class="screen-saver-countdown"></small>
+    </div>
+  </div>
+
+<div id="legacyCompatibilityNodes" hidden aria-hidden="true">
+  <button id="compactWorkspaceBtn" hidden aria-hidden="true"></button><div id="discountBanner" hidden aria-hidden="true"></div><div id="discountBannerText" hidden aria-hidden="true"></div><button id="exitDiscountModeBtn" hidden aria-hidden="true"></button><button id="exitTrainingModeBtn" hidden aria-hidden="true"></button><button id="professionalWorkspaceBtn" hidden aria-hidden="true"></button><button id="resetWorkspaceBtn" hidden aria-hidden="true"></button><button id="touchWorkspaceBtn" hidden aria-hidden="true"></button><div id="trainingBanner" hidden aria-hidden="true"></div><div id="workspaceEditorList" hidden aria-hidden="true"></div>
+</div>
+</body>
+</html>
