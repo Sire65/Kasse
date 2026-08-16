@@ -6,30 +6,19 @@ window.KC_RUNTIME_FLAGS = Object.freeze({
 });
 
 (()=>{
+  const add=(src,key)=>{if(document.querySelector(`script[data-${key}]`))return;const s=document.createElement('script');s.src=src;s.dataset[key.replace(/-([a-z])/g,(_,c)=>c.toUpperCase())]='1';s.async=true;document.head.appendChild(s);};
+  const css=(href,key)=>{if(document.querySelector(`link[data-${key}]`))return;const l=document.createElement('link');l.rel='stylesheet';l.href=href;l.dataset[key.replace(/-([a-z])/g,(_,c)=>c.toUpperCase())]='1';document.head.appendChild(l);};
   const loadManagerMirror=()=>{
     if(document.querySelector('script[data-kc-manager-mirror]'))return;
     const script=document.createElement('script');
-    script.src='shared/manager-mirror.js';
-    script.dataset.kcManagerMirror='1';
-    script.async=true;
+    script.src='shared/manager-mirror.js';script.dataset.kcManagerMirror='1';script.async=true;
     script.addEventListener('load',()=>{
-      if(!document.querySelector('script[data-kc-manager-mirror-sim]')){
-        const sim=document.createElement('script');
-        sim.src='shared/manager-mirror-sim.js';
-        sim.dataset.kcManagerMirrorSim='1';
-        sim.async=true;
-        document.head.appendChild(sim);
-      }
-      if(!document.querySelector('script[data-kc-manager-mirror-status]')){
-        const status=document.createElement('script');
-        status.src='shared/manager-mirror-status.js';
-        status.dataset.kcManagerMirrorStatus='1';
-        status.async=true;
-        document.head.appendChild(status);
-      }
+      add('shared/manager-mirror-sim.js','kc-manager-mirror-sim');
+      add('shared/manager-mirror-status.js','kc-manager-mirror-status');
+      css('shared/manager-mirror-core.css','kc-manager-mirror-core-css');
+      add('shared/manager-mirror-core.js','kc-manager-mirror-core');
     },{once:true});
     document.head.appendChild(script);
   };
-  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',loadManagerMirror,{once:true});
-  else loadManagerMirror();
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',loadManagerMirror,{once:true});else loadManagerMirror();
 })();
