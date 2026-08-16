@@ -1,0 +1,29 @@
+name: PC Manager KC-DP Error Monitor Gate
+on:
+  pull_request:
+    paths:
+      - 'shared/manager-dp-errors.js'
+      - 'shared/manager-dp-errors.css'
+      - 'shared/runtime-flags.js'
+      - '.github/workflows/manager-system-monitor-gate.yml'
+jobs:
+  manager-monitor:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v5
+        with:
+          node-version: '22'
+      - name: Syntax
+        run: node --check shared/manager-dp-errors.js
+      - name: Contract
+        run: |
+          node - <<'NODE'
+          const fs=require('fs');
+          const js=fs.readFileSync('shared/manager-dp-errors.js','utf8');
+          const rt=fs.readFileSync('shared/runtime-flags.js','utf8');
+          for(const s of ['kc_dp_error_admin_list_v2','kcDpErrorLamp','kcDpErrorStats','kcDpErrorList','kc-system-health','Jetzt prüfen']) if(!js.includes(s)) throw new Error('Fehlt: '+s);
+          for(const s of ['manager-dp-errors.css','manager-dp-errors.js']) if(!rt.includes(s)) throw new Error('Loader fehlt: '+s);
+          if(js.includes('localStorage.setItem(')) throw new Error('Diagnosemodul darf keine Zugangsdaten persistent speichern');
+          console.log('PC Manager KC-DP error monitor contract: OK');
+          NODE
