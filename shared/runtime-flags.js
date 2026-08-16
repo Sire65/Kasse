@@ -17,6 +17,8 @@ window.KC_RUNTIME_FLAGS = Object.freeze({
       add('shared/manager-mirror-status.js','kc-manager-mirror-status');
       css('shared/manager-mirror-core.css','kc-manager-mirror-core-css');
       add('shared/manager-mirror-core.js','kc-manager-mirror-core');
+      css('shared/manager-dp-errors.css','kc-manager-dp-errors-css');
+      add('shared/manager-dp-errors.js','kc-manager-dp-errors');
     },{once:true});
     document.head.appendChild(script);
   };
