@@ -1,0 +1,57 @@
+name: Security Sprint 2 TÜV
+
+on:
+  push:
+    branches:
+      - security-hardening-sprint2-impl
+  workflow_dispatch:
+
+jobs:
+  security-tuv:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
+      security-events: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Device crypto attack tests 50+
+        run: node --test scripts/device-auth.test.mjs
+
+      - name: Existing application syntax TÜV
+        run: |
+          node --check app.js
+          node --check service-worker.js
+          node --check shared/kc-resilience.js
+          node --check shared/runtime-flags.js
+          node --check shared/kc-device-auth.mjs
+
+      - name: Security architecture assertions
+        shell: bash
+        run: |
+          set -euo pipefail
+          grep -q "ECDSA" shared/kc-device-auth.mjs
+          grep -q "P-256" shared/kc-device-auth.mjs
+          grep -q "generateKey" shared/kc-device-auth.mjs
+          grep -q "false.*sign.*verify" shared/kc-device-auth.mjs
+          grep -q "kc-device-auth.mjs" service-worker.js
+          if grep -Eiq '(privateKey|deviceSecret|masterKey)[[:space:]]*=[[:space:]]*["'"'][A-Za-z0-9_-]{24,}' shared/kc-device-auth.mjs; then
+            echo 'Possible embedded secret found'
+            exit 1
+          fi
+          echo 'Sprint 2 policy assertions passed.'
+
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v3
+        with:
+          languages: javascript-typescript
+
+      - name: CodeQL analysis
+        uses: github/codeql-action/analyze@v3
