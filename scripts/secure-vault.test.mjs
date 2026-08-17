@@ -17,7 +17,7 @@ test('KDF work factor is at least 600k',()=>assert.ok(v.VAULT_CONSTANTS.KDF_ITER
 test('data key is non-extractable',()=>assert.equal(dataKey.extractable,false));
 test('data key AES-GCM',()=>assert.equal(dataKey.algorithm.name,'AES-GCM'));
 test('recovery package validates',()=>assert.equal(v.validateRecoveryPackage(recoveryPackage),true));
-test('recovery package has no plaintext key field',()=>{for(const k of Object.keys(recoveryPackage))assert.notMatch(k,/^(?:rawKey|dataKey|plaintextKey)$/i)});
+test('recovery package has no plaintext key field',()=>{for(const k of Object.keys(recoveryPackage))assert.equal(/^(?:rawKey|dataKey|plaintextKey)$/i.test(k),false)});
 test('recovery package fingerprint stable',async()=>assert.equal(await v.fingerprintRecoveryPackage(recoveryPackage),await v.fingerprintRecoveryPackage(recoveryPackage)));
 
 for(let i=0;i<40;i++)test(`encrypted record roundtrip ${i+1}`,async()=>{
