@@ -7,7 +7,10 @@ on:
     paths:
       - 'app.js'
       - 'service-worker.js'
+      - 'shared/kc-resilience.js'
+      - 'shared/runtime-flags.js'
       - 'scripts/supergau-audit.mjs'
+      - 'scripts/supergau-runtime-test.mjs'
       - '.github/workflows/supergau-client-audit.yml'
   workflow_dispatch:
 
@@ -23,5 +26,22 @@ jobs:
         with:
           node-version: '22'
 
-      - name: Run scenarios 4 to 10 audit
+      - name: Run scenarios 4 to 10 structural audit
         run: node scripts/supergau-audit.mjs
+
+      - name: Run offline queue functional runtime test
+        run: node scripts/supergau-runtime-test.mjs
+
+      - name: Verify live failover gateway health
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl --fail --silent --show-error --max-time 30 https://kc-failover-gateway.ha-joko.workers.dev/ | tee gateway-health.json
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          const body=JSON.parse(fs.readFileSync('gateway-health.json','utf8'));
+          if(body.status!=='OK') throw new Error(JSON.stringify(body));
+          if(body.fallback?.reachable!==true) throw new Error(JSON.stringify(body));
+          if(body.durablePosJournal!==true) throw new Error(JSON.stringify(body));
+          console.log('PASS|gateway|live durable POS journal reachable');
+          NODE
