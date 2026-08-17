@@ -1,0 +1,64 @@
+name: Security Sprint 4 TÜV
+
+on:
+  push:
+    branches:
+      - security-hardening-sprint4-impl
+  workflow_dispatch:
+
+jobs:
+  signed-sync-tuv:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
+      security-events: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Sprint 4 signed sync tests 50+
+        run: node --test scripts/security-sprint4.test.mjs
+
+      - name: Vault regression
+        run: node --test scripts/secure-vault.test.mjs
+
+      - name: Device identity regression
+        run: node --test scripts/device-auth.test.mjs
+
+      - name: Existing application syntax TÜV
+        run: |
+          node --check app.js
+          node --check shared/kc-resilience.js
+          node --check shared/kc-device-auth.mjs
+          node --check shared/kc-secure-vault.mjs
+
+      - name: Security architecture assertions
+        shell: bash
+        run: |
+          set -euo pipefail
+          grep -q "signedHeaders('POST'" shared/kc-resilience.js
+          grep -q "signedHeaders('GET'" shared/kc-resilience.js
+          grep -q "SECURITY_ENROLLMENT_REQUIRED" shared/kc-resilience.js
+          grep -q "kc_security_device_id_v1" shared/kc-resilience.js
+          grep -q "kc_security_enrollment_v1" shared/kc-resilience.js
+          grep -q "ECDSA" shared/kc-device-auth.mjs
+          grep -q "AES-GCM" shared/kc-secure-vault.mjs
+          if grep -Eiq '(privateKey|masterKey|deviceSecret)[[:space:]]*=[[:space:]]*["'"'][A-Za-z0-9_-]{24,}' app.js shared/*.js shared/*.mjs; then
+            echo 'Possible embedded secret found'
+            exit 1
+          fi
+          echo 'Sprint 4 assertions passed.'
+
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v3
+        with:
+          languages: javascript-typescript
+
+      - name: CodeQL analysis
+        uses: github/codeql-action/analyze@v3
