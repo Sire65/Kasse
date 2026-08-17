@@ -1,0 +1,61 @@
+name: Security Sprint 3 TÜV
+
+on:
+  push:
+    branches:
+      - security-hardening-sprint3-impl
+  workflow_dispatch:
+
+jobs:
+  vault-tuv:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: read
+      security-events: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Vault tests 50+
+        run: node --test scripts/secure-vault.test.mjs
+
+      - name: Device identity regression
+        run: node --test scripts/device-auth.test.mjs
+
+      - name: Existing application syntax TÜV
+        run: |
+          node --check app.js
+          node --check service-worker.js
+          node --check shared/kc-resilience.js
+          node --check shared/kc-device-auth.mjs
+          node --check shared/kc-secure-vault.mjs
+
+      - name: Cryptography policy assertions
+        run: |
+          set -euo pipefail
+          grep -q "AES-GCM" shared/kc-secure-vault.mjs
+          grep -q "600000" shared/kc-secure-vault.mjs
+          grep -q "additionalData" shared/kc-secure-vault.mjs
+          grep -q "false.*encrypt.*decrypt" shared/kc-secure-vault.mjs
+          grep -q "kc-secure-vault.mjs" service-worker.js
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          const t=fs.readFileSync('shared/kc-secure-vault.mjs','utf8');
+          if(/(?:recoveryPassphrase|masterKey)\s*=\s*["'][^"']{16,}["']/i.test(t)) throw new Error('Embedded recovery secret found');
+          if(!t.includes('raw.fill(0)')) throw new Error('Raw key zeroization missing');
+          console.log('Vault cryptography assertions passed.');
+          NODE
+
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v3
+        with:
+          languages: javascript-typescript
+
+      - name: CodeQL analysis
+        uses: github/codeql-action/analyze@v3
