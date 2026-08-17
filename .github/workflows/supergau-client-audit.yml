@@ -1,0 +1,27 @@
+name: Super-GAU Client Resilience Audit
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'app.js'
+      - 'service-worker.js'
+      - 'scripts/supergau-audit.mjs'
+      - '.github/workflows/supergau-client-audit.yml'
+  workflow_dispatch:
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Run scenarios 4 to 10 audit
+        run: node scripts/supergau-audit.mjs
