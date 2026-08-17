@@ -1,4 +1,4 @@
-const CACHE="kc-marktkasse-v0-29-0-security-sprint3-1";
+const CACHE="kc-marktkasse-v0-29-0-security-sprint4-1";
 const ASSETS=[
   "./",
   "./index.html",
