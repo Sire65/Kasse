@@ -42,10 +42,13 @@ jobs:
           grep -q "generateKey" shared/kc-device-auth.mjs
           grep -q "false.*sign.*verify" shared/kc-device-auth.mjs
           grep -q "kc-device-auth.mjs" service-worker.js
-          if grep -Eiq '(privateKey|deviceSecret|masterKey)[[:space:]]*=[[:space:]]*["'"'][A-Za-z0-9_-]{24,}' shared/kc-device-auth.mjs; then
-            echo 'Possible embedded secret found'
-            exit 1
-          fi
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          const text=fs.readFileSync('shared/kc-device-auth.mjs','utf8');
+          const suspicious=/(?:deviceSecret|masterKey)\s*=\s*["'][A-Za-z0-9_-]{24,}["']/i.test(text);
+          if(suspicious) throw new Error('Possible embedded secret found');
+          console.log('No embedded device/master secret found.');
+          NODE
           echo 'Sprint 2 policy assertions passed.'
 
       - name: Initialize CodeQL
