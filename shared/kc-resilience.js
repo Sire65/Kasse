@@ -7,10 +7,14 @@ const OUTBOX_KEY='kc_sync_outbox_v1';
 const ACK_KEY='kc_sync_ack_v1';
 const CONFLICT_KEY='kc_sync_conflicts_v1';
 const STATUS_KEY='kc_sync_status_v1';
+const DEVICE_ID_KEY='kc_security_device_id_v1';
+const ENROLLMENT_KEY='kc_security_enrollment_v1';
 const MAX_ACKS=12000;
 const originalSetItem=Storage.prototype.setItem;
 let syncing=false;
 let timer=null;
+let authPromise=null;
+let identityPromise=null;
 
 const readJson=(key,fallback)=>{try{const v=localStorage.getItem(key);return v?JSON.parse(v):fallback}catch{return fallback}};
 const writeJson=(key,value)=>originalSetItem.call(localStorage,key,JSON.stringify(value));
@@ -19,11 +23,44 @@ const outbox=()=>readJson(OUTBOX_KEY,[]);
 const ackIds=()=>new Set(readJson(ACK_KEY,[]));
 const conflicts=()=>readJson(CONFLICT_KEY,[]);
 const nowIso=()=>new Date().toISOString();
+const master=()=>readJson('kc_master_v040',{});
 
 function setStatus(state,detail={}){
   const status={state,time:nowIso(),queued:outbox().length,...detail};
   writeJson(STATUS_KEY,status);
   window.dispatchEvent(new CustomEvent('kc-resilience-status',{detail:status}));
+}
+
+function registerId(){return String(master()?.registerId||transactions()[0]?.registerId||'').trim();}
+function stableDeviceId(){
+  let id=String(localStorage.getItem(DEVICE_ID_KEY)||'').trim();
+  if(/^[A-Za-z0-9._:-]{3,100}$/.test(id))return id;
+  const rid=registerId()||'KASSE';
+  id=`${rid}-DEV-${crypto.randomUUID()}`.replace(/[^A-Za-z0-9._:-]/g,'-').slice(0,100);
+  originalSetItem.call(localStorage,DEVICE_ID_KEY,id);
+  return id;
+}
+async function authModule(){return authPromise||(authPromise=import('./kc-device-auth.mjs'));}
+async function deviceIdentity(){
+  const rid=registerId();
+  if(!rid)throw new Error('REGISTER_ID_REQUIRED');
+  if(!identityPromise)identityPromise=(async()=>{
+    const auth=await authModule();
+    const identity=await auth.getOrCreateIdentity({deviceId:stableDeviceId(),registerId:rid,keyVersion:1});
+    const descriptor=await auth.enrollmentDescriptor(identity);
+    writeJson(ENROLLMENT_KEY,descriptor);
+    return identity;
+  })();
+  return identityPromise;
+}
+async function signedHeaders(method,url,bodyText=''){
+  const auth=await authModule();
+  const identity=await deviceIdentity();
+  return auth.signRequest(identity,{method,url,bodyText});
+}
+async function enrollmentDescriptor(){
+  await deviceIdentity();
+  return readJson(ENROLLMENT_KEY,null);
 }
 
 function queueTransactions(rows){
@@ -69,14 +106,36 @@ function saveConflict(item,remoteStatus='CONFLICT'){
   }
 }
 
+function securityError(data,status){
+  const code=String(data?.error||'');
+  if(status===401||status===403||code==='SECURITY_NOT_CONFIGURED'){
+    setStatus('SECURITY_ENROLLMENT_REQUIRED',{error:code||`HTTP_${status}`,deviceId:stableDeviceId(),registerId:registerId()});
+  }
+}
+
 async function post(path,body,timeoutMs=12000){
   const controller=new AbortController();
   const timeout=setTimeout(()=>controller.abort(),timeoutMs);
   try{
-    const res=await fetch(`${GATEWAY}${path}`,{method:'POST',headers:{'content-type':'application/json','x-kc-client':'KC-MarktKasse'},body:JSON.stringify(body),signal:controller.signal,cache:'no-store'});
+    const url=`${GATEWAY}${path}`;
+    const bodyText=JSON.stringify(body);
+    const authHeaders=await signedHeaders('POST',url,bodyText);
+    const res=await fetch(url,{method:'POST',headers:{'content-type':'application/json','x-kc-client':'KC-MarktKasse',...authHeaders},body:bodyText,signal:controller.signal,cache:'no-store'});
     const data=await res.json().catch(()=>({}));
+    securityError(data,res.status);
     if(!res.ok&&res.status!==207&&res.status!==409)throw new Error(data?.error||`HTTP_${res.status}`);
     return {res,data};
+  }finally{clearTimeout(timeout)}
+}
+
+async function signedGet(url,timeoutMs=20000){
+  const controller=new AbortController();const timeout=setTimeout(()=>controller.abort(),timeoutMs);
+  try{
+    const authHeaders=await signedHeaders('GET',url,'');
+    const res=await fetch(url,{headers:{'x-kc-client':'KC-MarktKasse',...authHeaders},cache:'no-store',signal:controller.signal});
+    const data=await res.json().catch(()=>({}));securityError(data,res.status);
+    if(!res.ok)throw new Error(data?.error||`HTTP_${res.status}`);
+    return data;
   }finally{clearTimeout(timeout)}
 }
 
@@ -110,7 +169,7 @@ async function flushOutbox(){
   }catch(error){
     const list=outbox().map(item=>{const attempts=Number(item.attempts||0)+1;return {...item,attempts,nextAttemptAt:Date.now()+Math.min(300000,Math.max(3000,2**Math.min(attempts,8)*1000)),lastError:error instanceof Error?error.message:String(error)}});
     writeJson(OUTBOX_KEY,list);
-    setStatus('GATEWAY_UNREACHABLE',{error:error instanceof Error?error.message:String(error)});
+    if(getStatus().state!=='SECURITY_ENROLLMENT_REQUIRED')setStatus('GATEWAY_UNREACHABLE',{error:error instanceof Error?error.message:String(error)});
   }finally{
     syncing=false;
     if(outbox().length)scheduleSync(5000);
@@ -122,23 +181,23 @@ function scheduleSync(delay=1500){
   timer=setTimeout(flushOutbox,delay);
 }
 
-async function reconcile(registerId){
-  const local=transactions().filter(x=>!registerId||x.registerId===registerId);
-  const rid=registerId||local[0]?.registerId;
-  if(!rid)return {status:'NO_REGISTER'};
+async function reconcile(rid){
+  const local=transactions().filter(x=>!rid||x.registerId===rid);
+  const target=rid||registerId()||local[0]?.registerId;
+  if(!target)return {status:'NO_REGISTER'};
   const ids=local.map(x=>x.transactionId);
-  const {data}=await post('/sync/reconcile',{registerId:rid,transactionIds:ids},20000);
+  const {data}=await post('/sync/reconcile',{registerId:target,transactionIds:ids},20000);
   const missing=new Set(data.missingRemote||[]);
   if(missing.size)queueTransactions(local.filter(x=>missing.has(x.transactionId)));
-  if((data.missingLocal||[]).length)await restoreRegister(rid);
+  if((data.missingLocal||[]).length)await restoreRegister(target);
   scheduleSync(50);
   return data;
 }
 
-async function restoreRegister(registerId,{since=null}={}){
-  if(!registerId)throw new Error('REGISTER_ID_REQUIRED');
-  const url=new URL(`${GATEWAY}/sync/transactions`);url.searchParams.set('register_id',registerId);if(since)url.searchParams.set('since',since);
-  const res=await fetch(url,{cache:'no-store'});const data=await res.json().catch(()=>({}));if(!res.ok)throw new Error(data?.error||`HTTP_${res.status}`);
+async function restoreRegister(rid,{since=null}={}){
+  const target=rid||registerId();if(!target)throw new Error('REGISTER_ID_REQUIRED');
+  const url=new URL(`${GATEWAY}/sync/transactions`);url.searchParams.set('register_id',target);if(since)url.searchParams.set('since',since);
+  const data=await signedGet(url.toString());
   const local=transactions();
   const map=new Map(local.map(x=>[x.transactionId,x]));
   const conflictRows=conflicts();
@@ -150,7 +209,7 @@ async function restoreRegister(registerId,{since=null}={}){
     const samePayload=JSON.stringify(old)===JSON.stringify(remote);
     if(!sameHash&&!samePayload){
       conflictCount++;
-      if(!conflictRows.some(x=>x.transactionId===remote.transactionId))conflictRows.push({transactionId:remote.transactionId,registerId,detectedAt:nowIso(),remoteStatus:'RESTORE_CONFLICT',localRecordHash:old.recordHash||null,remoteRecordHash:remote.recordHash||null});
+      if(!conflictRows.some(x=>x.transactionId===remote.transactionId))conflictRows.push({transactionId:remote.transactionId,registerId:target,detectedAt:nowIso(),remoteStatus:'RESTORE_CONFLICT',localRecordHash:old.recordHash||null,remoteRecordHash:remote.recordHash||null});
     }
   }
   const merged=[...map.values()].sort((a,b)=>String(a.time||a.endTime||'').localeCompare(String(b.time||b.endTime||'')));
@@ -171,7 +230,10 @@ window.KCResilience=Object.freeze({
   scan:scanLocalTransactions,
   status:getStatus,
   queueSize:()=>outbox().length,
-  conflicts:()=>conflicts().slice()
+  conflicts:()=>conflicts().slice(),
+  enrollment:enrollmentDescriptor,
+  deviceId:stableDeviceId,
+  registerId
 });
 
 window.addEventListener('online',()=>{setStatus('ONLINE');scanLocalTransactions();});
