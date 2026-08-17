@@ -34,10 +34,10 @@ test('wrong recovery passphrase rejected',async()=>{await assert.rejects(()=>v.r
 test('short recovery passphrase rejected',async()=>{await assert.rejects(()=>v.createVaultKey('short'),/RECOVERY_PASSPHRASE_TOO_SHORT/)});
 
 const base=await v.encryptRecord(dataKey,{amount:12.34,operator:'Hans'},{namespace:'transactions',keyId:recoveryPackage.keyId,recordId:'tamper-1'});
-const mutateChar=s=>s.slice(0,-1)+(s.endsWith('A')?'B':'A');
+const flipEncodedByte=(value,index=0)=>{const raw=Buffer.from(v.fromB64url(value));if(!raw.length)throw new Error('EMPTY_TAMPER_TARGET');raw[Math.min(index,raw.length-1)]^=1;return v.b64url(raw);};
 const envelopeTamper=[
- ['ciphertext',{...base,ciphertext:mutateChar(base.ciphertext)}],
- ['iv',{...base,iv:mutateChar(base.iv)}],
+ ['ciphertext',{...base,ciphertext:flipEncodedByte(base.ciphertext,0)}],
+ ['iv',{...base,iv:flipEncodedByte(base.iv,0)}],
  ['namespace',{...base,namespace:'other'}],
  ['recordId',{...base,recordId:'tamper-2'}],
  ['keyId',{...base,keyId:v.newKeyId()}]
@@ -55,10 +55,10 @@ const recoveryTamper=[
 ];
 for(const [name,pkg] of recoveryTamper)test(`invalid recovery ${name} rejected`,async()=>{await assert.rejects(async()=>v.recoverVaultKey(pass,pkg),/RECOVERY_/)});
 
-test('tampered wrapped recovery key rejected cryptographically',async()=>{const pkg={...recoveryPackage,wrappedKey:mutateChar(recoveryPackage.wrappedKey)};await assert.rejects(()=>v.recoverVaultKey(pass,pkg),/RECOVERY_AUTHENTICATION_FAILED/)});
-test('tampered recovery IV rejected cryptographically',async()=>{const raw=Buffer.from(v.fromB64url(recoveryPackage.iv));raw[0]^=1;const pkg={...recoveryPackage,iv:v.b64url(raw)};await assert.rejects(()=>v.recoverVaultKey(pass,pkg),/RECOVERY_AUTHENTICATION_FAILED/)});
-test('tampered recovery salt rejected cryptographically',async()=>{const raw=Buffer.from(v.fromB64url(recoveryPackage.salt));raw[0]^=1;const pkg={...recoveryPackage,salt:v.b64url(raw)};await assert.rejects(()=>v.recoverVaultKey(pass,pkg),/RECOVERY_AUTHENTICATION_FAILED/)});
+test('tampered wrapped recovery key rejected cryptographically',async()=>{const pkg={...recoveryPackage,wrappedKey:flipEncodedByte(recoveryPackage.wrappedKey,0)};await assert.rejects(()=>v.recoverVaultKey(pass,pkg),/RECOVERY_AUTHENTICATION_FAILED/)});
+test('tampered recovery IV rejected cryptographically',async()=>{const pkg={...recoveryPackage,iv:flipEncodedByte(recoveryPackage.iv,0)};await assert.rejects(()=>v.recoverVaultKey(pass,pkg),/RECOVERY_AUTHENTICATION_FAILED/)});
+test('tampered recovery salt rejected cryptographically',async()=>{const pkg={...recoveryPackage,salt:flipEncodedByte(recoveryPackage.salt,0)};await assert.rejects(()=>v.recoverVaultKey(pass,pkg),/RECOVERY_AUTHENTICATION_FAILED/)});
 
 test('vault requires context',async()=>{await assert.rejects(()=>v.encryptRecord(dataKey,{a:1},{keyId:recoveryPackage.keyId}),/VAULT_CONTEXT_REQUIRED/)});
 test('wrong key cannot decrypt',async()=>{const other=(await v.createVaultKey('Another-Recovery-Passphrase-2026!')).dataKey;await assert.rejects(()=>v.decryptRecord(other,base),/VAULT_AUTHENTICATION_FAILED/)});
-test('fingerprint changes if wrapped package changes',async()=>{const changed={...recoveryPackage,createdAt:'2099-01-01'};assert.equal(await v.fingerprintRecoveryPackage(changed),await v.fingerprintRecoveryPackage(recoveryPackage));const raw=Buffer.from(v.fromB64url(recoveryPackage.wrappedKey));raw[0]^=1;const tam={...recoveryPackage,wrappedKey:v.b64url(raw)};assert.notEqual(await v.fingerprintRecoveryPackage(tam),await v.fingerprintRecoveryPackage(recoveryPackage))});
+test('fingerprint changes if wrapped package changes',async()=>{const changed={...recoveryPackage,createdAt:'2099-01-01'};assert.equal(await v.fingerprintRecoveryPackage(changed),await v.fingerprintRecoveryPackage(recoveryPackage));const tam={...recoveryPackage,wrappedKey:flipEncodedByte(recoveryPackage.wrappedKey,0)};assert.notEqual(await v.fingerprintRecoveryPackage(tam),await v.fingerprintRecoveryPackage(recoveryPackage))});
