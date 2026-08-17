@@ -1,4 +1,4 @@
-const CACHE="kc-marktkasse-v0-29-0-publish-slim-1";
+const CACHE="kc-marktkasse-v0-29-0-resilience-1";
 const ASSETS=[
   "./",
   "./index.html",
@@ -6,7 +6,8 @@ const ASSETS=[
   "./app.js",
   "./manifest.webmanifest",
   "./assets/logo.png",
-  "./shared/runtime-flags.js"
+  "./shared/runtime-flags.js",
+  "./shared/kc-resilience.js"
 ];
 self.addEventListener("install",event=>event.waitUntil(
   caches.open(CACHE).then(cache=>cache.addAll(ASSETS)).then(()=>self.skipWaiting())
