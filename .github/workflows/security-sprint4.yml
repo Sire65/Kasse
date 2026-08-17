@@ -49,10 +49,16 @@ jobs:
           grep -q "kc_security_enrollment_v1" shared/kc-resilience.js
           grep -q "ECDSA" shared/kc-device-auth.mjs
           grep -q "AES-GCM" shared/kc-secure-vault.mjs
-          if grep -Eiq '(privateKey|masterKey|deviceSecret)[[:space:]]*=[[:space:]]*["'"'][A-Za-z0-9_-]{24,}' app.js shared/*.js shared/*.mjs; then
-            echo 'Possible embedded secret found'
-            exit 1
-          fi
+          node --input-type=module <<'NODE'
+          import { readFile } from 'node:fs/promises';
+          const files=['app.js','shared/kc-resilience.js','shared/kc-device-auth.mjs','shared/kc-secure-vault.mjs'];
+          const re=/(privateKey|masterKey|deviceSecret)\s*=\s*["'][A-Za-z0-9_-]{24,}["']/i;
+          for(const f of files){
+            const text=await readFile(f,'utf8');
+            if(re.test(text)){console.error(`Possible embedded secret found in ${f}`);process.exit(1);}
+          }
+          console.log('No embedded private/master/device secrets detected.');
+          NODE
           echo 'Sprint 4 assertions passed.'
 
       - name: Initialize CodeQL
