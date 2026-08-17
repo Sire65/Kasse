@@ -62,3 +62,5 @@ for(let i=0;i<10;i++)test(`nonce uniqueness ${i+1}`,()=>{
   const a=auth.generateNonce(),b=auth.generateNonce();
   assert.notEqual(a,b);assert.match(a,/^[A-Za-z0-9_-]{32}$/);assert.match(b,/^[A-Za-z0-9_-]{32}$/);
 });
+
+// TÜV trigger marker: Sprint 4 integration baseline.
