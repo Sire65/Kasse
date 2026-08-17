@@ -45,3 +45,26 @@ jobs:
           if(body.durablePosJournal!==true) throw new Error(JSON.stringify(body));
           console.log('PASS|gateway|live durable POS journal reachable');
           NODE
+
+      - name: Live POS journal write reconcile restore roundtrip
+        shell: bash
+        run: |
+          set -euo pipefail
+          BASE="https://kc-failover-gateway.ha-joko.workers.dev"
+          TX="SUPERGAU-CI-${GITHUB_RUN_ID}"
+          REGISTER="SUPERGAU-CI"
+          PAYLOAD=$(printf '{"transactions":[{"transactionId":"%s","registerId":"%s","registerName":"CI Test","time":"2026-08-17T20:00:00.000Z","recordHash":"ci-hash-%s","training":false,"total":1.23}]}' "$TX" "$REGISTER" "$GITHUB_RUN_ID")
+          curl --fail --silent --show-error --max-time 30 -H 'content-type: application/json' -d "$PAYLOAD" "$BASE/sync/batch" | tee sync-write.json
+          curl --fail --silent --show-error --max-time 30 -H 'content-type: application/json' -d "{\"registerId\":\"$REGISTER\",\"transactionIds\":[\"$TX\"]}" "$BASE/sync/reconcile" | tee sync-reconcile.json
+          curl --fail --silent --show-error --max-time 30 "$BASE/sync/transactions?register_id=$REGISTER" | tee sync-restore.json
+          TX="$TX" node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          const tx=process.env.TX;
+          const write=JSON.parse(fs.readFileSync('sync-write.json','utf8'));
+          const reconcile=JSON.parse(fs.readFileSync('sync-reconcile.json','utf8'));
+          const restore=JSON.parse(fs.readFileSync('sync-restore.json','utf8'));
+          if(!['STORED','ALREADY_STORED'].includes(write.results?.[0]?.status)) throw new Error(JSON.stringify(write));
+          if((reconcile.missingRemote||[]).includes(tx)) throw new Error(JSON.stringify(reconcile));
+          if(!(restore.transactions||[]).some(x=>x.transactionId===tx)) throw new Error(JSON.stringify(restore));
+          console.log('PASS|journal|live write -> reconcile -> restore roundtrip');
+          NODE
