@@ -7,8 +7,7 @@ if(!globalThis.btoa)globalThis.btoa=s=>Buffer.from(s,'binary').toString('base64'
 if(!globalThis.atob)globalThis.atob=s=>Buffer.from(s,'base64').toString('binary');
 
 const mod=await import('../shared/kc-device-auth.mjs');
-const {canonicalRequest,generateNonce,generateSigningKeyPair,signCanonical,verifyCanonical,exportPublicJwk,validateDeviceId,sha256Base64Url,fromB64url,b64url}=mod;
-
+const {canonicalRequest,generateNonce,generateSigningKeyPair,signCanonical,verifyCanonical,exportPublicJwk,validateDeviceId,sha256Base64Url,fromB64url,b64url,nextKeyVersion}=mod;
 const pair=await generateSigningKeyPair();
 
 test('private key is non-extractable',()=>assert.equal(pair.privateKey.extractable,false));
@@ -19,6 +18,9 @@ test('public descriptor is verify-only',async()=>{const j=await exportPublicJwk(
 
 for(const id of ['KASSE-01','KASSE-02','register-1','pos.tablet:01','abc','A.B_C-123:Z'])test(`valid device id ${id}`,()=>assert.equal(validateDeviceId(id),true));
 for(const id of ['', 'a','ab','has space','<script>','äöü','a/b','a?b','a#b','x'.repeat(101)])test(`invalid device id ${JSON.stringify(id)}`,()=>assert.equal(validateDeviceId(id),false));
+
+for(const [current,next] of [[1,2],[2,3],[9,10],[99,100],[999,1000],[999999998,999999999]])test(`key version rotates ${current} -> ${next}`,()=>assert.equal(nextKeyVersion(current),next));
+for(const bad of [0,-1,1.5,NaN,Infinity,'x',999999999,1000000000])test(`invalid key version rejected ${String(bad)}`,()=>assert.throws(()=>nextKeyVersion(bad),/INVALID_KEY_VERSION/));
 
 test('nonce has strong length',()=>assert.ok(generateNonce().length>=32));
 test('nonces differ',()=>assert.notEqual(generateNonce(),generateNonce()));
@@ -44,6 +46,9 @@ for(const [name,m,u,t,n,b] of changes)test(`tampered ${name} rejects signature`,
 for(let i=0;i<20;i++)test(`payload forgery case ${i+1}`,async()=>{const original=JSON.stringify({transactionId:`tx-${i}`,total:i+0.5});const forged=JSON.stringify({transactionId:`tx-${i}`,total:99999});const c1=await canonicalRequest('POST','https://g.example/sync/batch','1787000000',`nonce_${String(i).padStart(16,'0')}`,original);const sig=await signCanonical(pair.privateKey,c1);const c2=await canonicalRequest('POST','https://g.example/sync/batch','1787000000',`nonce_${String(i).padStart(16,'0')}`,forged);assert.equal(await verifyCanonical(pair.publicKey,c2,sig),false)});
 
 test('another device key cannot validate signature',async()=>{const other=await generateSigningKeyPair();const c=await canonicalRequest('POST','https://g.example/sync/batch','1787000000','abcdefghijklmnop','{}');const s=await signCanonical(pair.privateKey,c);assert.equal(await verifyCanonical(other.publicKey,c,s),false)});
+test('rotated key cannot validate old key signature',async()=>{const rotated=await generateSigningKeyPair();const c=await canonicalRequest('POST','https://g.example/sync/batch','1787000000','abcdefghijklmnop','{}');const s=await signCanonical(pair.privateKey,c);assert.equal(await verifyCanonical(rotated.publicKey,c,s),false)});
+test('old key cannot validate rotated key signature',async()=>{const rotated=await generateSigningKeyPair();const c=await canonicalRequest('POST','https://g.example/sync/batch','1787000000','abcdefghijklmnop','{}');const s=await signCanonical(rotated.privateKey,c);assert.equal(await verifyCanonical(pair.publicKey,c,s),false)});
+for(let i=0;i<12;i++)test(`fresh rotation key ${i+1} differs from current key`,async()=>{const rotated=await generateSigningKeyPair();const a=await exportPublicJwk(pair.publicKey),b=await exportPublicJwk(rotated.publicKey);assert.notEqual(`${a.x}.${a.y}`,`${b.x}.${b.y}`);assert.equal(rotated.privateKey.extractable,false)});
 test('malformed signature returns false',async()=>{const c=await canonicalRequest('POST','https://g.example/sync/batch','1787000000','abcdefghijklmnop','{}');assert.equal(await verifyCanonical(pair.publicKey,c,'%%%'),false)});
 test('canonical includes query ordering exactly',async()=>{const a=await canonicalRequest('GET','https://g.example/x?a=1&b=2','1','abcdefghijklmnop','');const b=await canonicalRequest('GET','https://g.example/x?b=2&a=1','1','abcdefghijklmnop','');assert.notEqual(a,b)});
 test('canonical strips host from signed resource',async()=>{const a=await canonicalRequest('GET','https://a.example/x?a=1','1','abcdefghijklmnop','');const b=await canonicalRequest('GET','https://b.example/x?a=1','1','abcdefghijklmnop','');assert.equal(a,b)});
