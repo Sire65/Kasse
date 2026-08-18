@@ -1,0 +1,61 @@
+name: Security Sprint 7 Key Rotation TÜV
+
+on:
+  push:
+    branches:
+      - security-hardening-sprint7-rotation
+  workflow_dispatch:
+
+jobs:
+  rotation-tuv:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
+      security-events: write
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v5
+        with:
+          node-version: '22'
+
+      - name: Device auth regression 50+
+        run: node --test scripts/device-auth.test.mjs
+
+      - name: Vault regression
+        run: node --test scripts/secure-vault.test.mjs
+
+      - name: Security regression
+        run: node --test scripts/security-sprint4.test.mjs
+
+      - name: SUPER-GAU structural audit
+        run: node scripts/supergau-audit.mjs
+
+      - name: Syntax TÜV
+        run: |
+          node --check shared/kc-device-auth.mjs
+          node --check shared/kc-secure-vault.mjs
+          node --check shared/kc-resilience.js
+
+      - name: Rotation architecture assertions
+        shell: bash
+        run: |
+          set -euo pipefail
+          grep -q 'PENDING_KEY_RECORD' shared/kc-device-auth.mjs
+          grep -q 'beginKeyRotation' shared/kc-device-auth.mjs
+          grep -q 'activatePendingRotation' shared/kc-device-auth.mjs
+          grep -q 'ROTATION_NOT_CONFIRMED' shared/kc-device-auth.mjs
+          grep -q 'nextKeyVersion' shared/kc-device-auth.mjs
+          grep -q "generateKey({name:'ECDSA',namedCurve:'P-256'},false" shared/kc-device-auth.mjs
+          if grep -Eiq '(private[_-]?key|master[_-]?key|device[_-]?secret)[[:space:]]*[:=][[:space:]]*[A-Za-z0-9_-]{32,}' shared/*.mjs; then
+            echo 'Possible embedded secret found'
+            exit 1
+          fi
+
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v3
+        with:
+          languages: javascript-typescript
+
+      - name: CodeQL analysis
+        uses: github/codeql-action/analyze@v3
