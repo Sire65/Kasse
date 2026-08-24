@@ -70,4 +70,18 @@ Die entpackten Dateien gehören in den ursprünglichen Ordner `kassenoberflaeche
 - tv-designer-launcher.js
 - weather-mobile-exchange-integration.css / .js
 
+## Präsentationsdaten 04.09.2026
+
+Zusätzlich liegt `presentation-demo-adapter.js` direkt in diesem Ordner. Dieses Modul gehört bewusst **nicht** in das komprimierte historische Supportarchiv, damit es bei einer Wiederherstellung sichtbar und separat prüfbar bleibt.
+
+Das Modul liest ausschließlich `kc_transactions_v040`, erkennt den markierten Batch `PRAESENTATION-2026-09-04` und stellt dem PC Manager aggregierte Kennzahlen bereit: Bonanzahl, Umsatz, Durchschnittsbon, Artikelmengen, Tages-/Stundenumsatz, Warengruppen, Kassen, Bediener und Pfandwerte.
+
+Einbindung nach Wiederherstellung des PC Managers:
+
+```html
+<script src="presentation-demo-adapter.js"></script>
+```
+
+Danach steht die API unter `window.KCPresentationDemoAdapter` zur Verfügung. Der Demo-Batch bleibt von echten Daten unterscheidbar und kann über den separaten Präsentationsdatengenerator vollständig zurückgesetzt werden. Der Adapter selbst schreibt oder löscht keine Umsatzdaten.
+
 Money Butler liegt getrennt unter `markt-kasse-suite/money-butler/` als normal lesbarer Quellcode.
