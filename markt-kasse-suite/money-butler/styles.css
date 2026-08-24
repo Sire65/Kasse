@@ -1,0 +1,47 @@
+:root{--navy:#07111f;--blue:#175d9d;--gold:#efb13c;--green:#15942a;--bg:#eef1f4;--line:#d5dbe2;--text:#172033}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);font-family:Segoe UI,Arial,sans-serif;color:var(--text)}
+.app{max-width:980px;margin:auto;min-height:100vh;background:#f7f9fb}
+header{background:linear-gradient(180deg,#07111f,#102238);color:white;padding:18px 24px;display:flex;align-items:center;gap:14px;box-shadow:0 5px 18px rgba(0,0,0,.18)}
+.logo{width:58px;height:58px;border-radius:15px;background:linear-gradient(145deg,#f5c25f,#ad7018);display:flex;align-items:center;justify-content:center;color:#111827;font-size:1.5rem;font-weight:1000}
+header h1{margin:0;font-size:1.6rem}header p{margin:4px 0 0;color:#d9e1eb}header>span{margin-left:auto;font-weight:800}
+main{padding:18px;display:grid;gap:14px}.card,.summary{background:white;border:1px solid var(--line);border-radius:12px;padding:16px;box-shadow:0 2px 8px rgba(0,0,0,.06)}
+.card h2{margin:0;font-size:1.05rem}.collapse-heading{display:flex;align-items:center;justify-content:space-between;gap:14px}.section-lock{flex:0 0 auto;border:1px solid #c2cad3;background:linear-gradient(#fff,#e8edf2);color:#172033;border-radius:9px;padding:7px 10px;display:flex;align-items:center;gap:6px;font-size:.78rem;font-weight:900;cursor:pointer}.section-lock:hover,.section-lock:focus-visible{border-color:#175d9d;outline:2px solid rgba(23,93,157,.25)}.lock-icon{font-size:1rem}.money-section-body{margin-top:14px}.money-section-body[hidden]{display:none}.setup-fields{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+label{display:flex;flex-direction:column;gap:6px;font-weight:800;font-size:.88rem}input,select,textarea{font:inherit;padding:10px;border:1px solid #c7ced6;border-radius:7px;background:white}
+label small{color:#667085;font-weight:500;line-height:1.35}.test-phase-note{margin:0;padding:12px 14px;border:1px solid #e0ad3d;border-left:5px solid #c98500;border-radius:9px;background:#fff6dc;color:#664400;line-height:1.45}.test-phase-note[hidden]{display:none}.handover-check{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:10px}.handover-check span{display:flex;flex-direction:column;gap:3px;padding:9px;border:1px solid #d4dae0;border-radius:8px;background:#fff;font-size:.78rem}.handover-check b{font-size:.9rem;color:#0b315d}
+.choice-row{display:grid;grid-template-columns:1fr 1fr;gap:7px}.choice{border:1px solid #c8cfd7;background:#eef1f4;border-radius:7px;padding:11px;font-weight:800}.choice.active{background:#173765;color:white}
+.denoms{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}.denom{border:1px solid #d4dae0;border-radius:9px;padding:10px;background:#fafbfc;display:grid;grid-template-columns:1fr 70px;align-items:center;gap:8px;border-left-width:5px}.denom strong{font-size:1rem}.denom input{text-align:center}
+/* Echte, EU-weit genormte Euro-Scheinfarben - rein optisch, nur ein schmaler linker Rand am bereits vorhandenen Kästchen. */
+.denom[data-schein="100"]{border-left-color:#2e7d4f}
+.denom[data-schein="50"]{border-left-color:#e08e2f}
+.denom[data-schein="20"]{border-left-color:#2e6da4}
+.denom[data-schein="10"]{border-left-color:#c0392b}
+.denom[data-schein="5"]{border-left-color:#8f8f8f}
+/* Echte Münzrollenpapier-Farben (vom User anhand der tatsächlichen Rollenpapier-Produkte bestätigt). */
+.coin-roll-row{border-left-width:5px}
+.coin-roll-row[data-rolle="2"]{border-left-color:#a97ca0}
+.coin-roll-row[data-rolle="1"]{border-left-color:#e0c23e}
+.coin-roll-row[data-rolle="0.5"]{border-left-color:#93a97c}
+.coin-roll-row[data-rolle="0.2"]{border-left-color:#d98a4a}
+.coin-roll-row[data-rolle="0.1"]{border-left-color:#6f93a3}
+.coin-roll-row[data-rolle="0.05"]{border-left-color:#b5544f}
+.coin-roll-row[data-rolle="0.02"]{border-left-color:#b9bec3}
+.coin-roll-row[data-rolle="0.01"]{border-left-color:#e3e1d8}
+.section-heading{align-items:flex-start}.section-heading h2{margin-bottom:4px}.section-heading p{margin:0;color:#667085;font-size:.84rem;line-height:1.45}.section-heading-actions{display:flex;align-items:center;gap:8px}.roll-badge{background:#173765;color:#fff;border-radius:999px;padding:7px 11px;font-size:.76rem;font-weight:900;white-space:nowrap}
+.roll-table-head,.coin-roll-row{display:grid;grid-template-columns:.75fr .9fr 1fr 1fr .9fr;align-items:center;gap:10px}.roll-table-head{padding:10px;margin-top:12px;color:#667085;font-size:.75rem;font-weight:900}.coin-rolls{display:grid;gap:7px}.coin-roll-row{border:1px solid #d4dae0;border-radius:9px;padding:9px 10px;background:#fafbfc}.coin-roll-row>span,.coin-roll-row>b{font-size:.86rem}.coin-roll-row>b{text-align:right;color:#0b315d}.roll-input{display:grid;grid-template-columns:minmax(54px,74px) auto;align-items:center;gap:6px}.roll-input input{text-align:center;width:100%}.roll-input small{color:#667085}
+.summary{display:grid;grid-template-columns:1fr 1fr 1.25fr;align-items:stretch;gap:10px;background:linear-gradient(#fff,#edf3f8)}.summary>div{display:flex;flex-direction:column;justify-content:center;gap:5px;padding:8px 12px;border-right:1px solid #d5dbe2}.summary>div:last-child{border-right:0}.summary span{font-weight:900;font-size:.82rem}.summary b{font-size:1.4rem}.summary-total{align-items:flex-end}.summary strong{font-size:2.5rem;color:#0b315d}
+.actions,.result-actions{display:flex;gap:9px;flex-wrap:wrap}.actions button,.result-actions button{border:1px solid #c7ced6;border-radius:8px;padding:11px 16px;font-weight:900;background:linear-gradient(#fff,#e8ebee)}.actions .primary{background:linear-gradient(#25b63d,#118c25);color:white;border:0}
+.result{text-align:center}.result canvas{max-width:100%;background:white;border:1px solid #d4dae0;border-radius:8px}.result textarea{width:100%;min-height:110px;margin:12px 0;font-size:.72rem}.result-actions{justify-content:center}.hint{color:#667085;font-size:.86rem}.handover-summary{display:flex;justify-content:center;gap:18px;flex-wrap:wrap;margin:0 0 12px;padding:10px;border-radius:8px;background:#eef3f7}.handover-summary span{font-size:.84rem}.handover-summary strong{color:#0b315d;font-size:1.1rem}
+@media(max-width:700px){.setup-fields,.handover-check{grid-template-columns:1fr}.denoms{grid-template-columns:1fr 1fr}.summary{grid-template-columns:1fr}.summary>div{border-right:0;border-bottom:1px solid #d5dbe2}.summary>div:last-child{border-bottom:0}.summary-total{align-items:flex-start}.summary strong{font-size:2rem}.roll-table-head{display:none}.coin-roll-row{grid-template-columns:1fr 1fr}.coin-roll-row>span:nth-of-type(2),.coin-roll-row>span:nth-of-type(3){font-size:.78rem}.coin-roll-row>b{text-align:left}.section-heading{align-items:center}.section-heading-actions{flex-direction:column;align-items:flex-end}.lock-label{display:none}}
+@media print{body{background:white}.setup,.entry-card,.summary,.actions,header p,.result textarea,.result-actions,.hint,.section-lock{display:none}.app{max-width:none}.result{border:0;box-shadow:none}.result h2:after{content:" – Bitte an der Kasse scannen"}.result .money-section-body[hidden]{display:block!important}}
+.choice-row.three{grid-template-columns:repeat(3,1fr)}
+
+
+/* V0.21.5 – Money Butler Formularführung */
+label:has(input:focus),label:has(select:focus),label:has(textarea:focus){background:#e8f4ff;outline:3px solid rgba(22,119,184,.25);border-radius:10px}
+.required-star{color:#b91c1c;font-weight:1000;margin-left:.25rem}
+.required-legend{padding:10px 14px;border-left:5px solid #b91c1c;background:#fff5f5;border-radius:8px;margin-bottom:14px}
+
+/* Kurzer Rückfall-Zahlencode ohne Scanner */
+.kurzcode-box{margin:10px 0;padding:12px 16px;background:#fff8e6;border:2px dashed #d9a441;border-radius:10px;text-align:center}
+.kurzcode-box small{display:block;color:#7a5a15;margin-bottom:4px}
+.kurzcode-anzeige{font-size:1.6rem;font-weight:900;letter-spacing:.08em;color:#5a3d0a;font-family:monospace}
