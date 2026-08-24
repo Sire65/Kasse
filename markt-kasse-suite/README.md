@@ -4,12 +4,15 @@ Quelle: `KC_MarktKasse_MoneyButler_Farben.zip`.
 
 Dieser Bereich wurde bewusst getrennt vom bestehenden veröffentlichten Kassenstand angelegt, damit der laufende Root-Stand im Repository nicht überschrieben wird.
 
-Enthalten bzw. aus dem Paket übernommen werden die zusammengehörigen Komponenten der KC MarktKasse, insbesondere:
+Aktueller Importstand:
 
-- `money-butler/` – KC Money Butler V0.21.5
-- `pc-manager/` – KC MarktKasse PC-Manager / Verwaltungsoberfläche
-- weitere gemeinsame Komponenten des Pakets werden unter diesem Suite-Bereich ergänzt.
+- `money-butler/` – KC Money Butler V0.21.5 als normal lesbarer Quellcode
+- `pc-manager-source/` – KC MarktKasse PC-Manager / Verwaltungsoberfläche als rekonstruierbarer Quellstand einschließlich der zusätzlichen 44 Supportmodule
+- `shared/` – bereits übernommene gemeinsame Runtime-/Core-Dateien
+- `pc-manager-source/RESTORE.md` – Wiederherstellungsanleitung und Modul-Inventar
 
 Das hochgeladene Paket enthält insgesamt 614 ZIP-Einträge. Der PC-Manager gehört zu diesem MarktKasse-Paket und ist kein eigenständiger zweiter PC-Manager des Failover-Gateways.
 
 Importregel: Bestehende Dateien an der Repository-Wurzel werden durch diesen Paketimport nicht ersetzt. Erst nach Prüfung/Regression kann entschieden werden, welche Suite-Komponenten produktiv geschaltet werden.
+
+Noch nicht als produktiver Root aktiviert: PC-Manager, Money Butler und weitere Suite-Komponenten. Sie sind bewusst getrennt gesichert, damit der bisherige laufende Kassenstand nicht unbeabsichtigt verändert wird.
