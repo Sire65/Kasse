@@ -1,0 +1,27 @@
+/* KC MarktKasse – 8.000 reversible Testumsätze für Präsentation 04.09.2026
+   Nutzt den normalen Produktiv-Umsatzspeicher, damit der vorhandene KCExchange-Umsatzexport
+   und der PC Manager exakt denselben Weg wie bei echten Umsätzen verwenden.
+   Alle erzeugten Datensätze tragen demoBatchId und können gezielt wieder entfernt werden. */
+(()=>{
+'use strict';
+const KEY='kc_transactions_v040';
+const BATCH='KC-DEMO-8000-2026-09-04';
+const COUNT=8000;
+const products=[
+ ['grot','Glühwein rot','Getränke',5.5,2,22],['gweiss','Glühwein weiß','Getränke',5.5,2,12],['feuer','Feuerzangenbowle','Getränke',5,4,9],['apfel','Apfelpunsch','Getränke',4.5,2,9],['eier','Eierlikörpunsch','Getränke',6.5,2,10],['sauerkraut','Sauerkrauteintopf','Speisen',5.5,0,7],['sauerkrautmett','Sauerkrauteintopf + Mettwurst','Speisen',7,0,7],['gruenkohl','Grünkohl','Speisen',5.5,0,6],['gruenkohlmett','Grünkohl + Mettwurst','Speisen',7,0,8],['knirpse','Kartoffelknirpse','Speisen',4,0,7],['becher','Außer-Haus-Becher','Sonstiges',1,0,3]
+].map(([id,name,category,price,deposit,w])=>({id,name,category,price,deposit,w}));
+function read(){try{const x=JSON.parse(localStorage.getItem(KEY)||'[]');return Array.isArray(x)?x:[]}catch{return[]}}
+function write(x){localStorage.setItem(KEY,JSON.stringify(x))}
+function rng(seed=4092026){let s=seed>>>0;return()=>((s=(Math.imul(s,1664525)+1013904223)>>>0)/4294967296)}
+function pick(r){const sum=products.reduce((a,p)=>a+p.w,0);let x=r()*sum;for(const p of products){x-=p.w;if(x<=0)return p}return products[0]}
+function dt(r){const dayWeights=[7,13,15,7,7,8,9,11,13,10],hours=[[12,3],[13,4],[14,5],[15,6],[16,8],[17,12],[18,17],[19,18],[20,14],[21,9],[22,4]];let x=r()*dayWeights.reduce((a,b)=>a+b,0),d=0;for(let i=0;i<dayWeights.length;i++){x-=dayWeights[i];if(x<=0){d=i;break}}let y=r()*hours.reduce((a,b)=>a+b[1],0),h=18;for(const q of hours){y-=q[1];if(y<=0){h=q[0];break}}return new Date(2025,11,4+d,h,Math.floor(r()*60),Math.floor(r()*60)).toISOString()}
+function make(){const r=rng(),ops=['Hans','Peter','Marion','Gast'],out=[];for(let n=1;n<=COUNT;n++){const time=dt(r),items=[];for(let j=0,c=1+Math.floor(r()*3);j<c;j++){const p=pick(r),qty=1+(r()<.18?1:0),unit=+(p.price+p.deposit).toFixed(2);items.push({id:p.id,name:p.name,category:p.category,price:p.price,qty,deposits:p.deposit?[{id:p.id==='feuer'?'glass+tong':'glass',name:p.id==='feuer'?'Glas + Feuerzangenpfand':'Glaspfand',price:p.deposit}]:[],unitTotal:unit,lineTotal:+(unit*qty).toFixed(2)})}if(r()<.055)items.push({id:'glasminus',name:'Glasrückgabe',category:'Pfand',price:-2,qty:1,deposits:[],unitTotal:-2,lineTotal:-2});const due=+items.reduce((a,i)=>a+Number(i.lineTotal||0),0).toFixed(2),reg=r()<.58?'KASSE-01':'KASSE-02';out.push({transactionId:`${BATCH}-${String(n).padStart(5,'0')}`,formatVersion:5,bon:`D-${String(n).padStart(6,'0')}`,bonNumber:`D-${String(n).padStart(6,'0')}`,startTime:time,time,endTime:time,registerId:reg,registerName:reg==='KASSE-01'?'Kasse 1':'Kasse 2',operator:ops[Math.floor(r()*ops.length)],type:'sale',training:false,method:'cash-button-direct',payment:'cash-button-direct',grossDue:due,grossDueCents:Math.round(due*100),discount:{percent:0,amount:0,amountCents:0,globalAmount:0,positionAmount:0,base:due,reason:null,note:null,keys:[],positions:[]},due,total:due,dueCents:Math.round(due*100),given:due,givenCents:Math.round(due*100),settlementTarget:due,change:0,changeCents:0,depositRule:'automatic',items,demo:true,demoBatchId:BATCH,demoPurpose:'Präsentation 04.09.2026',syncExcluded:false})}return out}
+function status(){const all=read(),d=all.filter(x=>x?.demoBatchId===BATCH);return{all,demo:d.length,revenue:d.reduce((a,x)=>a+Number(x.due||0),0)}}
+function show(msg){const el=document.getElementById('kcDemoSalesStatus');if(el)el.textContent=msg}
+function refresh(){const s=status();show(`Testumsätze: ${s.demo.toLocaleString('de-DE')} · ${s.revenue.toLocaleString('de-DE',{style:'currency',currency:'EUR'})}`)}
+function install(){const all=read(),old=all.filter(x=>x?.demoBatchId===BATCH);if(old.length){refresh();alert(`Es sind bereits ${old.length} Testbuchungen geladen.`);return}const demo=make();write([...all,...demo]);refresh();alert('8.000 Testbuchungen wurden in den normalen Umsatzbestand eingesetzt. Jetzt kann „Umsatzpaket exportieren“ verwendet werden.');}
+function remove(){const all=read(),before=all.length,rest=all.filter(x=>x?.demoBatchId!==BATCH);write(rest);refresh();alert(`${before-rest.length} Testbuchungen wurden entfernt. Echte Buchungen blieben unverändert.`)}
+function mount(){const exportBtn=document.getElementById('exportKCExchangeSales');if(!exportBtn||document.getElementById('kcDemoSalesInstall'))return;const host=exportBtn.parentElement,box=document.createElement('div');box.style.cssText='margin-top:10px;padding-top:10px;border-top:1px solid #ffffff26';box.innerHTML='<strong style="display:block;margin-bottom:7px">Präsentations-Testumsätze</strong><button type="button" id="kcDemoSalesInstall">8.000 Testbuchungen einsetzen</button> <button type="button" id="kcDemoSalesRemove">Testbuchungen entfernen</button><div id="kcDemoSalesStatus" class="import-summary" style="margin-top:7px"></div>';host.appendChild(box);document.getElementById('kcDemoSalesInstall').onclick=install;document.getElementById('kcDemoSalesRemove').onclick=remove;refresh()}
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>setTimeout(mount,0));else setTimeout(mount,0);
+window.KCDemoSales8000={install,remove,status,BATCH};
+})();
