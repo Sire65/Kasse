@@ -1,0 +1,15 @@
+(function(){
+  'use strict';
+  const cfg=window.KICC_PROGRAM_HEARTBEAT_CONFIG||{};
+  if(!cfg.programId)return;
+  const intervalMs=Math.max(10000,Number(cfg.intervalMs||30000));
+  let errors=0,tx=0,lastSendAt=null,lastError=null;
+  function instanceId(){const key=`kicc.hb.instance.${cfg.programId}`;try{let id=localStorage.getItem(key);if(!id){id=crypto.randomUUID?.()||(`${cfg.programId}-${Date.now()}-${Math.random().toString(36).slice(2)}`);localStorage.setItem(key,id);}return id;}catch{return 'browser';}}
+  const iid=instanceId();
+  function hb(latencyMs=null){return{schema:'kicc.program-heartbeat.v1',programId:cfg.programId,instanceId:iid,name:cfg.name||cfg.programId,deviceType:cfg.deviceType||'WEB_APP',version:cfg.version||null,build:cfg.build||null,status:navigator.onLine?'ONLINE':'OFFLINE',measuredAt:new Date().toISOString(),latencyMs:Number.isFinite(latencyMs)?Math.round(latencyMs):null,trafficTx:tx,errorCount:errors,source:'PROGRAM_HEARTBEAT',trust:'SELF_REPORTED',message:document.visibilityState==='hidden'?'App im Hintergrund':'App aktiv'};}
+  function local(x){try{window.dispatchEvent(new CustomEvent('kicc:program-heartbeat',{detail:x}));}catch{}try{const bc=new BroadcastChannel('kicc-program-heartbeat-v1');bc.postMessage(x);bc.close();}catch{}}
+  async function auth(){try{if(typeof window.KICC_AUTH?.getProgramHeartbeatBridgeAuth==='function')return await window.KICC_AUTH.getProgramHeartbeatBridgeAuth()||{};}catch{}try{if(typeof cfg.getAuth==='function')return await cfg.getAuth()||{};}catch{}return{};}
+  async function remote(x){const url=cfg.endpoint||window.KICC_PROGRAM_HEARTBEAT_ENDPOINT||null;if(!url||!/^https:\/\//i.test(url))return{sent:false,reason:'REMOTE_NOT_CONFIGURED'};const a=await auth();if(!a.authorization)return{sent:false,reason:'AUTH_REQUIRED'};const env={schema:'kicc.remote-program-heartbeat.v1',nonce:crypto.randomUUID?.()||String(Date.now())+Math.random(),sentAt:new Date().toISOString(),authState:'AUTHENTICATED',sourceId:iid,heartbeat:x};const headers={'content-type':'application/json','accept':'application/json','authorization':a.authorization};if(a.apikey)headers.apikey=a.apikey;const t=performance.now();const r=await fetch(url,{method:'POST',headers,body:JSON.stringify(env),cache:'no-store',credentials:'omit'});if(!r.ok)throw new Error(`Heartbeat HTTP ${r.status}`);tx++;lastSendAt=new Date().toISOString();lastError=null;return{sent:true,latencyMs:performance.now()-t};}
+  async function send(){let x=hb();local(x);try{const r=await remote(x);if(r.sent){x=hb(r.latencyMs);local(x);}}catch(e){errors++;lastError=e instanceof Error?e.message:String(e);}window.KICC_PROGRAM_HEARTBEAT_STATE={programId:cfg.programId,instanceId:iid,lastSendAt,lastError,remoteConfigured:Boolean(cfg.endpoint||window.KICC_PROGRAM_HEARTBEAT_ENDPOINT)};}
+  addEventListener('online',send);addEventListener('offline',send);addEventListener('visibilitychange',send);addEventListener('error',()=>errors++);addEventListener('unhandledrejection',()=>errors++);setTimeout(send,1500);setInterval(send,intervalMs);
+})();
