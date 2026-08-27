@@ -1,22 +1,10 @@
 #!/usr/bin/env node
 // KC Sync – echter Produktions-Startpunkt für den Manager-Companion (manager-companion).
-//
-// GEFUNDENE LÜCKE: install-manager-service.ps1 erwartet diese Datei bereits seit längerem
-// (Zeile "$runnerPath = Join-Path $scriptDir 'run-manager-service.js'"), sie existierte aber
-// nie tatsächlich - die Windows-Diensteinrichtung für den Manager konnte dadurch nie wirklich
-// starten. Dieses Skript ist der fehlende, echte Startpunkt, nach demselben Muster wie das
-// bereits vorhandene und bewährte run-device-companion.js.
-//
-// Verwendung:
-//   node run-manager-service.js [--db PFAD] [--port 8543]
-//
-// Umgebungsvariablen (Alternative, z. B. für Diensteinrichtung):
-//   KC_SYNC_MANAGER_DB_PATH, KC_SYNC_MANAGER_PORT
-
 'use strict';
 const path = require('path');
 const { spawn } = require('child_process');
 const { ManagerCompanion } = require('./manager-companion');
+const { KiccRuntimeTelemetry } = require('./kicc-runtime-telemetry');
 
 function parseArgs(argv) {
   const out = {};
@@ -49,20 +37,32 @@ async function main() {
   const args = parseArgs(process.argv.slice(2));
   const dbPath = args.dbPath || process.env.KC_SYNC_MANAGER_DB_PATH || path.join(process.cwd(), 'kc-sync-manager.sqlite');
   const port = args.port || Number(process.env.KC_SYNC_MANAGER_PORT) || 8543;
+  const telemetry = new KiccRuntimeTelemetry({
+    programId: 'kc-pc-manager',
+    name: 'KC PC Manager',
+    version: process.env.KC_PC_MANAGER_VERSION || null,
+    build: process.env.KC_PC_MANAGER_BUILD || null
+  });
 
   console.log(`[KC Sync Manager] Öffne Datenbank: ${dbPath}`);
   let mgr;
   try {
     mgr = new ManagerCompanion({ dbPath });
   } catch (err) {
+    telemetry.update({ status: 'OFFLINE', errorCount: 1, message: `Startfehler: ${err.message}` });
+    await telemetry.send().catch(()=>{});
     console.error(`[KC Sync Manager] Datenbank konnte nicht geöffnet werden, Start abgebrochen: ${err.message}`);
     process.exit(1);
   }
 
   try {
+    const started = performance.now();
     await mgr.start(port);
+    telemetry.update({ status: 'ONLINE', latencyMs: performance.now() - started, message: `Manager HTTPS aktiv · Port ${mgr.port}` });
     console.log(`[KC Sync Manager] HTTPS-Server läuft auf https://0.0.0.0:${mgr.port}`);
   } catch (err) {
+    telemetry.update({ status: 'OFFLINE', errorCount: 1, message: `Manager-Start: ${err.message}` });
+    await telemetry.send().catch(()=>{});
     console.error(`[KC Sync Manager] Start fehlgeschlagen: ${err.message}`);
     process.exit(1);
   }
@@ -74,16 +74,27 @@ async function main() {
     const wurzelOrdner = path.join(__dirname, '..', 'kassenoberflaeche-und-pc-manager');
     webserverProzess = spawn(process.execPath, ['serve-frontend.js', '--port', String(webserverPort), '--root', wurzelOrdner], { cwd: __dirname, stdio: ['ignore', 'pipe', 'pipe'] });
     webserverProzess.stdout.on('data', (d) => process.stdout.write(`[Webserver] ${d}`));
-    webserverProzess.stderr.on('data', (d) => process.stderr.write(`[Webserver] ${d}`));
+    webserverProzess.stderr.on('data', (d) => {
+      telemetry.update({ status: 'DEGRADED', errorCount: Number(telemetry.state.errorCount || 0) + 1, message: 'PC-Manager-Webserver meldet Fehler' });
+      process.stderr.write(`[Webserver] ${d}`);
+    });
+    webserverProzess.on('exit', (code) => {
+      if (code && code !== 0) telemetry.update({ status: 'DEGRADED', errorCount: Number(telemetry.state.errorCount || 0) + 1, message: `PC-Manager-Webserver beendet · Code ${code}` });
+    });
     await new Promise((resolve) => setTimeout(resolve, 1200));
+    telemetry.update({ status: 'ONLINE', message: `Manager + PC-Manager-Webserver aktiv · ${webserverPort}` });
     console.log(`[KC Sync Manager] PC-Manager hier öffnen: http://127.0.0.1:${webserverPort}/pc-manager/index.html`);
   }
 
+  telemetry.start();
   let stopping = false;
   async function shutdown(signal) {
     if (stopping) return;
     stopping = true;
     console.log(`[KC Sync Manager] ${signal} empfangen, beende sauber …`);
+    telemetry.update({ status: 'OFFLINE', message: `Beendet: ${signal}` });
+    await telemetry.send().catch(()=>{});
+    telemetry.stop();
     try { mgr.server?.close(); } catch (e) { /* bereits geschlossen */ }
     try { webserverProzess?.kill('SIGTERM'); } catch (e) { /* bereits beendet */ }
     console.log('[KC Sync Manager] Beendet.');
@@ -91,7 +102,9 @@ async function main() {
   }
   process.on('SIGTERM', () => shutdown('SIGTERM'));
   process.on('SIGINT', () => shutdown('SIGINT'));
-  process.on('uncaughtException', (err) => {
+  process.on('uncaughtException', async (err) => {
+    telemetry.update({ status: 'OFFLINE', errorCount: Number(telemetry.state.errorCount || 0) + 1, message: `Uncaught: ${err.message}` });
+    await telemetry.send().catch(()=>{});
     console.error('[KC Sync Manager] Unerwarteter Fehler, Prozess wird beendet:', err);
     process.exit(1);
   });
