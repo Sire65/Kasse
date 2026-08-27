@@ -12,8 +12,11 @@ class KiccRuntimeTelemetry {
     this.build = build;
     this.intervalMs = Math.max(10000, Number(intervalMs) || 30000);
     this.endpoint = process.env.KICC_PROGRAM_HEARTBEAT_ENDPOINT || '';
-    this.authorization = process.env.KICC_PROGRAM_HEARTBEAT_AUTHORIZATION || '';
-    this.apikey = process.env.KICC_PROGRAM_HEARTBEAT_APIKEY || '';
+    this.flowEndpoint = process.env.KICC_PROGRAM_FLOW_ENDPOINT || '';
+    this.authorization = process.env.KICC_PROGRAM_HEARTBEAT_AUTHORIZATION || process.env.KICC_PROGRAM_FLOW_AUTHORIZATION || '';
+    this.flowAuthorization = process.env.KICC_PROGRAM_FLOW_AUTHORIZATION || this.authorization;
+    this.apikey = process.env.KICC_PROGRAM_HEARTBEAT_APIKEY || process.env.KICC_PROGRAM_FLOW_APIKEY || '';
+    this.flowApikey = process.env.KICC_PROGRAM_FLOW_APIKEY || this.apikey;
     this.instanceId = process.env.KICC_INSTANCE_ID || `${os.hostname()}-${process.pid}`;
     this.startedAt = new Date().toISOString();
     this.timer = null;
@@ -46,6 +49,12 @@ class KiccRuntimeTelemetry {
     };
   }
 
+  headers(auth = this.authorization, apikey = this.apikey) {
+    const headers = { 'content-type': 'application/json', accept: 'application/json', authorization: auth };
+    if (apikey) headers.apikey = apikey;
+    return headers;
+  }
+
   async send() {
     if (!this.endpoint || !/^https:\/\//i.test(this.endpoint)) return { sent: false, reason: 'REMOTE_NOT_CONFIGURED' };
     if (!this.authorization) return { sent: false, reason: 'AUTH_REQUIRED' };
@@ -57,13 +66,34 @@ class KiccRuntimeTelemetry {
       sourceId: this.instanceId,
       heartbeat: this.heartbeat()
     };
-    const headers = { 'content-type': 'application/json', accept: 'application/json', authorization: this.authorization };
-    if (this.apikey) headers.apikey = this.apikey;
     const started = performance.now();
-    const response = await fetch(this.endpoint, { method: 'POST', headers, body: JSON.stringify(env) });
+    const response = await fetch(this.endpoint, { method: 'POST', headers: this.headers(), body: JSON.stringify(env) });
     if (!response.ok) throw new Error(`KICC heartbeat HTTP ${response.status}`);
     this.state.latencyMs = performance.now() - started;
     this.state.trafficTx = Number(this.state.trafficTx || 0) + 1;
+    return { sent: true, latencyMs: this.state.latencyMs };
+  }
+
+  async sendFlow({ sourceId, targetId, flowType = 'OTHER', status = 'OK', eventCount = null, byteCount = null } = {}) {
+    if (!this.flowEndpoint || !/^https:\/\//i.test(this.flowEndpoint)) return { sent: false, reason: 'FLOW_NOT_CONFIGURED' };
+    if (!this.flowAuthorization) return { sent: false, reason: 'AUTH_REQUIRED' };
+    if (!sourceId || !targetId) return { sent: false, reason: 'MISSING_ROUTE' };
+    const payload = {
+      programId: this.programId,
+      instanceId: this.instanceId,
+      sourceId: String(sourceId).slice(0, 160),
+      targetId: String(targetId).slice(0, 160),
+      flowType: String(flowType || 'OTHER').toUpperCase().slice(0, 40),
+      eventCount: Number.isFinite(eventCount) && eventCount >= 0 ? Math.round(eventCount) : null,
+      byteCount: Number.isFinite(byteCount) && byteCount >= 0 ? Math.round(byteCount) : null,
+      status: String(status || 'UNKNOWN').toUpperCase().slice(0, 30),
+      measuredAt: new Date().toISOString(),
+      nonce: crypto.randomUUID()
+    };
+    const started = performance.now();
+    const response = await fetch(this.flowEndpoint, { method: 'POST', headers: this.headers(this.flowAuthorization, this.flowApikey), body: JSON.stringify(payload) });
+    if (!response.ok) throw new Error(`KICC flow HTTP ${response.status}`);
+    this.state.latencyMs = performance.now() - started;
     return { sent: true, latencyMs: this.state.latencyMs };
   }
 
