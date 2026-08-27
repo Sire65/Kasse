@@ -55,14 +55,29 @@ async function main() {
     const started = performance.now();
     try {
       const result = await dev.sync();
+      const synced = Number(result.synced || 0);
       telemetry.update({
         status: 'ONLINE',
         latencyMs: performance.now() - started,
-        trafficTx: Number(telemetry.state.trafficTx || 0) + Number(result.synced || 0),
+        trafficTx: Number(telemetry.state.trafficTx || 0) + synced,
         queueDepth: Number.isFinite(result.pending) ? result.pending : telemetry.state.queueDepth,
-        message: result.synced > 0 ? `${result.synced} Ereignis(se) synchronisiert` : 'Synchronisation bereit'
+        message: synced > 0 ? `${synced} Ereignis(se) synchronisiert` : 'Synchronisation bereit'
       });
-      if (result.synced > 0) console.log(`[KC Sync Kasse] ${result.synced} Ereignis(se) synchronisiert.`);
+      if (synced > 0) {
+        console.log(`[KC Sync Kasse] ${synced} Ereignis(se) synchronisiert.`);
+        telemetry.sendFlow({
+          sourceId: 'program:kc-bilderkasse',
+          targetId: 'db-supabase-core',
+          flowType: 'SYNC',
+          status: 'OK',
+          eventCount: synced
+        }).catch(err => {
+          telemetry.update({
+            errorCount: Number(telemetry.state.errorCount || 0) + 1,
+            message: `Sync erfolgreich · KICC-Flow nicht bestätigt: ${err.message}`
+          });
+        });
+      }
     } catch (err) {
       telemetry.update({ status: 'DEGRADED', errorCount: Number(telemetry.state.errorCount || 0) + 1, message: `Sync-Fehler: ${err.message}` });
       console.error(`[KC Sync Kasse] Sync-Fehler: ${err.message}`);
