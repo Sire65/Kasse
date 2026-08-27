@@ -1,5 +1,7 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
+import crypto from 'node:crypto';
+import { gunzipSync } from 'node:zlib';
 import { fileURLToPath } from 'node:url';
 import { spawn } from 'node:child_process';
 
@@ -53,16 +55,26 @@ async function walk(dir,base=dir,acc=[]){
   return acc;
 }
 
+const sha256=buffer=>crypto.createHash('sha256').update(buffer).digest('hex');
+
 async function main(){
   await fs.rm(outRoot,{recursive:true,force:true});
   await fs.mkdir(supportDir,{recursive:true});
 
+  // Core wurde beim Import gzip-komprimiert und danach in Base64-Teile zerlegt.
+  // Nur Base64 zu dekodieren erzeugt deshalb KEIN gültiges HTML.
   const coreB64=await readConcat(coreParts);
-  const coreBytes=Buffer.from(coreB64,'base64');
+  const coreGzip=Buffer.from(coreB64,'base64');
+  if(coreGzip[0]!==0x1f||coreGzip[1]!==0x8b)throw new Error('PC-Manager-Core: gzip magic fehlt');
+  const coreBytes=gunzipSync(coreGzip);
+  const coreText=coreBytes.toString('utf8');
+  const htmlStart=coreText.slice(0,2048).toLowerCase();
+  if(!htmlStart.includes('<html')&&!htmlStart.includes('<!doctype'))throw new Error('PC-Manager-Core: nach gunzip kein HTML erkannt');
   await fs.writeFile(coreOut,coreBytes);
 
   const supportB64=await readConcat(supportParts);
   const supportBytes=Buffer.from(supportB64,'base64');
+  if(supportBytes[0]!==0x1f||supportBytes[1]!==0x8b)throw new Error('PC-Manager-Support: gzip magic fehlt');
   await fs.writeFile(supportArchive,supportBytes);
   await run('tar',['-xzf',supportArchive,'-C',supportDir],here);
 
@@ -70,10 +82,27 @@ async function main(){
   const basenames=new Set(files.map(x=>path.basename(x)));
   const missing=expectedSupport.filter(x=>!basenames.has(x));
   const report={
-    schema:'KC_PC_MANAGER_RESTORE_REPORT_V1',
+    schema:'KC_PC_MANAGER_RESTORE_REPORT_V2',
     restoredAt:new Date().toISOString(),
-    core:{parts:coreParts,bytes:coreBytes.length,output:path.relative(here,coreOut).replaceAll('\\','/')},
-    support:{parts:supportParts,archiveBytes:supportBytes.length,fileCount:files.length,files,missingExpected:missing},
+    source:'KC_MarktKasse_MoneyButler_Farben.zip · Import 24.08.2026',
+    productionRootTouched:false,
+    core:{
+      parts:coreParts,
+      compressedBytes:coreGzip.length,
+      compressedSha256:sha256(coreGzip),
+      htmlBytes:coreBytes.length,
+      htmlSha256:sha256(coreBytes),
+      htmlValidated:true,
+      output:path.relative(here,coreOut).replaceAll('\\','/')
+    },
+    support:{
+      parts:supportParts,
+      archiveBytes:supportBytes.length,
+      archiveSha256:sha256(supportBytes),
+      fileCount:files.length,
+      files,
+      missingExpected:missing
+    },
     status:missing.length?'INCOMPLETE':'RESTORED_VERIFIED'
   };
   await fs.writeFile(reportFile,JSON.stringify(report,null,2)+'\n','utf8');
@@ -81,7 +110,7 @@ async function main(){
     console.error('Restore incomplete. Missing:',missing.join(', '));
     process.exitCode=2;
   }else{
-    console.log(`PC-Manager restore verified: ${files.length} support files, core ${coreBytes.length} bytes.`);
+    console.log(`PC-Manager restore verified: HTML ${coreBytes.length} bytes, ${files.length} support files.`);
   }
 }
 
