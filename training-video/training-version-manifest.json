@@ -1,0 +1,10 @@
+{
+  "schema": "KC_TRAINING_VERSION_MANIFEST_V1",
+  "product": "KC Bilderrechner – Interaktive Schulung",
+  "trainingVersion": "0.29.4",
+  "basedOnProductVersion": "0.31.3.6.63",
+  "supportedUiSchema": "0.31.3.6-r18-ui.1",
+  "compatibleProductRange": "0.31.3.6 Repair 63",
+  "status": "Candidate",
+  "change": "Gegen die Kasse vom 02.09.2026 durchgesehen. Kapitel 11 berichtigt: die Infotaste sitzt oben LINKS, oben rechts sitzt der Favoritenstern - vorher stand dort \"oben rechts\" fuer beides. \"since 1991\" durch \"seit 1991\" ersetzt. OFFEN: Kapitel 14 (Kombinationsartikel) nennt noch einen eigenen Kombipreis; die Kasse rechnet die Summe der Einzelpreise. Auf Wunsch des Betreibers unveraendert gelassen und bei der Vorfuehrung am 04.09.2026 uebersprungen."
+}

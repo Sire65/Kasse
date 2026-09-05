@@ -1,0 +1,5 @@
+.recipe-card{display:grid;gap:14px}.recipe-table{width:100%;border-collapse:collapse}.recipe-table th,.recipe-table td{padding:7px;border-bottom:1px solid #d9e1ea;text-align:left}
+.recipe-table input,.recipe-table select{width:100%;min-width:76px}.recipe-summary{display:grid;grid-template-columns:repeat(4,minmax(120px,1fr));gap:8px}
+.recipe-summary span{background:#eef4fa;border-radius:9px;padding:10px}.recipe-toolbar{display:flex;gap:8px;flex-wrap:wrap}
+.recipe-result{padding:12px;border-radius:9px;background:#e9f7ed}.recipe-result.warn{background:#fff1d5}.recipe-public-note{border-left:4px solid #2672b9;padding:10px;background:#edf6ff}
+@media(max-width:900px){.recipe-summary{grid-template-columns:1fr 1fr}.recipe-scroll{overflow:auto}}

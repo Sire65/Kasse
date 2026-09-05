@@ -1,0 +1,31 @@
+{
+  "schema": "framework-release-monitor-v1",
+  "id": "WO-KC-20260724-001",
+  "createdAt": "2026-07-24T08:18:00+02:00",
+  "updatedAt": "2026-07-24T08:18:00+02:00",
+  "project": "KC MarktKasse / PC-Manager",
+  "workOrder": "Repair 48 – Rezeptdaten, Ergiebigkeit und kontrollierte Kassenübergabe",
+  "baselineVersion": "V0.31.3.6 Repair 47",
+  "baselineFile": "KC_MarktKasse_V0_31_3_6_Repair_47_Baseline.zip",
+  "baselineSha256": "6ac6fd677971a7ce90150760955f3160c2a37bd84cfaffd4aa288983be1c3afa",
+  "candidateVersion": "",
+  "candidateFile": "",
+  "candidateSha256": "",
+  "changeScope": "Nur Rezeptur-/Einkaufsdaten, Gar- und Schankverluste, generische Ergiebigkeitsberechnung, Getränkezusätze sowie die dafür notwendige Artikel- und Kassenübergabe. Studio-/TÜV-Registrierung, Tests und Dokumentation dürfen passend ergänzt werden.",
+  "protectedAreas": "TV-Editor, gemeinsamer TV-Renderer, Präsentationsplayer, Folienverwaltung, NavigationCore, WindowCore, DisplayMatrixCore, Wetter, Zeiterfassung, Meldungswesen, bestehende Combobox-Stabilisierung und bestehende Kassenfunktionen außerhalb der ausdrücklich beauftragten Artikel-/Zusatzlogik.",
+  "requireTv": true,
+  "evidence": {},
+  "approval": null,
+  "history": [
+    {
+      "at": "2026-07-24T08:18:00+02:00",
+      "event": "WORKORDER_CREATED",
+      "detail": "Arbeitsauftrag vor weiteren Änderungen nach FrameworkReleaseMonitor V1.0.0 festgeschrieben."
+    }
+  ],
+  "monitorState": {
+    "code": "BLUE",
+    "label": "In Bearbeitung",
+    "reason": "Candidate-Datei und Candidate-SHA werden erst nach Umsetzung und Prüfung gesetzt."
+  }
+}

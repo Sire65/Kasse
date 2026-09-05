@@ -1,0 +1,11 @@
+{
+  "schema": "KC_PRODUCT_VERSION_MANIFEST_V1",
+  "product": "KC Bilderrechner",
+  "version": "0.31.3.6.12",
+  "displayVersion": "V0.31.3.6 Repair 12",
+  "repair": 12,
+  "uiSchemaVersion": "0.31.3.6-r12-ui.1",
+  "buildDate": "2026-07-21",
+  "trainingCompatibility": "0.27.x",
+  "sourceRelease": "KC_MarktKasse_Suite_V0_31_3_6_Repair_12_POS_UI_Profile_Technical_Preview"
+}

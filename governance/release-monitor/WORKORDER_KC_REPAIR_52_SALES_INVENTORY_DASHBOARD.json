@@ -1,0 +1,23 @@
+{
+  "schema": "framework-release-monitor-v1",
+  "id": "WO-KC-20260724-006",
+  "createdAt": "2026-07-24T13:00:00+02:00",
+  "updatedAt": "2026-07-24T14:00:00+02:00",
+  "project": "KC MarktKasse / PC-Manager",
+  "workOrder": "Repair 52 – Umsatz-, Kunden- und Bestandsdashboard",
+  "baselineVersion": "V0.31.3.6 Repair 51",
+  "candidateVersion": "V0.31.3.6 Repair 52",
+  "candidateFile": "KC_MarktKasse_V0_31_3_6_Repair_52_Sales_Inventory_Dashboard_Candidate.zip",
+  "candidateSha256": "E3B1423BAB7E5BA540547623E40733348E5D24C7A8E0D9B71ECACA6CF8D5C0BA",
+  "changeScope": "Nur Dashboard-Unterseiten, SalesInventoryAnalysisCore, zentrale Manager-Bestandsbuchungen und deutsche Folientypbezeichnungen.",
+  "protectedAreas": "Kassenverkauf, POS-Bedienung, TV-Präsentation, NavigationCore, Zeiterfassung, Rezepturen und bestehende Stammdaten.",
+  "requireTv": false,
+  "evidence": {
+    "javascriptSyntax": "PASS",
+    "automatedTests": "30/30 PASS",
+    "studioCatalog": "cores/sales-inventory-analysis-core/studio-catalog-entry.json",
+    "tuvRules": "cores/sales-inventory-analysis-core/tuv-rules.json",
+    "report": "PRUEFBERICHT_REPAIR_52.md"
+  },
+  "monitorState": {"code":"YELLOW","label":"Candidate geprüft","reason":"Automatisierte Prüfung bestanden; praktischer Echtdaten- und Browserrundlauf bleibt offen."}
+}

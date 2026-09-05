@@ -1,0 +1,21 @@
+{
+  "id": "DesignCore.Presentation",
+  "version": "0.1.0",
+  "status": "Candidate",
+  "extends": "DesignCore",
+  "consumers": [
+    "KC PC-Manager",
+    "KC Mobil TV",
+    "KC TV-Player"
+  ],
+  "features": [
+    "palettes",
+    "backgrounds",
+    "typography",
+    "banners",
+    "shapes",
+    "transitions",
+    "master-slide",
+    "quality-check"
+  ]
+}

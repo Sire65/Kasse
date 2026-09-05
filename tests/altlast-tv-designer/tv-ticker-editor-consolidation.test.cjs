@@ -1,0 +1,12 @@
+const fs=require('node:fs'),assert=require('node:assert/strict');
+const studio=fs.readFileSync('pc-manager/kc-object-studio.js','utf8');
+const adapter=fs.readFileSync('pc-manager/tv-display-matrix-adapter.js','utf8');
+const html=fs.readFileSync('pc-manager/index.html','utf8');
+assert(html.includes('kc-object-studio.js'),'Objekt-Studio nicht eingebunden');
+assert(!html.includes('tv-unified-editor.js')&&!html.includes('tv-draw-ticker-v02957.js'),'Alte Laufschrift-Dateien müssen ersetzt sein');
+assert(studio.includes("if(active==='ticker') global.KCTVDisplayMatrixAdapter?.refresh?.()"),'Anzeigematrix wird nach Laufschrift-Änderung nicht aktualisiert');
+assert(studio.includes('active=key; apply(node,state(key),key); save(true); select(key,node);'),'Auswahl nach dem Ziehen ist nicht stabil');
+['pointerdown','pointermove','pointerup','stagePointerDown','insertObject','s.objectVisibility[key]=true'].forEach(x=>assert(studio.includes(x),`Aufziehfunktion fehlt: ${x}`));
+['Inhaltsquelle','tickerSource','separator','repeat','easing','gap','uppercase','shadow','outline'].forEach(x=>assert(studio.includes(x),`Laufschrift-Core-Feld fehlt: ${x}`));
+['effectCatalog','surfaces','directions','displayModes','presets','palettes','fontProfiles'].forEach(x=>assert(adapter.includes(`CORE.${x}`),`Core-Katalog fehlt: ${x}`));
+console.log('PASS tv-ticker-editor-consolidation: ein Objekt-Studio, stabile Auswahl, komplettes Laufschrift-Core und Rahmen-Aufziehwerkzeug');

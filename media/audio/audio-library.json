@@ -1,0 +1,20 @@
+{
+  "schema": "KC_AUDIO_LIBRARY_V1",
+  "hinweis": "Hier stehen nur Titel, die der Verein verwenden darf. Beide Stuecke wurden am 03.09.2026 vom Betreiber als GEMA-frei geliefert. Neue Titel: Datei nach media/audio/music legen und hier eintragen.",
+  "tracks": [
+    {
+      "name": "Weihnachtsmusik 1 · ruhig (1:37)",
+      "type": "music",
+      "src": "media/audio/music/weihnachten-nastelbom.mp3",
+      "dauerSekunden": 97,
+      "herkunft": "Vom Betreiber geliefert, GEMA-frei (03.09.2026)"
+    },
+    {
+      "name": "Weihnachtsmusik 2 · festlich (1:51)",
+      "type": "music",
+      "src": "media/audio/music/weihnachten-sound-gallery.mp3",
+      "dauerSekunden": 111,
+      "herkunft": "Vom Betreiber geliefert, GEMA-frei (03.09.2026)"
+    }
+  ]
+}

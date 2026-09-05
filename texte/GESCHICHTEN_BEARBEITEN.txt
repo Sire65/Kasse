@@ -1,0 +1,29 @@
+GESCHICHTEN VON LAURA UND MARC BEARBEITEN
+=========================================
+
+Datei: geschichten.js
+
+Diese Datei enthält ausschließlich die beiden Bonusgeschichten und ihre Titel.
+Sie wird beim Start der Schulung automatisch vor app.js geladen. Änderungen
+werden deshalb direkt in der Bildschirmanzeige, beim Vorlesen und in der
+Druck-/PDF-Ausgabe verwendet.
+
+SO GEHT ES
+1. Vorher eine Sicherheitskopie von geschichten.js anlegen.
+2. geschichten.js mit einem einfachen Texteditor öffnen.
+3. Nur den Text zwischen den einfachen Anführungszeichen ändern.
+4. Die einfachen Anführungszeichen, Kommas, eckigen Klammern und geschweiften
+   Klammern nicht löschen oder verschieben.
+5. Im eigentlichen Text kein einfaches Anführungszeichen verwenden. Stattdessen
+   beispielsweise „…“ oder einen Gedankenstrich schreiben.
+6. Datei als UTF-8 speichern und die Schulung neu laden.
+
+WICHTIG FÜR GITHUB
+Nach einer Änderung muss auch die Datei
+publish/texte/geschichten.js
+denselben Inhalt erhalten, bevor der Publish-Ordner hochgeladen wird.
+
+ANREDE
+Die Texte werden in der Du-Fassung gepflegt. Die Schulung wandelt die bekannten
+Anredeformulierungen automatisch in die Sie-Fassung um. Nach größeren
+Textänderungen sollten beide Anreden einmal kontrolliert werden.

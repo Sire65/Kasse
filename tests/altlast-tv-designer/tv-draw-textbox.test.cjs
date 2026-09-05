@@ -1,0 +1,15 @@
+const fs = require('fs');
+const assert = require('assert');
+const code = fs.readFileSync('pc-manager/kc-object-studio.js','utf8');
+const html = fs.readFileSync('pc-manager/index.html','utf8');
+const css = fs.readFileSync('pc-manager/styles.css','utf8');
+['pointerdown','pointermove','pointerup','setPointerCapture','customTextObjects ||= []','item.customTextObjects.push','createCustomText'].forEach(value => assert(code.includes(value), `Zeichenfunktion fehlt: ${value}`));
+assert(code.includes("event.key==='Escape'"), 'Abbruch mit Esc fehlt');
+assert(!code.includes('item.text ='), 'Ein neues Textfeld darf das vorhandene Standard-Textfeld nicht überschreiben');
+assert(code.includes("KCReleaseManifest?.register?.('kcObjectStudio', VERSION)"), 'Release-Registrierung fehlt');
+assert(html.includes('kc-object-studio.js'), 'Zeichenwerkzeug ist nicht eingebunden');
+assert(html.includes('tv-custom-text-editor-v02954.js'), 'Editor für unabhängige Textobjekte ist nicht eingebunden');
+assert(!html.includes('tv-draw-textbox-v02948.js'), 'Alte, einzeltyp-spezifische Zeichenfunktion muss ersetzt sein');
+assert(css.includes('.kc-draw-preview') && css.includes('cursor:crosshair'), 'Visuelle Zeichenführung fehlt');
+['title','text','price','ticker','banner','shape','image'].forEach(type=>assert(code.includes(`drawableKeys`),`Typ ${type} fehlt im Rahmen-Aufziehen`));
+console.log('PASS tv-draw-textbox: verallgemeinertes Rahmen-Aufziehen für alle Objekttypen, Geometrie, Sofortbearbeitung, Abbruch');

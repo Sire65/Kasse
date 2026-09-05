@@ -1,0 +1,92 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "KCB-CONFIG-1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "packageId",
+    "createdAt",
+    "validUntil",
+    "targetId",
+    "payload",
+    "integrity"
+  ],
+  "properties": {
+    "schema": {
+      "const": "KCB-CONFIG-1"
+    },
+    "packageId": {
+      "type": "string",
+      "minLength": 8,
+      "maxLength": 120
+    },
+    "createdAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "validUntil": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "targetId": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 120
+    },
+    "payload": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "groups": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          }
+        },
+        "articles": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          }
+        },
+        "packages": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          }
+        },
+        "offers": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          }
+        },
+        "settings": {
+          "type": "object"
+        },
+        "receipt": {
+          "type": "object"
+        }
+      }
+    },
+    "integrity": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "algorithm",
+        "value"
+      ],
+      "properties": {
+        "algorithm": {
+          "const": "KCB-CHECK-1"
+        },
+        "value": {
+          "type": "string",
+          "minLength": 16,
+          "maxLength": 128
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,71 @@
+{
+  "core": "AvatarCore",
+  "version": "0.1.0-candidate",
+  "designFamily": "Framework Realistic Professional",
+  "rules": {
+    "style": "photorealistic",
+    "background": "neutral-dark",
+    "headwear": "role-specific; chef role explicitly without chef hat",
+    "placement": "outside primary work surface",
+    "accessibility": "avatar optional; all instructions remain text-accessible"
+  },
+  "roles": {
+    "chef": {
+      "programs": [
+        "KC Köcheclub",
+        "KC MarktKasse"
+      ],
+      "male": {
+        "name": "Marc",
+        "title": "Koch und Kassentrainer",
+        "default": "assets/chef/chef_male_neutral_armless_v0257.webp",
+        "states": {
+          "neutral": "assets/chef/chef_male_neutral_armless_v0257.webp",
+          "smile": "assets/chef/chef_male_smile.webp",
+          "speaking": "assets/chef/chef_male_speaking.webp",
+          "wave": "assets/chef/chef_male_wave.webp",
+          "thinking": "assets/chef/chef_male_thinking.webp",
+          "approve": "assets/chef/chef_male_approve.webp"
+        }
+      },
+      "female": {
+        "name": "Laura",
+        "title": "Köchin und Kassentrainerin",
+        "default": "assets/chef/chef_female_neutral_armless_v0257.webp",
+        "states": {
+          "neutral": "assets/chef/chef_female_neutral_armless_v0257.webp"
+        }
+      }
+    },
+    "gardener": {
+      "programs": [
+        "PflanzenPflege"
+      ],
+      "status": "asset-set-pending"
+    },
+    "captain": {
+      "programs": [
+        "Kreuzfahrt"
+      ],
+      "status": "asset-set-pending"
+    },
+    "it_operator": {
+      "programs": [
+        "Netzwerk-Leitstand"
+      ],
+      "status": "asset-set-pending"
+    },
+    "architect": {
+      "programs": [
+        "Raumplaner"
+      ],
+      "status": "asset-set-pending"
+    },
+    "travel_advisor": {
+      "programs": [
+        "Reiseassistent"
+      ],
+      "status": "asset-set-pending"
+    }
+  }
+}

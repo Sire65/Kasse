@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>KC Sync · Verbindungsadresse für diese Kasse</title>
+<style>
+  body{font-family:system-ui,sans-serif;max-width:640px;margin:40px auto;padding:0 20px;color:#1c2430}
+  h1{font-size:1.4rem}
+  .hinweis{background:#fef3c7;padding:12px 16px;border-radius:8px;margin:16px 0}
+  .fehler{background:#fee2e2;padding:12px 16px;border-radius:8px;margin:16px 0}
+  label{display:block;margin:16px 0 6px;font-weight:700}
+  input{width:100%;padding:10px;border:1px solid #ccc;border-radius:6px;font-size:1rem;box-sizing:border-box}
+  .adresse{background:#f0f7ff;padding:14px;border-radius:8px;word-break:break-all;font-family:monospace;margin-top:16px}
+  button{margin-top:12px;padding:10px 18px;font-weight:700;border-radius:6px;border:1px solid #1677b8;background:#fff;color:#1677b8;cursor:pointer}
+  button:hover{background:#eef7ff}
+</style>
+</head>
+<body>
+  <h1>Verbindungsadresse für diese Kasse</h1>
+  <p>Diese Seite <strong>direkt auf dem Tablet oder Rechner öffnen, auf dem diese Kasse laufen soll</strong> - nicht auf dem Manager-PC. Sie liest den bereits automatisch vom Kassen-Companion erzeugten Zugangs-Schlüssel lokal aus.</p>
+  <div id="status"></div>
+  <div id="formBereich" hidden>
+    <label for="registerId">Kassen-ID für dieses Gerät</label>
+    <input id="registerId" placeholder="z. B. KASSE-01" value="KASSE-01">
+    <button id="erzeugen" type="button">Adresse erzeugen</button>
+    <div id="ergebnis"></div>
+  </div>
+
+<script>
+(async function () {
+  const statusFeld = document.getElementById('status');
+  // Prüft mehrere wahrscheinliche Ports nacheinander - der alte Standardport (falls der
+  // Companion einzeln und klassisch gestartet wurde) UND der Marktag-Automatik-Bereich
+  // (dort läuft je Kasse ein eigener Companion ab Port 47500 aufwärts). Damit muss hier
+  // niemand mehr wissen, welcher Port es genau ist.
+  const kandidaten = [47391, 47500, 47501, 47502, 47503, 47504, 47505];
+  let daten = null;
+  for (const port of kandidaten) {
+    try {
+      const antwort = await fetch(`http://127.0.0.1:${port}/kc-sync-my-connection-info`, { signal: AbortSignal.timeout(800) });
+      if (!antwort.ok) continue;
+      daten = await antwort.json();
+      break;
+    } catch (e) { /* dieser Port antwortet nicht - nächsten versuchen */ }
+  }
+  if (!daten) {
+    statusFeld.innerHTML = '<div class="fehler">Kein Kassen-Companion auf diesem Gerät gefunden. Läuft er hier? (Diese Seite muss direkt auf dem Kassen-Gerät geöffnet werden, nicht auf dem Manager-PC. Bei der Marktag-Automatik: läuft markttag-start.js gerade?)</div>';
+    return;
+  }
+  statusFeld.innerHTML = `<div class="hinweis">Companion erreicht (Port ${daten.port}) - Zugangs-Schlüssel gefunden.</div>`;
+  document.getElementById('formBereich').hidden = false;
+
+  const bevorzugteAdresse = daten.netzwerkAdressen?.[0]?.adresse || '127.0.0.1';
+
+  document.getElementById('erzeugen').onclick = () => {
+    const registerId = document.getElementById('registerId').value.trim() || 'KASSE-01';
+    const url = `http://${bevorzugteAdresse}:8080/pos/index.html?kcPort=${daten.port}&kcToken=${encodeURIComponent(daten.token)}&kcRegisterId=${encodeURIComponent(registerId)}`;
+    document.getElementById('ergebnis').innerHTML = `
+      <div class="adresse">${url}</div>
+      <button type="button" id="kopieren">In Zwischenablage kopieren</button>
+      ${daten.netzwerkAdressen?.length > 1 ? '<p><small>Mehrere Netzwerkadressen gefunden - falls diese nicht erreichbar ist, andere ausprobieren: ' + daten.netzwerkAdressen.map(a => a.adresse).join(', ') + '</small></p>' : ''}
+    `;
+    document.getElementById('kopieren').onclick = () => {
+      navigator.clipboard?.writeText(url).then(() => {
+        const b = document.getElementById('kopieren');
+        b.textContent = 'Kopiert!';
+        setTimeout(() => { b.textContent = 'In Zwischenablage kopieren'; }, 2000);
+      });
+    };
+  };
+})();
+</script>
+</body>
+</html>

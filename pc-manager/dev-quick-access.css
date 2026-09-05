@@ -1,0 +1,5 @@
+/* Temporärer Entwicklungs-Schnellzugang – vor Produktivfreigabe entfernen. */
+.dev-quick-access-trigger{cursor:default;user-select:none}
+.dev-quick-access-badge{position:fixed;z-index:100000;right:14px;bottom:14px;max-width:390px;padding:10px 14px;border:2px solid #9a6700;border-radius:10px;background:#fff3bf;color:#3f2d00;box-shadow:0 8px 28px rgba(0,0,0,.24);font:600 13px/1.35 system-ui,sans-serif}
+.dev-quick-access-badge strong{display:block;font-size:14px;letter-spacing:.04em}
+.dev-quick-access-badge span{display:block;font-weight:500;margin-top:2px}

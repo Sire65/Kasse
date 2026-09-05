@@ -1,0 +1,32 @@
+{
+  "schema": "KC_TUV_RULESET_V1",
+  "component": "tableCore",
+  "version": "1.0.0",
+  "rules": [
+    {
+      "id": "TC-001",
+      "severity": "block",
+      "rule": "TableCore und Adapter dürfen fachliche Tabellenwerte nicht verändern."
+    },
+    {
+      "id": "TC-002",
+      "severity": "block",
+      "rule": "Spaltenverschiebung muss alle Zellen einer Zeile gemeinsam verschieben."
+    },
+    {
+      "id": "TC-003",
+      "severity": "block",
+      "rule": "Gespeicherte Spaltenzustände dürfen nur bei passender Spaltenstruktur angewendet werden."
+    },
+    {
+      "id": "TC-004",
+      "severity": "block",
+      "rule": "TV-, Präsentations- und QR-Tabellen sind von der Manager-Anbindung ausgeschlossen."
+    },
+    {
+      "id": "TC-005",
+      "severity": "manual",
+      "rule": "Maus, Touch, Tastatur und Responsive-Darstellung benötigen vor Gold praktische Gerätenachweise."
+    }
+  ]
+}

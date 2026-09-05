@@ -1,0 +1,31 @@
+{
+  "schema": "framework-release-monitor-v1",
+  "id": "WO-KC-20260724-003",
+  "createdAt": "2026-07-24T09:00:00+02:00",
+  "updatedAt": "2026-07-24T09:00:00+02:00",
+  "project": "KC MarktKasse / PC-Manager",
+  "workOrder": "Repair 49 – kontrollierte Migration TV-Mitglieder und Preislisten",
+  "baselineVersion": "V0.31.3.6 Repair 48 TableCore",
+  "baselineFile": "KC_MarktKasse_V0_31_3_6_Repair_48_TableCore_Manager_Candidate.zip",
+  "baselineSha256": "7df1be6f4681b65b1e1ec5c22280d061b8f57d772959c1ea3b1595c2a21e830a",
+  "candidateVersion": "",
+  "candidateFile": "",
+  "candidateSha256": "",
+  "changeScope": "Ausschließlich die geprüften Mitglieder-, Sprüche-, Preislisten-, Rezeptfolien- und zugehörigen TV-Inhaltsmigrationsdateien aus dem fremden Repair-48-Paket übernehmen. Bestehenden TableCore erhalten; Manifest, Registry, Tests und Dokumentation konfliktfrei zusammenführen.",
+  "protectedAreas": "TableCore und Manager-TableCore-Adapter, NavigationCore, WindowCore, DisplayMatrixCore, Wetter, Zeiterfassung, Rezeptur-Fachlogik außerhalb der TV-Rezeptkarte, Meldungswesen, Combobox-Stabilisierung, Kassenlogik sowie gemeinsame TV-Renderer- und Editor-Konsolidierung.",
+  "requireTv": true,
+  "evidence": {},
+  "approval": null,
+  "history": [
+    {
+      "at": "2026-07-24T09:00:00+02:00",
+      "event": "WORKORDER_CREATED",
+      "detail": "Migrationsumfang vor Übernahme der fremden Candidate-Dateien begrenzt."
+    }
+  ],
+  "monitorState": {
+    "code": "BLUE",
+    "label": "In Bearbeitung",
+    "reason": "Zusammengeführter Candidate und Nachweise noch offen."
+  }
+}

@@ -1,0 +1,269 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#10243a">
+  <title>KC Bilderrechner – Interaktive Schulung V0.29.3</title>
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="training-playback-core.css">
+</head>
+<body>
+<main class="app-shell">
+  <header class="topbar">
+    <div><small>KC BILDERRECHNER · INTERAKTIVE SCHULUNG</small><h1>Bedienung sicher lernen</h1><div class="version-line"><span>Schulung <b data-training-version>V0.29.3 Candidate</b></span><span>Grundlage <b data-product-version>KC Bilderrechner V0.31.3.6 Repair 11</b></span></div></div>
+    <a class="backlink" href="../index.html">← Startseite</a>
+  </header>
+
+  <section id="welcome" class="panel welcome-panel">
+    <div class="welcome-copy">
+      <span class="eyebrow">Interaktive Schulung</span>
+      <h2>KC Bilderrechner sicher bedienen</h2>
+      <p id="privacyIntro">Dein Vorname und dein Lernfortschritt werden ausschließlich lokal auf diesem Gerät gespeichert. Es erfolgt keine Übertragung.</p>
+      <div class="identity-row" id="identityRow">
+        <label class="name-field"><span>Vorname <span class="required">*</span></span>
+          <input id="firstName" maxlength="40" autocomplete="given-name" placeholder="z. B. Peter" aria-describedby="nameRequiredHint">
+        </label>
+        <fieldset class="address-choice"><legend>Anrede</legend><label><input type="radio" name="addressMode" value="du" checked> Du</label><label><input type="radio" name="addressMode" value="sie"> Sie</label></fieldset>
+        <fieldset id="voiceChoice" class="voice-choice"><legend id="voiceChoiceLegend">Stimme auswählen</legend><label><input type="radio" name="voiceVariant" value="one" checked><span><strong id="voiceOneTitle">Stimme 1 · sanft und herzlich</strong><small id="voiceOneName">Natürliche deutsche Stimme</small></span></label><label><input type="radio" name="voiceVariant" value="two"><span><strong id="voiceTwoTitle">Stimme 2 · freundlich und klar</strong><small id="voiceTwoName">Alternative deutsche Stimme</small></span></label><button id="testVoice" type="button">🔊 Auswahl</button><button id="testLauraVoice" type="button">Laura testen</button><button id="testMarcVoice" type="button">Marc testen</button><p id="voiceTestStatus" class="status" aria-live="polite"></p></fieldset>
+      </div>
+      <p id="nameRequiredHint" class="name-required-hint">Der Vorname wird benötigt, bevor die Schulung gestartet werden kann.</p>
+      <fieldset class="assistant-start-choice">
+        <legend id="learningModeLegend">Wie möchtest du lernen?</legend>
+        <label class="assistant-mode-card selected" data-assistant-mode="female">
+          <input type="radio" name="assistantMode" value="female" checked>
+          <span class="mini-coach-image female"><img src="../avatar-core/assets/chef/chef_female_neutral_armless_v0257.webp" alt=""></span><span><strong>Mit Assistentin <b>Laura</b></strong><small>Erklärungen, Vormachen und aufmunternde Hinweise</small></span>
+        </label>
+        <label class="assistant-mode-card" data-assistant-mode="male">
+          <input type="radio" name="assistantMode" value="male">
+          <span class="mini-coach-image male"><img src="../avatar-core/assets/chef/chef_male_neutral_armless_v0257.webp" alt=""></span><span><strong>Mit Assistent <b>Marc</b></strong><small>Erklärungen, Vormachen und aufmunternde Hinweise</small></span>
+        </label>
+        <label class="assistant-mode-card without" data-assistant-mode="none">
+          <input type="radio" name="assistantMode" value="none">
+          <span class="without-icon" aria-hidden="true">↗</span>
+          <span><strong>Ohne Assistent lernen</strong><small>Nur Texte, Markierungen und praktische Aufgaben</small></span>
+        </label>
+      </fieldset>
+      <div class="welcome-settings"><label class="sound-start-choice"><input id="startSound" type="checkbox" checked> <span>Vorlesen</span></label><label class="sound-start-choice"><input id="skipGreeting" type="checkbox"> <span>Begrüßung überspringen</span></label><label class="consent"><input id="saveConsent" type="checkbox" checked> <span>Lernstand speichern</span></label></div>
+      <div class="welcome-actions"><button id="startTraining" class="primary">Schulung starten</button><button id="resetProgress" class="ghost">Gespeicherten Lernstand löschen</button></div>
+      <p id="welcomeMessage" class="status" aria-live="polite"></p>
+      <div id="versionSyncStatus" class="version-sync-status checking"><span class="version-dot"></span><div><strong>Versionsabgleich läuft …</strong><small>Schulung und Originaloberfläche werden geprüft.</small></div></div>
+    </div>
+    <div class="welcome-visual">
+      <div class="welcome-branding">
+        <img class="club-logo" src="Koecheclub_Logo.webp" alt="Köcheclub Werne Logo">
+        <div class="club-wordmark"><strong>Köcheclub Werne</strong><span class="brand-rule" aria-hidden="true"></span><small>seit 1991</small></div>
+      </div>
+      <span class="welcome-subtitle">Interaktive Schulung · KC Bilderrechner</span>
+      <div class="welcome-coach-pair" aria-label="Zwei freundliche Assistenten">
+        <div class="welcome-coach-card female"><img src="../avatar-core/assets/chef/chef_female_neutral_armless_v0257.webp" alt="Lachende Assistent-Assistentin"><span>Laura</span></div>
+        <div class="welcome-coach-card male"><img src="../avatar-core/assets/chef/chef_male_neutral_armless_v0257.webp" alt="Lachender Assistent-Assistent"><span>Marc</span></div>
+      </div>
+      <strong>Wir lernen gemeinsam</strong>
+      <span>Freundlich erklärt · direkt vorgemacht · selbst ausprobiert</span>
+      <div id="encouragement" class="encouragement">Du schaffst das!</div>
+      <small class="creator-credit">Schulungsprogramm erstellt von Hans-Joachim Koch © 2026</small>
+    </div>
+  </section>
+
+  <section id="dashboard" class="panel hidden">
+    <div class="learner-line"><div><span class="eyebrow">Dein Lernpfad</span><h2 id="greeting">Willkommen</h2></div><div class="score-pill"><span id="overallScore">0</span>% bestanden</div></div>
+    <div class="module-grid">
+      <button class="module-card" data-module="quick"><span>1</span><div><strong>Grundlagen und Verkauf</strong><small>6 Kapitel: Oberfläche, Artikel, Mengen, Löschen und Zahlung</small></div><b id="quickState">Starten</b></button>
+      <button class="module-card" data-module="advanced"><span>2</span><div><strong>Sonderfunktionen und Artikelintelligenz</strong><small>13 Kapitel: Trinkgeld, Konto, Personal, Pfand, Infos, Varianten, Favoriten, Pool, Happy Hour, Reklamation und Betriebsmodi</small></div><b id="advancedState">Starten</b></button>
+      <button class="module-card" data-module="practice"><span>3</span><div><strong>Interaktive Praxisprüfung</strong><small>Aufgaben selbst erledigen und direkt prüfen lassen</small></div><b id="practiceState">Starten</b></button>
+    </div>
+    <section id="completionCard" class="completion-card hidden" aria-live="polite"><div><span class="eyebrow">Geschafft</span><h3>Schulung vollständig abgeschlossen</h3><p>Als Dankeschön warten zwei persönliche Bonusgeschichten von Laura und Marc.</p><div class="completion-coaches"><img src="../avatar-core/assets/chef/chef_female_neutral_armless_v0257.webp" alt="Laura"><img src="../avatar-core/assets/chef/chef_male_neutral_armless_v0257.webp" alt="Marc"></div></div><div class="completion-actions"><button id="completionCertificate" class="primary">Zertifikat öffnen</button><button id="completionBonus">Bonusgeschichten</button><button id="completionFeedback">Schulung bewerten</button></div></section>
+    <div class="dashboard-actions"><button id="continueBtn" class="primary">Weiterlernen</button><button id="certificateBtn" class="hidden">Teilnahmezertifikat</button><button id="feedbackBtn">Feedbackbogen ansehen</button><button id="changeProfile" class="ghost">Name/Stimme ändern</button></div>
+  </section>
+
+  <section id="lesson" class="panel lesson-panel hidden">
+    <div class="training-progress-header">
+      <div class="progress-copy"><strong id="lessonPercent">0 %</strong><span id="lessonRemaining">Noch 0 Inhalte</span></div>
+      <div class="progress-track" aria-label="Gesamtfortschritt"><span id="lessonTopProgress"></span></div>
+    </div>
+    <div class="lesson-head"><div><span id="lessonModule" class="eyebrow"></span><h2 id="lessonTitle"></h2></div>
+      <div class="lesson-options" aria-label="Schulungseinstellungen">
+        <label><input id="assistantToggle" type="checkbox" checked> Assistent ein</label>
+        <label><input id="soundToggle" type="checkbox" checked> Ton ein</label>
+        <button id="exitLesson" class="ghost">Übersicht</button>
+      </div></div>
+    <div id="lessonStepTrack" class="lesson-step-track" aria-label="Lektionsfortschritt"></div>
+    <div class="lesson-stage coach-dock-layout">
+      <div class="lesson-workspace">
+        <div class="workspace-label">
+          <span>Live-Oberfläche des KC Bilderrechners</span>
+          <small>Die Schulung öffnet und markiert die passenden Bereiche direkt in der Originaloberfläche.</small>
+        </div>
+        <div id="lessonVisual" class="lesson-visual original-pos-frame scrollable-pos">
+          <iframe id="lessonPosFrame" scrolling="yes" title="Originaler KC Bilderrechner" src="../pos/index.html?training=1&embeddedTraining=1&ui=0.31.3.6-r11"></iframe>
+        </div>
+      </div>
+
+      <aside id="lessonGuide" class="coach-dock" aria-label="Assistent und Schrittanleitung">
+        <div class="coach-dock-head">
+          <div id="coachPortraitWrap" class="coach-portrait-wrap">
+            <img id="coachGuideImage" src="../avatar-core/assets/chef/chef_female_neutral_armless_v0257.webp" alt="Assistent">
+            <span class="coach-status-dot" aria-hidden="true"></span>
+          </div>
+          <div class="coach-title-block">
+            <div id="stepCounter" class="step-counter"></div><div id="currentAction" class="current-action">Vorbereitung</div>
+            <strong id="coachGuideTitle">Dein Assistent</strong>
+            <span id="coachModeLabel" class="coach-mode-label">Geführte Schulung</span>
+          </div>
+          <button id="collapseCoach" class="coach-collapse" type="button" title="Coachbereich einklappen" aria-label="Coachbereich einklappen">›</button>
+        </div>
+
+        <div class="coach-dock-body">
+          <p id="coachGuideText" class="coach-main-text"></p>
+          <div id="lessonTip" class="tip extra-tip-card"><span class="tip-icon" aria-hidden="true">💡</span><div><strong id="tipLabel">Extra-Tipp</strong><p id="tipText"></p></div></div>
+        </div>
+
+        <div class="coach-dock-progress">
+          <div class="progress"><span id="lessonProgress"></span></div>
+        </div>
+
+        <div class="coach-dock-actions" aria-label="Schulungssteuerung">
+          <button id="lessonBack">◀ Zurück</button>
+          <button id="speakBtn">🔊 Vorlesen</button>
+          <button id="repeatDemo" type="button">↻ Noch einmal zeigen</button>
+          <button id="lessonNext" class="primary">Weiter ▶</button>
+        </div>
+      </aside>
+    </div>
+  </section>
+
+  <section id="practice" class="panel hidden">
+    <div class="training-progress-header">
+      <div class="progress-copy"><strong id="practicePercent">0 %</strong><span id="practiceRemaining">Noch 0 Aufgaben</span></div>
+      <div class="progress-track" aria-label="Prüfungsfortschritt"><span id="practiceTopProgress"></span></div>
+    </div>
+    <div class="lesson-head"><div><span class="eyebrow">Interaktive Praxisprüfung</span><h2 id="taskTitle">Aufgabe</h2></div>
+      <div class="lesson-options" aria-label="Schulungseinstellungen">
+        <label><input id="practiceAssistantToggle" type="checkbox" checked> Assistent ein</label>
+        <label><input id="practiceSoundToggle" type="checkbox" checked> Ton ein</label>
+        <button id="exitPractice" class="ghost">Übersicht</button>
+      </div></div>
+    <div class="practice-command-bar" aria-label="Steuerung der Praxisaufgabe">
+      <div id="feedback" class="feedback" aria-live="assertive">Führe die Aufgabe aus und wähle anschließend „Aufgabe prüfen“.</div>
+      <div class="controls"><button id="taskBack">◀ Zurück</button><button id="taskReset">Aufgabe zurücksetzen</button><button id="checkTask" class="primary">✓ Aufgabe prüfen</button><button id="nextTask" disabled>Nächste Aufgabe ▶</button></div>
+    </div>
+    <div class="practice-layout">
+      <aside class="task-card">
+        <div class="practice-coach"><img id="practiceCoachImage" src="../avatar-core/assets/chef/chef_female_neutral_armless_v0257.webp" alt="Assistent"><div><strong id="practiceCoachName">Laura begleitet dich</strong><small id="practiceCoachText">Lies die Aufgabe und führe sie anschließend in der Kasse aus.</small></div></div>
+        <div class="task-number" id="taskNumber">1</div><p id="taskText"></p><div id="taskHint" class="tip"></div><div class="practice-help-actions"><button id="practiceSpeak" type="button">🔊 Hinweis vorlesen</button><button id="showTaskSolution" type="button">↻ Lösung noch einmal zeigen</button></div><div class="task-score"><span>Versuche</span><strong id="attempts">0</strong></div>
+      </aside>
+      <div class="simulator original-pos-frame scrollable-pos" id="simulator"><iframe id="practicePosFrame" scrolling="yes" title="Originaler KC Bilderrechner – Praxis" src="../pos/index.html?training=1&embeddedTraining=1&ui=0.31.3.6-r11"></iframe></div>
+    </div>
+  </section>
+
+  <section id="certificate" class="panel hidden certificate-panel">
+    <div id="certificatePaper" class="certificate-paper"><div class="cert-seal">✓</div><span>Köcheclub Werne</span><h2>Schulungszertifikat</h2><p>Hiermit wird bestätigt, dass</p><h3 id="certName"></h3><p>mit Erfolg an der interaktiven Schulung zum</p><h3 class="cert-product">KC Bilderrechner</h3><p>teilgenommen und die praktische Schulung abgeschlossen hat.</p><div class="cert-content"><strong>Schulungsinhalte</strong><span>Bedienung der Benutzeroberfläche · Verkaufsvorgänge und Warenkorbverwaltung · Zahlungsabwicklung · Sonderfunktionen · Praktische Übungen</span></div><p id="certDate"></p><p class="cert-version">Schulung <b data-training-version>V0.29.3 Candidate</b> · Grundlage <b data-product-version>KC Bilderrechner V0.31.3.6 Repair 11</b></p><div class="cert-signatures"><div><span class="signature-placeholder">Unterschrift folgt</span><strong>Clubsprecher</strong></div><div><span class="signature-placeholder">Unterschrift folgt</span><strong>Schulungsleiter</strong></div></div></div>
+    <div class="certificate-style-picker" aria-label="Zertifikatgestaltung"><strong>Gestaltung:</strong><button id="certificateClassic" class="active" type="button">Classic</button><button id="certificateModern" type="button">Modern · edel</button></div>
+    <div class="controls"><button id="printCertificate" class="primary">Zertifikat drucken / als PDF speichern</button><button id="downloadCertificate">Zertifikat als HTML speichern</button><button id="openBonus" class="primary">Bonusgeschichten öffnen</button><button id="closeCertificate">Zur Übersicht</button></div>
+  </section>
+
+
+  <section id="bonus" class="panel hidden bonus-panel">
+    <div class="bonus-head"><span class="eyebrow">Freiwilliger Bonus nach der Schulung</span><h2 id="bonusTitle">Lerne Marc und Laura kennen</h2><p class="fiction-note"><strong>Hinweis:</strong> Marc und Laura sind fiktive Schulungsbegleiter. Ihre Geschichten stehen stellvertretend für Gastfreundschaft, Teamgeist, Respekt und soziales Engagement.</p></div>
+    <div class="bonus-choice" id="bonusChoice">
+      <article><img src="../avatar-core/assets/chef/chef_male_neutral_armless_v0257.webp" alt="Marc"><h3>Geschichte von Marc</h3><p>Von Restaurants in Europa bis zur sozialen Gemeinschaftsverpflegung</p><button class="primary" data-story="marc">Geschichte von Marc öffnen</button></article>
+      <article><img src="../avatar-core/assets/chef/chef_female_neutral_armless_v0257.webp" alt="Laura"><h3>Geschichte von Laura</h3><p>Von der Sterneküche bis zu Senioren und Kindern</p><button class="primary" data-story="laura">Geschichte von Laura öffnen</button></article>
+    </div>
+    <article id="storyViewer" class="story-viewer hidden"><div class="story-person"><img id="storyImage" alt=""><div class="story-heading"><span class="eyebrow">Fiktive Bonusgeschichte</span><h3 id="storyTitle"></h3><p id="storyIntro" class="story-intro"></p><div class="story-actions story-header-actions"><button id="storyRead" class="primary">🔊 Geschichte vorlesen</button><button id="storyPause">⏸ Pause</button><button id="storyPrint">🖨 Drucken / als PDF</button><button id="storyBack">Andere Geschichte</button></div></div></div><div id="storyText" class="story-text"></div></article>
+    <div class="controls"><button id="bonusSkip">Geschichten überspringen</button><button id="bonusFeedback" class="primary">Weiter zum Feedback</button></div>
+  </section>
+
+  <section id="trainingTuv" class="panel hidden tuv-panel">
+    <div class="survey-head"><div><span class="eyebrow">Integrierter Schulungs-TÜV</span><h2>Technik- und Qualitätsprüfung</h2><p>Der Prüflauf kontrolliert technische Funktionen, Ablauf, Sprache, Bedienbarkeit und die vollständige Abschlusskette.</p></div><div id="tuvOverall" class="survey-badge">Noch nicht geprüft</div></div>
+    <div id="tuvResults" class="tuv-results"></div>
+    <div class="controls"><button id="runTuv" class="primary">Prüfung erneut starten</button><button id="downloadTuv">TÜV-Bericht exportieren</button><button id="closeTuv">Zur Übersicht</button></div>
+  </section>
+
+  <section id="survey" class="panel hidden survey-panel">
+    <div class="survey-head">
+      <div><span class="eyebrow">Feedbackbogen</span><h2 id="surveyTitle">Dein Feedback zur Schulung</h2><p id="surveyIntro">Mit deiner Rückmeldung können Schulungsinhalte, Sprache und Bedienführung gezielt verbessert werden.</p><p id="surveyProgressNote" class="survey-progress-note"></p></div>
+      <div class="survey-badge">1 = trifft nicht zu<br><strong>10 = trifft vollständig zu</strong></div>
+    </div>
+    <form id="feedbackForm">
+      <div id="surveyQuestions" class="survey-questions"></div>
+
+      <fieldset class="survey-fieldset">
+        <legend id="surveyHelpfulLegend">Was hat dir besonders geholfen? <small>Mehrfachauswahl möglich</small></legend>
+        <div class="choice-grid">
+          <label><input type="checkbox" name="helpful" value="live_demo"> Bewegte Live-Abläufe</label>
+          <label><input type="checkbox" name="helpful" value="voice"> Gesprochene Erklärungen</label>
+          <label><input type="checkbox" name="helpful" value="avatar"> Persönlicher Assistent</label>
+          <label><input type="checkbox" name="helpful" value="practice"> Selbstständige Übungen</label>
+          <label><input type="checkbox" name="helpful" value="repeat"> Wiederholungsmöglichkeit</label>
+          <label><input type="checkbox" name="helpful" value="original_ui"> Originaloberfläche</label>
+        </div>
+      </fieldset>
+
+      <fieldset class="survey-fieldset">
+        <legend>Wo sollte die Schulung verbessert werden? <small>Mehrfachauswahl möglich</small></legend>
+        <div class="choice-grid">
+          <label><input type="checkbox" name="improve" value="speech"> Sprache/Stimme</label>
+          <label><input type="checkbox" name="improve" value="speed"> Tempo</label>
+          <label><input type="checkbox" name="improve" value="explanations"> Verständlichkeit</label>
+          <label><input type="checkbox" name="improve" value="demonstrations"> Vorführungen</label>
+          <label><input type="checkbox" name="improve" value="practice"> Übungen/Prüfung</label>
+          <label><input type="checkbox" name="improve" value="navigation"> Bedienung der Schulung</label>
+        </div>
+      </fieldset>
+
+      <div class="survey-text-grid">
+        <label><span id="surveyPositiveLabel">Was hat dir besonders gut gefallen?</span>
+          <textarea id="feedbackPositive" maxlength="1000" rows="4" placeholder="Deine Rückmeldung …"></textarea>
+        </label>
+        <label>Was sollen wir noch verbessern?
+          <textarea id="feedbackImproveText" maxlength="1000" rows="4" placeholder="Deine Verbesserungsidee …"></textarea>
+        </label>
+      </div>
+
+      <fieldset class="survey-fieldset">
+        <legend id="surveyStoriesLegend">Wie haben dir die Bonusgeschichten gefallen?</legend>
+        <div class="choice-grid">
+          <label><input type="radio" name="stories_seen" value="both"> Beide angesehen</label>
+          <label><input type="radio" name="stories_seen" value="marc"> Nur Marc angesehen</label>
+          <label><input type="radio" name="stories_seen" value="laura"> Nur Laura angesehen</label>
+          <label><input type="radio" name="stories_seen" value="none" checked> Nicht angesehen</label>
+        </div>
+        <div class="survey-question"><label for="rating_stories">Waren die Geschichten warmherzig, passend und haben sie die Werte des Köcheclubs gut vermittelt?</label><div class="survey-scale"><div class="survey-range-wrap"><input id="rating_stories" name="rating_stories" type="range" min="1" max="10" step="1" value="8" data-rating="stories"><div class="survey-ticks" aria-hidden="true"><span>1</span><span>2</span><span>3</span><span>4</span><span>5</span><span>6</span><span>7</span><span>8</span><span>9</span><span>10</span></div></div><output class="survey-value" for="rating_stories">8</output></div></div>
+      </fieldset>
+
+      <fieldset class="survey-fieldset story-future-fieldset"><legend id="storyFutureLegend">Möchtest du weitere Geschichten hören?</legend><label class="consent"><input type="checkbox" name="story_continue" value="yes"><span id="storyContinuationLabel">Ich wünsche mir eine Fortsetzung von Marcs und Lauras Geschichten.</span></label><p id="nextStoryPrompt"><strong>Welche Geschichte würdest du gern als Nächstes hören?</strong></p><div class="choice-grid"><label><input type="radio" name="next_story" value="christmas_market"> Weihnachtsmarkt</label><label><input type="radio" name="next_story" value="gastronomy"> Gastronomie</label><label><input type="radio" name="next_story" value="social"> Soziales Engagement</label><label><input type="radio" name="next_story" value="team"> Teamgeschichten</label></div></fieldset>
+
+      <fieldset class="survey-fieldset recommend-fieldset">
+        <legend id="surveyRecommendLegend">Würdest du diese Schulung anderen Bedienern empfehlen?</legend>
+        <div class="recommend-options">
+          <label><input type="radio" name="recommend" value="yes" required> Ja</label>
+          <label><input type="radio" name="recommend" value="maybe"> Vielleicht</label>
+          <label><input type="radio" name="recommend" value="no"> Nein</label>
+        </div>
+      </fieldset>
+
+      <label class="consent"><input id="feedbackNameConsent" type="checkbox"> Meinen Vornamen in der Auswertung mitspeichern. Ohne Häkchen wird die Rückmeldung anonym gespeichert.</label>
+      <p id="surveyStatus" class="status" aria-live="polite"></p>
+      <div class="survey-actions">
+        <button type="button" id="cancelFeedback">Zur Übersicht</button>
+        <button type="submit" class="primary">Feedback verbindlich absenden</button>
+      </div>
+    </form>
+
+    <div id="feedbackComplete" class="feedback-complete hidden">
+      <div class="cert-seal">✓</div><h3 id="feedbackThanksTitle">Vielen Dank für dein Feedback!</h3>
+      <p id="feedbackSavedText">Vielen Dank. Deine Rückmeldung wurde sicher auf diesem Gerät gespeichert.</p>
+      <div class="feedback-export-box"><strong>Feedback lokal sichern</strong><span>Der Feedbackbogen kann auf diesem Gerät gedruckt oder als Datei gespeichert werden.</span></div>
+      <div class="controls feedback-output-actions"><button id="printFeedback" type="button">Feedback drucken / als PDF</button><button id="exportFeedbackJson" type="button">Feedbackdaten speichern (JSON)</button><button id="exportFeedbackCsv" type="button">Feedbacktabelle speichern (CSV)</button><button id="finishFeedback" class="primary">Zur Übersicht</button></div>
+    </div>
+  </section>
+</main>
+<button id="trainingTuvBtn" class="tuv-floating" type="button" title="Schulungs-TÜV und Diagnose">TÜV</button>
+<script src="../avatar-core/avatar-core.js"></script>
+<script src="version-sync-core.js"></script>
+<script src="training-playback-core.js"></script>
+<script src="../texte/geschichten.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

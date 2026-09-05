@@ -1,0 +1,161 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>KC MarktKasse · Money Butler</title>
+<link rel="stylesheet" href="styles.css">
+<link rel="stylesheet" href="../shared/kc-bargeld-statistik.css">
+<link rel="stylesheet" href="../shared/kc-geldkassette.css">
+</head>
+<body>
+<div class="app">
+  <header>
+    <div class="logo">KC</div>
+    <div>
+      <h1>KC Money Butler</h1>
+      <p>Wechselgeld vorbereiten – einfach und sicher</p>
+    </div>
+    <span>V0.21.5</span>
+  </header>
+
+  <main>
+    <p id="moneyToolTestHint" class="test-phase-note" hidden><strong>So ist es gedacht:</strong> Wechselgeld wird hier im Money Butler vorbereitet. Der PC-Manager ist ausschließlich für den geschützten Verwaltungsbereich da.</p>
+    <section class="card setup money-section" data-money-section="target" data-default-open="true">
+      <div class="collapse-heading">
+        <h2>1. Ziel auswählen</h2>
+        <button type="button" class="section-lock" aria-expanded="true" aria-controls="money-target-body" title="Bereich einklappen"><span class="lock-icon" aria-hidden="true">🔓</span><span class="lock-label">Einklappen</span></button>
+      </div>
+      <div class="money-section-body setup-fields" id="money-target-body">
+        <label>Kasse
+          <select id="register">
+            <option value="KASSE-01">Kasse 1</option>
+            <option value="KASSE-02">Kasse 2</option>
+            <option value="KASSETTE">Geldkassette – auf beide Laden aufteilen</option>
+          </select>
+        </label>
+        <label>Vorgang
+          <div class="choice-row three">
+            <button type="button" class="choice active" data-type="opening">Anfangsbestand</button>
+            <button type="button" class="choice" data-type="topup">Nachfüllung</button>
+            <button type="button" class="choice" data-type="count">Abendzählung</button>
+          </div>
+        </label>
+        <label><span id="effectiveDateLabel">Gültig für <span class="required-star">*</span></span>
+          <input id="effectiveDate" type="date" required autocomplete="off">
+          <small>Der Code kann an der Kasse nur an diesem Tag übernommen werden.</small>
+        </label>
+        <label>Notiz
+          <input id="note" placeholder="z. B. zusätzliches Wechselgeld">
+        </label>
+      </div>
+    </section>
+
+    <section class="card entry-card money-section" data-money-section="loose" data-default-open="true">
+      <div class="collapse-heading">
+        <h2>2. Lose Scheine und Münzen eingeben</h2>
+        <button type="button" class="section-lock" aria-expanded="true" aria-controls="money-loose-body" title="Bereich einklappen"><span class="lock-icon" aria-hidden="true">🔓</span><span class="lock-label">Einklappen</span></button>
+      </div>
+      <div class="money-section-body" id="money-loose-body"><div id="denoms" class="denoms"></div></div>
+    </section>
+
+    <section class="card entry-card roll-card money-section" data-money-section="rolls" data-default-open="false">
+      <div class="section-heading collapse-heading">
+        <div>
+          <h2>3. Rollengeld eingeben</h2>
+          <p>Nur vollständige Münzrollen eintragen. Angebrochene Rollen bitte oben als lose Münzen erfassen.</p>
+        </div>
+        <div class="section-heading-actions"><span class="roll-badge">Münzrollen</span><button type="button" class="section-lock" aria-expanded="false" aria-controls="money-rolls-body" title="Bereich ausklappen"><span class="lock-icon" aria-hidden="true">🔒</span><span class="lock-label">Ausklappen</span></button></div>
+      </div>
+      <div class="money-section-body" id="money-rolls-body" hidden>
+        <div class="roll-table-head" aria-hidden="true"><span></span><span>Münze</span><span>Rollen</span><span>Inhalt</span><span>Wert je Rolle</span><span>Summe</span></div>
+        <div id="coinRolls" class="coin-rolls"></div>
+      </div>
+    </section>
+
+    <!-- Nur bei Ziel "Geldkassette": der komplette Inhalt wird EINMAL oben erfasst und hier auf
+         die beiden Geldladen im Schrank verteilt. Kasse 2 ergibt sich immer aus dem Rest, damit
+         die Summe gar nicht erst auseinanderlaufen kann. -->
+    <section class="card entry-card money-section" id="kassetteSection" data-money-section="kassette" data-default-open="true" hidden>
+      <div class="collapse-heading">
+        <h2>3b. Auf die beiden Geldladen aufteilen</h2>
+        <button type="button" class="section-lock" aria-expanded="true" aria-controls="money-kassette-body" title="Bereich einklappen"><span class="lock-icon" aria-hidden="true">🔓</span><span class="lock-label">Einklappen</span></button>
+      </div>
+      <div class="money-section-body" id="money-kassette-body">
+        <div id="kassetteAufteilung"></div>
+      </div>
+    </section>
+
+    <section class="summary">
+      <div><span>Lose Scheine und Münzen</span><b id="looseTotal">0,00 €</b></div>
+      <div><span>Rollengeld</span><b id="rollTotal">0,00 €</b></div>
+      <div class="summary-total"><span>Gesamtbetrag</span><strong id="total">0,00 €</strong></div>
+    </section>
+
+    <section class="actions">
+      <button id="generate" class="primary">QR-Code erzeugen</button>
+      <button id="reset">Zurücksetzen</button>
+    </section>
+
+    <section class="card result money-section" data-money-section="handover" data-default-open="false">
+      <div class="collapse-heading">
+        <h2>4. An die Kasse übergeben</h2>
+        <button type="button" class="section-lock" aria-expanded="false" aria-controls="money-handover-body" title="Bereich ausklappen"><span class="lock-icon" aria-hidden="true">🔒</span><span class="lock-label">Ausklappen</span></button>
+      </div>
+      <div class="money-section-body" id="money-handover-body" hidden>
+        <div class="handover-check"><span>Vorgang <b id="handoverType">—</b></span><span>Ziel <b id="handoverRegister">—</b></span><span>Gültig für <b id="handoverDate">—</b></span></div>
+        <div class="handover-summary"><span>Lose <b id="handoverLooseTotal">0,00 €</b></span><span>Rollen <b id="handoverRollTotal">0,00 €</b></span><span>Gesamt <strong id="handoverTotal">0,00 €</strong></span></div>
+        <canvas id="qrCanvas" width="360" height="360"></canvas>
+        <div class="kurzcode-box"><small>Rückfall ohne Scanner - an der Kasse von Hand eingeben:</small><div id="kurzcode" class="kurzcode-anzeige">—</div></div>
+        <textarea id="payload" readonly placeholder="Der Übertragungscode erscheint hier."></textarea>
+        <div class="result-actions">
+          <button id="print">Drucken</button>
+          <button id="copy">Code kopieren</button>
+          <button id="save">Datei speichern</button>
+          <button id="protokoll" hidden>Übergabeprotokoll</button>
+        </div>
+        <p class="hint">QR-Code an der Kasse scannen oder die erzeugte Datei auf das Kassengerät übertragen.</p>
+        <p id="kassetteHinweis" class="kckass-doppelhinweis" hidden><strong>An BEIDEN Kassen einlesen.</strong> Jede Kasse bucht nur ihren eigenen Anteil – doppelt gezählt wird nichts. Wird der Code nur an einer Kasse eingelesen, fehlt der anderen der Anfangsbestand und ihre Abrechnung geht abends nicht auf.</p>
+      </div>
+    </section>
+
+    <!-- Uebergabeprotokoll fuer die Geldkassette (Bringen/Abholen, zwei Unterschriftszeilen).
+         Vollstaendig gebaut, aber ueber KC_RUNTIME_FLAGS.uebergabeProtokoll abgeschaltet -
+         solange der Schalter aus ist, bleiben Knopf und Blatt komplett unsichtbar. -->
+    <section class="card protokoll-blatt" id="protokollBlatt" hidden>
+      <div id="protokollInhalt"></div>
+    </section>
+
+    <!-- Statistik: was wurde ueber die Zeit tatsaechlich an Wechselgeld gebraucht.
+         Planungshilfe fuer den naechsten Markt - siehe shared/kc-bargeld-statistik.js. -->
+    <section class="card money-section" data-money-section="statistik" data-default-open="false">
+      <div class="collapse-heading">
+        <h2>5. Statistik über die Zeit</h2>
+        <button type="button" class="section-lock" aria-expanded="false" aria-controls="money-statistik-body" title="Bereich ausklappen"><span class="lock-icon" aria-hidden="true">🔒</span><span class="lock-label">Ausklappen</span></button>
+      </div>
+      <div class="money-section-body" id="money-statistik-body" hidden>
+        <p class="hint">Welche Stückelung wurde bisher übergeben? Als Planungshilfe für den nächsten Markt.</p>
+        <div class="kcbs-filter">
+          <label>Vorgang<select id="mbStatTyp">
+            <option value="alle">Alle</option><option value="opening">Anfangsbestand</option>
+            <option value="topup">Nachfüllung</option><option value="count">Abendzählung</option></select></label>
+          <label>Von<input type="date" id="mbStatVon"></label>
+          <label>Bis<input type="date" id="mbStatBis"></label>
+          <button type="button" id="mbStatAktualisieren">Aktualisieren</button>
+        </div>
+        <div id="mbStatistik"></div>
+      </div>
+    </section>
+  </main>
+</div>
+<script src="../pc-manager/vendor/qrcode-generator.js"></script>
+<!-- Ein QR-Zeichner fuer die ganze Suite: frueher hatte jedes Programm einen eigenen,
+     und derselbe Rundungsfehler musste dreimal repariert werden. -->
+<script src="../shared/kc-qr.js?build=0.1.0"></script>
+<script src="../shared/runtime-flags.js"></script>
+<script src="../shared/kc-bargeld-statistik.js"></script>
+<script src="../shared/kc-geldkassette.js"></script>
+<script src="../shared/kc-uebergabeprotokoll.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

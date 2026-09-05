@@ -1,0 +1,1 @@
+{"schema":"framework-studio-catalog-v1","id":"salesImportCore","name":"SalesImportCore","version":"0.2.0","status":"candidate","contracts":["KC_SALES_EXPORT_V4","KC_SALES_COMPACT_V1"],"features":["Kompaktimport","Deduplizierung","Mehrkassen-Zusammenführung","platzsparender Dauerspeicher","automatische Migration alter Umsatzdaten"]}

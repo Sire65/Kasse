@@ -1,0 +1,243 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>DisplayMatrixModule V0.2.3 Demo</title>
+  <style>
+    :root{color-scheme:dark;--bg:#0d1117;--panel:#151b23;--text:#e6edf3;--muted:#8b949e;--line:#30363d}
+    *{box-sizing:border-box}
+    body{margin:0;min-height:100vh;font-family:system-ui,Segoe UI,Arial,sans-serif;background:var(--bg);color:var(--text);display:grid;place-items:center;padding:24px}
+    main{width:min(1120px,100%);display:grid;gap:18px}
+    header{display:flex;justify-content:space-between;gap:16px;align-items:end}
+    h1{font-size:24px;margin:0;font-weight:750}
+    .version{color:var(--muted);font-size:13px}
+    .loaded-version{display:inline-flex;align-items:center;height:28px;border:1px solid #388bfd;border-radius:6px;padding:0 10px;color:#79c0ff;background:#0b1b33;font-size:12px;font-weight:700}
+    .status-line{display:flex;gap:8px;flex-wrap:wrap;margin-top:6px}
+    .status-pill{display:inline-flex;align-items:center;height:24px;border:1px solid #3fb950;border-radius:6px;padding:0 8px;color:#8ff0a4;background:#08250f;font-size:12px;font-weight:700}
+    .stage{border:1px solid var(--line);background:#050908;padding:22px;display:grid;place-items:center;min-height:210px}
+    .controls{display:grid;grid-template-columns:2fr repeat(6,1fr) auto;gap:10px;align-items:end}
+    label{display:grid;gap:6px;color:var(--muted);font-size:12px}
+    input,select,button{height:38px;border:1px solid var(--line);border-radius:6px;background:var(--panel);color:var(--text);padding:0 10px;font:inherit;min-width:0}
+    button{cursor:pointer;background:#1f6feb;border-color:#388bfd;font-weight:700}
+    .log{border:1px solid var(--line);background:var(--panel);padding:12px;min-height:74px;color:var(--muted);font-family:ui-monospace,Consolas,monospace;font-size:12px;white-space:pre-wrap;overflow:auto}
+    @media (max-width:900px){.controls{grid-template-columns:1fr 1fr}.controls label:first-child{grid-column:1/-1}button{grid-column:1/-1}}
+  </style>
+</head>
+<body>
+  <main>
+    <header>
+      <h1>DisplayMatrixModule</h1>
+      <div>
+        <div class="version">V0.2.3 - flüssige Canvas-Ausgabe - standalone</div>
+        <div id="loadedVersion" class="loaded-version">Geladenes Modul: pruefe...</div>
+        <div class="status-line"><span class="status-pill">Status: CANDIDATE</span><span class="status-pill">Gold: vorbereitet, nicht freigegeben</span></div>
+      </div>
+    </header>
+    <section class="stage">
+      <display-matrix-module id="matrix" text="{symbol:check} NETZWERK LEITSTAND BEREIT" priority="high" columns="42" rows="10"></display-matrix-module>
+    </section>
+    <section class="controls" aria-label="Display Matrix Demo Controls">
+      <label>Baukasten Demo
+        <select id="demoMode"><option value="manual">manuell</option><option value="kioskCoffee">Kiosk Coffee</option><option value="leitstandAlarm">Leitstand Alarm</option><option value="leitstandTop">Leitstand Topzeile</option><option value="pflanzenWetter">Pflanzen Wetter</option><option value="symbolShow">Symbol Schau</option><option value="screensaver">Bildschirmschoner</option></select>
+      </label>
+      <label>Text
+        <input id="text" value="COFFEE TO GO">
+      </label>
+      <label>Symbol
+        <select id="symbol">
+          <option value="">keins</option><option value="heart">Herz</option><option value="stop">Stop</option><option value="clover">Kleeblatt</option><option value="check">OK</option><option value="warning">Warnung</option><option value="alarm">Alarm</option><option value="wifi">WLAN</option><option value="router">Router</option><option value="lock">Schloss</option><option value="lightning">Blitz</option><option value="rainCloud">Regenwolke</option><option value="plant">Pflanze</option><option value="waterDrop">Wasser</option><option value="sun">Sonne</option>
+        </select>
+      </label>
+      <label>Symbolmodus
+        <select id="symbolMode"><option value="static">steht</option><option value="ticker">laeuft</option></select>
+      </label>
+      <label>Programm
+        <select id="program"><option value="generic">Generic</option><option value="leitstand">Leitstand</option><option value="pflanzen">Pflanzen</option></select>
+      </label>
+      <label>Preset
+        <select id="preset">
+          <option value="">manuell</option><option value="tickerSmall">Ticker klein</option><option value="kioskRedDots">Kiosk rote Dots</option><option value="leitstandTopLine">Leitstand Topzeile</option><option value="dashboardWide">Dashboard breit</option><option value="alarmFullscreen">Alarm Vollbild</option><option value="screensaverMatrix">Matrix Bildschirmschoner</option><option value="symbolShowcase">Symbol gross stehend</option><option value="symbolTicker">Symbol gross laufend</option><option value="lcdInfo">LCD Info</option>
+        </select>
+      </label>
+      <label>Richtung
+        <select id="direction">
+          <option value="left">links</option><option value="right">rechts</option><option value="up">oben</option><option value="down">unten</option><option value="static">statisch</option>
+        </select>
+      </label>
+      <label>Effekt
+        <select id="motionEffect"></select>
+      </label>
+      <label>Modus
+        <select id="displayMode">
+          <option value="ticker">laufband</option><option value="fullscreen">vollbild</option><option value="static">standbild</option>
+        </select>
+      </label>
+      <label>Panel
+        <select id="surface"><option value="led">LED</option><option value="lcd">LCD</option></select>
+      </label>
+      <label>Tempo
+        <input id="speed" type="number" min="8" max="240" value="58">
+      </label>
+      <label>Helligkeit
+        <input id="brightness" type="number" min="0.05" max="1.6" step="0.05" value="1">
+      </label>
+      <label>Schriftgroesse
+        <input id="fontSize" type="number" min="0.25" max="2.4" step="0.05" value="0.78">
+      </label>
+      <label>Prioritaet
+        <select id="priority"><option value="normal">normal</option><option value="high">hoch</option><option value="critical">kritisch</option><option value="low">niedrig</option></select>
+      </label>
+      <label>Palette
+        <select id="palette"><option value="signal">signal</option><option value="kioskRed">kiosk rot</option><option value="network">network</option><option value="alarm">alarm</option><option value="quiet">quiet</option><option value="lcd">lcd</option></select>
+      </label>
+      <label>Schrift
+        <select id="font"><option value="matrix">matrix</option><option value="mono">computer</option><option value="system">system</option><option value="condensed">condensed</option></select>
+      </label>
+      <label>Matrixfont
+        <select id="fontProfile"><option value="5x7">5x7</option><option value="8x8">8x8</option><option value="16x16">16x16</option><option value="vector">vector</option></select>
+      </label>
+      <label>Renderer
+        <select id="renderer"><option value="auto">auto</option><option value="pixel">pixel</option><option value="text">text</option></select>
+      </label>
+      <button id="send" type="button">Senden</button>
+      <button id="runDemo" type="button">Demo</button>
+    </section>
+    <output id="log" class="log"></output>
+  </main>
+  <script src="display-matrix-module.js?v=0.2.3"></script>
+  <script>
+    const matrix=document.getElementById("matrix");
+    const log=document.getElementById("log");
+    document.getElementById("loadedVersion").textContent=`Geladenes Modul: V${FrameworkDisplayMatrixModule.version}`;
+    const ids=["demoMode","text","symbol","symbolMode","program","preset","direction","motionEffect","displayMode","surface","speed","brightness","fontSize","priority","palette","font","fontProfile","renderer"];
+    const fields=ids.reduce((acc,id)=>(acc[id]=document.getElementById(id),acc),{});
+    Object.entries(FrameworkDisplayMatrixModule.effectCatalog).forEach(([value,effect])=>{
+      const option=document.createElement("option");
+      option.value=value;
+      option.textContent=`${effect.label} (${effect.category})`;
+      fields.motionEffect.appendChild(option);
+    });
+    function report(){
+      const stats=matrix.exportStatistics();
+      log.value=JSON.stringify({version:FrameworkDisplayMatrixModule.version,active:stats.active,total:stats.total,settings:stats.settings,byPriority:stats.byPriority},null,2);
+    }
+    function setField(id,value){if(fields[id])fields[id].value=value;}
+    function runBaukastenDemo(){
+      const mode=fields.demoMode.value;
+      if(mode==="manual"){document.getElementById("send").click();return;}
+      const scenarios={
+        kioskCoffee:{preset:"kioskRedDots",program:"generic",text:"COFFEE TO GO",symbol:"",palette:"kioskRed",motionEffect:"softScroll",renderer:"pixel",font:"matrix",fontProfile:"5x7",displayMode:"ticker",direction:"left",speed:54,fontSize:.9,priority:"normal"},
+        leitstandAlarm:{preset:"alarmFullscreen",program:"leitstand",text:"ROUTER DOWN",symbol:"alarm",palette:"alarm",motionEffect:"scanner",renderer:"text",font:"condensed",fontProfile:"vector",displayMode:"fullscreen",direction:"static",speed:72,fontSize:.95,priority:"critical"},
+        leitstandTop:{preset:"leitstandTopLine",program:"leitstand",text:"NETZWERK STABIL - 24 GERAETE ONLINE",symbol:"check",palette:"network",motionEffect:"scroll",renderer:"auto",font:"matrix",fontProfile:"5x7",displayMode:"ticker",direction:"left",speed:42,fontSize:.78,priority:"high"},
+        pflanzenWetter:{preset:"dashboardWide",program:"pflanzen",text:"REGEN KOMMT - GIESSEN PAUSIEREN",symbol:"rainCloud",palette:"signal",motionEffect:"wave",renderer:"text",font:"system",fontProfile:"vector",displayMode:"ticker",direction:"left",speed:36,fontSize:.7,priority:"normal"},
+        symbolShow:{preset:"symbolShowcase",program:"generic",text:"",symbol:"heart",palette:"signal",motionEffect:"pulse",renderer:"text",font:"system",fontProfile:"vector",displayMode:"static",direction:"static",speed:32,fontSize:1.2,priority:"high"},
+        screensaver:{preset:"screensaverMatrix",program:"generic",text:"DISPLAY MATRIX MODULE - BAUKASTEN CANDIDATE",symbol:"",palette:"network",motionEffect:"matrixReveal",renderer:"pixel",font:"matrix",fontProfile:"8x8",displayMode:"ticker",direction:"left",speed:28,fontSize:.72,priority:"normal"}
+      };
+      const s=scenarios[mode]||scenarios.kioskCoffee;
+      Object.keys(s).forEach(key=>setField(key,s[key]));
+      if(s.preset)matrix.applyPreset(s.preset);
+      matrix.setDisplayMode(s.displayMode);
+      matrix.engine.setMotionEffect(s.motionEffect);
+      matrix.engine.setSurface(fields.surface.value);
+      matrix.setBrightness(Number(s.brightness||fields.brightness.value));
+      matrix.setFont({family:s.font,profile:s.fontProfile,scale:Number(s.fontSize),weight:s.program==="leitstand"?800:700});
+      matrix.setRenderer(s.renderer);
+      matrix.engine.submitProgramMessage(s.program,{
+        text:s.text,
+        symbol:s.symbol,
+        symbolOnly:Boolean(s.symbol&&!s.text),
+        direction:s.direction,
+        motionEffect:s.motionEffect,
+        displayMode:s.displayMode,
+        speed:Number(s.speed),
+        brightness:Number(s.brightness||fields.brightness.value),
+        textScale:Number(s.fontSize),
+        priority:s.priority,
+        fontFamily:FrameworkDisplayMatrixModule.fonts[s.font],
+        fontProfile:s.fontProfile,
+        foreground:FrameworkDisplayMatrixModule.palettes[s.palette].foreground,
+        background:FrameworkDisplayMatrixModule.palettes[s.palette].background,
+        accent:FrameworkDisplayMatrixModule.palettes[s.palette].accent,
+        channel:"baukasten-demo"
+      },{activate:true});
+      report();
+    }
+    function showSelectedSymbol(){
+      const selectedSymbol=fields.symbol.value;
+      if(!selectedSymbol)return;
+      const palette=FrameworkDisplayMatrixModule.palettes[fields.palette.value];
+      const mode=fields.symbolMode.value;
+      matrix.applyPreset(mode==="ticker"?"symbolTicker":"symbolShowcase");
+      matrix.setDisplayMode(mode);
+      matrix.engine.setMotionEffect(fields.motionEffect.value);
+      matrix.engine.setDirection(mode==="ticker"?fields.direction.value:"static");
+      matrix.setRenderer("text");
+      matrix.setFont({family:"system",profile:"vector",scale:Number(fields.fontSize.value)||1.05,weight:800});
+      matrix.engine.submitProgramMessage(fields.program.value,{
+        text:"",
+        symbol:selectedSymbol,
+        symbolOnly:true,
+        direction:mode==="ticker"?fields.direction.value:"static",
+        motionEffect:fields.motionEffect.value,
+        displayMode:mode,
+        speed:Number(fields.speed.value),
+        priority:"high",
+        fontFamily:FrameworkDisplayMatrixModule.fonts.system,
+        fontProfile:"vector",
+        textScale:Number(fields.fontSize.value)||1.05,
+        fontWeight:800,
+        foreground:palette.foreground,
+        background:palette.background,
+        accent:palette.accent,
+        channel:"symbol-preview"
+      },{activate:true});
+      report();
+    }
+    fields.symbol.addEventListener("change",showSelectedSymbol);
+    fields.preset.addEventListener("change",()=>{
+      if(fields.preset.value){
+        matrix.applyPreset(fields.preset.value);
+        report();
+      }
+    });
+    document.getElementById("send").addEventListener("click",()=>{
+      const palette=FrameworkDisplayMatrixModule.palettes[fields.palette.value];
+      const selectedSymbol=fields.symbol.value;
+      const symbolMode=fields.symbolMode.value;
+      const cleanText=fields.text.value.replace(/\{symbol:[^}]+\}\s*/g,"").trim();
+      const symbolLabel=selectedSymbol&&FrameworkDisplayMatrixModule.symbols[selectedSymbol]?FrameworkDisplayMatrixModule.symbols[selectedSymbol].label:selectedSymbol;
+      const displayText=cleanText||symbolLabel||"DISPLAY";
+      if(fields.preset.value)matrix.applyPreset(fields.preset.value);
+      matrix.setDisplayMode(fields.displayMode.value);
+      matrix.engine.setMotionEffect(fields.motionEffect.value);
+      matrix.engine.setSurface(fields.surface.value);
+      matrix.setBrightness(Number(fields.brightness.value));
+      matrix.setFont({family:fields.font.value,profile:fields.fontProfile.value,scale:Number(fields.fontSize.value)});
+      matrix.setRenderer(fields.renderer.value);
+      matrix.engine.submitProgramMessage(fields.program.value,{
+        text:displayText,
+        symbol:selectedSymbol,
+        symbolOnly:selectedSymbol&&displayText===symbolLabel,
+        direction:fields.direction.value,
+        motionEffect:fields.motionEffect.value,
+        displayMode:selectedSymbol&&displayText===symbolLabel?symbolMode:fields.displayMode.value,
+        speed:Number(fields.speed.value),
+        brightness:Number(fields.brightness.value),
+        textScale:Number(fields.fontSize.value),
+        priority:fields.priority.value,
+        fontFamily:FrameworkDisplayMatrixModule.fonts[fields.font.value],
+        fontProfile:fields.fontProfile.value,
+        foreground:palette.foreground,
+        background:palette.background,
+        accent:palette.accent,
+        channel:"demo"
+      },{activate:true});
+      report();
+    });
+    document.getElementById("runDemo").addEventListener("click",runBaukastenDemo);
+    matrix.engine.subscribe(report);
+    report();
+  </script>
+</body>
+</html>

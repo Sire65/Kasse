@@ -1,0 +1,13 @@
+{
+  "schema": "KC_STUDIO_COMPONENT_V1",
+  "id": "salesInventoryAnalysisCore",
+  "name": "SalesInventoryAnalysisCore",
+  "version": "0.1.0",
+  "status": "Candidate",
+  "type": "shared-core",
+  "owner": "Framework Studio",
+  "consumers": ["pc-manager", "dienstplan", "einkauf", "bestellung"],
+  "contracts": ["KC_SALES_ANALYSIS_V1", "KC_MANAGER_STOCK_LEDGER_V1", "KC_STOCK_FORECAST_V1"],
+  "dependencies": [],
+  "runtimeIsolation": "Nur Auswertung im PC-Manager; keine Pflichtpflege und keine Inventur an der Verkaufskasse."
+}

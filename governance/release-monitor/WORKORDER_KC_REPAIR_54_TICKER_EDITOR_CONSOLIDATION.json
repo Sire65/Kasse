@@ -1,0 +1,17 @@
+{
+  "schema": "framework-release-monitor-v1",
+  "id": "WO-KC-20260724-008",
+  "createdAt": "2026-07-24T16:00:00+02:00",
+  "updatedAt": "2026-07-24T16:00:00+02:00",
+  "project": "KC MarktKasse / PC-Manager",
+  "workOrder": "Repair 54 – LaufschriftCore-Konsolidierung",
+  "baselineVersion": "V0.31.3.6 Repair 53",
+  "candidateVersion": "V0.31.3.6 Repair 54",
+  "candidateFile": "KC_MarktKasse_V0_31_3_6_Repair_54_LaufschriftCore_Konsolidierung_Candidate.zip",
+  "candidateSha256": "",
+  "changeScope": "Nur Laufschrift-Auswahl, DisplayMatrixCore-Inspector und Laufschrift-Aufziehwerkzeug.",
+  "protectedAreas": "Präsentationsinhalte, Kasse, Dashboard, Navigation, Zeiterfassung, Rezepte und Stammdaten.",
+  "requireTv": true,
+  "evidence": {"javascriptSyntax":"PASS","automatedTests":"32/32 PASS","studioRegistry":"cores/STUDIO_TUV_COMPONENT_REGISTRY_V1.json","report":"PRUEFBERICHT_REPAIR_54.md"},
+  "monitorState": {"code":"YELLOW","label":"Candidate geprüft","reason":"32 automatisierte Tests bestanden; praktischer Browser-Sichttest steht aus."}
+}

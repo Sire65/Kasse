@@ -1,0 +1,11 @@
+{
+  "schema": "KC_POS_UI_PROFILE_SCHEMA_V1",
+  "coreVersion": "0.1.0",
+  "profileSchema": "KC_POS_UI_PROFILE_V1",
+  "envelopeSchema": "KC_POS_UI_PROFILE_ENVELOPE_V1",
+  "states": ["draft", "review", "approved", "published", "withdrawn", "archived"],
+  "responsibility": "Darstellung und zulässige Funktionszuordnung; keine Artikel-, Preis-, Pfand-, Rabatt-, Zahlungs- oder Verkaufsdaten.",
+  "requiredCommands": ["payment", "void", "cart", "message", "logout"],
+  "protectedZones": ["cart", "payment", "message", "status"],
+  "limits": {"touchSizeMin": 44, "fontSizeMin": 14, "contrastMin": 4.5, "opacityMin": 0.8}
+}

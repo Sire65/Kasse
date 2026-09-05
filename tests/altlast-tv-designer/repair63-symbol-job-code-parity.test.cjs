@@ -1,0 +1,17 @@
+const fs=require("fs"),path=require("path"),assert=require("assert");
+const root=path.resolve(__dirname,".."),read=file=>fs.readFileSync(path.join(root,file),"utf8");
+const shell=read("pc-manager/tv-editor-shell-v02935.js");
+const shared=read("pc-manager/tv-shared-renderer-v02946.js");
+const player=read("tv-player/weihnachtsmarkt-presentation-runtime.js");
+const activation=read("pc-manager/mobile-job-activation-fix-v02963.js");
+const index=read("pc-manager/index.html");
+assert.match(shell,/setProperty\('display','none','important'\)/);
+assert.match(shared,/function positionedSymbols/);
+assert.match(shared,/slide\.decorationObjects/);
+assert.match(shared,/dataset\.kcDecorationObject/);
+assert.match(player,/slide\.decorationObjects/);
+assert.match(activation,/Math\.floor\(100000\+Math\.random\(\)\*900000\)/);
+assert.match(activation,/Aktivierungscode: \$\{job\.activationCode\}/);
+assert.match(activation,/Datei und Code gehören immer zusammen/);
+assert.match(index,/mobile-job-activation-fix-v02963\.js/);
+console.log("PASS Repair 63: keine Symbol-Doppelanzeige, freie TV-Symbolpositionen und eindeutige sechsstellige Auftragscodes");

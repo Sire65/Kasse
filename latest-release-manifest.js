@@ -1,0 +1,52 @@
+(function (global) {
+  'use strict';
+  global.KC_DISABLE_LEGACY_TV_EDITORS = true;
+  global.KC_CENTRAL_RELEASE_MANIFEST = Object.freeze({
+    schema: 'KC_CENTRAL_RELEASE_MANIFEST_V2',
+    product: 'KC Bilderrechner',
+    releaseVersion: '0.31.3.6.63-symbol-job-code-parity',
+    displayVersion: 'V0.31.3.6 Repair 63 · Symbol- und Aktivierungscode-Parität Candidate',
+    productBaseVersion: '0.31.3.6.19',
+    productBaseDisplayVersion: 'V0.31.3.6 Repair 19',
+    uiSchemaVersion: '0.31.3.6-r18-ui.1',
+    releaseDate: '2026-07-24',
+    status: 'Candidate',
+    releaseName: 'Frei positionierte Symbole auf Bau- und TV-Bildschirm sowie eindeutige Auftragscodes',
+    priority: Object.freeze({ component: 'tv-presentation-manager', label: 'TV-Präsentation im Manager', freezeOtherFeatures: true }),
+    components: Object.freeze({
+      manager: Object.freeze({ requiredVersion: '0.31.2.5', label: 'KC MarktKasse Manager' }),
+      tvPresentation: Object.freeze({ requiredVersion: '0.29.38', label: 'TV-Präsentation mit Mitglieder- und Preislistenmigration' }),
+      unifiedEditor: Object.freeze({ requiredVersion: '1.2.0', label: 'Unified Editor ohne auswahlbedingten Schriftgrößenwechsel' }),
+      displayMatrix: Object.freeze({ requiredVersion: '0.2.3', label: 'DisplayMatrixCore' }),
+      presentationTuv: Object.freeze({ requiredVersion: '1.3.0', label: 'Präsentations-TÜV' }),
+      runtimeStability: Object.freeze({ requiredVersion: '1.1.0', label: 'Laufzeitdiagnose' }),
+      professionalGuard: Object.freeze({ requiredVersion: '1.3.0', label: 'TV-Layout-Guard' }),
+      posUIProfileCore: Object.freeze({ requiredVersion: '0.1.0', label: 'POS-UI-Profilkern' }),
+      posUIProfileManager: Object.freeze({ requiredVersion: '0.1.2', label: 'POS-UI-Profilverwaltung mit Detailsteuerung' }),
+      managerMasterdataHealth: Object.freeze({ requiredVersion: '0.29.49', label: 'Warengruppen-, Artikel- und Etikettenstabilisierung' }),
+      mobileJobActivationFix: Object.freeze({ requiredVersion: '0.29.63', label: 'Einheitliche sechsstellige Aktivierungscodes je Bauauftrag' }),
+      eventProgramExchange: Object.freeze({ requiredVersion: '0.1.1', label: 'Tagesprogramm-Übergabekern' }),
+      eventProgramStudioCatalog: Object.freeze({ requiredVersion: '1.0.0', label: 'Studio-Katalogeintrag Programmübergabe' }),
+      eventProgramTuvRules: Object.freeze({ requiredVersion: '1.0.0', label: 'TÜV-Regelsatz Programmübergabe' }),
+      christmasPresentationTemplate: Object.freeze({ requiredVersion: '1.3.0', label: 'Weihnachtsmarkt-Vorlage mit bestätigter Mitglieder-Fotozuordnung', runtimeRequired: true }),
+      timeClockCore: Object.freeze({ requiredVersion: '0.1.0', label: 'Studio TimeClockCore' }),
+      timeClockManager: Object.freeze({ requiredVersion: '0.3.0', label: 'Zeiterfassung im PC-Manager' }),
+      timeClockDutyRosterAdapter: Object.freeze({ requiredVersion: '0.2.0', label: 'Dienstplan Soll-/Ist-Schnittstelle' }),
+      timeClockPOS: Object.freeze({ requiredVersion: '0.1.1', label: 'Schnellerfassung an der Kasse mit Candidate-Testzugang', runtimeRequired: false }),
+      recipeManager: Object.freeze({ requiredVersion: '0.1.1', label: 'Rezepturpflege mit Grünkohl-/Sauerkraut-Arbeitsständen' }),
+      managerMessageCore: Object.freeze({ requiredVersion: '0.2.0', label: 'Zentrales sichtbares Manager-Meldungswesen' }),
+      salesInventoryAnalysisCore: Object.freeze({ requiredVersion: '0.1.1', label: 'Studio Umsatz-, Kunden- und BestandsanalyseCore mit deutschen Folientypen' }),
+      managerSalesInventoryDashboard: Object.freeze({ requiredVersion: '0.1.1', label: 'PC-Manager Analyse- und Bestandsdashboard mit Legende und Listenaktionen' }),
+      salesImportCore: Object.freeze({ requiredVersion: '0.2.0', label: 'Quota-sicherer kompakter Umsatzimport' }),
+      eventSimulationCore: Object.freeze({ requiredVersion: '0.1.0', label: 'TÜV-Echtbetriebssimulation', runtimeRequired: false }),
+      managerEventSimulation: Object.freeze({ requiredVersion: '0.1.0', label: 'Isolierter PC-Manager-Testadapter', runtimeRequired: false }),
+      managerImportProgress: Object.freeze({ requiredVersion: '0.1.0', label: 'Sichtbarer Umsatzimport-FortschrittsCore' })
+    }),
+    training: Object.freeze({ version: '0.29.3', supportedUiSchema: '0.31.3.6-r15-ui.1' }),
+    releaseGate: Object.freeze({ blockOnMissingManifest: true, blockOnVersionMismatch: true, blockOnMissingComponent: true, requirePracticalVisualCheck: true }),
+    verification: Object.freeze({ practicalVisualCheck: 'PENDING_TARGET_DEVICE', checkedBy: 'Codex Static and Regression Tests', checkedAt: '2026-07-24T18:00:00+02:00' }),
+    sourceOfTruth: 'latest-release-manifest.js',
+    sourceRelease: 'KC_MarktKasse_Suite_V0_31_3_6_Repair_15_Fluid_Text_Input_Candidate',
+    updatedAt: '2026-07-24T19:35:00+02:00'
+  });
+})(window);

@@ -1,0 +1,66 @@
+KC Kassendesigner (Kassenbaukasten) - Testpaket vom 04.09.2026
+==============================================================
+
+STARTEN
+  pc-manager/tv-designer/index.html  im Browser öffnen.
+  Oben links "Arbeitsmodus" auf "Kassenoberfläche" stellen - dann ist der
+  Kassenbaukasten da. Rechts oben steht, woher das Sortiment kommt und wie
+  viele Artikel es hat.
+
+WAS DAS HIER IST
+  Der Kassendesigner lag bisher in einem eigenen Arbeitsstand (Baukasten,
+  02./03.09.). Der trug aber noch die ALTEN Angaben: "Karla Katzig",
+  "Ruth Katzig", "Fridbert Köhling" und die Kartoffelknirpse.
+
+  Dieses Paket ist deshalb der FREITAGSSTAND - mit den berichtigten Namen,
+  den bestätigten Preisen und ohne Knirpse - und in ihn hineingelegt sind
+  die Dateien des Kassendesigners. So testest du den Designer an den Daten,
+  die heute gelten, und nicht an denen von vorgestern.
+
+  Hineingelegt wurden genau:
+    pc-manager/tv-designer/index.html, app.js
+    pc-manager/tv-designer/kc-kassenbaukasten*.js und .css   (10 Dateien)
+    shared/kc-oberflaechen-format.js
+    pos/kc-oberflaechen-pos.js
+    tests/kassenbaukasten.test.cjs, uebergabe-kasse.test.cjs,
+    tests/uebergabe-kassenseite.html
+  Alles andere ist der Freitagsstand, unverändert.
+
+  In app.js steckt dabei eine Fehlerbehebung aus dem Baukasten-Stand: Beim
+  Größerziehen eines Objekts lief der Designer vorher in einen Fehler
+  (queueAutosave gibt es in der ganzen Suite nicht). Jetzt nicht mehr.
+
+BILDER: 14 PFADE, DIE INS LEERE ZEIGTEN
+  Die Designer-Datei verweist auf assets/kasse-presentation/{avatars,
+  backgrounds,members}/ - diese Ordner gab es nicht. Alle 14 Bilder waren
+  im Paket vorhanden, nur woanders (avatar-core/, media/backgrounds/,
+  tv-content/weihnachtsmarkt-2026/members/).
+  Behoben, OHNE eine einzige Zeile deiner Daten zu ändern: Die Bilder
+  liegen jetzt zusätzlich dort, wo die Datei sie sucht. Deine Designer-JSON
+  ist Zeichen für Zeichen dieselbe.
+
+GEPRÜFT
+  Kassenbaukasten:        207 von 207 bestanden
+  Übergabe an die Kasse:   22 von 22 bestanden
+  Designer im Browser:     0 Skriptfehler, 0 fehlende Dateien
+  Sortiment im Designer:   20 Artikel (Auslieferungsstand), keine Knirpse
+
+NOCH NICHT FERTIG - und das sagt der Baukasten auch selbst
+  Die Übergabe in die echte Kasse ist die letzte Meile: Von 13 Feldern einer
+  Oberfläche kann die Kasse heute 7 zuordnen. Die übrigen benennt sie
+  ausdrücklich (kc-funktionsleiste, kc-zahlen-rueckgeld, kc-zahlen-arten,
+  kn-bar, kn-stimmtso, kn-aufrunden) - sie behauptet nicht, sie hätte sich
+  schon umgebaut. pos/kc-oberflaechen-pos.js ist noch nicht in pos/index.html
+  eingebunden; die Übergabe lässt sich über tests/uebergabe-kassenseite.html
+  ansehen.
+
+NICHT ENTHALTEN - nur wegen der Dateigröße (Grenze 30 MB)
+  - node_modules            (für Prüfläufe: npm install playwright)
+  - tests/tuev und die übrigen Bildschirmabzüge der Prüfläufe
+  - media/audio/music/*.mp3 (die beiden Weihnachtsstücke, zusammen 6,4 MB)
+
+  Folge davon: Die TV-Vorführung LÄUFT in diesem Paket, aber ohne Ton -
+  kasse-presentation-data.js verweist auf media/audio/music/. Wenn du sie
+  hier mit Musik willst, kopiere die beiden MP3 aus dem Freitagspaket in
+  media/audio/music/ zurück; dann ist der Ton wieder da. Für den
+  Kassendesigner spielt das keine Rolle.

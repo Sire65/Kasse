@@ -1,0 +1,14 @@
+const assert=require("node:assert/strict"),fs=require("node:fs"),path=require("node:path");
+const root=path.resolve(__dirname,".."),read=file=>fs.readFileSync(path.join(root,file),"utf8");
+const app=read("pc-manager/app.js"),html=read("pc-manager/index.html"),core=read("pc-manager/manager-import-progress-core.js"),css=read("pc-manager/manager-import-progress-core.css");
+assert.match(html,/id="salesFile"[^>]*multiple/,"Mehrfachauswahl für Kassenexporte fehlt");
+assert.match(html,/id="salesFile"[^>]*accept="\.kcsales"/,"Umsatzimport darf keine Prüfberichte anbieten");
+assert(html.indexOf("manager-import-progress-core.js")<html.indexOf("app.js"),"Fortschrittscore muss vor app.js laden");
+assert.match(app,/for\(let index=0;index<files\.length;index\+\+\)/,"Dateien werden nicht einzeln verarbeitet");
+assert.match(app,/Keine neuen Vorgänge: Alle/,"Doppelimport wird nicht verständlich erklärt");
+assert.match(app,/expected-results\.json gehören nicht in den Umsatzimport/,"Falsche Simulationsdatei wird nicht verständlich erklärt");
+assert.match(app,/ungeeignete Begleitdatei/,"Begleitdateien werden nicht kontrolliert übersprungen");
+assert.match(app,/Der Browser-Speicher ist voll/,"Speicherfehler wird nicht auf Deutsch erklärt");
+["Datei einlesen","Verschlüsseltes Paket prüfen","Umsatzdaten entschlüsseln","Buchungen und Duplikate prüfen","Managerdaten speichern"].forEach(label=>assert(app.includes(label),`Arbeitsschritt fehlt: ${label}`));
+assert.match(core,/Voraussichtliche Restzeit/);assert.match(core,/kcImportProgressPercent/);assert.match(core,/Gesamtdauer/);assert.match(css,/\.kc-import-progress-dialog/);
+console.log("PASS manager-sales-import-progress: Mehrfachimport, Prozent, Dauer, Einzelschritte und klare Duplikatmeldung");

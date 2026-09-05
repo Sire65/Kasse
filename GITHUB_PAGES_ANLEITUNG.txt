@@ -1,0 +1,10 @@
+GITHUB-PAGES-VERÖFFENTLICHUNG
+
+1. Den Ordner publish öffnen.
+2. Den gesamten Inhalt dieses Ordners in die Wurzel des GitHub-Repositories hochladen.
+3. Auf GitHub Settings → Pages öffnen.
+4. Deploy from a branch auswählen.
+5. Den gewünschten Branch und / (root) auswählen.
+6. Speichern und die von GitHub angezeigte Internetadresse öffnen.
+
+Wichtig: Nicht den Ordner publish selbst als zusätzliche Unterebene hochladen, sondern dessen Inhalt.

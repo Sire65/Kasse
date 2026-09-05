@@ -1,0 +1,8 @@
+<!doctype html>
+<html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Köcheclub Werne · Präsentationsprüfung</title><link rel="stylesheet" href="styles.css"></head>
+<body><header><div><strong>Köcheclub Werne</strong><small>Präsentation prüfen und freigeben</small></div><button id="download">Rückmeldung herunterladen</button></header>
+<main><nav><button id="prev">←</button><span id="count"></span><button id="next">→</button></nav><section id="slide" aria-live="polite"></section>
+<aside><h2 id="title"></h2><label>Entscheidung<select id="decision"><option value="open">Noch offen</option><option value="approved">Freigeben</option><option value="change">Änderung nötig</option></select></label><label>Kommentar<textarea id="comment" rows="5" placeholder="Was soll geändert werden?"></textarea></label><label>Ihr Name<input id="reviewer" autocomplete="name"></label><p id="status"></p></aside></main>
+<footer>Die Rückmeldung bleibt auf diesem Gerät, bis sie als JSON-Datei heruntergeladen und an den Köcheclub gesendet wird.</footer>
+<script src="presentation-source.js"></script><script src="presentation-data.js"></script><script src="app.js"></script></body></html>

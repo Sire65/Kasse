@@ -1,0 +1,17 @@
+{
+  "schema": "KC_STUDIO_COMPONENT_V1",
+  "id": "timeClockCore",
+  "name": "TimeClockCore",
+  "version": "0.1.0",
+  "status": "Candidate",
+  "type": "shared-core",
+  "owner": "Framework Studio",
+  "consumers": ["pc-manager", "pos", "dienstplan-standalone"],
+  "contracts": [
+    "KC_TIME_CLOCK_CONFIG_V1",
+    "KC_TIME_CLOCK_EVENT_DELTA_V1",
+    "KC_DUTY_ROSTER_ACTUALS_V1"
+  ],
+  "dependencies": [],
+  "runtimeIsolation": "Keine Abhängigkeit von Verkauf, TV-Präsentation oder Dienstplan-UI."
+}

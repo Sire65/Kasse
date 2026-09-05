@@ -1,0 +1,16 @@
+(function(){'use strict';
+const $=id=>document.getElementById(id),esc=s=>String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+let baseSlides=[],changeLog=[];
+function mode(){const p=job?.permissions||{};if(['view','comment','edit'].includes(p.mode))return p.mode;if(p.edit===true||p.editor===true)return 'edit';if(p.comment===true)return 'comment';return 'view'}
+function canEdit(){return mode()==='edit'}
+function canComment(){return mode()==='comment'||mode()==='edit'}
+function log(kind,detail){changeLog.push(KCMobilePresentationExchangeCore.createLogEntry(kind,detail,$('builderName').value.trim()));renderLog();}
+function renderLog(){const box=$('mobileChangeLog');if(!box)return;box.innerHTML=changeLog.length?changeLog.slice().reverse().map(x=>`<div><strong>${esc(x.kind)}</strong><span>${esc(x.detail)}</span><small>${new Date(x.at).toLocaleString('de-DE')}</small></div>`).join(''):'<p>Noch keine Änderungen.</p>';}
+function applyMode(){const m=mode();job.permissions=Object.assign({},job.permissions,{mode:m,view:true,comment:m==='comment'||m==='edit',edit:m==='edit'});const banner=$('mobilePermissionBanner');if(banner)banner.innerHTML=`<strong>${m==='view'?'Nur ansehen':m==='comment'?'Ansehen und kommentieren':'Bearbeiten erlaubt'}</strong><span>${job?.name||''}</span>`;document.body.dataset.exchangeMode=m;document.querySelectorAll('#editor button,#editor input,#editor textarea,#editor select').forEach(e=>{if(['export','mobileComment','commentText'].includes(e.id))return;if(!canEdit())e.disabled=true;});if($('export'))$('export').hidden=m==='view';if($('mobileCommentBox'))$('mobileCommentBox').hidden=!canComment();}
+const oldOpen=$('openJob').onclick;
+$('openJob').onclick=async function(){await oldOpen.call(this);if(!job||$('editor').hidden)return;if(job.schema!=='kc-mobile-presentation-job-v2'&&job.schema!=='kc-mobile-tv-job-v1')throw new Error('Nicht unterstütztes Austauschformat.');baseSlides=KCMobilePresentationExchangeCore.clone(job.basePresentation?.slides||slides);changeLog=Array.isArray(job.changeLog)?job.changeLog.slice():[];applyMode();renderLog();};
+function snapshot(){return JSON.stringify(slides)}
+let before='';document.addEventListener('pointerdown',e=>{if(canEdit()&&e.target.closest('#editor'))before=snapshot()},{capture:true});document.addEventListener('change',e=>{if(!canEdit()||!e.target.closest('#editor'))return;const after=snapshot();if(before&&before!==after)log('Änderung',`${slides[idx]?.title||'Folie'} · ${e.target.dataset.bind||e.target.id||'Objekt'}`);before=after;},true);
+$('mobileComment')?.addEventListener('click',()=>{const t=$('commentText').value.trim();if(!t)return;log('Kommentar',t);$('commentText').value='';});
+$('export').onclick=async()=>{if(mode()==='view')return;const p={schema:'kc-mobile-presentation-return-v2',jobId:job.jobId,assignmentId:job.assignmentId,activationCode:job.activationCode,packageId:`KCMOB-RET-${Date.now()}`,builderName:$('builderName').value.trim(),builderId:$('builderId').value.trim(),createdAt:new Date().toISOString(),mode:mode(),slides,changes:KCMobilePresentationExchangeCore.diff(baseSlides,slides),changeLog};const c={...p};p.checksum=await sha(stable(c));dl(`${p.packageId}.kcreturn`,p)};
+})();

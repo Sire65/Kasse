@@ -1,0 +1,25 @@
+{
+  "schema": "framework-release-monitor-v1",
+  "id": "WO-KC-20260724-013",
+  "createdAt": "2026-07-24T17:10:00+02:00",
+  "updatedAt": "2026-07-24T17:10:00+02:00",
+  "project": "KC MarktKasse / PC-Manager",
+  "workOrder": "Repair 59 – UI-Persistenz und Laufschrift-Konsolidierung",
+  "baselineVersion": "V0.31.3.6 Repair 58",
+  "candidateVersion": "V0.31.3.6 Repair 59",
+  "candidateFile": "KC_MarktKasse_V0_31_3_6_Repair_59_UI_Persistenz_Laufschrift_Candidate.zip",
+  "candidateSha256": "SEE_SIDECAR_SHA256",
+  "changeScope": "Nur dauerhafte Textflächen, farbige Legende im Übersichts-Kreisdiagramm und Entfernung konkurrierender Laufschriftfelder.",
+  "protectedAreas": "Kassenbuchung, Umsatzimport, Bestand, Navigation, Zeiterfassung, Rezepte und Präsentationsablauf.",
+  "requireTv": true,
+  "evidence": {
+    "javascriptSyntax": "PASS",
+    "automatedTests": "37/37 PASS",
+    "studioRegistry": "cores/STUDIO_TUV_COMPONENT_REGISTRY_V1.json"
+  },
+  "monitorState": {
+    "code": "YELLOW",
+    "label": "Candidate – praktische Sichtprüfung offen",
+    "reason": "Die drei gemeldeten Ursachen sind statisch und automatisiert geprüft; Bedienprüfung im Zielbrowser bleibt erforderlich."
+  }
+}

@@ -1,0 +1,14 @@
+{
+  "schema": "KC_TUV_RULESET_V1",
+  "component": "timeClockCore",
+  "version": "1.0.0",
+  "rules": [
+    {"id":"TC-001","severity":"block","rule":"Aushilfen benötigen validFrom und validUntil im Manager."},
+    {"id":"TC-002","severity":"block","rule":"Abgelaufene oder gesperrte Zugänge dürfen nicht identifiziert werden."},
+    {"id":"TC-003","severity":"block","rule":"Kommen und Gehen müssen alternieren."},
+    {"id":"TC-004","severity":"block","rule":"Zeitabweichungen über fünf Minuten benötigen einen Korrekturgrund."},
+    {"id":"TC-005","severity":"block","rule":"Deltaimporte müssen anhand der Ereignis-ID idempotent sein."},
+    {"id":"TC-006","severity":"warning","rule":"Geburtstagscode muss abschaltbar sein; QR/ID ist der bevorzugte Weg."},
+    {"id":"TC-007","severity":"manual","rule":"Scanner-, Mehrkassen- und Datenschutzprüfung sind vor Gold erforderlich."}
+  ]
+}

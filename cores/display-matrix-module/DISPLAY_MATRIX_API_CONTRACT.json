@@ -1,0 +1,231 @@
+{
+  "version": "0.2.3",
+  "global": "FrameworkDisplayMatrixModule",
+  "customElement": "display-matrix-module",
+  "api": [
+    "createEngine(options)",
+    "createFontManager(customProfiles)",
+    "createRendererFactory(fontManager)",
+    "engine.addMessage(input)",
+    "engine.addSymbol(symbol, options)",
+    "engine.symbolFor(name)",
+    "engine.expandSymbols(text)",
+    "engine.registerSymbol(name, definition)",
+    "engine.registerSymbolPack(packName, symbols)",
+    "engine.submitProgramMessage(program, input, options)",
+    "engine.setText(text, options)",
+    "engine.setActive(id)",
+    "engine.next()",
+    "engine.clear()",
+    "engine.start()",
+    "engine.stop()",
+    "engine.step(deltaMs)",
+    "engine.tick(timeMs)",
+    "engine.setDisplayMode(mode)",
+    "engine.setSurface(surface)",
+    "engine.setDirection(direction)",
+    "engine.setMotionEffect(effect)",
+    "engine.setSpeed(speed)",
+    "engine.setBrightness(value)",
+    "engine.setGlow(value)",
+    "engine.setContrast(value)",
+    "engine.setFont(options)",
+    "engine.setFontSize(size)",
+    "engine.setRenderer(renderer)",
+    "engine.setColors(colors)",
+    "engine.setPalette(nameOrPalette)",
+    "engine.setPixelSize(value)",
+    "engine.setMatrixSize(columns, rows)",
+    "engine.setAnimation(enabled)",
+    "engine.applyPreset(name)",
+    "engine.applyDesignTokens(tokens)",
+    "engine.createHostAdapter(hostName)",
+    "engine.getMessages()",
+    "engine.getActiveMessage()",
+    "engine.exportStatistics()",
+    "draw(canvas, engine)"
+  ],
+  "exports": [
+    "motionEffects",
+    "effectCatalog",
+    "presets",
+    "symbols",
+    "programProfiles",
+    "fontProfiles",
+    "palettes",
+    "DisplayMatrixLeitstandAdapter"
+  ],
+  "events": [
+    "display-matrix.message",
+    "display-matrix.statistics",
+    "display-matrix.active",
+    "display-matrix.clear",
+    "display-matrix.cycle",
+    "display-matrix.loop",
+    "display-matrix.frame",
+    "display-matrix.settings",
+    "display-matrix.preset",
+    "display-matrix.program-message",
+    "display-matrix.design-tokens"
+  ],
+  "displayModes": [
+    "ticker",
+    "fullscreen",
+    "static"
+  ],
+  "surfaces": [
+    "led",
+    "lcd"
+  ],
+  "directions": [
+    "left",
+    "right",
+    "up",
+    "down",
+    "static"
+  ],
+  "motionEffects": [
+    "scroll",
+    "softScroll",
+    "pendulum",
+    "centerOut",
+    "outsideIn",
+    "letterStep",
+    "chase",
+    "blink",
+    "pulse",
+    "typewriter",
+    "scramble",
+    "matrixReveal",
+    "flipboard",
+    "bounce",
+    "wave",
+    "scanner",
+    "sparkle",
+    "wipe",
+    "pixelBuild",
+    "pixelDissolve"
+  ],
+  "effectCatalogRule": "Every motion effect is published through effectCatalog with label, status and category so Framework Studio and host programs can build safe effect pickers.",
+  "priorityValues": [
+    "low",
+    "normal",
+    "high",
+    "critical"
+  ],
+  "paletteValues": [
+    "signal",
+    "network",
+    "alarm",
+    "quiet",
+    "lcd",
+    "kioskRed"
+  ],
+  "symbolValues": [
+    "heart",
+    "stop",
+    "clover",
+    "check",
+    "warning",
+    "alarm",
+    "info",
+    "wifi",
+    "router",
+    "lock",
+    "lightning",
+    "play",
+    "pause",
+    "arrowLeft",
+    "arrowRight",
+    "arrowUp",
+    "arrowDown",
+    "rainCloud",
+    "cloud",
+    "sun",
+    "plant",
+    "waterDrop",
+    "thermometer",
+    "calendar",
+    "leaf"
+  ],
+  "symbolSyntax": "Text may contain placeholders like {symbol:heart}, {symbol:stop}, {symbol:clover}, {symbol:wifi}. Hosts may also pass message.symbol.",
+  "programHandover": {
+    "method": "engine.submitProgramMessage(program, input, options)",
+    "programs": [
+      "leitstand",
+      "pflanzen",
+      "generic"
+    ],
+    "rule": "Host programs decide what is shown by submitting program messages. The module only handles rendering, queueing, priorities and display settings."
+  },
+  "leitstandAdapter": {
+    "status": "prepared-only",
+    "entry": "display-matrix-leitstand-adapter.js",
+    "global": "DisplayMatrixLeitstandAdapter",
+    "contract": "DISPLAY_MATRIX_LEITSTAND_ADAPTER_CONTRACT.json",
+    "rule": "Prepared adapter translates Leitstand status messages to DisplayMatrixModule messages without changing Leitstand app.js."
+  },
+  "baukastenDemo": {
+    "status": "implemented",
+    "demoFile": "demo.html",
+    "modes": [
+      "manual",
+      "kioskCoffee",
+      "leitstandAlarm",
+      "leitstandTop",
+      "pflanzenWetter",
+      "symbolShow",
+      "screensaver"
+    ]
+  },
+  "fontControls": [
+    "fontFamily",
+    "fontProfile",
+    "fontWeight",
+    "textScale",
+    "fontSize",
+    "align"
+  ],
+  "fontProfiles": [
+    "5x7",
+    "8x8",
+    "16x16",
+    "vector"
+  ],
+  "renderers": [
+    "auto",
+    "pixel",
+    "text"
+  ],
+  "presets": [
+    "tickerSmall",
+    "leitstandTopLine",
+    "dashboardWide",
+    "alarmFullscreen",
+    "screensaverMatrix",
+    "symbolShowcase",
+    "symbolTicker",
+    "kioskRedDots",
+    "lcdInfo"
+  ],
+  "layoutModes": [
+    "one-line top display for host applications",
+    "dashboard panel",
+    "fullscreen screensaver-style matrix",
+    "large smooth symbol showcase",
+    "large smooth symbol ticker"
+  ],
+  "visualControls": [
+    "columns",
+    "rows",
+    "pixelSize",
+    "gap",
+    "brightness",
+    "contrast",
+    "glow",
+    "foreground",
+    "background",
+    "accent"
+  ],
+  "integrationRule": "Hosts load the module script and talk to the global factory or custom element. Hosts must not place Display Matrix logic in app.js."
+}

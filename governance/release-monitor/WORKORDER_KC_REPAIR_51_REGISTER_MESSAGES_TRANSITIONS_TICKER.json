@@ -1,0 +1,25 @@
+{
+  "schema": "framework-release-monitor-v1",
+  "id": "WO-KC-20260724-005",
+  "createdAt": "2026-07-24T11:20:00+02:00",
+  "updatedAt": "2026-07-24T12:00:00+02:00",
+  "project": "KC MarktKasse / PC-Manager",
+  "workOrder": "Repair 51 – Kassenlöschung, Meldungen, Übergänge und Laufschriftkonsolidierung",
+  "baselineVersion": "V0.31.3.6 Repair 50",
+  "candidateVersion": "V0.31.3.6 Repair 51",
+  "candidateFile": "KC_MarktKasse_V0_31_3_6_Repair_51_Register_Messages_Transitions_Ticker_Candidate.zip",
+  "candidateSha256": "95DFB4DCB77A61119E2750C8D9111B75B9AD419D3B6BA1130787D5A007B7D2B1",
+  "changeScope": "Nur TÜV-Auswertung, Kassenlöschung, sichtbares Meldungswesen, Folienübergänge und Zusammenführung des Laufschrifteditors.",
+  "protectedAreas": "Artikel, Preislisten, Navigation, Wetter, Zeiterfassung, Rezepturen, Kassenverkauf, Bestände und gemeinsame TV-Geometrie.",
+  "requireTv": true,
+  "evidence": {
+    "javascriptSyntax": "PASS",
+    "automatedTests": "29/29 PASS vor Abschlussprüfung",
+    "tuvInput": "KC_Praesentations_TUV_2026-07-24 (1).json"
+  },
+  "monitorState": {
+    "code": "YELLOW",
+    "label": "Candidate geprüft",
+    "reason": "Automatisierte Prüfung bestanden; praktischer Sichttest bleibt offen."
+  }
+}

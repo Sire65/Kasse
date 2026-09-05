@@ -1,0 +1,292 @@
+KC MarktKasse Suite
+STAND: 01.09.2026, 22:00 Uhr  -  ARBEITSVERSION FUER FREITAG
+
+Vollstaendige Kopie. Aeltere ZIPs koennen weg, es muss nichts zusammengefuehrt werden.
+
+NEU IN DIESEM STAND (aus der ChatGPT-Lieferung uebernommen und eingepasst):
+  * Halbe Portionen: Freigabe und ½-Preis je Artikel im PC-Manager (Stammdaten -> Artikel
+    -> Verkauf), Knopf "50 %" fuer den halben Verkaufspreis. An der Kasse steht der
+    ½-Knopf in JEDER Bonzeile als eigene Spalte, nur bei freigegebenen Artikeln; die
+    Mengenspalte zeigt dann 0,5, nochmal druecken stellt ganze Portion und ganzen Preis
+    wieder her. Gemischte Bons (halb + ganz) stehen direkt untereinander.
+    Kennzahl und Liste im Dashboard; Ganze/½/Portionsaequivalent im Tagesbericht.
+    PFAND WIRD NIE HALBIERT - Glas und Feuerzange bleiben bei 2,00 EUR, halbiert wird nur
+    das Getraenk oder das Essen. Geprueft in allen drei Pfandregeln.
+  * Kochmuetze als Logo oben links, in der Kasse und im PC-Manager - dieselbe wie in der
+    KC Verwaltung, weisse Fassung fuer die dunklen Kopfzeilen.
+  * Drei eigene Speisenbilder: Mettwurst, Heringsstipp mit Kartoffeln, Knirpse mit
+    Kartoffelcreme. Gruenkohl und Sauerkraut in besserer Aufloesung.
+  * Preise: Kartoffel mit Hering 4,50 (vorher 5,50 bzw. 6,00 im Manager),
+    Kartoffel mit Kartoffelcreme 3,50 (vorher 4,50).
+  * Kartoffelgerichte: es gibt nur noch ZWEI - "Kartoffel mit Hering" und "Kartoffel mit
+    Kartoffelcreme". "Kartoffelknirpse" und "Knirpse mit Heringsstipp" sind stillgelegt
+    (active:false), nicht geloescht - so bleiben alte Buchungen in der Auswertung
+    aufloesbar. In den Vorfuehrdaten sind ihre Zeilen auf die beiden verbliebenen
+    Gerichte umgebucht (nur Nummer und Name, Preise unveraendert).
+
+  * ARTIKELNUMMERN UND QR-ETIKETTEN (neu). Jeder Artikel hat eine fuenfstellige
+    Artikelnummer aus reinen Ziffern im vorhandenen Feld "Barcode"; die Artikel-ID bleibt
+    unveraendert - es war KEIN Umbau von Kasse und Manager noetig. Aufbau: zwei Ziffern
+    Warengruppe + drei Ziffern laufende Nummer (01 Getraenke, 02 Speisen, 03 Pfand,
+    04 Sonstiges, 05 Packages, 09 Happy Hour); bei Pfand trennt 03001-03099 die Ausgabe
+    von 03101-03199 der Ruecknahme. Nur Ziffern, damit dieselbe Nummer auf allen drei
+    Wegen funktioniert: QR scannen, Suchfeld, Zahlenblock -> ART.
+    Die Tabelle steht EINMAL in shared/kc-artikelnummern-core.js; Kasse und Manager lesen
+    sie beim Start, eine von Hand abweichend gesetzte Nummer wird nicht ueberschrieben.
+    Vollstaendige Liste: ARTIKELNUMMERN_UND_QR_LIESMICH.md
+    BEFUNDE, die dabei aufgefallen sind und behoben wurden:
+      - die Kasse kannte nur fuenf fest verdrahtete Demo-Codes und hat ein echtes Etikett
+        OHNE JEDE MELDUNG ignoriert; jetzt wird der Artikelstamm durchsucht
+      - das Suchfeld suchte die Artikelnummer nicht mit (genau dort landet ein
+        Bluetooth-Scanner, wenn der Cursor im Feld steht)
+      - Zahlenblock und Scanner waren zwei getrennte Suchwege; jetzt derselbe
+      - auf dem Etikett stand unter "Art.-Nr." die technische ID ("grot"), die auf keinem
+        der drei Wege eingebbar war
+      - das Etikett druckte KEIN PFAND, weil es nur depositGroupIds las und die
+        Kassenartikel ihr Pfand in depositComponents fuehren
+      - das Etikett druckte KEINE ALLERGENE, sobald die Angabe als Freitext vorlag
+        ("Enthaelt Sulfite") statt in der Big-14-Tabelle - stillschweigend
+    Geprueft: tests/artikelnummern-und-qr.test.cjs, 28/28. Gesamte Testreihe 33 Laeufe gruen.
+
+  * DIE VIER SCANNER-WEGE GEPRUEFT UND REPARIERT (neu). Geprueft mit echten Tastendruecken,
+    weil ein Bluetooth-Scanner sich als Tastatur meldet und mit Enter abschliesst.
+    Test tests/scan-wege.test.cjs, 28/28. Ergebnis der vier Wege:
+      1. Mitarbeiterausweis -> Bediener oben links: geht, sowohl der Bedienerausweis
+         (KCOPE1:...) aus dem Manager als auch der Mitgliedsausweis (KNG|...) aus der
+         Verwaltung. Der Bediener bleibt, bis sich ein anderer anmeldet.
+      2. Artikel-Barcode -> liegt SOFORT im Warenkorb, mit Pfand, zweimal derselbe Code
+         erhoeht die Menge statt eine zweite Zeile zu bauen.
+      3. Bezahlcode auf der gruenen Taste (CMD-CHECKOUT) -> Verkauf sofort abgeschlossen,
+         Bonnummer weiter, Gesamt zurueck auf 0,00; bei leerem Korb KEIN Leerbon.
+      4. Uhrknopf, dann Mitarbeitercode -> Zeiterfassungsfenster mit Kommen/Gehen. Der
+         Cursor steht im Ausweisfeld, der Scanner tippt also direkt dorthin.
+    BEFUNDE, die dabei aufgefallen sind und behoben wurden:
+      - JEDE Meldung, die aus einem Scan entstand, war UNSICHTBAR. Der Scanner schickt
+        hinter dem Code ein Enter, und dieses Enter hat den Hinweis, den es gerade
+        ausgeloest hatte, im selben Moment wieder weggeklickt (die Fenster tragen
+        <form method="dialog"> mit einem Standardknopf). Betroffen: unbekannter Ausweis,
+        unbekannte Artikelnummer, abgelehnter Geld-QR. Am Stand sah es aus, als sei der
+        Scan gar nicht angekommen.
+      - Der Bediener wurde dauerhaft gespeichert und ueberlebte den NEUSTART. Am naechsten
+        Markttag stand noch der Bediener vom Vorabend oben links, und jeder Verkauf lief
+        unter seinem Namen. Jetzt nach dem Start immer "Team".
+      - Wurde bei GEOEFFNETER Bedienerliste gescannt (also nach Druck auf die Bedienertaste),
+        wechselte der Bediener im Hintergrund, das Fenster blieb offen und zeigte weiter den
+        ALTEN Namen mit Haken. Jetzt schliesst es sich beim Scan.
+      - Zwei Meldungstexte in Vereinsdeutsch gebracht statt Entwicklersprache.
+    Der Uhrknopf ist ohne uebernommene Personen bewusst ausgeblendet - das ist richtig so
+    und in der Freitags-Checkliste vermerkt. Einzelheiten: SCANNER_WEGE_LIESMICH.md
+
+  * WARENGRUPPE "PACKAGES" HEISST JETZT "KOMBI" (neu). Am Stand sagt niemand "Package".
+    Die Umbenennung ist durch Kasse, PC-Manager, Etiketten, Artikelnummern und Auswertung
+    gezogen; Geraete mit dem alten Namen werden beim Start EINMALIG nachgezogen, es entsteht
+    keine zweite Warengruppe daneben. Alte Buchungen mit "Packages" landen in der Auswertung
+    unter Kombi - sonst stuenden dort zwei Zeilen fuer dieselbe Sache.
+    Beschriftung unter dem Preis jetzt "beides zusammen".
+  * KOMBI-KACHEL ZEIGT BEIDE ARTIKEL. Getraenk oben, Essen unten rechts, dazwischen eine
+    schraege weisse Linie. Die Linie ist ein SVG mit non-scaling-stroke - ein CSS-Verlauf
+    trifft die Diagonale bei nicht-quadratischen Kacheln nicht. Die Reihenfolge kommt aus der
+    KATEGORIE, nicht aus der Eingabereihenfolge, sonst haengt das Bild davon ab, was jemand
+    beim Anlegen zuerst getippt hat. Jedes Bild ist in seine eigene Haelfte gerueckt.
+  * KOMBIPREIS = SUMME DER BESTANDTEILE (Vorgabe des Vereins). Eine Kombination ist ein
+    KNOPF, kein Rabatt. Der Preis wird GERECHNET statt gespeichert und stimmt dadurch auch
+    nach einer Preisaenderung im Manager noch. Gruenkohl + Gluehwein rot 11,00 (vorher 10,50),
+    Gruenkohl + Eierlikoerpunsch 12,00 (vorher 11,50). Das Preisfeld im Kombi-Editor ist
+    schreibgeschuetzt und zeigt die gerechnete Summe.
+  * KEINE DOPPELTEN KACHELN MEHR. Die Tagesvorschlaege aus den Verkaufsdaten schlugen auch
+    Kombinationen vor, die schon fest angelegt sind - in der Warengruppe standen vier Kacheln
+    statt zwei, "Gruenkohl + Eierlikoerpunsch" einmal zu 11,50 und einmal zu 11,40 Euro.
+    Verglichen wird ueber die Bestandteile, nicht ueber den Namen; die Meldung sagt jetzt,
+    wie viele Vorschlaege uebersprungen wurden.
+  * METTWURST-DOPPELEINTRAG STILLGELEGT (vom Verein freigegeben). "mett" 3,50 aus den alten
+    Vorgabedaten des Managers ist inaktiv und nicht mehr in der Preisliste; "mettwurst" 1,50
+    aus der Kasse bleibt. NICHT geloescht - alte Auswertungen bleiben aufloesbar. Auf schon
+    laufenden Geraeten einmalig ueber ein Merkzeichen, wer ihn spaeter bewusst wieder
+    einschaltet, behaelt ihn.
+    Geprueft: tests/kombi-warengruppe.test.cjs, 23/23.
+
+  * SCANNER-AUSWEISE GEGEN FALSCHE SCANNER-EINSTELLUNG ABGESICHERT (neu). Ein Handscanner ist
+    eine TASTATUR - er tippt. Steht sein Tastaturlayout auf einer anderen Sprache als das
+    Tablet, kommen ZIFFERN richtig an (Artikelnummern gehen also immer), SONDERZEICHEN aber
+    nicht: ausgerechnet der senkrechte Strich "|" der Mitgliedsausweise
+    (KNG|Koecheclub Werne|KC-0005|...) liegt auf deutscher und englischer Tastatur an voellig
+    verschiedenen Stellen. Manche Scanner senden ausserdem alles in GROSSBUCHSTABEN, und ein
+    eingeschaltetes Caps Lock am Tablet tut dasselbe.
+    Geaendert: die Mitgliedsnummer wird jetzt aus dem GANZEN gescannten Text gezogen statt aus
+    dem dritten Feld hinter einem "|", und Gross-/Kleinschreibung spielt keine Rolle mehr.
+    Gilt fuer Kasse UND Zeiterfassung. Geprueft mit zerstoertem Trennzeichen, mit reinen
+    Grossbuchstaben und mit reinen Kleinbuchstaben.
+    Ausserdem: ein nicht erkannter Code sagt jetzt IMMER etwas und nennt dabei, WAS
+    tatsaechlich angekommen ist ("Gelesen wurde: ..."). Das ist die schnellste Selbstauskunft
+    bei einem falsch eingestellten Scanner - Buchstabensalat statt Nummer heisst falsches
+    Tastaturlayout. Vorher hat die Kasse einen unbekannten Code kommentarlos verschluckt.
+    Test tests/scan-wege.test.cjs jetzt 34/34.
+    Der Scanner ist ein HW0010 (Ringscanner, 1D/2D, Bluetooth HID/SPP/BLE und 2,4 GHz).
+    SCANNER_EINRICHTUNG.md nennt jetzt die NEUN Codes aus seinem Handbuch mit Seitenzahl,
+    in der richtigen Reihenfolge, dazu die Codes, die man auf keinen Fall scannen darf
+    (Storage Mode, SPP/BLE, CR+LF, Dauerlesen). Wichtigster Punkt: sein Handbuch sagt auf
+    Seite 12 selbst "American English Keyboard is the default" - der Code "German" muss
+    gescannt werden, sonst kommt der senkrechte Strich der Mitgliedsausweise falsch an.
+    Der Sammelspeicher der Kasse wartet jetzt 300 ms statt 130 ms auf das naechste Zeichen.
+    Grund: das Handbuch empfiehlt bei fehlenden Zeichen eine langsamere Uebertragungsstufe
+    (High/Medium/Low/Super Low). Bei 130 ms waere der Code mittendrin abgerissen und der Rest
+    als NEUER Code gelesen worden.
+
+  * PIN-SPERRE AUF DEM TABLET REPARIERT (neu, am echten iPad aufgefallen). Das Fenster mit der
+    PIN sass senkrecht MITTIG. Sobald die Bildschirmtastatur aufging, lag sie genau darueber -
+    man tippte blind und konnte eine Fehleingabe nicht einmal loeschen, weil man das Feld nicht
+    sah. iOS verkleinert bei position:fixed die Flaeche NICHT, das Feld rutscht also nicht von
+    selbst nach oben.
+    Behoben zweifach: (1) das Fenster sitzt jetzt OBEN und ist notfalls scrollbar,
+    (2) es hat einen EIGENEN ZIFFERNBLOCK (Tasten 64 px hoch, dazu eine Loeschtaste), und das
+    Feld traegt inputmode="none" - die Bildschirmtastatur geht damit gar nicht erst auf.
+    Am Stand wird ohnehin mit dem Daumen getippt, oft mit Handschuh; 64-px-Tasten trifft man,
+    Tastaturtasten nicht. Ein angeschlossenes Keyboard funktioniert weiterhin.
+    Test tests/pin-sperre-tablet.test.cjs, 14/14, gemessen auf iPad-Groesse mit Fingerbedienung.
+  * Kassenoberflaeche auf iPad-Groessen nachgemessen (1024x768, 1080x810, 1194x834): keine
+    Ueberlappungen, nichts ausserhalb des Bildes, kein Querscrollen, keine Skriptfehler.
+    OFFEN und nur kosmetisch: auf dieser Breite sind die Warengruppen-Namen abgeschnitten
+    ("Ko... 2", "Ge... 6"), und REKLAMATION/PERSONAL brechen mitten im Wort um.
+
+  * VORPRUEFUNGEN BEIM MARKTTAG-START (neu, kc-sync-installation-und-backend/vorpruefungen.js).
+    Ganz oben im schwarzen Fenster stehen jetzt der LAUFENDE STAND (aus der STAND.txt) und die
+    verwendete WLAN-ADRESSE - genau die zwei Angaben, die am 01.09. gefehlt haben.
+    ABBRUCH (nichts wird gestartet, nichts veraendert): Start aus dem ZIP heraus, kein
+    Schreibrecht, keine WLAN-Adresse.
+    HINWEIS (Start laeuft weiter): fehlende Firewall-Freigabe, Netzwerkprofil "Oeffentlich",
+    mehrere Netzwerkadressen, Ordner auf Netzlaufwerk oder in der Cloud, Energiesparmodus,
+    nachgehende Uhr, wenig Speicherplatz.
+    GRUNDREGEL: unbekannt ist KEIN Alarm - kann eine Pruefung ihre Antwort nicht sicher
+    ermitteln, schweigt sie. Ein Fehlalarm am Marktmorgen ist schlimmer als keine Pruefung.
+  * SCHWERSTER BEFUND DABEI: die WLAN-Adresse wurde GERATEN - genommen wurde die erste IPv4,
+    die Windows meldet. Auf einem Rechner mit VirtualBox, Hyper-V, Docker oder VPN ist das oft
+    192.168.56.1; dann zeigen ALLE QR-Codes auf eine Adresse, die kein Tablet erreicht, und
+    nichts sagt es. Der Stand saehe aus wie ein Firewall- oder WLAN-Problem und waere keines.
+    Jetzt wird die Routing-Tabelle des Systems gefragt statt geraten, alle Kandidaten werden
+    genannt, und mit markttag-adresse.json laesst sich eine Adresse festnageln.
+  * "TABLET VERBUNDEN" LIVE AUF DER UEBERSICHTSSEITE. Unter jedem QR-Code steht zuerst
+    "wartet auf Tablet ...", nach dem Scannen "Tablet verbunden" mit Adresse und Zeitpunkt.
+    Der eigene Rechner zaehlt NICHT mit - sonst zeigte die Seite gruen, obwohl nie ein Tablet
+    da war. Meldet sich ein Geraet ohne Kasse zu oeffnen, steht auch das da: dann stimmen WLAN
+    und Firewall, es wurde nur kein Kassen-QR gescannt.
+    Das ist der einzige Beweis, der zaehlt - jede Vorpruefung am PC ist nur ein Indiz.
+  * Firewall-Freigabe-einrichten.cmd (neu): legt EINE Regel an, sagt vorher welche, fragt nach,
+    verlangt Administrator. Schaltet die Firewall NICHT ab und aendert das Netzwerkprofil nicht.
+  * Die Uebersichtsseite sagt jetzt ausdruecklich, dass sie zu DIESEM Rechner gehoert und nur
+    ihre eigenen QR-Codes gelten - ein Foto oder Ausdruck von woanders zeigt auf einen fremden
+    Rechner. Genau das ist am 01.09. passiert.
+    Geprueft: tests/vorpruefungen.test.cjs, 21/21, dazu ein echter Abbruch-Durchlauf aus einem
+    ZIP-Pfad (es wurde nachweislich nichts angelegt) und ein echter Normalstart.
+
+  * !!! SCHWERSTER BEFUND DES TAGES - AM ECHTEN iPAD GEFUNDEN !!!
+    UEBER DIE WLAN-ADRESSE LIESS SICH KEIN EINZIGER VERKAUF BUCHEN.
+    Browser geben crypto.subtle (die eingebaute Verschluesselung) nur im "sicheren Kontext"
+    frei - also ueber https ODER localhost. Das Tablet ruft die Kasse aber ueber die
+    WLAN-Adresse auf (http://192.168.178.79:8090), und DORT ist crypto.subtle schlicht
+    undefined. Gemessen mit demselben Programm ueber zwei Adressen:
+      http://127.0.0.1:8090  -> isSecureContext true,  crypto.subtle vorhanden
+      http://192.0.2.2:8090  -> isSecureContext false, crypto.subtle UNDEFINED
+    Betroffen war sha256Hex() in app.js - und die sitzt MITTEN IM VERKAUFSABSCHLUSS: der Bon
+    bekommt dort seine Pruefsumme, DANACH wird gespeichert und die Bonnummer hochgezaehlt.
+    Warf sie, brach completeSale ab. Gemessen: Warenkorb voll, Bezahlen ausgeloest, Bonnummer
+    blieb auf 123 stehen, NULL Buchungen gespeichert. Ohne Meldung.
+    Am PC lief alles, weil 127.0.0.1 als sicher gilt - deshalb ist es nie aufgefallen, und
+    ALLE bisherigen Tests liefen ueber 127.0.0.1.
+    Aufgefallen ist es nur, weil der User am iPad die PIN nicht setzen konnte: vier Ziffern,
+    gruener Knopf, nichts passierte. Derselbe Fehler, andere Stelle.
+  * Behoben mit shared/kc-krypto.js (neu): SHA-256 ueber crypto.subtle, wenn vorhanden, sonst
+    dieselbe Rechnung in reinem JavaScript - mit IDENTISCHEM Ergebnis, damit eine am PC
+    gesetzte PIN auch am Tablet aufschliesst. Gegen die offiziellen Pruefwerte aus FIPS 180-4
+    geprueft. Angeschlossen: app.js (Bonpruefsummen, Stornos, Backup, Ledger), kc-pin-lock.js,
+    kc-hash-chain.js.
+  * Die PIN-Sperre faengt jetzt JEDEN Fehler ab und schreibt ihn in die Fehlerzeile. Ein Knopf,
+    der nichts tut und nichts sagt, ist am Stand das Schlimmste - man tippt ihn zehnmal und
+    weiss immer noch nichts.
+  * NEUER DAUERTEST tests/kasse-ueber-wlan.test.cjs (17/17): laeuft bewusst ueber die
+    LAN-Adresse statt ueber 127.0.0.1 - also im unsicheren Kontext, genau wie das Tablet.
+    Prueft PIN setzen, Neustart, falsche PIN, Artikel scannen UND einen vollstaendig
+    gebuchten Verkauf. Damit kann dieser Fehler nicht noch einmal unbemerkt entstehen.
+  * WAS DAMIT NICHT GELOEST IST (bewusst, und kein Problem fuer Freitag): AES-Verschluesselung
+    (Bonverschluesselung, Live-Kanal, Security Card) braucht crypto.subtle wirklich. Auf dem
+    Tablet ueber http arbeiten diese Stellen unverschluesselt weiter, statt das Kassieren zu
+    verweigern - am Stand ist eine Kasse, die nicht kassiert, der groessere Schaden. Der
+    Bonspeicher macht das schon von sich aus richtig (ohne Schluessel: unverschluesselt
+    speichern statt den Verkauf abzulehnen). Wer die Verschluesselung auch auf dem Tablet
+    will, muss die Kasse ueber https ausliefern.
+
+  * FEHLALARM DER FIRWALL-PRUEFUNG BEHOBEN (beim ersten echten Lauf beim Verein aufgefallen).
+    Die Pruefung meldete "Keine Firewall-Freigabe fuer Node.js gefunden", OBWOHL die Freigabe
+    angelegt war und das Tablet nachweislich verbunden - also genau der Fehlalarm, den diese
+    Pruefungen ausdruecklich vermeiden sollen. Zwei Ursachen, beide meine:
+      1. Number('') ist in JavaScript 0, nicht NaN. Lieferte PowerShell gar keine Ausgabe,
+         wurde daraus "null Regeln gefunden" statt "konnte ich nicht ermitteln".
+         Die Zahl steht jetzt hinter einem Merkwort (KCFW=n); fehlt es, wird geschwiegen.
+      2. Der Pfadvergleich war auf das Zeichen genau. Windows speichert aber durchaus eine
+         andere Schreibweise (Kurzpfad, zweite Node-Installation). Verglichen wird jetzt nur
+         noch auf "...\node.exe" - lieber einmal zu viel erkannt als ein Fehlalarm.
+    Die Lesefunktion ist einzeln pruefbar und mit neun Faellen abgesichert (leere Antwort,
+    Fehlertext, nackte Null, echte Null, Zahl zwischen anderer Ausgabe).
+    Backend jetzt 30/30.
+
+  * "ALLES BEREIT" SAGTE ES AUCH, WENN DER LIVE-KANAL FEHLTE (beim Verein aufgefallen).
+    Der Manager startet den Live-Kanal auf Port 47392; kam er nicht hoch, wurde der Fehler in
+    manager-companion/index.js VERSCHLUCKT ("Zusatzkanal, kein Grund nicht zu starten") - und
+    das schwarze Fenster meldete trotzdem "ALLES BEREIT". Im PC-Manager blieben die Kassen-LEDs
+    grau, die eingebaute Seite "Verbindung pruefen" sagte korrekt "Port 47392 antwortet nicht".
+    Zwei Anzeigen, die sich widersprechen - und die falsche stand im Startfenster.
+    Behoben: der Grund wird jetzt gemerkt (liveMonitorFehler) und der Marktstart prueft nach dem
+    Start, ob dort WIRKLICH jemand antwortet. Erfolgsmeldung heisst jetzt entweder
+    "ALLES BEREIT (... Live-Kanal)" oder "BEREIT ZUM KASSIEREN - aber OHNE Live-Kanal" mit Grund
+    und Handlungsanweisung. Wichtig dabei: der Live-Kanal ist ein ANZEIGEweg, kein Verkaufsweg -
+    Kassieren, Bons und Abschluesse laufen auch ohne ihn.
+    "Port belegt" und "Dienst antwortet" sind zwei verschiedene Fragen; geprueft wird jetzt die
+    zweite.
+
+  * VERBINDUNGS-LED IM MANAGER AUF DIE VEREINSVORGABE UMGEBAUT.
+    [Vorgabe] "Die gruene LED soll IMMER leuchten bei Verbindung, nicht nur bei Verkauf.
+    Bei realem Datenverkehr soll die gelbe flackern."
+    BEFUND: genau das tat sie nicht. Die Status-LED hing an "lastSeenAt" - also am letzten
+    Ereignis einer GEOEFFNETEN Kasse. Ist am Tablet Safari im Hintergrund oder der Bildschirm
+    aus, friert iOS die Seite ein, es kommen keine Herzschlaege mehr, und die LED ging auf rot,
+    obwohl die Kasse gekoppelt und der Dienst erreichbar war. Der Manager meldete "nicht
+    verbunden", waehrend alles stand - und man sucht dann am voellig falschen Ende.
+    Der Manager-Dienst weiss es besser: unter /kassen-verbindungen (Port 47392) fuehrt er,
+    welche Kasse gekoppelt ist. Diese Auskunft wird jetzt alle 5 Sekunden geholt. Seitdem:
+      gruen  = Dienst erreichbar UND diese Kasse gekoppelt  -> leuchtet DAUERHAFT
+      gelb   = Aktivitaets-LED, flackert bei jedem echten Ereignis (unveraendert)
+      rot    = Dienst antwortet nicht ODER Kasse nicht gekoppelt, jeweils mit Grund im Tooltip
+    Die Klartextliste trennt jetzt sauber: "Verbunden · Kasse sendet" gegenueber
+    "Verbunden · zurzeit keine Meldungen". Dass gerade nichts gesendet wird, ist eine Aussage
+    ueber den VERKEHR, nicht ueber die Verbindung.
+    Test tests/manager-led-verbindung.test.cjs, 12/12 - laeuft ausdruecklich OHNE geoeffnete
+    Kasse und prueft auch die beiden roten Faelle samt Begruendung im Tooltip.
+
+NICHT UEBERNOMMEN aus derselben Lieferung, weil es Freitags-Korrekturen rueckgaengig
+gemacht haette (jeweils geprueft, nicht vermutet):
+  * Release-Manifest mit alten Versionsnummern -> haette "Pruefhinweise" auf jede
+    Managerseite gebracht (Gate stand dort auf BLOCKED, hier auf CONDITIONAL)
+  * Fenstertitel mit Entwicklersprache ("Symbol- und Aktivierungscode-Paritaet Candidate")
+  * Vorfuehrdaten mit erfundenen Pfand-Artikelnummern -> Pfandumsatz unter "Sonstiges"
+  * aeltere Fassung der Freitags-Checkliste und des Pruefberichts
+  * Ruecknahme der Trainingsmodus-Kopfzeile, der Balkenbeschriftung und der
+    Artikelsuche ueber Nummer ODER Name
+
+VOR FREITAG NOCH ZU TUN (siehe FREITAG_CHECKLISTE.md, Schritt 8 und 9):
+  1. Kein Artikel ist bisher fuer die halbe Portion freigegeben. Ohne diesen Schritt ist
+     der ½-Knopf an der Kasse bei jedem Artikel grau.
+  2. Master-PIN im PC-Manager setzen. Solange sie fehlt, liegt ein Weichzeichner ueber der
+     ganzen Oberflaeche - und ein in diesem Zustand gedrucktes Etikett waere unscharf und
+     der QR-Code nicht lesbar.
+
+GEPRUEFT: 39 Prueflaeufe gruen (darunter 53 Punkte fuer die halbe Portion, 28 fuer
+Artikelnummern und QR, 34 fuer die vier Scanner-Wege, 23 fuer die Warengruppe Kombi), Generalprobe 25/25, Bereitschaftspruefung 39/39,
+Release-Gate CONDITIONAL (nur der gewollte Rundlauf-Punkt REL-006).
+
+WORAN MAN DEN STAND ERKENNT
+Die Versionszeile oben im Manager aendert sich NICHT bei jeder Aenderung. Verlaesslich ist
+diese Datei und das Aenderungsdatum der Dateien im Ordner.
+
+WENN AENDERUNGEN NICHT ZU SEHEN SIND
+1. Strg+F5 (Browser laedt sonst die alte Datei aus dem Zwischenspeicher).
+2. Die DATEN (Artikel, Vorfuehrdaten, PIN) liegen im Browser, nicht im ZIP.
+3. Nachsehen, ob wirklich der neue Ordner geoeffnet ist.

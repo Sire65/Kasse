@@ -1,0 +1,16 @@
+const fs=require('fs'),assert=require('assert');
+const html=fs.readFileSync('pc-manager/index.html','utf8');
+const tuv=fs.readFileSync('pc-manager/presentation-tuv-integration.js','utf8');
+const render=fs.readFileSync('pc-manager/tv-render-consolidation-v02955.js','utf8');
+const effects=fs.readFileSync('pc-manager/kc-object-studio.js','utf8');
+const messages=fs.readFileSync('pc-manager/manager-message-integration-v010.js','utf8');
+for(const file of ['manager-message-integration-v010.js','kc-object-studio.js','tv-render-consolidation-v02955.js'])assert(html.includes(file),`${file} ist nicht geladen`);
+assert(!html.includes('tv-context-effect-fix.js'),'Alte Effekt-/Routing-Datei muss durch das Objekt-Studio ersetzt sein');
+assert(!tuv.includes('setInterval(run'),'TÜV darf die Oberfläche nicht periodisch blockieren');
+assert(tuv.includes('schedule(2500)'),'TÜV-Speicherprüfung ist nicht entprellt');
+for(const effect of ['snow-light','snow-heavy','rain','glitter','gold-dust','gold-rain','stars','star-rain','bokeh','sparkle-wave','shooting-star'])assert(effects.includes(effect),`Effekt ${effect} fehlt`);
+assert(effects.includes('function updateEffectLayer'),'Effekt-Live-Update fehlt im Objekt-Studio');
+assert(render.includes("setProperty('--tv-scale','1')"),'Konkurrierende Bildschirm-Zoll-Skalierung ist nicht neutralisiert');
+assert(render.includes('cqw'),'Gemeinsame Folien-Schriftbasis fehlt');
+assert(messages.includes('wirklich ausführen?')&&messages.includes('erfolgreich gespeichert'),'Meldungs- oder Löschbestätigung fehlt');
+console.log('PASS tv-runtime-consolidation: Meldungen, Effekte (inkl. Regen) im Objekt-Studio, entprellter TÜV und verbindliche Bau-/TV-Skalierung');

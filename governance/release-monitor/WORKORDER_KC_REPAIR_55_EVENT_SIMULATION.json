@@ -1,0 +1,29 @@
+{
+  "schema": "framework-release-monitor-v1",
+  "id": "WO-KC-20260724-009",
+  "createdAt": "2026-07-24T12:35:00+02:00",
+  "updatedAt": "2026-07-24T12:35:00+02:00",
+  "project": "KC MarktKasse / PC-Manager",
+  "workOrder": "Repair 55 – Echtbetriebssimulation und Umsatzimport-Härtung",
+  "baselineVersion": "V0.31.3.6 Repair 54",
+  "candidateVersion": "V0.31.3.6 Repair 55",
+  "candidateFile": "KC_MarktKasse_V0_31_3_6_Repair_55_Echtbetriebssimulation_Candidate.zip",
+  "candidateSha256": "SEE_SIDECAR_SHA256",
+  "changeScope": "Testgenerator, Umsatzimport-Deduplizierung, kompakte Analysedaten und große Managerauswertungen.",
+  "protectedAreas": "Kassenbedienung, Präsentationsinhalte, Navigation, Zeiterfassung, Rezepte und Stammdaten.",
+  "requireTv": false,
+  "evidence": {
+    "javascriptSyntax": "PASS",
+    "automatedTests": "35/35 PASS",
+    "visiblePosSales": "21/21 PASS",
+    "simulatedTransactions": 8200,
+    "managerExpectedValues": "PASS",
+    "studioRegistry": "cores/STUDIO_TUV_COMPONENT_REGISTRY_V1.json",
+    "report": "PRUEFBERICHT_REPAIR_55.md"
+  },
+  "monitorState": {
+    "code": "GREEN",
+    "label": "Technisch geprüft",
+    "reason": "Hashketten, Speicher, Doppelimport, Managerkennzahlen, Bestand und sichtbare Kassenbuchungen bestanden."
+  }
+}

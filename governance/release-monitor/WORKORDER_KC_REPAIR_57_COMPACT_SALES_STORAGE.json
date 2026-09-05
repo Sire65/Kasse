@@ -1,0 +1,29 @@
+{
+  "schema": "framework-release-monitor-v1",
+  "id": "WO-KC-20260724-011",
+  "createdAt": "2026-07-24T14:40:00+02:00",
+  "updatedAt": "2026-07-24T14:40:00+02:00",
+  "project": "KC MarktKasse / PC-Manager",
+  "workOrder": "Repair 57 – Kompakter Umsatzspeicher",
+  "baselineVersion": "V0.31.3.6 Repair 56",
+  "candidateVersion": "V0.31.3.6 Repair 57",
+  "candidateFile": "KC_MarktKasse_V0_31_3_6_Repair_57_Kompakter_Umsatzspeicher_Candidate.zip",
+  "candidateSha256": "SEE_SIDECAR_SHA256",
+  "changeScope": "Nur Umsatzspeicherung, Rückwärtsmigration und deutsche Importfehlermeldungen.",
+  "protectedAreas": "Kassenbuchung, Präsentation, Navigation, Zeiterfassung, Rezepte und Stammdaten.",
+  "requireTv": false,
+  "evidence": {
+    "javascriptSyntax": "PASS",
+    "automatedTests": "36/36 PASS",
+    "visibleMultiFileImport": "8200 Vorgänge / 100 Prozent / kein Quota-Fehler",
+    "compactStorage": "866091 Bytes / 16.5 Prozent",
+    "browserConsole": "0 Fehler",
+    "studioRegistry": "cores/STUDIO_TUV_COMPONENT_REGISTRY_V1.json",
+    "report": "PRUEFBERICHT_REPAIR_57.md"
+  },
+  "monitorState": {
+    "code": "GREEN",
+    "label": "Technisch und praktisch geprüft",
+    "reason": "Speicherbedarf um 72 Prozent gegenüber Repair 56 reduziert; Großimport ohne Quota-Fehler."
+  }
+}

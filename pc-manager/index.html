@@ -1,0 +1,1155 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>KC MarktKasse · PC-Manager</title>
+<link rel="stylesheet" href="styles.css"><link rel="stylesheet" href="pos-ui-profile-manager.css"><link rel="stylesheet" href="dev-quick-access.css"><link rel="stylesheet" href="weather-mobile-exchange-integration.css"><link rel="stylesheet" href="../cores/design-core/design-core-presentation.css">
+<link rel="stylesheet" href="../shared/kc-bargeld-statistik.css">
+<link rel="stylesheet" href="../shared/kc-geldkassette.css">
+<link rel="stylesheet" href="kc-happyhour-manager.css">
+<link rel="stylesheet" href="../cores/presentation-tuv-core/presentation-tuv-core.css">
+
+<link rel="stylesheet" href="program-import-core-v010.css">
+<link rel="stylesheet" href="event-program-export-v010.css">
+<link rel="stylesheet" href="manager-navigation-adapter-v010.css">
+<link rel="stylesheet" href="manager-navigation-extras-v011.css">
+
+
+<link rel="stylesheet" href="pos-ui-profile-details-v012.css">
+<link rel="stylesheet" href="time-clock-manager.css">
+<link rel="stylesheet" href="recipe-manager.css">
+<link rel="stylesheet" href="manager-table-core.css">
+<link rel="stylesheet" href="manager-sales-inventory-dashboard.css">
+<link rel="stylesheet" href="kc-live-monitor.css">
+<link rel="stylesheet" href="manager-import-progress-core.css">
+</head>
+<body>
+<div class="app">
+<header class="header">
+  <div class="brand">
+    <div class="logo"><img id="managerClubLogo" src="assets/kochmuetze.png" alt=""></div>
+    <div><strong id="managerClubName">Köcheclub Werne</strong><small id="managerVersionLine">Release-Manifest wird geprüft …</small></div>
+  </div>
+  <div class="header-meta">
+    <span>Projekt: <b id="projectName">Weihnachtsmarkt 2026</b></span>
+    <span>Kassen: <b id="registerCount">2</b></span>
+    <span>Status: <b class="ok">Arbeitsstand gespeichert</b></span>
+  </div>
+</header>
+
+<div class="body">
+<aside class="sidebar" aria-label="Hauptnavigation">
+  <button class="nav nav-home active" type="button" data-view="dashboard">▦ Dashboard</button>
+
+  <section class="nav-group" data-nav-group="masterdata">
+    <button class="nav-group-toggle" type="button" aria-expanded="false" aria-controls="nav-masterdata">
+      <span>▣ Stammdaten</span><span class="nav-chevron" aria-hidden="true">›</span>
+    </button>
+    <div class="nav-submenu" id="nav-masterdata" hidden>
+      <button class="nav" type="button" data-view="groups">Warengruppen</button>
+      <button class="nav" type="button" data-view="articles">Artikel</button>
+      <button class="nav" type="button" data-view="labels">Artikel-Etiketten</button>
+    </div>
+  </section>
+
+  <section class="nav-group" data-nav-group="operation">
+    <button class="nav-group-toggle" type="button" aria-expanded="false" aria-controls="nav-operation">
+      <span>▥ Kassenbetrieb</span><span class="nav-chevron" aria-hidden="true">›</span>
+    </button>
+    <div class="nav-submenu" id="nav-operation" hidden>
+      <button class="nav" type="button" data-view="registers">Kassen</button>
+      <button class="nav" type="button" data-view="cashprep">Money Butler</button>
+      <button class="nav" type="button" data-view="closing">Kassenabschluss</button>
+      <button class="nav" type="button" data-view="businessyear">Geschäftsjahr</button>
+      <button class="nav" type="button" data-view="training">Schulung</button>
+      <button class="nav" type="button" data-view="tvscreen">TV-Bildschirm</button>
+      <button class="nav" type="button" data-view="receipt">Bonlayout</button>
+      <button class="nav" type="button" data-view="pricelist">Preisliste drucken</button>
+      <button class="nav" type="button" data-view="verbindung">Verbindung prüfen</button>
+      <button class="nav" type="button" data-view="gutscheine">Gutscheine</button>
+      <button class="nav" type="button" data-view="vorfuehrung">Vorführdaten</button>
+      <button class="nav" type="button" data-view="zentral">Zentrale Daten</button>
+    </div>
+  </section>
+
+  <section class="nav-group" data-nav-group="data">
+    <button class="nav-group-toggle" type="button" aria-expanded="false" aria-controls="nav-data">
+      <span>▧ Auswertung &amp; Daten</span><span class="nav-chevron" aria-hidden="true">›</span>
+    </button>
+    <div class="nav-submenu" id="nav-data" hidden>
+      <button class="nav" type="button" data-view="reports">Auswertungen</button>
+      <button class="nav" type="button" data-view="sales">Umsatzdaten importieren</button>
+      <button class="nav" type="button" data-view="recovery">Datei entschlüsseln</button>
+      <button class="nav" type="button" data-view="exchange">Datenaustausch</button>
+      <button class="nav" type="button" data-view="configuration">Konfiguration exportieren</button>
+      <button class="nav" type="button" data-view="sync">Teammodus</button>
+    </div>
+  </section>
+
+  <section class="nav-group" data-nav-group="system">
+    <button class="nav-group-toggle" type="button" aria-expanded="false" aria-controls="nav-system">
+      <span>⚙ System &amp; Sicherheit</span><span class="nav-chevron" aria-hidden="true">›</span>
+    </button>
+    <div class="nav-submenu" id="nav-system" hidden>
+      <button class="nav" type="button" data-view="settings">Einstellungen</button>
+      <button class="nav" type="button" data-view="featureconfig">Funktionskonfiguration</button>
+      <button class="nav" type="button" data-view="workspace">Kassenoberfläche</button>
+      <button class="nav" type="button" data-view="corecatalog">Core-Katalog &amp; Zuordnung</button>
+      <button class="nav" type="button" data-view="devices">Geräte &amp; QR-Codes</button>
+      <button class="nav" type="button" data-view="backup">Sicherung</button>
+      <button class="nav" type="button" data-view="practice">Praxistest</button>
+      <button class="nav" type="button" data-view="emergency">Notfallzugang</button>
+    </div>
+  </section>
+
+  <div class="sidebar-footer">
+    <span>WindowCore</span><span>NavigationCore</span><span>DesignCore</span>
+  </div>
+</aside>
+
+<main class="content">
+<section class="view active" data-view-panel="dashboard">
+  <div class="page-head"><div><h1>Dashboard</h1><p>Gesamtüberblick über alle importierten Kassen.</p></div></div>
+  <div class="kpis">
+    <article><span>Gesamtumsatz</span><strong id="kpiRevenue">0,00 €</strong></article>
+    <article><span>Verkäufe</span><strong id="kpiSales">0</strong></article>
+    <article><span>Ø Bon</span><strong id="kpiAverage">0,00 €</strong></article>
+    <article><span>Pfandrückgaben</span><strong id="kpiDeposit">0</strong></article>
+    <article><span>Aktive Kassen</span><strong id="kpiActiveRegisters">0</strong></article>
+    <article><span>Trainingsbons</span><strong id="kpiTraining">0</strong></article>
+    <article><span>Trinkgeld gesamt</span><strong id="kpiTips">0,00 €</strong></article>
+    <article><span>½ Portionen</span><strong id="kpiHalfPortions">0</strong></article>
+  </div>
+  <div class="dashboard-grid">
+    <article class="panel"><h3>Umsatz nach Kasse</h3><canvas id="registerChart" width="600" height="260"></canvas></article>
+    <article class="panel"><h3>Umsatz nach Warengruppe</h3><canvas id="groupChart" width="600" height="260"></canvas></article>
+    <article class="panel"><h3>Top-Artikel</h3><canvas id="articleChart" width="600" height="260"></canvas></article>
+    <article class="panel gauges"><h3>Kassenstatus</h3><div id="gaugeContainer"></div></article>
+    <article class="panel"><h3>Umsatz nach Uhrzeit</h3><canvas id="hourChart" width="600" height="260"></canvas></article>
+    <article class="panel"><h3>Umsatz nach Bediener</h3><canvas id="operatorChart" width="600" height="260"></canvas></article>
+    <article class="panel"><h3>½-Portionen nach Artikel</h3><div id="halfPortionSummary">Noch keine ½-Portionen verkauft.</div></article>
+  </div>
+  <!-- Demodaten: erfundene Umsätze, damit Auswertungen und Grafiken etwas anzeigen.
+       Jeder erzeugte Datensatz ist markiert und lässt sich restlos wieder entfernen. -->
+  <article class="panel kc-demo-panel">
+    <h3>Demodaten für Auswertungen</h3>
+    <p class="hint">Erzeugt erfundene Verkäufe, Trinkgelder, Tagesabschlüsse und Bargeldbewegungen über
+       mehrere Markttage – mit den echten Artikeln, Warengruppen und Kassen dieses Managers, damit
+       alle Grafiken gefüllt sind. Nichts davon wird gemeldet oder in die Cloud übertragen.</p>
+    <div class="kc-demo-aktionen">
+      <button type="button" id="demoDatenErzeugen" class="primary-action">Demodaten erzeugen</button>
+      <button type="button" id="demoDatenEntfernen" class="danger-action">Demodaten entfernen</button>
+    </div>
+    <p id="demoDatenStand" class="hint"></p>
+  </article>
+</section>
+
+<section class="view" data-view-panel="groups">
+  <div class="page-head"><div><h1>Warengruppen</h1><p>Gruppen anlegen, sortieren und gestalten.</p></div></div>
+  <div class="toolbar" id="groupToolbar">
+    <button data-cmd="new">＋ Neu</button><button data-cmd="save">💾 Speichern</button>
+    <button data-cmd="delete">🗑 Löschen</button><button data-cmd="import">⇩ Import</button>
+    <button data-cmd="export">⇧ Export</button><button data-cmd="print">🖨 Drucken</button>
+  </div>
+  <div class="split">
+    <form class="form-card" id="groupForm">
+      <label>Warengruppen-Nr.<input id="gId"></label>
+      <label>Bezeichnung<input id="gName"></label>
+      <label>Kurzbezeichnung<input id="gShort"></label>
+      <label>Sortierung<input id="gSort" type="number"></label>
+      <label>Farbe<input id="gColor" type="color"></label>
+      <label class="check">Aktiv<input id="gActive" type="checkbox" checked></label>
+      <label class="wide">Beschreibung<textarea id="gNotes" rows="5"></textarea></label>
+    </form>
+    <div class="table-card"><table><thead><tr><th>Nr.</th><th>Bezeichnung</th><th>Sort.</th><th>Farbe</th><th>Status</th></tr></thead><tbody id="groupBody"></tbody></table></div>
+  </div>
+</section>
+
+<section class="view" data-view-panel="articles">
+  <div class="page-head"><div><h1>Artikel</h1><p>Alle Stammdaten, Preise, Bilder, Pfandregeln und Informationen.</p></div></div>
+  <div class="toolbar" style="margin-bottom:10px;">
+    <button type="button" id="masterDataPushBtn" class="primary">📤 Artikel, Warengruppen und Darstellung an alle Kassen senden</button>
+    <span id="masterDataPushStatus" style="margin-left:10px;color:var(--muted);font-size:.88rem;"></span>
+  </div>
+  <div class="toolbar" id="articleToolbar">
+    <button data-cmd="new">＋ Neu</button><button data-cmd="save">💾 Speichern</button>
+    <button data-cmd="delete">🗑 Löschen</button><button data-cmd="image">🖼 Bild auswählen</button>
+    <button data-cmd="import">⇩ Import</button><button data-cmd="export">⇧ Export</button>
+    <button data-cmd="print">🖨 Drucken</button>
+  </div>
+  <div class="article-layout">
+    <div class="article-editor">
+      <div class="tabs">
+        <button class="active" data-atab="basic">Grunddaten</button><button data-atab="sale">Verkauf</button>
+        <button data-atab="deposit">Pfand/Optionen</button><button data-atab="info">Informationen</button>
+        <button data-atab="display">Darstellung</button><button data-atab="prices">Preishistorie</button><button data-atab="depositgroups">Pfandgruppen</button>
+      </div>
+      <div class="atab active" data-apanel="basic">
+        <div class="form-grid">
+          <label>Artikel-Nr.<input id="aId"></label><label>Artikelbezeichnung<input id="aName"></label>
+          <label>Warengruppe<select id="aCategory"></select></label><label>Kurztext<input id="aShort"></label>
+          <label>Bontext<input id="aReceipt"></label><label>Barcode / QR-Inhalt<input id="aBarcode"></label>
+          <label>Verkaufseinheit<select id="aUnit"><option>Stück</option><option>Portion</option><option>Becher</option><option>Glas</option></select></label>
+          <label>Menge je Verkauf<input id="aQty" type="number" step="0.001" value="1"></label>
+          <label class="check">Aktiv<input id="aActive" type="checkbox" checked></label>
+          <label class="check">Favorit<input id="aFavorite" type="checkbox"></label>
+          <label class="check" title="Nur markierte Artikel erscheinen in den Preislisten der TV-Präsentation.">PL · Preisliste<input id="aPriceListVisible" type="checkbox" checked></label>
+        </div>
+      </div>
+      <div class="atab" data-apanel="sale">
+        <div class="form-grid">
+          <label>Verkaufspreis brutto<input id="aPrice" type="number" step="0.01"></label>
+          <!-- Happy Hour je Artikel: das Häkchen sagt, DASS der Artikel teilnimmt, das Feld
+               daneben, ZU WELCHEM Preis. Bewusst ein fester Preis statt eines Prozentsatzes -
+               10 % auf 5,50 € sind 4,95 €, und am Stand zählt jemand Wechselgeld ab.
+               WANN die Happy Hour gilt, steht in der eigenen Ansicht "Happy Hour". -->
+          <label class="hh-feld">Happy Hour
+            <span class="hh-zeile">
+              <input id="aHappyHour" type="checkbox">
+              <span>nimmt teil</span>
+            </span>
+          </label>
+          <label class="hh-feld">Happy-Hour-Preis
+            <input id="aHappyHourPrice" type="number" step="0.01" min="0" placeholder="z. B. 5,00">
+            <small id="aHappyHourHinweis" class="hh-hinweis"></small>
+          </label>
+          <!-- Halbe Portion je Artikel: das Häkchen gibt sie an der Kasse frei, das Feld
+               daneben nennt den Preis. Fester Preis statt Prozentsatz, aus demselben Grund
+               wie bei der Happy Hour - am Stand wird Wechselgeld abgezählt. Der Knopf
+               "50 %" übernimmt die Hälfte des Verkaufspreises und setzt die Freigabe mit. -->
+          <label class="hh-feld">½ Portion
+            <span class="hh-zeile"><input id="aHalfAllowed" type="checkbox"><span>erlaubt</span></span>
+          </label>
+          <label class="hh-feld">½-Preis
+            <span class="hh-zeile"><input id="aHalfPrice" type="number" step="0.01" min="0" placeholder="Halbpreis"><button type="button" id="aHalfPrice50" title="50 % des aktuellen Verkaufspreises übernehmen">50 %</button></span>
+          </label>
+          <label>Einkaufspreis netto<input id="aPurchase" type="number" step="0.01"></label>
+          <label>Steuersatz<select id="aTax"><option value="0">0 %</option><option value="7">7 %</option><option value="19">19 %</option></select></label>
+          <label>Bestand<input id="aStock" type="number" step="0.01"></label>
+          <label>Mindestbestand<input id="aMinStock" type="number" step="0.01"></label>
+          <label class="check">Personalverbrauch<input id="aStaff" type="checkbox" checked></label>
+        </div>
+      </div>
+      <div class="atab" data-apanel="deposit">
+        <div class="form-grid">
+          <label>Pfandregel<select id="aDepositRule"><option value="global">Global</option><option value="none">Kein Pfand</option><option value="automatic">Automatisch</option><option value="included">Im Preis</option><option value="manual">Manuell</option></select></label>
+          <label>Optionsgruppe<select id="aOption"><option value="">Keine</option><option value="shot">Rum / Amaretto</option><option value="dip">Dip-Auswahl</option></select></label>
+          <label>Pfandart 1<input id="aDep1Name"></label><label>Pfandbetrag 1<input id="aDep1Price" type="number" step="0.01"></label>
+          <label>Pfandart 2<input id="aDep2Name"></label><label>Pfandbetrag 2<input id="aDep2Price" type="number" step="0.01"></label>
+        </div>
+      </div>
+      <div class="atab" data-apanel="info">
+        <div class="form-grid">
+          <label>Prüfstatus<select id="aInfoStatus"><option value="draft">Entwurf</option><option value="incomplete">Unvollständig</option><option value="review">In Prüfung</option><option value="approved">Freigegeben</option><option value="outdated">Veraltet</option><option value="blocked">Gesperrt</option></select></label>
+          <label>Datensatz-Version<input id="aInfoVersion" value="1.0.0"></label>
+          <label class="wide">Kurzbeschreibung<textarea id="aInfoShort"></textarea></label>
+          <label class="wide">Zutaten<textarea id="aIngredients"></textarea></label>
+          <label class="wide">Zusatzstoffe / Inhaltsstoffe<textarea id="aContents"></textarea></label>
+          <label class="wide">Wichtiger Hinweis<textarea id="aImportant"></textarea></label>
+          <label class="wide">Bisheriger Allergen-Freitext (nur Übergang/Ergänzung)<textarea id="aAllergens"></textarea></label>
+          <section class="wide big14-editor-card"><h3>Big 14 – strukturierte Allergene</h3><p>Fehlende Angaben bleiben bewusst „Nicht geprüft“ und werden niemals als allergenfrei ausgegeben.</p><div id="aBig14Editor" class="big14-editor-grid"></div></section>
+          <label>Hersteller<input id="aManufacturer"></label><label>Lieferant<input id="aSupplier"></label>
+          <label class="wide">Datenquelle<input id="aInfoSource"></label>
+          <label>Gültig ab<input id="aInfoValidAt" type="date"></label><label>Freigegeben am<input id="aInfoApprovedAt" type="date"></label>
+          <label class="wide">Freigegeben von<input id="aInfoApprovedBy"></label>
+          <fieldset class="wide nutrition-editor"><legend>Nährwerte je 100 g / 100 ml</legend><div class="form-grid"><label>Energie kJ<input id="aEnergyKj" type="number" step="0.01"></label><label>Energie kcal<input id="aEnergyKcal" type="number" step="0.01"></label><label>Fett g<input id="aFat" type="number" step="0.01"></label><label>davon gesättigt g<input id="aSaturates" type="number" step="0.01"></label><label>Kohlenhydrate g<input id="aCarbohydrate" type="number" step="0.01"></label><label>davon Zucker g<input id="aSugars" type="number" step="0.01"></label><label>Eiweiß g<input id="aProtein" type="number" step="0.01"></label><label>Salz g<input id="aSalt" type="number" step="0.01"></label></div></fieldset>
+          <label class="wide">Freitext / interne Notiz<textarea id="aNotes"></textarea></label>
+        </div>
+      </div>
+
+
+      <div class="atab" data-apanel="depositgroups">
+        <div class="price-adjust-card">
+          <h3>Pfandgruppen zuordnen</h3>
+          <div id="depositGroupChoices" class="deposit-group-choices"></div>
+        </div>
+      </div>
+
+      <div class="atab" data-apanel="prices">
+        <div class="price-adjust-card">
+          <h3>Preisanpassung planen</h3>
+          <div class="form-grid">
+            <label>Aktueller VK-Preis<input id="priceCurrent" type="number" step="0.01" readonly></label>
+            <label>Neuer VK-Preis<input id="priceNew" type="number" step="0.01"></label>
+            <label>Gültig ab Datum<input id="priceValidDate" type="date"></label>
+            <label>Gültig ab Uhrzeit<input id="priceValidTime" type="time" value="00:00"></label>
+            <label class="wide">Änderungsgrund / Bemerkung<textarea id="priceReason" rows="3"></textarea></label>
+          </div>
+          <button type="button" id="schedulePriceChange" class="primary">Preisanpassung speichern</button>
+        </div>
+        <div class="table-card price-history-table">
+          <table>
+            <thead><tr><th>Gültig ab</th><th>Alter Preis</th><th>Neuer Preis</th><th>Geändert am</th><th>Benutzer</th><th>Grund</th><th>Status</th></tr></thead>
+            <tbody id="priceHistoryBody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="atab" data-apanel="display">
+        <div class="form-grid">
+          <label>Buttonfarbe<input id="aColor" type="color"></label>
+          <label>Darstellung<select id="aDisplay"><option value="global">Global</option><option value="image">Bild</option><option value="mixed">Bild/Farbe/Text</option><option value="color">Farbe</option><option value="text">Text</option></select></label>
+          <label class="wide">Bilddatei / Pfad<input id="aImage"></label>
+          <div class="image-preview wide"><img id="aPreview" alt=""><span>Bildvorschau</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="table-card article-table"><table><thead><tr><th>Nr.</th><th>Artikel</th><th>Gruppe</th><th>Preis</th><th title="Happy-Hour-Preis, sofern der Artikel teilnimmt">HH</th><th title="In Präsentations-Preislisten anzeigen">PL</th></tr></thead><tbody id="articleBody"></tbody></table></div>
+  </div>
+  <input id="imageFile" type="file" accept="image/*" hidden>
+</section>
+
+<section class="view" data-view-panel="registers">
+  <div class="page-head"><div><h1>Kassenverwaltung</h1><p>Jede Kasse erhält eine eindeutige ID und ein eigenes Profil.</p></div></div>
+  <div class="toolbar"><button id="newRegister">＋ Neue Kasse</button><button id="saveRegisters">💾 Speichern</button><button id="deleteRegister" class="danger" data-confirm-handler="register" title="Die markierte Kasse löschen">🗑 Kasse löschen</button></div>
+  <div id="registerCards" class="register-grid"></div>
+</section>
+
+<section class="view" data-view-panel="settings">
+  <div class="page-head"><div><h1>Grundeinstellungen</h1><p>Globale Einstellungen für alle Kassenprofile.</p></div></div>
+  <div class="required-legend"><strong><span class="required-star">*</span> Pflichtfeld</strong> – diese Angaben werden für Kasse, Bon und Ausdruck benötigt.</div>
+  <div class="settings-grid">
+    <label>Vereins-/Firmenname <span class="required-star" aria-hidden="true">*</span><input id="sClub" required autocomplete="organization"></label><label>Veranstaltung <span class="required-star" aria-hidden="true">*</span><input id="sEvent" required></label>
+    <label class="club-logo-setting-inline check">PIN-Sperre auf den Kassen aktiv<input type="checkbox" id="sPinLockEnabled" checked></label>
+    <label class="club-logo-setting">Logo als Datei hinterlegen
+      <img id="sClubLogoPreview" src="assets/kochmuetze.png" alt="Logo-Vorschau">
+      <input id="sClubLogoFile" type="file" accept="image/png,image/jpeg,image/webp">
+      <button type="button" id="clearClubLogo">Standardlogo verwenden</button>
+    </label>
+    <label>Land<select id="sCountry"><option>Deutschland</option><option>Niederlande</option><option>Belgien</option><option>Österreich</option><option>Anderes Land</option></select></label>
+    <label>TSE<select id="sTse"><option value="true">Aktiv</option><option value="false">Nicht aktiv</option></select></label>
+    <label>Button-Größe<select id="sButtonSize"><option value="compact">Kompakt</option><option value="standard">Standard</option><option value="large">Groß</option></select></label>
+    <label>Darstellung<select id="sButtonMode"><option value="image">Bild</option><option value="mixed">Bild/Farbe/Text</option><option value="color">Farbe</option><option value="text">Text</option></select></label>
+    <label class="check">Info-I anzeigen<input id="sInfo" type="checkbox" checked></label>
+    <label class="check">Preise anzeigen<input id="sPrice" type="checkbox" checked></label>
+    <label class="check">Taste Personal sichtbar<input id="sShowStaff" type="checkbox" checked></label>
+    <label class="check">Taste Trinkgeld sichtbar<input id="sShowTip" type="checkbox" checked></label>
+    <label class="check">Taste Pfandrückgabe sichtbar<input id="sShowDeposit" type="checkbox" checked></label>
+    <label class="check">Taste Bondruck sichtbar<input id="sShowPrint" type="checkbox" checked></label>
+    <label class="check">Taste Mehr sichtbar<input id="sShowMore" type="checkbox" checked></label>
+    <label class="check">Rückgeldfunktion sichtbar<input id="sShowChange" type="checkbox" checked></label>
+    <label class="check">Rückgeld vor Abschluss zwingend<input id="sRequireChange" type="checkbox"></label>
+    <label class="check">Bediener vor jedem Verkauf bestätigen<input id="sRequireOperator" type="checkbox"></label>
+    <label class="wide">Bediener – eine Person pro Zeile<textarea id="sOperators" rows="6" placeholder="Hans&#10;Peter&#10;Marion&#10;Gast"></textarea></label>
+  </div>
+  <button id="saveSettings" class="primary">Einstellungen speichern</button>
+  <article class="panel operator-qr-manager">
+    <h3>Bediener-QR-Codes</h3>
+    <p>Bei aktivierter Bedienerbestätigung wird vor dem ersten Artikel der persönliche QR-Code gescannt oder der Name über die Bedienertaste gewählt.</p>
+    <div id="operatorQrCards" class="operator-qr-cards"></div>
+  </article>
+</section>
+
+
+
+<section class="view" data-view-panel="featureconfig">
+  <div class="page-head"><div><h1>Funktionskonfiguration</h1><p>Optionale Kassenfunktionen zentral festlegen. Die Kasse selbst bietet dafür keine Einstellmöglichkeiten.</p></div></div>
+  <div class="required-legend"><strong>Pflichtfunktionen</strong> sind verriegelt und können nicht abgeschaltet werden.</div>
+  <div id="featureConfigSections" class="feature-config-grid"></div>
+  <div class="toolbar">
+    <button id="featureConfigRecommended" type="button">Empfohlene Grundeinstellung</button>
+    <button id="saveFeatureConfig" type="button" class="primary">💾 Funktionskonfiguration speichern</button>
+  </div>
+  <article class="panel">
+    <h3>Pfandrückgaben</h3>
+    <p>Die Rückgabeartikel werden mit der Konfiguration an die Kassen übertragen. Der Betrag ist negativ, weil er an den Kunden ausgezahlt wird.</p>
+    <div id="featureDepositPreview" class="feature-deposit-preview"></div>
+  </article>
+</section>
+
+<section class="view" data-view-panel="workspace">
+  <div class="page-head"><div><h1>Kassenoberfläche bearbeiten</h1><p>Die Verkäuferkasse bleibt minimalistisch. Alle sichtbaren Tasten, Reihenfolgen, Größen, Texte, Farben, Symbole und Bilder werden ausschließlich hier verwaltet.</p></div></div>
+  <article class="panel workspace-manager-intro"><strong>Leitprinzip:</strong> Die Verkaufsversion ist ein schneller, bildgestützter Taschenrechner. Keine Umsätze, Stammdaten oder Systemeinstellungen sind dort bearbeitbar.</article>
+  <div class="toolbar workspace-presets">
+    <button type="button" id="wsPresetCompact">Kompakt</button>
+    <button type="button" id="wsPresetTouch">Große Touch-Kasse</button>
+    <button type="button" id="wsPresetProfessional">Professionell ausgewogen</button>
+    <button type="button" id="wsReset">Standard wiederherstellen</button>
+  </div>
+  <article class="panel category-order-panel">
+    <h3>Reihenfolge der Karteikartenreiter</h3>
+    <p>Mit den Pfeilen legen Sie die Reihenfolge in der Verkaufskasse fest, zum Beispiel Favoriten, Getränke, Speisen und Pfand.</p>
+    <div id="managerCategoryOrder" class="manager-category-order"></div>
+  </article>
+  <div id="managerWorkspaceEditor" class="manager-workspace-editor"></div>
+  <div class="toolbar workspace-savebar"><button type="button" id="saveWorkspace" class="primary">Kassenoberfläche speichern</button></div>
+</section>
+
+
+<section class="view" data-view-panel="corecatalog">
+  <div class="page-head"><div><h1>Core-Katalog &amp; Programmzuordnung</h1><p>Wiederverwendbare Framework-Cores zentral verwalten und beliebigen Programmen zuordnen. Eine Zuordnung ist noch keine Produktivfreigabe.</p></div></div>
+  <article class="panel">
+    <div class="catalog-core-head"><div><strong>SellerAuthCore</strong><span class="status-pill candidate">V0.1.0 Candidate</span></div><p>Optionaler Authentifizierungs-Core mit PIN, Betriebssystem-Biometrie/WebAuthn und erweiterbaren NFC/RFID/FIDO2-Adaptern. Biometrische Rohdaten werden nicht im Framework gespeichert.</p></div>
+    <div class="catalog-settings-grid">
+      <label><input id="sellerAuthEnabled" type="checkbox"> In zugeordneten Programmen grundsätzlich aktivierbar</label>
+      <label>Standardverfahren<select id="sellerAuthMethod"><option value="pin">PIN</option><option value="platform-webauthn">Fingerprint / Windows Hello / WebAuthn</option><option value="platform-webauthn+pin">Fingerprint mit PIN-Fallback</option></select></label>
+      <label>FastLogin (Sekunden)<input id="sellerAuthFastLogin" type="number" min="0" max="3600" value="30"></label>
+    </div>
+  </article>
+  <article class="panel"><h2>Programmen zuordnen</h2><p class="muted">Neue Programme können ergänzt werden. Jede Integration benötigt Übernahmeprotokoll, Kompatibilitätsnachweis, QA/TÜV und Freigabe-Gate.</p><div id="sellerAuthProgramList" class="catalog-program-list"></div><div class="toolbar"><button type="button" id="addCatalogProgram">Programm ergänzen</button><button type="button" id="saveCoreCatalog" class="primary">Katalog und Zuordnungen speichern</button><button type="button" id="exportCoreAssignments">Zuordnungen exportieren</button></div></article>
+</section>
+
+<section class="view" data-view-panel="devices">
+  <div class="page-head"><div><h1>Geräte &amp; QR-Codes</h1><p>Bondrucker, Scanner, Kartenterminals und Bezahl-QR je Kasse konfigurieren.</p></div></div>
+  <div class="toolbar"><button id="newDevice">＋ Gerät</button><button id="saveDevices">💾 Speichern</button><button id="testPrinter">🖨 Testbon</button></div>
+  <div class="split">
+    <form class="form-card" id="deviceForm">
+      <label>Zielkasse<select id="dRegister"></select></label>
+      <label>Geräteart<select id="dType"><option>Bondrucker</option><option>Barcode-/QR-Scanner</option><option>Kartenterminal</option></select></label>
+      <label>Hersteller<input id="dMaker"></label>
+      <label>Modell<input id="dModel"></label>
+      <label>Verbindung<select id="dConnection"><option>Bluetooth</option><option>USB</option><option>WLAN/LAN</option><option>Systemdrucker</option></select></label>
+      <label>Papierbreite<select id="dPaper"><option value="58">58 mm</option><option value="80">80 mm</option></select></label>
+      <label>Protokoll<select id="dProtocol"><option>ESC/POS</option><option>Systemdruck</option><option>Hersteller-API</option></select></label>
+      <label>Zeichensatz<select id="dCharset"><option>UTF-8</option><option>CP858</option><option>CP850</option></select></label>
+      <label class="check">Automatisch drucken<input id="dAutoPrint" type="checkbox" checked></label>
+      <label class="check">Aktiv<input id="dActive" type="checkbox" checked></label>
+      <label class="wide">Technische Daten / Hinweise<textarea id="dNotes" rows="5"></textarea></label>
+      <button type="button" id="deviceAiSearch" class="primary wide">Geräte-Assistent starten</button>
+      <button type="button" id="deviceCheckCompatibility" class="wide">Kompatibilität prüfen</button>
+      <p class="hint wide">Im Produktivsystem kann hier anhand Hersteller und Modell eine Internetrecherche nach ESC/POS, Papierbreite und Schnittstellen gestartet werden.</p>
+    </form>
+    <div class="table-card"><table><thead><tr><th>Kasse</th><th>Art</th><th>Hersteller</th><th>Modell</th><th>Verbindung</th><th>Status</th></tr></thead><tbody id="deviceBody"></tbody></table></div>
+  </div>
+  <article class="panel command-qr-card">
+    <div><h3>Bezahl-QR für den Kassenscanner</h3><p>Dieser QR-Code löst exakt dieselbe Funktion wie die Taste BEZAHLEN aus. Nach erfolgreichem Schnellabschluss ist die Kasse sofort für den nächsten Verkauf bereit.</p><code>CMD-CHECKOUT</code></div>
+    <canvas id="checkoutCommandQr" width="300" height="300"></canvas>
+    <div class="report-actions"><button id="printCheckoutQr">Bezahl-QR drucken</button><button id="saveCheckoutQr">QR als Bild speichern</button></div>
+  </article>
+</section>
+
+<section class="view" data-view-panel="receipt">
+  <div class="page-head"><div><h1>Bonlayout</h1><p>Inhalt und Darstellung des Kundenbons konfigurieren.</p></div></div>
+  <div class="receipt-layout">
+    <form class="settings-grid receipt-settings">
+      <label class="check">Kopf anzeigen<input id="rHeader" type="checkbox" checked></label>
+      <label>Kopfzeile 1<input id="rHead1"></label>
+      <label>Kopfzeile 2<input id="rHead2"></label>
+      <label class="check">Logo anzeigen<input id="rLogo" type="checkbox" checked></label>
+      <label class="check">Kassen-ID anzeigen<input id="rRegisterId" type="checkbox" checked></label>
+      <label class="check">Bediener anzeigen<input id="rReceiptOperator" type="checkbox" checked></label>
+      <label class="check">Bonnummer anzeigen<input id="rBonNo" type="checkbox" checked></label>
+      <label>MwSt-Darstellung<select id="rVat"><option value="none">Ohne MwSt-Ausweis</option><option value="summary">MwSt-Zusammenfassung</option><option value="peritem">MwSt je Position</option></select></label>
+      <label class="check">Pfand getrennt anzeigen<input id="rDeposit" type="checkbox" checked></label>
+      <label class="check">Zahlungsart anzeigen<input id="rReceiptPayment" type="checkbox" checked></label>
+      <label class="check">Gegeben/Rückgeld anzeigen<input id="rChange" type="checkbox" checked></label>
+      <label>Fußzeile 1<input id="rFoot1"></label>
+      <label>Fußzeile 2<input id="rFoot2"></label>
+      <label class="check">Automatischer Bondruck<input id="rAutoPrint" type="checkbox" checked></label>
+      <button type="button" id="saveReceipt" class="primary">Bonlayout speichern</button>
+    </form>
+    <article class="receipt-preview"><div id="receiptPreview"></div></article>
+  </div>
+</section>
+
+<section class="view" data-view-panel="cashprep">
+  <div class="page-head"><div><h1>Money Butler</h1><p>Startbestand oder Nachfüllung erfassen und direkt an die Kasse übertragen.</p></div><a class="standalone-link" href="../money-butler/index.html" target="_blank">Als eigene Money-Butler-App öffnen</a></div>
+  <p id="managerCashTestHint" class="test-phase-note" hidden><strong>So ist es gedacht:</strong> Reines Wechselgeld bereitet man in der eigenständigen Money-Butler-App vor. Dieser Manager bleibt der geschützte Verwaltungsbereich.</p>
+  <div class="cashprep-layout">
+    <form class="secure-card cash-form">
+      <section class="manager-cash-section" data-manager-cash-section="target" data-default-open="true">
+        <div class="manager-cash-heading"><h3>1. Ziel und Vorgang</h3><button type="button" class="manager-cash-lock" aria-expanded="true" aria-controls="manager-cash-target" title="Bereich einklappen"><span class="manager-lock-icon" aria-hidden="true">🔓</span><span class="manager-lock-label">Einklappen</span></button></div>
+        <div class="manager-cash-body" id="manager-cash-target">
+          <label>Zielkasse<select id="cashRegister"></select></label>
+          <label>Vorgangsart<select id="cashType"><option value="opening">Anfangsbestand</option><option value="topup">Nachfüllung</option></select></label>
+          <label>Gültig für (Pflichtfeld)<input id="cashEffectiveDate" type="date" required autocomplete="off"><small>Die Zielkasse akzeptiert den Code ausschließlich an diesem Tag.</small></label>
+        </div>
+      </section>
+      <section class="manager-cash-section" data-manager-cash-section="loose" data-default-open="true">
+        <div class="manager-cash-heading"><h3>2. Lose Scheine und Münzen</h3><button type="button" class="manager-cash-lock" aria-expanded="true" aria-controls="manager-cash-loose" title="Bereich einklappen"><span class="manager-lock-icon" aria-hidden="true">🔓</span><span class="manager-lock-label">Einklappen</span></button></div>
+        <div class="manager-cash-body" id="manager-cash-loose"><div id="denominations" class="denomination-grid"></div></div>
+      </section>
+      <section class="manager-cash-section" data-manager-cash-section="rolls" data-default-open="false">
+        <div class="manager-cash-heading"><div><h3>3. Rollengeld</h3><small>Nur vollständige Münzrollen; angebrochene Rollen als lose Münzen zählen.</small></div><button type="button" class="manager-cash-lock" aria-expanded="false" aria-controls="manager-cash-rolls" title="Bereich ausklappen"><span class="manager-lock-icon" aria-hidden="true">🔒</span><span class="manager-lock-label">Ausklappen</span></button></div>
+        <div class="manager-cash-body" id="manager-cash-rolls" hidden><div id="cashCoinRolls" class="cash-roll-grid"></div></div>
+      </section>
+      <!-- Nur bei Ziel "Geldkassette": derselbe Bereich wie im Money Butler, aus demselben
+           Modul (shared/kc-geldkassette.js). Faellt der Kassenwart aus, macht der PC-Manager
+           dieselbe Aufgabe - und zwar genau gleich. -->
+      <section class="manager-cash-section" id="cashKassetteSection" data-manager-cash-section="kassette" data-default-open="true" hidden>
+        <div class="manager-cash-heading"><h3>3b. Auf die beiden Geldladen aufteilen</h3><button type="button" class="manager-cash-lock" aria-expanded="true" aria-controls="manager-cash-kassette" title="Bereich einklappen"><span class="manager-lock-icon" aria-hidden="true">🔓</span><span class="manager-lock-label">Einklappen</span></button></div>
+        <div class="manager-cash-body" id="manager-cash-kassette"><div id="cashKassetteAufteilung"></div></div>
+      </section>
+      <section class="manager-cash-section" data-manager-cash-section="approval" data-default-open="true">
+        <div class="manager-cash-heading"><h3>4. Freigabe und Erzeugen</h3><button type="button" class="manager-cash-lock" aria-expanded="true" aria-controls="manager-cash-approval" title="Bereich einklappen"><span class="manager-lock-icon" aria-hidden="true">🔓</span><span class="manager-lock-label">Einklappen</span></button></div>
+        <div class="manager-cash-body" id="manager-cash-approval">
+          <label>Notiz<input id="cashNote" placeholder="z. B. zusätzliches Wechselgeld"></label>
+          <p class="hint">Die Übergabe wird mit der entsperrten Manager-Sitzung freigegeben.</p>
+          <button type="button" id="generateCashQr" class="primary">QR-Code erzeugen</button>
+          <button type="button" id="sendCashDirect" class="secondary">📶 Direkt an Kasse senden (nur im selben WLAN)</button>
+          <div id="sendCashDirectResult" class="hint"></div>
+        </div>
+      </section>
+    </form>
+    <article class="qr-card manager-cash-section" data-manager-cash-section="result" data-default-open="true">
+      <div class="manager-cash-heading"><h3>5. Bargeldübergabe</h3><button type="button" class="manager-cash-lock" aria-expanded="true" aria-controls="manager-cash-result" title="Bereich einklappen"><span class="manager-lock-icon" aria-hidden="true">🔓</span><span class="manager-lock-label">Einklappen</span></button></div>
+      <div class="manager-cash-body cash-result-body" id="manager-cash-result">
+        <div id="cashTotal" class="cash-total">0,00 €</div>
+        <div class="cash-total-parts"><span>Lose <b id="cashLooseTotal">0,00 €</b></span><span>Rollen <b id="cashRollTotal">0,00 €</b></span></div>
+        <div class="cash-transfer-check"><span>Vorgang <b id="cashResultType">—</b></span><span>Ziel <b id="cashResultRegister">—</b></span><span>Gültig für <b id="cashResultDate">—</b></span></div>
+        <canvas id="cashQrCanvas" width="320" height="320"></canvas>
+        <div class="kurzcode-box"><small>Rückfall ohne Scanner - an der Kasse von Hand eingeben:</small><div id="cashKurzcode" class="kurzcode-anzeige">—</div></div>
+        <textarea id="cashQrPayload" readonly></textarea>
+        <button id="printCashQr">QR-Beleg drucken</button>
+        <p id="cashKassetteHinweis" class="kckass-doppelhinweis" hidden><strong>An BEIDEN Kassen einlesen.</strong> Jede Kasse bucht nur ihren eigenen Anteil – doppelt gezählt wird nichts. Wird der Code nur an einer Kasse eingelesen, fehlt der anderen der Anfangsbestand und ihre Abrechnung geht abends nicht auf.</p>
+      </div>
+    </article>
+  </div>
+
+  <!-- Statistik ueber die Zeit: welche Stueckelung wurde tatsaechlich gebraucht.
+       Gleiches Modul wie in der eigenstaendigen Money-Butler-App, damit beide Stellen
+       dieselben Zahlen zeigen (shared/kc-bargeld-statistik.js). -->
+  <article class="secure-card" id="mgrStatKarte">
+    <h3>Statistik über die Zeit</h3>
+    <p class="hint">Welche Stückelung wurde bisher übergeben? Planungshilfe für den nächsten Markt –
+       gezählt werden alle Übergaben aller Geräte, sowohl per QR als auch über das WLAN.</p>
+    <div class="kcbs-filter">
+      <label>Vorgang<select id="mgrStatTyp">
+        <option value="alle">Alle</option><option value="opening">Anfangsbestand</option>
+        <option value="topup">Nachfüllung</option><option value="count">Abendzählung</option></select></label>
+      <label>Kasse<select id="mgrStatKasse"><option value="alle">Alle Kassen</option></select></label>
+      <label>Von<input type="date" id="mgrStatVon"></label>
+      <label>Bis<input type="date" id="mgrStatBis"></label>
+      <button type="button" id="mgrStatAktualisieren">Aktualisieren</button>
+    </div>
+    <div id="mgrStatistik"></div>
+  </article>
+
+  <!-- Archiv der Uebergabeprotokolle. Zwei Wege enden hier: der Money Butler meldet jeden
+       erzeugten Beleg automatisch, und ein Beleg vom Papier laesst sich per QR-Code oder
+       eingefuegtem Text nachtragen. Beides prueft dieselbe Pruefsumme (shared/kc-uebergabeprotokoll.js). -->
+  <article class="secure-card" id="mgrProtokollKarte">
+    <h3>Übergabeprotokolle der Geldkassette</h3>
+    <p class="hint">Wer hat wann welche Kassette gebracht, mit welcher Stückelung und welcher Aufteilung.
+       Neue Belege meldet der Money Butler selbst; ein Beleg vom Papier lässt sich hier nachtragen.</p>
+    <div class="kcbs-filter">
+      <label>Beleg nachtragen<input type="text" id="mgrProtokollEingabe" placeholder="KCPROT1:… vom Papier scannen oder einfügen" autocomplete="off"></label>
+      <button type="button" id="mgrProtokollUebernehmen">Übernehmen</button>
+      <button type="button" id="mgrProtokollAktualisieren">Aktualisieren</button>
+    </div>
+    <p id="mgrProtokollMeldung" class="kcprot-meldung" hidden></p>
+    <div id="mgrProtokolle"></div>
+  </article>
+</section>
+
+
+<section class="view" data-view-panel="emergency">
+  <div class="page-head"><div><h1>Superadmin-Zugang</h1><p>Persönlichen QR-Zugang für den schnellen Vor-Ort-Zugriff erzeugen und verwalten.</p></div></div>
+  <div class="cashprep-layout">
+    <article class="secure-card">
+      <h3>Superadmin-QR erzeugen</h3>
+      <p>Der QR-Code wird zufällig erzeugt. In die Kassenkonfiguration gelangt nur seine Prüfsumme – niemals das QR-Geheimnis selbst.</p>
+      <label>Name für das Protokoll<input id="superAdminOwner" placeholder="z. B. Hans-Joachim Koch"></label>
+      <label>Gültigkeit<select id="superAdminValidity"><option value="14">14 Tage</option><option value="30">30 Tage</option><option value="90">90 Tage</option><option value="365" selected>1 Jahr</option></select></label>
+      <label>Neue vierstellige Kassen-PIN<input id="superAdminPin" type="password" inputmode="numeric" pattern="[0-9]{4}" maxlength="4" autocomplete="new-password" placeholder="••••"></label>
+      <button type="button" id="generateSuperAdminQr" class="primary">Neuen Superadmin-QR erzeugen</button>
+      <button type="button" id="printEmergencyQr">QR-Karte drucken</button>
+      <button type="button" id="saveSuperAdminQr">QR-Karte als Bild speichern</button>
+      <button type="button" id="revokeSuperAdminQr">QR-Zugang sperren</button>
+      <div id="superAdminQrStatus" class="result">Noch kein persönlicher QR-Zugang erzeugt.</div>
+      <p class="hint">Nach Erzeugung oder Sperrung für jede Kasse eine neue Konfigurationsdatei exportieren und dort einlesen.</p>
+    </article>
+    <article class="qr-card emergency-card">
+      <h3>KC MarktKasse</h3>
+      <p><strong>SUPERADMIN · PERSÖNLICH</strong></p>
+      <img id="superAdminQrImage" alt="Persönlicher Superadmin QR-Code" style="display:none">
+      <code id="superAdminCredentialSummary" style="display:none"></code>
+      <p id="emergencyWarning">Noch kein QR-Zugang erzeugt.</p>
+    </article>
+  </div>
+</section>
+
+
+<section class="view" data-view-panel="labels">
+  <div class="page-head"><div><h1>Artikel-Etiketten</h1><p>Etiketten mit Bild, Preis, Allergenen und QR-/Barcode gestalten.</p></div></div>
+  <div class="label-layout">
+    <form class="secure-card">
+      <label>Artikel<select id="labelArticle"></select></label>
+      <label>Etikettengröße<select id="labelSize"><option value="small">Klein</option><option value="medium">Mittel</option><option value="large">Groß</option></select></label>
+      <label>Codeart<select id="labelCodeType"><option value="qr">QR-Code</option><option value="none">Kein Code</option></select></label>
+      <div class="checkbox-list">
+        <label class="check">Artikelname<input id="labelName" type="checkbox" checked></label>
+        <label class="check">Preis<input id="labelPrice" type="checkbox" checked></label>
+        <label class="check">Foto<input id="labelImage" type="checkbox" checked></label>
+        <label class="check">Allergene<input id="labelAllergens" type="checkbox" checked></label>
+        <label class="check">Zutaten<input id="labelIngredients" type="checkbox"></label>
+        <label class="check">Pfandhinweis<input id="labelDeposit" type="checkbox" checked></label>
+        <label class="check">Vereinslogo/-name<input id="labelClub" type="checkbox" checked></label>
+        <label class="check">Artikelnummer<input id="labelId" type="checkbox"></label>
+      </div>
+      <button type="button" id="refreshLabel" class="primary">Vorschau aktualisieren</button>
+      <button type="button" id="printLabel">Drucken / PDF</button>
+    </form>
+    <article class="label-preview-card"><div id="labelPreview" class="label-preview"></div></article>
+  </div>
+</section>
+
+<section class="view" data-view-panel="backup">
+  <div class="page-head"><div><h1>Sicherung und Wiederherstellung</h1><p>Ein-Klick-Sicherung aller Managerdaten.</p></div></div>
+  <div class="export-card-grid">
+    <article class="export-card">
+      <h4>Vollständige Sicherung</h4>
+      <p>Stammdaten, Preise, Historien, Kassen, Geräte, Bons, Trinkgeld, Abschlüsse und Einstellungen.</p>
+      <button id="oneClickBackup" class="primary">Sicherung erstellen</button>
+    </article>
+    <article class="export-card">
+      <h4>Wiederherstellung</h4>
+      <input id="restoreFile" type="file" accept=".kcfullbackup,.json">
+      <button id="restoreBackup">Sicherung prüfen und wiederherstellen</button>
+      <div id="restoreStatus" class="result"></div>
+    </article>
+  </div>
+</section>
+
+<section class="view" data-view-panel="practice">
+  <div class="page-head"><div><h1>Praxistest</h1><p>Kompletter Testlauf vom Öffnen bis zum Tagesabschluss.</p></div></div>
+  <div id="practiceSteps" class="practice-steps"></div>
+  <div class="toolbar">
+    <button id="resetPractice">Test zurücksetzen</button>
+    <button id="exportPracticeReport">Prüfbericht exportieren</button>
+  </div>
+</section>
+
+
+<section class="view" data-view-panel="exchange">
+  <div class="page-head">
+    <div>
+      <h1>KC Datenaustausch</h1>
+      <p>Verbindlicher Austausch zwischen Köcheclub, Kassen-Manager und Kassenterminals.</p>
+    </div>
+    <span class="record-status">KCExchangePackage V1</span>
+  </div>
+
+  <div class="exchange-grid">
+    <article class="secure-card">
+      <h3>Paket exportieren</h3>
+      <label>Paketart
+        <select id="exchangeExportType">
+          <option value="config">Konfiguration / Stammdaten</option>
+          <option value="sales">Umsätze / Stornos / Trinkgeld</option>
+          <option value="staff">Bediener / Schichten</option>
+          <option value="purchase">Einkauf / Lieferanten</option>
+          <option value="expense">Ausgaben / Belege</option>
+          <option value="inventory">Lager / Inventur</option>
+          <option value="closing">Kassenabschlüsse</option>
+          <option value="bundle">Gesamtpaket</option>
+        </select>
+      </label>
+      <label>Zielsystem
+        <select id="exchangeTarget">
+          <option value="KOECHECLUB">Köcheclub-Verwaltung</option>
+          <option value="KC_MARKTKASSE_POS">Kassenterminal</option>
+          <option value="KC_MARKTKASSE_MANAGER">Kassen-Manager</option>
+        </select>
+      </label>
+      <label>Vereins-ID<input id="exchangeClubId" value="KC-WERNE"></label>
+      <label>Veranstaltungs-ID<input id="exchangeEventId" value="WM-2026"></label>
+      <label class="check">Bilder/Anhänge einbeziehen<input id="exchangeAttachments" type="checkbox"></label>
+      <button id="createExchangePackage" class="primary">Paket erzeugen</button>
+      <div id="exchangeExportResult" class="result"></div>
+    </article>
+
+    <article class="secure-card">
+      <h3>Paket importieren</h3>
+      <input id="exchangeImportFile" type="file"
+        accept=".kcexchange,.kcconfig,.kcsales,.kcstaff,.kcpurchase,.kcexpense,.kcinventory,.kcclosing,.kcchanges,.kcbundle,.json">
+      <button id="inspectExchangePackage">Paket prüfen</button>
+      <div id="exchangeImportStatus" class="result">Noch kein Paket geprüft.</div>
+      <button id="applyExchangePackage" class="primary" disabled>Geprüftes Paket übernehmen</button>
+    </article>
+  </div>
+
+  <article class="panel exchange-preview-panel">
+    <h3>Importvorschau</h3>
+    <div class="exchange-summary" id="exchangeSummary"></div>
+    <div class="table-card">
+      <table>
+        <thead><tr><th>Bereich</th><th>Neu</th><th>Geändert</th><th>Unverändert</th><th>Konflikte</th></tr></thead>
+        <tbody id="exchangeDiffBody"></tbody>
+      </table>
+    </div>
+  </article>
+
+  <article class="panel">
+    <h3>Importprotokoll</h3>
+    <div class="table-card exchange-log">
+      <table>
+        <thead><tr><th>Zeit</th><th>Paket-ID</th><th>Typ</th><th>Quelle</th><th>Ergebnis</th><th>Details</th></tr></thead>
+        <tbody id="exchangeLogBody"></tbody>
+      </table>
+    </div>
+  </article>
+
+  <article class="panel">
+    <h3>Vor-Ort-Änderungsprotokoll</h3>
+    <div class="table-card exchange-log">
+      <table>
+        <thead><tr><th>Zeit</th><th>Kasse</th><th>Benutzer</th><th>Anmeldung</th><th>Aktion</th><th>Ergebnis</th></tr></thead>
+        <tbody id="posAdminAuditBody"></tbody>
+      </table>
+    </div>
+  </article>
+</section>
+
+<section class="view" data-view-panel="configuration">
+  <div class="page-head"><div><h1>Konfiguration exportieren</h1><p>Verschlüsseltes Paket für eine bestimmte Kasse erzeugen.</p></div></div>
+  <div class="secure-card">
+    <label>Zielkasse<select id="configRegister"></select></label>
+    <label>Passwort für Datei<input id="configPassword" type="password"></label>
+    <label>Admincode<input id="configCode" type="password" inputmode="numeric"></label>
+    <label>Erster Buchstabe des Namens<input id="configInitial" maxlength="1"></label>
+    <label class="check">Bilder einbetten<input id="configImages" type="checkbox" checked></label>
+    <button id="createConfig" class="primary">Verschlüsselte .kcpos-Datei erstellen</button>
+    <p class="hint">Die Datei kann per E-Mail, WhatsApp, USB-Stick oder Cloud übertragen werden. Ohne Passwort ist sie nicht lesbar.</p>
+  </div>
+</section>
+
+<section class="view" data-view-panel="sales">
+  <div class="page-head"><div><h1>Umsatzdaten importieren</h1><p>Verschlüsselte Exportdateien der einzelnen Kassen einlesen.</p></div></div>
+  <div class="secure-card">
+    <input id="salesFile" type="file" multiple accept=".kcsales">
+    <label>Dateipasswort<input id="salesPassword" type="password"></label>
+    <label>Admincode<input id="salesCode" type="password" inputmode="numeric"></label>
+    <label>Erster Buchstabe des Namens<input id="salesInitial" maxlength="1"></label>
+    <button id="importSales" class="primary">Umsatzdatei entschlüsseln und importieren</button>
+    <div id="salesImportResult" class="result"></div>
+  </div>
+</section>
+
+<section class="view" data-view-panel="recovery">
+  <div class="page-head"><div><h1>Datei entschlüsseln</h1><p>Jede mit dem KC-Format verschlüsselte Datei einlesen und den Inhalt sichtbar machen (Wiederherstellung, falls z.B. eine PIN vergessen wurde).</p></div></div>
+  <div class="secure-card">
+    <div id="recoveryDropZone" style="border:2px dashed #94a3b8;border-radius:10px;padding:28px;text-align:center;cursor:pointer;color:#475569;">
+      Datei hierher ziehen<br>oder klicken, um eine Datei auszuwählen
+      <input id="recoveryFile" type="file" style="display:none;">
+    </div>
+    <div id="recoveryFileName" class="hint"></div>
+    <label>Dateipasswort<input id="recoveryPassword" type="password"></label>
+    <button id="recoveryDecrypt" class="primary">Entschlüsseln</button>
+    <div id="recoveryResult" class="result"></div>
+    <button id="recoveryDownload" class="primary" hidden>Entschlüsselten Inhalt als Datei speichern</button>
+  </div>
+</section>
+
+
+<section class="view" data-view-panel="zentral">
+  <div class="page-head"><div><h1>Zentrale Daten</h1>
+    <p>Gemeinsame Datenhaltung aller KC-Programme. Personen kommen aus der Mitgliederverwaltung,
+       Arbeitszeiten gehen von hier aus zentral hoch – damit Dienstplan, Communicator und die
+       übrigen Programme dieselben Daten nutzen.</p></div></div>
+
+  <article class="secure-card">
+    <div class="zd-zustand" id="zdZustand">Zustand wird geprüft …</div>
+    <div class="zd-karten">
+      <div class="zd-karte">
+        <h3>Personen abholen</h3>
+        <p>Holt Namen, Mitgliedsnummern und Pseudonyme aus der zentralen Datenhaltung in die
+           Zeiterfassung dieses Managers. Vorhandene werden aktualisiert, keiner wird gelöscht.</p>
+        <button type="button" id="zdPersonen" class="primary">Personen abholen</button>
+      </div>
+      <div class="zd-karte">
+        <h3>Arbeitszeiten hochmelden</h3>
+        <p>Meldet die Kommen-/Gehen-Buchungen der Kassen zentral. Dieselbe Buchung darf mehrfach
+           gemeldet werden – sie landet nur einmal.</p>
+        <button type="button" id="zdZeiten">Arbeitszeiten hochmelden</button>
+      </div>
+      <div class="zd-karte">
+        <h3>Pseudonyme hochschreiben</h3>
+        <p>Die Kassen-Pseudonyme gehören dem Manager. Hier werden sie zentral bereitgestellt,
+           damit Dienstplan und Kasse dieselben Namen zeigen.</p>
+        <button type="button" id="zdPseudonyme">Pseudonyme hochschreiben</button>
+      </div>
+    </div>
+    <p id="zdMeldung" class="zd-meldung"></p>
+  </article>
+</section>
+
+<section class="view" data-view-panel="vorfuehrung">
+  <div class="page-head"><div><h1>Vorführdaten</h1>
+    <p>Beispieldaten für Präsentationen: 6395 echte Buchungen über zwölf Markttage.
+       Sie wurden von der Kasse selbst gebucht, damit alle Summen und Auswertungen stimmen.</p></div></div>
+  <article class="secure-card">
+    <p class="vf-hinweis"><strong>Wichtig:</strong> Beim Laden wird der aktuelle Bestand beiseitegelegt und
+       beim Entfernen zurückgeholt. Es geht nichts verloren. Vor dem echten Markttag müssen die
+       Vorführdaten aber entfernt werden – sonst mischen sie sich in die Auswertungen.</p>
+    <div class="dialog-actions">
+      <button type="button" id="vfLaden" class="primary">Vorführdaten laden</button>
+      <button type="button" id="vfEntfernen">Vorführdaten entfernen</button>
+    </div>
+    <p id="vfMeldung" class="vf-meldung"></p>
+  </article>
+</section>
+
+<section class="view" data-view-panel="gutscheine">
+  <div class="page-head"><div><h1>Gutscheine</h1>
+    <p>Alle ausgegebenen Gutscheine mit Restwert. Das offene Guthaben ist eine Verpflichtung des
+       Vereins – Ware, die noch geschuldet wird, kein Gewinn.</p></div></div>
+
+  <article class="secure-card">
+    <div class="gsm-kopf">
+      <input type="text" id="gsmSuche" placeholder="Nummer suchen">
+      <select id="gsmFilter">
+        <option value="alle">Alle</option>
+        <option value="offen">Nur offene</option>
+        <option value="teilweise">Teilweise eingelöst</option>
+        <option value="eingeloest">Vollständig eingelöst</option>
+        <option value="abgelaufen">Abgelaufen</option>
+      </select>
+      <button type="button" id="gsmAktualisieren">Aktualisieren</button>
+    </div>
+    <div class="gsm-zahlen" id="gsmZahlen"></div>
+    <div class="gsm-liste" id="gsmListe"></div>
+  </article>
+</section>
+
+<section class="view" data-view-panel="verbindung">
+  <div class="page-head"><div><h1>Verbindung prüfen</h1>
+    <p>Zeigt im Klartext, was verbunden ist und was nicht – damit man nicht aus LED-Farben raten muss.</p></div></div>
+
+  <article class="secure-card">
+    <div class="vb-kopf">
+      <button type="button" id="vbPruefen" class="primary">Jetzt prüfen</button>
+      <label class="check">Alle 10 Sekunden wiederholen<input type="checkbox" id="vbAuto" checked></label>
+      <span id="vbStand" class="vb-stand"></span>
+    </div>
+    <div id="vbErgebnis" class="vb-liste"></div>
+  </article>
+
+  <article class="secure-card">
+    <h3>Adressen zum Öffnen der Kassen</h3>
+    <p class="vb-hinweis">Diese Adressen stammen aus der laufenden Markttag-Einrichtung. Beim Neustart
+       ändern sich Schlüssel und Ports – dann hier neu abholen statt eine gemerkte Adresse zu verwenden.</p>
+    <div id="vbAdressen" class="vb-adressen"></div>
+  </article>
+</section>
+
+<section class="view" data-view-panel="pricelist">
+  <div class="page-head"><div><h1>Preisliste drucken</h1>
+    <p>Aushang für den Verkaufsstand: zu jedem Artikel die Preise für 1 bis 10 Stück.
+       Nur für Mitarbeiter – nicht für Kunden.</p></div></div>
+
+  <article class="secure-card pl-steuerung">
+    <h3>Was soll auf die Liste?</h3>
+    <p class="pl-hinweis">Es erscheinen nur Artikel, bei denen in den Stammdaten der Haken
+       <strong>PL · Preisliste</strong> gesetzt ist. Darüber lässt sich auch eine Liste nur für
+       Essen oder nur für alkoholfreie Getränke zusammenstellen.</p>
+    <div class="pl-optionen">
+      <label>Überschrift<input id="plTitel" type="text" value="Preisliste" maxlength="60"></label>
+      <label>Jahr<input id="plJahr" type="number" min="2000" max="2999"></label>
+      <label class="check">Pfandzeilen mitrechnen
+        <input id="plPfand" type="checkbox" checked
+               title="Erzeugt zu jedem Artikel mit Pfand zusätzlich eine Zeile inklusive Pfand"></label>
+      <label class="check">Ausverkauftes mitdrucken
+        <input id="plAusverkauft" type="checkbox" checked
+               title="Die Liste hängt den ganzen Tag - was mittags aus ist, kann abends wieder da sein"></label>
+    </div>
+    <div class="pl-gruppen" id="plGruppen"></div>
+    <div class="dialog-actions">
+      <button type="button" id="plAktualisieren">Vorschau aktualisieren</button>
+      <button type="button" id="plDrucken" class="primary">Drucken (A4 quer)</button>
+    </div>
+    <p id="plMeldung" class="pl-meldung"></p>
+  </article>
+
+  <div id="plVorschau" class="pl-vorschau"></div>
+</section>
+
+<section class="view" data-view-panel="closing">
+  <div class="page-head"><div><h1>Kassenabschluss</h1><p>Abschlusscode der Kasse und Zählcode des Kassenwarts zusammenführen.</p></div></div>
+
+  <!-- Von den Kassen selbst gemeldete Abschluesse. Erspart das Einsammeln von QR-Codes am
+       Stand und funktioniert auch ueber die Fernstrecke. Siehe kc-abschluesse-manager.js. -->
+  <article class="secure-card" id="mgrAbschlussKarte">
+    <h3>Von den Kassen gemeldet</h3>
+    <p class="hint">Jede Kasse meldet ihren Tagesabschluss selbst, sobald er fertig ist –
+       auch von unterwegs. Angefordert wird nur ein bereits fertiger Abschluss; gibt es noch
+       keinen, kommt eine entsprechende Rückmeldung statt halber Zahlen.</p>
+    <div class="kcbs-filter">
+      <label>Kasse anfordern<select id="mgrAbschlussKasse"></select></label>
+      <button type="button" id="mgrAbschlussAnfordern">Abschluss anfordern</button>
+      <button type="button" id="mgrAbschlussAktualisieren">Aktualisieren</button>
+    </div>
+    <p id="mgrAbschlussStand" class="tc-status">Noch nicht abgerufen.</p>
+    <div id="mgrAbschluesse"></div>
+  </article>
+
+  <div class="closing-manager-grid">
+    <article class="secure-card">
+      <h3>Scanner-Eingang</h3>
+      <p>USB- oder Bluetooth-HID-Scanner anschließen. Der Scanner arbeitet wie eine Tastatur und muss den Code mit Enter abschließen.</p>
+      <label>Scanner-/Codefeld<textarea id="closingScanInput" rows="7" placeholder="Code scannen oder einfügen"></textarea></label>
+      <div class="report-actions">
+        <button id="processClosingScan">Code verarbeiten</button>
+        <button id="clearClosingScan">Leeren</button>
+      </div>
+      <input id="closingFileInput" type="file" accept=".kcclosing,.kccash,.txt" hidden>
+      <button id="selectClosingFile">Datei einlesen</button>
+      <div id="closingScanResult" class="result"></div>
+    </article>
+    <article class="panel">
+      <h3>Offene Abschlüsse</h3>
+      <div id="closingPairs"></div>
+    </article>
+  </div>
+  <div class="table-card">
+    <table><thead><tr><th>Kasse</th><th>Datum</th><th>Soll</th><th>Ist</th><th>Differenz</th><th>Personal</th><th>Status</th></tr></thead><tbody id="closingBody"></tbody></table>
+  </div>
+  <div class="page-head" style="margin-top:28px"><div><h1>Bargeldbewegungen</h1><p>Anfangsbestand und Nachfüllungen - angenommen und abgelehnt, mit Zeitpunkt und Herkunft.</p></div></div>
+  <div class="table-card">
+    <table><thead><tr><th>Zeitpunkt</th><th>Kasse</th><th>Vorgang</th><th>Betrag</th><th>Weg</th><th>Status</th></tr></thead><tbody id="cashMovementsBody"></tbody></table>
+  </div>
+  <div class="table-card" style="margin-top:14px">
+    <h3 style="padding:10px 14px 0">Abgelehnte Versuche</h3>
+    <table><thead><tr><th>Zeitpunkt</th><th>Kasse</th><th>Grund</th></tr></thead><tbody id="cashAuditBody"></tbody></table>
+  </div>
+</section>
+
+
+
+<section class="view" data-view-panel="businessyear">
+  <div class="page-head"><div><h1>Geschäftsjahr verwalten</h1><p>Geführter, gesicherter Neustart mit neuer Bonnummer.</p></div></div>
+  <div class="simple-guidance"><strong>Einfach und sicher:</strong> Der Assistent erstellt zuerst eine Sicherung, archiviert den bisherigen Stand und ändert erst danach Geschäftsjahr und nächste Bonnummer.</div>
+  <div class="year-grid">
+    <article class="panel"><h3>Aktueller Stand</h3><dl class="status-list"><div><dt>Geschäftsjahr</dt><dd id="currentBusinessYear">—</dd></div><div><dt>Nächste Bonnummer</dt><dd id="currentNextBon">—</dd></div><div><dt>Verkäufe im Jahr</dt><dd id="currentYearSales">—</dd></div></dl></article>
+    <article class="secure-card"><h3>Assistent „Neues Geschäftsjahr“</h3>
+      <label>Neues Geschäftsjahr<input id="newBusinessYear" type="number" min="2020" max="2099" value="2026"></label>
+      <label>Erste Bonnummer<input id="newBonStart" type="number" min="1" step="1" value="1"></label>
+      <label>Verantwortliche Person<input id="yearChangeOwner" maxlength="80" placeholder="Name"></label>
+      <label>Begründung<textarea id="yearChangeReason" rows="3" maxlength="300" placeholder="z. B. Neustart Weihnachtsmarkt 2026"></textarea></label>
+      <label class="check"><input id="yearChangeConfirm" type="checkbox"> Ich habe die Angaben geprüft.</label>
+      <button id="runBusinessYearAssistant" class="primary">Sicherung erstellen und Geschäftsjahr starten</button>
+      <div id="businessYearResult" class="result"></div>
+    </article>
+  </div>
+  <article class="panel"><h3>Archivierte Geschäftsjahre</h3><div id="businessYearArchive"></div></article>
+</section>
+
+<section class="view" data-view-panel="training">
+  <div class="page-head"><div><h1>Schulung für Mitglieder</h1><p>Interaktiver Übungsverkauf ohne echte Umsätze.</p></div></div>
+  <div class="simple-guidance"><strong>Empfohlen:</strong> Jedes Mitglied startet die Schulung direkt an der Kasse. Das Programm erklärt die Bedienoberfläche Schritt für Schritt.</div>
+  <div class="training-manager-grid">
+    <article class="panel"><h3>Schulungsinhalte</h3><ol class="training-list"><li>Anmelden und Trainingsmodus erkennen</li><li>Warengruppe und Artikel auswählen</li><li>Menge ändern und Artikel löschen</li><li>Produktinformation und Allergene öffnen</li><li>Rabatt anwenden</li><li>Barzahlung und Rückgeld</li><li>Kartenzahlung</li><li>Bon stornieren und Fehler korrigieren</li><li>Abmelden und Tagesende</li></ol></article>
+    <article class="secure-card"><h3>Schulung starten</h3><p>Das Schulungsvideo erklärt zuerst den vollständigen Verkauf. Danach kann derselbe Ablauf gefahrlos interaktiv geübt werden.</p><button id="launchTrainingVideo" class="primary">▶ Schulungsvideo ansehen</button><button id="launchTraining">🎓 Interaktive Schulung öffnen</button><button id="printTrainingGuide">Kurzanleitung drucken</button><div id="trainingLaunchResult" class="result"></div></article>
+  </div>
+</section>
+
+<section class="view" data-view-panel="sync">
+  <div class="simple-guidance"><strong>Einfacher Betrieb:</strong> Die Kasse speichert automatisch lokal. Bei Verbindung werden offene Vorgänge übertragen. Technische Einstellungen sind nur für Admins nötig.</div>
+  <div class="page-head">
+    <div>
+      <h1>Online-Teammodus</h1>
+      <p>Gemeinsamer Manager für Superadmin und Kassenwart mit Offline-Warteschlange.</p>
+    </div>
+    <span id="syncConnectionBadge" class="sync-badge offline">Nicht verbunden</span>
+  </div>
+
+  <div class="sync-grid">
+    <article class="secure-card">
+      <h3>Backend auswählen</h3>
+      <label>Betriebsart
+        <select id="syncMode">
+          <option value="local">Nur lokal</option>
+          <option value="online">Online-Teammodus</option>
+        </select>
+      </label>
+      <label>Backend-Typ
+        <select id="syncProvider">
+          <option value="supabase">Supabase</option>
+          <option value="rest">Eigener REST-Server</option>
+          <option value="mock">Lokaler Testserver</option>
+        </select>
+      </label>
+      <label>Server-/Projekt-URL
+        <input id="syncUrl" placeholder="https://projekt.supabase.co oder https://server/api">
+      </label>
+      <label>Projekt / Mandant
+        <input id="syncProject" placeholder="koecheclub-werne">
+      </label>
+      <label>Öffentlicher API-Schlüssel
+        <input id="syncPublicKey" type="password" placeholder="Nur öffentlicher Client-Schlüssel">
+      </label>
+      <p class="hint">Kein Service-Role- oder Admin-Schlüssel im Browser speichern.</p>
+    </article>
+
+    <article class="secure-card">
+      <h3>Benutzer und Rolle</h3>
+      <label>Rolle
+        <select id="syncRole">
+          <option value="superadmin">Superadmin</option>
+          <option value="cashier">Kassenwart</option>
+        </select>
+      </label>
+      <label>E-Mail / Benutzername
+        <input id="syncUser">
+      </label>
+      <label>Passwort / Zugriffstoken
+        <input id="syncToken" type="password">
+      </label>
+      <label class="check">Automatisch synchronisieren
+        <input id="syncAuto" type="checkbox" checked>
+      </label>
+      <label>Synchronisationsintervall
+        <select id="syncInterval">
+          <option value="1">1 Minute</option>
+          <option value="5">5 Minuten</option>
+          <option value="15">15 Minuten</option>
+          <option value="30">30 Minuten</option>
+        </select>
+      </label>
+    </article>
+  </div>
+
+  <details class="security-details"><summary>🔐 Schutz der Übertragungsdaten</summary>
+  <div class="form-grid">
+    <label class="check">Zusätzliche Paketverschlüsselung (empfohlen, sobald der Server sie unterstützt)
+      <input id="syncEncryption" type="checkbox">
+    </label>
+    <label>Gemeinsamer Übertragungsschlüssel
+      <input id="syncSecret" type="password" autocomplete="new-password" placeholder="Mindestens 16 Zeichen; nur Admin kennt ihn">
+    </label>
+    <p class="help">Der Schlüssel wird nicht in Diagnoseexporte geschrieben. Sender und Empfänger müssen denselben Schlüssel verwenden. Ohne passenden Serveradapter bleibt die Option deaktiviert.</p>
+    <div><span id="syncCryptoBadge" class="sync-badge offline">Standardschutz</span></div>
+  </div>
+</details>
+<div class="toolbar sync-toolbar">
+    <button id="saveSyncSettings">💾 Einstellungen speichern</button>
+    <button id="testSyncConnection">🔌 Verbindung testen</button>
+    <button id="syncNow">↻ Jetzt synchronisieren</button>
+    <button id="exportSyncDiagnostics">🧾 Diagnose exportieren</button>
+  </div>
+
+  <div class="kpis sync-kpis">
+    <article><span>Warteschlange</span><strong id="syncQueueCount">0</strong></article>
+    <article><span>Letzte Synchronisation</span><strong id="syncLastRun">—</strong></article>
+    <article><span>Letzter Status</span><strong id="syncLastStatus">—</strong></article>
+    <article><span>Konflikte</span><strong id="syncConflictCount">0</strong></article>
+  </div>
+
+  <div class="dashboard-grid">
+    <article class="panel">
+      <h3>Synchronisationsprotokoll</h3>
+      <div class="table-card sync-log-wrap">
+        <table>
+          <thead><tr><th>Zeit</th><th>Aktion</th><th>Status</th><th>Details</th></tr></thead>
+          <tbody id="syncLogBody"></tbody>
+        </table>
+      </div>
+    </article>
+
+    <article class="panel">
+      <h3>Vorgesehene Datenbereiche</h3>
+      <ul class="sync-scope-list">
+        <li>Warengruppen und Artikel</li>
+        <li>Kassenprofile und Geräte</li>
+        <li>Grundeinstellungen und Bonlayout</li>
+        <li>Umsätze und Stornos</li>
+        <li>Kassenabschlüsse und Zählungen</li>
+        <li>Bargeldbewegungen</li>
+        <li>Audit- und Synchronisationsprotokolle</li>
+      </ul>
+    </article>
+  </div>
+</section>
+
+
+<section class="view" data-view-panel="reports">
+  <div class="page-head"><div><h1>Auswertungen</h1><p>Filterbare Berichte über einzelne oder mehrere Kassen.</p></div></div>
+  <div class="filters">
+    <label>Kasse<select id="rRegister"><option value="">Alle Kassen</option></select></label>
+    <label>Warengruppe<select id="rGroup"><option value="">Alle Warengruppen</option></select></label>
+    <label>Datum von<input id="rFrom" type="date"></label><label>Datum bis<input id="rTo" type="date"></label>
+    <label>Bediener<input id="rOperator" placeholder="Alle Bediener"></label>
+    <label>Zahlungsart<select id="rPayment"><option value="">Alle</option><option value="cash">Bar</option><option value="card">Karte</option></select></label>
+    <label>Datentyp<select id="rDataType"><option value="sales">Umsätze / Rabatte</option><option value="tips">Trinkgeld</option><option value="withdrawals">Entnahmen / Reklamationen</option></select></label>
+    <button id="applyReport">Auswertung aktualisieren</button>
+  </div>
+  <div class="report-actions"><button id="reportCsv">CSV</button><button id="reportExcel">Excel</button><button id="reportPrint">PDF / Drucken</button></div>
+  <div class="table-card"><table><thead><tr><th>Kasse</th><th>Datum</th><th>Bon</th><th>Artikel</th><th>Menge</th><th>Umsatz</th></tr></thead><tbody id="reportBody"></tbody></table></div>
+</section>
+
+<section class="view" data-view-panel="tvscreen">
+  <div class="panel-head"><h2>TV-Bildschirm</h2><p>Präsentation für den Weihnachtsmarkt-Bildschirm gestalten und testen.</p></div>
+  <div class="tv-kpi-grid">
+    <article><span>Status</span><strong id="tvMgrKpiStatus">—</strong></article>
+    <article><span>Folien</span><strong id="tvMgrKpiSlides">—</strong></article>
+    <article><span>Gesamtlaufzeit</span><strong id="tvMgrKpiRuntime">—</strong></article>
+    <article><span>Wiedergabe</span><strong id="tvMgrKpiSchedule">—</strong></article>
+    <article><span>Bildschirm</span><strong id="tvMgrKpiScreen">—</strong></article>
+    <article><span>Wetter-Folien</span><strong id="tvMgrKpiWeather">—</strong></article>
+  </div>
+  <div class="tv-dashboard-grid">
+    <article class="panel"><h3>Übergänge</h3><div id="tvMgrScheduleChart" class="tv-bar-chart"></div></article>
+    <article class="panel"><h3>Element-Typen</h3><div id="tvMgrTypeChart" class="tv-donut-list"></div></article>
+    <article class="panel"><h3>Aktuelle TV-Folie</h3><div class="tv-preview-frame compact"><div id="tvMgrDashboardPreview" class="tv-preview-screen"></div></div></article>
+    <article class="panel"><h3>Schnellaktionen</h3><div class="toolbar"><button id="tvDashEdit" class="primary">🖥️ Präsentation bearbeiten</button><button id="tvDashTest">▶ Präsentation testen</button><button id="tvDashExport">⇧ Speichern unter / Exportieren</button></div><div id="tvMgrHealthList" class="tv-health-list"></div></article>
+  </div>
+</section>
+
+</main>
+</div>
+</div>
+
+<dialog id="authDialog"><form method="dialog" class="dialog">
+<h2 id="authTitle">Manager entsperren</h2>
+<p id="authHelp">Master-PIN eingeben.</p>
+<label id="authOwnerRow">Name des Verantwortlichen<input id="authOwner" autocomplete="name"></label>
+<label>Sechsstellige Master-PIN<input id="authCode" type="password" inputmode="numeric" pattern="[0-9]{6}" maxlength="6" autocomplete="current-password"></label>
+<label id="authConfirmRow">Master-PIN wiederholen<input id="authConfirmCode" type="password" inputmode="numeric" pattern="[0-9]{6}" maxlength="6" autocomplete="new-password"></label>
+<div><button id="authConfirm" value="ok" class="primary">Entsperren</button></div>
+</form></dialog>
+
+<script src="vendor/qrcode-generator.js"></script>
+<!-- Ein QR-Zeichner fuer die ganze Suite (siehe shared/kc-qr.js). -->
+<script src="../shared/kc-qr.js?build=0.1.0"></script>
+<!-- Allergene lesbar machen (Etikett zeigte sonst "[object Object]"). -->
+<script src="../shared/kc-allergene.js?build=0.1.0"></script>
+<!-- Happy Hour: gemeinsame Rechnung (shared) und die Bedienung im Manager. -->
+<script src="../shared/kc-happyhour.js?build=0.1.0"></script>
+<script src="kc-happyhour-manager.js?build=0.1.0"></script>
+<script src="../cores/navigation-core/navigation-core.js"></script>
+<script src="vendor/xlsx.full.min.js"></script>
+<script src="../shared/runtime-flags.js"></script>
+<script src="../latest-release-manifest.js"></script>
+<!-- Bestätigung der praktischen Sichtprüfung am echten Gerät (siehe kc-sichtpruefung.js). -->
+<script src="kc-sichtpruefung.js?build=0.1.0"></script>
+<script src="../shared/release-manifest-core.js"></script><script src="manager-message-integration-v010.js"></script>
+<script src="../cores/security-core/crypto-secure-sync.js"></script>
+<script src="../cores/design-core/design-core-presentation.js"></script><script src="../cores/weather-core/weather-core.js"></script><script src="../cores/audio-presentation-core/audio-presentation-core.js"></script><script src="../cores/mobile-presentation-exchange-core/mobile-presentation-exchange-core.js"></script><script src="../cores/pos-ui-profile-core/pos-ui-profile-core.js"></script><script src="../cores/sales-import-core/sales-import-core.js"></script><script src="manager-import-progress-core.js"></script><script src="../shared/pos-catalog-registry-v02946.js"></script><script src="../tv-content/weihnachtsmarkt-2026/presentation.js"></script>
+<script src="../shared/kc-geldkassette.js?build=0.1.0"></script>
+<script src="kc-demo-daten.js?build=0.1.0"></script>
+<script src="../shared/kc-artikelnummern-core.js?build=1.0.0"></script>
+<script src="app.js"></script>
+<script src="kc-preisliste.js?build=0.1.0"></script>
+<script src="kc-verbindung-pruefen.js?build=0.1.0"></script>
+<script src="../shared/kc-bargeld-statistik.js?build=0.1.0"></script>
+<script src="kc-gutscheine-manager.js?build=0.1.0"></script>
+<script src="kc-bargeld-statistik-manager.js?build=0.1.0"></script>
+<script src="../shared/kc-uebergabeprotokoll.js?build=0.1.0"></script>
+<script src="kc-uebergabeprotokoll-manager.js?build=0.1.0"></script>
+<script src="../shared/kc-security-card.js?build=0.1.0"></script>
+<script src="kc-security-card-manager.js?build=0.1.0"></script>
+<script src="kc-abschluesse-manager.js?build=0.1.0"></script>
+<script src="kc-folien-takt.js?build=0.1.0"></script>
+<script src="kc-mitgliedsdaten.js?build=0.1.0"></script>
+<script src="kc-mitgliedsausweise.js?build=0.1.0"></script>
+<script src="kc-vorfuehrdaten.js?build=0.1.0"></script>
+<script src="kc-zentral.js?build=0.1.0"></script>
+<script src="kc-verbindungspruefung.js?build=0.1.0"></script><script src="kc-object-studio.js"></script><script src="pos-ui-profile-manager.js"></script><script src="dev-quick-access.js"></script><script src="design-core-presentation-integration.js"></script><script src="member-rotation-settings.js"></script><script src="dynamic-content-resolver.js"></script><script src="presentation-save-open.js"></script><script src="tv-designer-launcher.js"></script>
+<script src="tv-dashboard-live.js"></script>
+<script src="../cores/runtime-stability-core/runtime-stability-core.js"></script><script src="presentation-professional-guard.js"></script><script src="../cores/presentation-tuv-core/presentation-tuv-core.js"></script><script src="presentation-tuv-integration.js"></script>
+<script src="weather-mobile-exchange-integration.js"></script><script src="audio-presentation-integration.js"></script>
+<script src="../cores/selection-core/selection-core.js"></script><script src="../cores/property-core/property-core.js"></script><script src="../cores/smart-layout-core/smart-layout-core.js"></script><script src="../cores/display-matrix-module/display-matrix-module.js"></script><script src="../shared/event-program-exchange-core-v010.js"></script><script src="manager-navigation-adapter-v010.js"></script><script src="release-manifest-integration.js"></script>
+<script src="manager-navigation-extras-v011.js"></script><script src="mobile-job-activation-fix-v02963.js"></script><script src="manager-select-health-v02946.js"></script><script src="manager-masterdata-health-v02949.js"></script>
+<script src="../cores/time-clock-core/time-clock-core.js"></script><script src="../shared/time-clock-duty-roster-adapter-v010.js"></script><script src="time-clock-manager.js"></script>
+<script src="../cores/recipe-calculation-core/recipe-calculation-core.js"></script><script src="recipe-manager.js"></script>
+<script src="../cores/table-core/table-core.js"></script><script src="manager-table-core.js"></script>
+<script src="../cores/sales-inventory-analysis-core/sales-inventory-analysis-core.js"></script><script src="manager-sales-inventory-dashboard.js"></script><script src="manager-event-simulation-adapter.js"></script>
+
+<script src="kc-live-monitor.js"></script>
+<script src="kc-verbindungsdiagnose.js"></script>
+<script src="kc-fernverkehr-dashboard.js"></script>
+<script src="kc-admin-center.js"></script>
+<script src="kc-manager-supabase-status.js"></script>
+<script src="kc-supabase-dashboard.js"></script>
+</body></html>

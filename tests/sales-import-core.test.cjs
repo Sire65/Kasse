@@ -1,0 +1,7 @@
+const assert=require("node:assert/strict"),core=require("../cores/sales-import-core/sales-import-core.js");
+const large={transactionId:"TX-1",bon:"1",time:"2026-12-04T12:00:00Z",registerId:"K1",registerName:"Kasse",operator:"Hans",method:"cash",total:7.5,recordHash:"nicht-im-manager",previousHash:"nicht-im-manager",discount:{lots:"of data"},items:[{id:"grot",name:"Glühwein",category:"Getränke",qty:1,price:5.5,lineTotal:5.5,deposits:[{large:"runtime"}]},{id:"glasplus",name:"Pfand",category:"Pfand",qty:1,price:2}]};
+const clean=core.transaction(large);assert.equal(clean.transactionId,"TX-1");assert.equal(clean.items.length,2);assert.deepEqual(clean.items[0],{id:"grot",name:"Glühwein",qty:1,price:5.5});assert(!("recordHash" in clean));assert(!("deposits" in clean.items[0]));
+const merged=core.merge([clean],[large],{registerId:"K1",registerName:"Kasse"});assert.equal(merged.transactions.length,1);assert.equal(merged.duplicates.length,1);assert.equal(merged.added,0);
+const packed=core.stringifyStorage([clean,core.transaction({...large,transactionId:"TX-2",bon:"2"})]),restored=core.parseStorage(packed);
+assert.equal(restored.length,2);assert.deepEqual(restored[0],clean);assert.equal(restored[1].transactionId,"TX-2");assert(packed.length<JSON.stringify([clean,restored[1]]).length,"Kompaktspeicher spart keinen Platz");
+console.log("PASS sales-import-core: kompakter Managerdatensatz und sicherer Doppelimport-Schutz");

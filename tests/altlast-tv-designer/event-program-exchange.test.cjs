@@ -1,0 +1,40 @@
+const fs = require('fs');
+const vm = require('vm');
+const assert = require('assert');
+const registered = {};
+const registry = { register(id, version) { registered[id] = version; return this; } };
+const code = fs.readFileSync('shared/event-program-exchange-core-v010.js', 'utf8');
+const sandbox = { window: { KCReleaseManifest: registry }, Date };
+sandbox.window.window = sandbox.window;
+vm.runInNewContext(code, sandbox);
+const core = sandbox.window.KCEventProgramExchangeCore;
+const pkg = core.create({ program: [
+  { id: '1', date: '2026-07-22', time: '12:00', endTime: '15:00', title: 'Kindersingen', impact: 'normal' },
+  { id: '2', time: '18:00', title: 'Schlagerband', impact: 'high' }
+] }, { program: true, rating: true, weather: false, staffing: false });
+assert(core.verify(pkg).ok, 'Paketprüfung fehlgeschlagen');
+assert.equal(pkg.program[0].endTime, '15:00');
+assert.equal(core.label('normal'), 'mittel');
+assert.equal(core.label('high'), 'gut');
+assert.equal(core.color('very-high'), 'green');
+assert.equal(core.contract.runtimeId, 'shared.event-program.exchange');
+assert.equal(registered.eventProgramExchange, '0.1.1');
+assert.equal(registered.eventProgramStudioCatalog, '1.0.0');
+assert.equal(registered.eventProgramTuvRules, '1.0.0');
+const changed = JSON.parse(JSON.stringify(pkg)); changed.program[0].title = 'Manipuliert';
+assert(!core.verify(changed).ok, 'Manipulation wurde nicht erkannt');
+const forbidden = { ...pkg, prices: [{ id: 'x', price: 1 }] };
+forbidden.checksum = core.checksum(Object.fromEntries(Object.entries(forbidden).filter(([key]) => key !== 'checksum')));
+assert(!core.verify(forbidden).ok, 'Fachfremde Preisdaten wurden nicht blockiert');
+const catalog = JSON.parse(fs.readFileSync('cores/event-program-exchange-core/studio-catalog-entry.json', 'utf8'));
+const rules = JSON.parse(fs.readFileSync('cores/event-program-exchange-core/tuv-rules.json', 'utf8'));
+assert.equal(catalog.version, core.version);
+assert.equal(catalog.runtimeId, core.contract.runtimeId);
+assert.equal(rules.staticStatus, 'PASS');
+assert.equal(rules.practicalStatus, 'PENDING');
+assert(rules.rules.some(rule => rule.id === 'EPX-003'));
+const manager = fs.readFileSync('pc-manager/event-program-export-v010.js', 'utf8');
+const pos = fs.readFileSync('pos/event-program-display.js', 'utf8');
+['kcExpRating', 'kcExpWeather', 'kcExpStaffing', '.kcprogram'].forEach(value => assert(manager.includes(value), `Exportoption fehlt: ${value}`));
+['650', 'show(true)', 'show(false)', 'kcProgramFile', 'data-impact'].forEach(value => assert(pos.includes(value), `Kassenfunktion fehlt: ${value}`));
+console.log('PASS event-program-exchange: Übergabe, Studio-Registrierung, TÜV-Regeln und Kassendatenschutz');

@@ -1,0 +1,26 @@
+{
+  "schema": "framework-release-monitor-v1",
+  "id": "WO-KC-20260724-007",
+  "createdAt": "2026-07-24T15:00:00+02:00",
+  "updatedAt": "2026-07-24T15:00:00+02:00",
+  "project": "KC MarktKasse / PC-Manager",
+  "workOrder": "Repair 53 – Mitglieder-Fotozuordnung",
+  "baselineVersion": "V0.31.3.6 Repair 52",
+  "candidateVersion": "V0.31.3.6 Repair 53",
+  "candidateFile": "KC_MarktKasse_V0_31_3_6_Repair_53_Mitglieder_Fotozuordnung_Candidate.zip",
+  "candidateSha256": "8DF14298AE6602754F3DA6070B4816F0DE5B2E0C3BBA83605E3DBF7C951FB127",
+  "changeScope": "Ausschließlich die bestätigte Namenszuordnung der vorhandenen Mitgliederfotos 01 bis 10 und die sichere Inhaltsmigration.",
+  "protectedAreas": "Mitgliedersprüche, Folienlayout, Fotos selbst, Mitglieder 11 bis 18, Kassenfunktionen, Dashboard, Navigation, Zeiterfassung, Rezepturen und Stammdaten.",
+  "requireTv": true,
+  "evidence": {
+    "javascriptSyntax": "PASS",
+    "automatedTests": "31/31 PASS",
+    "studioRegistry": "cores/STUDIO_TUV_COMPONENT_REGISTRY_V1.json",
+    "report": "PRUEFBERICHT_REPAIR_53.md"
+  },
+  "monitorState": {
+    "code": "YELLOW",
+    "label": "Candidate geprüft",
+    "reason": "Syntax und 31 automatisierte Tests bestanden; praktischer Sichttest bleibt offen."
+  }
+}

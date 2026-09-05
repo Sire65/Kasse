@@ -1,0 +1,16 @@
+{
+  "schema": "KC_STUDIO_CORE_CATALOG_ENTRY_V1",
+  "coreId": "EventProgramExchangeCore",
+  "runtimeId": "shared.event-program.exchange",
+  "label": "Tagesprogramm-Übergabekern",
+  "version": "0.1.1",
+  "apiVersion": "0.1.0",
+  "status": "Candidate",
+  "owner": "central-core-runtime",
+  "canonicalRuntime": "shared/event-program-exchange-core-v010.js",
+  "consumers": ["pc-manager/event-program-export-v010.js", "pos/event-program-display.js"],
+  "capabilities": ["program-export", "rating-export", "optional-weather-hint", "optional-staffing-hint", "checksum-verification"],
+  "forbiddenMutations": ["articles", "prices", "receipts", "transactions", "cash-state", "users", "permissions"],
+  "test": "tests/event-program-exchange.test.cjs",
+  "releaseGate": "YELLOW_REAL_DEVICE_EVIDENCE_OPEN"
+}

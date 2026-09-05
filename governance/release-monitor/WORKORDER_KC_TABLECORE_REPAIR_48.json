@@ -1,0 +1,31 @@
+{
+  "schema": "framework-release-monitor-v1",
+  "id": "WO-KC-20260724-002",
+  "createdAt": "2026-07-24T08:30:00+02:00",
+  "updatedAt": "2026-07-24T08:30:00+02:00",
+  "project": "KC MarktKasse / PC-Manager",
+  "workOrder": "Repair 48 – TableCore für alle fachlichen PC-Manager-Tabellen",
+  "baselineVersion": "V0.31.3.6 Repair 47",
+  "baselineFile": "KC_MarktKasse_V0_31_3_6_Repair_47_Baseline.zip",
+  "baselineSha256": "6ac6fd677971a7ce90150760955f3160c2a37bd84cfaffd4aa288983be1c3afa",
+  "candidateVersion": "",
+  "candidateFile": "",
+  "candidateSha256": "",
+  "changeScope": "TableCore V1.1.0 aus Framework Studio übernehmen und über einen PC-Manager-Adapter an alle fachlichen HTML-Tabellen anbinden. Sortierung, Spaltenreihenfolge, Spaltenbreite, Auto-Fit, gespeicherter Zustand sowie Maus-, Touch-, Tastatur- und Responsive-Bedienung ergänzen. Tabellen in TV-Bühnen und QR-Ausgaben ausdrücklich ausschließen.",
+  "protectedAreas": "Fachliche Tabelleninhalte und Speicherlogik, TV-Editor, TV-Renderer, Präsentationsplayer, Folienverwaltung, NavigationCore, WindowCore, DisplayMatrixCore, Wetter, Zeiterfassung-Fachlogik, Rezeptur-Fachlogik, Meldungswesen, Combobox-Stabilisierung und bestehende Kassenlogik.",
+  "requireTv": false,
+  "evidence": {},
+  "approval": null,
+  "history": [
+    {
+      "at": "2026-07-24T08:30:00+02:00",
+      "event": "WORKORDER_CREATED",
+      "detail": "Separater TableCore-Arbeitsauftrag vor der Integration angelegt."
+    }
+  ],
+  "monitorState": {
+    "code": "BLUE",
+    "label": "In Bearbeitung",
+    "reason": "Candidate und praktische Nachweise sind noch offen."
+  }
+}

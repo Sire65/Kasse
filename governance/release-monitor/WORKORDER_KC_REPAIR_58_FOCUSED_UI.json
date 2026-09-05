@@ -1,0 +1,26 @@
+{
+  "schema": "framework-release-monitor-v1",
+  "id": "WO-KC-20260724-012",
+  "createdAt": "2026-07-24T16:15:00+02:00",
+  "updatedAt": "2026-07-24T16:15:00+02:00",
+  "project": "KC MarktKasse / PC-Manager",
+  "workOrder": "Repair 58 – Begrenzte UI- und Dashboard-Reparatur",
+  "baselineVersion": "V0.31.3.6 Repair 57",
+  "candidateVersion": "V0.31.3.6 Repair 58",
+  "candidateFile": "KC_MarktKasse_V0_31_3_6_Repair_58_TV_Oberflaechen_Dashboard_Candidate.zip",
+  "candidateSha256": "SEE_SIDECAR_SHA256",
+  "changeScope": "TV-Textflächen, deutsche Folientypen, Manager-Spaltenschutz, vorläufige Artikelfotos, Diagrammlegende, Exportknopf und Bestandslistenaktionen.",
+  "protectedAreas": "Kassenbuchung, Navigation, Zeiterfassung, Rezepte, Laufschrift, Präsentationsablauf und Umsatzimport.",
+  "requireTv": true,
+  "evidence": {
+    "javascriptSyntax": "PASS",
+    "automatedTests": "37/37 PASS",
+    "studioRegistry": "cores/STUDIO_TUV_COMPONENT_REGISTRY_V1.json",
+    "report": "PRUEFBERICHT_REPAIR_58.md"
+  },
+  "monitorState": {
+    "code": "YELLOW",
+    "label": "Candidate – praktische Sichtprüfung offen",
+    "reason": "Automatisierte Prüfung grün; Glaswirkung und responsive Darstellung müssen am Zielbildschirm bestätigt werden."
+  }
+}

@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="de"><head><meta charset="utf-8">
+<title>KC MarktKasse · Blatt für die Hüttenwand</title>
+<!-- Zum Einlaminieren und an die Wand hängen. Gedacht für jemanden, der die Anlage NICHT
+     kennt und den Betreiber gerade nicht erreicht. Deshalb: vier Schritte, große Schrift,
+     und für jeden wahrscheinlichen Fehlerfall genau ein Satz, was zu tun ist.
+     Bewusst KEINE Erklärungen, warum etwas so ist - wer hier steht, will es zum Laufen
+     bringen, nicht verstehen. -->
+<style>
+ @page{size:A4;margin:0}
+ body{font-family:"Segoe UI",Arial,sans-serif;margin:0;padding:14mm 13mm;color:#111827;background:#fff}
+ h1{font-size:25pt;margin:0 0 1mm;letter-spacing:-.4pt}
+ .unter{font-size:11.5pt;color:#4b5563;margin:0 0 7mm}
+ ol{list-style:none;counter-reset:s;padding:0;margin:0}
+ li{counter-increment:s;display:flex;gap:5mm;align-items:flex-start;
+    border:1.6pt solid #d1d5db;border-radius:3mm;padding:5mm 6mm;margin-bottom:4mm}
+ li::before{content:counter(s);flex:none;width:12mm;height:12mm;border-radius:50%;
+    background:#166534;color:#fff;font-size:19pt;font-weight:800;display:grid;place-items:center}
+ .was{font-size:15.5pt;font-weight:800;line-height:1.25}
+ .dazu{font-size:11pt;color:#4b5563;margin-top:1.5mm;line-height:1.4}
+ .gut{border-color:#166534;background:#f0fdf4}
+ .gut .was{color:#14532d}
+ h2{font-size:14pt;margin:8mm 0 3mm;border-bottom:1.6pt solid #111827;padding-bottom:1.5mm}
+ table{width:100%;border-collapse:collapse;font-size:11pt}
+ td{border-bottom:1pt solid #e5e7eb;padding:2.6mm 2mm;vertical-align:top;line-height:1.4}
+ td:first-child{font-weight:800;width:44%;color:#7c2d12}
+ .fuss{margin-top:7mm;border:1.6pt solid #b45309;background:#fffbeb;border-radius:3mm;
+   padding:4.5mm 5mm;font-size:11.5pt;line-height:1.5}
+ .fuss b{color:#92400e}
+</style></head>
+<body>
+
+<h1>Wenn niemand da ist, der sich auskennt</h1>
+<p class="unter">Köcheclub Werne · KC MarktKasse — vier Schritte, mehr ist es nicht.</p>
+
+<ol>
+  <li><div><div class="was">Steckdosenleiste einschalten.</div>
+    <div class="dazu">Der kleine Rechner in der Hütte startet von allein. Bildschirm anlassen.</div></div></li>
+
+  <li><div><div class="was">Zwei Minuten warten. Nichts anklicken.</div>
+    <div class="dazu">In dieser Zeit startet alles von selbst — auch der Fernseher.</div></div></li>
+
+  <li class="gut"><div><div class="was">Auf dem Bildschirm muss stehen: ALLES BEREIT</div>
+    <div class="dazu">Steht das da, ist alles in Ordnung. Steht etwas anderes da: unten nachsehen.</div></div></li>
+
+  <li><div><div class="was">Am Tablet den QR-Code auf dem Bildschirm scannen.</div>
+    <div class="dazu">Die Kasse geht auf. Fertig — es kann kassiert werden.</div></div></li>
+</ol>
+
+<h2>Wenn etwas anders ist</h2>
+<table>
+  <tr><td>Der Rechner bleibt dunkel</td>
+      <td>Steckdose und Kabel prüfen. Dann den Einschaltknopf am Rechner drücken.</td></tr>
+  <tr><td>Kein schwarzes Fenster zu sehen</td>
+      <td>Auf dem Bildschirm das Symbol <b>KC_Markttag_Start</b> doppelt anklicken. Zwei Minuten warten.</td></tr>
+  <tr><td>Der Fernseher zeigt nichts</td>
+      <td>Am Fernseher den richtigen Eingang wählen (HDMI). Hilft das nicht: am Rechner
+          <b>Windows-Taste + P</b> drücken und <b>Erweitern</b> wählen.
+          Kassieren geht davon unabhängig weiter.</td></tr>
+  <tr><td>Es stehen mehrere schwarze Fenster offen</td>
+      <td>Alle schließen. Eine Minute warten. Nur <b>eines</b> neu starten.</td></tr>
+  <tr><td>Das Tablet lädt die Kasse nicht</td>
+      <td>Prüfen, ob das Tablet im richtigen WLAN ist. Dann den QR-Code noch einmal scannen.</td></tr>
+  <tr><td>Der Scanner schreibt Buchstabensalat</td>
+      <td>Weiter tippen statt scannen — die Kasse funktioniert vollständig ohne Scanner.</td></tr>
+  <tr><td>Rote Lämpchen im Manager</td>
+      <td>Kein Grund zur Sorge: Kassieren, Bons und Abschluss laufen weiter. Später melden.</td></tr>
+</table>
+
+<div class="fuss">
+  <b>Das Wichtigste zuletzt:</b> Solange auf dem Tablet die Kasse offen ist, kann verkauft
+  werden — auch wenn Fernseher, Internet oder Lämpchen nicht mitspielen. Die Bons liegen
+  sicher auf dem Tablet und gehen nicht verloren.<br><br>
+  Im Zweifel: <b>weiterkassieren</b> und hinterher Bescheid sagen. Es geht nichts kaputt.
+</div>
+
+</body></html>

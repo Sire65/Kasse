@@ -1,0 +1,16 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "KC_TIME_CLOCK_V1",
+  "type": "object",
+  "required": ["id", "personId", "kind", "recordedAt", "effectiveAt", "registerId"],
+  "properties": {
+    "id": { "type": "string", "minLength": 1 },
+    "personId": { "type": "string", "minLength": 1 },
+    "kind": { "enum": ["in", "out"] },
+    "recordedAt": { "type": "string", "format": "date-time" },
+    "effectiveAt": { "type": "string", "format": "date-time" },
+    "registerId": { "type": "string", "minLength": 1 },
+    "correctionReason": { "type": "string" },
+    "shiftReason": { "type": "string" }
+  }
+}

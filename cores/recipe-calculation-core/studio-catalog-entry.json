@@ -1,0 +1,13 @@
+{
+  "schema":"KC_STUDIO_COMPONENT_V1",
+  "id":"recipeCalculationCore",
+  "name":"RecipeCalculationCore",
+  "version":"0.1.0",
+  "status":"Candidate",
+  "type":"shared-core",
+  "owner":"Framework Studio",
+  "consumers":["pc-manager","koecheclub-verwaltung","einkauf","bestellung"],
+  "contracts":["KC_RECIPE_V1","KC_RECIPE_PACKAGE_V1","KC_PRODUCT_INFO_PACKAGE_V1"],
+  "dependencies":[],
+  "runtimeIsolation":"Keine Abhängigkeit von Verkauf, Kasse, Lieferant oder konkreter Verwaltungsoberfläche."
+}

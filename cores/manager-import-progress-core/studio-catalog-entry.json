@@ -1,0 +1,17 @@
+{
+  "schema": "KC_STUDIO_COMPONENT_V1",
+  "id": "manager-import-progress",
+  "name": "ManagerImportProgressCore",
+  "version": "0.1.0",
+  "status": "Candidate",
+  "category": "Manager / Import / Rückmeldung",
+  "runtime": "../../pc-manager/manager-import-progress-core.js",
+  "stylesheet": "../../pc-manager/manager-import-progress-core.css",
+  "capabilities": [
+    "Prozentanzeige",
+    "vergangene und voraussichtliche Restzeit",
+    "sichtbare Einzelarbeitsschritte",
+    "Mehrfachdatei-Fortschritt",
+    "Erfolg- und Fehlermeldung"
+  ]
+}

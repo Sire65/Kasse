@@ -1,0 +1,19 @@
+{
+  "erzeugtAm": "2026-09-01T18:48:52.009Z",
+  "webserverPort": 8090,
+  "lanAdresse": "192.0.2.2",
+  "kassen": [
+    {
+      "id": "KASSE-01",
+      "name": "KASSE-01",
+      "port": 47500,
+      "token": "-jIzD6emboFBCOLaIcLIZ29wd6YajZ4N"
+    },
+    {
+      "id": "KASSE-02",
+      "name": "KASSE-02",
+      "port": 47501,
+      "token": "hzokQjIUV7O9Uq7L_Hw_WKCHFMY3L3Pj"
+    }
+  ]
+}

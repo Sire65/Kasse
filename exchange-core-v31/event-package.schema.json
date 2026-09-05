@@ -1,0 +1,102 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "KCB-EVENT-1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "packageId",
+    "sourceId",
+    "createdAt",
+    "events",
+    "integrity"
+  ],
+  "properties": {
+    "schema": {
+      "const": "KCB-EVENT-1"
+    },
+    "packageId": {
+      "type": "string",
+      "minLength": 8,
+      "maxLength": 120
+    },
+    "sourceId": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 120
+    },
+    "createdAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "events": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "transactions"
+      ],
+      "properties": {
+        "transactions": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          }
+        },
+        "trainingTransactions": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          }
+        },
+        "tips": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          }
+        },
+        "withdrawals": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          }
+        },
+        "cashMovements": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          }
+        },
+        "closings": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          }
+        },
+        "discountAudit": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          }
+        }
+      }
+    },
+    "integrity": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "algorithm",
+        "value"
+      ],
+      "properties": {
+        "algorithm": {
+          "const": "KCB-CHECK-1"
+        },
+        "value": {
+          "type": "string",
+          "minLength": 16,
+          "maxLength": 128
+        }
+      }
+    }
+  }
+}

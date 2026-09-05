@@ -1,0 +1,5 @@
+const fs=require('fs'),vm=require('vm'),assert=require('assert'),path=require('path');
+const code=fs.readFileSync(path.join(__dirname,'../cores/navigation-core/navigation-core.js'),'utf8'),sandbox={window:{},Date};sandbox.window=sandbox;vm.runInNewContext(code,sandbox);
+const calls=[],core=sandbox.NavigationCore.create();core.bindAdapter({version:'test',setWidth(w){calls.push(['width',w]);return w},toggleQuick(){calls.push(['toggle']);return true},resetWidth(){calls.push(['reset']);return 270}});
+assert.equal(core.isBound(),true);assert.equal(core.setWidth(300),300);assert.equal(core.setWidth(999),420);assert.equal(core.toggleSidebar(),true);assert.equal(core.resetWidth(),270);assert.equal(calls.length,4);assert.equal(sandbox.NavigationCore.version,'1.2.0');assert.equal(sandbox.NavigationCore.widthSignal(270),'green');assert.equal(sandbox.NavigationCore.widthSignal(185),'yellow');assert.equal(sandbox.NavigationCore.widthSignal(100),'red');assert.equal(sandbox.NavigationCore.widthPolicy.standard,270);
+console.log('PASS manager-navigation-core: Studio-Vertrag, Breitenlimit, Ampelsignal, Reset und Zustandsaktionen');

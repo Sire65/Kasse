@@ -1,0 +1,170 @@
+<!doctype html>
+<html lang="de"><head><meta charset="utf-8">
+<title>KC MarktKasse · Scanner-Testblatt</title>
+<!-- Die QR-Codes werden mit DERSELBEN Bibliothek erzeugt, die auch die Etiketten im
+     PC-Manager benutzt (vendor/qrcode-generator.js über shared/kc-qr.js). Damit ist der
+     Test ehrlich: was hier steht, ist genau das, was später auf dem Etikett steht.
+
+     BEFUND 02.09.2026 (Betreiber): "Du hast mir ein Testblatt gegeben mit Artikel- und
+     Mitarbeitercodes, die kennt er nicht." Das Blatt trug fest eingetippte Beispielcodes aus
+     MEINER Standardliste. Eine Kasse, die vom PC-Manager echte Bediener bekommen hat, kennt
+     die nicht - und dann prüft das Blatt nicht den Scanner, sondern erzeugt Zweifel an einer
+     Kasse, die in Ordnung ist.
+
+     SEITDEM: dieses Blatt tippt nichts mehr ein. Es liest die Codes aus dem Speicher DIESES
+     Geräts - dieselbe Quelle, aus der auch die Kasse liest. Kann es das nicht (Kasse auf
+     diesem Gerät noch nie geöffnet), sagt es das oben in einem roten Kasten, statt heimlich
+     auf Beispiele auszuweichen. -->
+<style>
+ body{font-family:"Segoe UI",Arial,sans-serif;margin:0;padding:18mm 14mm;color:#172033;background:#fff}
+ h1{font-size:20pt;margin:0 0 2mm}
+ .unter{color:#5b6572;font-size:10pt;margin:0 0 6mm;line-height:1.45}
+ .herkunft{border:1.2pt solid #cfd6de;background:#f6f8fa;border-radius:3mm;padding:4mm 5mm;
+   font-size:9.5pt;line-height:1.5;margin:0 0 8mm}
+ .herkunft b{color:#172033}
+ .herkunft.warnung{border-color:#b45309;background:#fffbeb}
+ .herkunft.warnung b{color:#92400e}
+ .gitter{display:grid;grid-template-columns:repeat(3,1fr);gap:7mm}
+ .karte{border:1.4pt solid #cfd6de;border-radius:3mm;padding:5mm;text-align:center;break-inside:avoid}
+ .karte canvas{width:38mm;height:38mm;image-rendering:pixelated}
+ .titel{font-weight:800;font-size:11.5pt;margin:3mm 0 1mm;line-height:1.25}
+ .code{font-family:Consolas,"Courier New",monospace;font-size:8.5pt;color:#5b6572;word-break:break-all}
+ .was{font-size:9pt;color:#31506e;margin-top:2mm;line-height:1.35}
+ .abschnitt{margin:9mm 0 4mm;font-size:13pt;font-weight:800;border-bottom:1.4pt solid #172033;padding-bottom:1.5mm}
+ .leer{font-size:10pt;color:#92400e;background:#fffbeb;border:1.2pt solid #b45309;border-radius:3mm;padding:4mm}
+ .hinweis{margin-top:9mm;border:1.4pt solid #b45309;background:#fffbeb;border-radius:3mm;padding:5mm;font-size:9.5pt;line-height:1.5}
+ .hinweis b{color:#92400e}
+ @page{size:A4;margin:0}
+</style></head>
+<body>
+<h1>Scanner-Testblatt · KC MarktKasse</h1>
+<p class="unter">
+  Zum Ausprobieren <b>ohne gedruckte Etiketten</b>: dieses Blatt ausdrucken — oder einfach vom
+  Bildschirm abscannen, der Ringscanner liest auch von Glas.<br>
+  Kasse öffnen, einmal auf die <b>Kachelfläche</b> tippen (nicht ins Suchfeld), dann der Reihe
+  nach scannen.
+</p>
+
+<div class="herkunft" id="herkunft">Wird gelesen …</div>
+
+<div class="abschnitt">1 · Artikel — muss sofort im Bon liegen</div>
+<div class="gitter" id="artikel"></div>
+
+<div class="abschnitt">2 · Bedienerausweis — oben links muss der Name umspringen</div>
+<div class="gitter" id="ausweise"></div>
+
+<div class="abschnitt">3 · Bezahlen — der Bon muss sofort durch sein</div>
+<div class="gitter" id="bezahlen"></div>
+
+<div class="hinweis">
+  <b>Was du am Ergebnis abliest:</b><br>
+  <b>Artikel liegt im Bon</b> → alles richtig eingestellt.<br>
+  <b>Fenster „Code nicht erkannt" mit Buchstabensalat</b> → falsches Tastaturlayout.
+  Seite 12 im Scanner-Heft, Code <b>German</b> scannen.<br>
+  <b>Fenster mit der richtigen, aber unvollständigen Nummer</b> (z.&nbsp;B. 0100 statt 01001) →
+  Übertragung zu schnell. Seite 07, <b>Medium</b> scannen.<br>
+  <b>Es passiert gar nichts</b> → kein Enter hinter dem Code. Seite 11,
+  <b>Add Carriage Return (0x0D)</b> scannen. Oder der Scanner steht auf <i>Storage Mode</i> —
+  Seite 02, <b>Instant Upload Mode</b>.<br>
+  <b>Die Nummer landet doppelt im Bon</b> → Dauerlesen. Seite 08, <b>Button-press Mode</b>.
+</div>
+
+<script src="../pc-manager/vendor/qrcode-generator.js"></script>
+<script src="../shared/kc-qr.js"></script>
+<script src="../shared/kc-artikelnummern-core.js"></script>
+<script>
+// ---------------------------------------------------------------------------------------
+// Alle Codes kommen aus dem Speicher DIESES Geräts - derselben Quelle, aus der die Kasse
+// liest. Nichts wird hier eingetippt. Wo eine Quelle fehlt, wird das gesagt, nicht ersetzt.
+// ---------------------------------------------------------------------------------------
+const H = [];                 // Herkunftszeilen fuer den Kasten oben
+let gewarnt = false;
+
+function lies(schluessel, ersatz) {
+  try { const r = JSON.parse(localStorage.getItem(schluessel) || 'null'); return r == null ? ersatz : r; }
+  catch (e) { return ersatz; }
+}
+
+// --- Artikel -----------------------------------------------------------------------------
+// Erste Wahl: die Artikelliste dieser Kasse. Die Nummern stehen dort im Feld "barcode" -
+// eingetragen beim Start durch shared/kc-artikelnummern-core.js.
+// Zweite Wahl: derselbe Kern direkt. Die Nummern sind geraeteunabhaengig, deshalb ist das
+// hier KEIN stiller Ersatz, sondern gleichwertig - es fehlen nur Preis und Warengruppe.
+const produkte = lies('kc_products_v050', []);
+let artikelKarten = [];
+if (Array.isArray(produkte) && produkte.length) {
+  const wunsch = ['01001', '02003', '03101'];      // je ein Getraenk, eine Speise, eine Ruecknahme
+  const aktiv = produkte.filter((p) => p && p.barcode && p.active !== false);
+  const gewaehlt = wunsch.map((nr) => aktiv.find((p) => String(p.barcode) === nr)).filter(Boolean);
+  // Fehlt einer der drei, wird aufgefuellt - lieber drei echte Karten als eine Luecke.
+  for (const p of aktiv) { if (gewaehlt.length >= 3) break; if (!gewaehlt.includes(p)) gewaehlt.push(p); }
+  artikelKarten = gewaehlt.map((p) => ({
+    t: p.name, c: String(p.barcode),
+    w: `${Number(p.price || 0).toFixed(2).replace('.', ',')} €` + (p.category ? ` · ${p.category}` : ''),
+  }));
+  H.push(`<b>Artikel:</b> aus der Artikelliste dieser Kasse (${aktiv.length} Artikel mit Nummer).`);
+} else if (window.KCArtikelnummern) {
+  const n = window.KCArtikelnummern.NUMMERN || {};
+  artikelKarten = [['grot', 'Glühwein rot'], ['gruenkohl', 'Grünkohl'], ['glasminus', 'Glasrückgabe']]
+    .filter(([id]) => n[id]).map(([id, name]) => ({ t: name, c: n[id], w: 'Nummer aus dem Artikelnummern-Kern' }));
+  H.push('<b>Artikel:</b> aus dem Artikelnummern-Kern — diese Nummern sind auf jeder Kasse gleich.');
+}
+
+// --- Bediener ----------------------------------------------------------------------------
+// NUR aus den Stammdaten dieser Kasse. Kein Ersatz aus einer Beispielliste: genau das war der
+// Fehler, den dieses Blatt beim Betreiber ausgeloest hat.
+const master = lies('kc_master_v040', null) || lies('kc_master_v030', null) || {};
+const bediener = Array.isArray(master.operatorProfiles) ? master.operatorProfiles.filter((p) => p && p.id && p.id !== 'team') : [];
+let ausweisKarten = [];
+if (bediener.length) {
+  const erste = bediener[0];
+  ausweisKarten.push({ t: `Bedienerausweis ${erste.name}`, c: erste.code || `KCOPE1:${erste.id}`,
+    w: 'aus der Bedienerliste dieser Kasse' });
+  // Bewusst ein ANDERER Name als auf dem Bedienerausweis: zwei Karten mit derselben Person
+  // pruefen nur einen der beiden Wege, sehen aber nach zweien aus.
+  const mitNummer = bediener.find((p) => p.memberNo && p.id !== erste.id) || bediener.find((p) => p.memberNo);
+  if (mitNummer) {
+    const verein = master.clubName || 'Köcheclub Werne';
+    ausweisKarten.push({ t: `Mitgliedsausweis ${mitNummer.name}`,
+      c: `KNG|${verein}|${mitNummer.memberNo}|m_${String(mitNummer.memberNo).toLowerCase().replace(/-/g, '_')}`,
+      w: 'Aufbau wie in KC Verwaltung · enthält den senkrechten Strich, an dem sich ein falsches Tastaturlayout zeigt' });
+  }
+  ausweisKarten.push({ t: 'Zurück auf Team', c: 'KCOPE1:team', w: 'meldet wieder das Team an' });
+  H.push(`<b>Bediener:</b> aus den Stammdaten dieser Kasse (${bediener.length} Bediener). `
+       + `Gedruckt: Bedienerausweis ${erste.name}`
+       + (mitNummer ? `, Mitgliedsausweis ${mitNummer.name} (${mitNummer.memberNo})` : '')
+       + ', Zurück auf Team.');
+} else {
+  gewarnt = true;
+  H.push('<b>Bediener: KEINE gefunden.</b> Auf diesem Gerät wurde die Kasse noch nie geöffnet, '
+       + 'oder es sind keine Bediener hinterlegt. Bedienerausweise lassen sich deshalb nicht drucken — '
+       + 'es werden bewusst KEINE Beispielcodes gedruckt, die die Kasse hinterher nicht kennt. '
+       + 'Zu tun: die Kasse einmal auf DIESEM Gerät öffnen, dann dieses Blatt neu laden.');
+}
+
+// --- Bezahlen ----------------------------------------------------------------------------
+const bezahlKarten = [{ t: 'Bon abschließen', c: 'CMD-CHECKOUT', w: 'derselbe Code, der auf der grünen Zahltaste steht' }];
+
+// --- Ausgabe -----------------------------------------------------------------------------
+const kasten = document.getElementById('herkunft');
+kasten.className = 'herkunft' + (gewarnt ? ' warnung' : '');
+kasten.innerHTML = `<b>Woher die Codes stammen</b> — erzeugt am ${new Date().toLocaleString('de-DE')}`
+  + (master.registerName || master.registerId ? ` auf „${master.registerName || master.registerId}"` : '')
+  + `.<br>${H.join('<br>')}<br>`
+  + 'Ein Blatt gilt für Kassen mit <b>derselben</b> Bedienerliste. Erkennt eine andere Kasse einen '
+  + 'Ausweis nicht, hat sie eine andere Liste — dann im PC-Manager „An alle Kassen senden".';
+
+for (const [bereich, liste] of Object.entries({ artikel: artikelKarten, ausweise: ausweisKarten, bezahlen: bezahlKarten })) {
+  const ziel = document.getElementById(bereich);
+  if (!liste.length) { ziel.outerHTML = `<div class="leer" id="${bereich}">Hier steht nichts, weil auf diesem Gerät keine Daten dafür vorliegen — siehe Kasten oben.</div>`; continue; }
+  ziel.innerHTML = liste.map((k, i) =>
+    `<div class="karte"><canvas id="${bereich}${i}" width="220" height="220"></canvas>
+     <div class="titel">${k.t}</div><div class="code">${k.c.replace(/</g, '&lt;')}</div>
+     <div class="was">${k.w}</div></div>`).join('');
+  liste.forEach((k, i) => window.KCQrCode.zeichne(document.getElementById(bereich + i), k.c, 220));
+}
+
+// Fuer den Pruefdurchlauf: welche Codes stehen tatsaechlich auf dem Blatt?
+window.KCTestblattCodes = [...artikelKarten, ...ausweisKarten, ...bezahlKarten].map((k) => k.c);
+</script>
+</body></html>

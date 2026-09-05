@@ -1,0 +1,26 @@
+<!-- Feuerzange Rückgabe.
+     Vorher stand hier ein gestrichelter Kasten mit der Aufschrift "FOTO FEUERZANGE FOLGT".
+     Auf der Kachel und in der Funktionskonfiguration las sich das wie ein unfertiges Programm.
+     Jetzt eine fertige Zeichnung: Glas mit aufliegender Zange und Zuckerhut, dazu das
+     Rückgabezeichen. Kein Foto nötig - und falls doch eines kommt, wird nur diese Datei getauscht. -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 520" role="img" aria-label="Feuerzange Rückgabe">
+  <rect width="800" height="520" fill="#fdf2f4"/>
+  <!-- Zuckerhut auf der Zange -->
+  <path d="M352 168 L400 74 L448 168 Z" fill="#fbbf24" stroke="#b45309" stroke-width="14" stroke-linejoin="round"/>
+  <g fill="none" stroke="#9f1239" stroke-width="20" stroke-linecap="round" stroke-linejoin="round">
+    <!-- Zange: Brücke über dem Glas -->
+    <path d="M236 210 H564"/>
+    <path d="M300 168 H500"/>
+    <path d="M300 168 L268 210 M500 168 L532 210"/>
+    <!-- Glas -->
+    <path d="M282 236 L318 428 Q323 456 351 456 L449 456 Q477 456 482 428 L518 236"/>
+    <!-- Henkel -->
+    <path d="M508 274 Q566 284 561 332 Q556 380 496 380"/>
+  </g>
+  <!-- Rückgabezeichen -->
+  <g transform="translate(650 396)">
+    <circle r="72" fill="#9f1239"/>
+    <path d="M-40 0 A40 40 0 1 1 0 40" fill="none" stroke="#fff" stroke-width="15" stroke-linecap="round"/>
+    <path d="M-40 -26 L-19 4 L-59 8 Z" fill="#fff"/>
+  </g>
+</svg>

@@ -1,0 +1,25 @@
+{
+  "schema": "framework-release-monitor-v1",
+  "id": "WO-KC-20260724-016",
+  "createdAt": "2026-07-24T19:05:00+02:00",
+  "updatedAt": "2026-07-24T19:05:00+02:00",
+  "project": "KC MarktKasse / PC-Manager",
+  "workOrder": "Repair 62 – Laufzeit-Endlosschleife und Buchstaben-Verlaufskopie stoppen",
+  "baselineVersion": "V0.31.3.6 Repair 61",
+  "candidateVersion": "V0.31.3.6 Repair 62",
+  "candidateFile": "KC_MarktKasse_V0_31_3_6_Repair_62_Runtime_Laufschrift_Stabil_Candidate.zip",
+  "candidateSha256": "SEE_SIDECAR_SHA256",
+  "changeScope": "Pingpong zwischen alten Laufschrift-Beobachtern und Core-Konsolidierung beendet; Entwurfseingaben vom globalen Verlauf getrennt.",
+  "protectedAreas": "Kassenbuchung, Umsatzimport, Bestand, Navigation, Zeiterfassung, Rezepte und übrige Präsentationsdaten.",
+  "requireTv": true,
+  "evidence": {
+    "javascriptSyntax": "PASS",
+    "automatedTests": "38/38 PASS",
+    "rootCause": "MutationObserver-Pingpong plus vollständiger Präsentations-Checkpoint je Eingabeereignis"
+  },
+  "monitorState": {
+    "code": "YELLOW",
+    "label": "Candidate – praktische Bedienprüfung offen",
+    "reason": "Die nachgewiesenen Endlosschleifen sind entfernt; Zielbrowser- und Fire-TV-Test stehen aus."
+  }
+}

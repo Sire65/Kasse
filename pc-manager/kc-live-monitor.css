@@ -1,0 +1,59 @@
+/* KC Sync Live-Monitor – dynamische LED-Gruppen (Kopfzeile) und Live-Monitor-Seite im PC Manager.
+   Nutzt die bereits im PC Manager vorhandenen Design-Tokens (--green/--red/--gold/--muted aus
+   styles.css) statt neue Farben einzuführen. */
+
+.kc-live-led-groups { display: inline-flex; align-items: center; gap: 18px; margin-left: 12px; }
+.kc-live-led-group { display: inline-flex; align-items: center; gap: 9px; padding: 5px 12px; border-radius: 14px; background: #ffffff18; }
+.kc-live-led-group-label { font-size: .82rem; font-weight: 700; color: #fff; opacity: .9; }
+.kc-live-led-group-inactive { background: #ffffff0a; }
+.kc-live-led-group-inactive .kc-live-led-group-label { opacity: .55; }
+.kc-live-led-inactive-mark { display: inline-flex; align-items: center; justify-content: center; width: 24px; height: 24px; font-size: 20px; font-weight: 900; color: #c82c25; line-height: 1; }
+.kc-live-led-pair { display: flex; flex-direction: column; gap: 5px; } /* User-Wunsch: beide LEDs je Kasse untereinander statt nebeneinander */
+.kc-live-led {
+  width: 24px; height: 24px; border-radius: 50%; border: 2px solid #fff;
+  background: var(--muted, #667085); box-shadow: 0 0 0 1px #33415580;
+  transition: background-color .25s ease, box-shadow .25s ease;
+}
+.kc-live-led-status.kc-live-gruen { background: var(--green, #15942a); box-shadow: 0 0 0 1px #0b6b1c, 0 0 8px 2px rgba(21,148,42,.6); }
+.kc-live-led-status.kc-live-gelb  { background: var(--gold, #efb13c); box-shadow: 0 0 0 1px #a06f00, 0 0 8px 2px rgba(239,177,60,.6); }
+.kc-live-led-status.kc-live-rot   { background: var(--red, #c82c25); box-shadow: 0 0 0 1px #7a1b17, 0 0 8px 2px rgba(200,44,37,.6); }
+.kc-live-led-activity.kc-live-aktiv { animation: kcLiveActivityFlicker .9s ease-out; }
+@keyframes kcLiveActivityFlicker {
+  0%   { background: var(--muted, #667085); }
+  12%  { background: var(--gold, #efb13c); box-shadow: 0 0 0 1px #a06f00, 0 0 10px 3px rgba(239,177,60,.7); }
+  40%  { background: var(--gold, #efb13c); box-shadow: 0 0 0 1px #a06f00, 0 0 8px 2px rgba(239,177,60,.55); }
+  100% { background: var(--muted, #667085); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .kc-live-led-activity.kc-live-aktiv { animation: none; background: var(--gold, #efb13c); }
+}
+
+/* Live-Monitor-Seite */
+.kc-live-monitor-toolbar { display: flex; flex-wrap: wrap; gap: 10px; align-items: end; margin-bottom: 14px; }
+.kc-live-monitor-toolbar label { display: flex; flex-direction: column; gap: 4px; font-size: .82rem; color: var(--muted); }
+.kc-live-monitor-toolbar select, .kc-live-monitor-toolbar input { padding: 7px 9px; border: 1px solid var(--line); border-radius: 8px; font: inherit; }
+.kc-live-monitor-counter { margin-left: auto; font-weight: 700; color: var(--text); align-self: center; }
+.kc-live-monitor-list { display: flex; flex-direction: column; gap: 6px; max-height: 65vh; overflow-y: auto; }
+.kc-live-row { display: grid; grid-template-columns: 90px 90px 120px 1fr 90px; gap: 10px; align-items: center; padding: 9px 12px; border-radius: 8px; background: #fff; border: 1px solid var(--line); font-size: .88rem; }
+.kc-live-row.kc-live-row-storno { border-color: var(--red, #c82c25); background: #fef2f2; }
+.kc-live-row.kc-live-row-staff { background: #f0f7ff; }
+.kc-live-row time { color: var(--muted); font-variant-numeric: tabular-nums; }
+.kc-live-row .kc-live-amount { text-align: right; font-weight: 700; font-variant-numeric: tabular-nums; }
+.kc-live-empty { padding: 24px; text-align: center; color: var(--muted); }
+
+/* Verkehrsanzeige (Zeigerinstrument) - User-Wunsch: sichtbar machen, wie stark der
+   Datenverkehr zwischen Kassen und Manager gerade ist. */
+.kc-live-gauge-row { display: flex; gap: 20px; margin-bottom: 16px; }
+.kc-live-gauge { background: #fff; border: 1px solid var(--line); border-radius: 10px; padding: 10px 18px; display: flex; flex-direction: column; align-items: center; }
+.kc-live-gauge svg { display: block; }
+.kc-live-gauge-label { margin-top: 4px; font-size: .88rem; color: var(--muted); }
+.kc-live-gauge-label b { font-size: 1.1rem; color: var(--text); }
+
+/* Supabase-Überwachungs-Dashboard */
+.kc-dash-grid { display: flex; flex-wrap: wrap; gap: 18px; }
+.kc-dash-card { background: #fff; border: 1px solid var(--line); border-radius: 10px; padding: 16px; width: 280px; }
+.kc-dash-card-head { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; font-size: 1.05rem; }
+.kc-dash-led { width: 14px; height: 14px; border-radius: 50%; display: inline-block; flex: none; }
+.kc-dash-row { display: flex; justify-content: space-between; padding: 4px 0; font-size: .88rem; border-bottom: 1px solid #f1f1f1; }
+.kc-dash-bar { height: 8px; background: #eee; border-radius: 4px; overflow: hidden; margin: 6px 0 10px; }
+.kc-dash-bar i { display: block; height: 100%; }

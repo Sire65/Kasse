@@ -1,0 +1,42 @@
+{
+  "schema": "framework-release-monitor-v1",
+  "id": "WO-KC-20260724-004",
+  "createdAt": "2026-07-24T09:20:00+02:00",
+  "updatedAt": "2026-07-24T10:15:00+02:00",
+  "project": "KC MarktKasse / PC-Manager",
+  "workOrder": "Repair 50 – Aufzählungen, Glasdarstellung und PL-Artikelsteuerung",
+  "baselineVersion": "V0.31.3.6 Repair 49",
+  "baselineFile": "KC_MarktKasse_V0_31_3_6_Repair_49_TableCore_TV_Mitglieder_Preislisten_Candidate.zip",
+  "baselineSha256": "263037d4527abe724af96b4311d5cd3e2fb0128c46a33da323b669fd8b9b7ba3",
+  "candidateVersion": "V0.31.3.6 Repair 50",
+  "candidateFile": "KC_MarktKasse_V0_31_3_6_Repair_50_Text_Glass_PL_Preislisten_Candidate.zip",
+  "candidateSha256": "F0A9609E875595FE4A08318209569F0BA5A2B03CF54A3A931F61D9D0D55C5616",
+  "changeScope": "Nur Aufzählungsformatierung für TV-Texte, Bühnenprogramm als Aufzählung/Tabelle, kompaktere Preislisten, transparenter Glasstil, Korrektur Steven Linley sowie ein PL-Kennzeichen in der Artikelverwaltung zur gezielten Ein-/Ausblendung von Artikeln in TV-Preislisten.",
+  "protectedAreas": "NavigationCore, WindowCore, TableCore-Funktionen, DisplayMatrixCore, Wetter, Zeiterfassung, Rezepturkalkulation, Meldungswesen, Combobox-Stabilisierung, Kassenverkauf, Bestandslogik, gemeinsame Renderer-Geometrie und alle nicht ausdrücklich genannten Stammdatenfelder.",
+  "requireTv": true,
+  "evidence": {
+    "javascriptSyntax": "PASS",
+    "automatedTests": "28/28 PASS",
+    "plRegression": "PASS",
+    "managerPlayerGlassParity": "PASS",
+    "report": "PRUEFBERICHT_REPAIR_50.md"
+  },
+  "approval": null,
+  "history": [
+    {
+      "at": "2026-07-24T09:20:00+02:00",
+      "event": "WORKORDER_CREATED",
+      "detail": "Eng begrenzter Auftrag vor Änderungen festgeschrieben."
+    },
+    {
+      "at": "2026-07-24T10:15:00+02:00",
+      "event": "VERIFICATION_PASSED",
+      "detail": "Syntaxprüfung und 28 automatisierte Tests bestanden."
+    }
+  ],
+  "monitorState": {
+    "code": "YELLOW",
+    "label": "Candidate geprüft",
+    "reason": "Automatisierte Prüfung bestanden; praktischer Sichttest durch Anwender bleibt offen."
+  }
+}

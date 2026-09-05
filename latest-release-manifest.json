@@ -1,0 +1,151 @@
+{
+  "schema": "KC_CENTRAL_RELEASE_MANIFEST_V2",
+  "product": "KC Bilderrechner",
+  "releaseVersion": "0.31.3.6.63-symbol-job-code-parity",
+  "displayVersion": "V0.31.3.6 Repair 63 · Symbol- und Aktivierungscode-Parität Candidate",
+  "productBaseVersion": "0.31.3.6.19",
+  "productBaseDisplayVersion": "V0.31.3.6 Repair 19",
+  "uiSchemaVersion": "0.31.3.6-r18-ui.1",
+  "releaseDate": "2026-07-24",
+  "status": "Candidate",
+  "releaseName": "Frei positionierte Symbole auf Bau- und TV-Bildschirm sowie eindeutige Auftragscodes",
+  "priority": {
+    "component": "tv-presentation-manager",
+    "label": "TV-Präsentation im Manager",
+    "freezeOtherFeatures": true
+  },
+  "components": {
+    "manager": {
+      "requiredVersion": "0.31.2.5",
+      "label": "KC MarktKasse Manager"
+    },
+    "tvPresentation": {
+      "requiredVersion": "0.29.38",
+      "label": "TV-Präsentation mit Mitglieder- und Preislistenmigration"
+    },
+    "unifiedEditor": {
+      "requiredVersion": "1.2.0",
+      "label": "Unified Editor ohne auswahlbedingten Schriftgrößenwechsel"
+    },
+    "displayMatrix": {
+      "requiredVersion": "0.2.3",
+      "label": "DisplayMatrixCore"
+    },
+    "presentationTuv": {
+      "requiredVersion": "1.3.0",
+      "label": "Präsentations-TÜV"
+    },
+    "runtimeStability": {
+      "requiredVersion": "1.1.0",
+      "label": "Laufzeitdiagnose"
+    },
+    "professionalGuard": {
+      "requiredVersion": "1.3.0",
+      "label": "TV-Layout-Guard"
+    },
+    "posUIProfileCore": {
+      "requiredVersion": "0.1.0",
+      "label": "POS-UI-Profilkern"
+    },
+    "posUIProfileManager": {
+      "requiredVersion": "0.1.2",
+      "label": "POS-UI-Profilverwaltung mit Detailsteuerung"
+    },
+    "managerMasterdataHealth": {
+      "requiredVersion": "0.29.49",
+      "label": "Warengruppen-, Artikel- und Etikettenstabilisierung"
+    },
+    "mobileJobActivationFix": {
+      "requiredVersion": "0.29.63",
+      "label": "Einheitliche sechsstellige Aktivierungscodes je Bauauftrag"
+    },
+    "eventProgramExchange": {
+      "requiredVersion": "0.1.1",
+      "label": "Tagesprogramm-Übergabekern"
+    },
+    "eventProgramStudioCatalog": {
+      "requiredVersion": "1.0.0",
+      "label": "Studio-Katalogeintrag Programmübergabe"
+    },
+    "eventProgramTuvRules": {
+      "requiredVersion": "1.0.0",
+      "label": "TÜV-Regelsatz Programmübergabe"
+    },
+    "christmasPresentationTemplate": {
+      "requiredVersion": "1.3.0",
+      "label": "Weihnachtsmarkt-Vorlage mit bestätigter Mitglieder-Fotozuordnung",
+      "runtimeRequired": true
+    },
+    "timeClockCore": {
+      "requiredVersion": "0.1.0",
+      "label": "Studio TimeClockCore"
+    },
+    "timeClockManager": {
+      "requiredVersion": "0.3.0",
+      "label": "Zeiterfassung im PC-Manager"
+    },
+    "timeClockDutyRosterAdapter": {
+      "requiredVersion": "0.2.0",
+      "label": "Dienstplan Soll-/Ist-Schnittstelle"
+    },
+    "timeClockPOS": {
+      "requiredVersion": "0.1.1",
+      "label": "Schnellerfassung an der Kasse mit Candidate-Testzugang",
+      "runtimeRequired": false
+    },
+    "recipeManager": {
+      "requiredVersion": "0.1.1",
+      "label": "Rezepturpflege mit Grünkohl-/Sauerkraut-Arbeitsständen"
+    },
+    "managerMessageCore": {
+      "requiredVersion": "0.2.0",
+      "label": "Zentrales sichtbares Manager-Meldungswesen"
+    },
+    "salesInventoryAnalysisCore": {
+      "requiredVersion": "0.1.1",
+      "label": "Studio Umsatz-, Kunden- und BestandsanalyseCore mit deutschen Folientypen"
+    },
+    "managerSalesInventoryDashboard": {
+      "requiredVersion": "0.1.1",
+      "label": "PC-Manager Analyse- und Bestandsdashboard mit Legende und Listenaktionen"
+    },
+    "salesImportCore": {
+      "requiredVersion": "0.2.0",
+      "label": "Quota-sicherer kompakter Umsatzimport"
+    },
+    "eventSimulationCore": {
+      "requiredVersion": "0.1.0",
+      "label": "TÜV-Echtbetriebssimulation",
+      "runtimeRequired": false
+    },
+    "managerEventSimulation": {
+      "requiredVersion": "0.1.0",
+      "label": "Isolierter PC-Manager-Testadapter",
+      "runtimeRequired": false
+    },
+    "managerImportProgress": {
+      "requiredVersion": "0.1.0",
+      "label": "Sichtbarer Umsatzimport-FortschrittsCore"
+    }
+  },
+  "training": {
+    "version": "0.29.3",
+    "supportedUiSchema": "0.31.3.6-r15-ui.1"
+  },
+  "releaseGate": {
+    "blockOnMissingManifest": true,
+    "blockOnVersionMismatch": true,
+    "blockOnMissingComponent": true,
+    "requirePracticalVisualCheck": true
+  },
+  "verification": {
+    "practicalVisualCheck": "PENDING_TARGET_DEVICE",
+    "checkedBy": "Codex Static and Regression Tests",
+    "checkedAt": "2026-07-24T18:00:00+02:00"
+  },
+  "sourceOfTruth": "latest-release-manifest.js",
+  "sourceRelease": "KC_MarktKasse_Suite_V0_31_3_6_Repair_15_Fluid_Text_Input_Candidate",
+  "updatedAt": "2026-07-24T19:35:00+02:00",
+  "hinweis": "ERZEUGT AUS latest-release-manifest.js - NICHT VON HAND AENDERN. Die .js ist die Quelle der Wahrheit (sie fuehrt sich selbst als sourceOfTruth); diese Datei ist nur die Fassung fuer Programmteile, die kein Skript laden koennen (derzeit nur die Schulung). Befund 02.09.2026: sie stand auf Repair 76, waehrend die .js auf Repair 63 stand - die Schulung meldete deshalb eine Abweichung, die es gar nicht gab. Zwei Quellen fuer dieselbe Angabe, eine davon veraltet.",
+  "abgeglichenAm": "2026-09-02"
+}

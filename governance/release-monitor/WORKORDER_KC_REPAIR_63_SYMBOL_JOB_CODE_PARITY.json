@@ -1,0 +1,25 @@
+{
+  "schema": "framework-release-monitor-v1",
+  "id": "WO-KC-20260724-017",
+  "createdAt": "2026-07-24T19:35:00+02:00",
+  "updatedAt": "2026-07-24T19:35:00+02:00",
+  "project": "KC MarktKasse / PC-Manager",
+  "workOrder": "Repair 63 – Symbol- und Aktivierungscode-Parität",
+  "baselineVersion": "V0.31.3.6 Repair 62",
+  "candidateVersion": "V0.31.3.6 Repair 63",
+  "candidateFile": "KC_MarktKasse_V0_31_3_6_Repair_63_Symbole_Aktivierungscode_Candidate.zip",
+  "candidateSha256": "SEE_SIDECAR_SHA256",
+  "changeScope": "Doppelte Symbolanzeige im Editor entfernt, freie Symbolpositionen in Präsentationsmodus und Player übernommen, neue Bauaufträge auf sechsstellige Codes vereinheitlicht.",
+  "protectedAreas": "Kassenbuchung, Umsatzimport, Bestand, Navigation, Zeiterfassung, Rezepte und Laufschriftkonsolidierung.",
+  "requireTv": true,
+  "evidence": {
+    "javascriptSyntax": "PASS",
+    "automatedTests": "39/39 PASS",
+    "legacyJobRule": "KCTV-JOB-<timestamp>-<suffix> verwendet <timestamp>-<suffix> als Aktivierungscode"
+  },
+  "monitorState": {
+    "code": "YELLOW",
+    "label": "Candidate – praktische Bedienprüfung offen",
+    "reason": "Automatisiert geprüft; vorhandener Altauftrag behält seinen in der Datei gespeicherten Altcode."
+  }
+}

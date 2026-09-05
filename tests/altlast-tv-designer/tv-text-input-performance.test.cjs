@@ -1,0 +1,13 @@
+const fs=require('fs'),assert=require('assert');
+const html=fs.readFileSync('pc-manager/index.html','utf8'),code=fs.readFileSync('pc-manager/tv-text-input-performance-v02939.js','utf8');
+const performanceIndex=html.indexOf('tv-text-input-performance-v02939.js'),workflowIndex=html.indexOf('tv-editor-workflow.js');
+assert(performanceIndex>0&&performanceIndex<workflowIndex,'Eingabebremse muss vor dem schweren Workflow geladen werden');
+assert(code.includes("const VERSION='0.29.44',DELAY=2000"),'Debounce-Version oder verlängerte Wartezeit fehlt');
+const draft=code.match(/function draft\(input\)\{([\s\S]*?)\}\nfunction init/)?.[1]||'';
+assert(draft.includes('s[key]=input.value'),'Entwurf wird nicht im Arbeitsspeicher aktualisiert');
+assert(!draft.includes('renderTvSlideList'),'Folienliste darf während eines Tastendrucks nicht neu aufgebaut werden');
+assert(!draft.includes('saveTvPresentation'),'Vollspeicherung darf nicht unmittelbar pro Buchstabe erfolgen');
+assert(code.includes("addEventListener('focusout'")&&code.includes('commit(input.dataset.content,true)'),'Sofortspeicherung beim Verlassen fehlt');
+assert(code.includes('KCTVEditorWorkflow?.checkpoint'),'Verlaufspunkt nach Schreibpause fehlt');
+assert(code.includes('requestAnimationFrame'),'Vorschauaktualisierung muss bildschirmweise gebündelt sein');
+console.log('PASS tv-text-input-performance: Entwurf leichtgewichtig, 2000-ms-Schreibpause, Blur-Commit, Verlauf erhalten');

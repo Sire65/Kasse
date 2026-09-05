@@ -1,0 +1,28 @@
+{
+  "schema": "framework-release-monitor-v1",
+  "id": "WO-KC-20260724-010",
+  "createdAt": "2026-07-24T14:10:00+02:00",
+  "updatedAt": "2026-07-24T14:10:00+02:00",
+  "project": "KC MarktKasse / PC-Manager",
+  "workOrder": "Repair 56 – Sichtbarer Umsatzimport",
+  "baselineVersion": "V0.31.3.6 Repair 55",
+  "candidateVersion": "V0.31.3.6 Repair 56",
+  "candidateFile": "KC_MarktKasse_V0_31_3_6_Repair_56_Importfortschritt_Candidate.zip",
+  "candidateSha256": "SEE_SIDECAR_SHA256",
+  "changeScope": "Nur Umsatzimport: Mehrfachauswahl, Fortschrittsfenster, Prozent, Zeit, Einzelstatus und verständliche Duplikatmeldung.",
+  "protectedAreas": "Kassenbuchung, Präsentation, Navigation, Zeiterfassung, Rezepte und Stammdaten.",
+  "requireTv": false,
+  "evidence": {
+    "javascriptSyntax": "PASS",
+    "automatedTests": "36/36 PASS",
+    "visibleMultiFileImport": "4 Dateien / 8200 Duplikate korrekt",
+    "browserConsole": "0 Fehler",
+    "studioRegistry": "cores/STUDIO_TUV_COMPONENT_REGISTRY_V1.json",
+    "report": "PRUEFBERICHT_REPAIR_56.md"
+  },
+  "monitorState": {
+    "code": "GREEN",
+    "label": "Technisch und praktisch geprüft",
+    "reason": "Vier Kassenexporte sichtbar verarbeitet; 100 %, Gesamtdauer, Einzelschritte und klare Duplikatmeldung bestätigt."
+  }
+}

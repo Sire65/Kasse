@@ -1,0 +1,24 @@
+<!-- Glas + Feuerzange Rückgabe (Komplettrückgabe).
+     Vorher stand hier ein gestrichelter Kasten mit "GLAS + FEUERZANGE · 4,00 €" - ein Preis
+     fest im Bild ist doppelt gefährlich: er wird nicht mitgeändert, wenn der Preis sich ändert.
+     Jetzt eine fertige Zeichnung ohne Preis: Glas + Zange, dazu das Rückgabezeichen. -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 520" role="img" aria-label="Glas und Feuerzange Rückgabe">
+  <rect width="800" height="520" fill="#fdf2f4"/>
+  <g fill="none" stroke="#9f1239" stroke-width="20" stroke-linecap="round" stroke-linejoin="round">
+    <!-- linkes Glas -->
+    <path d="M96 176 L128 404 Q132 432 160 432 L232 432 Q260 432 264 404 L296 176 Z"/>
+    <path d="M286 214 Q338 224 333 268 Q328 312 274 312"/>
+    <!-- Pluszeichen -->
+    <path d="M396 268 H468 M432 232 V304" stroke-width="26"/>
+    <!-- rechts: Zange mit Zuckerhut -->
+    <path d="M536 214 H756"/>
+    <path d="M580 174 H712"/>
+    <path d="M580 174 L556 214 M712 174 L736 214"/>
+  </g>
+  <path d="M608 174 L646 96 L684 174 Z" fill="#fbbf24" stroke="#b45309" stroke-width="14" stroke-linejoin="round"/>
+  <g transform="translate(646 372)">
+    <circle r="72" fill="#9f1239"/>
+    <path d="M-40 0 A40 40 0 1 1 0 40" fill="none" stroke="#fff" stroke-width="15" stroke-linecap="round"/>
+    <path d="M-40 -26 L-19 4 L-59 8 Z" fill="#fff"/>
+  </g>
+</svg>

@@ -1,0 +1,1683 @@
+﻿{
+    "schema":  "KC_FILE_MANIFEST_SHA256_V1",
+    "release":  "0.31.3.6.44-editor-runtime",
+    "createdAt":  "2026-07-23T15:54:25.0683198+02:00",
+    "fileCount":  335,
+    "files":  [
+                  {
+                      "path":  ".nojekyll",
+                      "bytes":  0,
+                      "sha256":  "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+                  },
+                  {
+                      "path":  "CHANGELOG_CONTENT_OBJECT_CORE_REPAIR_16.md",
+                      "bytes":  725,
+                      "sha256":  "a0fdd8d6d7e8fe48f4387483b4104980213c404f97fd776f39806b5ca0feca29"
+                  },
+                  {
+                      "path":  "CHANGELOG_FLUID_TEXT_INPUT_REPAIR_15.md",
+                      "bytes":  873,
+                      "sha256":  "f098b91140eeb57c0aab7de6f34ac5cc236dc8860867e27c1473348cd89fa976"
+                  },
+                  {
+                      "path":  "CHANGELOG_OBJECT_EDITOR_REPAIR_14.md",
+                      "bytes":  1519,
+                      "sha256":  "47e2d2ff534de65fd34f2f89f6b46b0c11696557cbabbdf2a31d3360b7c3c8e5"
+                  },
+                  {
+                      "path":  "CHANGELOG_POS_UI_REPAIR_12.md",
+                      "bytes":  785,
+                      "sha256":  "1bc6265d309f5d0b7aefb55db8771bd57adc190d38a5d3bab14f6d89af66834e"
+                  },
+                  {
+                      "path":  "CHANGELOG_TV_STABILITY_REPAIR_13.md",
+                      "bytes":  1466,
+                      "sha256":  "2443f035962e1ce100e9b57f7fde34b64766735f3bd07fdadf63e06f15113c4a"
+                  },
+                  {
+                      "path":  "CHANGELOG_WEIHNACHTSMARKT_EDITOR_CANDIDATE.md",
+                      "bytes":  1360,
+                      "sha256":  "533903c6822d73c1fa98efbec53c7df797d7f907a407eebed9b59f8329dc5d5c"
+                  },
+                  {
+                      "path":  "CONSOLIDATION_REPORT_REPAIR_32.md",
+                      "bytes":  1567,
+                      "sha256":  "d48ebbcc3cde991b419b0e39c24a7175c6cdcc966676fd776ce12f36df1e660e"
+                  },
+                  {
+                      "path":  "DISPLAY_MATRIX_INTEGRATION_V0_29_33.md",
+                      "bytes":  1206,
+                      "sha256":  "5962bc76abf1b9bf5a10c27ecc910f71b4b05e31e36dbe7c706ff69594bd1f39"
+                  },
+                  {
+                      "path":  "ENTWICKLUNGS_SCHNELLZUGANG_V0_29_19.md",
+                      "bytes":  675,
+                      "sha256":  "9936d72cf63cb8f1f77417aa9f6874388ebfc33e8a16f51076cb83bc0efda01d"
+                  },
+                  {
+                      "path":  "FOLIENARBEITSPLATZ_V0_29_35.md",
+                      "bytes":  1319,
+                      "sha256":  "3609cf05d326a4128084cd686f0dfd69d65a5951a7151d4adb4f315c438ef9db"
+                  },
+                  {
+                      "path":  "GITHUB_PAGES_ANLEITUNG.txt",
+                      "bytes":  452,
+                      "sha256":  "c611744712a95cbad73dc355638f730851619978dbc97400194edbf9d0c1d945"
+                  },
+                  {
+                      "path":  "IMAGE_OPTIMIZATION_REPORT.tsv",
+                      "bytes":  1913,
+                      "sha256":  "7ecbe3ca3b0329830c4300dd9cdff079516e5788ed660793cd76606833f262b4"
+                  },
+                  {
+                      "path":  "IMPORT_EDITOR_POLISH_V0_29_18.md",
+                      "bytes":  811,
+                      "sha256":  "f365f53125675373e06a550465ece1a35f2fda8c3a99235d92e90c6dd1877881"
+                  },
+                  {
+                      "path":  "index.html",
+                      "bytes":  1243,
+                      "sha256":  "a3b3e8c18e88bfe9f1976441c0cbbe09a0a7871ba3dc861de1118d2d325508fe"
+                  },
+                  {
+                      "path":  "KOMPATIBILITAETSNACHWEIS_V0_29_24.md",
+                      "bytes":  460,
+                      "sha256":  "5b3267c52163dda19ae9b26ce4c674cd4b6bc55ad64ccafb696b7348eaed1e58"
+                  },
+                  {
+                      "path":  "KOMPATIBILITAETSNACHWEIS_V0_29_25.md",
+                      "bytes":  433,
+                      "sha256":  "ba7c6cc49e99d293a7215bb15c4e1cf1017856f79ace3060daa5079a7ba3cf1d"
+                  },
+                  {
+                      "path":  "KONTEXTEDITOR_BEREINIGUNG_V0_29_31.md",
+                      "bytes":  1293,
+                      "sha256":  "1b804237ab571c0e14aa02045f8440437e7908e20ebb8301164a411b78825dc9"
+                  },
+                  {
+                      "path":  "KONTEXT_EFFECT_FIX_V0_29_23.md",
+                      "bytes":  571,
+                      "sha256":  "c1ea88fd5caa557114523e2f62ce0bb77cbd539f68d7cd75299c910a64fed178"
+                  },
+                  {
+                      "path":  "latest-release-manifest.js",
+                      "bytes":  6688,
+                      "sha256":  "d631b2527c10acf64ebf2a694d6dde6b9eb45112a0f7e75d7eb37a43245da9c7"
+                  },
+                  {
+                      "path":  "latest-release-manifest.json",
+                      "bytes":  5974,
+                      "sha256":  "879812017a652e0b6b40c7919ccced656568a893d06626c7cea0cfc7149336eb"
+                  },
+                  {
+                      "path":  "LIVE_EDITOR_FIX_V0_29_16.md",
+                      "bytes":  677,
+                      "sha256":  "8959935651c311f8f3f0d3cefed222ba22e592801a99c6fadcdcf13d1a251769"
+                  },
+                  {
+                      "path":  "NAVIGATIONCORE_PC_MANAGER_MIGRATION_REPAIR_21.md",
+                      "bytes":  768,
+                      "sha256":  "89559896ec97ec91498bc1fce26922ace31413f2d70dcf20b53bd748f68d7e0f"
+                  },
+                  {
+                      "path":  "NAVIGATIONCORE_V1_2_REPAIR_23.md",
+                      "bytes":  855,
+                      "sha256":  "e328cc6f2911b6438cd367d5689dc6edcf6fea0db05f6a9ce6d4804ef2f8425e"
+                  },
+                  {
+                      "path":  "NAVIGATION_UND_GITHUB_REVIEW_REPAIR_22.md",
+                      "bytes":  770,
+                      "sha256":  "f8db6aedef0f09a2b2f1ca1c3ab0df7bc214f616710ee0c5059e440a04469672"
+                  },
+                  {
+                      "path":  "OBJEKTWORKFLOW_V0_29_32.md",
+                      "bytes":  1032,
+                      "sha256":  "d9c988cdd40dc0885adb98a2e0521de1bf5112f7bf492be9890bcd4e43de3147"
+                  },
+                  {
+                      "path":  "PERFORMANCE_CHECK_V0_29_20.md",
+                      "bytes":  612,
+                      "sha256":  "e70a3c2dee2ef8c91491beea0ba0ab6d3451a6726f465d66b5ac057660254a93"
+                  },
+                  {
+                      "path":  "POS_UI_PROFILE_TECHNICAL_PREVIEW.md",
+                      "bytes":  2202,
+                      "sha256":  "41846327c5ff67c66af159566750c53980c82e35db2ffa1a9d90b2d82bc3a0e0"
+                  },
+                  {
+                      "path":  "PROGRAMMIMPORT_REPAIR_20.md",
+                      "bytes":  918,
+                      "sha256":  "cebd6d9aef77872e69206a0443fe91ef363f18d52775e18cc70cc842da6e0a3a"
+                  },
+                  {
+                      "path":  "PROGRAMM_UEBERGABE_KASSE_REPAIR_27.md",
+                      "bytes":  900,
+                      "sha256":  "4e9824f8e427c86031ba55ff11d17b1b019e98ab4e0625a904b52c90ce7db359"
+                  },
+                  {
+                      "path":  "PRUEFBERICHT_REPAIR_40.md",
+                      "bytes":  1478,
+                      "sha256":  "7eb5771e9a0d7477808191e2ecd23a229f7e8ea076d5952576bf545923d01d36"
+                  },
+                  {
+                      "path":  "PRUEFBERICHT_REPAIR_41.md",
+                      "bytes":  1231,
+                      "sha256":  "a6d9b38c5575408f8c12bf33d52cf7183c39932f494d1ea00c7e3a63f0237534"
+                  },
+                  {
+                      "path":  "PRUEFBERICHT_REPAIR_42.md",
+                      "bytes":  1607,
+                      "sha256":  "68ec49b11cfd59b7d412bba2ea8a099c45f33d0dcf7d51bea814ec8d6fdc48b3"
+                  },
+                  {
+                      "path":  "PRUEFBERICHT_REPAIR_43.md",
+                      "bytes":  1235,
+                      "sha256":  "40a51cb4b54c298a1dfdc61bc8bf522d851f52e2cb4f1190d6d715814d9062aa"
+                  },
+                  {
+                      "path":  "PRUEFBERICHT_REPAIR_44.md",
+                      "bytes":  1664,
+                      "sha256":  "5a88f95702a27feff8b49c12976a7f99ef407e29d03f10d0d9e02827cdc1cf96"
+                  },
+                  {
+                      "path":  "README.md",
+                      "bytes":  6385,
+                      "sha256":  "50e491cdf72bd1c18bd0b47f471cc3217084ae70b89da4f69368f81d89b3f393"
+                  },
+                  {
+                      "path":  "README_V0_29_15.txt",
+                      "bytes":  387,
+                      "sha256":  "64e1de1e13e8f99e4dad988534268fdf66afbd100cfd54271edc2bcfa91dd1c2"
+                  },
+                  {
+                      "path":  "RECIPE_CORE_PFLICHTENHEFT_REPAIR_43.md",
+                      "bytes":  1216,
+                      "sha256":  "91790d4362656a23a8f494e8eb323ca8976ffc8c532e3a24a3a12328de36b0f5"
+                  },
+                  {
+                      "path":  "RELEASE_BEREINIGUNG_V0_29_15.md",
+                      "bytes":  954,
+                      "sha256":  "a99e327b3b578d187c12812dff645332744ff1e0fca76ccec65737f6bbe514d0"
+                  },
+                  {
+                      "path":  "RENDERER_KATALOG_COMBOBOX_REPAIR_26.md",
+                      "bytes":  948,
+                      "sha256":  "d23a8ed8750960ee90c5500898774ec91f62bba4a9dce9eb0e8e990d46aa60a9"
+                  },
+                  {
+                      "path":  "REPAIR_18_ARCHITEKTUR_PFLICHTENHEFT_TUV.md",
+                      "bytes":  1642,
+                      "sha256":  "c3c01119d9739684604028d32d2120443afab93ea3bca70524d2d9cfc114c587"
+                  },
+                  {
+                      "path":  "REPAIR_31_TV_OBJEKTE_STAMMDATEN.md",
+                      "bytes":  1272,
+                      "sha256":  "f078a6f441240caf13595527c05a32ce38d0d4467284fc6f6a92ef82cbb27099"
+                  },
+                  {
+                      "path":  "SLIDE_NUMBERS_OBJECT_LIBRARY_POS_DETAILS_REPAIR_25.md",
+                      "bytes":  947,
+                      "sha256":  "250975090411f461d1f1829e7fc7da2136e1b33d533449b61c06d9941e424e8a"
+                  },
+                  {
+                      "path":  "SMART_OBJECT_EDITOR_V0_29_22.md",
+                      "bytes":  1323,
+                      "sha256":  "d865ad0de6fe13dae9d7aa3c0b0f9862ce55ee9796e93600332664db066a2dce"
+                  },
+                  {
+                      "path":  "STABILITAETSBERICHT_V0_29_30.md",
+                      "bytes":  1954,
+                      "sha256":  "0a33bd2cc3f71be05df85aa88ac6cb1b391ad3ceccf26f8af275238a75a364d0"
+                  },
+                  {
+                      "path":  "STUDIO_TUV_CONTENT_REGISTRATION_REPAIR_40.md",
+                      "bytes":  1994,
+                      "sha256":  "364c3174c50f2bb273760c1e8179da8d85d0b3f2e17082df58439c4641cb11eb"
+                  },
+                  {
+                      "path":  "STUDIO_TUV_EVENT_PROGRAM_REGISTRATION_REPAIR_28.md",
+                      "bytes":  1373,
+                      "sha256":  "2e789a004ee2d62c7b9b1fd04105b72b21dae33b9b23fd0ae00f641b2b136024"
+                  },
+                  {
+                      "path":  "STUDIO_TUV_MIGRATION_REGISTRATION_REPAIR_41.md",
+                      "bytes":  1639,
+                      "sha256":  "7144bd125f0dd53a570eff4b82688d37f6e7bfaf4b5223bd84718b2cf5eccc0d"
+                  },
+                  {
+                      "path":  "STUDIO_UEBERNAHMEPROTOKOLL_V0_29_24.md",
+                      "bytes":  1121,
+                      "sha256":  "ed844575433e942609cbf73415488b9078a73995603b55f486a52f65e14e0ea5"
+                  },
+                  {
+                      "path":  "STUDIO_UEBERNAHMEPROTOKOLL_V0_29_25.md",
+                      "bytes":  741,
+                      "sha256":  "41d2036c182b3735140f681b583e96106b56be1fc4160711b9ed379d55c3f365"
+                  },
+                  {
+                      "path":  "TEXTFELD_AUFZIEHEN_REPAIR_30.md",
+                      "bytes":  970,
+                      "sha256":  "7c19ed782c8678278d47f0a6db20459ea26bc950cb7557b8dcf8529ecf7d021e"
+                  },
+                  {
+                      "path":  "TEXT_OBJEKT_PIXEL_REPAIR_24.md",
+                      "bytes":  910,
+                      "sha256":  "419c02c01f0637d3478b5dbe3dcaa762991644854eccda7316ab65cd7f251b49"
+                  },
+                  {
+                      "path":  "TIEFENCHECK_KONSOLIDIERUNG_TUV_V0_29_15.md",
+                      "bytes":  1643,
+                      "sha256":  "d0ebdc3e6fc44a626727d657c09f61acb4344a9b712f738312a7c08586001d77"
+                  },
+                  {
+                      "path":  "TIME_CLOCK_PFLICHTENHEFT_REPAIR_42.md",
+                      "bytes":  2318,
+                      "sha256":  "f91e25ee5a011ceeb54356228c025f006e2133508537adf145ef5a67db1697de"
+                  },
+                  {
+                      "path":  "TUV_BUTTON_FIX_V0_29_21.md",
+                      "bytes":  357,
+                      "sha256":  "24785e53c835aeab81cadf3adfba379a58a2831da0f76bb5b57159893cad6985"
+                  },
+                  {
+                      "path":  "TUV_PROFESSIONALITAET_AUTO_KORREKTUR_V0_29_17.md",
+                      "bytes":  504,
+                      "sha256":  "a5afc3d006173e42cc0c43215c8535c9a873238ac76cb0f47c8d27cdce777dec"
+                  },
+                  {
+                      "path":  "TUV_QA_FIX_V0_29_28.md",
+                      "bytes":  1057,
+                      "sha256":  "098c6641776736837603657dcd7d3c78d46f8a78ebf0d5f00af85f37316f4b39"
+                  },
+                  {
+                      "path":  "TUV_QA_FIX_V0_29_29.md",
+                      "bytes":  1009,
+                      "sha256":  "485e2c3148af7b5aacf1abf1f159d900a2280eeb5229228253d8d0f0d2f53cf9"
+                  },
+                  {
+                      "path":  "TUV_QA_PRUEFBERICHT_V0_29_24.md",
+                      "bytes":  952,
+                      "sha256":  "18beb8ee21402554654b19325e67ca03917d874db75c3c4a58bd58035314d8bc"
+                  },
+                  {
+                      "path":  "TUV_QA_PRUEFBERICHT_V0_29_25.md",
+                      "bytes":  591,
+                      "sha256":  "6162c160a690cd49bc216ece18d870c38e3b73097b1c514f66e1dbaa36d35c4d"
+                  },
+                  {
+                      "path":  "TUV_QA_PRUEFBERICHT_V0_29_27.md",
+                      "bytes":  1448,
+                      "sha256":  "d081813fcbb7b5c352a9d65ac08d31981c907a7328c65b76202f07ecafac9ecb"
+                  },
+                  {
+                      "path":  "TV_RENDER_PARITAET_REPAIR_29.md",
+                      "bytes":  1001,
+                      "sha256":  "47df9ce951ff5745067c56bdef1dbdb752b144b98d271a1d014e72155a11e7d3"
+                  },
+                  {
+                      "path":  "WEATHER_ICONS_AUDIO_FIX_V0_29_26.md",
+                      "bytes":  976,
+                      "sha256":  "cbe4a38a81a931acf9f49c55c12cbae075e17b58f5a4399e15cd49cbf893f0d1"
+                  },
+                  {
+                      "path":  "WEIHNACHTSMARKT_PRAESENTATION_V1.md",
+                      "bytes":  1837,
+                      "sha256":  "29436106533aaa2758266f2259dc62b2425277964bf73e307994ecf40a540fce"
+                  },
+                  {
+                      "path":  "avatar-core/avatar-core.js",
+                      "bytes":  1474,
+                      "sha256":  "2b51af4f7753c2cd10f714ab20d9603399e430cc56cb27d69697a402ba2ca3e8"
+                  },
+                  {
+                      "path":  "avatar-core/avatar-manifest.json",
+                      "bytes":  1923,
+                      "sha256":  "f7ed7f138fc65de34b2bb938d14a1c6d4cfea6b5464630b580647624f70df75d"
+                  },
+                  {
+                      "path":  "avatar-core/README_AVATARCORE.md",
+                      "bytes":  764,
+                      "sha256":  "51aac199d471095df7470b5abf6a92e400e8a723896ca4e1d06c006388814ce4"
+                  },
+                  {
+                      "path":  "avatar-core/assets/chef/chef_female_neutral.webp",
+                      "bytes":  17202,
+                      "sha256":  "00d7a816e07b4f81011a4f194686d2e5129a9ed856b2523b13a1e67124021f05"
+                  },
+                  {
+                      "path":  "avatar-core/assets/chef/chef_female_neutral_armless_v0257.webp",
+                      "bytes":  57910,
+                      "sha256":  "5eb1e0cc22d850633a1fb0df924756052dd66bd776c9c3fb1e0b75dbb0b507b2"
+                  },
+                  {
+                      "path":  "avatar-core/assets/chef/chef_male_approve.webp",
+                      "bytes":  11304,
+                      "sha256":  "527997fc4616a1b82a25762569465299596c868657be310fdbb187e64daca65e"
+                  },
+                  {
+                      "path":  "avatar-core/assets/chef/chef_male_neutral.webp",
+                      "bytes":  20390,
+                      "sha256":  "ec7b7c761cb5fd3c506420cc3b4cc775eaff48c1827fc9c4e339961b11f87103"
+                  },
+                  {
+                      "path":  "avatar-core/assets/chef/chef_male_neutral_armless_v0257.webp",
+                      "bytes":  49452,
+                      "sha256":  "a9fde53ad4e15b266328570910f28fd244a5a20f22c6c6816e0b038231867ca0"
+                  },
+                  {
+                      "path":  "avatar-core/assets/chef/chef_male_smile.webp",
+                      "bytes":  9754,
+                      "sha256":  "b7291908c088105da62886df60fd0229623b718d40fa5f38df0d33ace021822c"
+                  },
+                  {
+                      "path":  "avatar-core/assets/chef/chef_male_speaking.webp",
+                      "bytes":  10032,
+                      "sha256":  "1e05203aeeabfa4aa03c7769f753ae32eadc5ed056cc46ce64c75c34122cf461"
+                  },
+                  {
+                      "path":  "avatar-core/assets/chef/chef_male_thinking.webp",
+                      "bytes":  10654,
+                      "sha256":  "3091949d4a12e3d698c8674c5dc19e868373ab5127534f7d0c50530e82321c99"
+                  },
+                  {
+                      "path":  "avatar-core/assets/chef/chef_male_wave.webp",
+                      "bytes":  13678,
+                      "sha256":  "05c26d5bb20e5614ea55fa7d840955cf5c28284f871b903f98fe91978465be6a"
+                  },
+                  {
+                      "path":  "cores/STUDIO_TUV_COMPONENT_REGISTRY_V1.json",
+                      "bytes":  2033,
+                      "sha256":  "e0f76b199a7adf673f9e68149484edaa2ecc600086ff614153a651feeb4f9f26"
+                  },
+                  {
+                      "path":  "cores/audio-presentation-core/audio-presentation-core.js",
+                      "bytes":  1081,
+                      "sha256":  "2aed2340424c20009d0b696778790cb34b4d90d165dbf0cedc7778ddd1df06db"
+                  },
+                  {
+                      "path":  "cores/audio-presentation-core/README.md",
+                      "bytes":  317,
+                      "sha256":  "ba4adf98aa86e3fe8421cb128c5064912f30f4c7bb9b9dd572d2d291d15ded5f"
+                  },
+                  {
+                      "path":  "cores/audit-core/audit-core.js",
+                      "bytes":  1404,
+                      "sha256":  "7ac7c43a2b88725b00e59b2fbf4e1df9b7774198bfb6e077719187798d074178"
+                  },
+                  {
+                      "path":  "cores/audit-core/README.md",
+                      "bytes":  272,
+                      "sha256":  "c7ea4de69c95f05e61ef78e48d9413bc984294e79893c05dcabe96f0f2b55114"
+                  },
+                  {
+                      "path":  "cores/design-core/design-core-presentation.css",
+                      "bytes":  4542,
+                      "sha256":  "b71bb8e0bfc2bfab68f4f901d59a4b2e7aef9745d6dc8521723a9a480fb7fb81"
+                  },
+                  {
+                      "path":  "cores/design-core/design-core-presentation.js",
+                      "bytes":  6043,
+                      "sha256":  "29312809312ad6330d1f12198a0ac21992e725db2bab27f2ee63b0a9bf5225d8"
+                  },
+                  {
+                      "path":  "cores/design-core/design-core-presentation.manifest.json",
+                      "bytes":  354,
+                      "sha256":  "12844a03ddc287a3299408a77b8499d0f0d26ac556f2894f3a0c44ae7807f013"
+                  },
+                  {
+                      "path":  "cores/design-core/README.md",
+                      "bytes":  203,
+                      "sha256":  "2128d2a7cd953711b32faaf4d42d9f62b28940868fa42ffa9e9325df231d545e"
+                  },
+                  {
+                      "path":  "cores/display-matrix-module/demo.html",
+                      "bytes":  15403,
+                      "sha256":  "24ebba4bfc198a9a90bbd79c6973b38b6568379f8659483ccc2cdbd5928c6889"
+                  },
+                  {
+                      "path":  "cores/display-matrix-module/display-matrix-module.js",
+                      "bytes":  45939,
+                      "sha256":  "45fa8ee683f6b48899e541578b50ef4ba2f640e827fec6e8b1fc014c1d503223"
+                  },
+                  {
+                      "path":  "cores/display-matrix-module/DISPLAY_MATRIX_API_CONTRACT.json",
+                      "bytes":  5470,
+                      "sha256":  "6e07006d01f91704e2bab2be8f890a982774f79d3ce5cb137b8aacbca6bb6af7"
+                  },
+                  {
+                      "path":  "cores/event-program-exchange-core/README.md",
+                      "bytes":  609,
+                      "sha256":  "6d62ed76be68957a3eb79e8c356739009840582540ec40fe3d20d969118b317e"
+                  },
+                  {
+                      "path":  "cores/event-program-exchange-core/studio-catalog-entry.json",
+                      "bytes":  796,
+                      "sha256":  "5ec29a3c0a6749e5e410726c72c7cc9e7e51054c29295571c740e48075f17595"
+                  },
+                  {
+                      "path":  "cores/event-program-exchange-core/tuv-rules.json",
+                      "bytes":  1281,
+                      "sha256":  "133411dfd3ec7f962020e30a075670da75f9b9dc8464a8cfb3aab41382f27205"
+                  },
+                  {
+                      "path":  "cores/health-core/health-core.js",
+                      "bytes":  7582,
+                      "sha256":  "1ec5a7eba72dbebdfb45f87569ec56c26aa093b1477e1cb41e95c19927f0747e"
+                  },
+                  {
+                      "path":  "cores/health-core/README.md",
+                      "bytes":  544,
+                      "sha256":  "13bef19e1b5d96a41105c132f18b74f713c6e2a7d6416df8e631dfe590943aa5"
+                  },
+                  {
+                      "path":  "cores/message-core/message-core.js",
+                      "bytes":  2914,
+                      "sha256":  "a84a22b9e2e368ea59838e0d58a2e5265706a32933ce734903f60e691edbd022"
+                  },
+                  {
+                      "path":  "cores/mobile-presentation-exchange-core/mobile-presentation-exchange-core.js",
+                      "bytes":  813,
+                      "sha256":  "e747594e3274d6b17951d23324c559f419d13a4febbfab21ad75a7ec424d32e4"
+                  },
+                  {
+                      "path":  "cores/mobile-presentation-exchange-core/README.md",
+                      "bytes":  225,
+                      "sha256":  "34d73e3135250f0bc6eae437cfbad4c39839f131870d3d12a96e9ec1f79c1ec8"
+                  },
+                  {
+                      "path":  "cores/navigation-core/navigation-core.js",
+                      "bytes":  1990,
+                      "sha256":  "7a459be6731693f2fde0c073ac78dcceec7428e0016f3946a140fc18f1455099"
+                  },
+                  {
+                      "path":  "cores/notification-core/notification-core.js",
+                      "bytes":  1384,
+                      "sha256":  "1bf3719b79b0149feb6b88cb96d70ea7ba6c6960eaf28e27763010f071bdb447"
+                  },
+                  {
+                      "path":  "cores/notification-core/README.md",
+                      "bytes":  266,
+                      "sha256":  "468006182fe824b54d581201b3aaafd9cae2688aef38aca04f869c4bf7293e8c"
+                  },
+                  {
+                      "path":  "cores/pos-ui-profile-core/pos-ui-profile-core.js",
+                      "bytes":  9995,
+                      "sha256":  "a8d95a9a1f3e8b4f272367abed75261921b4ae62403c2988db466d4f25e0217f"
+                  },
+                  {
+                      "path":  "cores/pos-ui-profile-core/POS_UI_PROFILE_SCHEMA.json",
+                      "bytes":  618,
+                      "sha256":  "9d0d2258f3fe1c907404e787208115825c5e9577019611ecfed73c708b9e662d"
+                  },
+                  {
+                      "path":  "cores/presentation-tuv-core/presentation-tuv-core.css",
+                      "bytes":  1985,
+                      "sha256":  "e68b57df83a906a20466fe6a71e5145235e8b8d4f1ae6651044473ac321db43e"
+                  },
+                  {
+                      "path":  "cores/presentation-tuv-core/presentation-tuv-core.js",
+                      "bytes":  10854,
+                      "sha256":  "68b451951fd1609eb1703ce2deebe7820b3524010e1722a4b83c89013c998abc"
+                  },
+                  {
+                      "path":  "cores/presentation-tuv-core/README.md",
+                      "bytes":  261,
+                      "sha256":  "b2e4963c4776cf7de1f9e6ee1773500bb874eb3e120a57be3c9d34c4db63d290"
+                  },
+                  {
+                      "path":  "cores/product-info-core/KC_PRODUCT_INFO_V1.schema.json",
+                      "bytes":  973,
+                      "sha256":  "00fe4fc01778e80bcade83c80471a1dd08dae3754712863ec5dc4274796a3edf"
+                  },
+                  {
+                      "path":  "cores/product-info-core/product-info-core.js",
+                      "bytes":  2245,
+                      "sha256":  "dfb7b6c6b5bff93d88bb5d1e19631e4bac16defd1cc810d2f7d75f5c8b77927e"
+                  },
+                  {
+                      "path":  "cores/product-info-core/README.md",
+                      "bytes":  322,
+                      "sha256":  "d5ed3b00ef0f8aa0ce80e2d49f315efb58d881290328a5fb108a44c09f526035"
+                  },
+                  {
+                      "path":  "cores/property-core/property-core.js",
+                      "bytes":  1359,
+                      "sha256":  "6543d32580c5e76a41f6e53d40c32bb05024451e6e99f2f15c2fadfcde73382f"
+                  },
+                  {
+                      "path":  "cores/property-core/README.md",
+                      "bytes":  188,
+                      "sha256":  "8bb030e0ea360bdfd9b1fb444f3cdb5a789fb81ca786534d916dfd6e68129cb8"
+                  },
+                  {
+                      "path":  "cores/recipe-calculation-core/README.md",
+                      "bytes":  458,
+                      "sha256":  "417ed0a0ca81ad25c00b50d42996491584098729284f7a217e858a54a9511336"
+                  },
+                  {
+                      "path":  "cores/recipe-calculation-core/recipe-calculation-core.js",
+                      "bytes":  8493,
+                      "sha256":  "a5177eeff3975a1d98675e8846bf55cd8adcc481843c9962068e5d87b7ebf64d"
+                  },
+                  {
+                      "path":  "cores/recipe-calculation-core/recipe.schema.json",
+                      "bytes":  535,
+                      "sha256":  "0e34329b6c95d99a46c00b70359b004dd6b1b06e09be2d0299c9f893b3501321"
+                  },
+                  {
+                      "path":  "cores/recipe-calculation-core/studio-catalog-entry.json",
+                      "bytes":  500,
+                      "sha256":  "7f896662c7f47ecd6fa2bfa5f16dc7acc6fc37ceaef1b5db1ac0dad849e31d2d"
+                  },
+                  {
+                      "path":  "cores/recipe-calculation-core/tuv-rules.json",
+                      "bytes":  850,
+                      "sha256":  "d5111eb7324202c03ecb737cb078d652936e4aec31c4a867c3e5120a0a7e85d1"
+                  },
+                  {
+                      "path":  "cores/runtime-stability-core/runtime-stability-core.js",
+                      "bytes":  3613,
+                      "sha256":  "3a11f5900b2d26fbba62081df6fd1493c5ac8ab2abaf6ff69601dbfd3b6de68f"
+                  },
+                  {
+                      "path":  "cores/security-core/crypto-secure-sync.js",
+                      "bytes":  3397,
+                      "sha256":  "4f2b46d874d98459dbc35bd9e2acadd1153ae8e4490e73e7139c113c0964d301"
+                  },
+                  {
+                      "path":  "cores/security-core/README.md",
+                      "bytes":  397,
+                      "sha256":  "0d86f4f000a78c30039f9467ab9113ca13868cb0da2a7ff79326746a0bff9212"
+                  },
+                  {
+                      "path":  "cores/security-core/security-core.js",
+                      "bytes":  2456,
+                      "sha256":  "3261cb3367556e3fc9867a529c66c45727bf40a04cbdfe2c52bfaa19bb236b37"
+                  },
+                  {
+                      "path":  "cores/selection-core/README.md",
+                      "bytes":  162,
+                      "sha256":  "7f73a0d34449beb4c9303a2bf767edb924acd07d3beebc44c644eb1e7c37de46"
+                  },
+                  {
+                      "path":  "cores/selection-core/selection-core.js",
+                      "bytes":  884,
+                      "sha256":  "7a94a3bee589646a17f9f4f7abbbda8959b9758feb638b77aac72f234c03127e"
+                  },
+                  {
+                      "path":  "cores/smart-layout-core/README.md",
+                      "bytes":  177,
+                      "sha256":  "695e4d798550769b2e528dc5ec8082f5d32f6b1bfd64ada9242e1dea83e6890f"
+                  },
+                  {
+                      "path":  "cores/smart-layout-core/smart-layout-core.js",
+                      "bytes":  1499,
+                      "sha256":  "8f0b9116e81529621a6f335c43340aae30b072659ca058486485c74f6c8336cd"
+                  },
+                  {
+                      "path":  "cores/sound-core/README.md",
+                      "bytes":  594,
+                      "sha256":  "39d12111615093b265a4d6b89f204c48e3d5d74045d377c6b0bc2dc8eaab7bbd"
+                  },
+                  {
+                      "path":  "cores/sound-core/sound-core.js",
+                      "bytes":  4939,
+                      "sha256":  "995d22260ced67f5c9d027553228d10d68b131584cdbbd2fc9545357fc52085e"
+                  },
+                  {
+                      "path":  "cores/time-clock-core/README.md",
+                      "bytes":  598,
+                      "sha256":  "7e830a498942f104f2651063bb068ae9d139853a0a52f2e41521936e9718d0f4"
+                  },
+                  {
+                      "path":  "cores/time-clock-core/studio-catalog-entry.json",
+                      "bytes":  497,
+                      "sha256":  "a7f5b58b6a756acdc4fa7f4e6772c7b5cc8884353a5b6626cad7ec9cce1800f5"
+                  },
+                  {
+                      "path":  "cores/time-clock-core/time-clock-core.js",
+                      "bytes":  7418,
+                      "sha256":  "dc7d8ff5786bd3629edcb881a84934e08b7d276f07909c22ffd4ec04682797b8"
+                  },
+                  {
+                      "path":  "cores/time-clock-core/time-clock.schema.json",
+                      "bytes":  590,
+                      "sha256":  "ba7b26fbaa771688c15b18b4932d85302c4f49df5b5da0936f324e873dcf476e"
+                  },
+                  {
+                      "path":  "cores/time-clock-core/tuv-rules.json",
+                      "bytes":  895,
+                      "sha256":  "5b611fb55863a6b259537045fcd664d8ecc2230376d95cd896eccfdfdef81b7d"
+                  },
+                  {
+                      "path":  "cores/weather-core/README.md",
+                      "bytes":  257,
+                      "sha256":  "63e1ee447088a1d4328b0bfa5e99eda6322d4f50eea9d6e4f04d7516ca7f989c"
+                  },
+                  {
+                      "path":  "cores/weather-core/weather-core.js",
+                      "bytes":  3939,
+                      "sha256":  "e5615ce563bb6bd48c4f56afc4472618ae65807829006aeec17529969cfcc086"
+                  },
+                  {
+                      "path":  "exchange-core-v31/cash-package.schema.json",
+                      "bytes":  1411,
+                      "sha256":  "dd432a5e73770c060de01e9cd80724afa7a174177b0bf88e6cc1acb5da14899d"
+                  },
+                  {
+                      "path":  "exchange-core-v31/config-package.schema.json",
+                      "bytes":  1777,
+                      "sha256":  "ac162978c1c0197897d31f156e1b5e0e20f024c98daeeafd546a28d8a1b77c4b"
+                  },
+                  {
+                      "path":  "exchange-core-v31/event-package.schema.json",
+                      "bytes":  2004,
+                      "sha256":  "b4b1821a1f3b64af7d630dc1ec23492d7ff6fd83547766f93090429401b43401"
+                  },
+                  {
+                      "path":  "exchange-core-v31/exchange-filter.js",
+                      "bytes":  8782,
+                      "sha256":  "dc3fcd8edf609e2ac93067a2c52ffcaebc47f35677d8699d81440b54b721b709"
+                  },
+                  {
+                      "path":  "exchange-core-v31/README.md",
+                      "bytes":  400,
+                      "sha256":  "6dec5157a4bf8f9feea18186baa93f93a10f37f6b631bfd56782d7c2736180cd"
+                  },
+                  {
+                      "path":  "github-review-site/.nojekyll",
+                      "bytes":  1,
+                      "sha256":  "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b"
+                  },
+                  {
+                      "path":  "github-review-site/app.js",
+                      "bytes":  2043,
+                      "sha256":  "433bee52973c4a9fd77acce576524a7ce6f1be3ee3b53c3a0f6d8aae75986254"
+                  },
+                  {
+                      "path":  "github-review-site/index.html",
+                      "bytes":  1254,
+                      "sha256":  "e58bb01d621bea54fac6d41d080a9eda4b3ab8f35273ab9f07ae7ff1aef895d6"
+                  },
+                  {
+                      "path":  "github-review-site/presentation-data.js",
+                      "bytes":  439,
+                      "sha256":  "468ee7b6771ab29acb14a61f190ab350d32a9d675a0eaa5a9f4f96adb209a879"
+                  },
+                  {
+                      "path":  "github-review-site/presentation-source.js",
+                      "bytes":  10438,
+                      "sha256":  "e659f169f1cf7146e4e04d9af82bdbd104294497badffbe60b3360a02df322e7"
+                  },
+                  {
+                      "path":  "github-review-site/README.md",
+                      "bytes":  436,
+                      "sha256":  "fcf4ef1ae11e768be787ad7e0f9731a546fc601b254f57dfa943980270efc9ee"
+                  },
+                  {
+                      "path":  "github-review-site/styles.css",
+                      "bytes":  1437,
+                      "sha256":  "3f04235c56ac28f179a7021413b007d2a5ebad81034d323a97202c66898104be"
+                  },
+                  {
+                      "path":  "github-review-site/.github/workflows/pages.yml",
+                      "bytes":  575,
+                      "sha256":  "84815bf906227bd8aac283dee10109ff23d0cb014aa5aed99b33737ec34bf304"
+                  },
+                  {
+                      "path":  "kc-mobile-tv/app.js",
+                      "bytes":  19918,
+                      "sha256":  "ded0bafcb9630ee52e1cf9d519c589d159007fa894a576a128df5fb85c03af33"
+                  },
+                  {
+                      "path":  "kc-mobile-tv/design-core-presentation-integration.js",
+                      "bytes":  91,
+                      "sha256":  "d32bacba212d85edd020000b6046fbbd9278c2fb1e57d21bff2dbfed24265029"
+                  },
+                  {
+                      "path":  "kc-mobile-tv/export-center-extension.js",
+                      "bytes":  4969,
+                      "sha256":  "0384d78443c1f0f107761cd86fd0639443d07b751b7a122239f90dafb48033ef"
+                  },
+                  {
+                      "path":  "kc-mobile-tv/index.html",
+                      "bytes":  2928,
+                      "sha256":  "34d740bd9f15d2abf8a3e993e69d12c4c01da3968d607a1f2bdade2589efca0f"
+                  },
+                  {
+                      "path":  "kc-mobile-tv/live-editor-fix.js",
+                      "bytes":  6016,
+                      "sha256":  "18d30bbb7e4303f6c1ba78b3185b5fb63490262b80e7aa696c08be83f395d8f3"
+                  },
+                  {
+                      "path":  "kc-mobile-tv/mobile-exchange-v2.js",
+                      "bytes":  3264,
+                      "sha256":  "22f3a801780cebb5feed9933e5a9541300f238e67c3413210a168c32ce8514f0"
+                  },
+                  {
+                      "path":  "kc-mobile-tv/presentation-professional-guard.js",
+                      "bytes":  3407,
+                      "sha256":  "467e23c60c1dcc799792d739c146d2d27df032abfcd3f9f6f53fb6985514485f"
+                  },
+                  {
+                      "path":  "kc-mobile-tv/presentation-tuv-integration.js",
+                      "bytes":  3211,
+                      "sha256":  "c2ce700470ef3b325a196192511b6611b6cf20c75062ce4cbf83e69ffc9b4cd6"
+                  },
+                  {
+                      "path":  "kc-mobile-tv/styles.css",
+                      "bytes":  15575,
+                      "sha256":  "850028b7f383f23cc60edc1bf3654874af04cc464332f89bd5ac1248362d5ac6"
+                  },
+                  {
+                      "path":  "kc-mobile-tv/table-reorder-extension.js",
+                      "bytes":  2700,
+                      "sha256":  "1e20199288843fdb99c35311311ec085e1ec19764f313793e66eeb28f4e46149"
+                  },
+                  {
+                      "path":  "media/audio/audio-library.json",
+                      "bytes":  54,
+                      "sha256":  "9865cd6ab681a611dceea048216e4311060a0375da1da706fcea77e6c0120d9a"
+                  },
+                  {
+                      "path":  "media/audio/music/README.md",
+                      "bytes":  341,
+                      "sha256":  "896e375b96f1e7a9f665977dbadbfd60027f75043d09bb34bb9a6784e3cee3e6"
+                  },
+                  {
+                      "path":  "media/audio/speech/README.md",
+                      "bytes":  127,
+                      "sha256":  "793430f9705d9d34d30557f110a3b4b448033e1f8f7440e52986dd7f27f84e7a"
+                  },
+                  {
+                      "path":  "media/backgrounds/rathaus-werne-weihnachtsmarkt-v1.png",
+                      "bytes":  2818975,
+                      "sha256":  "1ae21c9cbfda29e9eb38d692611a1a54a3504e0f853b00dbf634e520f7d6d8af"
+                  },
+                  {
+                      "path":  "media/backgrounds/weihnachtsmarkt-werne-fensterlicht-v2.png",
+                      "bytes":  2988241,
+                      "sha256":  "809312e2d48356e54e02e172f1684097141962f2a2885a545ca0405dfa9e3197"
+                  },
+                  {
+                      "path":  "money-butler/app.js",
+                      "bytes":  9040,
+                      "sha256":  "6c48234e07f4066b7320899de05033ff84c724e30f91eacc1849c1b7013c106f"
+                  },
+                  {
+                      "path":  "money-butler/index.html",
+                      "bytes":  5865,
+                      "sha256":  "f06530e24d6e99de866bc9eb58ad7f2e13acd837502be11aba9dc2a417788711"
+                  },
+                  {
+                      "path":  "money-butler/styles.css",
+                      "bytes":  6477,
+                      "sha256":  "cb74119f6abc253929f948ace093b36411b1ababda75310b844bab41f7bac775"
+                  },
+                  {
+                      "path":  "pc-manager/app.js",
+                      "bytes":  183429,
+                      "sha256":  "0b3cf4e6498eee34449d8a87981efbedd5d37c49a0017956811e0f47662f7e73"
+                  },
+                  {
+                      "path":  "pc-manager/audio-presentation-integration.js",
+                      "bytes":  3107,
+                      "sha256":  "b9b03ebc984a3f244d07a829b2b9a8a9818ca74c590acd001640275ebe642e93"
+                  },
+                  {
+                      "path":  "pc-manager/design-core-presentation-integration.js",
+                      "bytes":  3567,
+                      "sha256":  "f399d2ba26b2fe94b9553c7a76f01a914fac4550dc7e30531332bef000c1b711"
+                  },
+                  {
+                      "path":  "pc-manager/dev-quick-access.css",
+                      "bytes":  565,
+                      "sha256":  "5545a9247a53a6e51d55cee677515406b19719e1ec936e301c7b6fc3f616e602"
+                  },
+                  {
+                      "path":  "pc-manager/dev-quick-access.js",
+                      "bytes":  1664,
+                      "sha256":  "56d882c9e71533098dcbfcedaaa15d7ceabd0dcdae33393cb83c96e93b13afe1"
+                  },
+                  {
+                      "path":  "pc-manager/event-program-export-v010.css",
+                      "bytes":  411,
+                      "sha256":  "5a989ca2c0df433ffe3bb2cc855951683da17c45bc5836c6a4f9419958671b75"
+                  },
+                  {
+                      "path":  "pc-manager/event-program-export-v010.js",
+                      "bytes":  2533,
+                      "sha256":  "0c97e906b7bd30f128ac6fc30a0542f765c37185e3488437a78c546dde24e1b9"
+                  },
+                  {
+                      "path":  "pc-manager/index.html",
+                      "bytes":  75195,
+                      "sha256":  "31fc0ba8fbb3e54281f02d5635f371046035fce82dc0bf745fcbee00e384f7f4"
+                  },
+                  {
+                      "path":  "pc-manager/manager-masterdata-health-v02949.js",
+                      "bytes":  4119,
+                      "sha256":  "a982f9c84c7b8f8fa5ffb455323bccaebc456966106233f0e0c983ea040ec236"
+                  },
+                  {
+                      "path":  "pc-manager/manager-navigation-adapter-v010.css",
+                      "bytes":  1943,
+                      "sha256":  "c8c674020c013d6401ccd601dd0ef263037164fd2e81057c8dcd9337e765656e"
+                  },
+                  {
+                      "path":  "pc-manager/manager-navigation-adapter-v010.js",
+                      "bytes":  5737,
+                      "sha256":  "3bab7d0fc159ee1c93a71e72a02a433efead106fdf4683c2e671aa04deaa1f83"
+                  },
+                  {
+                      "path":  "pc-manager/manager-navigation-extras-v011.css",
+                      "bytes":  2350,
+                      "sha256":  "03139372ce8392fa62a354ac957d8b1691f3c2cbcb72f0cd24ddc1d47e4f8490"
+                  },
+                  {
+                      "path":  "pc-manager/manager-navigation-extras-v011.js",
+                      "bytes":  7211,
+                      "sha256":  "c6178a5ebdc0ebe929ddf8c5dd2eb2b7cb7edd176b02fb77c057494c211b0be2"
+                  },
+                  {
+                      "path":  "pc-manager/manager-select-health-v02946.js",
+                      "bytes":  1558,
+                      "sha256":  "40c084df60eae833012c3730bb6b19b08c403983326caac31d896a6255e28da9"
+                  },
+                  {
+                      "path":  "pc-manager/pos-ui-profile-details-v012.css",
+                      "bytes":  423,
+                      "sha256":  "281f4af47b4264b4840231093e745365ea2d693a584071d6c84bb8b9a4a0fcf1"
+                  },
+                  {
+                      "path":  "pc-manager/pos-ui-profile-manager.css",
+                      "bytes":  1094,
+                      "sha256":  "157801da0cd80057a504d1bcdbd246e93b241df05bf9bee3b0cb2e528af37c69"
+                  },
+                  {
+                      "path":  "pc-manager/pos-ui-profile-manager.js",
+                      "bytes":  12012,
+                      "sha256":  "8af9cca2e4f250dd749af2d54b5d9910a17c8d51f32d01518232adc9f8075087"
+                  },
+                  {
+                      "path":  "pc-manager/presentation-professional-guard.js",
+                      "bytes":  3626,
+                      "sha256":  "44922df20a427ace9dac4938be37def63456e6fb60e76b5ef8107eabcc647fff"
+                  },
+                  {
+                      "path":  "pc-manager/presentation-tuv-integration.js",
+                      "bytes":  4620,
+                      "sha256":  "a6a02ad3fefbe7e2ece912e5de6ba2e13e2e317dbd46c3fef6886dc9bf46e265"
+                  },
+                  {
+                      "path":  "pc-manager/program-import-core-v010.css",
+                      "bytes":  414,
+                      "sha256":  "6f01899f62abc41d459948b6c8fa1a10485d5f4b31613d3aaa510942314f38fe"
+                  },
+                  {
+                      "path":  "pc-manager/program-import-core-v010.js",
+                      "bytes":  5824,
+                      "sha256":  "2d0e4976af9a0b3d19585d6398df8c101f6c5198893116a877b789326d791f3f"
+                  },
+                  {
+                      "path":  "pc-manager/recipe-manager.css",
+                      "bytes":  747,
+                      "sha256":  "10f9583fdcfa95ee66372dfc617330f2b3c4d64af562375551e76bebd83c3b26"
+                  },
+                  {
+                      "path":  "pc-manager/recipe-manager.js",
+                      "bytes":  12062,
+                      "sha256":  "43abfe0d4c1e867c695a9b80199d31dca21a90e46429903c9cb1001d6d69e88a"
+                  },
+                  {
+                      "path":  "pc-manager/release-manifest-integration.js",
+                      "bytes":  4021,
+                      "sha256":  "55bf11735bc5f6f556f04ef77c1f93b33f63191f467b0c56f1f7789012b3a53a"
+                  },
+                  {
+                      "path":  "pc-manager/styles.css",
+                      "bytes":  71647,
+                      "sha256":  "28b6388a0a59e3d360884fdc5a81358a33642d539801a65d8ccef1033f11e56a"
+                  },
+                  {
+                      "path":  "pc-manager/time-clock-manager.css",
+                      "bytes":  694,
+                      "sha256":  "526a35f512f12fc7d53fe71290c4299a46df854711f4a9f786fd9c08cc817497"
+                  },
+                  {
+                      "path":  "pc-manager/time-clock-manager.js",
+                      "bytes":  10148,
+                      "sha256":  "7845d16d5c669730702a441ddf9a528095aec1f68a1964f6768b41777f3a53ca"
+                  },
+                  {
+                      "path":  "pc-manager/tv-auto-contrast.js",
+                      "bytes":  2036,
+                      "sha256":  "3c0d976544651533034e8ad378e8a41c40559048a8dbef0079b4bfcff66a98b0"
+                  },
+                  {
+                      "path":  "pc-manager/tv-content-object-core-v02940.js",
+                      "bytes":  7910,
+                      "sha256":  "84c4c29d26f6594ce52a5d1265d7c1ab49193905cb2ddee0d513cc3fc065a2d3"
+                  },
+                  {
+                      "path":  "pc-manager/tv-context-effect-fix.js",
+                      "bytes":  5376,
+                      "sha256":  "c70330a2501ba9073ded970bed498250a97dc08a33fd31440238fb7a4be43974"
+                  },
+                  {
+                      "path":  "pc-manager/tv-context-inspector-v02942.css",
+                      "bytes":  846,
+                      "sha256":  "d98c9b186f13e0ac128dabb9c4efef854bc5eab095b75af888bf8af3770bf152"
+                  },
+                  {
+                      "path":  "pc-manager/tv-context-inspector-v02942.js",
+                      "bytes":  2689,
+                      "sha256":  "f2c9dfe5c678f4829335117ac3e464d9d127a32982bd6f3f9214f2d6a485b612"
+                  },
+                  {
+                      "path":  "pc-manager/tv-display-matrix-adapter.js",
+                      "bytes":  8105,
+                      "sha256":  "73fcd98eb2fce076d5cfdcedacfa2c4a5cd7a8c4801344e3ba579d339f158328"
+                  },
+                  {
+                      "path":  "pc-manager/tv-draw-textbox-v02948.js",
+                      "bytes":  5438,
+                      "sha256":  "9f93039233b67b46cc369e0387ebc1eec0eaef95ffda27893cdb65a513ada8a1"
+                  },
+                  {
+                      "path":  "pc-manager/tv-editor-runtime-repair-v02953.js",
+                      "bytes":  3911,
+                      "sha256":  "27ef6db1fc10446bc37e9b858f96e485b69e49de8a63239067eb659e8ef4e470"
+                  },
+                  {
+                      "path":  "pc-manager/tv-editor-shell-v02935.js",
+                      "bytes":  9946,
+                      "sha256":  "d1a54b3448a31107d35188a41f91b94ae323a1ed0d0b5d36016b0e7d3f2deb4e"
+                  },
+                  {
+                      "path":  "pc-manager/tv-editor-workflow.js",
+                      "bytes":  11141,
+                      "sha256":  "fda6574e1c3d58fe74e1cc8c8b3f89651e36b2982984b12f1a2e7f9d95d2423d"
+                  },
+                  {
+                      "path":  "pc-manager/tv-export-center-extension.js",
+                      "bytes":  14434,
+                      "sha256":  "5bb2a2b97dc86992bbebce14678ea5320a6345816517bdee17b7cbb04e938006"
+                  },
+                  {
+                      "path":  "pc-manager/tv-import-editor-polish.js",
+                      "bytes":  8839,
+                      "sha256":  "07ae0dc22fda02150519059e217ccbf68c316b36ce6627ccc6c29635a4093aa8"
+                  },
+                  {
+                      "path":  "pc-manager/tv-live-editor-fix.js",
+                      "bytes":  7521,
+                      "sha256":  "a9ef1d63547e8d1c9b6e71f627d38842abbce539bd47a25e9267639789f92d34"
+                  },
+                  {
+                      "path":  "pc-manager/tv-manager-stability-v02936.js",
+                      "bytes":  1736,
+                      "sha256":  "72e6b9e8790539c32166e47c5c7050b85931f8e1ffd98251cab8741fa1cbc6b8"
+                  },
+                  {
+                      "path":  "pc-manager/tv-master-template-extension.js",
+                      "bytes":  8896,
+                      "sha256":  "18f84733fd5573d8a066835cc7c73e78e34d69398bee5cf2f0ab3022c21c462b"
+                  },
+                  {
+                      "path":  "pc-manager/tv-object-context-menu-v02944.css",
+                      "bytes":  653,
+                      "sha256":  "98588fac1ebbd845b7381eaa3a6295ef141f31c6a485b9e52ddb58cadf0e020e"
+                  },
+                  {
+                      "path":  "pc-manager/tv-object-context-menu-v02944.js",
+                      "bytes":  4292,
+                      "sha256":  "9e89b4e8a16efaecd357fa1433a63cf1ec9b24916da91ee07be43cf83c682043"
+                  },
+                  {
+                      "path":  "pc-manager/tv-object-library-v02945.js",
+                      "bytes":  2383,
+                      "sha256":  "10d2041835aac58078f693c478292f46ae2b3bd9fe0483d4110fb295252c2694"
+                  },
+                  {
+                      "path":  "pc-manager/tv-object-productivity-v02941.js",
+                      "bytes":  3393,
+                      "sha256":  "aed9d7b4f44b5a7e9ca6837d367805aee4998411de015f200edff24b66fa002d"
+                  },
+                  {
+                      "path":  "pc-manager/tv-presentation-mode-extension.js",
+                      "bytes":  7191,
+                      "sha256":  "f7e405cf602c8fceea4b71246a49c7d8f4b63495b87e5eb94e85fb53e9d445c7"
+                  },
+                  {
+                      "path":  "pc-manager/tv-shared-renderer-v02946.js",
+                      "bytes":  5882,
+                      "sha256":  "1fba7ebd0e7ede9995d3a80cd33fa6d461c321a6a3663eae2cdefbbeeb6fee60"
+                  },
+                  {
+                      "path":  "pc-manager/tv-slide-numbers-v02945.css",
+                      "bytes":  437,
+                      "sha256":  "749d22383010129271ba5f27a3fc454080b589329f8232ef648e371ddfee68bb"
+                  },
+                  {
+                      "path":  "pc-manager/tv-slide-numbers-v02945.js",
+                      "bytes":  943,
+                      "sha256":  "10fe887f4519f7eb714bc144c94fa1a9981a0d00231287a7539e1327a395ec0e"
+                  },
+                  {
+                      "path":  "pc-manager/tv-smart-object-editor.css",
+                      "bytes":  4196,
+                      "sha256":  "334a449c24434b64bc5acb226a6573c393fb947cd427b61e419ae0e0c974af58"
+                  },
+                  {
+                      "path":  "pc-manager/tv-smart-object-editor.js",
+                      "bytes":  13049,
+                      "sha256":  "2ff35fc3f81abe9844de9deb58d92300a7efbf760d20eb914d045076f80848b3"
+                  },
+                  {
+                      "path":  "pc-manager/tv-table-reorder-extension.js",
+                      "bytes":  9520,
+                      "sha256":  "956a813a63ee0d5711669ac44d02083086ccbe22f284f57229d44bd3a23d241b"
+                  },
+                  {
+                      "path":  "pc-manager/tv-text-input-performance-v02939.js",
+                      "bytes":  2453,
+                      "sha256":  "47cf6af3ef1e64f7bfc36738362a34a10c932b35e4bb0c3d0955fbfc0765dfca"
+                  },
+                  {
+                      "path":  "pc-manager/tv-unified-editor.css",
+                      "bytes":  8304,
+                      "sha256":  "9f9616b5a3b8d0741c1659144611a351f9bd4d3b79f796658756e2ac2a9ff9c8"
+                  },
+                  {
+                      "path":  "pc-manager/tv-unified-editor.js",
+                      "bytes":  25226,
+                      "sha256":  "3fe56514bb84b8e624ea46c52c3d5083bc50ea864eb35d3c172545066884c82e"
+                  },
+                  {
+                      "path":  "pc-manager/tv-weihnachtsmarkt-presentation.css",
+                      "bytes":  4588,
+                      "sha256":  "d3ea49070608808a0c714535ed8eeba2425b8573fa6d919a8a57982bfbfdea8a"
+                  },
+                  {
+                      "path":  "pc-manager/tv-weihnachtsmarkt-presentation.js",
+                      "bytes":  16411,
+                      "sha256":  "c5a1a6945ee38796e50598cbb573f22e88cde87eccff4944e21fb7a9a3cd2f25"
+                  },
+                  {
+                      "path":  "pc-manager/weather-mobile-exchange-integration.css",
+                      "bytes":  1028,
+                      "sha256":  "a5b1698557268921a5fc8ba221171136ebd473cd6fdb4885004ac8f01ff9dec5"
+                  },
+                  {
+                      "path":  "pc-manager/weather-mobile-exchange-integration.js",
+                      "bytes":  10701,
+                      "sha256":  "498cc959d13cec1fec5f35f8efee54c7b1bbcf207c691160cc119c4d37cc2347"
+                  },
+                  {
+                      "path":  "pc-manager/werne-program-archive-v02943.js",
+                      "bytes":  5533,
+                      "sha256":  "bdedad774d9354fa9433612de4dc346fcb06c9cd33aa347bdbbe45ab66ae3392"
+                  },
+                  {
+                      "path":  "pc-manager/assets/emergency_admin_qr.png",
+                      "bytes":  842,
+                      "sha256":  "28f5085cb4c66d8eabc2f4500938bf6c21b3713b46ea7470671a551914e3bfd7"
+                  },
+                  {
+                      "path":  "pc-manager/vendor/qrcode-generator.js",
+                      "bytes":  56694,
+                      "sha256":  "18ae399f81182bc9de916e9c77b195df20cc58d6f2d55a62b085a299f1bf1780"
+                  },
+                  {
+                      "path":  "pc-manager/vendor/xlsx.full.min.js",
+                      "bytes":  881727,
+                      "sha256":  "c9506197caf809a075b6dee1da0d36fb19da7158ffe8a88e7b0c96c5d8623c99"
+                  },
+                  {
+                      "path":  "pos/app.js",
+                      "bytes":  272078,
+                      "sha256":  "28e510e49603cae9c0da1c04a68281a5ad83703435abeddd596aa541834a53d2"
+                  },
+                  {
+                      "path":  "pos/ARCHITEKTUR.md",
+                      "bytes":  1381,
+                      "sha256":  "f5bd23737466460255781c45b89f7d47a6cb58618c5dd555e52391a943f631ac"
+                  },
+                  {
+                      "path":  "pos/event-program-display.css",
+                      "bytes":  1558,
+                      "sha256":  "9c84b2610220294d3d2db35dfcd19e89f5b0eef0ab1627be490ee8520f5a2c2d"
+                  },
+                  {
+                      "path":  "pos/event-program-display.js",
+                      "bytes":  3721,
+                      "sha256":  "327a99606c20a668e01df46139bb7ae1f1ec4ed34ae1f4c182bc4c2557305968"
+                  },
+                  {
+                      "path":  "pos/index.html",
+                      "bytes":  82377,
+                      "sha256":  "a2a6020e682b36b97176d537538adfc356485852596aea4102b5c3839f5732ea"
+                  },
+                  {
+                      "path":  "pos/manifest.webmanifest",
+                      "bytes":  468,
+                      "sha256":  "42a2d71fa88111aa992b26450ff0660c6a476f15751b89018547ec2a25a6498b"
+                  },
+                  {
+                      "path":  "pos/pos-ui-profile-consumer.css",
+                      "bytes":  652,
+                      "sha256":  "8f012c6826079b719a46cd7885f98a727ba2247e8d1112c70c8c0e636a871fb2"
+                  },
+                  {
+                      "path":  "pos/pos-ui-profile-consumer.js",
+                      "bytes":  3362,
+                      "sha256":  "df905aa3079ad0c995d12edff34e1a3eab591b954dd6cd4cec565dc9927800c9"
+                  },
+                  {
+                      "path":  "pos/README.md",
+                      "bytes":  1509,
+                      "sha256":  "75eb8191d2090aeb4d579f9a62789aa80786419723ea57f04ea2d7eee82faabe"
+                  },
+                  {
+                      "path":  "pos/service-worker.js",
+                      "bytes":  1663,
+                      "sha256":  "f466771ea55df4af9e72a352501dbcbccf6e48ea63c78ac0b09982025298d796"
+                  },
+                  {
+                      "path":  "pos/styles.css",
+                      "bytes":  153031,
+                      "sha256":  "b67c5f763094799259b673481ba64def91465802cbc2ec11a1830217265742ef"
+                  },
+                  {
+                      "path":  "pos/time-clock-pos.css",
+                      "bytes":  596,
+                      "sha256":  "099d7d283c6d8f07fa9489fbee37cb22b241a18cf2b513c307b94077692cb2e1"
+                  },
+                  {
+                      "path":  "pos/time-clock-pos.js",
+                      "bytes":  8309,
+                      "sha256":  "408ff859969ce357d0f365c14385b8eb982b1b651a6111a2238acd4ffda865aa"
+                  },
+                  {
+                      "path":  "pos/training-demo-bridge.js",
+                      "bytes":  15266,
+                      "sha256":  "1ba0402b4e57a48b3c3b0b4ea6249cac06ddddcfb2ef2341a7dda7a6654e1650"
+                  },
+                  {
+                      "path":  "pos/version-manifest.json",
+                      "bytes":  372,
+                      "sha256":  "b06ef3752b8312626e1dc653eb24dcb672612708cce6088e249492fcbc5de110"
+                  },
+                  {
+                      "path":  "pos/assets/amaretto_auth.webp",
+                      "bytes":  11652,
+                      "sha256":  "bc45664dff4a5a712ccf0b3032589a3c7a4ddda08e969b9543c23f5a36062f00"
+                  },
+                  {
+                      "path":  "pos/assets/apfelpunsch_auth.webp",
+                      "bytes":  9596,
+                      "sha256":  "ac7bad8170da35b7a7add69646318d8def0e00993eb4bdd0113c6b0d45da1102"
+                  },
+                  {
+                      "path":  "pos/assets/becher_auth.webp",
+                      "bytes":  7180,
+                      "sha256":  "fb907d8768e88d0253abc12f3a66e04db9c5864441013a4a81211440bba577bd"
+                  },
+                  {
+                      "path":  "pos/assets/bratwurst.webp",
+                      "bytes":  14582,
+                      "sha256":  "b1bdc799f1cc9e962f031287ab75e750864217bddbbd909b4db9af10d047fd41"
+                  },
+                  {
+                      "path":  "pos/assets/brezel.webp",
+                      "bytes":  13812,
+                      "sha256":  "c264f6325df86999440aef13c0c963fcf1e7640a7019b7356d2401f742214432"
+                  },
+                  {
+                      "path":  "pos/assets/cappuccino.webp",
+                      "bytes":  11620,
+                      "sha256":  "6339751df04fc414088f5dfff47ddc1e63bd9b00b12c520e94e051452c963df0"
+                  },
+                  {
+                      "path":  "pos/assets/cola.webp",
+                      "bytes":  7674,
+                      "sha256":  "369936450733cd9e24e459708d4169eb1501df15601774adee23f30f3a5d0538"
+                  },
+                  {
+                      "path":  "pos/assets/currywurst.webp",
+                      "bytes":  14142,
+                      "sha256":  "a8334dcfe697f105e8e088d8869d722337d183a674be136bc97b88be2e27ded5"
+                  },
+                  {
+                      "path":  "pos/assets/eierlikoerpunsch_auth.webp",
+                      "bytes":  6970,
+                      "sha256":  "9ab63cdf6f23c3a8bc6e3e2cc563a7fbd99b0fe1a60b38c592cde00ebc57112d"
+                  },
+                  {
+                      "path":  "pos/assets/erbsensuppe.webp",
+                      "bytes":  13226,
+                      "sha256":  "7627c398f6a51a2862ae44c7b548b1d30811e3589e4740daf803bfaa13a65a71"
+                  },
+                  {
+                      "path":  "pos/assets/fanta.webp",
+                      "bytes":  8858,
+                      "sha256":  "837bea0c2823e393a3f7a0f1a59033283e58425a47b9918ed90be94edea22fc6"
+                  },
+                  {
+                      "path":  "pos/assets/feuerzangenbowle_auth.webp",
+                      "bytes":  7110,
+                      "sha256":  "21970761417678ec1570919790c3c1375427b1bf3892cd501cce11804cef96bc"
+                  },
+                  {
+                      "path":  "pos/assets/feuerzange_placeholder.svg",
+                      "bytes":  603,
+                      "sha256":  "ab25c38d637064ac9e6d0f149f46259fdf0320468c97d39c21f07958b75abe43"
+                  },
+                  {
+                      "path":  "pos/assets/gluehwein_rot.webp",
+                      "bytes":  15554,
+                      "sha256":  "0d59eee1d2d8acdc5e41799b1eaa788182dcbdf2189d86843586043aea49dfe3"
+                  },
+                  {
+                      "path":  "pos/assets/gluehwein_rot_auth.webp",
+                      "bytes":  4834,
+                      "sha256":  "55c5d5e811ad4f4610dd32e6e567e72c1a51b1d9abb4d284f19867ee18aab279"
+                  },
+                  {
+                      "path":  "pos/assets/gluehwein_weiss.webp",
+                      "bytes":  15582,
+                      "sha256":  "37a38d941cffa6367acd851278ad585db64f15fcc6a448add66403455c1776ac"
+                  },
+                  {
+                      "path":  "pos/assets/gluehwein_weiss_auth.webp",
+                      "bytes":  6822,
+                      "sha256":  "f7f949118dd3e07417aae10b83dc21b9093c5222fd63031df893f5be554edbc1"
+                  },
+                  {
+                      "path":  "pos/assets/gruenkohl_auth.webp",
+                      "bytes":  10604,
+                      "sha256":  "cfee11e1a5c11f3da128bf283dd891a39ea7f7584f59cd5c9dc079eacac718c9"
+                  },
+                  {
+                      "path":  "pos/assets/gruenkohl_mettwurst_auth.webp",
+                      "bytes":  10984,
+                      "sha256":  "eacfc81752862d9b34c4631414b7788f47d922dd359a6348969eede2dfe72c03"
+                  },
+                  {
+                      "path":  "pos/assets/kaffee.webp",
+                      "bytes":  9330,
+                      "sha256":  "1822347165fe51cce0e1d634eec7f81e8eeec8069fd26167eaff9ca13d7e0555"
+                  },
+                  {
+                      "path":  "pos/assets/kakao.webp",
+                      "bytes":  9870,
+                      "sha256":  "ec094be9b4d250eb1fded3265a20d9000c65bd01c5258cb3e47c46cb0016c248"
+                  },
+                  {
+                      "path":  "pos/assets/kinderpunsch.webp",
+                      "bytes":  14724,
+                      "sha256":  "a196e6295541df86f73eddb80797f537d8dbd176b425c586a48c9d9f4a661a47"
+                  },
+                  {
+                      "path":  "pos/assets/logo.webp",
+                      "bytes":  15842,
+                      "sha256":  "2631bfb05fc29e18627825bf86d10168209d3ce8ea117282926b95890b60042f"
+                  },
+                  {
+                      "path":  "pos/assets/pfandglas_auth.webp",
+                      "bytes":  11508,
+                      "sha256":  "ac712582b58d60d5f1f2de634f53ec13d1ce31614cc0ed999f913eb1ca140c52"
+                  },
+                  {
+                      "path":  "pos/assets/pfand_bundle_placeholder.svg",
+                      "bytes":  768,
+                      "sha256":  "cc0d2ab23d46e1109ed29c3628690f82fcf8ff981634afa75e84cb5e59f37c5a"
+                  },
+                  {
+                      "path":  "pos/assets/pommes.webp",
+                      "bytes":  11962,
+                      "sha256":  "bc7611f00a86c9c5ffebe9d78cdd6038bc0d12642888477dae866962b6eb02bf"
+                  },
+                  {
+                      "path":  "pos/assets/sauerkraut_auth.webp",
+                      "bytes":  9084,
+                      "sha256":  "85269bc2f8ebdb5ff6f0d909b35c013d5f5c6adc1302c4e7f8777e73ad95fd27"
+                  },
+                  {
+                      "path":  "pos/assets/sauerkraut_mettwurst_auth.webp",
+                      "bytes":  9096,
+                      "sha256":  "9b0065efb9e4f3a53e46718446252413eff4e37a533251d1b3dde7f58282d70f"
+                  },
+                  {
+                      "path":  "pos/assets/schokolade.webp",
+                      "bytes":  12826,
+                      "sha256":  "370b9f90215a8347c7a5d38d611e0c8ad2ef22828e1d2363712dcbad358a265d"
+                  },
+                  {
+                      "path":  "pos/assets/wasser.webp",
+                      "bytes":  8508,
+                      "sha256":  "9accfa81860e73ce5aadd28e64af1b67df0fa89a87c1684c41998f3bdc281509"
+                  },
+                  {
+                      "path":  "pos/cores/adaptive-layout-core/adaptive-layout-core.js",
+                      "bytes":  2983,
+                      "sha256":  "cda20427a5d7e2746cccad54e1a4342a462bbf87e7e0a2e74e76eb856caf8564"
+                  },
+                  {
+                      "path":  "pos/cores/adaptive-layout-core/README.md",
+                      "bytes":  130,
+                      "sha256":  "7eace4dcd61cfa1c84cd53943d345426f4190605fce3379f4396169e178d67a0"
+                  },
+                  {
+                      "path":  "pos/sounds/kassenton.mp3",
+                      "bytes":  79412,
+                      "sha256":  "ae6702f67ca39475db2f82ea71cb93e681049785813e12b0dd5b801485a45ee7"
+                  },
+                  {
+                      "path":  "shared/event-program-exchange-core-v010.js",
+                      "bytes":  4235,
+                      "sha256":  "b9245c35de61af41197ad576342fdcdefac30cf11da74b5e519acaa6fd6ab1d6"
+                  },
+                  {
+                      "path":  "shared/pos-catalog-registry-v02946.js",
+                      "bytes":  2005,
+                      "sha256":  "bdf2d0000a1044065c7af0bdcdab7d52097a66a872d987e642ce293571bc2bd6"
+                  },
+                  {
+                      "path":  "shared/release-manifest-core.js",
+                      "bytes":  3190,
+                      "sha256":  "62a4bb22e4b643665da7e00eb29dce17b379b3f1012d114ca262a588a337309b"
+                  },
+                  {
+                      "path":  "shared/runtime-flags.js",
+                      "bytes":  197,
+                      "sha256":  "60a896d3fe27fb275dd2456e6ff31e18fbc58909dac63a763cc1630756340e38"
+                  },
+                  {
+                      "path":  "shared/time-clock-duty-roster-adapter-v010.js",
+                      "bytes":  602,
+                      "sha256":  "99b8c8f1780f4e2f5ba62c8a4032fcc000e6109e508f5d660acb80ab23cab841"
+                  },
+                  {
+                      "path":  "tests/catalog-select-shared-renderer.test.cjs",
+                      "bytes":  3190,
+                      "sha256":  "af64662cbfda1e1d78f4c0174823bdb54676abbdb36c9932e7915db79face343"
+                  },
+                  {
+                      "path":  "tests/christmas-member-migration.test.cjs",
+                      "bytes":  2744,
+                      "sha256":  "e22eae99d7b6f937dd9f33530abf92b7688671ed2a76bf5bec777b6251011968"
+                  },
+                  {
+                      "path":  "tests/christmas-object-layout.test.cjs",
+                      "bytes":  2467,
+                      "sha256":  "dab2b644a1098f1afcda1d7265076a988536c9141b597be1e37cead846e3f962"
+                  },
+                  {
+                      "path":  "tests/deep-consolidation.test.cjs",
+                      "bytes":  2377,
+                      "sha256":  "6386aa9e7bd7b24ca564a19305511e6f5f590fd2ce810c72904a86f5176f4dfb"
+                  },
+                  {
+                      "path":  "tests/editor-runtime-repair.test.cjs",
+                      "bytes":  2168,
+                      "sha256":  "67dd91ebe9c2bda2bf8f9a4453b0d26110c52deb6536ce3ead0acddc3d0d8025"
+                  },
+                  {
+                      "path":  "tests/event-program-exchange.test.cjs",
+                      "bytes":  2711,
+                      "sha256":  "4e6c82fd2b0c5f72636c378ef9affdcce33093eadaf1e75239ba7f92daa4a74d"
+                  },
+                  {
+                      "path":  "tests/manager-masterdata-health.test.cjs",
+                      "bytes":  859,
+                      "sha256":  "f2d8b5401d2c55891cf1e16e780af7e8ca1c3774b470b7bfd079bef9dff322a8"
+                  },
+                  {
+                      "path":  "tests/manager-navigation-core.test.cjs",
+                      "bytes":  1132,
+                      "sha256":  "582abd96da68b56e1f27af951a4f6a103a6165e94edbbf399b5f567404eb80e3"
+                  },
+                  {
+                      "path":  "tests/pos-ui-consumer.test.cjs",
+                      "bytes":  2146,
+                      "sha256":  "7101a266e8b1fd3f019092cb53444dba71da61b900d2589cc7b6c0c1327740ee"
+                  },
+                  {
+                      "path":  "tests/pos-ui-detail-editor.test.cjs",
+                      "bytes":  667,
+                      "sha256":  "42cf9b146fc6811e498e4e52ac8d67b5e0fd04482ed675ea6a3cac3e70ab639d"
+                  },
+                  {
+                      "path":  "tests/pos-ui-profile-core.test.cjs",
+                      "bytes":  1956,
+                      "sha256":  "371bdd5d9c3d2e94e72a7974ab6117ae59d5afef20ac0a0b68d403ee030f62e4"
+                  },
+                  {
+                      "path":  "tests/presentation-tuv-visible-objects.test.cjs",
+                      "bytes":  1081,
+                      "sha256":  "d3fcb4e85f75fe7b9e46284a0c3d8752de7c1163f79bb9ccb1d78294be263499"
+                  },
+                  {
+                      "path":  "tests/program-import-core.test.cjs",
+                      "bytes":  767,
+                      "sha256":  "959f58decd19f638af7028b7df3323070ea2318c7af9fec3d7c509aafc45721b"
+                  },
+                  {
+                      "path":  "tests/rathaus-background-regression.test.cjs",
+                      "bytes":  1885,
+                      "sha256":  "c625d8596f347720fb4d6a957ff4cc220d80d6718577670256449e4681846c59"
+                  },
+                  {
+                      "path":  "tests/recipe-calculation-core.test.cjs",
+                      "bytes":  3134,
+                      "sha256":  "ff449cfbdb1008f12fce1238e0fe884ea861a274aba56cd824d3d05e6b6af527"
+                  },
+                  {
+                      "path":  "tests/time-clock-core.test.cjs",
+                      "bytes":  3036,
+                      "sha256":  "4d23ef3c3a8df70041f4e3ca1154b7d4763cefa24236ced3a49758e5f2208a26"
+                  },
+                  {
+                      "path":  "tests/tv-draw-textbox.test.cjs",
+                      "bytes":  1020,
+                      "sha256":  "732f67b6004672ea700d1ce02267e838b865a879fc4b5619d8361ded0dd4a1de"
+                  },
+                  {
+                      "path":  "tests/tv-object-context-menu.test.cjs",
+                      "bytes":  918,
+                      "sha256":  "fb0c973d96965f2b6ba6481a187b3a7a2bdb1c9a79e0c6a38f9201d73720650f"
+                  },
+                  {
+                      "path":  "tests/tv-player-parity.test.cjs",
+                      "bytes":  4097,
+                      "sha256":  "8f00e9a3a05df299853b801e7302cbc652efdb940115a8bc9bad3ef521ecac9d"
+                  },
+                  {
+                      "path":  "tests/tv-slide-numbers-object-library.test.cjs",
+                      "bytes":  954,
+                      "sha256":  "9a85bb771b8cb9223323fc1d96ef36fe00712a84b29e8839132ef4421d84cd8a"
+                  },
+                  {
+                      "path":  "tests/tv-text-input-performance.test.cjs",
+                      "bytes":  1450,
+                      "sha256":  "1663a4620c27fd813ade1094307a5b31cc3c28ccba8833894d9e8c2c770b202e"
+                  },
+                  {
+                      "path":  "tests/werne-program-archive.test.cjs",
+                      "bytes":  968,
+                      "sha256":  "e8b879fa8ed592062e28649957f8895eea89593203df03c51cef53ce684550b0"
+                  },
+                  {
+                      "path":  "texte/geschichten.js",
+                      "bytes":  8732,
+                      "sha256":  "2f811a28107cfe9d37732196f6c965acf163bc5629c0c930ed234a48e45d8372"
+                  },
+                  {
+                      "path":  "texte/GESCHICHTEN_BEARBEITEN.txt",
+                      "bytes":  1280,
+                      "sha256":  "044838847094ee2d7228f4bdcfead654b1da4d0ff5ae482ac0c15d5001184920"
+                  },
+                  {
+                      "path":  "training-video/app.js",
+                      "bytes":  79517,
+                      "sha256":  "b1f7efdb365277334fc58c6022d6cb9891dd56cda084c5339c61e7fa86a78624"
+                  },
+                  {
+                      "path":  "training-video/index.html",
+                      "bytes":  24852,
+                      "sha256":  "f29150ee051ad1c7e4a5cc62ea43fa2a039fc1af46d318aca47f6092a726ea75"
+                  },
+                  {
+                      "path":  "training-video/Koecheclub_Logo.webp",
+                      "bytes":  99704,
+                      "sha256":  "4fe774307edf7e9c0bf11a0b6d8c6e01994a95a1d62dc0f22d3ef760eec8b5aa"
+                  },
+                  {
+                      "path":  "training-video/styles.css",
+                      "bytes":  65828,
+                      "sha256":  "39006721815920a56146d0876dcc84317fb5b83965236d7057c6c760fba61105"
+                  },
+                  {
+                      "path":  "training-video/training-playback-core.css",
+                      "bytes":  1019,
+                      "sha256":  "234c460291e6d68ac4f9a3f112147300e7f79545350a38967c39ccfe705155c5"
+                  },
+                  {
+                      "path":  "training-video/training-playback-core.js",
+                      "bytes":  4172,
+                      "sha256":  "1201557c9fed1eeb18ee3942dedb38583979c122a5f7f5600b1c34acac77b8d5"
+                  },
+                  {
+                      "path":  "training-video/training-version-manifest.json",
+                      "bytes":  465,
+                      "sha256":  "cc3ae57070008ae0fce4a46c7d9c55a66b9e7101add7aec8953ee77168419930"
+                  },
+                  {
+                      "path":  "training-video/version-sync-core.js",
+                      "bytes":  3713,
+                      "sha256":  "cacc0aa57a79eec5eb6597e24af73c52761fb605581f64b4ab7a5f87932b77f7"
+                  },
+                  {
+                      "path":  "tv-content/weihnachtsmarkt-2026/presentation.js",
+                      "bytes":  13146,
+                      "sha256":  "6477a07ae09ded5938ccb8c96c4f50e43e81515dfde348363f288bdf62807b5f"
+                  },
+                  {
+                      "path":  "tv-content/weihnachtsmarkt-2026/Weihnachtsmarkt_Werne_2026_Bearbeitbar.kctv",
+                      "bytes":  95776,
+                      "sha256":  "6059b3478d9edd7207177495fd5205e8a10310fbea20d3de555a9ceaee110261"
+                  },
+                  {
+                      "path":  "tv-content/weihnachtsmarkt-2026/backgrounds/market-photo.webp",
+                      "bytes":  63570,
+                      "sha256":  "15d0e9f7c799f652cdaf2d9c090b6ede2a7792dd120cd7e3478a558b1ee50512"
+                  },
+                  {
+                      "path":  "tv-content/weihnachtsmarkt-2026/members/gruppenfoto-koecheclub.jpg",
+                      "bytes":  764813,
+                      "sha256":  "03803eb6c44f061c37fb59f62afe1d0253ad4541797bc801cdf8e96b4492b235"
+                  },
+                  {
+                      "path":  "tv-content/weihnachtsmarkt-2026/members/mitglied-01.jpg",
+                      "bytes":  110280,
+                      "sha256":  "b2eb66f9382c7c3ac9e55d2d50b26e2eee44e5d8cdd6f1dad66a3a2d5bf030a7"
+                  },
+                  {
+                      "path":  "tv-content/weihnachtsmarkt-2026/members/mitglied-02.jpg",
+                      "bytes":  79500,
+                      "sha256":  "447b2798553de18804be75266fe33daea565af555e17959f801efbbad2833ed9"
+                  },
+                  {
+                      "path":  "tv-content/weihnachtsmarkt-2026/members/mitglied-03.jpg",
+                      "bytes":  65253,
+                      "sha256":  "47e4a08c0e8c403a369978327cbbca8584161e3095c6283c79142f235794b540"
+                  },
+                  {
+                      "path":  "tv-content/weihnachtsmarkt-2026/members/mitglied-04.jpg",
+                      "bytes":  70446,
+                      "sha256":  "e3b9f8a40e0d032d6411498dcee235e8dce3530109a953a7e5e1800d5bf8f2ed"
+                  },
+                  {
+                      "path":  "tv-content/weihnachtsmarkt-2026/members/mitglied-05.jpg",
+                      "bytes":  80090,
+                      "sha256":  "180b9d8514894fc76765281322c3cc6934c6ed2e72b57b480e9acbeddc7ce54f"
+                  },
+                  {
+                      "path":  "tv-content/weihnachtsmarkt-2026/members/mitglied-06.jpg",
+                      "bytes":  86596,
+                      "sha256":  "e56d7b02004d68aca465abdc6d0363cbfa036ca7df7f4f6b17e9110841652c5f"
+                  },
+                  {
+                      "path":  "tv-content/weihnachtsmarkt-2026/members/mitglied-07.jpg",
+                      "bytes":  92951,
+                      "sha256":  "f7a8cfbe7249974c673704b7a138ab405b7aa2e9194d49f843ecdac25114d5cb"
+                  },
+                  {
+                      "path":  "tv-content/weihnachtsmarkt-2026/members/mitglied-08.jpg",
+                      "bytes":  101645,
+                      "sha256":  "08d0cb79ec6d7d0d531cbca8acdd94cbb8b3d75fdafd49025b36f7ae606bcb1b"
+                  },
+                  {
+                      "path":  "tv-content/weihnachtsmarkt-2026/members/mitglied-09.jpg",
+                      "bytes":  112080,
+                      "sha256":  "f0688feb53dfe668a17bf6fecb8370944c6de5bafc410ed8e2a8af161119e0a0"
+                  },
+                  {
+                      "path":  "tv-content/weihnachtsmarkt-2026/members/mitglied-10.jpg",
+                      "bytes":  99162,
+                      "sha256":  "45fee47e0146ac95a657aad39c27823fb1c7d1cff18f237cc65e430de457f960"
+                  },
+                  {
+                      "path":  "tv-player/app.js",
+                      "bytes":  11064,
+                      "sha256":  "6130555ca46872b7dccda5e5006e47e93cc9a6be2dc21da31d698480131e1290"
+                  },
+                  {
+                      "path":  "tv-player/auto-contrast.js",
+                      "bytes":  1060,
+                      "sha256":  "cefc7fa6f9fa5d02c0d5753e509391c90437f7c39c07cf8da1ec417c03a0a774"
+                  },
+                  {
+                      "path":  "tv-player/design-core-presentation-integration.js",
+                      "bytes":  91,
+                      "sha256":  "d32bacba212d85edd020000b6046fbbd9278c2fb1e57d21bff2dbfed24265029"
+                  },
+                  {
+                      "path":  "tv-player/index.html",
+                      "bytes":  1422,
+                      "sha256":  "5265c9fedb8bc8dd3d4fe7ef2f653a08f14e877cb1b5d7dd6aaa1bb9e0f76877"
+                  },
+                  {
+                      "path":  "tv-player/presentation-tuv-runtime.js",
+                      "bytes":  810,
+                      "sha256":  "0affb738353e56f0cb8966005636cd72ba90523fbdfd60545f9d8d5679a70a34"
+                  },
+                  {
+                      "path":  "tv-player/styles.css",
+                      "bytes":  9654,
+                      "sha256":  "a0ddb27b48f637716c4c81150d291e20e51f103e5525a21d793dc664a99b1d68"
+                  },
+                  {
+                      "path":  "tv-player/table-object-extension.js",
+                      "bytes":  1006,
+                      "sha256":  "d6aa425bf4131e098b0ef124cc437fce647e8bdb6b927a44e46e63224b69363c"
+                  },
+                  {
+                      "path":  "tv-player/tv-object-parity-v1.js",
+                      "bytes":  7956,
+                      "sha256":  "07c1cead665b2fca77eab2388a34a37261e5805e2284c3585d2e559aae55cae4"
+                  },
+                  {
+                      "path":  "tv-player/weihnachtsmarkt-presentation-runtime.css",
+                      "bytes":  2342,
+                      "sha256":  "d6324c033f5bededb8bd9d0705402e268e3ed5898ea937a34dbeb42b8ba1ac4c"
+                  },
+                  {
+                      "path":  "tv-player/weihnachtsmarkt-presentation-runtime.js",
+                      "bytes":  4078,
+                      "sha256":  "dc6a9f3ac79b3710fea43d3404c23c77a94a7713dfba6ca82a72f07eb80557a1"
+                  }
+              ]
+}

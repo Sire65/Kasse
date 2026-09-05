@@ -1,0 +1,14 @@
+const assert=require("node:assert/strict"),fs=require("node:fs"),path=require("node:path");
+const root=path.resolve(__dirname,".."),read=file=>fs.readFileSync(path.join(root,file),"utf8");
+const dashboard=read("pc-manager/manager-sales-inventory-dashboard.js"),adapter=read("pc-manager/manager-event-simulation-adapter.js"),html=read("pc-manager/index.html");
+assert.match(dashboard,/transactions\.slice\(0,500\)/,"Detailtabelle muss auf 500 DOM-Zeilen begrenzt bleiben");
+assert.match(dashboard,/alle Vorgänge sind in Kennzahlen/,"Benutzerhinweis zur vollständigen Berechnung fehlt");
+assert.match(adapter,/PARAM\.get\("kcSimulation"\)!=="repair55"/,"Testadapter darf im Normalbetrieb nicht anlaufen");
+assert.match(adapter,/testOnly!==true/,"Testdatei braucht eine harte Testkennzeichnung");
+assert.match(adapter,/sessionStorage\.setItem\(BACKUP/,"Managerdaten müssen vor dem Test gesichert werden");
+assert(html.indexOf("../cores/sales-import-core/sales-import-core.js")<html.indexOf("app.js"),"Import-Core muss vor der Manageranwendung laden");
+const report=JSON.parse(read("simulation-results/repair55/simulation-report.json"));
+assert.equal(report.pass,true);assert.equal(report.generation.transactions,8200);assert.equal(report.chainErrors.length,0);
+assert.equal(report.duplicateImport.added,0);assert.equal(report.duplicateImport.skipped,8200);
+assert(report.limits.manager.percent<=60,"Manager-Speicherreserve ist zu klein");
+console.log("PASS event-simulation-manager: isolierter Testmodus, Speicherreserve, DOM-Limit und Doppelimport-Schutz");

@@ -1,0 +1,23 @@
+{
+  "name": "KC Bildrechner",
+  "short_name": "KC Bildrechner",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#07111f",
+  "theme_color": "#07111f",
+  "icons": [],
+  "scope": "./",
+  "orientation": "any",
+  "id": "./",
+  "lang": "de-DE",
+  "description": "KC Bildrechner V0.31.3.6 Repair 11",
+  "categories": [
+    "business",
+    "productivity"
+  ],
+  "display_override": [
+    "fullscreen",
+    "standalone",
+    "minimal-ui"
+  ]
+}

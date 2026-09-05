@@ -1,0 +1,11 @@
+const fs=require('fs'),assert=require('assert');
+const editor=fs.readFileSync('pc-manager/tv-unified-editor.js','utf8');
+const effects=fs.readFileSync('pc-manager/tv-context-effect-fix.js','utf8');
+const recipes=fs.readFileSync('pc-manager/recipe-manager.js','utf8');
+assert(!editor.includes("node.style.setProperty('font-size',`${t.size}em`"),'Objektauswahl darf keine zweite em-Schriftgröße setzen');
+assert(editor.includes("cqw * ${t.size}"),'Unified Editor muss dieselbe Folienbreiten-Skalierung verwenden');
+assert(effects.includes("pointerdown',event=>event.stopPropagation()")&&effects.includes("pointermove',event=>event.stopPropagation()"),'Effektregler sind nicht gegen Ziehhandler abgeschirmt');
+for(const ingredient of ['Zucker','Lorbeerblätter','Nelken','Wacholderbeeren','Speck','Zwiebeln'])assert(recipes.includes(ingredient),`${ingredient} fehlt im Rezept-Arbeitsstand`);
+assert(recipes.includes('Kein Abtropfverlust')&&recipes.includes('lossPercent:0'),'Speck-Zwiebel-Verlustlogik fehlt');
+assert(recipes.includes("amount:0"),'Offene Mengen müssen ausdrücklich als offen und nicht erfunden gespeichert werden');
+console.log('PASS selection-effect-recipe: identische Auswahlgröße, bedienbare Effektregler und bekannte Rezeptstruktur');

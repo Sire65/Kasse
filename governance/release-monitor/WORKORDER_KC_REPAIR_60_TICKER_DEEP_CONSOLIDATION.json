@@ -1,0 +1,25 @@
+{
+  "schema": "framework-release-monitor-v1",
+  "id": "WO-KC-20260724-014",
+  "createdAt": "2026-07-24T18:00:00+02:00",
+  "updatedAt": "2026-07-24T18:00:00+02:00",
+  "project": "KC MarktKasse / PC-Manager",
+  "workOrder": "Repair 60 – Laufschrift-Tiefenkonsolidierung und begrenzte TV-Objektkorrekturen",
+  "baselineVersion": "V0.31.3.6 Repair 59",
+  "candidateVersion": "V0.31.3.6 Repair 60",
+  "candidateFile": "KC_MarktKasse_V0_31_3_6_Repair_60_Laufschrift_Tiefenkonsolidierung_Candidate.zip",
+  "candidateSha256": "28FA6F43B8ED67537CD75043F371C97F4BEA3F1F56BD34B68B7B1E1E8895D955",
+  "changeScope": "Ein Laufschrift-Editor mit entprellter Texteingabe; Del-Löschen; Wetterflächen; Symbolparität; Preislistenstil; Kerze und Laterne.",
+  "protectedAreas": "Kassenbuchung, Umsatzimport, Bestand, Navigation, Zeiterfassung, Rezepte und Präsentationsdaten.",
+  "requireTv": true,
+  "evidence": {
+    "javascriptSyntax": "PASS",
+    "automatedTests": "38/38 PASS",
+    "studioRegistry": "latest-release-manifest.js und latest-release-manifest.json"
+  },
+  "monitorState": {
+    "code": "YELLOW",
+    "label": "Candidate – praktische Sichtprüfung auf Zielgerät offen",
+    "reason": "Syntax und Regressionen werden automatisiert geprüft; abschließender Bedien- und Fire-TV-Test bleibt erforderlich."
+  }
+}

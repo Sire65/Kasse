@@ -1,0 +1,11 @@
+const fs=require('fs'),assert=require('assert');
+const html=fs.readFileSync('pc-manager/index.html','utf8');
+const numbers=fs.readFileSync('pc-manager/tv-slide-numbers-v02945.js','utf8');
+const studio=fs.readFileSync('pc-manager/kc-object-studio.js','utf8');
+assert(html.includes('tv-slide-numbers-v02945.js')&&html.includes('kc-object-studio.js'),'Foliennummern oder Objekt-Studio nicht integriert');
+assert(!html.includes('tv-object-library-v02945.js'),'Alte Objektbibliothek muss durch das Objekt-Studio ersetzt sein');
+assert(numbers.includes('index+1')&&numbers.includes('MutationObserver'),'Nummern müssen aus der aktuellen DOM-Reihenfolge entstehen');
+['title','text','price','ticker','banner','shape','symbols','weather'].forEach(x=>assert(studio.includes(`'${x}'`)||studio.includes(`"${x}"`),`Wiederherstellbares Objekt fehlt: ${x}`));
+assert(studio.includes('objectVisibility[key]=true'),'Wiederherstellung muss gelöschte Objekte sichtbar machen');
+assert(studio.includes('drawableKeys')&&studio.includes('armDraw'),'Rahmen-Aufziehen für neue Objekte fehlt');
+console.log('PASS tv-slide-numbers-object-library: dynamische Reihenfolge, acht wiederherstellbare Objekttypen und Rahmen-Aufziehen im Objekt-Studio');
