@@ -153,6 +153,8 @@
   function handleEvent(evt) {
     const registerId = evt.payload?.registerId;
     if (registerId) {
+      // Datenfluss-Melder (kc-datenfluss-melder.js): Kasse -> PC-Manager mitzählen, falls geladen
+      try { global.KCDatenfluss?.kasse(registerId, evt); } catch (e) { /* Zählung darf den Monitor nie stören */ }
       const entry = perRegister.get(registerId) || {};
       entry.lastSeenAt = Date.now();
       if (evt.type !== 'heartbeat') entry.lastActivityAt = Date.now();
