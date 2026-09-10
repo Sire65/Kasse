@@ -1,39 +1,23 @@
 // KC PC-Manager – Datenfluss-Melder + Lebenszeichen für KC System Check.
 //
 // Zwei Aufgaben, beide ohne Zusatzbibliothek (nur fetch, wie der ganze PC-Manager):
-//
-// 1. DATENFLUSS: zählt im Speicher, wie viele Anfragen dieser PC-Manager an welches
-//    Ziel schickt (Supabase, lokaler Manager-Dienst 47392, B2 …) und was von den Kassen
-//    über den Live-Monitor hereinkommt. Alle 10 s geht ein kleines Zähler-Paket als
-//    Supabase Realtime BROADCAST raus – über die REST-Schnittstelle des Realtime-Dienstes
-//    (/realtime/v1/api/broadcast). Das berührt Postgres nicht: kein Insert, kein Egress
-//    aus der Datenbank. KC System Check hört auf demselben Kanal mit.
-//    Gesendet wird NUR, wenn seit der letzten Meldung etwas passiert ist.
-//
-// 2. LEBENSZEICHEN: alle 30 s an die Edge Function kicc-program-heartbeat, Schema
-//    kicc.program-heartbeat.v1, programId 'kc-pc-manager' – dieselbe Form wie der
-//    bereits vorbereitete Node-Melder (kicc-runtime-telemetry.js). Damit kann KC System
-//    Check den PC-Manager als Pflicht-Programm führen.
-//
-// Der Kanal ist öffentlich und trägt nur Zähler (Anzahl, Bytes, Fehler) – keine Inhalte,
-// keine Beträge, keine Namen.
+// 1. Echten Datenfluss des Managers und des Money-Butlers zählen und nur bei realem I/O melden.
+// 2. Lebenszeichen des PC-Managers an KC System Check senden.
+// Telemetrie selbst wird über originalFetch übertragen und erzeugt daher keinen Scheinverkehr.
 (function (global) {
   'use strict';
 
   const SUPABASE_URL = 'https://ptblnpiroqftcvlsrhac.supabase.co';
   const SUPABASE_ANON_KEY = 'sb_publishable_SqXIeGN-clcZ4gjmpLdSww_4DLfyy24';
-  // Die Edge Functions prüfen ein JWT (verify_jwt). Der publishable key ist keins; ohne
-  // angemeldete Sitzung wird deshalb der öffentliche anon-JWT des Projekts benutzt –
-  // derselbe, den KC System Check in config/runtime.public.json führt.
   const ANON_JWT = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB0YmxucGlyb3FmdGN2bHNyaGFjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODUwNzU1MzEsImV4cCI6MjEwMDY1MTUzMX0.NRfXGXDoW17VjHeOHjupfrcPHMkbvtizY_K-BguJqz0';
   const KANAL = 'kc-datenfluss';
   const PROGRAMM = 'pc-manager';
+  const MONEY_BUTLER = 'money-butler';
   const HEARTBEAT_PROGRAMM = 'kc-pc-manager';
   const MELDE_INTERVALL_MS = 10000;
   const HEARTBEAT_INTERVALL_MS = 30000;
   const INSTANZ_KEY = 'kc_manager_datenfluss_instanz_v1';
 
-  // von -> nach -> {req, bytes, fehler}
   const zaehler = Object.create(null);
   let geaendert = false;
   let letzterBroadcast = { ok: null, zeit: 0, fehler: '' };
@@ -47,9 +31,15 @@
     } catch (e) { return 'pc-manager-browser'; }
   }
   function bearer() {
-    // Angemeldete Sitzung bevorzugen (kc-manager-supabase-status.js legt sie hier ab)
     try { const s = JSON.parse(localStorage.getItem('kc_manager_supabase_session_v1') || 'null'); if (s?.access_token) return s.access_token; } catch (e) { /* egal */ }
     return ANON_JWT;
+  }
+  function quellProgramm() {
+    try {
+      const cashprep = document.querySelector('[data-view-panel="cashprep"]');
+      if (cashprep?.classList.contains('active')) return MONEY_BUTLER;
+    } catch (e) { /* im Zweifel Manager */ }
+    return PROGRAMM;
   }
 
   function zielName(url) {
@@ -59,7 +49,7 @@
     if (/backblazeb2\.com$/.test(host)) return 'b2';
     if (/neon\.tech$/.test(host)) return 'neon';
     if (/^(127\.0\.0\.1|localhost):47392$/.test(host)) return 'manager-dienst';
-    if (/^(127\.0\.0\.1|localhost)/.test(host)) return null;      // eigene Dateien (index.html, js) zählen nicht
+    if (/^(127\.0\.0\.1|localhost)/.test(host)) return null;
     if (host === global.location?.host) return null;
     return host.slice(0, 40);
   }
@@ -72,24 +62,23 @@
     geaendert = true;
   }
 
-  // fetch umhüllen: jede ausgehende Anfrage wird dem Ziel zugeordnet. Der Broadcast selbst
-  // und das Lebenszeichen werden über das Original geschickt und zählen nicht mit.
   const originalFetch = global.fetch.bind(global);
   function fetchUmhuellen() {
     if (global.fetch.__kcDatenfluss) return;
     const umhuellt = function (eingabe, optionen) {
       const url = typeof eingabe === 'string' ? eingabe : (eingabe && eingabe.url) || '';
       const nach = zielName(url);
+      const von = quellProgramm();
       let raus = 0;
       try { const b = optionen && optionen.body; if (typeof b === 'string') raus = b.length; else if (b && b.byteLength) raus = b.byteLength; } catch (e) { /* egal */ }
       const p = originalFetch(eingabe, optionen);
       if (!nach) return p;
       return p.then((antwort) => {
         let rein = 0; try { rein = parseInt(antwort.headers.get('content-length') || '0', 10) || 0; } catch (e) { /* egal */ }
-        zaehle(PROGRAMM, nach, raus + rein, !antwort.ok);
+        zaehle(von, nach, raus + rein, !antwort.ok);
         if (nach === 'manager-dienst') { if (antwort.ok) managerZuletztOk = Date.now(); else managerZuletztFehler = Date.now(); }
         return antwort;
-      }, (fehler) => { zaehle(PROGRAMM, nach, raus, true); if (nach === 'manager-dienst') managerZuletztFehler = Date.now(); throw fehler; });
+      }, (fehler) => { zaehle(von, nach, raus, true); if (nach === 'manager-dienst') managerZuletztFehler = Date.now(); throw fehler; });
     };
     umhuellt.__kcDatenfluss = true;
     global.fetch = umhuellt;
@@ -128,8 +117,6 @@
   function version() {
     return String(global.KC_PC_MANAGER_VERSION || global.KC_VERSION || document.documentElement.dataset.version || document.querySelector('#version')?.textContent || '').replace(/^v/i, '').trim() || null;
   }
-  // Manager-Dienst (47392): der eigene fetch-Zähler weiß, ob die letzten Anfragen dorthin
-  // durchkamen - keine zweite Prüfung nötig.
   let managerZuletztOk = 0, managerZuletztFehler = 0;
   function managerVerbunden() {
     if (!managerZuletztOk && !managerZuletztFehler) return null;
@@ -157,16 +144,15 @@
   }
 
   const KCDatenfluss = {
-    // Kassen-Ereignis aus dem Live-Monitor: Kasse -> PC-Manager. Wird aus kc-live-monitor.js
-    // mit einer Zeile aufgerufen; Heartbeats der Kasse zählen als Verkehr mit (sie sind welcher).
     kasse(registerId, evt) {
       const n = String(registerId || '').match(/(\d{1,2})/);
-      const von = n ? `kasse-${n[1].padStart(2, '0')}` : 'kasse-01';
+      const von = n ? `kasse-${n[1].padStart(2, '0')}` : null;
+      if (!von) return;
       let bytes = 0; try { bytes = JSON.stringify(evt || {}).length; } catch (e) { /* egal */ }
       zaehle(von, PROGRAMM, bytes, false);
     },
-    manuell(nach, bytes, fehler) { zaehle(PROGRAMM, nach, bytes, fehler); },
-    zustand() { return { broadcast: letzterBroadcast, heartbeat: letzterHeartbeat, instanz: instanz() }; },
+    manuell(nach, bytes, fehler) { zaehle(quellProgramm(), nach, bytes, fehler); },
+    zustand() { return { broadcast: letzterBroadcast, heartbeat: letzterHeartbeat, instanz: instanz(), quelle: quellProgramm() }; },
     KANAL,
   };
 

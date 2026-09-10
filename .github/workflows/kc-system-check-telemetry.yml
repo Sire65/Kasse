@@ -1,0 +1,22 @@
+name: KC System Check Telemetrie TÜV
+on:
+  pull_request:
+    paths:
+      - 'pc-manager/kc-datenfluss-melder.js'
+      - 'pc-manager/kc-live-monitor.js'
+      - 'pc-manager/index.html'
+      - 'pos/kc-sync-live-event.js'
+      - 'tests/kc-system-check-telemetry.test.mjs'
+      - '.github/workflows/kc-system-check-telemetry.yml'
+jobs:
+  telemetry:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Syntax PC Manager telemetry
+        run: node --check pc-manager/kc-datenfluss-melder.js
+      - name: Regression real traffic contract
+        run: node --test tests/kc-system-check-telemetry.test.mjs
