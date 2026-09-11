@@ -1,0 +1,30 @@
+{
+  "erzeugtAm": "2026-09-10T08:44:31.031Z",
+  "webserverPort": 8090,
+  "lanAdresse": "192.0.2.2",
+  "kassen": [
+    {
+      "id": "KASSE-01",
+      "name": "KASSE-01",
+      "port": 47500,
+      "token": "BYOCJG-ZInhwkgQYItEGDahBWAgK07Ji"
+    },
+    {
+      "id": "KASSE-02",
+      "name": "KASSE-02",
+      "port": 47501,
+      "token": "S5U7EPazSYDjWeTi-XPl2ECrlSop57uX"
+    },
+    {
+      "id": "KASSE-03",
+      "name": "KASSE-03",
+      "port": 47502,
+      "token": "coE67wepQ53WubMj0NUWB6yoo4rtYziO"
+    }
+  ],
+  "liveKanal": {
+    "laeuft": true,
+    "fehler": null,
+    "gestartetUm": "2026-09-10T08:44:31.031Z"
+  }
+}

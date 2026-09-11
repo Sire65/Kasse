@@ -1,0 +1,103 @@
+/* kc-legacy-fallback.css - 11.09.2026
+ * Responsive Tablet-Kompatibilität (Codex-Auftrag, alte Geräte - Referenz Samsung SM-T535,
+ * Android 5.0.2). Bewusst eine EIGENE, separate Schicht (siehe Arbeitsregel: bestehende
+ * funktionierende Logik/CSS nicht anfassen) - wird NACH styles.css und den anderen
+ * Stylesheets geladen und greift NUR dort ein, wo der Browser eine moderne CSS-Funktion
+ * nachweislich nicht kann (@supports-Abfrage) bzw. für die Querformat-Aufforderung, die es
+ * bisher gar nicht gab.
+ *
+ * WICHTIG: @supports selbst ist eine sehr alte, breit unterstützte Funktion (seit ca. 2013).
+ * Versteht ein Browser @supports nicht, überspringt er den ganzen Block folgenlos - dann bleibt
+ * nur das normale, unveränderte Grid-Layout stehen (heutiger Stand). Auf modernen Geräten
+ * ändert diese Datei nichts sichtbar, weil deren @supports-Prüfungen alle "erfüllt" ergeben.
+ */
+
+/* ===== 1) Querformat-Aufforderung ============================================
+   Bisher gab es keinen Hinweis, wenn ein Tablet im Hochformat gehalten wird - die Kasse ist
+   ausdrücklich für Querformat gebaut (Auftrag). Rein CSS-basiert (kein JavaScript nötig),
+   dadurch auch auf einem Browser wirksam, dessen JavaScript aus anderen Gründen Probleme
+   machen sollte. .kc-rotate-overlay liegt als eigenes <div> ganz am Anfang von <body> in
+   index.html, ist per Grundregel unsichtbar und wird nur bei Hochformat+Touch+Tablet-Breite
+   eingeblendet. */
+.kc-rotate-overlay{display:none}
+@media (orientation:portrait) and (pointer:coarse) and (max-width:1366px){
+  .kc-rotate-overlay{
+    display:flex!important;position:fixed;inset:0;z-index:99999;
+    background:#07111f;color:#fff;flex-direction:column;align-items:center;justify-content:center;
+    text-align:center;padding:32px;box-sizing:border-box;
+  }
+  .kc-rotate-overlay .kc-rotate-icon{font-size:64px;line-height:1;margin-bottom:18px}
+  .kc-rotate-overlay p{font-size:1.3rem;font-weight:700;max-width:480px;margin:0;line-height:1.4}
+}
+
+/* ===== 2) Fallback fuer dvh/clamp() auf Hoehen-kritischen Bereichen =========
+   Browser, die eine Deklaration nicht verstehen, ignorieren GENAU DIESE Deklaration (nicht
+   die ganze Regel) - deshalb reicht hier eine einfache @supports-Ersatzregel mit fester,
+   vernuenftiger Pixelhoehe statt dvh/clamp(), die NUR greift, wenn dvh selbst nicht
+   unterstuetzt wird. */
+@supports not (height: 1dvh) {
+  html,body{height:100vh!important;max-height:100vh!important}
+  .app-shell{height:100vh!important}
+  body.tablet-fit .app-shell{height:100vh!important}
+  .bottom-layout{height:220px!important;min-height:190px!important}
+  .bottom-layout .banknote-button{height:52px!important}
+  #withdrawDialog .withdraw-card{max-height:calc(100vh - 16px)!important}
+}
+
+/* ===== 3) Fallback fuer fehlende CSS-Grid-Unterstuetzung ====================
+   Betrifft nur echte Altgeraete (Grid ist seit 2017 Standard) - Funktion vor Optik: die
+   Kernbereiche bleiben nutzbar (Artikel waehlen, Warengruppe wechseln, Menge, Bon, Summe,
+   Zahlung, Storno), auch wenn es nicht mehr pixelgenau wie das Grid-Layout aussieht. */
+@supports not (display: grid) {
+  .app-shell{display:flex!important;flex-direction:column!important;height:auto!important;min-height:100vh!important;overflow:visible!important}
+  .app-header{display:flex!important;flex-wrap:wrap!important}
+  .header-info{display:flex!important;flex-wrap:wrap!important}
+  .header-info .info-cell{flex:1 1 120px!important}
+  .header-status{display:flex!important;flex-wrap:wrap!important}
+  .mode-strip{display:flex!important;flex-wrap:wrap!important;align-items:center!important;gap:6px!important}
+
+  .main-layout{display:flex!important;flex-direction:column!important;height:auto!important;overflow:visible!important}
+  .sales-area{width:100%!important;min-width:0!important}
+  .cart-area{width:100%!important;min-width:0!important;margin-top:10px!important}
+
+  .category-tabs{display:flex!important;flex-wrap:wrap!important;overflow-x:visible!important}
+
+  .product-grid{display:flex!important;flex-wrap:wrap!important;height:auto!important}
+  .product-grid .product-tile-wrap,.product-grid .product-tile{
+    flex:1 1 30%!important;min-width:150px!important;height:auto!important;min-height:120px!important;margin:4px!important;
+  }
+
+  .cart-title{display:flex!important;flex-wrap:wrap!important}
+  .cart-row{display:flex!important;flex-wrap:wrap!important;align-items:center!important;gap:6px!important;padding:8px 4px!important}
+  .cart-quantity-bar{display:flex!important;flex-wrap:wrap!important}
+
+  .bottom-layout{display:flex!important;flex-wrap:wrap!important;height:auto!important;min-height:0!important}
+  .bottom-layout>.cash-card,.bottom-layout>.change-card,.bottom-layout>.card-payment,
+  .bottom-layout>.keypad-shell,.bottom-layout>.main-actions{
+    flex:1 1 220px!important;height:auto!important;min-height:0!important;max-height:none!important;margin:4px!important;
+  }
+  .banknote-row,.coin-row{display:flex!important;flex-wrap:wrap!important}
+  .cash-finish-row{display:flex!important;flex-wrap:wrap!important;gap:6px!important}
+
+  .main-actions{display:flex!important;flex-wrap:wrap!important;height:auto!important}
+  .main-actions button{flex:1 1 45%!important;min-height:52px!important;margin:3px!important}
+
+  .status-footer{display:flex!important;flex-wrap:wrap!important}
+
+  /* Dialoge (Reklamation, Auszahlung, Wertmarke usw.) nutzen an vielen Stellen ebenfalls
+     Grid fuer ihre Formularzeilen - genereller, grober Fallback auf Block/Flex statt jede
+     einzelne Dialogregel nachzuziehen (Funktion vor Optik: Formulare bleiben ausfuellbar,
+     stehen im Zweifel nur untereinander statt nebeneinander). */
+  dialog [class*="-grid"],dialog [class*="-row"]:not(.cart-row){display:block!important}
+  dialog [class*="-grid"]>*{margin-bottom:6px!important}
+}
+
+/* ===== 4) Mindest-Touch-Groesse als generelle Absicherung ===================
+   Ergaenzt die bereits vorhandene "@media (pointer:coarse)"-Regel in index.html um Fallback-
+   Faelle, in denen pointer:coarse selbst falsch/gar nicht erkannt wird (manche sehr alten
+   Android-Browser melden pointer:fine, obwohl es ein reines Touch-Geraet ist). Betrifft nur
+   Geraete mit Bildschirmbreite <=1366px (Tablet-Groessenordnung), damit Desktop-Mauszeiger
+   nicht unnoetig vergroessert werden. */
+@media (max-width:1366px){
+  .category-tabs button,.product-tile,.main-actions button,.cash-finish-row button{min-height:44px}
+}
