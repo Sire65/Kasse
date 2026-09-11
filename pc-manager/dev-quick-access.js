@@ -26,7 +26,8 @@
     ['time-clock-supabase-sync.js?build=1.0.0','data-kc-timeclock-sync'],
     ['kc-schulung-kachel.js?build=1.0.0','data-kc-schulung-kachel'],
     ['kc-claude-merge-ui.js?build=1.0.0','data-kc-claude-merge-ui'],
-    ['kc-database-center.js?build=1.0.0','data-kc-database-center']
+    ['kc-database-center.js?build=1.0.0','data-kc-database-center'],
+    ['kc-supplier-link.js?build=1.0.0','data-kc-supplier-link']
   ];
   function loadAt(i){if(i>=modules.length)return;const [src,attr]=modules[i];if(document.querySelector(`script[${attr}]`)){loadAt(i+1);return;}const s=document.createElement('script');s.src=src;s.setAttribute(attr,'1');s.onload=()=>loadAt(i+1);s.onerror=()=>{console.error('KC Zusatzmodul konnte nicht geladen werden:',src);loadAt(i+1);};document.head.appendChild(s);}
   loadAt(0);
