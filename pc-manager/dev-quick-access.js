@@ -45,3 +45,12 @@
     unlockForDevelopment();
   });
 })();
+
+/* Bestands-/Inventur-Erweiterung getrennt laden, damit das bestehende Dashboard unangetastet bleibt. */
+(()=>{
+  if(document.querySelector('script[data-kc-inventory-supabase]'))return;
+  const s=document.createElement('script');
+  s.src='inventory-supabase-integration.js?build=0.1.0';
+  s.dataset.kcInventorySupabase='1';
+  document.head.appendChild(s);
+})();
