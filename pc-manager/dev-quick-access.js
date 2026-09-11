@@ -46,11 +46,15 @@
   });
 })();
 
-/* Bestands-/Inventur-Erweiterung getrennt laden, damit das bestehende Dashboard unangetastet bleibt. */
+/* Zusatzmodule bewusst getrennt laden, damit bestehende Manager-Module unangetastet bleiben. */
 (()=>{
-  if(document.querySelector('script[data-kc-inventory-supabase]'))return;
-  const s=document.createElement('script');
-  s.src='inventory-supabase-integration.js?build=0.1.0';
-  s.dataset.kcInventorySupabase='1';
-  document.head.appendChild(s);
+  function laden(src,attribut){
+    if(document.querySelector(`script[${attribut}]`))return;
+    const s=document.createElement('script');
+    s.src=src;
+    s.setAttribute(attribut,'1');
+    document.head.appendChild(s);
+  }
+  laden('inventory-supabase-integration.js?build=0.1.0','data-kc-inventory-supabase');
+  laden('kc-database-center.js?build=1.0.0','data-kc-database-center');
 })();
