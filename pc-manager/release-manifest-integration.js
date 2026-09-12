@@ -80,8 +80,8 @@
 (function(){
   if(window.KCServingMaterials || document.querySelector('script[data-kc-serving-materials="1"]')) return;
   if(document.readyState==='loading'){
-    document.write('<script src="recipe-serving-materials.js?v=0.1.1" data-kc-serving-materials="1"></'+'script>');
+    document.write('<script src="recipe-serving-materials.js?v=0.2.0" data-kc-serving-materials="1"></'+'script>');
     return;
   }
-  const s=document.createElement('script');s.src='recipe-serving-materials.js?v=0.1.1';s.dataset.kcServingMaterials='1';document.head.appendChild(s);
+  const s=document.createElement('script');s.src='recipe-serving-materials.js?v=0.2.0';s.dataset.kcServingMaterials='1';document.head.appendChild(s);
 })();
