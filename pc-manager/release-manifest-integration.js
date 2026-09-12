@@ -74,3 +74,14 @@
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>{render();setTimeout(render,900)});else{render();setTimeout(render,900)}
   global.KCManagerReleaseGate={refresh:render,report:registerRuntime};
 })(window);
+
+/* Muss vor recipe-calculation-core und recipe-manager ausgeführt sein, damit Verpackungs-/Ausgabegefäßkosten
+   Bestandteil derselben Kalkulation werden. document.write ist hier absichtlich parser-synchron. */
+(function(){
+  if(window.KCServingMaterials || document.querySelector('script[data-kc-serving-materials="1"]')) return;
+  if(document.readyState==='loading'){
+    document.write('<script src="recipe-serving-materials.js?v=0.1.1" data-kc-serving-materials="1"><\\/script>');
+    return;
+  }
+  const s=document.createElement('script');s.src='recipe-serving-materials.js?v=0.1.1';s.dataset.kcServingMaterials='1';document.head.appendChild(s);
+})();
