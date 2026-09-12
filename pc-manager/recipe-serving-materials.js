@@ -1,6 +1,6 @@
 (function(global){
   'use strict';
-  const VERSION='0.1.0';
+  const VERSION='0.1.1';
   const MATERIAL_STORE='kcm_consumables_v1';
   const ASSIGN_STORE='kcm_recipe_serving_materials_v1';
   const BOWL_ID='CONSUMABLE-BOWL-BAGASSE-500-WM';
@@ -54,14 +54,20 @@
   function assign(productId,materialId=BOWL_ID,qtyPerPortion=1){const a=assignments();a[productId]=[{materialId,qtyPerPortion:Number(qtyPerPortion)||1,role:'Ausgabegefäß'}];write(ASSIGN_STORE,a);render();return a[productId]}
 
   seed();
-  const original=global.KCRecipeCalculationCore;
-  if(original&&!original.__servingMaterialWrapped){
-    const wrapped={...original,__servingMaterialWrapped:true,calculate(recipe,options={}){
-      const result=original.calculate(recipe,options);const c=costForProduct(recipe.productId,result.desiredPortions);
-      const ingredientCost=result.totalCost;
+  function wrapCore(original){
+    if(!original||original.__servingMaterialWrapped)return original;
+    return Object.freeze({...original,__servingMaterialWrapped:true,calculate(recipe,options={}){
+      const result=original.calculate(recipe,options),c=costForProduct(recipe.productId,result.desiredPortions),ingredientCost=result.totalCost;
       return {...result,ingredientCost,servingMaterials:c.rows,servingMaterialCost:c.totalCost,servingMaterialCostPerPortion:c.costPerPortion,totalCost:(ingredientCost==null?0:ingredientCost)+c.totalCost};
-    }};
-    global.KCRecipeCalculationCore=Object.freeze(wrapped);
+    }});
+  }
+  if(global.KCRecipeCalculationCore){
+    global.KCRecipeCalculationCore=wrapCore(global.KCRecipeCalculationCore);
+  }else{
+    let coreValue;
+    try{
+      Object.defineProperty(global,'KCRecipeCalculationCore',{configurable:true,enumerable:true,get(){return coreValue},set(value){coreValue=wrapCore(value)}});
+    }catch(e){console.warn('Rezept-Core-Hook konnte nicht vorbereitet werden',e)}
   }
 
   function money(v){return Number(v||0).toLocaleString('de-DE',{minimumFractionDigits:2,maximumFractionDigits:4})+' €'}
