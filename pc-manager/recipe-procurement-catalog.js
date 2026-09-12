@@ -2,18 +2,21 @@
    Additiv: keine vorhandenen Zutaten, Mengen oder Preise werden überschrieben. */
 (function(global){
   'use strict';
-  const VERSION='0.1.0';
+  const VERSION='0.2.0';
   const STORE='kcm_recipe_procurement_catalog_v1';
   const ITEMS=[
-    {id:'WM-HH-WUERFELZUCKER',name:'Würfelzucker',supplier:'Handelshof',procurement:'Selbstabholung',packageText:'Packungsgröße noch erfassen',price:null},
-    {id:'WM-HH-SENF-BOLTE-MITTEL',name:'Bolte Senf, mittelscharf',supplier:'Handelshof',procurement:'Selbstabholung',packageText:'ca. 800 ml Flasche – genaue Größe prüfen',price:null},
-    {id:'WM-HH-KARTOFFEL-KLEIN-VORGEGART',name:'Kartoffeln, klein, vorgegart',supplier:'Handelshof',procurement:'Selbstabholung',packageText:'Gebinde/Menge noch erfassen',price:null},
+    {id:'WM-HH-WUERFELZUCKER',name:'Würfelzucker',supplier:'Handelshof',procurement:'Selbstabholung',packageText:'1 kg Packung',price:null},
+    {id:'WM-HH-SENF-EFS-MITTEL-875',name:'EDEKA Foodservice Classic Senf, mittelscharf',supplier:'Handelshof',procurement:'Selbstabholung',packageText:'875 ml Flasche',price:null,gtin:'4311596609093',usageNote:'Selbstbedienung für Kunden'},
+    {id:'WM-HH-PEKA-PARISER-2200',name:'Peka Freshline Pariser Kartoffeln, vorgegart',supplier:'Handelshof',procurement:'Selbstabholung',packageText:'2,2 kg Beutel',price:null,gtin:'8711118008544',storage:'gekühlt max. 7 °C; vor Gebrauch abtropfen lassen'},
     {id:'WM-HH-ZWIEBELN',name:'Zwiebeln',supplier:'Handelshof',procurement:'Selbstabholung',packageText:'Gebinde/Menge noch erfassen',price:null},
     {id:'WM-HH-APFEL',name:'Äpfel',supplier:'Handelshof',procurement:'Selbstabholung',packageText:'Sorte/Gebinde noch erfassen',price:null},
     {id:'WM-HH-HERINGSFILETS',name:'Heringsfilets',supplier:'Handelshof',procurement:'Selbstabholung',packageText:'Gebinde/Menge noch erfassen',price:null},
     {id:'WM-HH-SAHNE',name:'Sahne',supplier:'Handelshof',procurement:'Selbstabholung',packageText:'Gebinde/Menge noch erfassen',price:null},
     {id:'WM-HH-MAYONNAISE',name:'Mayonnaise',supplier:'Handelshof',procurement:'Selbstabholung',packageText:'Gebinde/Menge noch erfassen',price:null},
-    {id:'WM-HH-POPP-KARTOFFELCREME',name:'Popp Kartoffelcreme',supplier:'Handelshof',procurement:'Selbstabholung',packageText:'ca. 2,5 kg Schale – genaue Größe prüfen',price:null},
+    {id:'WM-HH-SALZ',name:'Speisesalz',supplier:'Handelshof',procurement:'Selbstabholung',packageText:'Gebinde noch erfassen',price:null},
+    {id:'WM-HH-PFEFFER',name:'Pfeffer',supplier:'Handelshof',procurement:'Selbstabholung',packageText:'Gebinde noch erfassen',price:null},
+    {id:'WM-HH-ZUCKER',name:'Zucker',supplier:'Handelshof',procurement:'Selbstabholung',packageText:'Gebinde noch erfassen',price:null},
+    {id:'WM-HH-POPP-KARTOFFELCREME',name:'Popp Kartoffel Creme',supplier:'Handelshof',procurement:'Selbstabholung',packageText:'3 kg Gastrogebinde',price:null},
     {id:'WM-ALDI-RUM-54',name:'Rum 54 % vol.',supplier:'Aldi',procurement:'Selbstabholung',packageText:'Marke/Flaschengröße noch erfassen',price:null,alcoholPercent:54},
     {id:'WM-ALDI-GEWUERZSPEKULATIUS',name:'Gewürzspekulatius',supplier:'Aldi',procurement:'Selbstabholung',packageText:'Packungsgröße noch erfassen',price:null,freeIssue:true},
     {id:'WM-HH-PAPIERSERVIETTEN',name:'Papierservietten',supplier:'Handelshof',procurement:'Selbstabholung',packageText:'Packungsgröße noch erfassen',price:null,consumable:true},
@@ -23,16 +26,17 @@
   ];
   const LINKS={
     hering:[
-      ['WM-HH-KARTOFFEL-KLEIN-VORGEGART','Kartoffeln, klein, vorgegart'],['WM-HH-ZWIEBELN','Zwiebeln'],['WM-HH-APFEL','Äpfel'],
-      ['WM-HH-HERINGSFILETS','Heringsfilets'],['WM-HH-SAHNE','Sahne'],['WM-HH-MAYONNAISE','Mayonnaise']
+      ['WM-HH-PEKA-PARISER-2200','Peka Freshline Pariser Kartoffeln, vorgegart'],['WM-HH-ZWIEBELN','Zwiebeln'],['WM-HH-APFEL','Äpfel'],
+      ['WM-HH-HERINGSFILETS','Heringsfilets'],['WM-HH-SAHNE','Sahne'],['WM-HH-MAYONNAISE','Mayonnaise'],
+      ['WM-HH-SALZ','Speisesalz'],['WM-HH-PFEFFER','Pfeffer'],['WM-HH-ZUCKER','Zucker']
     ],
-    knirpsecreme:[['WM-HH-KARTOFFEL-KLEIN-VORGEGART','Kartoffeln, klein, vorgegart'],['WM-HH-POPP-KARTOFFELCREME','Popp Kartoffelcreme']],
+    knirpsecreme:[['WM-HH-PEKA-PARISER-2200','Peka Freshline Pariser Kartoffeln, vorgegart'],['WM-HH-POPP-KARTOFFELCREME','Popp Kartoffel Creme']],
     feuer:[['WM-ALDI-RUM-54','Rum 54 % vol.']]
   };
   function read(){try{return JSON.parse(localStorage.getItem(STORE)||'null')||{}}catch{return {}}}
   function seed(){
     const old=read(),items=new Map((old.items||[]).map(x=>[x.id,x]));ITEMS.forEach(x=>items.set(x.id,{...x,...(items.get(x.id)||{})}));
-    const links={...(old.links||{})};Object.entries(LINKS).forEach(([pid,list])=>{if(!Array.isArray(links[pid])||!links[pid].length)links[pid]=list.map(([itemId,name])=>({itemId,name,amount:null,unit:null,status:'Menge offen'}));});
+    const links={...(old.links||{})};Object.entries(LINKS).forEach(([pid,list])=>{const prior=Array.isArray(links[pid])?links[pid]:[];const byId=new Map(prior.map(x=>[x.itemId,x]));list.forEach(([itemId,name])=>{if(!byId.has(itemId))byId.set(itemId,{itemId,name,amount:null,unit:null,status:'Menge offen'})});links[pid]=[...byId.values()]});
     const result={version:VERSION,items:[...items.values()],links,existingReferences:{rum40:{name:'Rum 40 % vol.',action:'vorhandenen Datensatz verwenden; nicht doppelt anlegen'},amaretto:{name:'Amaretto',action:'vorhandenen Datensatz verwenden; nicht doppelt anlegen'}}};
     localStorage.setItem(STORE,JSON.stringify(result));return result;
   }
