@@ -245,6 +245,10 @@ document.querySelectorAll(".nav-group-toggle").forEach(toggle=>toggle.addEventLi
 document.querySelectorAll(".nav").forEach(b=>b.onclick=()=>{
   document.querySelectorAll(".nav").forEach(x=>x.classList.toggle("active",x===b));
   document.querySelectorAll(".view").forEach(x=>x.classList.toggle("active",x.dataset.viewPanel===b.dataset.view));
+  // 11.09.2026 (Betreiber: "beim Seitenwechsel immer nach oben, nicht dort weitermachen wo die
+  // vorherige Seite aufgehoert hat"): .content hat keine eigene Hoehenbegrenzung (nur
+  // .app{min-height:100vh}) - tatsaechlich scrollt das Browserfenster selbst.
+  window.scrollTo({top:0,behavior:"auto"});
   const parentGroup=b.closest(".nav-group");
   if(parentGroup)setNavGroup(parentGroup,true);
   if(b.dataset.view==="dashboard")renderDashboard();
@@ -258,7 +262,7 @@ document.querySelectorAll(".nav").forEach(b=>b.onclick=()=>{
   if(b.dataset.view==="closing")renderClosings();
 });
 restoreNavGroups();
-document.querySelectorAll("[data-atab]").forEach(b=>b.onclick=()=>{document.querySelectorAll("[data-atab]").forEach(x=>x.classList.toggle("active",x===b));document.querySelectorAll("[data-apanel]").forEach(x=>x.classList.toggle("active",x.dataset.apanel===b.dataset.atab))});
+document.querySelectorAll("[data-atab]").forEach(b=>b.onclick=()=>{document.querySelectorAll("[data-atab]").forEach(x=>x.classList.toggle("active",x===b));document.querySelectorAll("[data-apanel]").forEach(x=>x.classList.toggle("active",x.dataset.apanel===b.dataset.atab));window.scrollTo({top:0,behavior:"auto"})});
 
 const EXCHANGE_FORMAT="KC_EXCHANGE_PACKAGE";
 const EXCHANGE_SCHEMA="1.0";

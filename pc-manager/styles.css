@@ -477,6 +477,16 @@ body.kc-editor-collapsed .tv-manager-grid{grid-template-columns:270px minmax(650
 .vb-kopf{display:flex;flex-wrap:wrap;align-items:center;gap:14px;margin-bottom:12px}
 .vb-stand{font-weight:800;font-size:.9rem}
 .vb-stand-gut{color:#166534}.vb-stand-warnung{color:#92400e}.vb-stand-fehler{color:#b91c1c}
+/* 10.09.2026: einfache, aufgeraeumte Tabellen-Ansicht fuer Supabase - siehe kc-supabase-tabellen.js */
+.db-kopf{display:flex;flex-wrap:wrap;align-items:flex-end;gap:14px;margin-bottom:10px}
+.db-kopf label{display:flex;flex-direction:column;gap:4px;font-weight:700;font-size:.85rem;min-width:240px}
+.db-meldung{font-weight:700;font-size:.85rem;margin:6px 0}
+.db-meldung.db-ok{color:#166534}.db-meldung.db-warnung{color:#92400e}.db-meldung.db-fehler{color:#b91c1c}
+.db-tabelle-wrap{overflow-x:auto;max-width:100%}
+.db-tabelle-wrap table{white-space:nowrap}
+.db-tabelle-wrap input[type="text"]{width:100%;min-width:90px;border:1px solid #cbd5e1;border-radius:6px;padding:4px 6px;font:inherit}
+.db-aktionen{white-space:nowrap;text-align:right}
+.db-aktionen button{border:0;background:none;font-size:1.1rem;cursor:pointer;padding:2px 6px}
 .vb-liste{display:grid;gap:8px}
 .vb-zeile{display:grid;grid-template-columns:34px 1fr;gap:10px;align-items:start;
   padding:10px 12px;border-radius:9px;border:1px solid #e2e8f0;background:#f8fafc}
@@ -603,6 +613,7 @@ tr:has(.tc-teilnahme select option[value="nein"]:checked){background:#fffbeb}
   font-weight:800;font-size:.86rem;cursor:pointer}
 .zd-karte button.primary{background:#166534;color:#fff;border-color:#14532d}
 .zd-karte button:disabled{opacity:.5;cursor:not-allowed}
+.zd-einrichten{padding:13px;border:1px solid #fcd34d;border-radius:10px;background:#fffbeb;margin-bottom:12px;display:flex;flex-direction:column;gap:8px}.zd-einrichten label{display:flex;flex-direction:column;gap:4px;font-size:.85rem;font-weight:600;color:#78350f}.zd-einrichten input{min-height:40px;padding:0 10px;border:1px solid #cbd5e1;border-radius:8px;font-size:1rem}.zd-einrichten button{min-height:40px;border:1px solid #14532d;border-radius:8px;background:#166534;color:#fff;font-weight:700;cursor:pointer;align-self:flex-start;padding:0 18px}.zd-einrichten-hinweis{margin:0;font-size:.78rem;color:#78350f;opacity:.85}
 .zd-meldung{margin:14px 0 0;font-size:.88rem;font-weight:700}
 .zd-meldung.zd-gut{color:#166534}.zd-meldung.zd-warn{color:#b45309}
 
@@ -702,3 +713,39 @@ tr:has(.tc-teilnahme select option[value="nein"]:checked){background:#fffbeb}
 .kc-sicht-hinweis{color:#54627a;margin:.2rem 0 .8rem}
 .kc-sicht-schritte{margin:.4rem 0 .9rem 1.2rem;line-height:1.65}
 .kc-sicht-ok{background:#e7f6ea;border:1px solid #8fca9c;border-radius:9px;padding:11px 13px;margin:.2rem 0 .8rem}
+.hh-warnung{grid-column:1/-1;margin:4px 0 0;padding:8px 10px;background:#fef3c7;border:1px solid #f59e0b;border-radius:8px;color:#92400e;font-size:.85rem;font-weight:600}
+/* 10.09.2026: Abendzaehlung im Manager-eigenen Geldbereich - dieselben Regeln wie im
+   eigenstaendigen Money Butler (money-butler/styles.css), damit beide gleich aussehen. */
+.soll-anzeige { font-size: 14px; color: #374151; margin: 8px 0 0; }
+.zaehl-kontrolle { display: flex; gap: 16px; margin: -6px 0 18px; padding: 12px 16px; background: #f3f4f6; border-radius: 10px; }
+.zaehl-kontrolle > div { flex: 1; display: flex; flex-direction: column; gap: 2px; }
+.zaehl-kontrolle span { font-size: 12px; color: #6b7280; text-transform: uppercase; letter-spacing: .02em; }
+.zaehl-kontrolle b { font-size: 20px; font-weight: 800; color: #374151; }
+.zaehl-kontrolle b.ok { color: #15803d; }
+.zaehl-kontrolle b.warn { color: #b45309; }
+.date-quick-row{display:flex;gap:8px;margin-top:6px}
+.date-quick-row>button{flex:1;padding:8px;border:1px solid #cbd5e1;border-radius:8px;background:#f3f4f6;font-weight:700;font-size:.85rem;cursor:pointer}
+.date-quick-row>button:active{background:#dbeafe}
+/* 10.09.2026: Uebergabeprotokoll im Manager - dieselben Regeln wie money-butler/styles.css,
+   die Druck-Isolierung an das Manager-DOM angepasst (eigenes body.print-protokoll-cash statt
+   body.nur-protokoll, dasselbe Muster wie body.print-cash-qr oben). */
+.protokoll-blatt{margin-top:14px}
+.protokoll-tabelle{width:100%;border-collapse:collapse;margin:6px 0 14px}
+.protokoll-tabelle td{border-bottom:1px solid #d4dae0;padding:6px 8px;font-size:.86rem}
+.protokoll-tabelle td:last-child{text-align:right;font-weight:900;color:#0b315d}
+.protokoll-summe td{border-top:2px solid #0b315d;border-bottom:0;font-weight:900}
+.protokoll-unterschriften{display:grid;grid-template-columns:1fr 1fr;gap:26px;margin-top:34px}
+.protokoll-unterschriften div{font-size:.8rem;color:#667085}
+.protokoll-linie{display:block;border-top:1px solid #333;margin-bottom:5px}
+.protokoll-kopf{display:flex;justify-content:space-between;align-items:flex-start;gap:20px}
+.protokoll-kopf h3{margin:0 0 6px}
+.protokoll-kopf>div:first-child{flex:1;min-width:0}
+.protokoll-qr{flex:0 0 auto;text-align:center}
+.protokoll-qr canvas{width:150px;height:150px;border:1px solid #d4dae0;border-radius:6px;background:#fff}
+.protokoll-qr small{display:block;margin-top:4px;font-family:monospace;font-size:.72rem;color:#667085;letter-spacing:.06em}
+@media(max-width:700px){.protokoll-kopf{flex-direction:column}.protokoll-qr{align-self:flex-start}}
+@media print{
+  body.print-protokoll-cash .protokoll-blatt,body.print-protokoll-cash .protokoll-blatt *{visibility:visible}
+  body.print-protokoll-cash .protokoll-blatt{position:absolute;left:0;top:0;width:100%;border:0;box-shadow:none}
+  .protokoll-qr canvas{width:46mm;height:46mm}
+}

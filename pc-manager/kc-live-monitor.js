@@ -172,6 +172,32 @@
       renderGauge();
       if (listView && !listView.hidden) renderList();
     }
+    // 10.09.2026 (Betreiber/KC System Check: "die fehlende Bruecke Manager -> Supabase
+    // bauen"): der Companion-Heartbeat der Kasse kam bisher lokal beim Manager an und blieb
+    // dort liegen - keine Weiterleitung an Supabase, KC Check bekam dadurch NIE etwas zu
+    // sehen, egal was die Kasse sendete. Nur Heartbeats mit einer instanceId weiterreichen
+    // (die von der Kasse gemeldete "kasse-01"/"kasse-02" - vgl. pos/kc-sync-live-event.js);
+    // "fire and forget" wie der Rest der Live-Anzeige - ein Fehlschlag (Manager nicht bei
+    // Supabase angemeldet, kein Netz) darf die lokale Kassenbedienung/-anzeige nie
+    // beeintraechtigen.
+    // 10.09.2026, ergaenzt (KC System Check kennt das genaue, produktive Format): neben
+    // programId/instanceId/trafficTx braucht die Funktion zusaetzlich einen aktuellen
+    // Zeitstempel, einen ONLINE-Status und einen je Aufruf einmaligen Nonce (Zufallswert) -
+    // ohne die drei liesse sich der Heartbeat zwar empfangen, aber nicht sicher als echte,
+    // neue, dieser Kasse zuzuordnende Bewegung verbuchen.
+    if (evt.type === 'heartbeat' && evt.payload?.instanceId && global.KCSupabase?.istAngemeldet?.()) {
+      global.KCSupabase.rufeEdgeFunktionAuf('kicc-program-heartbeat', {
+        programId: 'kc-bilderkasse',
+        instanceId: evt.payload.instanceId,
+        registerId: evt.payload.registerId || null,
+        status: 'ONLINE',
+        timestamp: new Date().toISOString(),
+        nonce: (global.crypto || crypto).randomUUID(),
+        trafficTx: Number(evt.payload.trafficTx || 0),
+        queueDepth: evt.payload.queueDepth ?? null,
+        version: evt.payload.version || null,
+      }).catch(() => { /* bewusst ignoriert - reine Anzeige-Weiterleitung, siehe oben */ });
+    }
   }
 
   // --- LED-Gruppen in der Kopfzeile, dynamisch aus window.registers ---

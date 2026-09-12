@@ -11,8 +11,8 @@
  * ausdrücklich, wie viele ihrer Bausteine die Kasse heute schon einem echten Bereich zuordnen
  * kann und welche nicht. Eine Lücke, die man sieht, ist eine Aufgabe.
  *
- * DIESE DATEI IST IM FREITAGSSTAND NICHT EINGEBUNDEN. Sie liegt in der Arbeitskopie und wird
- * erst nach der Vorführung eingehängt.
+ * SEIT 07.09.2026 EINGEBUNDEN (pos/index.html) - und der Umbau selbst liegt jetzt in
+ * pos/kc-oberflaechen-anwenden.js. Diese Datei bleibt die Ablage und die Wahl.
  */
 'use strict';
 (function (global) {
@@ -68,7 +68,7 @@
   }
 
   const liste = () => sammlung().oberflaechen.map((o) => ({
-    id: o.id, name: o.name, geraet: o.geraet, klasse: o.klasse,
+    id: o.id, name: o.name, geraet: o.geraet, klasse: o.klasse, kcNummer: o.kcNummer,
     felder: (o.seiten || []).reduce((n, se) => n + (se.bausteine || []).length, 0),
     seiten: (o.seiten || []).length,
   }));

@@ -18,12 +18,13 @@
       const f = el('zdZustand');
       if (!z.eingerichtet) {
         f.className = 'zd-zustand zd-warn';
-        f.innerHTML = '<strong>Noch nicht eingerichtet.</strong> Im Ordner der Synchronisierung die Datei '
-          + '<code>zentral-zugang.beispiel.json</code> nach <code>zentral-zugang.json</code> kopieren '
-          + 'und den Dienstschlüssel eintragen. Er bleibt auf diesem Rechner.';
+        f.innerHTML = '<strong>Noch nicht eingerichtet.</strong> Zugangswort unten eintragen und auf '
+          + '„Einrichten“ tippen.';
+        if (el('zdEinrichten')) el('zdEinrichten').hidden = false;
         document.querySelectorAll('.zd-karte button').forEach((b) => b.disabled = true);
         return;
       }
+      if (el('zdEinrichten')) el('zdEinrichten').hidden = true;
       if (z.fehler) { f.className = 'zd-zustand zd-warn'; f.textContent = `Zentrale nicht erreichbar: ${z.fehler}`; return; }
       f.className = 'zd-zustand zd-gut';
       f.innerHTML = `<strong>Verbunden.</strong> Zentral hinterlegt: ${z.personen} Person(en), ${z.zeiten} Zeitbuchung(en).`;
@@ -108,16 +109,37 @@
     } catch (e) { melde(`Fehlgeschlagen: ${e.message}`, 'warn'); }
   }
 
+  // 11.09.2026 (Betreiber: "geht das nicht automatisch, ein Knopf im Manager-Fenster"):
+  // schreibt die Konfigurationsdatei direkt ueber den Companion - kein Ordner suchen, keine
+  // Datei von Hand kopieren/bearbeiten mehr noetig. Nur das Zugangswort selbst muss von
+  // ausserhalb kommen (ein Geheimnis, das nur die Zentrale und der Kassenwart kennen duerfen -
+  // das kann und darf ich nicht automatisch ausfuellen).
+  async function einrichten() {
+    const wort = el('zdZugangswort')?.value || '';
+    if (!wort.trim()) { melde('Bitte zuerst das Zugangswort eintragen.', 'warn'); return; }
+    melde('Wird eingerichtet …', '');
+    try {
+      const antwort = await (await fetch(`${DIENST}/zentral/einrichten`, {method: 'POST',
+        headers: {'Content-Type': 'application/json'}, body: JSON.stringify({zugangswort: wort}),
+        signal: AbortSignal.timeout(10000)})).json();
+      if (antwort.fehler) { melde(`Einrichten fehlgeschlagen: ${antwort.fehler}`, 'warn'); return; }
+      if (el('zdZugangswort')) el('zdZugangswort').value = '';
+      melde('Eingerichtet.', 'gut');
+      zustand();
+    } catch (e) { melde(`Einrichten fehlgeschlagen: ${e.message}`, 'warn'); }
+  }
+
   function starten() {
     if (!el('zdZustand')) return;
     el('zdPersonen').onclick = personenAbholen;
     el('zdZeiten').onclick = zeitenMelden;
     el('zdPseudonyme').onclick = pseudonymeSchreiben;
+    if (el('zdEinrichtenBtn')) el('zdEinrichtenBtn').onclick = einrichten;
     zustand();
   }
   document.querySelectorAll('[data-view="zentral"]').forEach((b) =>
     b.addEventListener('click', () => setTimeout(starten, 80)));
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', starten);
   else starten();
-  global.KCZentral = {zustand, personenAbholen, zeitenMelden, pseudonymeSchreiben};
+  global.KCZentral = {zustand, personenAbholen, zeitenMelden, pseudonymeSchreiben, einrichten};
 })(window);

@@ -55,6 +55,99 @@
       throw e;
     }
   }
+  // 10.09.2026 (KC System Check: "kicc-program-heartbeat" - Funktion mit Bindestrichen im
+  // Namen, nicht mit Unterstrichen wie alle bisherigen hier (kc_manager_..., kc_dp_...): das
+  // ist keine gewoehnliche Postgres-Funktion (/rest/v1/rpc/...) wie oben, sondern eine
+  // Supabase EDGE FUNCTION - die liegt unter einem anderen Pfad (/functions/v1/...). Eigene,
+  // kleine Variante von rufeFunktionAuf() mit demselben Wiederholungs-bei-abgelaufenem-Token-
+  // Verhalten, nur mit dem richtigen Pfad fuer Edge Functions.
+  async function rufeEdgeFunktionAuf(name, argumente) {
+    const versuch = async () => {
+      const kopf = { 'Content-Type': 'application/json', apikey: SUPABASE_ANON_KEY };
+      kopf.Authorization = 'Bearer ' + (accessToken() || SUPABASE_ANON_KEY);
+      const antwort = await fetch(`${SUPABASE_URL}/functions/v1/${name}`, {
+        method: 'POST', headers: kopf, body: JSON.stringify(argumente),
+      });
+      const daten = await antwort.json().catch(() => null);
+      if (!antwort.ok) { const fehler = new Error(daten?.message || daten?.error || `Fehler ${antwort.status}`); fehler.istAbgelaufen = /jwt expired|invalid jwt/i.test(daten?.message || daten?.error || ''); throw fehler; }
+      return daten;
+    };
+    try {
+      return await versuch();
+    } catch (e) {
+      if (e.istAbgelaufen && session?.refresh_token) {
+        await tokenErneuern();
+        return await versuch();
+      }
+      throw e;
+    }
+  }
+
+  // 10.09.2026 (Betreiber: "Supabase Studio ist zu kompliziert und englisch, mein Freund hat
+  // mir MariaDB gezeigt, das sah aufgeraeumt aus" -> "eine einfache, deutsche Tabellen-
+  // Ansicht bauen, mit allen Tabellen zur Auswahl, ansehen/bearbeiten/loeschen"): dritte
+  // kleine Variante, diesmal fuer die normalen Tabellen selbst (nicht Funktionen) - Supabase
+  // legt fuer JEDE Tabelle automatisch einen eigenen REST-Weg unter /rest/v1/<Tabellenname>
+  // an (GET zum Lesen, PATCH zum Aendern, DELETE zum Loeschen, POST zum Anlegen). "pfad" ist
+  // z.B. "received_events?select=*&limit=50" oder "received_events?event_id=eq.123" - alles
+  // nach dem Tabellennamen wird 1:1 an Supabase weitergereicht.
+  async function rufeTabelleAuf(pfad, methode = 'GET', body = null) {
+    const versuch = async () => {
+      const kopf = { 'Content-Type': 'application/json', apikey: SUPABASE_ANON_KEY, Prefer: 'return=representation' };
+      kopf.Authorization = 'Bearer ' + (accessToken() || SUPABASE_ANON_KEY);
+      const antwort = await fetch(`${SUPABASE_URL}/rest/v1/${pfad}`, {
+        method: methode, headers: kopf, body: body != null ? JSON.stringify(body) : undefined,
+      });
+      const text = await antwort.text();
+      const daten = text ? JSON.parse(text) : null;
+      if (!antwort.ok) { const fehler = new Error(daten?.message || `Fehler ${antwort.status}`); fehler.istAbgelaufen = /jwt expired|invalid jwt/i.test(daten?.message || ''); throw fehler; }
+      return daten;
+    };
+    try {
+      return await versuch();
+    } catch (e) {
+      if (e.istAbgelaufen && session?.refresh_token) {
+        await tokenErneuern();
+        return await versuch();
+      }
+      throw e;
+    }
+  }
+  // 10.09.2026: die eingebaute Uebersicht, welche Tabellen ueberhaupt zugaenglich sind
+  // (Supabase liefert das automatisch mit, abhaengig von den Rechten der angemeldeten Person -
+  // man sieht also von vornherein nur, was man auch wirklich nutzen darf).
+  // 11.09.2026 ECHTER FUND (Betreiber: "Fehler 401" beim Laden der Tabellenliste): anders als
+  // die drei Funktionen oben hatte diese hier KEINE automatische Token-Erneuerung bei
+  // abgelaufenem Zugangs-Token - nach einer Weile (Token laeuft nach einer Stunde ab) schlug
+  // das Laden der Liste fehl, obwohl die Anmeldung selbst noch gueltig war (der
+  // Erneuerungs-Schluessel haelt viel laenger). Jetzt nach demselben Muster wie
+  // rufeTabelleAuf() direkt darunter behoben.
+  async function listeTabellen() {
+    const versuch = async () => {
+      const kopf = { apikey: SUPABASE_ANON_KEY, Authorization: 'Bearer ' + (accessToken() || SUPABASE_ANON_KEY) };
+      const antwort = await fetch(`${SUPABASE_URL}/rest/v1/`, { headers: kopf });
+      if (!antwort.ok) {
+        const daten = await antwort.json().catch(() => null);
+        const fehler = new Error(daten?.message || `Fehler ${antwort.status}`);
+        fehler.istAbgelaufen = antwort.status === 401 || /jwt expired|invalid jwt/i.test(daten?.message || '');
+        throw fehler;
+      }
+      const spec = await antwort.json();
+      return Object.keys(spec.paths || {})
+        .filter((p) => p.startsWith('/') && !p.startsWith('/rpc/') && p !== '/')
+        .map((p) => p.slice(1))
+        .sort((a, b) => a.localeCompare(b, 'de'));
+    };
+    try {
+      return await versuch();
+    } catch (e) {
+      if (e.istAbgelaufen && session?.refresh_token) {
+        await tokenErneuern();
+        return await versuch();
+      }
+      throw e;
+    }
+  }
 
   async function anmelden(email, passwort) {
     const antwort = await fetch(`${SUPABASE_URL}/auth/v1/token?grant_type=password`, {
@@ -245,7 +338,7 @@
     setInterval(pruefeVerbindungLeise, 30000);
   }
 
-  global.KCSupabase = { rufeFunktionAuf, istAngemeldet: () => !!accessToken() };
+  global.KCSupabase = { rufeFunktionAuf, rufeEdgeFunktionAuf, rufeTabelleAuf, listeTabellen, istAngemeldet: () => !!accessToken(), holeZugriffsToken: () => accessToken() };
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
   else init();

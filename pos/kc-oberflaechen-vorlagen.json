@@ -1,0 +1,3753 @@
+{
+  "format": "kc-kassenoberflaechen",
+  "version": 1,
+  "oberflaechen": [
+    {
+      "id": "vorlage-vl-wunsch-gross",
+      "name": "Wunschaufbau Köcheclub · großes iPad",
+      "geraet": "ipad-gross-quer",
+      "klasse": "tablet",
+      "flaeche": {
+        "breite": 1366,
+        "hoehe": 1024
+      },
+      "raster": {
+        "spalten": 12,
+        "zeilen": 8,
+        "stufe": "normal"
+      },
+      "geaendert": "2026-09-08T08:54:48.719Z",
+      "seiten": [
+        {
+          "art": "kasse",
+          "name": "Kasse",
+          "bausteine": [
+            {
+              "typ": "kc-gruppen-leiste",
+              "spalte": 0,
+              "zeile": 0,
+              "spalten": 7,
+              "zeilen": 1,
+              "text": "Warengruppen als Leiste",
+              "farbe": "#2f6f4f",
+              "rahmenfarbe": "#334155",
+              "rahmen": 2,
+              "radius": 0
+            },
+            {
+              "typ": "kc-kopf-kompakt",
+              "spalte": 7,
+              "zeile": 0,
+              "spalten": 5,
+              "zeilen": 1,
+              "text": "Kopfzeile nur rechts",
+              "farbe": "#123a5c",
+              "rahmenfarbe": "#334155",
+              "rahmen": 2,
+              "radius": 0
+            },
+            {
+              "typ": "kc-artikel-mittel",
+              "spalte": 0,
+              "zeile": 1,
+              "spalten": 7,
+              "zeilen": 5,
+              "text": "Artikel mittel (6×4)",
+              "farbe": "#3d6b8f",
+              "rahmenfarbe": "#334155",
+              "rahmen": 2,
+              "radius": 0
+            },
+            {
+              "typ": "kc-bon-tabelle",
+              "spalte": 7,
+              "zeile": 1,
+              "spalten": 5,
+              "zeilen": 6,
+              "text": "Bon als Tabelle",
+              "farbe": "#7a5230",
+              "rahmenfarbe": "#334155",
+              "rahmen": 2,
+              "radius": 0
+            },
+            {
+              "typ": "kc-zahlen-taste",
+              "spalte": 0,
+              "zeile": 6,
+              "spalten": 2,
+              "zeilen": 2,
+              "text": "Rückgeld-Taste (öffnet Seite 2)",
+              "farbe": "#1e6848",
+              "rahmenfarbe": "#334155",
+              "rahmen": 2,
+              "radius": 0
+            },
+            {
+              "typ": "kc-sonder-leiste",
+              "spalte": 2,
+              "zeile": 6,
+              "spalten": 5,
+              "zeilen": 2,
+              "text": "Sondertasten als Leiste",
+              "farbe": "#6b3f6b",
+              "rahmenfarbe": "#334155",
+              "rahmen": 2,
+              "radius": 0
+            },
+            {
+              "typ": "kc-zahlen-arten",
+              "spalte": 7,
+              "zeile": 7,
+              "spalten": 5,
+              "zeilen": 1,
+              "text": "Zahlungsarten (Bar, EC, Konto)",
+              "farbe": "#1e6848",
+              "rahmenfarbe": "#334155",
+              "rahmen": 2,
+              "radius": 0
+            }
+          ]
+        },
+        {
+          "art": "zahlen",
+          "name": "Zahlen",
+          "bausteine": [
+            {
+              "typ": "kc-zahlen-scheine",
+              "spalte": 0,
+              "zeile": 0,
+              "spalten": 6,
+              "zeilen": 2,
+              "text": "Scheine (zwei Reihen: 50·100·200 / 5·10·20)",
+              "farbe": "#1e6848",
+              "rahmenfarbe": "#334155",
+              "rahmen": 2,
+              "radius": 0
+            },
+            {
+              "typ": "kc-zahlen-muenzen",
+              "spalte": 0,
+              "zeile": 2,
+              "spalten": 6,
+              "zeilen": 1,
+              "text": "Münzen (eine Reihe, Wert darunter)",
+              "farbe": "#2c5f8a",
+              "rahmenfarbe": "#334155",
+              "rahmen": 2,
+              "radius": 0
+            },
+            {
+              "typ": "kc-zahlen-block",
+              "spalte": 0,
+              "zeile": 3,
+              "spalten": 4,
+              "zeilen": 4,
+              "text": "Ziffernblock",
+              "farbe": "#1e6848",
+              "rahmenfarbe": "#334155",
+              "rahmen": 2,
+              "radius": 0
+            },
+            {
+              "typ": "kc-zahlen-korrektur",
+              "spalte": 4,
+              "zeile": 3,
+              "spalten": 2,
+              "zeilen": 4,
+              "text": "Zurück (letzte Eingabe) · Löschen",
+              "farbe": "#0c1726",
+              "rahmenfarbe": "#334155",
+              "rahmen": 2,
+              "radius": 0
+            },
+            {
+              "typ": "kc-berechnung",
+              "spalte": 6,
+              "zeile": 0,
+              "spalten": 6,
+              "zeilen": 2,
+              "text": "Berechnung: Positionen · Zu zahlen · Gegeben · Rückgeld",
+              "farbe": "#8a2c2c",
+              "rahmenfarbe": "#334155",
+              "rahmen": 2,
+              "radius": 0
+            },
+            {
+              "typ": "kc-beleg",
+              "spalte": 6,
+              "zeile": 2,
+              "spalten": 6,
+              "zeilen": 5,
+              "text": "Bon wie im Ausdruck (scrollt)",
+              "farbe": "#f5f5f5",
+              "rahmenfarbe": "#334155",
+              "rahmen": 2,
+              "radius": 0
+            },
+            {
+              "typ": "kc-zahlen-tasten",
+              "spalte": 0,
+              "zeile": 7,
+              "spalten": 12,
+              "zeilen": 1,
+              "text": "Tastenzeile: ← · Druck · Trinkgeld · Aufrunden · Stimmt so · BAR+QR · Karte · Konto",
+              "farbe": "#374151",
+              "rahmenfarbe": "#334155",
+              "rahmen": 2,
+              "radius": 0
+            }
+          ]
+        }
+      ],
+      "kcNummer": "KC001"
+    },
+    {
+      "id": "vorlage-vl-wunsch-9",
+      "name": "Wunschaufbau Köcheclub · 9 Zoll",
+      "geraet": "ipad-9-quer",
+      "klasse": "tablet",
+      "flaeche": {
+        "breite": 1024,
+        "hoehe": 768
+      },
+      "raster": {
+        "spalten": 12,
+        "zeilen": 8,
+        "stufe": "normal"
+      },
+      "geaendert": "2026-09-08T08:54:49.006Z",
+      "seiten": [
+        {
+          "art": "kasse",
+          "name": "Kasse",
+          "bausteine": [
+            {
+              "typ": "kc-gruppen-leiste",
+              "spalte": 0,
+              "zeile": 0,
+              "spalten": 7,
+              "zeilen": 1,
+              "text": "Warengruppen als Leiste",
+              "farbe": "#2f6f4f",
+              "rahmenfarbe": "#334155",
+              "rahmen": 2,
+              "radius": 0
+            },
+            {
+              "typ": "kc-kopf-kompakt",
+              "spalte": 7,
+              "zeile": 0,
+              "spalten": 5,
+              "zeilen": 1,
+              "text": "Kopfzeile nur rechts",
+              "farbe": "#123a5c",
+              "rahmenfarbe": "#334155",
+              "rahmen": 2,
+              "radius": 0
+            },
+            {
+              "typ": "kc-artikel-mittel",
+              "spalte": 0,
+              "zeile": 1,
+              "spalten": 7,
+              "zeilen": 5,
+              "text": "Artikel mittel (6×4)",
+              "farbe": "#3d6b8f",
+              "rahmenfarbe": "#334155",
+              "rahmen": 2,
+              "radius": 0
+            },
+            {
+              "typ": "kc-bon-tabelle",
+              "spalte": 7,
+              "zeile": 1,
+              "spalten": 5,
+              "zeilen": 6,
+              "text": "Bon als Tabelle",
+              "farbe": "#7a5230",
+              "rahmenfarbe": "#334155",
+              "rahmen": 2,
+              "radius": 0
+            },
+            {
+              "typ": "kc-zahlen-taste",
+              "spalte": 0,
+              "zeile": 6,
+              "spalten": 2,
+              "zeilen": 2,
+              "text": "Rückgeld-Taste (öffnet Seite 2)",
+              "farbe": "#1e6848",
+              "rahmenfarbe": "#334155",
+              "rahmen": 2,
+              "radius": 0
+            },
+            {
+              "typ": "kc-sonder-leiste",
+              "spalte": 2,
+              "zeile": 6,
+              "spalten": 5,
+              "zeilen": 2,
+              "text": "Sondertasten als Leiste",
+              "farbe": "#6b3f6b",
+              "rahmenfarbe": "#334155",
+              "rahmen": 2,
+              "radius": 0
+            },
+            {
+              "typ": "kc-zahlen-arten",
+              "spalte": 7,
+              "zeile": 7,
+              "spalten": 5,
+              "zeilen": 1,
+              "text": "Zahlungsarten (Bar, EC, Konto)",
+              "farbe": "#1e6848",
+              "rahmenfarbe": "#334155",
+              "rahmen": 2,
+              "radius": 0
+            }
+          ]
+        },
+        {
+          "art": "zahlen",
+          "name": "Zahlen",
+          "bausteine": [
+            {
+              "typ": "kc-zahlen-scheine",
+              "spalte": 0,
+              "zeile": 0,
+              "spalten": 6,
+              "zeilen": 2,
+              "text": "Scheine (zwei Reihen: 50·100·200 / 5·10·20)",
+              "farbe": "#1e6848",
+              "rahmenfarbe": "#334155",
+              "rahmen": 2,
+              "radius": 0
+            },
+            {
+              "typ": "kc-zahlen-muenzen",
+              "spalte": 0,
+              "zeile": 2,
+              "spalten": 6,
+              "zeilen": 1,
+              "text": "Münzen (eine Reihe, Wert darunter)",
+              "farbe": "#2c5f8a",
+              "rahmenfarbe": "#334155",
+              "rahmen": 2,
+              "radius": 0
+            },
+            {
+              "typ": "kc-zahlen-block",
+              "spalte": 0,
+              "zeile": 3,
+              "spalten": 4,
+              "zeilen": 4,
+              "text": "Ziffernblock",
+              "farbe": "#1e6848",
+              "rahmenfarbe": "#334155",
+              "rahmen": 2,
+              "radius": 0
+            },
+            {
+              "typ": "kc-zahlen-korrektur",
+              "spalte": 4,
+              "zeile": 3,
+              "spalten": 2,
+              "zeilen": 4,
+              "text": "Zurück (letzte Eingabe) · Löschen",
+              "farbe": "#0c1726",
+              "rahmenfarbe": "#334155",
+              "rahmen": 2,
+              "radius": 0
+            },
+            {
+              "typ": "kc-berechnung",
+              "spalte": 6,
+              "zeile": 0,
+              "spalten": 6,
+              "zeilen": 2,
+              "text": "Berechnung: Positionen · Zu zahlen · Gegeben · Rückgeld",
+              "farbe": "#8a2c2c",
+              "rahmenfarbe": "#334155",
+              "rahmen": 2,
+              "radius": 0
+            },
+            {
+              "typ": "kc-beleg",
+              "spalte": 6,
+              "zeile": 2,
+              "spalten": 6,
+              "zeilen": 5,
+              "text": "Bon wie im Ausdruck (scrollt)",
+              "farbe": "#f5f5f5",
+              "rahmenfarbe": "#334155",
+              "rahmen": 2,
+              "radius": 0
+            },
+            {
+              "typ": "kc-zahlen-tasten",
+              "spalte": 0,
+              "zeile": 7,
+              "spalten": 12,
+              "zeilen": 1,
+              "text": "Tastenzeile: ← · Druck · Trinkgeld · Aufrunden · Stimmt so · BAR+QR · Karte · Konto",
+              "farbe": "#374151",
+              "rahmenfarbe": "#334155",
+              "rahmen": 2,
+              "radius": 0
+            }
+          ]
+        }
+      ],
+      "kcNummer": "KC002"
+    },
+    {
+      "id": "vorlage-vl-koecheclub-9",
+      "name": "Köcheclub · 9 Zoll (Stand 08.09.)",
+      "geraet": "ipad-9-quer",
+      "klasse": "tablet",
+      "flaeche": {
+        "breite": 1024,
+        "hoehe": 768
+      },
+      "raster": {
+        "spalten": 12,
+        "zeilen": 8,
+        "stufe": "normal"
+      },
+      "geaendert": "2026-09-08T08:54:49.212Z",
+      "seiten": [
+        {
+          "art": "kasse",
+          "name": "Kasse",
+          "bausteine": [
+            {
+              "typ": "kc-gruppen-leiste",
+              "spalte": 0,
+              "zeile": 0,
+              "spalten": 6,
+              "zeilen": 1,
+              "text": "Warengruppen als Leiste",
+              "farbe": "#2f6f4f",
+              "rahmenfarbe": "#334155",
+              "rahmen": 2,
+              "radius": 0
+            },
+            {
+              "typ": "kc-kopf-kompakt",
+              "spalte": 6,
+              "zeile": 0,
+              "spalten": 6,
+              "zeilen": 1,
+              "text": "Kopfzeile nur rechts",
+              "farbe": "#123a5c",
+              "rahmenfarbe": "#334155",
+              "rahmen": 2,
+              "radius": 0
+            },
+            {
+              "typ": "kc-artikel-info",
+              "spalte": 0,
+              "zeile": 1,
+              "spalten": 6,
+              "zeilen": 5,
+              "text": "Artikelkacheln mit Info-Ecke",
+              "farbe": "#2a4d68",
+              "rahmenfarbe": "#334155",
+              "rahmen": 2,
+              "radius": 0
+            },
+            {
+              "typ": "kc-bon-tabelle",
+              "spalte": 6,
+              "zeile": 1,
+              "spalten": 6,
+              "zeilen": 6,
+              "text": "Bon als Tabelle",
+              "farbe": "#7a5230",
+              "rahmenfarbe": "#334155",
+              "rahmen": 2,
+              "radius": 0
+            },
+            {
+              "typ": "kc-bedienblock",
+              "spalte": 0,
+              "zeile": 6,
+              "spalten": 6,
+              "zeilen": 2,
+              "text": "Bedienblock: Statuszeile · Rückgeld · Sondertasten",
+              "farbe": "#4e2d4e",
+              "rahmenfarbe": "#334155",
+              "rahmen": 2,
+              "radius": 0
+            },
+            {
+              "typ": "kc-zahlen-arten",
+              "spalte": 6,
+              "zeile": 7,
+              "spalten": 6,
+              "zeilen": 1,
+              "text": "Zahlungsarten (Bar, EC, Konto)",
+              "farbe": "#1e6848",
+              "rahmenfarbe": "#334155",
+              "rahmen": 2,
+              "radius": 0
+            }
+          ]
+        },
+        {
+          "art": "zahlen",
+          "name": "Zahlen",
+          "bausteine": [
+            {
+              "typ": "kc-zahlen-scheine",
+              "spalte": 0,
+              "zeile": 0,
+              "spalten": 6,
+              "zeilen": 2,
+              "text": "Scheine (zwei Reihen: 50·100·200 / 5·10·20)",
+              "farbe": "#1e6848",
+              "rahmenfarbe": "#334155",
+              "rahmen": 2,
+              "radius": 0
+            },
+            {
+              "typ": "kc-zahlen-muenzen",
+              "spalte": 0,
+              "zeile": 2,
+              "spalten": 6,
+              "zeilen": 1,
+              "text": "Münzen (eine Reihe, Wert darunter)",
+              "farbe": "#2c5f8a",
+              "rahmenfarbe": "#334155",
+              "rahmen": 2,
+              "radius": 0
+            },
+            {
+              "typ": "kc-zahlen-block",
+              "spalte": 0,
+              "zeile": 3,
+              "spalten": 4,
+              "zeilen": 4,
+              "text": "Ziffernblock",
+              "farbe": "#1e6848",
+              "rahmenfarbe": "#334155",
+              "rahmen": 2,
+              "radius": 0
+            },
+            {
+              "typ": "kc-zahlen-korrektur",
+              "spalte": 4,
+              "zeile": 3,
+              "spalten": 2,
+              "zeilen": 4,
+              "text": "Zurück (letzte Eingabe) · Löschen",
+              "farbe": "#0c1726",
+              "rahmenfarbe": "#334155",
+              "rahmen": 2,
+              "radius": 0
+            },
+            {
+              "typ": "kc-berechnung",
+              "spalte": 6,
+              "zeile": 0,
+              "spalten": 6,
+              "zeilen": 2,
+              "text": "Berechnung: Positionen · Zu zahlen · Gegeben · Rückgeld",
+              "farbe": "#8a2c2c",
+              "rahmenfarbe": "#334155",
+              "rahmen": 2,
+              "radius": 0
+            },
+            {
+              "typ": "kc-beleg",
+              "spalte": 6,
+              "zeile": 2,
+              "spalten": 6,
+              "zeilen": 5,
+              "text": "Bon wie im Ausdruck (scrollt)",
+              "farbe": "#f5f5f5",
+              "rahmenfarbe": "#334155",
+              "rahmen": 2,
+              "radius": 0
+            },
+            {
+              "typ": "kc-zahlen-tasten",
+              "spalte": 0,
+              "zeile": 7,
+              "spalten": 12,
+              "zeilen": 1,
+              "text": "Tastenzeile: ← · Druck · Trinkgeld · Aufrunden · Stimmt so · BAR+QR · Karte · Konto",
+              "farbe": "#374151",
+              "rahmenfarbe": "#334155",
+              "rahmen": 2,
+              "radius": 0
+            }
+          ]
+        }
+      ],
+      "kcNummer": "KC003"
+    },
+    {
+      "id": "vorlage-vl-koecheclub-gross",
+      "name": "Köcheclub · großes iPad (Stand 08.09.)",
+      "geraet": "ipad-gross-quer",
+      "klasse": "tablet",
+      "flaeche": {
+        "breite": 1366,
+        "hoehe": 1024
+      },
+      "raster": {
+        "spalten": 12,
+        "zeilen": 8,
+        "stufe": "normal"
+      },
+      "geaendert": "2026-09-08T08:54:49.422Z",
+      "seiten": [
+        {
+          "art": "kasse",
+          "name": "Kasse",
+          "bausteine": [
+            {
+              "typ": "kc-gruppen-leiste",
+              "spalte": 0,
+              "zeile": 0,
+              "spalten": 6,
+              "zeilen": 1,
+              "text": "Warengruppen als Leiste",
+              "farbe": "#2f6f4f",
+              "rahmenfarbe": "#334155",
+              "rahmen": 2,
+              "radius": 0
+            },
+            {
+              "typ": "kc-kopf-kompakt",
+              "spalte": 6,
+              "zeile": 0,
+              "spalten": 6,
+              "zeilen": 1,
+              "text": "Kopfzeile nur rechts",
+              "farbe": "#123a5c",
+              "rahmenfarbe": "#334155",
+              "rahmen": 2,
+              "radius": 0
+            },
+            {
+              "typ": "kc-artikel-info",
+              "spalte": 0,
+              "zeile": 1,
+              "spalten": 6,
+              "zeilen": 5,
+              "text": "Artikelkacheln mit Info-Ecke",
+              "farbe": "#2a4d68",
+              "rahmenfarbe": "#334155",
+              "rahmen": 2,
+              "radius": 0
+            },
+            {
+              "typ": "kc-bon-tabelle",
+              "spalte": 6,
+              "zeile": 1,
+              "spalten": 6,
+              "zeilen": 6,
+              "text": "Bon als Tabelle",
+              "farbe": "#7a5230",
+              "rahmenfarbe": "#334155",
+              "rahmen": 2,
+              "radius": 0
+            },
+            {
+              "typ": "kc-bedienblock",
+              "spalte": 0,
+              "zeile": 6,
+              "spalten": 6,
+              "zeilen": 2,
+              "text": "Bedienblock: Statuszeile · Rückgeld · Sondertasten",
+              "farbe": "#4e2d4e",
+              "rahmenfarbe": "#334155",
+              "rahmen": 2,
+              "radius": 0
+            },
+            {
+              "typ": "kc-zahlen-arten",
+              "spalte": 6,
+              "zeile": 7,
+              "spalten": 6,
+              "zeilen": 1,
+              "text": "Zahlungsarten (Bar, EC, Konto)",
+              "farbe": "#1e6848",
+              "rahmenfarbe": "#334155",
+              "rahmen": 2,
+              "radius": 0
+            }
+          ]
+        },
+        {
+          "art": "zahlen",
+          "name": "Zahlen",
+          "bausteine": [
+            {
+              "typ": "kc-zahlen-scheine",
+              "spalte": 0,
+              "zeile": 0,
+              "spalten": 6,
+              "zeilen": 2,
+              "text": "Scheine (zwei Reihen: 50·100·200 / 5·10·20)",
+              "farbe": "#1e6848",
+              "rahmenfarbe": "#334155",
+              "rahmen": 2,
+              "radius": 0
+            },
+            {
+              "typ": "kc-zahlen-muenzen",
+              "spalte": 0,
+              "zeile": 2,
+              "spalten": 6,
+              "zeilen": 1,
+              "text": "Münzen (eine Reihe, Wert darunter)",
+              "farbe": "#2c5f8a",
+              "rahmenfarbe": "#334155",
+              "rahmen": 2,
+              "radius": 0
+            },
+            {
+              "typ": "kc-zahlen-block",
+              "spalte": 0,
+              "zeile": 3,
+              "spalten": 4,
+              "zeilen": 4,
+              "text": "Ziffernblock",
+              "farbe": "#1e6848",
+              "rahmenfarbe": "#334155",
+              "rahmen": 2,
+              "radius": 0
+            },
+            {
+              "typ": "kc-zahlen-korrektur",
+              "spalte": 4,
+              "zeile": 3,
+              "spalten": 2,
+              "zeilen": 4,
+              "text": "Zurück (letzte Eingabe) · Löschen",
+              "farbe": "#0c1726",
+              "rahmenfarbe": "#334155",
+              "rahmen": 2,
+              "radius": 0
+            },
+            {
+              "typ": "kc-berechnung",
+              "spalte": 6,
+              "zeile": 0,
+              "spalten": 6,
+              "zeilen": 2,
+              "text": "Berechnung: Positionen · Zu zahlen · Gegeben · Rückgeld",
+              "farbe": "#8a2c2c",
+              "rahmenfarbe": "#334155",
+              "rahmen": 2,
+              "radius": 0
+            },
+            {
+              "typ": "kc-beleg",
+              "spalte": 6,
+              "zeile": 2,
+              "spalten": 6,
+              "zeilen": 5,
+              "text": "Bon wie im Ausdruck (scrollt)",
+              "farbe": "#f5f5f5",
+              "rahmenfarbe": "#334155",
+              "rahmen": 2,
+              "radius": 0
+            },
+            {
+              "typ": "kc-zahlen-tasten",
+              "spalte": 0,
+              "zeile": 7,
+              "spalten": 12,
+              "zeilen": 1,
+              "text": "Tastenzeile: ← · Druck · Trinkgeld · Aufrunden · Stimmt so · BAR+QR · Karte · Konto",
+              "farbe": "#374151",
+              "rahmenfarbe": "#334155",
+              "rahmen": 2,
+              "radius": 0
+            }
+          ]
+        }
+      ],
+      "kcNummer": "KC004"
+    },
+    {
+      "id": "vorlage-vl-wunsch-9-text",
+      "name": "Wunschaufbau 9 Zoll · Artikel nur Name + Preis",
+      "geraet": "ipad-9-quer",
+      "klasse": "tablet",
+      "flaeche": {
+        "breite": 1024,
+        "hoehe": 768
+      },
+      "raster": {
+        "spalten": 12,
+        "zeilen": 8,
+        "stufe": "normal"
+      },
+      "geaendert": "2026-09-08T08:54:49.620Z",
+      "seiten": [
+        {
+          "art": "kasse",
+          "name": "Kasse",
+          "bausteine": [
+            {
+              "typ": "kc-gruppen-leiste",
+              "spalte": 0,
+              "zeile": 0,
+              "spalten": 6,
+              "zeilen": 1,
+              "text": "Warengruppen als Leiste",
+              "farbe": "#2f6f4f",
+              "rahmenfarbe": "#334155",
+              "rahmen": 2,
+              "radius": 0
+            },
+            {
+              "typ": "kc-kopf-kompakt",
+              "spalte": 6,
+              "zeile": 0,
+              "spalten": 6,
+              "zeilen": 1,
+              "text": "Kopfzeile nur rechts",
+              "farbe": "#123a5c",
+              "rahmenfarbe": "#334155",
+              "rahmen": 2,
+              "radius": 0
+            },
+            {
+              "typ": "kc-artikel-nurtext",
+              "spalte": 0,
+              "zeile": 1,
+              "spalten": 6,
+              "zeilen": 5,
+              "text": "Artikelkacheln nur Name + Preis (groß)",
+              "farbe": "#2a4d68",
+              "rahmenfarbe": "#334155",
+              "rahmen": 2,
+              "radius": 0
+            },
+            {
+              "typ": "kc-bon-tabelle",
+              "spalte": 6,
+              "zeile": 1,
+              "spalten": 6,
+              "zeilen": 6,
+              "text": "Bon als Tabelle",
+              "farbe": "#7a5230",
+              "rahmenfarbe": "#334155",
+              "rahmen": 2,
+              "radius": 0
+            },
+            {
+              "typ": "kc-zahlen-taste",
+              "spalte": 0,
+              "zeile": 6,
+              "spalten": 2,
+              "zeilen": 2,
+              "text": "Rückgeld-Taste (öffnet Seite 2)",
+              "farbe": "#1e6848",
+              "rahmenfarbe": "#334155",
+              "rahmen": 2,
+              "radius": 0
+            },
+            {
+              "typ": "kc-sonder-leiste",
+              "spalte": 2,
+              "zeile": 6,
+              "spalten": 4,
+              "zeilen": 2,
+              "text": "Sondertasten als Leiste",
+              "farbe": "#6b3f6b",
+              "rahmenfarbe": "#334155",
+              "rahmen": 2,
+              "radius": 0
+            },
+            {
+              "typ": "kc-zahlen-arten",
+              "spalte": 6,
+              "zeile": 7,
+              "spalten": 6,
+              "zeilen": 1,
+              "text": "Zahlungsarten (Bar, EC, Konto)",
+              "farbe": "#1e6848",
+              "rahmenfarbe": "#334155",
+              "rahmen": 2,
+              "radius": 0
+            }
+          ]
+        },
+        {
+          "art": "zahlen",
+          "name": "Zahlen",
+          "bausteine": [
+            {
+              "typ": "kc-zahlen-scheine",
+              "spalte": 0,
+              "zeile": 0,
+              "spalten": 6,
+              "zeilen": 2,
+              "text": "Scheine (zwei Reihen: 50·100·200 / 5·10·20)",
+              "farbe": "#1e6848",
+              "rahmenfarbe": "#334155",
+              "rahmen": 2,
+              "radius": 0
+            },
+            {
+              "typ": "kc-zahlen-muenzen",
+              "spalte": 0,
+              "zeile": 2,
+              "spalten": 6,
+              "zeilen": 1,
+              "text": "Münzen (eine Reihe, Wert darunter)",
+              "farbe": "#2c5f8a",
+              "rahmenfarbe": "#334155",
+              "rahmen": 2,
+              "radius": 0
+            },
+            {
+              "typ": "kc-zahlen-block",
+              "spalte": 0,
+              "zeile": 3,
+              "spalten": 4,
+              "zeilen": 4,
+              "text": "Ziffernblock",
+              "farbe": "#1e6848",
+              "rahmenfarbe": "#334155",
+              "rahmen": 2,
+              "radius": 0
+            },
+            {
+              "typ": "kc-zahlen-korrektur",
+              "spalte": 4,
+              "zeile": 3,
+              "spalten": 2,
+              "zeilen": 4,
+              "text": "Zurück (letzte Eingabe) · Löschen",
+              "farbe": "#0c1726",
+              "rahmenfarbe": "#334155",
+              "rahmen": 2,
+              "radius": 0
+            },
+            {
+              "typ": "kc-berechnung",
+              "spalte": 6,
+              "zeile": 0,
+              "spalten": 6,
+              "zeilen": 2,
+              "text": "Berechnung: Positionen · Zu zahlen · Gegeben · Rückgeld",
+              "farbe": "#8a2c2c",
+              "rahmenfarbe": "#334155",
+              "rahmen": 2,
+              "radius": 0
+            },
+            {
+              "typ": "kc-beleg",
+              "spalte": 6,
+              "zeile": 2,
+              "spalten": 6,
+              "zeilen": 5,
+              "text": "Bon wie im Ausdruck (scrollt)",
+              "farbe": "#f5f5f5",
+              "rahmenfarbe": "#334155",
+              "rahmen": 2,
+              "radius": 0
+            },
+            {
+              "typ": "kc-zahlen-tasten",
+              "spalte": 0,
+              "zeile": 7,
+              "spalten": 12,
+              "zeilen": 1,
+              "text": "Tastenzeile: ← · Druck · Trinkgeld · Aufrunden · Stimmt so · BAR+QR · Karte · Konto",
+              "farbe": "#374151",
+              "rahmenfarbe": "#334155",
+              "rahmen": 2,
+              "radius": 0
+            }
+          ]
+        }
+      ],
+      "kcNummer": "KC005"
+    },
+    {
+      "id": "vorlage-vl-wunsch-9-farbe",
+      "name": "Wunschaufbau 9 Zoll · Artikel Farbe + Name + Preis",
+      "geraet": "ipad-9-quer",
+      "klasse": "tablet",
+      "flaeche": {
+        "breite": 1024,
+        "hoehe": 768
+      },
+      "raster": {
+        "spalten": 12,
+        "zeilen": 8,
+        "stufe": "normal"
+      },
+      "geaendert": "2026-09-08T08:54:49.845Z",
+      "seiten": [
+        {
+          "art": "kasse",
+          "name": "Kasse",
+          "bausteine": [
+            {
+              "typ": "kc-gruppen-leiste",
+              "spalte": 0,
+              "zeile": 0,
+              "spalten": 6,
+              "zeilen": 1,
+              "text": "Warengruppen als Leiste",
+              "farbe": "#2f6f4f",
+              "rahmenfarbe": "#334155",
+              "rahmen": 2,
+              "radius": 0
+            },
+            {
+              "typ": "kc-kopf-kompakt",
+              "spalte": 6,
+              "zeile": 0,
+              "spalten": 6,
+              "zeilen": 1,
+              "text": "Kopfzeile nur rechts",
+              "farbe": "#123a5c",
+              "rahmenfarbe": "#334155",
+              "rahmen": 2,
+              "radius": 0
+            },
+            {
+              "typ": "kc-artikel-farbe",
+              "spalte": 0,
+              "zeile": 1,
+              "spalten": 6,
+              "zeilen": 5,
+              "text": "Artikelkacheln Farbe + Name + Preis",
+              "farbe": "#2a4d68",
+              "rahmenfarbe": "#334155",
+              "rahmen": 2,
+              "radius": 0
+            },
+            {
+              "typ": "kc-bon-tabelle",
+              "spalte": 6,
+              "zeile": 1,
+              "spalten": 6,
+              "zeilen": 6,
+              "text": "Bon als Tabelle",
+              "farbe": "#7a5230",
+              "rahmenfarbe": "#334155",
+              "rahmen": 2,
+              "radius": 0
+            },
+            {
+              "typ": "kc-zahlen-taste",
+              "spalte": 0,
+              "zeile": 6,
+              "spalten": 2,
+              "zeilen": 2,
+              "text": "Rückgeld-Taste (öffnet Seite 2)",
+              "farbe": "#1e6848",
+              "rahmenfarbe": "#334155",
+              "rahmen": 2,
+              "radius": 0
+            },
+            {
+              "typ": "kc-sonder-leiste",
+              "spalte": 2,
+              "zeile": 6,
+              "spalten": 4,
+              "zeilen": 2,
+              "text": "Sondertasten als Leiste",
+              "farbe": "#6b3f6b",
+              "rahmenfarbe": "#334155",
+              "rahmen": 2,
+              "radius": 0
+            },
+            {
+              "typ": "kc-zahlen-arten",
+              "spalte": 6,
+              "zeile": 7,
+              "spalten": 6,
+              "zeilen": 1,
+              "text": "Zahlungsarten (Bar, EC, Konto)",
+              "farbe": "#1e6848",
+              "rahmenfarbe": "#334155",
+              "rahmen": 2,
+              "radius": 0
+            }
+          ]
+        },
+        {
+          "art": "zahlen",
+          "name": "Zahlen",
+          "bausteine": [
+            {
+              "typ": "kc-zahlen-scheine",
+              "spalte": 0,
+              "zeile": 0,
+              "spalten": 6,
+              "zeilen": 2,
+              "text": "Scheine (zwei Reihen: 50·100·200 / 5·10·20)",
+              "farbe": "#1e6848",
+              "rahmenfarbe": "#334155",
+              "rahmen": 2,
+              "radius": 0
+            },
+            {
+              "typ": "kc-zahlen-muenzen",
+              "spalte": 0,
+              "zeile": 2,
+              "spalten": 6,
+              "zeilen": 1,
+              "text": "Münzen (eine Reihe, Wert darunter)",
+              "farbe": "#2c5f8a",
+              "rahmenfarbe": "#334155",
+              "rahmen": 2,
+              "radius": 0
+            },
+            {
+              "typ": "kc-zahlen-block",
+              "spalte": 0,
+              "zeile": 3,
+              "spalten": 4,
+              "zeilen": 4,
+              "text": "Ziffernblock",
+              "farbe": "#1e6848",
+              "rahmenfarbe": "#334155",
+              "rahmen": 2,
+              "radius": 0
+            },
+            {
+              "typ": "kc-zahlen-korrektur",
+              "spalte": 4,
+              "zeile": 3,
+              "spalten": 2,
+              "zeilen": 4,
+              "text": "Zurück (letzte Eingabe) · Löschen",
+              "farbe": "#0c1726",
+              "rahmenfarbe": "#334155",
+              "rahmen": 2,
+              "radius": 0
+            },
+            {
+              "typ": "kc-berechnung",
+              "spalte": 6,
+              "zeile": 0,
+              "spalten": 6,
+              "zeilen": 2,
+              "text": "Berechnung: Positionen · Zu zahlen · Gegeben · Rückgeld",
+              "farbe": "#8a2c2c",
+              "rahmenfarbe": "#334155",
+              "rahmen": 2,
+              "radius": 0
+            },
+            {
+              "typ": "kc-beleg",
+              "spalte": 6,
+              "zeile": 2,
+              "spalten": 6,
+              "zeilen": 5,
+              "text": "Bon wie im Ausdruck (scrollt)",
+              "farbe": "#f5f5f5",
+              "rahmenfarbe": "#334155",
+              "rahmen": 2,
+              "radius": 0
+            },
+            {
+              "typ": "kc-zahlen-tasten",
+              "spalte": 0,
+              "zeile": 7,
+              "spalten": 12,
+              "zeilen": 1,
+              "text": "Tastenzeile: ← · Druck · Trinkgeld · Aufrunden · Stimmt so · BAR+QR · Karte · Konto",
+              "farbe": "#374151",
+              "rahmenfarbe": "#334155",
+              "rahmen": 2,
+              "radius": 0
+            }
+          ]
+        }
+      ],
+      "kcNummer": "KC006"
+    },
+    {
+      "id": "vorlage-vl-speedy",
+      "name": "Speedy · Warengruppen unten",
+      "geraet": "ipad-9-quer",
+      "klasse": "tablet",
+      "flaeche": {
+        "breite": 1024,
+        "hoehe": 768
+      },
+      "raster": {
+        "spalten": 12,
+        "zeilen": 8,
+        "stufe": "normal"
+      },
+      "geaendert": "2026-09-08T08:54:50.044Z",
+      "seiten": [
+        {
+          "art": "kasse",
+          "name": "Kasse",
+          "bausteine": [
+            {
+              "typ": "kc-artikel-mittel",
+              "spalte": 0,
+              "zeile": 0,
+              "spalten": 7,
+              "zeilen": 6,
+              "text": "Artikel mittel (6×4)",
+              "farbe": "#3d6b8f",
+              "rahmenfarbe": "#334155",
+              "rahmen": 2,
+              "radius": 0
+            },
+            {
+              "typ": "kc-gruppen-leiste",
+              "spalte": 0,
+              "zeile": 6,
+              "spalten": 7,
+              "zeilen": 1,
+              "text": "Warengruppen als Leiste",
+              "farbe": "#2f6f4f",
+              "rahmenfarbe": "#334155",
+              "rahmen": 2,
+              "radius": 0
+            },
+            {
+              "typ": "kc-sonder-leiste",
+              "spalte": 0,
+              "zeile": 7,
+              "spalten": 7,
+              "zeilen": 1,
+              "text": "Sondertasten als Leiste",
+              "farbe": "#6b3f6b",
+              "rahmenfarbe": "#334155",
+              "rahmen": 2,
+              "radius": 0
+            },
+            {
+              "typ": "kc-kopf-kompakt",
+              "spalte": 7,
+              "zeile": 0,
+              "spalten": 5,
+              "zeilen": 1,
+              "text": "Kopfzeile nur rechts",
+              "farbe": "#123a5c",
+              "rahmenfarbe": "#334155",
+              "rahmen": 2,
+              "radius": 0
+            },
+            {
+              "typ": "kc-bon-tabelle",
+              "spalte": 7,
+              "zeile": 1,
+              "spalten": 5,
+              "zeilen": 5,
+              "text": "Bon als Tabelle",
+              "farbe": "#7a5230",
+              "rahmenfarbe": "#334155",
+              "rahmen": 2,
+              "radius": 0
+            },
+            {
+              "typ": "kc-zahlen-arten",
+              "spalte": 7,
+              "zeile": 6,
+              "spalten": 5,
+              "zeilen": 1,
+              "text": "Zahlungsarten (Bar, EC, Konto)",
+              "farbe": "#1e6848",
+              "rahmenfarbe": "#334155",
+              "rahmen": 2,
+              "radius": 0
+            },
+            {
+              "typ": "kc-zahlen-taste",
+              "spalte": 7,
+              "zeile": 7,
+              "spalten": 3,
+              "zeilen": 1,
+              "text": "Rückgeld-Taste (öffnet Seite 2)",
+              "farbe": "#1e6848",
+              "rahmenfarbe": "#334155",
+              "rahmen": 2,
+              "radius": 0
+            },
+            {
+              "typ": "kc-sonder-menue",
+              "spalte": 10,
+              "zeile": 7,
+              "spalten": 2,
+              "zeilen": 1,
+              "text": "Sondertasten hinter „Mehr“",
+              "farbe": "#6b3f6b",
+              "rahmenfarbe": "#334155",
+              "rahmen": 2,
+              "radius": 0
+            }
+          ]
+        },
+        {
+          "art": "zahlen",
+          "name": "Zahlen",
+          "bausteine": [
+            {
+              "typ": "kc-zahlen-scheine",
+              "spalte": 0,
+              "zeile": 0,
+              "spalten": 6,
+              "zeilen": 2,
+              "text": "Scheine (zwei Reihen: 50·100·200 / 5·10·20)",
+              "farbe": "#1e6848",
+              "rahmenfarbe": "#334155",
+              "rahmen": 2,
+              "radius": 0
+            },
+            {
+              "typ": "kc-zahlen-muenzen",
+              "spalte": 0,
+              "zeile": 2,
+              "spalten": 6,
+              "zeilen": 1,
+              "text": "Münzen (eine Reihe, Wert darunter)",
+              "farbe": "#2c5f8a",
+              "rahmenfarbe": "#334155",
+              "rahmen": 2,
+              "radius": 0
+            },
+            {
+              "typ": "kc-zahlen-block",
+              "spalte": 0,
+              "zeile": 3,
+              "spalten": 4,
+              "zeilen": 4,
+              "text": "Ziffernblock",
+              "farbe": "#1e6848",
+              "rahmenfarbe": "#334155",
+              "rahmen": 2,
+              "radius": 0
+            },
+            {
+              "typ": "kc-zahlen-korrektur",
+              "spalte": 4,
+              "zeile": 3,
+              "spalten": 2,
+              "zeilen": 4,
+              "text": "Zurück (letzte Eingabe) · Löschen",
+              "farbe": "#0c1726",
+              "rahmenfarbe": "#334155",
+              "rahmen": 2,
+              "radius": 0
+            },
+            {
+              "typ": "kc-berechnung",
+              "spalte": 6,
+              "zeile": 0,
+              "spalten": 6,
+              "zeilen": 2,
+              "text": "Berechnung: Positionen · Zu zahlen · Gegeben · Rückgeld",
+              "farbe": "#8a2c2c",
+              "rahmenfarbe": "#334155",
+              "rahmen": 2,
+              "radius": 0
+            },
+            {
+              "typ": "kc-beleg",
+              "spalte": 6,
+              "zeile": 2,
+              "spalten": 6,
+              "zeilen": 5,
+              "text": "Bon wie im Ausdruck (scrollt)",
+              "farbe": "#f5f5f5",
+              "rahmenfarbe": "#334155",
+              "rahmen": 2,
+              "radius": 0
+            },
+            {
+              "typ": "kc-zahlen-tasten",
+              "spalte": 0,
+              "zeile": 7,
+              "spalten": 12,
+              "zeilen": 1,
+              "text": "Tastenzeile: ← · Druck · Trinkgeld · Aufrunden · Stimmt so · BAR+QR · Karte · Konto",
+              "farbe": "#374151",
+              "rahmenfarbe": "#334155",
+              "rahmen": 2,
+              "radius": 0
+            }
+          ]
+        }
+      ],
+      "kcNummer": "KC007"
+    },
+    {
+      "id": "vorlage-vl-bon-links",
+      "name": "Bon links · Artikel rechts",
+      "geraet": "ipad-9-quer",
+      "klasse": "tablet",
+      "flaeche": {
+        "breite": 1024,
+        "hoehe": 768
+      },
+      "raster": {
+        "spalten": 12,
+        "zeilen": 8,
+        "stufe": "normal"
+      },
+      "geaendert": "2026-09-08T08:54:50.246Z",
+      "seiten": [
+        {
+          "art": "kasse",
+          "name": "Kasse",
+          "bausteine": [
+            {
+              "typ": "kc-bon-tabelle",
+              "spalte": 0,
+              "zeile": 0,
+              "spalten": 4,
+              "zeilen": 6,
+              "text": "Bon als Tabelle",
+              "farbe": "#7a5230",
+              "rahmenfarbe": "#334155",
+              "rahmen": 2,
+              "radius": 0
+            },
+            {
+              "typ": "kc-zahlen-arten",
+              "spalte": 0,
+              "zeile": 6,
+              "spalten": 4,
+              "zeilen": 1,
+              "text": "Zahlungsarten (Bar, EC, Konto)",
+              "farbe": "#1e6848",
+              "rahmenfarbe": "#334155",
+              "rahmen": 2,
+              "radius": 0
+            },
+            {
+              "typ": "kc-zahlen-taste",
+              "spalte": 0,
+              "zeile": 7,
+              "spalten": 2,
+              "zeilen": 1,
+              "text": "Rückgeld-Taste (öffnet Seite 2)",
+              "farbe": "#1e6848",
+              "rahmenfarbe": "#334155",
+              "rahmen": 2,
+              "radius": 0
+            },
+            {
+              "typ": "kc-sonder-menue",
+              "spalte": 2,
+              "zeile": 7,
+              "spalten": 2,
+              "zeilen": 1,
+              "text": "Sondertasten hinter „Mehr“",
+              "farbe": "#6b3f6b",
+              "rahmenfarbe": "#334155",
+              "rahmen": 2,
+              "radius": 0
+            },
+            {
+              "typ": "kc-gruppen-leiste",
+              "spalte": 4,
+              "zeile": 0,
+              "spalten": 4,
+              "zeilen": 1,
+              "text": "Warengruppen als Leiste",
+              "farbe": "#2f6f4f",
+              "rahmenfarbe": "#334155",
+              "rahmen": 2,
+              "radius": 0
+            },
+            {
+              "typ": "kc-kopf-kompakt",
+              "spalte": 8,
+              "zeile": 0,
+              "spalten": 4,
+              "zeilen": 1,
+              "text": "Kopfzeile nur rechts",
+              "farbe": "#123a5c",
+              "rahmenfarbe": "#334155",
+              "rahmen": 2,
+              "radius": 0
+            },
+            {
+              "typ": "kc-artikel-mittel",
+              "spalte": 4,
+              "zeile": 1,
+              "spalten": 8,
+              "zeilen": 6,
+              "text": "Artikel mittel (6×4)",
+              "farbe": "#3d6b8f",
+              "rahmenfarbe": "#334155",
+              "rahmen": 2,
+              "radius": 0
+            },
+            {
+              "typ": "kc-sonder-leiste",
+              "spalte": 4,
+              "zeile": 7,
+              "spalten": 8,
+              "zeilen": 1,
+              "text": "Sondertasten als Leiste",
+              "farbe": "#6b3f6b",
+              "rahmenfarbe": "#334155",
+              "rahmen": 2,
+              "radius": 0
+            }
+          ]
+        },
+        {
+          "art": "zahlen",
+          "name": "Zahlen",
+          "bausteine": [
+            {
+              "typ": "kc-zahlen-scheine",
+              "spalte": 0,
+              "zeile": 0,
+              "spalten": 6,
+              "zeilen": 2,
+              "text": "Scheine (zwei Reihen: 50·100·200 / 5·10·20)",
+              "farbe": "#1e6848",
+              "rahmenfarbe": "#334155",
+              "rahmen": 2,
+              "radius": 0
+            },
+            {
+              "typ": "kc-zahlen-muenzen",
+              "spalte": 0,
+              "zeile": 2,
+              "spalten": 6,
+              "zeilen": 1,
+              "text": "Münzen (eine Reihe, Wert darunter)",
+              "farbe": "#2c5f8a",
+              "rahmenfarbe": "#334155",
+              "rahmen": 2,
+              "radius": 0
+            },
+            {
+              "typ": "kc-zahlen-block",
+              "spalte": 0,
+              "zeile": 3,
+              "spalten": 4,
+              "zeilen": 4,
+              "text": "Ziffernblock",
+              "farbe": "#1e6848",
+              "rahmenfarbe": "#334155",
+              "rahmen": 2,
+              "radius": 0
+            },
+            {
+              "typ": "kc-zahlen-korrektur",
+              "spalte": 4,
+              "zeile": 3,
+              "spalten": 2,
+              "zeilen": 4,
+              "text": "Zurück (letzte Eingabe) · Löschen",
+              "farbe": "#0c1726",
+              "rahmenfarbe": "#334155",
+              "rahmen": 2,
+              "radius": 0
+            },
+            {
+              "typ": "kc-berechnung",
+              "spalte": 6,
+              "zeile": 0,
+              "spalten": 6,
+              "zeilen": 2,
+              "text": "Berechnung: Positionen · Zu zahlen · Gegeben · Rückgeld",
+              "farbe": "#8a2c2c",
+              "rahmenfarbe": "#334155",
+              "rahmen": 2,
+              "radius": 0
+            },
+            {
+              "typ": "kc-beleg",
+              "spalte": 6,
+              "zeile": 2,
+              "spalten": 6,
+              "zeilen": 5,
+              "text": "Bon wie im Ausdruck (scrollt)",
+              "farbe": "#f5f5f5",
+              "rahmenfarbe": "#334155",
+              "rahmen": 2,
+              "radius": 0
+            },
+            {
+              "typ": "kc-zahlen-tasten",
+              "spalte": 0,
+              "zeile": 7,
+              "spalten": 12,
+              "zeilen": 1,
+              "text": "Tastenzeile: ← · Druck · Trinkgeld · Aufrunden · Stimmt so · BAR+QR · Karte · Konto",
+              "farbe": "#374151",
+              "rahmenfarbe": "#334155",
+              "rahmen": 2,
+              "radius": 0
+            }
+          ]
+        }
+      ],
+      "kcNummer": "KC008"
+    },
+    {
+      "id": "vorlage-vl-gruppen-spalte",
+      "name": "Warengruppen als Spalte links",
+      "geraet": "ipad-9-quer",
+      "klasse": "tablet",
+      "flaeche": {
+        "breite": 1024,
+        "hoehe": 768
+      },
+      "raster": {
+        "spalten": 12,
+        "zeilen": 8,
+        "stufe": "normal"
+      },
+      "geaendert": "2026-09-08T08:54:50.454Z",
+      "seiten": [
+        {
+          "art": "kasse",
+          "name": "Kasse",
+          "bausteine": [
+            {
+              "typ": "kc-gruppen-spalte",
+              "spalte": 0,
+              "zeile": 0,
+              "spalten": 2,
+              "zeilen": 6,
+              "text": "Warengruppen als Spalte",
+              "farbe": "#2f6f4f",
+              "rahmenfarbe": "#334155",
+              "rahmen": 2,
+              "radius": 0
+            },
+            {
+              "typ": "kc-zahlen-taste",
+              "spalte": 0,
+              "zeile": 6,
+              "spalten": 2,
+              "zeilen": 2,
+              "text": "Rückgeld-Taste (öffnet Seite 2)",
+              "farbe": "#1e6848",
+              "rahmenfarbe": "#334155",
+              "rahmen": 2,
+              "radius": 0
+            },
+            {
+              "typ": "kc-artikel-mittel",
+              "spalte": 2,
+              "zeile": 0,
+              "spalten": 5,
+              "zeilen": 7,
+              "text": "Artikel mittel (6×4)",
+              "farbe": "#3d6b8f",
+              "rahmenfarbe": "#334155",
+              "rahmen": 2,
+              "radius": 0
+            },
+            {
+              "typ": "kc-sonder-leiste",
+              "spalte": 2,
+              "zeile": 7,
+              "spalten": 5,
+              "zeilen": 1,
+              "text": "Sondertasten als Leiste",
+              "farbe": "#6b3f6b",
+              "rahmenfarbe": "#334155",
+              "rahmen": 2,
+              "radius": 0
+            },
+            {
+              "typ": "kc-kopf-kompakt",
+              "spalte": 7,
+              "zeile": 0,
+              "spalten": 5,
+              "zeilen": 1,
+              "text": "Kopfzeile nur rechts",
+              "farbe": "#123a5c",
+              "rahmenfarbe": "#334155",
+              "rahmen": 2,
+              "radius": 0
+            },
+            {
+              "typ": "kc-bon-tabelle",
+              "spalte": 7,
+              "zeile": 1,
+              "spalten": 5,
+              "zeilen": 6,
+              "text": "Bon als Tabelle",
+              "farbe": "#7a5230",
+              "rahmenfarbe": "#334155",
+              "rahmen": 2,
+              "radius": 0
+            },
+            {
+              "typ": "kc-zahlen-arten",
+              "spalte": 7,
+              "zeile": 7,
+              "spalten": 5,
+              "zeilen": 1,
+              "text": "Zahlungsarten (Bar, EC, Konto)",
+              "farbe": "#1e6848",
+              "rahmenfarbe": "#334155",
+              "rahmen": 2,
+              "radius": 0
+            }
+          ]
+        },
+        {
+          "art": "zahlen",
+          "name": "Zahlen",
+          "bausteine": [
+            {
+              "typ": "kc-zahlen-scheine",
+              "spalte": 0,
+              "zeile": 0,
+              "spalten": 6,
+              "zeilen": 2,
+              "text": "Scheine (zwei Reihen: 50·100·200 / 5·10·20)",
+              "farbe": "#1e6848",
+              "rahmenfarbe": "#334155",
+              "rahmen": 2,
+              "radius": 0
+            },
+            {
+              "typ": "kc-zahlen-muenzen",
+              "spalte": 0,
+              "zeile": 2,
+              "spalten": 6,
+              "zeilen": 1,
+              "text": "Münzen (eine Reihe, Wert darunter)",
+              "farbe": "#2c5f8a",
+              "rahmenfarbe": "#334155",
+              "rahmen": 2,
+              "radius": 0
+            },
+            {
+              "typ": "kc-zahlen-block",
+              "spalte": 0,
+              "zeile": 3,
+              "spalten": 4,
+              "zeilen": 4,
+              "text": "Ziffernblock",
+              "farbe": "#1e6848",
+              "rahmenfarbe": "#334155",
+              "rahmen": 2,
+              "radius": 0
+            },
+            {
+              "typ": "kc-zahlen-korrektur",
+              "spalte": 4,
+              "zeile": 3,
+              "spalten": 2,
+              "zeilen": 4,
+              "text": "Zurück (letzte Eingabe) · Löschen",
+              "farbe": "#0c1726",
+              "rahmenfarbe": "#334155",
+              "rahmen": 2,
+              "radius": 0
+            },
+            {
+              "typ": "kc-berechnung",
+              "spalte": 6,
+              "zeile": 0,
+              "spalten": 6,
+              "zeilen": 2,
+              "text": "Berechnung: Positionen · Zu zahlen · Gegeben · Rückgeld",
+              "farbe": "#8a2c2c",
+              "rahmenfarbe": "#334155",
+              "rahmen": 2,
+              "radius": 0
+            },
+            {
+              "typ": "kc-beleg",
+              "spalte": 6,
+              "zeile": 2,
+              "spalten": 6,
+              "zeilen": 5,
+              "text": "Bon wie im Ausdruck (scrollt)",
+              "farbe": "#f5f5f5",
+              "rahmenfarbe": "#334155",
+              "rahmen": 2,
+              "radius": 0
+            },
+            {
+              "typ": "kc-zahlen-tasten",
+              "spalte": 0,
+              "zeile": 7,
+              "spalten": 12,
+              "zeilen": 1,
+              "text": "Tastenzeile: ← · Druck · Trinkgeld · Aufrunden · Stimmt so · BAR+QR · Karte · Konto",
+              "farbe": "#374151",
+              "rahmenfarbe": "#334155",
+              "rahmen": 2,
+              "radius": 0
+            }
+          ]
+        }
+      ],
+      "kcNummer": "KC009"
+    },
+    {
+      "id": "vorlage-vl-alles-im-bild",
+      "name": "Alles im Bild · ohne zweite Seite",
+      "geraet": "ipad-9-quer",
+      "klasse": "tablet",
+      "flaeche": {
+        "breite": 1024,
+        "hoehe": 768
+      },
+      "raster": {
+        "spalten": 12,
+        "zeilen": 8,
+        "stufe": "normal"
+      },
+      "geaendert": "2026-09-08T08:54:50.660Z",
+      "seiten": [
+        {
+          "art": "kasse",
+          "name": "Kasse",
+          "bausteine": [
+            {
+              "typ": "kc-gruppen-leiste",
+              "spalte": 0,
+              "zeile": 0,
+              "spalten": 8,
+              "zeilen": 1,
+              "text": "Warengruppen als Leiste",
+              "farbe": "#2f6f4f",
+              "rahmenfarbe": "#334155",
+              "rahmen": 2,
+              "radius": 0
+            },
+            {
+              "typ": "kc-kopf-kompakt",
+              "spalte": 8,
+              "zeile": 0,
+              "spalten": 4,
+              "zeilen": 1,
+              "text": "Kopfzeile nur rechts",
+              "farbe": "#123a5c",
+              "rahmenfarbe": "#334155",
+              "rahmen": 2,
+              "radius": 0
+            },
+            {
+              "typ": "kc-artikel-klein",
+              "spalte": 0,
+              "zeile": 1,
+              "spalten": 8,
+              "zeilen": 4,
+              "text": "Artikel klein (7×4)",
+              "farbe": "#3d6b8f",
+              "rahmenfarbe": "#334155",
+              "rahmen": 2,
+              "radius": 0
+            },
+            {
+              "typ": "kc-bon-kompakt",
+              "spalte": 8,
+              "zeile": 1,
+              "spalten": 4,
+              "zeilen": 5,
+              "text": "Bon kompakt",
+              "farbe": "#7a5230",
+              "rahmenfarbe": "#334155",
+              "rahmen": 2,
+              "radius": 0
+            },
+            {
+              "typ": "kc-zahlen-fest",
+              "spalte": 0,
+              "zeile": 5,
+              "spalten": 8,
+              "zeilen": 2,
+              "text": "Zahlbereich fest im Bild",
+              "farbe": "#1e6848",
+              "rahmenfarbe": "#334155",
+              "rahmen": 2,
+              "radius": 0
+            },
+            {
+              "typ": "kc-sonder-leiste",
+              "spalte": 0,
+              "zeile": 7,
+              "spalten": 8,
+              "zeilen": 1,
+              "text": "Sondertasten als Leiste",
+              "farbe": "#6b3f6b",
+              "rahmenfarbe": "#334155",
+              "rahmen": 2,
+              "radius": 0
+            },
+            {
+              "typ": "kc-zahlen-arten",
+              "spalte": 8,
+              "zeile": 6,
+              "spalten": 4,
+              "zeilen": 1,
+              "text": "Zahlungsarten (Bar, EC, Konto)",
+              "farbe": "#1e6848",
+              "rahmenfarbe": "#334155",
+              "rahmen": 2,
+              "radius": 0
+            },
+            {
+              "typ": "kn-stimmtso",
+              "spalte": 8,
+              "zeile": 7,
+              "spalten": 2,
+              "zeilen": 1,
+              "text": "✓ Stimmt so",
+              "farbe": "#41556b",
+              "rahmenfarbe": "#334155",
+              "rahmen": 2,
+              "radius": 0
+            },
+            {
+              "typ": "kn-aufrunden",
+              "spalte": 10,
+              "zeile": 7,
+              "spalten": 2,
+              "zeilen": 1,
+              "text": "⤴ Aufrunden",
+              "farbe": "#41556b",
+              "rahmenfarbe": "#334155",
+              "rahmen": 2,
+              "radius": 0
+            }
+          ]
+        },
+        {
+          "art": "zahlen",
+          "name": "Zahlen",
+          "bausteine": [
+            {
+              "typ": "kc-zahlen-scheine",
+              "spalte": 0,
+              "zeile": 0,
+              "spalten": 6,
+              "zeilen": 2,
+              "text": "Scheine (zwei Reihen: 50·100·200 / 5·10·20)",
+              "farbe": "#1e6848",
+              "rahmenfarbe": "#334155",
+              "rahmen": 2,
+              "radius": 0
+            },
+            {
+              "typ": "kc-zahlen-muenzen",
+              "spalte": 0,
+              "zeile": 2,
+              "spalten": 6,
+              "zeilen": 1,
+              "text": "Münzen (eine Reihe, Wert darunter)",
+              "farbe": "#2c5f8a",
+              "rahmenfarbe": "#334155",
+              "rahmen": 2,
+              "radius": 0
+            },
+            {
+              "typ": "kc-zahlen-block",
+              "spalte": 0,
+              "zeile": 3,
+              "spalten": 4,
+              "zeilen": 4,
+              "text": "Ziffernblock",
+              "farbe": "#1e6848",
+              "rahmenfarbe": "#334155",
+              "rahmen": 2,
+              "radius": 0
+            },
+            {
+              "typ": "kc-zahlen-korrektur",
+              "spalte": 4,
+              "zeile": 3,
+              "spalten": 2,
+              "zeilen": 4,
+              "text": "Zurück (letzte Eingabe) · Löschen",
+              "farbe": "#0c1726",
+              "rahmenfarbe": "#334155",
+              "rahmen": 2,
+              "radius": 0
+            },
+            {
+              "typ": "kc-berechnung",
+              "spalte": 6,
+              "zeile": 0,
+              "spalten": 6,
+              "zeilen": 2,
+              "text": "Berechnung: Positionen · Zu zahlen · Gegeben · Rückgeld",
+              "farbe": "#8a2c2c",
+              "rahmenfarbe": "#334155",
+              "rahmen": 2,
+              "radius": 0
+            },
+            {
+              "typ": "kc-beleg",
+              "spalte": 6,
+              "zeile": 2,
+              "spalten": 6,
+              "zeilen": 5,
+              "text": "Bon wie im Ausdruck (scrollt)",
+              "farbe": "#f5f5f5",
+              "rahmenfarbe": "#334155",
+              "rahmen": 2,
+              "radius": 0
+            },
+            {
+              "typ": "kc-zahlen-tasten",
+              "spalte": 0,
+              "zeile": 7,
+              "spalten": 12,
+              "zeilen": 1,
+              "text": "Tastenzeile: ← · Druck · Trinkgeld · Aufrunden · Stimmt so · BAR+QR · Karte · Konto",
+              "farbe": "#374151",
+              "rahmenfarbe": "#334155",
+              "rahmen": 2,
+              "radius": 0
+            }
+          ]
+        }
+      ],
+      "kcNummer": "KC010"
+    },
+    {
+      "id": "vorlage-vl-ziffernblock",
+      "name": "Ziffernblock immer da",
+      "geraet": "ipad-9-quer",
+      "klasse": "tablet",
+      "flaeche": {
+        "breite": 1024,
+        "hoehe": 768
+      },
+      "raster": {
+        "spalten": 12,
+        "zeilen": 8,
+        "stufe": "normal"
+      },
+      "geaendert": "2026-09-08T08:54:50.859Z",
+      "seiten": [
+        {
+          "art": "kasse",
+          "name": "Kasse",
+          "bausteine": [
+            {
+              "typ": "kc-gruppen-leiste",
+              "spalte": 0,
+              "zeile": 0,
+              "spalten": 9,
+              "zeilen": 1,
+              "text": "Warengruppen als Leiste",
+              "farbe": "#2f6f4f",
+              "rahmenfarbe": "#334155",
+              "rahmen": 2,
+              "radius": 0
+            },
+            {
+              "typ": "kc-kopf-kompakt",
+              "spalte": 9,
+              "zeile": 0,
+              "spalten": 3,
+              "zeilen": 1,
+              "text": "Kopfzeile nur rechts",
+              "farbe": "#123a5c",
+              "rahmenfarbe": "#334155",
+              "rahmen": 2,
+              "radius": 0
+            },
+            {
+              "typ": "kc-artikel-mittel",
+              "spalte": 0,
+              "zeile": 1,
+              "spalten": 9,
+              "zeilen": 5,
+              "text": "Artikel mittel (6×4)",
+              "farbe": "#3d6b8f",
+              "rahmenfarbe": "#334155",
+              "rahmen": 2,
+              "radius": 0
+            },
+            {
+              "typ": "kc-bon-tabelle",
+              "spalte": 9,
+              "zeile": 1,
+              "spalten": 3,
+              "zeilen": 4,
+              "text": "Bon als Tabelle",
+              "farbe": "#7a5230",
+              "rahmenfarbe": "#334155",
+              "rahmen": 2,
+              "radius": 0
+            },
+            {
+              "typ": "kc-zahlen-block",
+              "spalte": 9,
+              "zeile": 5,
+              "spalten": 3,
+              "zeilen": 3,
+              "text": "Ziffernblock",
+              "farbe": "#1e6848",
+              "rahmenfarbe": "#334155",
+              "rahmen": 2,
+              "radius": 0
+            },
+            {
+              "typ": "kc-zahlen-taste",
+              "spalte": 0,
+              "zeile": 6,
+              "spalten": 2,
+              "zeilen": 2,
+              "text": "Rückgeld-Taste (öffnet Seite 2)",
+              "farbe": "#1e6848",
+              "rahmenfarbe": "#334155",
+              "rahmen": 2,
+              "radius": 0
+            },
+            {
+              "typ": "kc-sonder-leiste",
+              "spalte": 2,
+              "zeile": 6,
+              "spalten": 7,
+              "zeilen": 2,
+              "text": "Sondertasten als Leiste",
+              "farbe": "#6b3f6b",
+              "rahmenfarbe": "#334155",
+              "rahmen": 2,
+              "radius": 0
+            }
+          ]
+        },
+        {
+          "art": "zahlen",
+          "name": "Zahlen",
+          "bausteine": [
+            {
+              "typ": "kc-zahlen-scheine",
+              "spalte": 0,
+              "zeile": 0,
+              "spalten": 6,
+              "zeilen": 2,
+              "text": "Scheine (zwei Reihen: 50·100·200 / 5·10·20)",
+              "farbe": "#1e6848",
+              "rahmenfarbe": "#334155",
+              "rahmen": 2,
+              "radius": 0
+            },
+            {
+              "typ": "kc-zahlen-muenzen",
+              "spalte": 0,
+              "zeile": 2,
+              "spalten": 6,
+              "zeilen": 1,
+              "text": "Münzen (eine Reihe, Wert darunter)",
+              "farbe": "#2c5f8a",
+              "rahmenfarbe": "#334155",
+              "rahmen": 2,
+              "radius": 0
+            },
+            {
+              "typ": "kc-zahlen-block",
+              "spalte": 0,
+              "zeile": 3,
+              "spalten": 4,
+              "zeilen": 4,
+              "text": "Ziffernblock",
+              "farbe": "#1e6848",
+              "rahmenfarbe": "#334155",
+              "rahmen": 2,
+              "radius": 0
+            },
+            {
+              "typ": "kc-zahlen-korrektur",
+              "spalte": 4,
+              "zeile": 3,
+              "spalten": 2,
+              "zeilen": 4,
+              "text": "Zurück (letzte Eingabe) · Löschen",
+              "farbe": "#0c1726",
+              "rahmenfarbe": "#334155",
+              "rahmen": 2,
+              "radius": 0
+            },
+            {
+              "typ": "kc-berechnung",
+              "spalte": 6,
+              "zeile": 0,
+              "spalten": 6,
+              "zeilen": 2,
+              "text": "Berechnung: Positionen · Zu zahlen · Gegeben · Rückgeld",
+              "farbe": "#8a2c2c",
+              "rahmenfarbe": "#334155",
+              "rahmen": 2,
+              "radius": 0
+            },
+            {
+              "typ": "kc-beleg",
+              "spalte": 6,
+              "zeile": 2,
+              "spalten": 6,
+              "zeilen": 5,
+              "text": "Bon wie im Ausdruck (scrollt)",
+              "farbe": "#f5f5f5",
+              "rahmenfarbe": "#334155",
+              "rahmen": 2,
+              "radius": 0
+            },
+            {
+              "typ": "kc-zahlen-tasten",
+              "spalte": 0,
+              "zeile": 7,
+              "spalten": 12,
+              "zeilen": 1,
+              "text": "Tastenzeile: ← · Druck · Trinkgeld · Aufrunden · Stimmt so · BAR+QR · Karte · Konto",
+              "farbe": "#374151",
+              "rahmenfarbe": "#334155",
+              "rahmen": 2,
+              "radius": 0
+            }
+          ]
+        }
+      ],
+      "kcNummer": "KC011"
+    },
+    {
+      "id": "vorlage-vl-stosszeit-minimal",
+      "name": "Stoßzeit · nur das Nötigste",
+      "geraet": "ipad-9-quer",
+      "klasse": "tablet",
+      "flaeche": {
+        "breite": 1024,
+        "hoehe": 768
+      },
+      "raster": {
+        "spalten": 12,
+        "zeilen": 8,
+        "stufe": "normal"
+      },
+      "geaendert": "2026-09-08T08:54:51.057Z",
+      "seiten": [
+        {
+          "art": "kasse",
+          "name": "Kasse",
+          "bausteine": [
+            {
+              "typ": "kc-gruppen-leiste",
+              "spalte": 0,
+              "zeile": 0,
+              "spalten": 12,
+              "zeilen": 1,
+              "text": "Warengruppen als Leiste",
+              "farbe": "#2f6f4f",
+              "rahmenfarbe": "#334155",
+              "rahmen": 2,
+              "radius": 0
+            },
+            {
+              "typ": "kc-artikel-mittel",
+              "spalte": 0,
+              "zeile": 1,
+              "spalten": 7,
+              "zeilen": 6,
+              "text": "Artikel mittel (6×4)",
+              "farbe": "#3d6b8f",
+              "rahmenfarbe": "#334155",
+              "rahmen": 2,
+              "radius": 0
+            },
+            {
+              "typ": "kc-bon-dunkel",
+              "spalte": 7,
+              "zeile": 1,
+              "spalten": 5,
+              "zeilen": 5,
+              "text": "🖤 Bonfeld dunkel mit großer Summe",
+              "farbe": "#111827",
+              "rahmenfarbe": "#334155",
+              "rahmen": 2,
+              "radius": 0
+            },
+            {
+              "typ": "kc-zahlen-arten",
+              "spalte": 7,
+              "zeile": 6,
+              "spalten": 5,
+              "zeilen": 1,
+              "text": "Zahlungsarten (Bar, EC, Konto)",
+              "farbe": "#1e6848",
+              "rahmenfarbe": "#334155",
+              "rahmen": 2,
+              "radius": 0
+            },
+            {
+              "typ": "kc-kopf-kompakt",
+              "spalte": 0,
+              "zeile": 7,
+              "spalten": 4,
+              "zeilen": 1,
+              "text": "Kopfzeile nur rechts",
+              "farbe": "#123a5c",
+              "rahmenfarbe": "#334155",
+              "rahmen": 2,
+              "radius": 0
+            },
+            {
+              "typ": "kc-sonder-leiste",
+              "spalte": 4,
+              "zeile": 7,
+              "spalten": 3,
+              "zeilen": 1,
+              "text": "Sondertasten als Leiste",
+              "farbe": "#6b3f6b",
+              "rahmenfarbe": "#334155",
+              "rahmen": 2,
+              "radius": 0
+            },
+            {
+              "typ": "kc-sonder-menue",
+              "spalte": 7,
+              "zeile": 7,
+              "spalten": 2,
+              "zeilen": 1,
+              "text": "Sondertasten hinter „Mehr“",
+              "farbe": "#6b3f6b",
+              "rahmenfarbe": "#334155",
+              "rahmen": 2,
+              "radius": 0
+            },
+            {
+              "typ": "kc-zahlen-taste",
+              "spalte": 9,
+              "zeile": 7,
+              "spalten": 3,
+              "zeilen": 1,
+              "text": "Rückgeld-Taste (öffnet Seite 2)",
+              "farbe": "#1e6848",
+              "rahmenfarbe": "#334155",
+              "rahmen": 2,
+              "radius": 0
+            }
+          ]
+        },
+        {
+          "art": "zahlen",
+          "name": "Zahlen",
+          "bausteine": [
+            {
+              "typ": "kc-zahlen-scheine",
+              "spalte": 0,
+              "zeile": 0,
+              "spalten": 6,
+              "zeilen": 2,
+              "text": "Scheine (zwei Reihen: 50·100·200 / 5·10·20)",
+              "farbe": "#1e6848",
+              "rahmenfarbe": "#334155",
+              "rahmen": 2,
+              "radius": 0
+            },
+            {
+              "typ": "kc-zahlen-muenzen",
+              "spalte": 0,
+              "zeile": 2,
+              "spalten": 6,
+              "zeilen": 1,
+              "text": "Münzen (eine Reihe, Wert darunter)",
+              "farbe": "#2c5f8a",
+              "rahmenfarbe": "#334155",
+              "rahmen": 2,
+              "radius": 0
+            },
+            {
+              "typ": "kc-zahlen-block",
+              "spalte": 0,
+              "zeile": 3,
+              "spalten": 4,
+              "zeilen": 4,
+              "text": "Ziffernblock",
+              "farbe": "#1e6848",
+              "rahmenfarbe": "#334155",
+              "rahmen": 2,
+              "radius": 0
+            },
+            {
+              "typ": "kc-zahlen-korrektur",
+              "spalte": 4,
+              "zeile": 3,
+              "spalten": 2,
+              "zeilen": 4,
+              "text": "Zurück (letzte Eingabe) · Löschen",
+              "farbe": "#0c1726",
+              "rahmenfarbe": "#334155",
+              "rahmen": 2,
+              "radius": 0
+            },
+            {
+              "typ": "kc-berechnung",
+              "spalte": 6,
+              "zeile": 0,
+              "spalten": 6,
+              "zeilen": 2,
+              "text": "Berechnung: Positionen · Zu zahlen · Gegeben · Rückgeld",
+              "farbe": "#8a2c2c",
+              "rahmenfarbe": "#334155",
+              "rahmen": 2,
+              "radius": 0
+            },
+            {
+              "typ": "kc-beleg",
+              "spalte": 6,
+              "zeile": 2,
+              "spalten": 6,
+              "zeilen": 5,
+              "text": "Bon wie im Ausdruck (scrollt)",
+              "farbe": "#f5f5f5",
+              "rahmenfarbe": "#334155",
+              "rahmen": 2,
+              "radius": 0
+            },
+            {
+              "typ": "kc-zahlen-tasten",
+              "spalte": 0,
+              "zeile": 7,
+              "spalten": 12,
+              "zeilen": 1,
+              "text": "Tastenzeile: ← · Druck · Trinkgeld · Aufrunden · Stimmt so · BAR+QR · Karte · Konto",
+              "farbe": "#374151",
+              "rahmenfarbe": "#334155",
+              "rahmen": 2,
+              "radius": 0
+            }
+          ]
+        }
+      ],
+      "kcNummer": "KC012"
+    },
+    {
+      "id": "vorlage-vl-heute",
+      "name": "Unsere Oberfläche heute",
+      "geraet": "ipad-gross-quer",
+      "klasse": "tablet",
+      "flaeche": {
+        "breite": 1366,
+        "hoehe": 1024
+      },
+      "raster": {
+        "spalten": 12,
+        "zeilen": 8,
+        "stufe": "normal"
+      },
+      "geaendert": "2026-09-08T08:54:51.250Z",
+      "seiten": [
+        {
+          "art": "kasse",
+          "name": "Kasse",
+          "bausteine": [
+            {
+              "typ": "kc-kopf-voll",
+              "spalte": 0,
+              "zeile": 0,
+              "spalten": 12,
+              "zeilen": 1,
+              "text": "Kopfzeile vollständig",
+              "farbe": "#123a5c",
+              "rahmenfarbe": "#334155",
+              "rahmen": 2,
+              "radius": 0
+            },
+            {
+              "typ": "kc-gruppen-leiste",
+              "spalte": 0,
+              "zeile": 1,
+              "spalten": 7,
+              "zeilen": 1,
+              "text": "Warengruppen als Leiste",
+              "farbe": "#2f6f4f",
+              "rahmenfarbe": "#334155",
+              "rahmen": 2,
+              "radius": 0
+            },
+            {
+              "typ": "kc-artikel-mittel",
+              "spalte": 0,
+              "zeile": 2,
+              "spalten": 7,
+              "zeilen": 4,
+              "text": "Artikel mittel (6×4)",
+              "farbe": "#3d6b8f",
+              "rahmenfarbe": "#334155",
+              "rahmen": 2,
+              "radius": 0
+            },
+            {
+              "typ": "kc-bon-ausfuehrlich",
+              "spalte": 7,
+              "zeile": 1,
+              "spalten": 5,
+              "zeilen": 5,
+              "text": "Bon ausführlich (mit Bild)",
+              "farbe": "#7a5230",
+              "rahmenfarbe": "#334155",
+              "rahmen": 2,
+              "radius": 0
+            },
+            {
+              "typ": "kc-zahlen-fest",
+              "spalte": 0,
+              "zeile": 6,
+              "spalten": 6,
+              "zeilen": 2,
+              "text": "Zahlbereich fest im Bild",
+              "farbe": "#1e6848",
+              "rahmenfarbe": "#334155",
+              "rahmen": 2,
+              "radius": 0
+            },
+            {
+              "typ": "kc-zahlen-block",
+              "spalte": 6,
+              "zeile": 6,
+              "spalten": 2,
+              "zeilen": 2,
+              "text": "Ziffernblock",
+              "farbe": "#1e6848",
+              "rahmenfarbe": "#334155",
+              "rahmen": 2,
+              "radius": 0
+            },
+            {
+              "typ": "kc-sonder-leiste",
+              "spalte": 8,
+              "zeile": 6,
+              "spalten": 4,
+              "zeilen": 2,
+              "text": "Sondertasten als Leiste",
+              "farbe": "#6b3f6b",
+              "rahmenfarbe": "#334155",
+              "rahmen": 2,
+              "radius": 0
+            }
+          ]
+        },
+        {
+          "art": "zahlen",
+          "name": "Zahlen",
+          "bausteine": [
+            {
+              "typ": "kc-zahlen-scheine",
+              "spalte": 0,
+              "zeile": 0,
+              "spalten": 6,
+              "zeilen": 2,
+              "text": "Scheine (zwei Reihen: 50·100·200 / 5·10·20)",
+              "farbe": "#1e6848",
+              "rahmenfarbe": "#334155",
+              "rahmen": 2,
+              "radius": 0
+            },
+            {
+              "typ": "kc-zahlen-muenzen",
+              "spalte": 0,
+              "zeile": 2,
+              "spalten": 6,
+              "zeilen": 1,
+              "text": "Münzen (eine Reihe, Wert darunter)",
+              "farbe": "#2c5f8a",
+              "rahmenfarbe": "#334155",
+              "rahmen": 2,
+              "radius": 0
+            },
+            {
+              "typ": "kc-zahlen-block",
+              "spalte": 0,
+              "zeile": 3,
+              "spalten": 4,
+              "zeilen": 4,
+              "text": "Ziffernblock",
+              "farbe": "#1e6848",
+              "rahmenfarbe": "#334155",
+              "rahmen": 2,
+              "radius": 0
+            },
+            {
+              "typ": "kc-zahlen-korrektur",
+              "spalte": 4,
+              "zeile": 3,
+              "spalten": 2,
+              "zeilen": 4,
+              "text": "Zurück (letzte Eingabe) · Löschen",
+              "farbe": "#0c1726",
+              "rahmenfarbe": "#334155",
+              "rahmen": 2,
+              "radius": 0
+            },
+            {
+              "typ": "kc-berechnung",
+              "spalte": 6,
+              "zeile": 0,
+              "spalten": 6,
+              "zeilen": 2,
+              "text": "Berechnung: Positionen · Zu zahlen · Gegeben · Rückgeld",
+              "farbe": "#8a2c2c",
+              "rahmenfarbe": "#334155",
+              "rahmen": 2,
+              "radius": 0
+            },
+            {
+              "typ": "kc-beleg",
+              "spalte": 6,
+              "zeile": 2,
+              "spalten": 6,
+              "zeilen": 5,
+              "text": "Bon wie im Ausdruck (scrollt)",
+              "farbe": "#f5f5f5",
+              "rahmenfarbe": "#334155",
+              "rahmen": 2,
+              "radius": 0
+            },
+            {
+              "typ": "kc-zahlen-tasten",
+              "spalte": 0,
+              "zeile": 7,
+              "spalten": 12,
+              "zeilen": 1,
+              "text": "Tastenzeile: ← · Druck · Trinkgeld · Aufrunden · Stimmt so · BAR+QR · Karte · Konto",
+              "farbe": "#374151",
+              "rahmenfarbe": "#334155",
+              "rahmen": 2,
+              "radius": 0
+            }
+          ]
+        }
+      ],
+      "kcNummer": "KC013"
+    },
+    {
+      "id": "vorlage-vl-streifen",
+      "name": "Bon als schmaler Streifen oben",
+      "geraet": "ipad-gross-quer",
+      "klasse": "tablet",
+      "flaeche": {
+        "breite": 1366,
+        "hoehe": 1024
+      },
+      "raster": {
+        "spalten": 12,
+        "zeilen": 8,
+        "stufe": "normal"
+      },
+      "geaendert": "2026-09-08T08:54:51.449Z",
+      "seiten": [
+        {
+          "art": "kasse",
+          "name": "Kasse",
+          "bausteine": [
+            {
+              "typ": "kc-bon-streifen",
+              "spalte": 0,
+              "zeile": 0,
+              "spalten": 8,
+              "zeilen": 1,
+              "text": "Bon als schmaler Bildstreifen",
+              "farbe": "#7a5230",
+              "rahmenfarbe": "#334155",
+              "rahmen": 2,
+              "radius": 0
+            },
+            {
+              "typ": "kc-summe-haken",
+              "spalte": 8,
+              "zeile": 0,
+              "spalten": 4,
+              "zeilen": 1,
+              "text": "Summe groß + Haken zum Abschließen",
+              "farbe": "#1e6848",
+              "rahmenfarbe": "#334155",
+              "rahmen": 2,
+              "radius": 0
+            },
+            {
+              "typ": "kc-artikel-bild",
+              "spalte": 0,
+              "zeile": 1,
+              "spalten": 12,
+              "zeilen": 5,
+              "text": "Artikelkacheln mit Bild",
+              "farbe": "#2a4d68",
+              "rahmenfarbe": "#334155",
+              "rahmen": 2,
+              "radius": 0
+            },
+            {
+              "typ": "kc-gruppen-leiste",
+              "spalte": 0,
+              "zeile": 6,
+              "spalten": 8,
+              "zeilen": 2,
+              "text": "Warengruppen als Leiste",
+              "farbe": "#2f6f4f",
+              "rahmenfarbe": "#334155",
+              "rahmen": 2,
+              "radius": 0
+            },
+            {
+              "typ": "kc-sammelkachel",
+              "spalte": 8,
+              "zeile": 6,
+              "spalten": 2,
+              "zeilen": 2,
+              "text": "Sammelkachel mit Vorschau",
+              "farbe": "#3d6b8f",
+              "rahmenfarbe": "#334155",
+              "rahmen": 2,
+              "radius": 0
+            },
+            {
+              "typ": "kc-funktionsraster",
+              "spalte": 10,
+              "zeile": 6,
+              "spalten": 2,
+              "zeilen": 2,
+              "text": "Funktionsraster 3 × 3",
+              "farbe": "#4e2d4e",
+              "rahmenfarbe": "#334155",
+              "rahmen": 2,
+              "radius": 0
+            }
+          ]
+        },
+        {
+          "art": "zahlen",
+          "name": "Zahlen",
+          "bausteine": [
+            {
+              "typ": "kc-zahlen-scheine",
+              "spalte": 0,
+              "zeile": 0,
+              "spalten": 6,
+              "zeilen": 2,
+              "text": "Scheine (zwei Reihen: 50·100·200 / 5·10·20)",
+              "farbe": "#1e6848",
+              "rahmenfarbe": "#334155",
+              "rahmen": 2,
+              "radius": 0
+            },
+            {
+              "typ": "kc-zahlen-muenzen",
+              "spalte": 0,
+              "zeile": 2,
+              "spalten": 6,
+              "zeilen": 1,
+              "text": "Münzen (eine Reihe, Wert darunter)",
+              "farbe": "#2c5f8a",
+              "rahmenfarbe": "#334155",
+              "rahmen": 2,
+              "radius": 0
+            },
+            {
+              "typ": "kc-zahlen-block",
+              "spalte": 0,
+              "zeile": 3,
+              "spalten": 4,
+              "zeilen": 4,
+              "text": "Ziffernblock",
+              "farbe": "#1e6848",
+              "rahmenfarbe": "#334155",
+              "rahmen": 2,
+              "radius": 0
+            },
+            {
+              "typ": "kc-zahlen-korrektur",
+              "spalte": 4,
+              "zeile": 3,
+              "spalten": 2,
+              "zeilen": 4,
+              "text": "Zurück (letzte Eingabe) · Löschen",
+              "farbe": "#0c1726",
+              "rahmenfarbe": "#334155",
+              "rahmen": 2,
+              "radius": 0
+            },
+            {
+              "typ": "kc-berechnung",
+              "spalte": 6,
+              "zeile": 0,
+              "spalten": 6,
+              "zeilen": 2,
+              "text": "Berechnung: Positionen · Zu zahlen · Gegeben · Rückgeld",
+              "farbe": "#8a2c2c",
+              "rahmenfarbe": "#334155",
+              "rahmen": 2,
+              "radius": 0
+            },
+            {
+              "typ": "kc-beleg",
+              "spalte": 6,
+              "zeile": 2,
+              "spalten": 6,
+              "zeilen": 5,
+              "text": "Bon wie im Ausdruck (scrollt)",
+              "farbe": "#f5f5f5",
+              "rahmenfarbe": "#334155",
+              "rahmen": 2,
+              "radius": 0
+            },
+            {
+              "typ": "kc-zahlen-tasten",
+              "spalte": 0,
+              "zeile": 7,
+              "spalten": 12,
+              "zeilen": 1,
+              "text": "Tastenzeile: ← · Druck · Trinkgeld · Aufrunden · Stimmt so · BAR+QR · Karte · Konto",
+              "farbe": "#374151",
+              "rahmenfarbe": "#334155",
+              "rahmen": 2,
+              "radius": 0
+            }
+          ]
+        }
+      ],
+      "kcNummer": "KC014"
+    },
+    {
+      "id": "vorlage-vl-kassierer",
+      "name": "Kassierer-Ansicht mit Bontabelle",
+      "geraet": "pc-manager",
+      "klasse": "tablet",
+      "flaeche": {
+        "breite": 1600,
+        "hoehe": 1000
+      },
+      "raster": {
+        "spalten": 12,
+        "zeilen": 8,
+        "stufe": "normal"
+      },
+      "geaendert": "2026-09-08T08:54:51.649Z",
+      "seiten": [
+        {
+          "art": "kasse",
+          "name": "Kasse",
+          "bausteine": [
+            {
+              "typ": "kc-bon-kassierer",
+              "spalte": 0,
+              "zeile": 0,
+              "spalten": 5,
+              "zeilen": 3,
+              "text": "🧾 Bon als Kassierer-Tabelle",
+              "farbe": "#7a5230",
+              "rahmenfarbe": "#334155",
+              "rahmen": 2,
+              "radius": 0
+            },
+            {
+              "typ": "kc-bon-blaettern",
+              "spalte": 5,
+              "zeile": 0,
+              "spalten": 1,
+              "zeilen": 3,
+              "text": "⏫ Blättern im Bon (4 Pfeiltasten)",
+              "farbe": "#7a5230",
+              "rahmenfarbe": "#334155",
+              "rahmen": 2,
+              "radius": 0
+            },
+            {
+              "typ": "kc-zahlen-block",
+              "spalte": 6,
+              "zeile": 0,
+              "spalten": 3,
+              "zeilen": 3,
+              "text": "Ziffernblock",
+              "farbe": "#1e6848",
+              "rahmenfarbe": "#334155",
+              "rahmen": 2,
+              "radius": 0
+            },
+            {
+              "typ": "kc-verwaltungsspalte",
+              "spalte": 9,
+              "zeile": 0,
+              "spalten": 3,
+              "zeilen": 5,
+              "text": "⚙ Verwaltungsspalte",
+              "farbe": "#4a4f63",
+              "rahmenfarbe": "#334155",
+              "rahmen": 2,
+              "radius": 0
+            },
+            {
+              "typ": "kc-artikel-bild",
+              "spalte": 0,
+              "zeile": 3,
+              "spalten": 6,
+              "zeilen": 5,
+              "text": "Artikelkacheln mit Bild",
+              "farbe": "#2a4d68",
+              "rahmenfarbe": "#334155",
+              "rahmen": 2,
+              "radius": 0
+            },
+            {
+              "typ": "kc-gruppen-raster",
+              "spalte": 6,
+              "zeile": 3,
+              "spalten": 3,
+              "zeilen": 5,
+              "text": "▦ Warengruppen als zweispaltiges Raster",
+              "farbe": "#2f6f4f",
+              "rahmenfarbe": "#334155",
+              "rahmen": 2,
+              "radius": 0
+            }
+          ]
+        },
+        {
+          "art": "zahlen",
+          "name": "Zahlen",
+          "bausteine": [
+            {
+              "typ": "kc-zahlen-scheine",
+              "spalte": 0,
+              "zeile": 0,
+              "spalten": 6,
+              "zeilen": 2,
+              "text": "Scheine (zwei Reihen: 50·100·200 / 5·10·20)",
+              "farbe": "#1e6848",
+              "rahmenfarbe": "#334155",
+              "rahmen": 2,
+              "radius": 0
+            },
+            {
+              "typ": "kc-zahlen-muenzen",
+              "spalte": 0,
+              "zeile": 2,
+              "spalten": 6,
+              "zeilen": 1,
+              "text": "Münzen (eine Reihe, Wert darunter)",
+              "farbe": "#2c5f8a",
+              "rahmenfarbe": "#334155",
+              "rahmen": 2,
+              "radius": 0
+            },
+            {
+              "typ": "kc-zahlen-block",
+              "spalte": 0,
+              "zeile": 3,
+              "spalten": 4,
+              "zeilen": 4,
+              "text": "Ziffernblock",
+              "farbe": "#1e6848",
+              "rahmenfarbe": "#334155",
+              "rahmen": 2,
+              "radius": 0
+            },
+            {
+              "typ": "kc-zahlen-korrektur",
+              "spalte": 4,
+              "zeile": 3,
+              "spalten": 2,
+              "zeilen": 4,
+              "text": "Zurück (letzte Eingabe) · Löschen",
+              "farbe": "#0c1726",
+              "rahmenfarbe": "#334155",
+              "rahmen": 2,
+              "radius": 0
+            },
+            {
+              "typ": "kc-berechnung",
+              "spalte": 6,
+              "zeile": 0,
+              "spalten": 6,
+              "zeilen": 2,
+              "text": "Berechnung: Positionen · Zu zahlen · Gegeben · Rückgeld",
+              "farbe": "#8a2c2c",
+              "rahmenfarbe": "#334155",
+              "rahmen": 2,
+              "radius": 0
+            },
+            {
+              "typ": "kc-beleg",
+              "spalte": 6,
+              "zeile": 2,
+              "spalten": 6,
+              "zeilen": 5,
+              "text": "Bon wie im Ausdruck (scrollt)",
+              "farbe": "#f5f5f5",
+              "rahmenfarbe": "#334155",
+              "rahmen": 2,
+              "radius": 0
+            },
+            {
+              "typ": "kc-zahlen-tasten",
+              "spalte": 0,
+              "zeile": 7,
+              "spalten": 12,
+              "zeilen": 1,
+              "text": "Tastenzeile: ← · Druck · Trinkgeld · Aufrunden · Stimmt so · BAR+QR · Karte · Konto",
+              "farbe": "#374151",
+              "rahmenfarbe": "#334155",
+              "rahmen": 2,
+              "radius": 0
+            }
+          ]
+        }
+      ],
+      "kcNummer": "KC015"
+    },
+    {
+      "id": "vorlage-vl-belegleiste",
+      "name": "Beleg links, Funktionen unten",
+      "geraet": "ipad-gross-quer",
+      "klasse": "tablet",
+      "flaeche": {
+        "breite": 1366,
+        "hoehe": 1024
+      },
+      "raster": {
+        "spalten": 12,
+        "zeilen": 8,
+        "stufe": "normal"
+      },
+      "geaendert": "2026-09-08T08:54:51.848Z",
+      "seiten": [
+        {
+          "art": "kasse",
+          "name": "Kasse",
+          "bausteine": [
+            {
+              "typ": "kc-belegreiter",
+              "spalte": 0,
+              "zeile": 0,
+              "spalten": 4,
+              "zeilen": 1,
+              "text": "🗂 Reiter „Offene Belege | Alle Belege“",
+              "farbe": "#123a5c",
+              "rahmenfarbe": "#334155",
+              "rahmen": 2,
+              "radius": 0
+            },
+            {
+              "typ": "kc-bon-kompakt",
+              "spalte": 0,
+              "zeile": 1,
+              "spalten": 3,
+              "zeilen": 4,
+              "text": "Bon kompakt",
+              "farbe": "#7a5230",
+              "rahmenfarbe": "#334155",
+              "rahmen": 2,
+              "radius": 0
+            },
+            {
+              "typ": "kc-zahlen-block",
+              "spalte": 0,
+              "zeile": 5,
+              "spalten": 3,
+              "zeilen": 2,
+              "text": "Ziffernblock",
+              "farbe": "#1e6848",
+              "rahmenfarbe": "#334155",
+              "rahmen": 2,
+              "radius": 0
+            },
+            {
+              "typ": "kc-artikel-bild",
+              "spalte": 3,
+              "zeile": 1,
+              "spalten": 9,
+              "zeilen": 5,
+              "text": "Artikelkacheln mit Bild",
+              "farbe": "#2a4d68",
+              "rahmenfarbe": "#334155",
+              "rahmen": 2,
+              "radius": 0
+            },
+            {
+              "typ": "kc-gruppen-leiste",
+              "spalte": 3,
+              "zeile": 6,
+              "spalten": 9,
+              "zeilen": 1,
+              "text": "Warengruppen als Leiste",
+              "farbe": "#2f6f4f",
+              "rahmenfarbe": "#334155",
+              "rahmen": 2,
+              "radius": 0
+            },
+            {
+              "typ": "kc-funktionsleiste",
+              "spalte": 0,
+              "zeile": 7,
+              "spalten": 12,
+              "zeilen": 1,
+              "text": "▭ Funktionsleiste unten",
+              "farbe": "#4e2d4e",
+              "rahmenfarbe": "#334155",
+              "rahmen": 2,
+              "radius": 0
+            }
+          ]
+        },
+        {
+          "art": "zahlen",
+          "name": "Zahlen",
+          "bausteine": [
+            {
+              "typ": "kc-zahlen-scheine",
+              "spalte": 0,
+              "zeile": 0,
+              "spalten": 6,
+              "zeilen": 2,
+              "text": "Scheine (zwei Reihen: 50·100·200 / 5·10·20)",
+              "farbe": "#1e6848",
+              "rahmenfarbe": "#334155",
+              "rahmen": 2,
+              "radius": 0
+            },
+            {
+              "typ": "kc-zahlen-muenzen",
+              "spalte": 0,
+              "zeile": 2,
+              "spalten": 6,
+              "zeilen": 1,
+              "text": "Münzen (eine Reihe, Wert darunter)",
+              "farbe": "#2c5f8a",
+              "rahmenfarbe": "#334155",
+              "rahmen": 2,
+              "radius": 0
+            },
+            {
+              "typ": "kc-zahlen-block",
+              "spalte": 0,
+              "zeile": 3,
+              "spalten": 4,
+              "zeilen": 4,
+              "text": "Ziffernblock",
+              "farbe": "#1e6848",
+              "rahmenfarbe": "#334155",
+              "rahmen": 2,
+              "radius": 0
+            },
+            {
+              "typ": "kc-zahlen-korrektur",
+              "spalte": 4,
+              "zeile": 3,
+              "spalten": 2,
+              "zeilen": 4,
+              "text": "Zurück (letzte Eingabe) · Löschen",
+              "farbe": "#0c1726",
+              "rahmenfarbe": "#334155",
+              "rahmen": 2,
+              "radius": 0
+            },
+            {
+              "typ": "kc-berechnung",
+              "spalte": 6,
+              "zeile": 0,
+              "spalten": 6,
+              "zeilen": 2,
+              "text": "Berechnung: Positionen · Zu zahlen · Gegeben · Rückgeld",
+              "farbe": "#8a2c2c",
+              "rahmenfarbe": "#334155",
+              "rahmen": 2,
+              "radius": 0
+            },
+            {
+              "typ": "kc-beleg",
+              "spalte": 6,
+              "zeile": 2,
+              "spalten": 6,
+              "zeilen": 5,
+              "text": "Bon wie im Ausdruck (scrollt)",
+              "farbe": "#f5f5f5",
+              "rahmenfarbe": "#334155",
+              "rahmen": 2,
+              "radius": 0
+            },
+            {
+              "typ": "kc-zahlen-tasten",
+              "spalte": 0,
+              "zeile": 7,
+              "spalten": 12,
+              "zeilen": 1,
+              "text": "Tastenzeile: ← · Druck · Trinkgeld · Aufrunden · Stimmt so · BAR+QR · Karte · Konto",
+              "farbe": "#374151",
+              "rahmenfarbe": "#334155",
+              "rahmen": 2,
+              "radius": 0
+            }
+          ]
+        }
+      ],
+      "kcNummer": "KC016"
+    },
+    {
+      "id": "vorlage-vl-9quer",
+      "name": "9 Zoll quer · platzsparend",
+      "geraet": "ipad-9-quer",
+      "klasse": "tablet",
+      "flaeche": {
+        "breite": 1024,
+        "hoehe": 768
+      },
+      "raster": {
+        "spalten": 12,
+        "zeilen": 8,
+        "stufe": "normal"
+      },
+      "geaendert": "2026-09-08T08:54:52.044Z",
+      "seiten": [
+        {
+          "art": "kasse",
+          "name": "Kasse",
+          "bausteine": [
+            {
+              "typ": "kc-kopf-kompakt",
+              "spalte": 8,
+              "zeile": 0,
+              "spalten": 4,
+              "zeilen": 1,
+              "text": "Kopfzeile nur rechts",
+              "farbe": "#123a5c",
+              "rahmenfarbe": "#334155",
+              "rahmen": 2,
+              "radius": 0
+            },
+            {
+              "typ": "kc-gruppen-leiste",
+              "spalte": 0,
+              "zeile": 0,
+              "spalten": 8,
+              "zeilen": 1,
+              "text": "Warengruppen als Leiste",
+              "farbe": "#2f6f4f",
+              "rahmenfarbe": "#334155",
+              "rahmen": 2,
+              "radius": 0
+            },
+            {
+              "typ": "kc-artikel-bild",
+              "spalte": 0,
+              "zeile": 1,
+              "spalten": 8,
+              "zeilen": 6,
+              "text": "Artikelkacheln mit Bild",
+              "farbe": "#2a4d68",
+              "rahmenfarbe": "#334155",
+              "rahmen": 2,
+              "radius": 0
+            },
+            {
+              "typ": "kc-bon-dunkel",
+              "spalte": 8,
+              "zeile": 1,
+              "spalten": 4,
+              "zeilen": 4,
+              "text": "🖤 Bonfeld dunkel mit großer Summe",
+              "farbe": "#111827",
+              "rahmenfarbe": "#334155",
+              "rahmen": 2,
+              "radius": 0
+            },
+            {
+              "typ": "kc-zahlen-block",
+              "spalte": 8,
+              "zeile": 5,
+              "spalten": 4,
+              "zeilen": 2,
+              "text": "Ziffernblock",
+              "farbe": "#1e6848",
+              "rahmenfarbe": "#334155",
+              "rahmen": 2,
+              "radius": 0
+            },
+            {
+              "typ": "kc-funktionsleiste",
+              "spalte": 0,
+              "zeile": 7,
+              "spalten": 12,
+              "zeilen": 1,
+              "text": "▭ Funktionsleiste unten",
+              "farbe": "#4e2d4e",
+              "rahmenfarbe": "#334155",
+              "rahmen": 2,
+              "radius": 0
+            }
+          ]
+        },
+        {
+          "art": "zahlen",
+          "name": "Zahlen",
+          "bausteine": [
+            {
+              "typ": "kc-zahlen-scheine",
+              "spalte": 0,
+              "zeile": 0,
+              "spalten": 6,
+              "zeilen": 2,
+              "text": "Scheine (zwei Reihen: 50·100·200 / 5·10·20)",
+              "farbe": "#1e6848",
+              "rahmenfarbe": "#334155",
+              "rahmen": 2,
+              "radius": 0
+            },
+            {
+              "typ": "kc-zahlen-muenzen",
+              "spalte": 0,
+              "zeile": 2,
+              "spalten": 6,
+              "zeilen": 1,
+              "text": "Münzen (eine Reihe, Wert darunter)",
+              "farbe": "#2c5f8a",
+              "rahmenfarbe": "#334155",
+              "rahmen": 2,
+              "radius": 0
+            },
+            {
+              "typ": "kc-zahlen-block",
+              "spalte": 0,
+              "zeile": 3,
+              "spalten": 4,
+              "zeilen": 4,
+              "text": "Ziffernblock",
+              "farbe": "#1e6848",
+              "rahmenfarbe": "#334155",
+              "rahmen": 2,
+              "radius": 0
+            },
+            {
+              "typ": "kc-zahlen-korrektur",
+              "spalte": 4,
+              "zeile": 3,
+              "spalten": 2,
+              "zeilen": 4,
+              "text": "Zurück (letzte Eingabe) · Löschen",
+              "farbe": "#0c1726",
+              "rahmenfarbe": "#334155",
+              "rahmen": 2,
+              "radius": 0
+            },
+            {
+              "typ": "kc-berechnung",
+              "spalte": 6,
+              "zeile": 0,
+              "spalten": 6,
+              "zeilen": 2,
+              "text": "Berechnung: Positionen · Zu zahlen · Gegeben · Rückgeld",
+              "farbe": "#8a2c2c",
+              "rahmenfarbe": "#334155",
+              "rahmen": 2,
+              "radius": 0
+            },
+            {
+              "typ": "kc-beleg",
+              "spalte": 6,
+              "zeile": 2,
+              "spalten": 6,
+              "zeilen": 5,
+              "text": "Bon wie im Ausdruck (scrollt)",
+              "farbe": "#f5f5f5",
+              "rahmenfarbe": "#334155",
+              "rahmen": 2,
+              "radius": 0
+            },
+            {
+              "typ": "kc-zahlen-tasten",
+              "spalte": 0,
+              "zeile": 7,
+              "spalten": 12,
+              "zeilen": 1,
+              "text": "Tastenzeile: ← · Druck · Trinkgeld · Aufrunden · Stimmt so · BAR+QR · Karte · Konto",
+              "farbe": "#374151",
+              "rahmenfarbe": "#334155",
+              "rahmen": 2,
+              "radius": 0
+            }
+          ]
+        }
+      ],
+      "kcNummer": "KC017"
+    },
+    {
+      "id": "vorlage-vl-handy",
+      "name": "Handy hochkant",
+      "geraet": "handy-hoch",
+      "klasse": "handy",
+      "flaeche": {
+        "breite": 390,
+        "hoehe": 844
+      },
+      "raster": {
+        "spalten": 6,
+        "zeilen": 12,
+        "stufe": "normal"
+      },
+      "geaendert": "2026-09-08T08:54:52.241Z",
+      "seiten": [
+        {
+          "art": "kasse",
+          "name": "Kasse",
+          "bausteine": [
+            {
+              "typ": "kc-bon-dunkel",
+              "spalte": 0,
+              "zeile": 0,
+              "spalten": 6,
+              "zeilen": 2,
+              "text": "🖤 Bonfeld dunkel mit großer Summe",
+              "farbe": "#111827",
+              "rahmenfarbe": "#334155",
+              "rahmen": 2,
+              "radius": 0
+            },
+            {
+              "typ": "kc-gruppen-leiste",
+              "spalte": 0,
+              "zeile": 2,
+              "spalten": 6,
+              "zeilen": 1,
+              "text": "Warengruppen als Leiste",
+              "farbe": "#2f6f4f",
+              "rahmenfarbe": "#334155",
+              "rahmen": 2,
+              "radius": 0
+            },
+            {
+              "typ": "kc-artikel-bild",
+              "spalte": 0,
+              "zeile": 3,
+              "spalten": 6,
+              "zeilen": 5,
+              "text": "Artikelkacheln mit Bild",
+              "farbe": "#2a4d68",
+              "rahmenfarbe": "#334155",
+              "rahmen": 2,
+              "radius": 0
+            },
+            {
+              "typ": "kc-zahlen-block",
+              "spalte": 0,
+              "zeile": 8,
+              "spalten": 3,
+              "zeilen": 3,
+              "text": "Ziffernblock",
+              "farbe": "#1e6848",
+              "rahmenfarbe": "#334155",
+              "rahmen": 2,
+              "radius": 0
+            },
+            {
+              "typ": "kc-sonder-leiste",
+              "spalte": 3,
+              "zeile": 8,
+              "spalten": 3,
+              "zeilen": 3,
+              "text": "Sondertasten als Leiste",
+              "farbe": "#6b3f6b",
+              "rahmenfarbe": "#334155",
+              "rahmen": 2,
+              "radius": 0
+            },
+            {
+              "typ": "kc-funktionsleiste",
+              "spalte": 0,
+              "zeile": 11,
+              "spalten": 6,
+              "zeilen": 1,
+              "text": "▭ Funktionsleiste unten",
+              "farbe": "#4e2d4e",
+              "rahmenfarbe": "#334155",
+              "rahmen": 2,
+              "radius": 0
+            }
+          ]
+        },
+        {
+          "art": "zahlen",
+          "name": "Zahlen",
+          "bausteine": [
+            {
+              "typ": "kc-zahlen-rueckgeld",
+              "spalte": 0,
+              "zeile": 0,
+              "spalten": 6,
+              "zeilen": 2,
+              "text": "Rückgeld-Anzeige",
+              "farbe": "#1e6848",
+              "rahmenfarbe": "#334155",
+              "rahmen": 2,
+              "radius": 0
+            },
+            {
+              "typ": "kc-zahlen-scheine",
+              "spalte": 0,
+              "zeile": 2,
+              "spalten": 6,
+              "zeilen": 4,
+              "text": "Scheine (zwei Reihen: 50·100·200 / 5·10·20)",
+              "farbe": "#1e6848",
+              "rahmenfarbe": "#334155",
+              "rahmen": 2,
+              "radius": 0
+            },
+            {
+              "typ": "kc-zahlen-block",
+              "spalte": 0,
+              "zeile": 6,
+              "spalten": 3,
+              "zeilen": 4,
+              "text": "Ziffernblock",
+              "farbe": "#1e6848",
+              "rahmenfarbe": "#334155",
+              "rahmen": 2,
+              "radius": 0
+            },
+            {
+              "typ": "kc-zahlen-arten",
+              "spalte": 3,
+              "zeile": 6,
+              "spalten": 3,
+              "zeilen": 2,
+              "text": "Zahlungsarten (Bar, EC, Konto)",
+              "farbe": "#1e6848",
+              "rahmenfarbe": "#334155",
+              "rahmen": 2,
+              "radius": 0
+            },
+            {
+              "typ": "kn-bar",
+              "spalte": 3,
+              "zeile": 8,
+              "spalten": 3,
+              "zeilen": 2,
+              "text": "💶 BAR abschließen",
+              "farbe": "#41556b",
+              "rahmenfarbe": "#334155",
+              "rahmen": 2,
+              "radius": 0
+            },
+            {
+              "typ": "kn-stimmtso",
+              "spalte": 0,
+              "zeile": 10,
+              "spalten": 6,
+              "zeilen": 1,
+              "text": "✓ Stimmt so",
+              "farbe": "#41556b",
+              "rahmenfarbe": "#334155",
+              "rahmen": 2,
+              "radius": 0
+            },
+            {
+              "typ": "kn-aufrunden",
+              "spalte": 0,
+              "zeile": 11,
+              "spalten": 6,
+              "zeilen": 1,
+              "text": "⤴ Aufrunden",
+              "farbe": "#41556b",
+              "rahmenfarbe": "#334155",
+              "rahmen": 2,
+              "radius": 0
+            }
+          ]
+        }
+      ],
+      "kcNummer": "KC018"
+    },
+    {
+      "id": "vorlage-vl-9hoch",
+      "name": "9 Zoll hochkant",
+      "geraet": "ipad-9-hoch",
+      "klasse": "tablet",
+      "flaeche": {
+        "breite": 768,
+        "hoehe": 1024
+      },
+      "raster": {
+        "spalten": 12,
+        "zeilen": 8,
+        "stufe": "normal"
+      },
+      "geaendert": "2026-09-08T08:54:52.443Z",
+      "seiten": [
+        {
+          "art": "kasse",
+          "name": "Kasse",
+          "bausteine": [
+            {
+              "typ": "kc-gruppen-leiste",
+              "spalte": 0,
+              "zeile": 0,
+              "spalten": 12,
+              "zeilen": 1,
+              "text": "Warengruppen als Leiste",
+              "farbe": "#2f6f4f",
+              "rahmenfarbe": "#334155",
+              "rahmen": 2,
+              "radius": 0
+            },
+            {
+              "typ": "kc-artikel-bild",
+              "spalte": 0,
+              "zeile": 1,
+              "spalten": 12,
+              "zeilen": 3,
+              "text": "Artikelkacheln mit Bild",
+              "farbe": "#2a4d68",
+              "rahmenfarbe": "#334155",
+              "rahmen": 2,
+              "radius": 0
+            },
+            {
+              "typ": "kc-bon-dunkel",
+              "spalte": 0,
+              "zeile": 4,
+              "spalten": 12,
+              "zeilen": 2,
+              "text": "🖤 Bonfeld dunkel mit großer Summe",
+              "farbe": "#111827",
+              "rahmenfarbe": "#334155",
+              "rahmen": 2,
+              "radius": 0
+            },
+            {
+              "typ": "kc-zahlen-block",
+              "spalte": 0,
+              "zeile": 6,
+              "spalten": 5,
+              "zeilen": 2,
+              "text": "Ziffernblock",
+              "farbe": "#1e6848",
+              "rahmenfarbe": "#334155",
+              "rahmen": 2,
+              "radius": 0
+            },
+            {
+              "typ": "kc-sonder-leiste",
+              "spalte": 5,
+              "zeile": 6,
+              "spalten": 7,
+              "zeilen": 1,
+              "text": "Sondertasten als Leiste",
+              "farbe": "#6b3f6b",
+              "rahmenfarbe": "#334155",
+              "rahmen": 2,
+              "radius": 0
+            },
+            {
+              "typ": "kc-funktionsleiste",
+              "spalte": 5,
+              "zeile": 7,
+              "spalten": 7,
+              "zeilen": 1,
+              "text": "▭ Funktionsleiste unten",
+              "farbe": "#4e2d4e",
+              "rahmenfarbe": "#334155",
+              "rahmen": 2,
+              "radius": 0
+            }
+          ]
+        },
+        {
+          "art": "zahlen",
+          "name": "Zahlen",
+          "bausteine": [
+            {
+              "typ": "kc-zahlen-scheine",
+              "spalte": 0,
+              "zeile": 0,
+              "spalten": 6,
+              "zeilen": 2,
+              "text": "Scheine (zwei Reihen: 50·100·200 / 5·10·20)",
+              "farbe": "#1e6848",
+              "rahmenfarbe": "#334155",
+              "rahmen": 2,
+              "radius": 0
+            },
+            {
+              "typ": "kc-zahlen-muenzen",
+              "spalte": 0,
+              "zeile": 2,
+              "spalten": 6,
+              "zeilen": 1,
+              "text": "Münzen (eine Reihe, Wert darunter)",
+              "farbe": "#2c5f8a",
+              "rahmenfarbe": "#334155",
+              "rahmen": 2,
+              "radius": 0
+            },
+            {
+              "typ": "kc-zahlen-block",
+              "spalte": 0,
+              "zeile": 3,
+              "spalten": 4,
+              "zeilen": 4,
+              "text": "Ziffernblock",
+              "farbe": "#1e6848",
+              "rahmenfarbe": "#334155",
+              "rahmen": 2,
+              "radius": 0
+            },
+            {
+              "typ": "kc-zahlen-korrektur",
+              "spalte": 4,
+              "zeile": 3,
+              "spalten": 2,
+              "zeilen": 4,
+              "text": "Zurück (letzte Eingabe) · Löschen",
+              "farbe": "#0c1726",
+              "rahmenfarbe": "#334155",
+              "rahmen": 2,
+              "radius": 0
+            },
+            {
+              "typ": "kc-berechnung",
+              "spalte": 6,
+              "zeile": 0,
+              "spalten": 6,
+              "zeilen": 2,
+              "text": "Berechnung: Positionen · Zu zahlen · Gegeben · Rückgeld",
+              "farbe": "#8a2c2c",
+              "rahmenfarbe": "#334155",
+              "rahmen": 2,
+              "radius": 0
+            },
+            {
+              "typ": "kc-beleg",
+              "spalte": 6,
+              "zeile": 2,
+              "spalten": 6,
+              "zeilen": 5,
+              "text": "Bon wie im Ausdruck (scrollt)",
+              "farbe": "#f5f5f5",
+              "rahmenfarbe": "#334155",
+              "rahmen": 2,
+              "radius": 0
+            },
+            {
+              "typ": "kc-zahlen-tasten",
+              "spalte": 0,
+              "zeile": 7,
+              "spalten": 12,
+              "zeilen": 1,
+              "text": "Tastenzeile: ← · Druck · Trinkgeld · Aufrunden · Stimmt so · BAR+QR · Karte · Konto",
+              "farbe": "#374151",
+              "rahmenfarbe": "#334155",
+              "rahmen": 2,
+              "radius": 0
+            }
+          ]
+        }
+      ],
+      "kcNummer": "KC019"
+    }
+  ],
+  "geaendert": "2026-09-08T08:54:52.443Z",
+  "hinweis": "Automatisch aus den Designer-Vorlagen erzeugt (tests/vorlagen-export.cjs). Nicht von Hand ändern."
+}
