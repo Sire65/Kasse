@@ -71,3 +71,10 @@
   }
   const s=document.createElement('script');s.src='recipe-serving-materials.js?v=0.3.0';s.dataset.kcServingMaterials='1';document.head.appendChild(s);
 })();
+
+/* Zusätzlicher Einkaufs-/Beschaffungskatalog für Rezeptzutaten. Mengen bleiben offen, bis der Betreiber sie bestätigt. */
+(function(){
+  if(window.KCRecipeProcurementCatalog || document.querySelector('script[data-kc-recipe-procurement="1"]')) return;
+  const load=()=>{const s=document.createElement('script');s.src='recipe-procurement-catalog.js?v=0.1.0';s.dataset.kcRecipeProcurement='1';document.head.appendChild(s);};
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',load,{once:true});else load();
+})();
