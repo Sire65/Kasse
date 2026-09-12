@@ -48,26 +48,13 @@
   }
   function render() {
     const report=registerRuntime(),manifest=global.KCReleaseManifest?.state?.manifest,line=document.getElementById('managerVersionLine');if(!line||!report)return;
-    // BEFUND vor der Mitglieder-Präsentation: in dieser Zeile stand ganz oben auf JEDER
-    // Manager-Seite das Wort "BLOCKED" bzw. "PASS" - Entwicklersprache aus der internen
-    // Prüfung, gut sichtbar für jeden im Raum. Der technische Zustand bleibt erhalten
-    // (Datenfeld und Sprechblase, für die Entwicklung), die sichtbare Zeile spricht jetzt
-    // Deutsch und schreit nicht.
-    if(!manifest){line.textContent='Versionsangabe wird geladen …';line.dataset.releaseStatus='BLOCKED';
-      line.title='Das zentrale Release-Manifest ist nicht verfügbar. Für den Betrieb unerheblich, für die Entwicklung ein Hinweis.';return}
-    // Sichtbar bleibt nur, was auch einem Gast etwas sagt: die Versionsnummer. Der interne
-    // Entwicklungsname (z. B. "Symbol- und Aktivierungscode-Parität Candidate") und der
-    // Prüfstatus stehen weiterhin in der Sprechblase - fuer die Entwicklung vollständig,
-    // fuer den Raum unaufdringlich.
+    if(!manifest){line.textContent='Versionsangabe wird geladen …';line.dataset.releaseStatus='BLOCKED';line.title='Das zentrale Release-Manifest ist nicht verfügbar. Für den Betrieb unerheblich, für die Entwicklung ein Hinweis.';return}
     const inOrdnung=report.status==='PASS';
     const kurz=String(manifest.displayVersion||'').split('·')[0].trim()||manifest.displayVersion;
     line.textContent=`KC MarktKasse · ${kurz}`+(inOrdnung?'':' · Prüfhinweise');
     line.dataset.releaseStatus=report.status;
     line.dataset.releaseVoll=`${manifest.displayVersion} · ${manifest.priority?.label||'TV-Präsentation'} · ${report.status}`;
     line.title=(line.dataset.releaseVoll||'')+'\n\n'+(report.issues.length?report.issues.map(x=>`${x.code}: ${x.detail}`).join('\n'):'Zentrales Release-Manifest und geladene Manager-Komponenten stimmen überein.');
-    /* Auch der Fenstertitel stand voller Entwicklersprache ("… Repair 63 · Symbol- und
-    Aktivierungscode-Parität Candidate") - und der steht auf der Leinwand in der
-    Browserleiste und unten in der Taskleiste, die ganze Vorführung lang. */
     document.title=`KC MarktKasse · PC-Manager · ${kurz}`;global.KCPresentationTUVRun?.();
   }
   global.addEventListener('kc-release-manifest-ready',render);
@@ -75,13 +62,12 @@
   global.KCManagerReleaseGate={refresh:render,report:registerRuntime};
 })(window);
 
-/* Muss vor recipe-calculation-core und recipe-manager ausgeführt sein, damit Verpackungs-/Ausgabegefäßkosten
-   Bestandteil derselben Kalkulation werden. document.write ist hier absichtlich parser-synchron. */
+/* Muss vor recipe-calculation-core und recipe-manager ausgeführt sein, damit Ausgabegefäße Bestandteil derselben Rezeptlogik werden. */
 (function(){
   if(window.KCServingMaterials || document.querySelector('script[data-kc-serving-materials="1"]')) return;
   if(document.readyState==='loading'){
-    document.write('<script src="recipe-serving-materials.js?v=0.2.0" data-kc-serving-materials="1"></'+'script>');
+    document.write('<script src="recipe-serving-materials.js?v=0.3.0" data-kc-serving-materials="1"></'+'script>');
     return;
   }
-  const s=document.createElement('script');s.src='recipe-serving-materials.js?v=0.2.0';s.dataset.kcServingMaterials='1';document.head.appendChild(s);
+  const s=document.createElement('script');s.src='recipe-serving-materials.js?v=0.3.0';s.dataset.kcServingMaterials='1';document.head.appendChild(s);
 })();
