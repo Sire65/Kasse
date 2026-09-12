@@ -1,0 +1,98 @@
+name: Finalize verified KC MarktKasse ZIP merge
+
+on:
+  push:
+    branches:
+      - merge/zip-2026-09-12
+
+permissions:
+  contents: write
+
+jobs:
+  finalize:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout staging branch
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Reconstruct and verify original overlay
+        shell: bash
+        run: |
+          set -euo pipefail
+          cat .merge-runtime/seg-* > /tmp/zip_overlay.b64
+          echo "eafc5807135977b844de5f51b70596a4bd74da0b5645961bf25609eb260ecdde  /tmp/zip_overlay.b64" | sha256sum -c -
+          base64 -d /tmp/zip_overlay.b64 > /tmp/zip_overlay.tar.xz
+          echo "bd7d540dc38215ab648c1ded024691e559ecfa631b4b74a8b402d23b4a931f45  /tmp/zip_overlay.tar.xz" | sha256sum -c -
+          mkdir -p /tmp/overlay-check
+          tar -xJf /tmp/zip_overlay.tar.xz -C /tmp/overlay-check
+          test "$(find /tmp/overlay-check -type f | wc -l)" -eq 22
+
+      - name: Apply only to unchanged protected main
+        shell: bash
+        run: |
+          set -euo pipefail
+          EXPECTED_MAIN="5b489a11582174aaec1539ccec90a0ffadbe584c"
+          git fetch origin main
+          CURRENT_MAIN="$(git rev-parse origin/main)"
+          test "$CURRENT_MAIN" = "$EXPECTED_MAIN"
+
+          git checkout -B final-zip-2026-09-12 "$EXPECTED_MAIN"
+          tar -xJf /tmp/zip_overlay.tar.xz
+
+          node --check pc-manager/app.js
+          node --check pc-manager/kc-live-monitor.js
+          node --check pc-manager/kc-manager-supabase-status.js
+          node --check pc-manager/kc-zentral.js
+          node --check pos/kc-oberflaechen-pos.js
+          node --check pos/service-worker.js
+          node --check pos/kc-kopfzeile.js
+          node --check pos/kc-oberflaechen-anwenden.js
+          node --check pos/kc-reklamation.js
+          node --check pos/kc-schulung.js
+          node -e "JSON.parse(require('fs').readFileSync('pos/kc-oberflaechen-vorlagen.json','utf8'))"
+
+          for n in $(seq -w 1 19); do
+            grep -q "KC0${n}" pos/kc-oberflaechen-vorlagen.json
+          done
+
+          # Kernlogik und GitHub-exklusive Lieferantenintegration dürfen nicht verändert werden.
+          git diff --exit-code "$EXPECTED_MAIN" -- pos/app.js pc-manager/kc-supplier-link.js pc-manager/dev-quick-access.js
+
+          cat > /tmp/expected-paths <<'EOF'
+          pc-manager/app.js
+          pc-manager/index.html
+          pc-manager/kc-live-monitor.js
+          pc-manager/kc-manager-supabase-status.js
+          pc-manager/kc-zentral.js
+          pc-manager/styles.css
+          pos/assets/amaretto_flasche_11-09.webp
+          pos/assets/apfelpunsch_apfel_oben_11-09.webp
+          pos/assets/feuerzangenbowle_gewuerze_11-09.webp
+          pos/assets/gluehwein_rot_11-09.webp
+          pos/assets/roter_feger_kirschen_11-09.webp
+          pos/assets/rum_flasche_11-09.webp
+          pos/index.html
+          pos/kc-kopfzeile.js
+          pos/kc-legacy-fallback.css
+          pos/kc-oberflaechen-anwenden.css
+          pos/kc-oberflaechen-anwenden.js
+          pos/kc-oberflaechen-pos.js
+          pos/kc-oberflaechen-vorlagen.json
+          pos/kc-reklamation.js
+          pos/kc-schulung.js
+          pos/service-worker.js
+          EOF
+          sed -i 's/^          //' /tmp/expected-paths
+          sort -o /tmp/expected-paths /tmp/expected-paths
+          git status --porcelain | cut -c4- | sort > /tmp/actual-paths
+          diff -u /tmp/expected-paths /tmp/actual-paths
+
+          while IFS= read -r p; do git add -- "$p"; done < /tmp/expected-paths
+          test "$(git diff --cached --name-only | wc -l)" -eq 22
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "KC MarktKasse: geprüften ZIP-Stand vom 11.09.2026 integrieren"
+          git push origin HEAD:main
