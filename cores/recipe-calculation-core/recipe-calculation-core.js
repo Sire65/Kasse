@@ -4,13 +4,14 @@
   root.KCRecipeCalculationCore = api;
 })(typeof globalThis !== 'undefined' ? globalThis : this, function () {
   'use strict';
-  const VERSION = '0.1.0';
+  const VERSION = '0.2.0';
   const MASS = {mg:.001,g:1,kg:1000};
   const VOLUME = {ml:1,l:1000};
   const COUNT = {stueck:1,portion:1,packung:1,dose:1,bund:1};
   const text = (value, max=500) => String(value ?? '').replace(/[<>\u0000-\u001f]/g, '').trim().slice(0,max);
   const number = (value, fallback=0) => Number.isFinite(Number(value)) ? Number(value) : fallback;
   const uid = prefix => `${prefix}-${Date.now().toString(36)}-${Math.random().toString(36).slice(2,9)}`;
+
   function unitFamily(unit) {
     const id = text(unit,20).toLowerCase().replace('stück','stueck');
     if (id in MASS) return 'mass';
@@ -30,6 +31,7 @@
     if (!table) throw new Error(`Unbekannte Einheit: ${unit}`);
     return number(amount) / table[id];
   }
+
   function normalizeIngredient(raw={}) {
     const unit = text(raw.unit || 'kg',20).toLowerCase().replace('stück','stueck');
     return {
@@ -43,6 +45,31 @@
       notes:text(raw.notes,300)
     };
   }
+
+  /* Ausgabegefäß ist bewusst KEINE Zutat. So bleiben Allergene/Zutatenlisten sauber und
+     Einwegmaterial kann trotzdem je verkaufter Portion in die Kalkulation einfließen. */
+  function normalizeServingWare(raw={}) {
+    if (!raw || typeof raw !== 'object' || (!raw.id && !raw.name)) return null;
+    const reusable = raw.reusable === true || raw.materialType === 'reusable';
+    return {
+      id:text(raw.id || uid('AUSGABE'),80),
+      name:text(raw.name || 'Ausgabegefäß',160),
+      type:text(raw.type || 'sonstiges',40),
+      materialType:reusable ? 'reusable' : 'consumable',
+      reusable,
+      capacityMl:Math.max(0,number(raw.capacityMl)),
+      quantityPerPortion:Math.max(0,number(raw.quantityPerPortion,1)) || 1,
+      unitCost:raw.unitCost === '' || raw.unitCost == null ? null : Math.max(0,number(raw.unitCost)),
+      packSize:Math.max(0,number(raw.packSize)),
+      packPriceGross:raw.packPriceGross === '' || raw.packPriceGross == null ? null : Math.max(0,number(raw.packPriceGross)),
+      inventoryRef:text(raw.inventoryRef,80),
+      articleId:text(raw.articleId,80),
+      source:text(raw.source,300),
+      priceDate:text(raw.priceDate,40),
+      notes:text(raw.notes,500)
+    };
+  }
+
   function normalizeRecipe(raw={}) {
     return {
       schema:'KC_RECIPE_V1', id:text(raw.id || uid('REZEPT'),60), productId:text(raw.productId,80),
@@ -52,6 +79,7 @@
       portionAmount:Math.max(0,number(raw.portionAmount,250)), portionUnit:text(raw.portionUnit || 'g',20).toLowerCase(),
       reservePercent:Math.min(50,Math.max(0,number(raw.reservePercent))),
       ingredients:Array.isArray(raw.ingredients) ? raw.ingredients.map(normalizeIngredient) : [],
+      servingWare:normalizeServingWare(raw.servingWare || raw.servingVessel || null),
       publicIngredients:text(raw.publicIngredients,5000), publicAdditives:text(raw.publicAdditives,2000),
       publicImportant:text(raw.publicImportant,1500), allergens:raw.allergens && typeof raw.allergens === 'object' ? {...raw.allergens} : {},
       nutrition:raw.nutrition && typeof raw.nutrition === 'object' ? {...raw.nutrition} : {},
@@ -59,12 +87,14 @@
       createdAt:text(raw.createdAt || new Date().toISOString(),40), updatedAt:new Date().toISOString()
     };
   }
+
   function portions(recipe) {
     const r=normalizeRecipe(recipe);
     if (!r.outputAmount || !r.portionAmount) return 0;
     if (unitFamily(r.outputUnit) !== unitFamily(r.portionUnit)) throw new Error('Fertigmenge und Portionsgröße benötigen dieselbe Einheitenart.');
     return toBase(r.outputAmount,r.outputUnit) / toBase(r.portionAmount,r.portionUnit);
   }
+
   function calculate(recipe, options={}) {
     const r=normalizeRecipe(recipe), basePortions=portions(r);
     if (!basePortions) throw new Error('Fertigmenge und Portionsgröße müssen größer als null sein.');
@@ -81,9 +111,21 @@
         totalCost:ingredient.unitCost == null ? null : ingredient.amount*factor*ingredient.unitCost
       };
     });
-    return {recipe:r,basePortions,desiredPortions:desired,reservePercent:reserve,factor,ingredients:rows,
-      totalCost:rows.some(x=>x.totalCost!=null)?rows.reduce((sum,x)=>sum+(x.totalCost||0),0):null};
+    const ingredientCostKnown=rows.some(x=>x.totalCost!=null);
+    const ingredientCost=ingredientCostKnown ? rows.reduce((sum,x)=>sum+(x.totalCost||0),0) : null;
+    const vessel=r.servingWare;
+    const servingCost=(vessel && !vessel.reusable && vessel.unitCost!=null)
+      ? desired*vessel.quantityPerPortion*vessel.unitCost
+      : (vessel ? 0 : null);
+    const knownCost=(ingredientCost!=null)||(servingCost!=null);
+    const totalCost=knownCost ? (ingredientCost||0)+(servingCost||0) : null;
+    return {
+      recipe:r,basePortions,desiredPortions:desired,reservePercent:reserve,factor,ingredients:rows,
+      ingredientCost,servingWare:vessel,servingCost,totalCost,
+      costPerPortion:totalCost==null||desired<=0?null:totalCost/desired
+    };
   }
+
   function calculateFromAvailable(recipe, ingredientId, availableAmount, availableUnit) {
     const r=normalizeRecipe(recipe), ingredient=r.ingredients.find(x=>x.id===ingredientId);
     if (!ingredient) throw new Error('Bezugszutat wurde nicht gefunden.');
@@ -94,6 +136,7 @@
     const basePortions=portions(r);
     return calculate(r,{desiredPortions:basePortions*factor,includeReserve:false});
   }
+
   function validate(recipe) {
     const r=normalizeRecipe(recipe), errors=[],warnings=[];
     if(!r.productId)errors.push('Artikel-ID fehlt.');
@@ -103,9 +146,11 @@
     if(unitFamily(r.outputUnit)!==unitFamily(r.portionUnit))errors.push('Fertigmenge und Portion sind nicht vergleichbar.');
     if(!r.ingredients.length)errors.push('Mindestens eine Zutat ist erforderlich.');
     r.ingredients.forEach((i,index)=>{if(!i.name)errors.push(`Zutat ${index+1}: Name fehlt.`);if(!i.amount)errors.push(`Zutat ${index+1}: Menge fehlt.`);if(i.family==='unknown')errors.push(`Zutat ${index+1}: Einheit ist unbekannt.`);if(i.lossPercent>50)warnings.push(`${i.name||`Zutat ${index+1}`}: hoher Verlust von ${i.lossPercent} %.`)});
+    if(r.servingWare && !r.servingWare.reusable && r.servingWare.unitCost==null)warnings.push(`Ausgabegefäß „${r.servingWare.name}“ hat noch keinen Stückpreis und wird deshalb nicht in die Kalkulation eingerechnet.`);
     if(r.status==='approved'&&(!r.source||!r.approvedBy||!r.approvedAt))errors.push('Freigegebene Rezepturen benötigen Quelle, Freigebenden und Datum.');
     return {ok:errors.length===0,errors,warnings,record:r};
   }
+
   function publicProductInfo(recipe, baseInfo={}) {
     const r=normalizeRecipe(recipe);
     const listed=r.ingredients.filter(x=>x.publicIngredient).map(x=>x.publicName).filter(Boolean);
@@ -115,6 +160,7 @@
       ingredients:r.publicIngredients || listed.join(', '),
       additives:r.publicAdditives || text(baseInfo.additives || baseInfo.contents,2000),
       important:r.publicImportant || text(baseInfo.important,1500),
+      servingWare:r.servingWare ? {id:r.servingWare.id,name:r.servingWare.name,type:r.servingWare.type,capacityMl:r.servingWare.capacityMl,reusable:r.servingWare.reusable} : null,
       allergens:Object.keys(r.allergens).length ? {...r.allergens} : {...(baseInfo.allergens||{})},
       nutrition:Object.keys(r.nutrition).length ? {...r.nutrition} : {...(baseInfo.nutrition||{})}
     };
@@ -124,5 +170,5 @@
       products:records.map(item=>publicProductInfo(item.recipe,item.info))};
   }
   return Object.freeze({VERSION,UNITS:Object.freeze(['mg','g','kg','ml','l','stueck','packung','dose','bund']),unitFamily,toBase,fromBase,
-    normalizeIngredient,normalizeRecipe,portions,calculate,calculateFromAvailable,validate,publicProductInfo,makePublicPackage});
+    normalizeIngredient,normalizeServingWare,normalizeRecipe,portions,calculate,calculateFromAvailable,validate,publicProductInfo,makePublicPackage});
 });
