@@ -8,6 +8,23 @@
     "status":{"enum":["draft","review","approved","outdated","blocked"]},
     "outputAmount":{"type":"number","exclusiveMinimum":0},
     "portionAmount":{"type":"number","exclusiveMinimum":0},
-    "ingredients":{"type":"array","minItems":1}
+    "ingredients":{"type":"array","minItems":1},
+    "servingWare":{
+      "type":["object","null"],
+      "properties":{
+        "id":{"type":"string"},
+        "name":{"type":"string"},
+        "type":{"type":"string"},
+        "materialType":{"enum":["reusable","consumable"]},
+        "reusable":{"type":"boolean"},
+        "capacityMl":{"type":"number","minimum":0},
+        "quantityPerPortion":{"type":"number","minimum":0},
+        "unitCost":{"type":["number","null"],"minimum":0},
+        "packSize":{"type":"number","minimum":0},
+        "packPriceGross":{"type":["number","null"],"minimum":0},
+        "inventoryRef":{"type":"string"},
+        "articleId":{"type":"string"}
+      }
+    }
   }
 }
