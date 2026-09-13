@@ -66,7 +66,7 @@
       <div id="kcPinPad" style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:12px;">
         ${tasten.map(t=>t===''
           ? '<span></span>'
-          : `<button type="button" data-pin-taste="${t}" style="height:64px;font-size:1.5rem;font-weight:800;border:1px solid #c9d2dc;border-radius:10px;background:#f4f7fa;color:#172033;">${t}</button>`).join('')}
+          : `<button type="button" data-pin-taste="${t}" style="width:64px;height:64px;justify-self:center;font-size:1.5rem;font-weight:800;border:1px solid #c9d2dc;border-radius:10px;background:#f4f7fa;color:#172033;">${t}</button>`).join('')}
       </div>
       <button id="kcPinSubmit" type="button" style="margin-top:14px;width:100%;padding:14px;font-size:1.05rem;font-weight:900;border-radius:8px;border:none;background:#166534;color:#fff;">${bereitsEingerichtet ? 'Entsperren' : 'PIN festlegen'}</button>
     `;
