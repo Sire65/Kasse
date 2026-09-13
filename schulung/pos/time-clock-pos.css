@@ -1,0 +1,62 @@
+.time-clock-button{min-width:58px;font-size:25px}.time-clock-dialog{width:min(620px,94vw)}
+.time-clock-dialog input{font-size:22px;padding:14px}.tc-pos-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.tc-pos-primary{font-size:25px;min-height:70px}.tc-pos-message{padding:12px;border-radius:10px;background:#edf5ff}
+.tc-pos-message.ok{background:#def7e5;color:#145b29}.tc-pos-message.warn{background:#fff0d2;color:#704600}
+.tc-pos-person{font-size:24px;font-weight:800}.tc-pos-actions{display:flex;gap:8px;flex-wrap:wrap}
+@media(max-width:600px){.tc-pos-grid{grid-template-columns:1fr}}
+
+/* --- Neues Kommen/Gehen-Fenster (V0.2.0) -------------------------------------------------
+   Bewusst schlicht: ein Schritt pro Bildschirm, grosse Flaechen, keine Auswahlfelder.
+   Wird am Marktstand mit dem Finger bedient, oft mit Handschuh. */
+#timeClockDialog{max-width:640px}
+.tc-karte{width:min(640px,94vw);max-height:92vh;overflow-y:auto}
+.tc-titel{margin:0 0 18px;font-size:1.6rem}
+.tc-schritt{display:grid;gap:14px}
+/* WICHTIG: eine Klassenregel mit display:grid schlaegt das eingebaute Ausblenden ueber das
+   hidden-Attribut. Ohne diese Zeile bleiben beide Schritte gleichzeitig sichtbar - genau
+   das war im ersten Foto zu sehen. */
+.tc-schritt[hidden]{display:none}
+.tc-anleitung{margin:0;font-size:1.05rem;line-height:1.5;color:#334155}
+.tc-klein{font-size:.86rem;color:#64748b}
+.tc-eingabe{width:100%;font-size:1.4rem;padding:16px;border:2px solid #cbd5e1;border-radius:10px;text-align:center}
+.tc-eingabe:focus{outline:none;border-color:#1d4ed8;box-shadow:0 0 0 3px rgba(29,78,216,.18)}
+.tc-knopf-gross{width:100%;min-height:72px;font-size:1.25rem;font-weight:900;border:0;border-radius:12px;background:#1d4ed8;color:#fff;cursor:pointer}
+.tc-knopf-gross:disabled{opacity:.5;cursor:not-allowed}
+.tc-knopf-buchen{background:#15803d}
+.tc-knopf-flach{width:100%;min-height:52px;font-size:1rem;font-weight:800;border:1px solid #cbd5e1;border-radius:10px;background:#f1f5f9;color:#334155;cursor:pointer}
+.tc-person{display:flex;align-items:baseline;justify-content:center;gap:12px;padding:6px 0 2px}
+.tc-pseudonym{font-size:2.1rem;font-weight:900;color:#0f172a;letter-spacing:.01em}
+.tc-richtung{font-size:1.15rem;font-weight:700;color:#475569}
+/* Uhrzeit mit vier Stellknoepfen. Feste Spaltenbreiten, damit die Zeit beim Verstellen nicht
+   springt und man denselben Knopf mehrfach treffen kann, ohne hinzusehen. */
+.tc-zeithinweis{margin:0;text-align:center;font-size:.9rem;color:#64748b}
+
+/* --- Uhrzeit-Drehfeld -------------------------------------------------------------------
+   Zwei Rollen zum Drehen mit dem Finger, Stunde und Minute (5er-Schritte). Die Mitte ist durch
+   ein Band markiert; dort steht der gewaehlte Wert. Antippen springt ebenfalls dorthin.
+   Groessen bewusst tabletgerecht: 68px hohe Zeilen, 5 sichtbare Zeilen, grosse Ziffern -
+   die Rolle laesst sich auch mit Handschuh treffen. scroll-snap sorgt dafuer, dass immer
+   ein voller Wert einrastet und nie eine Zahl halb im Band steht. */
+.tc-drehfeld{position:relative;display:grid;grid-template-columns:1fr 34px 1fr;gap:6px;align-items:center;justify-items:center;padding:6px 0}
+.tc-band{position:absolute;left:0;right:0;top:50%;transform:translateY(-50%);height:68px;border-top:2px solid #1d4ed8;border-bottom:2px solid #1d4ed8;background:rgba(29,78,216,.07);border-radius:10px;pointer-events:none}
+.tc-rad{height:204px;width:100%;overflow-y:auto;scroll-snap-type:y mandatory;scrollbar-width:none;-webkit-overflow-scrolling:touch;touch-action:pan-y}
+.tc-rad::-webkit-scrollbar{display:none}
+.tc-rad.gesperrt{overflow:hidden;opacity:.5;pointer-events:none}
+.tc-fuell{height:68px}
+.tc-wert{height:68px;display:flex;align-items:center;justify-content:center;scroll-snap-align:center;font-size:2rem;font-weight:800;color:#94a3b8;font-variant-numeric:tabular-nums;cursor:pointer;user-select:none}
+.tc-wert.aktiv{font-size:2.6rem;font-weight:900;color:#0f172a}
+.tc-doppelpunkt{font-size:2.4rem;font-weight:900;color:#0f172a}
+
+/* --- Gruende beim Gehen -----------------------------------------------------------------
+   Sechs Knoepfe in zwei Reihen zu dritt. Optional: wer nichts antippt, bucht ohne Grund.
+   Nochmal antippen hebt die Auswahl wieder auf. */
+.tc-gruende{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.tc-gruende-frage{grid-column:1/-1;font-size:.9rem;font-weight:800;color:#475569}
+.tc-grund{min-height:62px;padding:6px 8px;font-size:.92rem;font-weight:800;line-height:1.2;border:2px solid #cbd5e1;border-radius:10px;background:#f8fafc;color:#1e293b;cursor:pointer}
+.tc-grund.aktiv{background:#b45309;border-color:#b45309;color:#fff}
+
+/* Uebertragungsstand der Zeitbuchungen. Bewusst immer sichtbar: niemand soll am Markttag im
+   Glauben nach Hause gehen, alles sei uebertragen, wenn noch Stunden offen sind. */
+.tc-offen{margin:6px 0 0;padding:8px 10px;border-radius:8px;font-size:.82rem;font-weight:700;line-height:1.3}
+.tc-offen.ok{background:#dcfce7;color:#14532d}
+.tc-offen.warn{background:#fef3c7;color:#78350f}

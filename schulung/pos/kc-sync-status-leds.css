@@ -1,0 +1,66 @@
+/* KC Sync Baustufe 4 – Status-/Aktivitäts-LEDs neben dem Hamburger-Menü.
+   Bewusst an die bereits bestehende .mode-led-Konvention (siehe styles.css, mode-quick-button)
+   angelehnt statt eines neuen visuellen Systems - dieselbe Kreisform, dieselbe Größe, dieselbe
+   Rahmen-/Schatten-Logik, nur mit den vorhandenen Farb-Tokens --green/--yellow/--red statt
+   ausschließlich Grün, weil hier drei Zustände statt nur an/aus unterschieden werden müssen. */
+
+/* Eine Reihe statt zwei Zeilen: zusammen mit der Sicherungs-Gruppe daneben ergab die alte
+   Anordnung sonst einen 2x2-Block aus vier Punkten (vom User am Stand beanstandet). */
+.kc-sync-status-leds {
+  display: inline-grid;
+  grid-template-columns: repeat(2, 20px);
+  grid-template-rows: 20px;
+  gap: 6px;
+  align-items: center;
+  justify-items: center;
+  padding: 0 8px;
+  height: 52px;
+}
+
+.kc-sync-led {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: 2px solid #fff;
+  background: var(--muted, #78848e);
+  box-shadow: 0 0 0 1px #56636e;
+  transition: background-color .25s ease, box-shadow .25s ease;
+  cursor: default;
+}
+
+/* Erste LED: Ampel (Verbindungs-/Synchronisationszustand). */
+.kc-sync-led-status.kc-led-gruen {
+  background: var(--green, #19d36f);
+  box-shadow: 0 0 0 1px #0b7a34, 0 0 10px 3px rgba(26, 163, 51, .55);
+}
+.kc-sync-led-status.kc-led-gelb {
+  background: var(--yellow, #f2a900);
+  box-shadow: 0 0 0 1px #a06f00, 0 0 10px 3px rgba(242, 169, 0, .55);
+}
+.kc-sync-led-status.kc-led-rot {
+  background: var(--red, #c9231f);
+  box-shadow: 0 0 0 1px #7a1512, 0 0 10px 3px rgba(201, 35, 31, .55);
+}
+
+/* Zweite LED: Aktivität (lokales Speichern/Netzwerkverkehr) - flackert kurz auf, statt
+   dauerhaft zu leuchten, damit sie erkennbar ein EREIGNIS anzeigt, keinen Dauerzustand. */
+.kc-sync-led-activity {
+  background: #3a4652;
+  box-shadow: 0 0 0 1px #232b33;
+}
+.kc-sync-led-activity.kc-led-aktiv {
+  animation: kcSyncActivityFlicker .9s ease-out;
+}
+@keyframes kcSyncActivityFlicker {
+  0%   { background: #3a4652; box-shadow: 0 0 0 1px #232b33; }
+  12%  { background: var(--yellow, #f2a900); box-shadow: 0 0 0 1px #a06f00, 0 0 10px 3px rgba(242, 169, 0, .7); }
+  40%  { background: var(--yellow, #f2a900); box-shadow: 0 0 0 1px #a06f00, 0 0 8px 2px rgba(242, 169, 0, .55); }
+  100% { background: #3a4652; box-shadow: 0 0 0 1px #232b33; }
+}
+
+/* Reduzierte Bewegung respektieren (bestehende Anforderung an alle Oberflächen-Animationen). */
+@media (prefers-reduced-motion: reduce) {
+  .kc-sync-led-activity.kc-led-aktiv { animation: none; background: var(--yellow, #f2a900); }
+}
+
+body.tablet-fit .kc-sync-led { width: 20px !important; height: 20px !important; }

@@ -1,0 +1,58 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "KC_PRODUCT_INFO_V1",
+  "type": "object",
+  "required": [
+    "schema",
+    "productId",
+    "version",
+    "status",
+    "allergens"
+  ],
+  "properties": {
+    "schema": {
+      "const": "KC_PRODUCT_INFO_V1"
+    },
+    "productId": {
+      "type": "string",
+      "minLength": 1
+    },
+    "version": {
+      "type": "string"
+    },
+    "status": {
+      "enum": [
+        "draft",
+        "incomplete",
+        "review",
+        "approved",
+        "outdated",
+        "blocked"
+      ]
+    },
+    "shortDescription": {
+      "type": "string"
+    },
+    "ingredients": {
+      "type": "string"
+    },
+    "additives": {
+      "type": "string"
+    },
+    "important": {
+      "type": "string"
+    },
+    "allergens": {
+      "type": "object"
+    },
+    "nutrition": {
+      "type": "object"
+    },
+    "source": {
+      "type": "string"
+    },
+    "approvedAt": {
+      "type": "string"
+    }
+  }
+}

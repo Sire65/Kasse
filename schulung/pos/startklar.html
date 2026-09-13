@@ -1,0 +1,271 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Startklar-Prüfung</title>
+<!--
+  Startklar-Prüfung vor dem Markttag.
+
+  ZWECK: an einem Stand mit Schlange dahinter ist das Letzte, was man gebrauchen kann, eine
+  Kasse, die "irgendwie nicht geht". Diese Seite geht der Reihe nach alles durch, was vorher
+  stimmen muss, und sagt in normalen Worten, was zu tun ist - ein Punkt pro Zeile, rot oder
+  grün, ohne Technikvokabular.
+
+  BEWUSST EIGENE SEITE, nicht in die Kasse eingebaut: sie soll VOR dem Betrieb aufgerufen
+  werden, auf jedem Gerät einmal. Und sie liest nur - sie ändert nichts, weder Einstellungen
+  noch Daten. Eine Prüfung, die selbst etwas verstellt, ist keine Prüfung.
+
+  WORTWAHL: wie überall an der Kasse neutral. "Sicherung", "Gerät", "Verbindung" - kein
+  Hinweis auf einen Manager oder was dahinter läuft.
+-->
+<style>
+  :root{color-scheme:light}
+  *{box-sizing:border-box}
+  body{margin:0;font-family:system-ui,'Segoe UI',sans-serif;background:#eef2f7;color:#172033}
+  header{background:#0f2744;color:#fff;padding:16px 20px}
+  header h1{margin:0;font-size:1.45rem}
+  header p{margin:4px 0 0;opacity:.85;font-size:.9rem}
+  main{max-width:820px;margin:0 auto;padding:16px}
+  .gesamt{border-radius:14px;padding:16px 18px;margin-bottom:14px;font-weight:800;font-size:1.15rem}
+  .gesamt.gut{background:#dcfce7;color:#14532d;border:2px solid #16a34a}
+  .gesamt.warn{background:#fef3c7;color:#713f12;border:2px solid #d97706}
+  .gesamt.schlecht{background:#fee2e2;color:#7f1d1d;border:2px solid #dc2626}
+  .gesamt.laeuft{background:#e0edff;color:#1e3a8a;border:2px solid #2563eb}
+  .punkt{background:#fff;border-radius:12px;padding:12px 14px;margin-bottom:9px;
+         display:flex;gap:12px;align-items:flex-start;box-shadow:0 1px 3px rgba(0,0,0,.08)}
+  .zeichen{font-size:1.4rem;line-height:1.2;flex:0 0 28px;text-align:center}
+  .punkt h3{margin:0 0 2px;font-size:1rem}
+  .punkt p{margin:0;font-size:.88rem;color:#374151;line-height:1.4}
+  .punkt .tun{margin-top:6px;font-size:.88rem;background:#fff7ed;border-left:4px solid #ea580c;
+              padding:7px 10px;border-radius:6px;color:#7c2d12}
+  .knopfzeile{display:flex;gap:10px;flex-wrap:wrap;margin:14px 0}
+  button{font:inherit;font-weight:800;padding:12px 18px;border-radius:10px;border:0;cursor:pointer}
+  .haupt{background:#166534;color:#fff}
+  .neben{background:#e2e8f0;color:#172033}
+  footer{max-width:820px;margin:0 auto;padding:0 16px 30px;font-size:.8rem;color:#4b5563}
+</style>
+</head>
+<body>
+<header>
+  <h1>Startklar-Prüfung</h1>
+  <p>Einmal pro Gerät vor dem Markttag durchgehen. Diese Seite ändert nichts – sie sieht nur nach.</p>
+</header>
+<main>
+  <div id="gesamt" class="gesamt laeuft">Wird geprüft …</div>
+  <div class="knopfzeile">
+    <button type="button" class="haupt" id="nochmal">Nochmal prüfen</button>
+    <button type="button" class="neben" id="zurKasse">Zur Kasse</button>
+    <button type="button" class="neben" id="testdruck">Testbon drucken</button>
+  </div>
+  <div id="liste"></div>
+</main>
+<footer id="fuss"></footer>
+
+<script>
+(function () {
+  'use strict';
+  const el = (id) => document.getElementById(id);
+  const lies = (schluessel, ersatz) => {
+    try { const roh = localStorage.getItem(schluessel); return roh ? JSON.parse(roh) : ersatz; }
+    catch (e) { return ersatz; }
+  };
+  const esc = (t) => String(t ?? '').replace(/[&<>"]/g, (c) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+
+  // Verbindungsdaten kommen wie an der Kasse aus der Adresszeile oder dem Gerätespeicher.
+  function verbindung() {
+    const p = new URLSearchParams(location.search);
+    // Dieselben Parameternamen wie die Kasse selbst (kc-sync-connection.js), sonst prueft
+    // diese Seite eine andere Kasse als die, die gleich benutzt wird.
+    const gespeichert = lies('kc_sync_connection_v1', {}) || {};
+    return {
+      host: p.get('kcHost') || gespeichert.host || location.hostname || '127.0.0.1',
+      port: p.get('kcPort') || gespeichert.port || 47391,
+      token: p.get('kcToken') || gespeichert.token || '',
+      registerId: p.get('kcRegisterId') || gespeichert.registerId || '',
+    };
+  }
+  function url(pfad) {
+    const v = verbindung();
+    const u = new URL(`http://${v.host}:${v.port}${pfad}`);
+    if (v.token) u.searchParams.set('token', v.token);
+    return u.toString();
+  }
+
+  // Ein Prüfpunkt: {stufe:'gut'|'warn'|'schlecht', titel, text, tun}
+  async function pruefe() {
+    const punkte = [];
+    const v = verbindung();
+    const master = lies('kc_master_v040', {}) || {};
+
+    // 1. Gerätespeicher - ohne den geht gar nichts, jede Buchung liegt zuerst hier.
+    let speicherOk = false;
+    try { localStorage.setItem('kc_startklar_probe', '1'); localStorage.removeItem('kc_startklar_probe'); speicherOk = true; } catch (e) {}
+    punkte.push(speicherOk
+      ? {stufe: 'gut', titel: 'Gerätespeicher', text: 'Das Gerät kann speichern.'}
+      : {stufe: 'schlecht', titel: 'Gerätespeicher', text: 'Dieses Gerät kann nichts speichern.',
+         tun: 'Privates Surfen / Inkognito beenden und die Seite normal öffnen. In diesem Zustand darf nicht kassiert werden – jede Buchung wäre nach dem Schließen weg.'});
+
+    // 2. Dauerhafte Ablage der Verkäufe.
+    let dbOk = false;
+    try { await new Promise((ja, nein) => { const a = indexedDB.open('kc_startklar_probe'); a.onsuccess = () => { a.result.close(); indexedDB.deleteDatabase('kc_startklar_probe'); ja(); }; a.onerror = () => nein(); }); dbOk = true; } catch (e) {}
+    punkte.push(dbOk
+      ? {stufe: 'gut', titel: 'Verkaufsablage', text: 'Die dauerhafte Ablage der Verkäufe steht bereit.'}
+      : {stufe: 'schlecht', titel: 'Verkaufsablage', text: 'Die dauerhafte Ablage lässt sich nicht öffnen.',
+         tun: 'Gerät neu starten. Bleibt es dabei, dieses Gerät heute nicht als Kasse verwenden.'});
+
+    // 3. Kassen-Kennung - ohne sie landen Buchungen unter der falschen Kasse.
+    const kasse = v.registerId || master.registerId || '';
+    punkte.push(kasse
+      ? {stufe: 'gut', titel: 'Kassen-Kennung', text: `Dieses Gerät ist ${esc(kasse)}.`}
+      : {stufe: 'schlecht', titel: 'Kassen-Kennung', text: 'Diesem Gerät ist keine Kasse zugeordnet.',
+         tun: 'Die Kasse über den Einrichtungs-QR öffnen, nicht über ein altes Lesezeichen.'});
+
+    // 4. Verbindung zur Sicherung.
+    let status = null;
+    try {
+      const antwort = await fetch(url('/kc-sync-status'), {signal: AbortSignal.timeout(3000), cache: 'no-store'});
+      if (antwort.ok) status = await antwort.json();
+    } catch (e) { /* nicht erreichbar - wird unten behandelt */ }
+
+    if (!status) {
+      punkte.push({stufe: 'schlecht', titel: 'Sicherung', text: 'Die Sicherung antwortet nicht.',
+        tun: 'Läuft das Markttag-Fenster? Ist dieses Gerät im richtigen WLAN? Ohne Sicherung kann kassiert werden, aber alle Buchungen liegen NUR auf diesem Gerät.'});
+    } else {
+      const farbe = status.connection?.color;
+      const grund = status.connection?.reason || '';
+      punkte.push(farbe === 'gruen'
+        ? {stufe: 'gut', titel: 'Sicherung', text: 'Verbunden und abgeglichen.'}
+        : farbe === 'gelb'
+        ? {stufe: 'warn', titel: 'Sicherung', text: `Verbunden, aber noch nicht vollständig abgeglichen (${esc(grund)}).`,
+           tun: 'Eine Minute warten und nochmal prüfen. Bleibt es gelb: Markttag-Fenster neu starten.'}
+        : {stufe: 'schlecht', titel: 'Sicherung', text: `Keine Verbindung (${esc(grund)}).`,
+           tun: 'WLAN prüfen und Markttag-Fenster neu starten.'});
+
+      if (status.multiDeviceConflict) {
+        punkte.push({stufe: 'schlecht', titel: 'Zweites Gerät', text: 'Ein weiteres Gerät benutzt gerade dieselbe Kasse.',
+          tun: 'Nur EIN Gerät je Kasse verwenden. Das andere Gerät schließen, sonst zählen Buchungen doppelt oder gehen durcheinander.'});
+      }
+    }
+
+    // 5. Warten noch Buchungen auf die Übertragung?
+    const zeitEreignisse = lies('kc_time_clock_events_v1', []) || [];
+    const zeitGemeldet = new Set(lies('kc_time_clock_gemeldet_v1', []) || []);
+    const zeitOffen = zeitEreignisse.filter((e) => e && e.id && !zeitGemeldet.has(e.id)).length;
+    const abschluesse = lies('kc_closings', []) || [];
+    const abschlussGemeldet = new Set(lies('kc_closings_gemeldet_v1', []) || []);
+    const abschlussOffen = abschluesse.filter((c) => c && c.closingId && !abschlussGemeldet.has(c.closingId)).length;
+    // Auch die Verkäufe, die noch nicht gesichert werden konnten (siehe kc-sync-live-event.js).
+    const verkaufOffen = (lies('kc_sync_offene_buchungen_v1', []) || []).length;
+    const offenGesamt = zeitOffen + abschlussOffen + verkaufOffen;
+    punkte.push(offenGesamt === 0
+      ? {stufe: 'gut', titel: 'Offene Meldungen', text: 'Alles vom letzten Mal ist übertragen.'}
+      : {stufe: 'warn', titel: 'Offene Meldungen',
+         text: `${verkaufOffen} Verkauf/Verkäufe, ${zeitOffen} Zeitbuchung(en) und ${abschlussOffen} Abschluss/Abschlüsse warten noch auf die Übertragung.`,
+         tun: 'Kein Datenverlust – sie werden automatisch nachgereicht, sobald die Sicherung erreichbar ist. Vor dem Markttag sollte die Liste aber leer sein.'});
+
+    // 6. Sind Artikel und Warengruppen da?
+    const artikel = (lies('kc_products_v050', []) || []).filter((p) => p && p.active !== false);
+    const gruppen = (lies('kc_groups_v050', []) || []).filter((g) => g && g.active !== false);
+    punkte.push(artikel.length >= 3 && gruppen.length >= 2
+      ? {stufe: 'gut', titel: 'Artikel', text: `${artikel.length} Artikel in ${gruppen.length} Warengruppen.`}
+      : {stufe: 'schlecht', titel: 'Artikel', text: `Nur ${artikel.length} Artikel in ${gruppen.length} Warengruppen – das sieht nach den Vorgabewerten aus.`,
+         tun: 'Die richtigen Artikel wurden noch nicht auf dieses Gerät übertragen. Vor dem Markt nachholen.'});
+
+    // 7. Was ist noch als ausverkauft markiert? Ein Marker vom letzten Mal blockiert stillschweigend.
+    const ausverkauft = lies('kc_ausverkauft_v1', []) || [];
+    const gesperrt = Array.isArray(ausverkauft) ? ausverkauft.length
+      : Object.values(ausverkauft || {}).filter(Boolean).length;
+    punkte.push(gesperrt === 0
+      ? {stufe: 'gut', titel: 'Ausverkauft-Markierungen', text: 'Kein Artikel ist gesperrt.'}
+      : {stufe: 'warn', titel: 'Ausverkauft-Markierungen', text: `${gesperrt} Artikel sind noch als ausverkauft markiert.`,
+         tun: 'Stammt das noch vom letzten Markttag? Dann vorher wieder freigeben – sonst lässt sich der Artikel heute nicht verkaufen.'});
+
+    // 8. Steht die Kasse noch im Testmodus oder ist sie gesperrt?
+    const gesperrtGeraet = localStorage.getItem('kc_geraet_gesperrt_v1') === '1';
+    if (gesperrtGeraet) {
+      punkte.push({stufe: 'schlecht', titel: 'Gerätesperre', text: 'Dieses Gerät ist gesperrt.',
+        tun: 'Die Sperre lässt sich nur aus der Ferne wieder aufheben. Vor dem Einsatz klären.'});
+    }
+    punkte.push(master.trainingMode
+      ? {stufe: 'schlecht', titel: 'Testmodus', text: 'Der Testmodus ist eingeschaltet – Verkäufe zählen nicht.',
+         tun: 'Vor dem ersten echten Verkauf ausschalten.'}
+      : {stufe: 'gut', titel: 'Testmodus', text: 'Aus – Verkäufe zählen echt.'});
+
+    // 9. Bediener: ohne Auswahl kein sauberer Bon.
+    const bediener = (master.operatorProfiles || []).map((x) => x && x.name).filter(Boolean);
+    punkte.push(bediener.length >= 2
+      ? {stufe: 'gut', titel: 'Bediener', text: `${bediener.length} Einträge, aktiv: ${esc(master.operatorName || 'Team')}.`}
+      : {stufe: 'warn', titel: 'Bediener', text: 'Es ist kaum ein Bediener hinterlegt.',
+         tun: 'Vor dem Markt die Bedienerliste übertragen.'});
+
+    // 10. Uhrzeit - eine falsch gehende Uhr verdirbt Bons, Zeiten und Abschluss gleichzeitig.
+    const jetzt = new Date();
+    punkte.push({stufe: 'warn', titel: 'Datum und Uhrzeit', text: `Dieses Gerät sagt: ${jetzt.toLocaleString('de-DE')}.`,
+      tun: 'Bitte kurz gegen die eigene Uhr halten. Stimmt es nicht, zuerst am Gerät richtigstellen – die Zeit steht auf jedem Bon und in jeder Zeitbuchung.'});
+
+    return punkte;
+  }
+
+  function zeichne(punkte) {
+    el('liste').innerHTML = punkte.map((p) => `
+      <div class="punkt">
+        <div class="zeichen">${p.stufe === 'gut' ? '\u2705' : p.stufe === 'warn' ? '\u26a0\ufe0f' : '\u274c'}</div>
+        <div>
+          <h3>${esc(p.titel)}</h3>
+          <p>${esc(p.text)}</p>
+          ${p.tun ? `<div class="tun"><b>Zu tun:</b> ${esc(p.tun)}</div>` : ''}
+        </div>
+      </div>`).join('');
+
+    const schlecht = punkte.filter((p) => p.stufe === 'schlecht').length;
+    const warn = punkte.filter((p) => p.stufe === 'warn' && p.tun).length;
+    const kasten = el('gesamt');
+    if (schlecht) {
+      kasten.className = 'gesamt schlecht';
+      kasten.textContent = `${schlecht} Punkt(e) müssen vor dem Betrieb erledigt werden.`;
+    } else if (warn) {
+      kasten.className = 'gesamt warn';
+      kasten.textContent = `Grundsätzlich einsatzbereit – ${warn} Punkt(e) bitte noch ansehen.`;
+    } else {
+      kasten.className = 'gesamt gut';
+      kasten.textContent = 'Alles startklar.';
+    }
+    el('fuss').textContent = `Geprüft am ${new Date().toLocaleString('de-DE')} · Kasse ${verbindung().registerId || 'ohne Kennung'}`;
+  }
+
+  async function lauf() {
+    el('gesamt').className = 'gesamt laeuft';
+    el('gesamt').textContent = 'Wird geprüft …';
+    zeichne(await pruefe());
+  }
+
+  el('nochmal').onclick = lauf;
+  el('zurKasse').onclick = () => { location.href = 'index.html' + location.search; };
+  // Testbon: prüft den einzigen Punkt, den keine Software allein prüfen kann - ob aus dem
+  // Drucker wirklich Papier mit lesbarer Schrift kommt.
+  el('testdruck').onclick = () => {
+    const w = window.open('', '_blank', 'width=420,height=600');
+    if (!w) return alert('Das Druckfenster wurde blockiert. Bitte Pop-ups für diese Seite erlauben.');
+    w.document.write(`<!doctype html><html lang="de"><head><meta charset="utf-8"><title>Testbon</title>
+      <style>@page{size:80mm auto;margin:4mm}body{font-family:"Courier New",monospace;width:72mm;font-size:10pt}
+      h1{font-size:13pt;text-align:center;margin:0 0 3mm}.zeile{display:flex;justify-content:space-between}
+      .strich{border-top:1px dashed #000;margin:2mm 0}</style></head><body>
+      <h1>Testbon</h1>
+      <div class="zeile"><span>Datum</span><span>${new Date().toLocaleString('de-DE')}</span></div>
+      <div class="zeile"><span>Kasse</span><span>${esc(verbindung().registerId || '-')}</span></div>
+      <div class="strich"></div>
+      <div class="zeile"><span>1x Testartikel</span><span>1,00 &euro;</span></div>
+      <div class="strich"></div>
+      <div class="zeile"><b>SUMME</b><b>1,00 &euro;</b></div>
+      <p>Wenn dieser Zettel vollst&auml;ndig und lesbar aus dem Drucker kommt,
+         ist der Drucker startklar. Papierbreite pr&uuml;fen: der Text darf nicht abgeschnitten sein.</p>
+      <script>window.onload=()=>setTimeout(()=>window.print(),150)<\/script></body></html>`);
+    w.document.close();
+  };
+
+  lauf();
+})();
+</script>
+</body>
+</html>

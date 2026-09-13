@@ -1,0 +1,935 @@
+/* KC Oberflächen ANWENDEN - Darstellung des Aufbaus in der Kasse.                07.09.2026
+   Alles hängt an body.kc-aufbau. Ohne diese Klasse ändert die Datei NICHTS an der Kasse.
+   Grundsatz aus den Notizen: keine festen Pixelhöhen - das Raster füllt den Bildschirm,
+   jeder Rahmen bekommt seinen Anteil, innen wird gescrollt statt überlappt. */
+
+body.kc-aufbau { overflow: hidden; }
+/* 08.09.2026 (Betreiber am iPad: "unten abgeschnitten"): Safari ohne Vollbild zählt seine
+   Leisten in 100vh mit - die untere Rasterzeile lag hinter der Browserleiste. Deshalb die
+   sichtbare Höhe: dvh wo der Browser es kann, sonst die vom Skript gemessene Höhe (--kc-vh). */
+body.kc-aufbau .app-shell { min-height: 0; height: 100vh; height: var(--kc-vh, 100dvh); display: flex; flex-direction: column; }
+
+/* Die alten Behälter bleiben im Bauplan, sind aber unsichtbar. */
+body.kc-aufbau .app-shell > header.app-header,
+body.kc-aufbau .app-shell > .mode-strip,
+body.kc-aufbau .app-shell > .main-layout,
+body.kc-aufbau .app-shell > .bottom-layout,
+body.kc-aufbau .app-shell > .status-footer { display: none !important; }
+
+.kc-aufbau-raster {
+  display: grid; gap: 6px; padding: 6px; box-sizing: border-box;
+  flex: 1 1 auto; min-height: 0; height: 100vh; height: var(--kc-vh, 100dvh); width: 100%;
+  background: linear-gradient(#f6f3ee, #e8e8e8);
+}
+.kc-bereich {
+  min-width: 0; min-height: 0; overflow: hidden;
+  display: flex; flex-direction: column; gap: 4px;
+  border-radius: 8px;
+}
+.kc-bereich > * { min-height: 0; }
+.kc-bereich.platzhalter {
+  align-items: center; justify-content: center; text-align: center;
+  border: 2px dashed #b45309; color: #7c2d12; background: #fff7ed; font-weight: 600; padding: 8px;
+}
+.kc-bereich.text { padding: 8px 10px; color: #111; font-weight: 600; justify-content: center; }
+
+/* ---- Kopfzeile -------------------------------------------------------------------- */
+.kc-bereich.kopf > header.app-header { display: grid !important; height: 100%; }
+.kc-bereich.kopf.kompakt > header.app-header { grid-template-columns: 1fr; }
+.kc-bereich.kopf.kompakt .brand-block, .kc-bereich.kopf.kompakt .header-info { display: none !important; }
+.kc-bereich.kopf.kompakt .header-status { justify-content: flex-end; flex-wrap: wrap; overflow: hidden; min-width: 0; }
+.kc-bereich.kopf > .mode-strip { display: flex !important; flex: 0 0 auto; }
+.kc-bereich.kopf.kompakt > .mode-message-center { flex: 0 0 auto; display: flex; align-items: center; gap: 6px; min-height: 26px; }
+.kc-bereich.kopf.kompakt > .mode-message-center #notificationBar { flex: 1; font-size: 13px; padding: 2px 8px; }
+.kc-bereich.knopf.meldungen > .mode-message-center { display: flex; align-items: center; }
+
+/* ---- Warengruppen ----------------------------------------------------------------- */
+.kc-bereich.gruppen > #categories {
+  display: flex !important; gap: 6px; flex: 1; align-items: stretch;
+  overflow: auto; padding: 0; height: 100% !important; min-height: 0 !important; max-height: none !important;
+}
+.kc-bereich.gruppen.leiste > #categories { flex-direction: row; flex-wrap: nowrap; }
+.kc-bereich.gruppen.leiste > #categories > * { flex: 1 1 0; min-width: 0; font-size: 14px; padding-left: 6px; padding-right: 6px; }
+.kc-bereich.gruppen.leiste > #categories > * > * { min-width: 0; }
+.kc-bereich.gruppen.leiste > #categories svg { width: 26px; height: 26px; flex: 0 0 auto; }
+/* 08.09.2026 (Betreiber): "Warengruppenreiter nur als Icon plus Zahl, wie viele Artikel drin
+   sind - dadurch werden die Gruppentasten schmaler." Im Aufbau zeigt die Leiste deshalb nur
+   Symbol und Zähler; der Name bleibt als title (Fingerdruck lang) und für Vorleseprogramme. */
+/* styles.css:2073 setzt den Reitern 116 px Mindestbreite mit !important - hier ebenso hart
+   zurückgenommen, sonst bleibt die Leiste breit, obwohl der Name weg ist. */
+.kc-bereich.gruppen.leiste > #categories > button { display: flex !important; flex-direction: column; align-items: center; justify-content: center; gap: 2px; padding: 4px 6px !important;
+  flex: 1 1 0 !important; min-width: 52px !important; width: auto !important; height: 100% !important; min-height: 0 !important; }
+.kc-bereich.gruppen.leiste > #categories .kategorie-name { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+.kc-bereich.gruppen.leiste > #categories svg, .kc-bereich.gruppen.leiste > #categories .kategorie-bild { width: 34px !important; height: 34px !important; }
+.kc-bereich.gruppen.leiste > #categories .kategorie-kuerzel { font-size: 18px; font-weight: 800; }
+.kc-bereich.gruppen.leiste > #categories .category-count { font-size: 12px; min-width: 20px; padding: 1px 6px; }
+.kc-bereich.gruppen.spalte > #categories { flex-direction: column; }
+.kc-bereich.gruppen.spalte > #categories > * { flex: 1 1 0; min-height: 0; min-width: 0; height: auto !important; }
+.kc-bereich.gruppen.raster > #categories { display: grid !important; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); }
+
+/* ---- Artikel ---------------------------------------------------------------------- */
+.kc-bereich.artikel > #productGrid {
+  flex: 1 1 auto; height: auto !important; min-height: 0;
+  grid-template-columns: repeat(var(--kcs, 5), minmax(0, 1fr)) !important;
+  grid-template-rows: repeat(var(--kcz, 3), minmax(0, 1fr)) !important;
+  grid-auto-rows: 0 !important; gap: 6px !important; overflow: hidden;
+}
+.kc-bereich.artikel .product-tile-wrap, .kc-bereich.artikel .product-tile { min-height: 0 !important; min-width: 0 !important; height: 100%; }
+/* Kacheln "nur Name + Preis" und "Farbe + Name + Preis" (Bausteine kc-artikel-nurtext /
+   kc-artikel-farbe). Die Kasse kennt diese Darstellung schon als Knopfart "text"/"color";
+   hier wird sie je Aufbau erzwungen, ohne die Stammdaten-Einstellung anzufassen.
+   08.09.2026 (Betreiber): auf 9 Zoll mit 7 Spalten drängeln sich Bild, Preis, Varianten-Knopf
+   und "zzgl. Pfand" auf 85 px - Bild und Info-Ecke weg, Name und Preis groß. */
+.kc-bereich.artikel.nurtext .product-tile img, .kc-bereich.artikel.farbe .product-tile img,
+.kc-bereich.artikel.nurtext .product-tile .kombi-bild, .kc-bereich.artikel.farbe .product-tile .kombi-bild { display: none !important; }
+.kc-bereich.artikel.nurtext .product-tile::after, .kc-bereich.artikel.farbe .product-tile::after { display: none !important; }
+.kc-bereich.artikel.nurtext .product-tile { background: linear-gradient(#fff, #e7ebef) !important; color: #101828 !important; border: 2px solid var(--gruppen-rand, #c9d0d8) !important; }
+.kc-bereich.artikel.farbe .product-tile { background: var(--tile-color, #315d8d) !important; color: #fff !important; }
+.kc-bereich.artikel.nurtext .product-label, .kc-bereich.artikel.farbe .product-label {
+  position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center;
+  text-shadow: none; padding: 6px 4px; font-size: 14px; line-height: 1.15; word-break: break-word; hyphens: auto;
+}
+.kc-bereich.artikel.nurtext .product-label { color: #101828; }
+.kc-bereich.artikel.nurtext .product-label b, .kc-bereich.artikel.nurtext .product-label strong,
+.kc-bereich.artikel.farbe .product-label b, .kc-bereich.artikel.farbe .product-label strong { font-size: 16px; }
+.kc-bereich.artikel.nurtext .product-info-button, .kc-bereich.artikel.farbe .product-info-button,
+.kc-bereich.artikel.nurtext .deposit-tag, .kc-bereich.artikel.farbe .deposit-tag { display: none !important; }
+.kc-bereich.artikel.nurtext .product-variant-button, .kc-bereich.artikel.farbe .product-variant-button { transform: scale(.8); transform-origin: bottom right; }
+.kc-bereich.artikel > .pager { flex: 0 0 auto; }
+/* Fließende Artikelfläche (Text-/Farbkacheln): feste Kachelhöhe, so viele Zeilen wie nötig,
+   die Fläche scrollt. Kein Blättern, also keine Blätterleiste. */
+.kc-bereich.artikel.fliessend { position: relative; }
+.kc-bereich.artikel.fliessend > #productGrid {
+  grid-template-rows: none !important; grid-auto-rows: 104px !important; overflow-y: auto !important;
+  flex: 1 1 0 !important; min-height: 0 !important; max-height: 100%;
+  align-content: start; padding-right: 2px; scrollbar-width: thin;
+}
+.kc-bereich.artikel.fliessend > .pager { display: none !important; }
+.kc-scrollpfeil {
+  position: absolute; left: 50%; bottom: 6px; transform: translateX(-50%); z-index: 3;
+  display: flex; flex-direction: column; align-items: center; line-height: 1;
+  padding: 6px 18px; border: 0; border-radius: 999px; background: rgba(12, 23, 38, .88); color: #fff;
+  font-size: 16px; font-weight: 800; box-shadow: 0 2px 8px rgba(0,0,0,.3); cursor: pointer;
+}
+.kc-scrollpfeil small { font-size: 10px; font-weight: 600; letter-spacing: .04em; }
+.kc-scrollpfeil[hidden] { display: none !important; }
+.kc-bereich.artikel > #workspaceModePanel { flex: 0 0 auto; }
+
+/* ---- Bon -------------------------------------------------------------------------- */
+.kc-bereich.bon { background: #fff; border: 1px solid #ccd1d7; box-shadow: 0 2px 8px rgba(0,0,0,.12); gap: 0; }
+.kc-bereich.bon > .cart-title { flex: 0 0 auto; }
+.kc-bereich.bon > #cartList { flex: 1 1 auto; overflow: auto; min-height: 0; }
+.kc-bereich.bon > .cart-summary { flex: 0 0 auto; }
+/* Bon als Tabelle / kompakt: schmale Zeilen, viele Positionen - das Einzige, was die gekauften
+   Kassen besser machten (Notiz vom 02.09.). Bilder raus, Schrift kleiner, Zeilen dicht. */
+.kc-bereich.bon.tabelle #cartList > *, .kc-bereich.bon.kompakt #cartList > * { padding: 3px 8px !important; min-height: 0 !important; font-size: 14px !important; line-height: 1.25 !important; border-bottom: 1px solid #e5e7eb; }
+.kc-bereich.bon.tabelle #cartList img, .kc-bereich.bon.kompakt #cartList img { display: none !important; }
+/* BEFUND 08.09.2026 (Betreiber: "der Artikel wird zweizeilig"): Die Bonzeile hat feste Spalten
+   42 | Name | 78 | 96 | 90 | 38 px plus Abstände - bei 418 px Bonbreite bleiben dem Namen
+   38 px. Breiter machen allein hilft also nicht; die festen Spalten müssen kleiner werden.
+   Tabellen-Bon: kein Bild, ½ nur als Knopf, Rabatt nur als "%", enge Mengenbox. Dem Namen
+   bleiben so rund 190 px - "Feuerzangenbowle" passt einzeilig. */
+.kc-bereich.bon.tabelle .cart-row, .kc-bereich.bon.kompakt .cart-row {
+  grid-template-columns: minmax(0, 1fr) auto 40px 70px auto 26px !important; gap: 4px !important; min-height: 40px !important;
+}
+.kc-bereich.bon.tabelle .cart-thumb, .kc-bereich.bon.kompakt .cart-thumb { display: none !important; }
+.kc-bereich.bon.tabelle .cart-name, .kc-bereich.bon.kompakt .cart-name { grid-column: 1 !important; min-width: 0; }
+.kc-bereich.bon.tabelle .cart-name strong, .kc-bereich.bon.kompakt .cart-name strong { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block; font-size: 14px; }
+.kc-bereich.bon.tabelle .cart-name small, .kc-bereich.bon.kompakt .cart-name small { font-size: 10px; line-height: 1.1; }
+.kc-bereich.bon.tabelle .half-portion-cell, .kc-bereich.bon.kompakt .half-portion-cell { grid-column: 2 !important; margin: 0 !important; }
+.kc-bereich.bon.tabelle .half-portion-button, .kc-bereich.bon.kompakt .half-portion-button { width: 32px; height: 32px; padding: 0; }
+.kc-bereich.bon.tabelle .position-discount-button, .kc-bereich.bon.kompakt .position-discount-button { grid-column: 3 !important; font-size: 0 !important; width: 40px !important; min-width: 0 !important; max-width: 40px; height: 32px; padding: 0 !important; }
+/* Der Knopf bringt sein %-Zeichen schon selbst mit (::before) - nur die Schrift wird versteckt. */
+.kc-bereich.bon.tabelle .position-discount-button::before, .kc-bereich.bon.kompakt .position-discount-button::before { font-size: 15px; font-weight: 800; }
+.kc-bereich.bon.tabelle .qty-box, .kc-bereich.bon.kompakt .qty-box { grid-column: 4 !important; grid-template-columns: 22px 26px 22px !important; }
+.kc-bereich.bon.tabelle .row-total, .kc-bereich.bon.kompakt .row-total { grid-column: 5 !important; font-size: 15px; }
+.kc-bereich.bon.tabelle .delete-row, .kc-bereich.bon.kompakt .delete-row { grid-column: 6 !important; width: 26px; padding: 0; }
+.kc-bereich.bon.tabelle #cartList > *:nth-child(even) { background: #f8fafc; }
+.kc-bereich.bon.tabelle > .cart-summary .summary-meta, .kc-bereich.bon.kompakt > .cart-summary .summary-meta { font-size: 11px; line-height: 1.15; }
+.kc-bereich.bon.dunkel { background: #111827; color: #f9fafb; }
+.kc-bereich.bon.dunkel > .cart-summary { background: #0b1220; color: #fff; }
+.kc-bereich.bon.dunkel .grand-total { font-size: 34px; }
+
+/* ---- Zahlen ----------------------------------------------------------------------- */
+.kc-bereich.zahlen > * { flex: 1 1 auto; }
+.kc-bereich.zahlen.arten { flex-direction: row; gap: 6px; }
+.kc-bereich.zahlen.arten > button { flex: 1 1 0; min-width: 0; height: 100%; font-size: 18px; }
+/* Der Bezahl-QR im BAR-Knopf braucht 116 px - in einer einzeiligen Knopfreihe auf Seite 1 deckt
+   er die Beschriftung zu. Dort bleibt er weg; auf der Zahlen-Seite ist Platz und er bleibt. */
+#kcAufbau .kc-bereich.zahlen.arten #checkoutQrMini { display: none !important; }
+.kc-bereich.zahlen.taste { }
+.kc-zahlen-taste {
+  flex: 1; width: 100%; height: 100%; border: 0; border-radius: 10px; cursor: pointer;
+  background: linear-gradient(180deg, #1e6848, #14532d); color: #fff; font-weight: 800;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px;
+}
+.kc-zahlen-taste strong { font-size: 22px; }
+.kc-zahlen-taste small { font-size: 12px; opacity: .85; }
+.kc-bereich.zahlen.block > .keypad-shell { height: 100%; display: flex; flex-direction: column; }
+.kc-bereich.zahlen.block .keypad { flex: 1; }
+
+/* ---- Sondertasten ----------------------------------------------------------------- */
+.kc-bereich.sonder { display: grid; gap: 6px; }
+.kc-bereich.sonder.leiste { grid-auto-flow: row; grid-template-columns: repeat(auto-fill, minmax(84px, 1fr)); grid-auto-rows: minmax(0, 1fr); }
+.kc-bereich.sonder > button { font-size: 13px; padding: 2px 4px; overflow: hidden; }
+.kc-bereich.sonder.spalte { grid-template-columns: 1fr; grid-auto-rows: minmax(0, 1fr); }
+.kc-bereich.sonder > button { min-width: 0; min-height: 0; height: 100%; width: 100%; font-size: 15px; white-space: normal; }
+.kc-bereich.sonder > button[hidden] { display: none !important; }
+.kc-bereich.knopf > * { flex: 1; width: 100%; height: 100%; }
+
+/* ---- Seite 2: Zahlen-Ebene -------------------------------------------------------- */
+#kcZahlenEbene { position: fixed; inset: 0; z-index: 120; background: #e8e8e8; }
+#kcZahlenEbene[hidden] { display: none !important; }
+#kcZahlenEbene .kc-aufbau-raster { height: 100vh; height: var(--kc-vh, 100dvh); }
+#kcZahlenEbene, #kcParkEbene, .kc-ebene { height: 100vh; height: var(--kc-vh, 100dvh); bottom: auto; }
+.kc-zahlen-zurueck {
+  position: fixed; top: 8px; right: 10px; z-index: 121;
+  padding: 10px 14px; border: 0; border-radius: 8px; background: #0c1726; color: #fff; font-weight: 700; cursor: pointer;
+}
+/* Auf Seite 2 ist die Geldwahl das Hauptelement - Platz geben. */
+#kcZahlenEbene .kc-bereich.zahlen.scheine > .cash-card, #kcZahlenEbene .kc-bereich.zahlen.fest > .cash-card { height: 100%; overflow: auto; }
+
+/* ---- Wahl im Mehr-Fenster --------------------------------------------------------- */
+.kc-aufbau-wahl { display: flex; align-items: center; gap: 10px; margin: 0 0 10px; font-weight: 600; }
+.kc-aufbau-wahl select { flex: 1; padding: 8px; font-size: 15px; }
+
+/* =====================================================================================
+   08.09.2026 - Durchspiel-Runde mit dem Betreiber ("erst mal passt das so")
+   ===================================================================================== */
+
+/* ---- Bon-Kopfzeile einzeilig: Warenkorb-Symbol · Mengenknöpfe ohne "MENGE" · Mülleimer ---- */
+.kc-bereich.bon.tabelle > .cart-title, .kc-bereich.bon.kompakt > .cart-title {
+  display: flex !important; flex-direction: row !important; align-items: center; gap: 6px; padding: 4px 6px !important; min-height: 0 !important;
+}
+.kc-bereich.bon.tabelle .cart-heading, .kc-bereich.bon.kompakt .cart-heading { flex: 0 0 auto; display: flex !important; flex-direction: row !important; align-items: center; gap: 6px; margin: 0 !important; padding: 0 !important; }
+.kc-bereich.bon.tabelle .cart-heading #selectedCartHint, .kc-bereich.bon.kompakt .cart-heading #selectedCartHint { display: none !important; }
+.kc-bereich.bon.tabelle .cart-heading-icon, .kc-bereich.bon.kompakt .cart-heading-icon { font-size: 24px; line-height: 1; display: inline-block !important; }
+.kc-bereich.bon.tabelle #cartQuantityBar, .kc-bereich.bon.kompakt #cartQuantityBar { flex: 1 1 auto; display: flex !important; gap: 4px; margin: 0 !important; padding: 0 !important; min-width: 0; }
+.kc-bereich.bon.tabelle #cartQuantityBar > span, .kc-bereich.bon.kompakt #cartQuantityBar > span { display: none !important; }
+.kc-bereich.bon.tabelle #cartQuantityBar > button, .kc-bereich.bon.kompakt #cartQuantityBar > button { flex: 1 1 0; min-width: 0; height: 40px !important; padding: 0 !important; font-size: 17px; }
+.kc-bereich.bon.tabelle #voidBonBtn, .kc-bereich.bon.kompakt #voidBonBtn { flex: 0 0 44px; width: 44px; height: 40px; padding: 0 !important; font-size: 20px; }
+.kc-bereich.bon.tabelle #voidBonBtn > span, .kc-bereich.bon.kompakt #voidBonBtn > span { display: none !important; }
+
+/* ---- Artikelzeile: zwei Zeilen. Zeile 1 Name + Knöpfe, Zeile 2 Pfand · Einzelpreis ------- */
+.kc-bereich.bon.tabelle .cart-row, .kc-bereich.bon.kompakt .cart-row {
+  grid-template-columns: minmax(0, 1fr) auto 40px 70px auto 26px !important;
+  grid-template-rows: auto auto !important; row-gap: 0 !important; align-items: center;
+}
+.kc-bereich.bon.tabelle .cart-name, .kc-bereich.bon.kompakt .cart-name { display: contents !important; }
+.kc-bereich.bon.tabelle .cart-name > strong, .kc-bereich.bon.kompakt .cart-name > strong { grid-column: 1; grid-row: 1; }
+.kc-bereich.bon.tabelle .cart-name > small, .kc-bereich.bon.kompakt .cart-name > small {
+  grid-column: 1 / -1; grid-row: 2; display: inline; font-size: 11px; line-height: 1.2; color: #4b5563; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.kc-bereich.bon.tabelle .cart-name > small:nth-of-type(n+2), .kc-bereich.bon.kompakt .cart-name > small:nth-of-type(n+2) { grid-column: 1 / -1; }
+/* mehrere <small> müssen in EINER Zeile stehen -> gemeinsam in Zeile 2, nebeneinander */
+.kc-bereich.bon.tabelle .cart-row > .cart-name > small, .kc-bereich.bon.kompakt .cart-row > .cart-name > small { justify-self: start; }
+.kc-bereich.bon.tabelle .cart-row > .cart-name > small:nth-of-type(2), .kc-bereich.bon.kompakt .cart-row > .cart-name > small:nth-of-type(2) { justify-self: end; text-align: right; }
+.kc-bereich.bon.tabelle .cart-deposit .rule-chip, .kc-bereich.bon.kompakt .cart-deposit .rule-chip { font-size: 10px; padding: 0 4px; }
+.kc-bereich.bon.tabelle .half-portion-cell, .kc-bereich.bon.tabelle .position-discount-button, .kc-bereich.bon.tabelle .qty-box, .kc-bereich.bon.tabelle .row-total, .kc-bereich.bon.tabelle .delete-row,
+.kc-bereich.bon.kompakt .half-portion-cell, .kc-bereich.bon.kompakt .position-discount-button, .kc-bereich.bon.kompakt .qty-box, .kc-bereich.bon.kompakt .row-total, .kc-bereich.bon.kompakt .delete-row { grid-row: 1; }
+
+/* ---- Positionsbereich: eine Zeile "Pos.: 3 | Ges.: 7 | Pfand 3 | % 1", GESAMT darunter ---- */
+.kc-bereich.bon.tabelle .summary-meta, .kc-bereich.bon.kompakt .summary-meta { display: flex !important; align-items: center; gap: 8px; flex-wrap: nowrap; font-size: 12px; }
+.kc-bereich.bon.tabelle .summary-meta > #positionCount, .kc-bereich.bon.kompakt .summary-meta > #positionCount { display: none !important; }
+.kc-bereich.bon.tabelle .summary-meta > .summary-meta-extra, .kc-bereich.bon.kompakt .summary-meta > .summary-meta-extra { display: none !important; }
+.kc-pos-zeile { flex: 1 1 auto; white-space: nowrap; font-size: 13px; color: #1f2937; }
+.kc-pos-zeile i { font-style: normal; color: #9ca3af; margin: 0 2px; }
+.kc-bereich.bon.tabelle .discount-inline, .kc-bereich.bon.kompakt .discount-inline { flex: 0 0 auto; display: flex; align-items: center; gap: 6px; }
+.kc-bereich.bon.tabelle .discount-inline #discountDisplay, .kc-bereich.bon.kompakt .discount-inline #discountDisplay { font-size: 11px; }
+.kc-bereich.bon.tabelle .cart-discount-button, .kc-bereich.bon.kompakt .cart-discount-button { padding: 4px 8px !important; font-size: 12px !important; }
+.kc-bereich.bon.tabelle .grand-total, .kc-bereich.bon.kompakt .grand-total { padding: 6px 10px !important; }
+
+/* ---- Bedienblock: Statuszeile (44 px) · darunter Rückgeld links + Sondertasten rechts ---- */
+.kc-bereich.bedienblock { gap: 6px; }
+.kc-statuszeile { flex: 0 0 44px; display: flex; gap: 6px; }
+.kc-statuszeile > button { flex: 1 1 0; min-width: 0; height: 44px !important; min-height: 0 !important; padding: 0 8px !important; font-size: 13px !important; display: flex !important; align-items: center; justify-content: center; gap: 6px; white-space: nowrap; overflow: hidden; }
+/* LED: grau aus, grün an. Die Kasse setzt bei aktivem Modus .active bzw. aria-pressed. */
+.kc-statuszeile > #trainingModeTopBtn::before, .kc-statuszeile > #rushModeBtn::before {
+  content: ''; width: 12px; height: 12px; border-radius: 50%; flex: 0 0 auto; background: #9ca3af; box-shadow: inset 0 0 0 2px rgba(0,0,0,.15);
+}
+.kc-statuszeile > #trainingModeTopBtn.active::before, .kc-statuszeile > #trainingModeTopBtn[aria-pressed="true"]::before,
+.kc-statuszeile > #rushModeBtn.active::before, .kc-statuszeile > #rushModeBtn[aria-pressed="true"]::before { background: #22c55e; box-shadow: 0 0 6px #22c55e; }
+.kc-statuszeile > #rushModeBtn > span:first-child, .kc-statuszeile > #trainingModeTopBtn > span:first-child { display: none; } /* das alte Punkt-Symbol, die LED übernimmt */
+/* 09.09.2026 (Betreiber): "Nur der Button Trainingsmodus soll die Beschriftung weg durch
+   Doktorhut markieren, alles andere (Warnfarbe, Text in der GESAMT-Zeile usw.) bleibt." LED
+   und Farbe des Knopfs unveraendert - nur der Wortlaut ersetzt. */
+.kc-statuszeile > #trainingModeTopBtn > span:last-child { font-size: 0 !important; }
+.kc-statuszeile > #trainingModeTopBtn > span:last-child::before { content: '🎓'; font-size: 20px; }
+.kc-bedien-unten { flex: 1 1 auto; min-height: 0; display: flex; gap: 6px; }
+.kc-bedien-unten > .kc-zahlen-taste { flex: 0 0 33%; }
+.kc-bedien-sonder { flex: 1 1 auto; min-width: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); grid-auto-rows: minmax(0, 1fr); gap: 6px; }
+.kc-bedien-sonder > button { min-width: 0; min-height: 0; height: 100%; width: 100%; font-size: 13px; padding: 2px 4px; overflow: hidden; white-space: normal; }
+.kc-bedien-sonder > button[hidden] { display: none !important; }
+.kc-bedien-sonder > #trainingModeBtn { display: flex !important; }
+
+/* ---- BAR mit QR: Text links, Code rechts ------------------------------------------------ */
+#kcAufbau .kc-bereich.zahlen.arten #checkoutQrMini { display: block !important; }
+.kc-bereich.zahlen.arten > #payBtn { display: flex !important; flex-direction: row !important; align-items: center; justify-content: space-between; gap: 8px; padding: 4px 10px !important; }
+.kc-bereich.zahlen.arten > #payBtn .pay-qr-canvas, .kc-bereich.zahlen.arten > #payBtn #checkoutQrMini { width: 78px !important; height: 78px !important; flex: 0 0 auto; }
+
+/* ---- Bildkacheln mit Info-Ecke im 3-Spalten-Fluss --------------------------------------- */
+.kc-bereich.artikel.fliessend > #productGrid { grid-auto-rows: 110px !important; }
+.kc-bereich.artikel.fliessend .product-tile { height: 100% !important; }
+.kc-bereich.artikel.fliessend .product-info-button { display: flex !important; }
+
+/* ---- Stoßzeiten: Zoom auf 9 Kacheln, Personal + Training weg -------------------------- */
+body.kc-aufbau.rush-mode .kc-bereich.artikel.fliessend > #productGrid { grid-auto-rows: 148px !important; }
+body.kc-aufbau.rush-mode .kc-bereich.artikel .product-label { font-size: 17px; }
+body.kc-aufbau.rush-mode .kc-bedien-sonder > #staffBtn, body.kc-aufbau.rush-mode .kc-bedien-sonder > #trainingModeBtn,
+body.kc-aufbau.rush-mode .kc-statuszeile > #trainingModeTopBtn { display: none !important; }
+/* Die Sondertasten bleiben in 3 Spalten - der Bedienblock ist fest 2 Rasterzeilen hoch, ein
+   Zusammenrücken gäbe den Artikeln nichts; dafür sind die verbliebenen 5 Knöpfe größer. */
+
+/* =====================================================================================
+   ZAHLEN-SEITE v4 (08.09.2026) - Geld links (8 Spalten), Berechnung + Bon rechts (4),
+   unten eine Tastenzeile. Alles nur in #kcZahlenEbene.
+   ===================================================================================== */
+#kcZahlenEbene .kc-aufbau-raster { background: #e8e8e8; }
+/* Happy-Hour-LED in der Statuszeile (wie Training/Stoßzeiten) */
+.kc-statuszeile > #happyHourQuickBtn::before { content: ''; width: 12px; height: 12px; border-radius: 50%; flex: 0 0 auto; background: #9ca3af; box-shadow: inset 0 0 0 2px rgba(0,0,0,.15); }
+.kc-statuszeile > #happyHourQuickBtn.active::before { background: #f59e0b; box-shadow: 0 0 6px #f59e0b; }
+.kc-statuszeile > #happyHourQuickBtn { font-size: 12px !important; }
+/* Mehr-Fenster: Kassenfunktionen nur nach Geheimweg + PIN (5 Minuten) */
+body.kc-aufbau #moreDialog .more-grid > button[data-action="opening"], body.kc-aufbau #moreDialog .more-grid > button[data-action="closing"], body.kc-aufbau #moreDialog .more-grid > button[data-action="cashdeposit"], body.kc-aufbau #moreDialog .more-grid > button[data-action="withdraw"], body.kc-aufbau #moreDialog .more-grid > button[data-action="vorfuehrung"], body.kc-aufbau #moreDialog .more-grid > button[data-action="central"], body.kc-aufbau #moreDialog .more-grid > button[data-action="rush"], body.kc-aufbau #moreDialog .more-grid > button[data-action="training"] { display: none !important; }
+body.kc-aufbau.kc-kassenfunktionen-offen #moreDialog .more-grid > button[data-action="opening"], body.kc-aufbau.kc-kassenfunktionen-offen #moreDialog .more-grid > button[data-action="closing"], body.kc-aufbau.kc-kassenfunktionen-offen #moreDialog .more-grid > button[data-action="cashdeposit"], body.kc-aufbau.kc-kassenfunktionen-offen #moreDialog .more-grid > button[data-action="withdraw"], body.kc-aufbau.kc-kassenfunktionen-offen #moreDialog .more-grid > button[data-action="vorfuehrung"], body.kc-aufbau.kc-kassenfunktionen-offen #moreDialog .more-grid > button[data-action="central"], body.kc-aufbau.kc-kassenfunktionen-offen #moreDialog .more-grid > button[data-action="rush"], body.kc-aufbau.kc-kassenfunktionen-offen #moreDialog .more-grid > button[data-action="training"] { display: inline-flex !important; outline: 2px solid #b45309; }
+/* PIN-Eingabe */
+#kcPinEbene { z-index: 150; background: rgba(12, 23, 38, .92); align-items: center; justify-content: center; }
+.kc-pin-karte { background: #fff; border-radius: 14px; padding: 18px 20px; width: 300px; text-align: center; }
+.kc-pin-titel { font-weight: 800; font-size: 18px; margin-bottom: 8px; }
+.kc-pin-punkte { font-size: 28px; letter-spacing: 8px; margin-bottom: 12px; }
+.kc-pin-tasten { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.kc-pin-tasten > button { height: 58px; font-size: 22px; font-weight: 700; border: 1px solid #cbd5e1; border-radius: 10px; background: #f3f4f6; cursor: pointer; }
+.kc-pin-hinweis { min-height: 20px; font-size: 13px; color: #b91c1c; margin-top: 8px; }
+
+/* ---- Scheine: eine Reihe, große Bilder ---- */
+#kcZahlenEbene .kc-bereich.scheine, #kcZahlenEbene .kc-bereich.muenzen { background: #fff; border: 1px solid #cbd5e1; padding: 6px; }
+#kcZahlenEbene .kc-bereich.scheine > #banknotes {
+  display: grid !important; grid-template-columns: repeat(3, minmax(0, 1fr)) !important; grid-template-rows: repeat(2, minmax(0, 1fr)); gap: 8px !important; height: 100%; min-height: 0;
+}
+/* Reihenfolge 50 · 100 · 200 oben, 5 · 10 · 20 unten (Betreiber): die Kasse rendert 5..200, hier
+   werden die Knöpfe per order umsortiert - die Logik bleibt unberührt. */
+#kcZahlenEbene .kc-bereich.scheine > #banknotes > button[data-value="50"] { order: 1; }
+#kcZahlenEbene .kc-bereich.scheine > #banknotes > button[data-value="100"] { order: 2; }
+#kcZahlenEbene .kc-bereich.scheine > #banknotes > button[data-value="200"] { order: 3; }
+#kcZahlenEbene .kc-bereich.scheine > #banknotes > button[data-value="5"] { order: 4; }
+#kcZahlenEbene .kc-bereich.scheine > #banknotes > button[data-value="10"] { order: 5; }
+#kcZahlenEbene .kc-bereich.scheine > #banknotes > button[data-value="20"] { order: 6; }
+#kcZahlenEbene .kc-bereich.scheine > #banknotes > button { height: 100% !important; min-height: 0 !important; width: 100% !important; padding: 4px !important; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+/* Die Scheine sind Hintergrundbilder auf .banknote-visual (fest 54/38 px hoch) - hier füllen sie
+   den Knopf: Bild in voller Höhe, Beschriftung groß unten links. */
+#kcZahlenEbene .kc-bereich.scheine > #banknotes .banknote-visual { height: 100% !important; width: 100% !important; font-size: 22px !important; background-size: contain !important; }
+#kcZahlenEbene .kc-bereich.scheine > #banknotes .banknote-visual > small { font-size: 20px; padding: 2px 8px; }
+/* ---- Münzen: eine Reihe à acht ---- */
+#kcZahlenEbene .kc-bereich.muenzen > #coins {
+  display: grid !important; grid-template-columns: repeat(8, minmax(0, 1fr)) !important; gap: 8px !important; height: 100%; min-height: 0; margin: 0 !important;
+}
+#kcZahlenEbene .kc-bereich.muenzen > #coins > button { height: 100% !important; min-height: 0 !important; width: 100% !important; padding: 2px !important; display: flex !important; flex-direction: column !important; align-items: center; justify-content: center; gap: 2px; font-size: 16px; }
+#kcZahlenEbene .kc-bereich.muenzen > #coins .coin-visual, #kcZahlenEbene .kc-bereich.muenzen > #coins .coin-foto { width: 56px !important; height: 56px !important; min-height: 56px !important; flex: 0 0 56px !important; border-radius: 50%; }
+#kcZahlenEbene .kc-bereich.muenzen > #coins > button { font-size: 15px !important; font-weight: 800; line-height: 1; }
+
+/* ---- Ziffernblock: nur die Tasten, groß ---- */
+#kcZahlenEbene .kc-bereich.zahlen.block > .keypad-shell { height: 100%; display: flex; flex-direction: column; gap: 4px; }
+#kcZahlenEbene .kc-bereich.zahlen.block .keypad-mode-row { display: none !important; }
+/* Anzeige des Ziffernblocks weg - der Betrag steht groß in der Berechnung */
+#kcZahlenEbene .kc-bereich.zahlen.block .keypad-display { display: none !important; }
+#kcZahlenEbene .kc-bereich.zahlen.block > .keypad-shell { display: flex !important; grid-template-areas: none !important; padding: 0 !important; }
+/* Der Ziffernblock der Kasse ist 4-spaltig (7 8 9 ⌫ / 4 5 6 C / 1 2 3 00 / , 0 . OK) - so lassen */
+#kcZahlenEbene .kc-bereich.zahlen.block .keypad { flex: 1 1 auto; min-height: 0; display: grid !important; grid-template-columns: repeat(4, minmax(0, 1fr)) !important; grid-auto-rows: minmax(0, 1fr) !important; gap: 6px !important; }
+#kcZahlenEbene .kc-bereich.zahlen.block .keypad > button { height: 100% !important; min-height: 0 !important; width: 100% !important; font-size: 24px !important; }
+
+/* ---- Korrektur: Zurück (Stapel, bis 10x) und Löschen ---- */
+#kcZahlenEbene .kc-bereich.korrektur { gap: 8px; }
+#kcZahlenEbene .kc-bereich.korrektur > button { flex: 1 1 0; min-height: 0; width: 100%; border: 0; border-radius: 10px; display: flex !important; flex-direction: column; align-items: center; justify-content: center; gap: 4px; color: #fff; font-weight: 800; cursor: pointer; }
+#kcZahlenEbene .kc-bereich.korrektur > #undoCashBtn { background: #1f2937; font-size: 22px; padding: 0 !important; text-align: center; }
+#kcZahlenEbene .kc-bereich.korrektur > #undoCashBtn::after { white-space: normal; padding: 0 6px; }
+#kcZahlenEbene .kc-bereich.korrektur > #undoCashBtn > b { font-size: 34px !important; line-height: 1; }
+#kcZahlenEbene .kc-bereich.korrektur > #undoCashBtn > span { display: none; }
+#kcZahlenEbene .kc-bereich.korrektur > #undoCashBtn::after { content: 'ZURÜCK · letzte Eingabe'; font-size: 12px; font-weight: 600; opacity: .85; }
+#kcZahlenEbene .kc-bereich.korrektur > #undoCashBtn[disabled] { opacity: .45; }
+#kcZahlenEbene .kc-bereich.korrektur > .kc-korrektur-loeschen { background: #7f1d1d; }
+#kcZahlenEbene .kc-bereich.korrektur > .kc-korrektur-loeschen strong { font-size: 18px; }
+#kcZahlenEbene .kc-bereich.korrektur > .kc-korrektur-loeschen small { font-size: 12px; opacity: .85; }
+
+/* ---- Berechnung: Positionszeile · Trennlinie · Zu zahlen · Gegeben · RÜCKGELD groß ---- */
+#kcZahlenEbene .kc-bereich.berechnung > .change-card { height: 100%; display: flex !important; flex-direction: column; padding: 8px 10px !important; gap: 2px; min-height: 0; }
+#kcZahlenEbene .kc-bereich.berechnung .kc-pos-zeile-zahlen { font-size: 12px; opacity: .85; border-bottom: 1px solid rgba(255,255,255,.35); padding-bottom: 3px; margin-bottom: 4px; white-space: nowrap; overflow: hidden; }
+/* 11.09.2026 (Betreiber: "Seite 2 - Zahlen-Seite - bei kleinen/alten Tablets nachbessern"):
+   ECHTER FUND bei kleiner Bildschirmhoehe (getestet 1024x600): die change-card war insgesamt
+   ca. 10px hoeher als ihr zugeteilter Platz - die Positionszeile (order:0, ganz oben) wurde
+   dadurch oben abgeschnitten. Nach demselben, in dieser Datei bereits etablierten Muster
+   (@media max-height:700px) behoben - Zeile wird bei wenig Hoehe zusaetzlich kompakter, das
+   reicht, um wieder vollstaendig ins zugeteilte Feld zu passen. */
+@media (max-height: 700px) {
+  #kcZahlenEbene .kc-bereich.berechnung > .change-card { gap: 0 !important; }
+  #kcZahlenEbene .kc-bereich.berechnung .kc-pos-zeile-zahlen { font-size: 10px !important; padding-bottom: 1px !important; margin-bottom: 1px !important; flex-shrink: 0 !important; }
+  #kcZahlenEbene .kc-bereich.berechnung > .change-card > small { flex-shrink: 0 !important; }
+  #kcZahlenEbene .kc-bereich.berechnung .change-card-head { flex-shrink: 0 !important; }
+  /* Der grosse Betrag darf als einziges etwas nachgeben, wenn es eng wird (siehe eigene,
+     spaeter im Stylesheet platzierte Regel bei der Original-Deklaration - eine fruehere
+     Regel hier an dieser Stelle wurde von der spaeteren, unbedingten 48px-Regel ueberstimmt). */
+}
+#kcZahlenEbene .kc-bereich.berechnung .change-card-head { order: 5; display: flex; justify-content: space-between; align-items: baseline; margin: 0; }
+#kcZahlenEbene .kc-bereich.berechnung .change-card-head > span { font-size: 13px; opacity: .85; }
+#kcZahlenEbene .kc-bereich.berechnung .change-card-head > #undoCashBtn { display: none; } /* sitzt im Korrekturfeld */
+#kcZahlenEbene .kc-bereich.berechnung .change-card-divider { display: none; }
+#kcZahlenEbene .kc-bereich.berechnung > .change-card > small { order: 2; display: flex; justify-content: space-between; align-items: baseline; font-size: 13px; }
+#kcZahlenEbene .kc-bereich.berechnung > .change-card > small > b { font-size: 26px; font-weight: 800; }
+#kcZahlenEbene .kc-bereich.berechnung > .change-card > small { font-size: 15px; }
+#kcZahlenEbene .kc-bereich.berechnung > .change-card > small:last-of-type { order: 1; }
+#kcZahlenEbene .kc-bereich.berechnung > .change-card > #changeDisplay { order: 6; font-size: 48px !important; line-height: 1.05; text-align: right; margin-top: auto; }
+/* 11.09.2026: bei wenig Bildschirmhoehe (siehe Fund weiter oben) ist 48px zu gross fuer das
+   zugeteilte Feld - hier an der RICHTIGEN Stelle im Stylesheet ueberschrieben (eine fruehere
+   Regel weiter oben wurde von der eben genannten, spaeteren 48px-Regel selbst uebertrumpft,
+   weil beide dieselbe Spezifitaet haben und die Reihenfolge im Stylesheet entscheidet). */
+@media (max-height: 700px) {
+  #kcZahlenEbene .kc-bereich.berechnung > .change-card > #changeDisplay { font-size: 24px !important; line-height: 1.1 !important; }
+}
+#kcZahlenEbene .kc-bereich.berechnung > .change-card > #changePaymentState { order: 7; font-size: 11px; text-align: right; }
+/* Zustände: fehlt -> rot, passt -> grün, Auszahlung -> alles rot */
+#kcZahlenEbene .kc-bereich.berechnung > .change-card.payment-insufficient #changeDisplay { color: #fca5a5; }
+#kcZahlenEbene .kc-bereich.berechnung > .change-card.payment-sufficient #changeDisplay { color: #86efac; }
+#kcZahlenEbene .kc-bereich.berechnung > .change-card.payment-payout { background: #991b1b !important; color: #fff !important; box-shadow: 0 0 0 3px #ef4444 inset; }
+/* 10.09.2026 (Betreiber: "die Schrift im roten Rueckgeld-Bereich muss groesser und
+   kontrastreicher sein"): ECHTER FUND - der dunkelrote Text (#c41717, aus der Grundansicht
+   fuer einen HELLEN rosa Hintergrund gedacht) blieb hier bestehen, obwohl der Aufbau die
+   Flaeche selbst dunkelrot faerbt (#991b1b) - dunkelrote Schrift auf dunkelrotem Grund war
+   dadurch praktisch unlesbar. #changePaymentState UND #dueDisplay standen dabei ausserdem nur
+   mit vorher 11px Schriftgroesse da, deutlich kleiner als die Nachbarfelder. Beides behoben:
+   alle vier Felder (auch #givenDisplay, das schon vorher richtig weiss war) jetzt einheitlich
+   weiss mit !important (die Grundansicht-Regel nutzt ebenfalls !important, ohne das eigene
+   waere sie unterlegen), und die kleine Statuszeile deutlich groesser. */
+#kcZahlenEbene .kc-bereich.berechnung > .change-card.payment-payout #changeDisplay,
+#kcZahlenEbene .kc-bereich.berechnung > .change-card.payment-payout #changePaymentState,
+#kcZahlenEbene .kc-bereich.berechnung > .change-card.payment-payout #dueDisplay,
+#kcZahlenEbene .kc-bereich.berechnung > .change-card.payment-payout #givenDisplay { color: #fff !important; }
+#kcZahlenEbene .kc-bereich.berechnung > .change-card.payment-payout #changePaymentState { font-size: 17px !important; font-weight: 900 !important; }
+#kcZahlenEbene .kc-bereich.berechnung > .change-card.payment-payout small { font-size: 15px !important; }
+#kcZahlenEbene .kc-bereich.berechnung > .change-card.payment-payout small b { font-size: 1.1em !important; }
+
+/* ---- Bon wie im Ausdruck, mit sichtbarem Scrollbalken ---- */
+#kcZahlenEbene .kc-bereich.beleg { background: #fff; border: 1px solid #cbd5e1; }
+.kc-beleg { height: 100%; display: flex; flex-direction: column; min-height: 0; }
+.kc-beleg-kopf { flex: 0 0 auto; font-weight: 800; font-size: 14px; padding: 6px 10px 2px; color: #374151; }
+.kc-beleg-text { flex: 1 1 auto; min-height: 0; margin: 0; padding: 4px 12px 8px; overflow-y: scroll; font: 15px/1.4 ui-monospace, "DejaVu Sans Mono", Menlo, Consolas, monospace; white-space: pre; color: #111; scrollbar-width: auto; scrollbar-gutter: stable; }
+.kc-beleg-text::-webkit-scrollbar { width: 12px; }
+.kc-beleg-text::-webkit-scrollbar-track { background: #e5e7eb; border-radius: 6px; }
+.kc-beleg-text::-webkit-scrollbar-thumb { background: #6b7280; border-radius: 6px; }
+
+/* ---- Tastenzeile: ← · Druck · Trinkgeld · Aufrunden · Stimmt so · BAR+QR · Karte · Konto ---- */
+#kcZahlenEbene .kc-bereich.tasten { display: flex; flex-direction: row; gap: 6px; }
+#kcZahlenEbene .kc-bereich.tasten > button { flex: 3 1 0; }
+#kcZahlenEbene .kc-bereich.tasten > .kc-taste-zurueck, #kcZahlenEbene .kc-bereich.tasten > #printBonBtn { flex: 2 1 0; }
+#kcZahlenEbene .kc-bereich.tasten > #exactCashBtn, #kcZahlenEbene .kc-bereich.tasten > #cashChangeBtn, #kcZahlenEbene .kc-bereich.tasten > #payBtn { flex: 4 1 0; }
+#kcZahlenEbene .kc-bereich.tasten > #cashChangeBtn { font-size: 13px !important; font-weight: 800; background: #166534 !important; color: #fff !important; white-space: normal; line-height: 1.15; }
+#kcZahlenEbene .kc-bereich.tasten > #cashChangeBtn[hidden] { display: none !important; }
+#kcZahlenEbene .kc-bereich.tasten > button { min-width: 0 !important; min-height: 0 !important; height: 100% !important; width: 100% !important; margin: 0 !important; padding: 4px !important; display: flex !important; flex-direction: column; align-items: center; justify-content: center; gap: 2px; border-radius: 10px; overflow: hidden; white-space: nowrap; }
+.kc-nur-vorlesen { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+#kcZahlenEbene .kc-bereich.tasten > .kc-taste-zurueck { background: #0c1726; color: #fff; border: 0; font-size: 34px; font-weight: 800; cursor: pointer; }
+/* Symboltasten: Text der Kasse ausblenden, Symbol groß, kleiner Untertitel */
+#kcZahlenEbene .kc-bereich.tasten > #printBonBtn, #kcZahlenEbene .kc-bereich.tasten > #tipBtn, #kcZahlenEbene .kc-bereich.tasten > #roundUpBtn { font-size: 0 !important; }
+#kcZahlenEbene .kc-bereich.tasten > #printBonBtn::before { content: '🖨'; font-size: 30px; }
+#kcZahlenEbene .kc-bereich.tasten > #tipBtn::before { content: '€+'; font-size: 26px; font-weight: 800; }
+#kcZahlenEbene .kc-bereich.tasten > #tipBtn::after { content: 'TRINKGELD'; font-size: 11px; font-weight: 700; }
+#kcZahlenEbene .kc-bereich.tasten > #roundUpBtn::before { content: '⤴'; font-size: 28px; font-weight: 800; }
+#kcZahlenEbene .kc-bereich.tasten > #roundUpBtn::after { content: 'AUFRUNDEN'; font-size: 11px; font-weight: 700; }
+#kcZahlenEbene .kc-bereich.tasten > #roundUpBtn { display: flex !important; }
+#kcZahlenEbene .kc-bereich.tasten > #exactCashBtn { font-size: 0 !important; font-weight: 800; }
+#kcZahlenEbene .kc-bereich.tasten > #exactCashBtn::before { content: '✓'; font-size: 26px; }
+#kcZahlenEbene .kc-bereich.tasten > #exactCashBtn::after { content: 'STIMMT SO'; font-size: 12px; }
+#kcZahlenEbene .kc-bereich.tasten > #exactCashBtn:not([disabled]) { background: #15803d !important; color: #fff !important; }
+#kcZahlenEbene .kc-bereich.tasten > #payBtn { flex-direction: row !important; justify-content: space-between; padding: 4px 8px !important; }
+#kcZahlenEbene .kc-bereich.tasten > #payBtn #checkoutQrMini { display: block !important; width: 70px !important; height: 70px !important; }
+#kcZahlenEbene .kc-bereich.tasten > #payBtn .pay-label { font-size: 22px; font-weight: 800; }
+#kcZahlenEbene .kc-bereich.tasten > #payBtn #payModeDetail { display: none; }
+#kcZahlenEbene .kc-bereich.tasten > button { grid-area: auto !important; } /* card-payment/keypad tragen Bereichsnamen aus dem alten Layout */
+#kcZahlenEbene .kc-bereich.tasten > #cardBtn { display: flex !important; opacity: .55; position: static !important; transform: none !important; }
+#kcZahlenEbene .kc-bereich.tasten > #cardBtn > b { font-size: 22px; }
+#kcZahlenEbene .kc-bereich.tasten > #cardBtn > span { font-size: 11px; }
+#kcZahlenEbene .kc-bereich.tasten > #cardBtn > small { font-size: 9px; }
+#kcZahlenEbene .kc-bereich.tasten > #cardBtn > small::after { content: ' · in Vorbereitung'; }
+#kcZahlenEbene .kc-bereich.tasten > #accountChargeBtn { font-size: 14px !important; font-weight: 800; }
+#kcZahlenEbene .kc-bereich.tasten > #tipBtn::before, #kcZahlenEbene .kc-bereich.tasten > #roundUpBtn::before { line-height: 1; }
+#kcZahlenEbene .kc-bereich.tasten > #payBtn > .pay-label { font-size: 22px; }
+/* Der feste Zurück-Knopf oben rechts wird nur gebraucht, wenn die Tastenzeile fehlt */
+#kcZahlenEbene .kc-zahlen-zurueck[hidden] { display: none !important; }
+
+
+/* ===================================================================================
+   PARKEN (08.09.2026): blaues P neben dem Warenkorb-Symbol; rot mit Zahl bei geparkten Bons
+   =================================================================================== */
+.kc-park-knopf { position: relative; width: 40px; height: 40px; border: 0; border-radius: 8px; background: #1d4ed8; color: #fff; font-size: 22px; font-weight: 900; cursor: pointer; flex: 0 0 auto; display: flex; align-items: center; justify-content: center; }
+.kc-park-knopf.mit-bons { background: #dc2626; }
+.kc-park-zahl { position: absolute; top: -6px; right: -6px; min-width: 20px; height: 20px; padding: 0 5px; border-radius: 999px; background: #fff; color: #dc2626; font-size: 13px; font-weight: 900; font-style: normal; display: flex; align-items: center; justify-content: center; box-shadow: 0 1px 3px rgba(0,0,0,.4); }
+.kc-park-zahl[hidden] { display: none !important; }
+#kcParkEbene { position: fixed; inset: 0; z-index: 130; background: #e8e8e8; display: flex; flex-direction: column; }
+#kcParkEbene[hidden] { display: none !important; }
+.kc-park-kopf { display: flex; justify-content: space-between; align-items: center; padding: 10px 14px; background: #0c1726; color: #fff; font-size: 20px; }
+.kc-park-zu { padding: 10px 14px; border: 0; border-radius: 8px; background: #1d4ed8; color: #fff; font-weight: 700; cursor: pointer; }
+.kc-park-liste { flex: 1; overflow: auto; padding: 12px; display: flex; flex-direction: column; gap: 10px; }
+.kc-park-karte { display: flex; align-items: center; gap: 12px; background: #fff; border: 1px solid #cbd5e1; border-radius: 10px; padding: 10px 12px; }
+.kc-park-info { flex: 1; min-width: 0; font-size: 16px; }
+.kc-park-pos { font-size: 13px; color: #4b5563; margin-top: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.kc-park-tasten { display: flex; gap: 8px; flex: 0 0 auto; }
+.kc-park-tasten > button { height: 56px; padding: 0 16px; border: 0; border-radius: 8px; font-weight: 800; font-size: 15px; cursor: pointer; }
+.kc-park-holen { background: #15803d; color: #fff; }
+.kc-park-anhaengen { background: #1d4ed8; color: #fff; }
+.kc-park-anhaengen[hidden] { display: none !important; }
+.kc-park-weg { background: #e5e7eb; color: #7f1d1d; font-size: 20px; }
+.kc-park-leer, .kc-park-hinweis { color: #6b7280; padding: 10px 4px; font-size: 14px; }
+
+/* ===================================================================================
+   KOPFZEILE (08.09.2026, Sitzungsende): Reihenfolge von rechts: Tür · Menü · Ansicht · Uhr ·
+   Ton · Schloss · Programm · LED-Blöcke · Herz. CSS-order; Uhr/Herz baut kc-kopfzeile.js.
+   =================================================================================== */
+body.kc-aufbau .kc-bereich.kopf .header-status { display: flex !important; flex-direction: row; justify-content: flex-end; align-items: center; gap: 6px; flex-wrap: nowrap !important; }
+body.kc-aufbau .kc-bereich.kopf .header-status > * { order: 50; }
+body.kc-aufbau .kc-bereich.kopf .header-status > #headerExitBtn { order: 100; }
+body.kc-aufbau .kc-bereich.kopf .header-status > #menuBtn { order: 99; }
+body.kc-aufbau .kc-bereich.kopf .header-status > #mirrorLayoutBtn { order: 98; }
+body.kc-aufbau .kc-bereich.kopf .header-status > #timeClockBtn { order: 97; } /* die Kasse hat schon eine Uhr */
+body.kc-aufbau .kc-bereich.kopf .header-status > #kcKopfUhr { display: none; }
+body.kc-aufbau .kc-bereich.kopf .header-status > #cashSoundBtn { order: 96; }
+body.kc-aufbau .kc-bereich.kopf .header-status > #screenLockBtn { order: 95; }
+body.kc-aufbau .kc-bereich.kopf .header-status > #kcProgramStatusBtn { order: 94; }
+body.kc-aufbau .kc-bereich.kopf .header-status > #kcLedBlock, body.kc-aufbau .kc-bereich.kopf .header-status > .supabase-led-group { order: 93; }
+body.kc-aufbau .kc-bereich.kopf .header-status > #kcHerz { order: 92; }
+.kc-kopf-uhr { color: #fff; font-weight: 800; font-size: 18px; padding: 0 8px; letter-spacing: .02em; font-variant-numeric: tabular-nums; }
+.kc-herz { border: 0; background: transparent; color: #6b7280; font-size: 24px; line-height: 1; padding: 4px 6px; cursor: pointer; }
+.kc-herz.lebt { color: #ef4444; animation: kcHerzschlag 1.2s ease-in-out infinite; }
+.kc-herz.tot { color: #6b7280; }
+.kc-herz.unbekannt { color: #9ca3af; }
+@keyframes kcHerzschlag { 0%, 100% { transform: scale(1); } 15% { transform: scale(1.25); } 30% { transform: scale(1); } 45% { transform: scale(1.15); } }
+/* Ebenen (Herz-Liste, Verbindungen) */
+.kc-ebene { position: fixed; inset: 0; z-index: 140; background: #e8e8e8; display: flex; flex-direction: column; }
+.kc-ebene[hidden] { display: none !important; }
+.kc-ebene-kopf { display: flex; justify-content: space-between; align-items: center; padding: 10px 14px; background: #0c1726; color: #fff; font-size: 20px; }
+.kc-ebene-zu, .kc-ebene-test { padding: 10px 14px; border: 0; border-radius: 8px; background: #1d4ed8; color: #fff; font-weight: 700; cursor: pointer; font-size: 15px; }
+.kc-ebene-test { background: #15803d; }
+.kc-ebene-inhalt { flex: 1; overflow: auto; padding: 14px; }
+.kc-herz-tabelle { width: 100%; border-collapse: collapse; background: #fff; font-size: 16px; }
+.kc-herz-tabelle th, .kc-herz-tabelle td { padding: 8px 12px; border-bottom: 1px solid #e5e7eb; text-align: left; }
+.kc-herz-tabelle tr.ok td:nth-child(2) { color: #15803d; font-weight: 700; }
+.kc-herz-tabelle tr.weg td:nth-child(2) { color: #b91c1c; font-weight: 700; }
+.kc-tachos { display: flex; gap: 14px; justify-content: space-around; margin-bottom: 14px; }
+.kc-tacho { flex: 1; background: #fff; border-radius: 12px; padding: 10px; text-align: center; border: 1px solid #cbd5e1; }
+.kc-tacho svg { width: 100%; max-width: 220px; height: auto; }
+.kc-tacho-wert { font-size: 26px; font-weight: 900; }
+.kc-tacho-titel { font-size: 13px; color: #4b5563; }
+.kc-verb-liste { background: #fff; border-radius: 12px; border: 1px solid #cbd5e1; padding: 6px 12px; }
+.kc-verb-zeile { display: flex; justify-content: space-between; gap: 12px; padding: 8px 0; border-bottom: 1px solid #e5e7eb; font-size: 16px; }
+.kc-verb-zeile.gut b { color: #15803d; } .kc-verb-zeile.schlecht b { color: #b91c1c; }
+.kc-verb-liste pre { font-size: 12px; white-space: pre-wrap; }
+
+/* Hinweisleiste "Neue Oberfläche verfügbar" (08.09.) */
+.kc-aufbau-hinweis { position: fixed; left: 50%; bottom: 40px; transform: translateX(-50%); z-index: 160; max-width: 90vw; padding: 12px 18px; border: 0; border-radius: 10px; background: #1d4ed8; color: #fff; font-size: 15px; box-shadow: 0 4px 16px rgba(0,0,0,.35); cursor: pointer; text-align: left; }
+.kc-aufbau-stand { display: block; font-weight: 400; font-size: 11px; color: #4b5563; }
+
+/* =====================================================================================
+   08.09.2026 abends - Rückmeldung vom Tablet-Test (Betreiber), alles nur im Aufbau
+   ===================================================================================== */
+:root { --kc-neon: #17c964; --kc-neon-dunkel: #0f9d4f; --kc-rot: #dc2626; }
+
+/* ---- Feste Farbtabelle je Funktion - gilt auf Seite 1 UND Seite 2 ---- */
+body.kc-aufbau #staffBtn { background: #d97706 !important; color: #fff !important; }
+body.kc-aufbau #depositBtn { background: #0369a1 !important; color: #fff !important; }
+body.kc-aufbau #tipBtn { background: #be185d !important; color: #fff !important; }
+body.kc-aufbau #complaintBtn { background: #9a3412 !important; color: #fff !important; }
+body.kc-aufbau #printBonBtn { background: #334155 !important; color: #fff !important; }
+body.kc-aufbau #moreBtn { background: #4b5563 !important; color: #fff !important; }
+body.kc-aufbau #roundUpBtn { background: #b45309 !important; color: #fff !important; }
+body.kc-aufbau #exactCashBtn:not([disabled]) { background: #15803d !important; color: #fff !important; }
+body.kc-aufbau #accountChargeBtn { background: #4c1d95 !important; color: #fff !important; }
+body.kc-aufbau #cardBtn { background: #9ca3af !important; color: #fff !important; }
+/* BAR, BAR KASSIEREN und RÜCKGELD: Neongrün mit weißer Schrift */
+body.kc-aufbau #payBtn, body.kc-aufbau #cashChangeBtn, body.kc-aufbau .kc-zahlen-taste {
+  background: linear-gradient(180deg, var(--kc-neon), var(--kc-neon-dunkel)) !important; color: #fff !important; text-shadow: 0 1px 2px rgba(0,0,0,.35);
+}
+body.kc-aufbau #payBtn .pay-label, body.kc-aufbau #payBtn #payModeDetail, body.kc-aufbau #cashChangeBtn * { color: #fff !important; }
+/* Auszahlung (Minusbetrag): Bartasten rot */
+body.kc-aufbau.kc-bon-auszahlung #payBtn, body.kc-aufbau.kc-bon-auszahlung #cashChangeBtn, body.kc-aufbau.kc-bon-auszahlung .kc-zahlen-taste, body.kc-aufbau.kc-bon-auszahlung #exactCashBtn:not([disabled]) {
+  background: linear-gradient(180deg, #ef4444, #b91c1c) !important;
+}
+/* Leerer Bon: Abschlusstasten ausgegraut, nichts Versehentliches */
+body.kc-aufbau.kc-bon-leer #kcAufbau #payBtn, body.kc-aufbau.kc-bon-leer #kcAufbau #accountChargeBtn, body.kc-aufbau.kc-bon-leer #kcAufbau .kc-zahlen-taste {
+  background: #d1d5db !important; color: #6b7280 !important; text-shadow: none; pointer-events: none;
+}
+/* Sondertasten: weiße fette Schrift, Bondruck nur Symbol, einheitliche Icons */
+body.kc-aufbau .kc-bedien-sonder > button { font-weight: 800; font-size: 13px; letter-spacing: .01em; }
+body.kc-aufbau .kc-bedien-sonder > #printBonBtn { font-size: 0 !important; }
+body.kc-aufbau .kc-bedien-sonder > #printBonBtn::before { content: '🖨'; font-size: 30px; }
+
+/* ---- Statuszeile: vier gleiche Tasten mit LED, Team wie die anderen ---- */
+.kc-statuszeile > button { background: #fff !important; color: #111827 !important; border: 1px solid #cbd5e1 !important; border-radius: 8px !important; font-weight: 700 !important; }
+.kc-statuszeile > #operatorBtn { display: flex !important; flex-direction: row !important; }
+.kc-statuszeile > #operatorBtn::before { content: ''; width: 12px; height: 12px; border-radius: 50%; flex: 0 0 auto; background: #22c55e; box-shadow: 0 0 6px #22c55e; }
+.kc-statuszeile > #operatorBtn > span { display: none !important; }
+.kc-statuszeile > #operatorBtn > small { display: none !important; }
+.kc-statuszeile > #operatorBtn::after { content: attr(data-kc-text); font-size: 13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.kc-statuszeile > #happyHourQuickBtn > span:first-child { display: none; }
+.kc-statuszeile > #happyHourQuickBtn > #happyHourQuickText { font-size: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+/* ---- Bon: Spalten fest, damit %, −/+, Preis, Papierkorb in allen Zeilen untereinander stehen ---- */
+.kc-bereich.bon.tabelle .cart-row, .kc-bereich.bon.kompakt .cart-row { grid-template-columns: minmax(0, 1fr) 34px 40px 76px 72px 28px !important; }
+.kc-bereich.bon.tabelle .half-portion-cell, .kc-bereich.bon.kompakt .half-portion-cell { width: 34px; min-width: 34px; }
+.kc-bereich.bon.tabelle .row-total, .kc-bereich.bon.kompakt .row-total { text-align: right; white-space: nowrap; }
+/* Bon-Kopf: Mengen 1-6 (7 weg), breiter; Warenkorb-Symbol hell */
+.kc-bereich.bon.tabelle #cartQuantityBar > button[data-cart-qty="7"], .kc-bereich.bon.kompakt #cartQuantityBar > button[data-cart-qty="7"] { display: none !important; }
+.kc-bereich.bon .cart-heading-icon { color: #fff; filter: brightness(1.6) contrast(1.2); }
+/* GESAMT größer; leer weiß, mit Positionen grün + grüner Rahmen um den Warenkorb */
+.kc-bereich.bon.tabelle .grand-total, .kc-bereich.bon.kompakt .grand-total { font-size: 26px !important; }
+.kc-bereich.bon.tabelle .grand-total strong, .kc-bereich.bon.kompakt .grand-total strong { font-size: 40px !important; }
+body.kc-aufbau.kc-bon-leer .kc-bereich.bon .grand-total { background: #fff !important; color: #6b7280 !important; border-color: #d1d5db !important; }
+body.kc-aufbau.kc-bon-leer .kc-bereich.bon .grand-total strong { color: #6b7280 !important; }
+body.kc-aufbau:not(.kc-bon-leer) .kc-bereich.bon { box-shadow: inset 0 0 0 4px #22c55e, 0 2px 8px rgba(0,0,0,.12) !important; }
+body.kc-aufbau.kc-bon-auszahlung .kc-bereich.bon { box-shadow: inset 0 0 0 4px #ef4444, 0 2px 8px rgba(0,0,0,.12) !important; }
+body.kc-aufbau.kc-bon-auszahlung .kc-bereich.bon .grand-total { background: #fee2e2 !important; color: #991b1b !important; border-color: #ef4444 !important; }
+
+/* ---- Zahlungsarten Seite 1: BAR mit QR 2/3, KONTO 1/3; QR ohne schwarzen Rahmen ---- */
+.kc-bereich.zahlen.arten > #payBtn { flex: 2 1 0; }
+.kc-bereich.zahlen.arten > #accountChargeBtn { flex: 1 1 0; }
+/* 09.09.2026 (Betreiber, Pfandrückgabe -> "kannste behalten"): BEHALTEN steht bei einer
+   Auszahlung in derselben Zeile wie BAR und KONTO - keine zusätzliche Höhe, kein neuer
+   Baustein nötig. KORREKTUR 10.09.2026: "auf Konto" ergibt bei einer Auszahlung SEHR WOHL
+   Sinn, wenn der ursprüngliche Kauf über genau dieses Konto lief (Pfand-Gutschrift statt
+   Bar-Auszahlung) - KONTO wird deshalb nicht mehr verdrängt, siehe weiter unten. */
+.kc-bereich.zahlen.arten > #keepAsTipBtn { display: none !important; flex: 1 1 0; }
+.kc-bereich.zahlen.arten > #keepAsTipBtn > small { display: block; font-size: 11px; font-weight: 700; }
+/* 10.09.2026 (Betreiber: "Glas soll als Gutschrift aufs Konto zurueck, nicht als Auszahlung -
+   das muss die Kasse annehmen"): KONTO blieb bisher bei einer Auszahlung IMMER ausgeblendet -
+   das ging von der Annahme aus, eine Auszahlung sei entweder bar oder Trinkgeld. Genau der
+   Fall "Kauf lief ueber ein Konto, Pfand soll als Gutschrift auf DASSELBE Konto zurueck" wurde
+   dabei nicht bedacht. KONTO bleibt jetzt auch bei Auszahlung sichtbar - fuehrt bei negativem
+   Betrag zu einer Gutschrift auf dem gewaehlten Konto (siehe kcRuleCheck: negative Positionen
+   umgehen bewusst die Warengruppen-Freigabe, das ist ja keine neue Belastung). BAR und
+   "Behalten als Trinkgeld" bleiben unveraendert fuer den Fall ohne Konto-Bezug (anderer Kunde). */
+body.kc-aufbau.kc-bon-auszahlung .kc-bereich.zahlen.arten > #keepAsTipBtn:not([hidden]) { display: flex !important; flex-direction: column; align-items: center; justify-content: center; }
+body.kc-aufbau .pay-qr-canvas, body.kc-aufbau #checkoutQrMini { border: 0 !important; box-shadow: none !important; border-radius: 6px !important; padding: 3px !important; background: #fff !important; }
+.kc-bereich.zahlen.arten > #payBtn .pay-label { font-size: 26px; }
+
+/* ---- Artikelkacheln: Info-Ecke groß, Pfand-Rahmen, Fotos ohne Balken ---- */
+.kc-bereich.artikel .product-info-button { width: 44px !important; height: 44px !important; min-width: 44px !important; font-size: 22px !important; z-index: 5; background: #1d4ed8 !important; color: #fff !important; border-radius: 0 0 12px 0 !important; display: flex !important; align-items: center; justify-content: center; top: 0 !important; left: 0 !important; }
+.kc-bereich.artikel .product-tile::before, .kc-bereich.artikel .product-tile .info-corner { display: none !important; }
+.kc-bereich.artikel .product-tile { background-size: cover !important; background-position: center !important; }
+.kc-bereich.artikel .product-tile img { object-fit: cover !important; width: 100% !important; height: 100% !important; }
+.kc-bereich.artikel .product-tile-wrap:has(.deposit-tag) .product-tile { box-shadow: inset 0 0 0 4px var(--kc-pfand-farbe, #93c5fd) !important; }
+.kc-bereich.artikel .deposit-tag { background: var(--kc-pfand-farbe, #93c5fd) !important; color: #111 !important; font-weight: 700; }
+
+/* ---- Kopfzeile: Logo links, alles andere gleich groß rechts, Herz & Uhr größer ---- */
+.kc-bereich.kopf.kompakt .brand-block { display: flex !important; order: -1 !important; margin: 0 auto 0 0 !important; padding: 0 !important; width: 40px; height: 38px; align-items: center; justify-content: center; background: #0c1726 !important; border: 1px solid #334155 !important; border-radius: 8px; flex: 0 0 auto; }
+.kc-bereich.kopf.kompakt .brand-block img { width: 32px !important; height: 32px !important; max-width: 32px !important; object-fit: contain; }
+.kc-bereich.kopf.kompakt > header.app-header { padding: 3px 6px !important; gap: 4px; }
+.kc-bereich.kopf.kompakt > header.app-header { display: flex !important; flex-direction: row; align-items: center; gap: 6px; background: #0c1726; }
+.kc-bereich.kopf.kompakt .header-status { flex: 1 1 auto; min-width: 0; }
+.kc-bereich.kopf.kompakt .brand-block .brand-text { display: none !important; }
+.kc-bereich.kopf.kompakt > header.app-header { padding: 4px 8px !important; min-height: 60px; }
+body.kc-aufbau .kc-bereich.kopf .header-status { gap: 3px; padding: 0 !important; flex-wrap: nowrap !important; min-height: 46px; overflow: hidden; justify-content: flex-end; }
+body.kc-aufbau .kc-bereich.kopf .header-status > button, body.kc-aufbau .kc-bereich.kopf .header-status > #kcLedBlock, body.kc-aufbau .kc-bereich.kopf .header-status > .supabase-led-group {
+  height: 38px !important; min-height: 38px !important; width: 38px; min-width: 38px !important; padding: 0 !important; margin: 0 !important; border-radius: 8px !important; display: flex !important; align-items: center; justify-content: center; box-sizing: border-box; flex: 0 0 auto; font-size: 17px;
+}
+body.kc-aufbau .kc-bereich.kopf .header-status > #kcLedBlock { width: auto; padding: 0 3px !important; gap: 2px; }
+body.kc-aufbau .kc-bereich.kopf .header-status > #kcLedBlock .kc-led, body.kc-aufbau .kc-bereich.kopf .header-status > #kcLedBlock > span { width: 20px; height: 20px; }
+body.kc-aufbau .kc-bereich.kopf .header-status > .supabase-led-group { width: auto; padding: 0 3px !important; order: 94 !important; }
+body.kc-aufbau .kc-bereich.kopf .header-status > .supabase-led-group .supabase-led { width: 18px; height: 18px; }
+body.kc-aufbau .kc-bereich.kopf .header-status > #kcProgramStatusBtn { width: auto; padding: 0 3px !important; font-size: 9px; }
+body.kc-aufbau .kc-bereich.kopf .header-status > #kcHerz { font-size: 28px; width: 36px; background: transparent !important; border: 0 !important; }
+body.kc-aufbau .kc-bereich.kopf .header-status > #timeClockBtn { width: auto; min-width: 46px !important; padding: 0 4px !important; font-size: 19px !important; }
+body.kc-aufbau .kc-bereich.kopf .header-status > #timeClockBtn * { font-size: 17px !important; }
+
+/* ---- Kassenfunktionen-Seite ---- */
+.kc-funk-raster { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }
+.kc-funk { min-height: 130px; border: 0; border-radius: 14px; background: #fff; box-shadow: 0 2px 8px rgba(0,0,0,.15); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; cursor: pointer; padding: 10px; }
+.kc-funk-icon { font-size: 36px; line-height: 1; }
+.kc-funk b { font-size: 17px; } .kc-funk small { font-size: 12px; color: #4b5563; text-align: center; }
+
+/* ---- Schließen-Kreuz oben in Fenstern ---- */
+.kc-dialog-x { position: absolute; top: 8px; right: 10px; width: 40px; height: 40px; border: 0; border-radius: 50%; background: #0c1726; color: #fff; font-size: 26px; line-height: 1; cursor: pointer; z-index: 5; }
+body.kc-aufbau dialog > form, body.kc-aufbau dialog { position: relative; }
+/* LED-Bloecke in der kompakten Kopfzeile kleiner, damit die ganze Reihe in 505 px passt */
+body.kc-aufbau .kc-bereich.kopf #kcLedBlock .kc-sync-led, body.kc-aufbau .kc-bereich.kopf #kcLedBlock .kc-sync-status-leds > * { width: 16px !important; height: 16px !important; min-width: 16px !important; }
+body.kc-aufbau .kc-bereich.kopf #kcLedBlock .kc-sync-status-leds { gap: 2px !important; padding: 0 2px !important; }
+body.kc-aufbau .kc-bereich.kopf .supabase-led-group .supabase-led { width: 16px !important; height: 16px !important; border-width: 1px !important; }
+body.kc-aufbau .kc-bereich.kopf .header-status > #kcProgramStatusBtn { max-width: 40px; overflow: hidden; }
+body.kc-aufbau .kc-bereich.kopf .header-status > #kcLedBlock, body.kc-aufbau .kc-bereich.kopf .header-status > .supabase-led-group { zoom: .72; height: 52px !important; }
+body.kc-aufbau .kc-bereich.kopf .header-status > #kcProgramStatusBtn { zoom: .85; height: 44px !important; }
+
+/* Kompakter Kopf in zwei Zeilen (08.09., iPad) */
+.kc-bereich.kopf.kompakt { gap: 2px; }
+.kc-bereich.kopf.kompakt > header.app-header { flex: 0 0 auto; min-height: 44px !important; padding: 2px 6px !important; }
+.kc-bereich.kopf.kompakt .kc-kopf-zeile2 { flex: 1 1 auto; min-height: 0; display: flex; align-items: center; gap: 4px; padding: 0 6px; background: #0c1726; border-radius: 0 0 8px 8px; }
+.kc-bereich.kopf.kompakt .kc-kopf-zeile2 > .brand-block { margin: 0 !important; }
+.kc-bereich.kopf.kompakt .kc-kopf-zeile2 > #kcHerz { font-size: 28px; width: 36px; background: transparent !important; border: 0 !important; padding: 0 !important; }
+.kc-bereich.kopf.kompakt .kc-kopf-zeile2 > #kcLedBlock, .kc-bereich.kopf.kompakt .kc-kopf-zeile2 > .supabase-led-group { zoom: .8; display: flex !important; align-items: center; }
+.kc-bereich.kopf.kompakt .kc-kopf-zeile2 > .mode-message-center { flex: 1 1 auto; min-width: 0; display: flex; align-items: center; gap: 4px; }
+.kc-bereich.kopf.kompakt .kc-kopf-zeile2 > .mode-message-center #notificationBar { flex: 1; min-width: 0; font-size: 12px; padding: 2px 6px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.kc-bereich.kopf.kompakt .kc-kopf-zeile2 > .mode-message-center > button { width: 32px; height: 32px; padding: 0; }
+/* die alte Zeile-1-Regel fuer LED-Bloecke gilt dort nicht mehr */
+body.kc-aufbau .kc-bereich.kopf .header-status > button { width: 42px; min-width: 42px !important; height: 40px !important; min-height: 40px !important; }
+body.kc-aufbau .kc-bereich.kopf .header-status > #timeClockBtn { min-width: 54px !important; }
+body.kc-aufbau .kc-bereich.kopf .header-status > #kcProgramStatusBtn { zoom: 1; max-width: 46px; height: 40px !important; }
+
+body.kc-aufbau .kc-bereich.kopf.kompakt > header.app-header > .header-status { justify-content: flex-end !important; margin-left: auto !important; width: 100%; }
+
+/* =====================================================================================
+   08.09.2026 Runde 3 (iPad-Foto): Kochmütze, Fotos, Team, Rückgängig, Info-Ecke, Puls,
+   Warenkorb-Symbol, BAR mit Betrag + Laufpfeil, Sammelbestellung
+   ===================================================================================== */
+/* 1 Kochmütze: feste Größe, das Bild darf nicht breiter werden (Safari) */
+.kc-bereich.kopf.kompakt .brand-block { width: 40px !important; min-width: 40px !important; max-width: 40px !important; height: 38px !important; flex: 0 0 40px !important; overflow: hidden; }
+.kc-bereich.kopf.kompakt .brand-block img { width: 30px !important; height: 30px !important; max-width: 30px !important; max-height: 30px !important; }
+/* 2 Fotos ohne Balken: die Kasse deckelt Bilder auf 54 px / 52 % (tablet-fit, kleine Höhe) - hier aufheben */
+body.kc-aufbau .kc-bereich.artikel .product-tile img, body.tablet-fit.kc-aufbau .kc-bereich.artikel .product-tile img { height: 100% !important; max-height: none !important; width: 100% !important; object-fit: cover !important; }
+@media (max-height: 700px) { body.kc-aufbau .kc-bereich.artikel .product-tile img { height: 100% !important; } }
+/* 3 Team-Taste exakt wie die anderen */
+.kc-statuszeile > button, .kc-statuszeile > #operatorBtn { height: 44px !important; min-height: 44px !important; max-height: 44px !important; padding: 0 8px !important; font-size: 13px !important; line-height: 1 !important; flex: 1 1 0 !important; min-width: 0 !important; width: auto !important; box-sizing: border-box; }
+/* 4 Rückgängig-Knopf neben der Meldungszeile deutlich */
+.kc-bereich.kopf.kompakt .kc-kopf-zeile2 > .mode-message-center > button { width: auto !important; height: 34px !important; padding: 0 10px !important; background: #1d4ed8 !important; color: #fff !important; border: 0 !important; border-radius: 8px !important; font-size: 0 !important; display: flex; align-items: center; gap: 4px; }
+.kc-bereich.kopf.kompakt .kc-kopf-zeile2 > .mode-message-center > button::before { content: '↶ Rückgängig'; font-size: 13px; font-weight: 700; white-space: nowrap; }
+/* 5 Info-Ecke: nur EIN i, 48 px */
+.kc-bereich.artikel .product-info-button { width: 48px !important; height: 48px !important; min-width: 48px !important; font-size: 0 !important; border-radius: 0 0 14px 0 !important; }
+.kc-bereich.artikel .product-info-button::after { content: 'i'; font-size: 26px; font-weight: 900; font-family: Georgia, serif; }
+/* 10.09.2026: die Puls-Animation samt korrekter Gruppenfarbe steht jetzt zentral in styles.css
+   (.category-tabs button.active) - dort wirkt sie fuer Standard- UND Aufbau-Ansicht gleich,
+   deshalb hier keine eigene, zweite Zuweisung mehr noetig (hatte sonst mit der dortigen um die
+   "animation"-Eigenschaft konkurriert). */
+/* Warenkorb-Symbol: ohne Kreis, groß, hell */
+.kc-bereich.bon .cart-heading-icon { background: transparent !important; border: 0 !important; box-shadow: none !important; width: 44px; height: 40px; display: inline-flex !important; align-items: center; justify-content: center; font-size: 30px !important; filter: brightness(2) drop-shadow(0 0 2px #000); border-radius: 8px; }
+.kc-bereich.bon .cart-heading-icon:active { background: rgba(255,255,255,.2) !important; }
+/* BAR mit Betrag, breiteres QR-Feld, Laufpfeil */
+.kc-bereich.zahlen.arten > #payBtn .pay-label { font-size: 0 !important; }
+.kc-bereich.zahlen.arten > #payBtn .pay-label::before { content: attr(data-kc-betrag); font-size: 22px; font-weight: 900; white-space: nowrap; }
+.kc-bereich.zahlen.arten > #payBtn { gap: 6px; padding: 4px 6px 4px 10px !important; }
+.kc-bereich.zahlen.arten > #payBtn .pay-qr-canvas, .kc-bereich.zahlen.arten > #payBtn #checkoutQrMini { width: 84px !important; height: 84px !important; }
+/* 10.09.2026 (Betreiber: "der untere Bereich wird etwas abgeschnitten, deshalb ist der
+   Bezahl-QR-Code zu tief und kann nicht gelesen werden"): auf kuerzeren Bildschirmen (viele
+   echte iPads liegen unter den hier sonst angenommenen 768px, besonders im Standalone-Modus
+   mit eigener Statuszeile) reichte die feste 84px-Groesse nicht mehr sicher aus. GENAU
+   DIESELBE Selektorkette wie in der Zeile direkt darueber, sonst gewinnt bei gleicher
+   Spezifitaet die FRUeHERE Regel im Dateifluss (schon mehrfach heute Nacht genau so
+   passiert) - deshalb bewusst DIREKT DANACH eingefuegt, nicht irgendwo anders in der Datei. */
+@media (max-height: 700px) {
+  .kc-bereich.zahlen.arten > #payBtn .pay-qr-canvas, .kc-bereich.zahlen.arten > #payBtn #checkoutQrMini { width: 62px !important; height: 62px !important; min-width: 0 !important; min-height: 0 !important; flex: 0 0 auto !important; }
+  .kc-bereich.zahlen.arten > #payBtn .pay-label::before { font-size: 18px !important; }
+  .kc-bereich.zahlen.arten > #payBtn { padding: 3px 5px 3px 8px !important; }
+}
+.kc-bereich.zahlen.arten > #payBtn::after { content: '◀'; font-size: 22px; color: #fff; opacity: .9; margin-right: 4px; animation: kcPfeilLinks 1.2s linear infinite; }
+body.kc-aufbau.kc-bon-auszahlung .kc-bereich.zahlen.arten > #payBtn::after { content: '▶'; animation: kcPfeilRechts 1.2s linear infinite; }
+body.kc-aufbau.kc-bon-leer .kc-bereich.zahlen.arten > #payBtn::after { display: none; }
+@keyframes kcPfeilLinks { 0% { transform: translateX(10px); opacity: 0; } 30% { opacity: 1; } 100% { transform: translateX(-10px); opacity: 0; } }
+@keyframes kcPfeilRechts { 0% { transform: translateX(-10px); opacity: 0; } 30% { opacity: 1; } 100% { transform: translateX(10px); opacity: 0; } }
+/* 09.09.2026 (Betreiber, Nachmessung): der alte Pfeil sass bei festen 118 px - das lag ueber
+   dem Wort "GESAMT" statt in der Luecke zum Betrag. Jetzt ein eigenes Feld ZWISCHEN Wort und
+   Betrag (echter Platz im Flex-Layout, keine feste Position), darin 3-4 kleine Pfeile im
+   Gleichschritt wie eine Laufschrift. Wird die Luecke eng (langes Wort + grosser Betrag),
+   nimmt JS die Pfeilzahl zurueck statt sie zu quetschen - siehe pfeileAnpassen() im JS-Modul. */
+.kc-bereich.bon .grand-total { display: flex !important; align-items: center; gap: 6px; }
+.kc-bereich.bon .grand-total-label { flex: 0 0 auto; }
+.kc-bereich.bon .grand-total > strong { margin-left: auto; flex: 0 0 auto; }
+.kc-pfeilfeld { flex: 1 1 auto; min-width: 0; display: flex; align-items: center; justify-content: center; gap: 10px; overflow: hidden; height: 100%; }
+/* 10.09.2026 (Betreiber: "der Laufpfeil muss entweder rechts neben den Zahlbetrag für
+   Auszahlung und links daneben für Einnahme"): bisher sass das Pfeilfeld IMMER an derselben
+   Stelle (zwischen "GESAMT" und dem Betrag) - nur die Pfeilrichtung selbst (links/rechts
+   laufend) aenderte sich, nicht die POSITION. Bei einer Einnahme passt "zwischen Wort und
+   Betrag" bereits als "links vom Betrag" - bei einer Auszahlung wandert das Pfeilfeld jetzt
+   per order hinter den Betrag, damit es dort wirklich RECHTS neben der Zahl steht.
+   flex-grow wird fuer diesen Fall abgeschaltet (sonst wuerde es wieder den Platz VOR dem
+   Betrag fuellen wollen) - stattdessen ein fester kleiner Abstand zur Zahl.*/
+body.kc-aufbau.kc-bon-auszahlung .kc-bereich.bon .grand-total > strong { order: 1; }
+body.kc-aufbau.kc-bon-auszahlung .kc-bereich.bon .kc-pfeilfeld { order: 2; flex: 0 0 auto; margin-left: 8px; justify-content: flex-start; }
+.kc-pfeilfeld > span { font-size: 20px; line-height: 1; color: #16a34a; animation: kcPfeilLinks 1.2s linear infinite; }
+.kc-pfeilfeld > span:nth-child(2) { animation-delay: .3s; }
+.kc-pfeilfeld > span:nth-child(3) { animation-delay: .6s; }
+.kc-pfeilfeld > span:nth-child(4) { animation-delay: .9s; }
+body.kc-aufbau.kc-bon-auszahlung .kc-pfeilfeld > span { color: #b91c1c; animation-name: kcPfeilRechts; }
+body.kc-aufbau.kc-bon-leer .kc-pfeilfeld { display: none; }
+/* Sammelbestellung */
+#kcSammelEbene { z-index: 135; }
+.kc-sammel-kopf { display: flex; justify-content: space-between; align-items: center; padding: 8px 14px; background: #0c1726; color: #fff; font-size: 18px; }
+.kc-sammel-stand { font-size: 14px; color: #a7f3d0; }
+.kc-sammel-mitte { flex: 1; min-height: 0; display: flex; }
+/* 09.09.2026 (Betreiber): "Die WG-Gruppen sollen sich so den kompletten Bildschirm teilen, dass
+   genau die 5 oder 6 nebeneinanderpassen. Artikel-Knoepfe nur so gross wie die WG-Knoepfe, dann
+   gibt es ein Raster, alle auf gleicher Linie." Ersetzt Liste+aufklappbare Abschnitte durch
+   gleich breite Spalten, eine je Warengruppe, alle gleichzeitig sichtbar. */
+.kc-sammel-artikel { flex: 1; min-width: 0; display: flex; gap: 6px; padding: 8px; overflow: hidden; }
+.kc-sammel-spalte { flex: 1 1 0; min-width: 0; display: flex; flex-direction: column; background: #dfe3e8; border-radius: 10px; overflow: hidden; }
+/* 10.09.2026 (Betreiber: "WG-Koepfe von der Hoehe her schmaler, anklickbar zum Einklappen"):
+   von gestapelt (Symbol ueber Text, min-height 56px) auf eine Zeile umgebaut - braucht
+   dadurch deutlich weniger Hoehe. Jetzt ein <button>, nicht mehr nur <div>. */
+.kc-sammel-spalte-kopf { position: relative; flex: 0 0 auto; min-height: 34px; width: 100%; display: flex; flex-direction: row; align-items: center; justify-content: center; gap: 5px; padding: 5px 8px; background: var(--group-flaeche, #e5e7eb); color: var(--group-vorder, #111); font-weight: 800; font-size: 12px; text-align: center; line-height: 1.15; border: 0; cursor: pointer; font-family: inherit; }
+.kc-sammel-spalte-kopf svg { width: 16px; height: 16px; flex: 0 0 auto; }
+.kc-sammel-spalte-kopf b { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.kc-sammel-pfeil { font-size: 10px; opacity: .7; flex: 0 0 auto; }
+.kc-sammel-spalte-karten { flex: 1; min-height: 0; overflow-y: auto; display: flex; flex-direction: column; gap: 5px; padding: 5px; transition: padding .18s ease; }
+/* Eingeklappt: die Kartenflaeche ist leer (siehe kc-oberflaechen-anwenden.js), braucht dann
+   keinen Innenabstand mehr - sonst bliebe eine leere Luecke stehen. */
+.kc-sammel-spalte.eingeklappt .kc-sammel-spalte-karten { padding: 0; }
+/* Die Lamellen-Animation selbst: jede Karte bekommt beim Einklappen eine EIGENE, ueber JS
+   gesetzte Verzoegerung (transitionDelay), dadurch schliessen sie sichtbar eine nach der
+   anderen statt alle gleichzeitig - wie ein Lamellenvorhang. scaleY von oben (transform-origin
+   top) fuer die "zuklappende Lamelle"-Optik, gleichzeitig ausblenden. */
+.kc-sammel-karte { transition: transform .22s ease, opacity .22s ease, max-height .22s ease, margin .22s ease, padding .22s ease; transform-origin: top center; max-height: 200px; }
+.kc-sammel-karte.kc-sammel-schliessen { transform: scaleY(0); opacity: 0; max-height: 0; margin: 0; padding: 0; pointer-events: none; }
+.kc-sammel-leer { padding: 10px 4px; text-align: center; color: #6b7280; font-size: 12px; }
+
+.kc-sammel-zahl { position: absolute; top: 4px; right: 4px; min-width: 22px; height: 22px; padding: 0 6px; border-radius: 999px; background: #16a34a; color: #fff; font-style: normal; font-size: 13px; display: flex; align-items: center; justify-content: center; }
+.kc-sammel-karte { position: relative; min-height: 52px; flex: 1 1 0; user-select: none; -webkit-user-select: none; border: 2px solid #cbd5e1; border-radius: 8px; background: #1f2937; color: #fff; overflow: hidden; display: flex; flex-direction: column; justify-content: center; padding: 4px 6px 4px 26px; text-align: left; cursor: pointer;
+  transition: flex-basis .22s ease, max-width .22s ease, width .22s ease, opacity .18s ease, margin .22s ease, padding .22s ease, border-width .22s ease, min-width .22s ease; }
+/* Ansicht "Farbe": Kartenfläche in der Warengruppenfarbe, Kontrast berechnet (sammelKontrast) */
+.kc-sammel-karte.ansicht-farbe { background: var(--tile-color); color: var(--tile-text, #fff); }
+.kc-sammel-karte.ansicht-farbe img { display: none; }
+/* Ansicht "Text": neutral und hell, kein Bild, keine Farbfläche - ruhig zum schnellen Lesen */
+.kc-sammel-karte.ansicht-text { background: #fff; color: #111827; border-color: #d1d5db; }
+.kc-sammel-karte.ansicht-text img { display: none; }
+.kc-sammel-karte.ansicht-text .kc-sammel-name, .kc-sammel-karte.ansicht-farbe .kc-sammel-name { text-shadow: none; font-size: 16px; }
+.kc-sammel-karte.ansicht-text .kc-sammel-preis, .kc-sammel-karte.ansicht-farbe .kc-sammel-preis { text-shadow: none; font-weight: 800; }
+.kc-sammel-karte.ansicht-text .kc-sammel-pfand { color: #4b5563; }
+/* die blaue Info-Ecke (i) - in ALLEN drei Ansichten vorhanden */
+/* 10.09.2026: .kc-sammel-info-Regel entfernt - der zugehoerige Knopf existiert nicht mehr
+   (war ohnehin nie klickbar, siehe kc-oberflaechen-anwenden.js). */
+/* Ein-/Ausklappen: Karte schrumpft seitlich nach links weg statt wie eine Jalousie */
+.kc-sammel-karte.kc-schrumpfen, .kc-sammel-karte.kc-startklein {
+  flex-basis: 0 !important; max-width: 0 !important; min-width: 0 !important; width: 0 !important;
+  opacity: 0; margin-left: 0 !important; margin-right: 0 !important; padding-left: 0 !important; padding-right: 0 !important; border-width: 0 !important;
+}
+.kc-sammel-karte img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: .55; }
+.kc-sammel-karte > span { position: relative; text-shadow: 0 1px 3px #000; }
+.kc-sammel-name { font-weight: 700; font-size: 15px; line-height: 1.2; white-space: normal; overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; }
+.kc-sammel-preis { font-size: 11px; opacity: .85; }
+.kc-sammel-pfand { font-size: 11px; color: #bfdbfe; }
+.kc-sammel-karte.gewaehlt { border-color: #22c55e; box-shadow: 0 0 0 3px #22c55e; }
+.kc-sammel-anzahl { position: absolute; top: 2px; left: 24px; background: #16a34a; color: #fff; font-weight: 900; font-size: 12px; padding: 1px 6px; border-radius: 999px; }
+.kc-sammel-minus { position: absolute; top: 2px; right: 2px; width: 22px; height: 22px; border: 0; border-radius: 50%; background: #dc2626; color: #fff; font-size: 15px; font-weight: 900; cursor: pointer; line-height: 1; }
+.kc-sammel-gruppe-var { background: #fff; border-radius: 10px; padding: 6px; display: flex; flex-direction: column; gap: 5px; flex: 1 1 0; }
+.kc-sammel-var-titel { display: flex; align-items: center; gap: 8px; font-size: 15px; }
+.kc-sammel-var-titel img { width: 40px; height: 40px; object-fit: cover; border-radius: 6px; }
+.kc-sammel-varianten { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 8px; }
+.kc-sammel-karte.variante { min-height: 80px; }
+.kc-sammel-karte.variante.ansicht-bild { background: #334155; }
+/* 10.09.2026 (Betreiber: "unten die Buttons schmal, dafuer nebeneinander, einer der MEHR heisst
+   - dort Bild/Farbe/Text hin, damit sie unten keine Zeile verbrauchen"): aus der dauerhaft
+   sichtbaren Zeile wird ein kleines Einblendfeld, das ueber dem MEHR-Knopf aufklappt. */
+.kc-sammel-mehr-popup { position: absolute; left: 8px; right: 8px; bottom: 100%; margin-bottom: 6px; display: flex; gap: 8px; padding: 8px; background: #0c1726; border-radius: 10px; box-shadow: 0 -4px 16px rgba(0,0,0,.35); z-index: 5; }
+/* 11.09.2026 (Betreiber: "die Farbe/Bilder-Knoepfe sollen nur in MEHR stehen, nicht als
+   eigene Reihe"): ECHTER FUND - display:flex oben galt IMMER, auch mit gesetztem
+   hidden-Attribut (Klassenregel schlaegt die Browser-eigene [hidden]-Regel, weil sie im
+   eigenen Stylesheet spaeter kommt). Dadurch blieb das Einblendfeld staendig sichtbar und
+   verbrauchte unten eine ganze Zeile - genau das Gegenteil von dem, was am 10.09. gebaut
+   werden sollte. Jetzt wird [hidden] wieder wirksam gemacht. */
+.kc-sammel-mehr-popup[hidden] { display: none; }
+.kc-sammel-mehr-popup > button { flex: 1; display: flex; align-items: center; justify-content: center; gap: 8px; height: 44px; border: 2px solid #334155; border-radius: 8px; background: #1f2937; color: #cbd5e1; font-size: 14px; font-weight: 700; cursor: pointer; }
+.kc-sammel-mehr-popup > button.aktiv { border-color: #22c55e; color: #fff; background: #14532d; }
+.kc-sammel-vorschau { width: 26px; height: 20px; border-radius: 4px; flex: 0 0 auto; }
+.kc-sammel-vorschau.vs-bild { background: linear-gradient(135deg, #64748b 40%, #cbd5e1 40% 60%, #64748b 60%); }
+.kc-sammel-vorschau.vs-farbe { background: #315d8d; }
+.kc-sammel-vorschau.vs-text { background: #fff; border: 1px solid #94a3b8; }
+.kc-sammel-fuss { position: relative; display: flex; gap: 8px; padding: 8px; background: #0c1726; }
+.kc-sammel-fuss > .kc-taste-zurueck { flex: 0 0 90px; height: 64px; font-size: 32px; border-radius: 10px; background: #1f2937; color: #fff; border: 0; }
+.kc-sammel-abbruch { flex: 1; height: 64px; border: 0; border-radius: 10px; background: #7f1d1d; color: #fff; font-size: 18px; font-weight: 800; }
+.kc-sammel-uebernehmen { flex: 2; height: 64px; border: 0; border-radius: 10px; background: linear-gradient(180deg, var(--kc-neon), var(--kc-neon-dunkel)); color: #fff; font-size: 20px; font-weight: 900; }
+.kc-sammel-uebernehmen[disabled] { background: #9ca3af; }
+.kc-sammel-mehr { flex: 1; height: 64px; border: 0; border-radius: 10px; background: #1f2937; color: #cbd5e1; font-size: 15px; font-weight: 800; }
+.kc-sammel-mehr[aria-expanded="true"] { background: #334155; color: #fff; }
+/* Alte Beschriftungen unter der neuen sauber weg (Safari rendert font-size 0 nicht immer) */
+.kc-bereich.zahlen.arten > #payBtn .pay-label > * { display: none !important; }
+.kc-bereich.zahlen.arten > #payBtn .pay-label { color: transparent !important; }
+.kc-bereich.zahlen.arten > #payBtn .pay-label::before { color: #fff; }
+.kc-bereich.artikel .product-info-button { color: transparent !important; }
+.kc-bereich.artikel .product-info-button::after { color: #fff; }
+/* Die Kasse setzt selbst ein ℹ per ::before - im Aufbau nur das große i */
+.kc-bereich.artikel .product-info-button::before { content: none !important; }
+.kc-bereich.artikel .product-info-button { border: 0 !important; }
+/* Info-Dreieck (clip-path) bleibt, wird groesser; das i sitzt in der Ecke, wo das Dreieck ist */
+.kc-bereich.artikel .product-info-button { width: 58px !important; height: 58px !important; min-width: 58px !important; justify-content: flex-start !important; align-items: flex-start !important; padding: 4px 0 0 8px !important; }
+.kc-bereich.artikel .product-info-button::after { font-size: 24px; line-height: 1; }
+
+/* 08.09. spaet: P grau ohne Bon und ohne geparkte Koerbe; Rabatt grau ohne Bon; Sammel + BAR/Rueckgeld */
+.kc-park-knopf.leer { background: #9ca3af !important; color: #e5e7eb !important; }
+body.kc-aufbau.kc-bon-leer .kc-bereich.bon .cart-discount-button { background: #d1d5db !important; color: #6b7280 !important; pointer-events: none; border-color: #d1d5db !important; }
+.kc-sammel-fuss { flex-wrap: wrap; }
+.kc-sammel-fuss > .kc-sammel-bar, .kc-sammel-fuss > .kc-sammel-rueckgeld { flex: 1 1 40%; height: 64px; border: 0; border-radius: 10px; color: #fff; font-size: 17px; font-weight: 900; background: linear-gradient(180deg, var(--kc-neon), var(--kc-neon-dunkel)); text-shadow: 0 1px 2px rgba(0,0,0,.35); }
+.kc-sammel-fuss > .kc-sammel-bar[disabled], .kc-sammel-fuss > .kc-sammel-rueckgeld[disabled] { background: #9ca3af; }
+.kc-sammel-fuss > .kc-sammel-uebernehmen { flex: 1 1 100%; }
+
+/* 08.09. (Foto Auszahlung): bei Auszahlung ist "Gegeben" ohne Sinn - Zeile weg, Geldtasten und
+   Ziffernblock gedimmt (der Kunde gibt nichts), nur der Auszahlbetrag zaehlt */
+body.kc-aufbau.kc-bon-auszahlung #kcZahlenEbene .kc-bereich.berechnung > .change-card > small:last-of-type { display: none !important; }
+body.kc-aufbau.kc-bon-auszahlung #kcZahlenEbene .kc-bereich.scheine, body.kc-aufbau.kc-bon-auszahlung #kcZahlenEbene .kc-bereich.muenzen, body.kc-aufbau.kc-bon-auszahlung #kcZahlenEbene .kc-bereich.zahlen.block, body.kc-aufbau.kc-bon-auszahlung #kcZahlenEbene .kc-bereich.korrektur { opacity: .35; pointer-events: none; }
+body.kc-aufbau.kc-bon-auszahlung #kcZahlenEbene .kc-bereich.berechnung > .change-card::after { content: 'Auszahlung an den Kunden - keine Geldeingabe nötig. Abschluss mit BAR.'; order: 9; font-size: 12px; opacity: .9; margin-top: 4px; }
+/* Muenzen: Wert darunter war abgeschnitten */
+#kcZahlenEbene .kc-bereich.muenzen > #coins .coin-visual, #kcZahlenEbene .kc-bereich.muenzen > #coins .coin-foto { width: 46px !important; height: 46px !important; min-height: 46px !important; flex: 0 0 46px !important; }
+#kcZahlenEbene .kc-bereich.muenzen > #coins > button { font-size: 13px !important; gap: 0; padding: 1px !important; }
+
+/* ===================================================================================
+   RUNDE 4 (08.09.): Kopf in einer Zeile, Meldung flach darunter, Kochmuetze deutlich,
+   Sammelbestellung als Abschnitte, Doppeltipp-Zoom aus
+   =================================================================================== */
+body.kc-aufbau, body.kc-aufbau * { touch-action: manipulation; }
+.kc-bereich.kopf.kompakt > header.app-header { min-height: 46px !important; }
+.kc-bereich.kopf.kompakt .brand-block { width: 44px !important; min-width: 44px !important; max-width: 44px !important; height: 40px !important; background: #fff !important; border: 2px solid #fbbf24 !important; order: -1 !important; margin: 0 !important; }
+.kc-bereich.kopf.kompakt .brand-block img { width: 36px !important; height: 36px !important; max-width: 36px !important; max-height: 36px !important; filter: invert(1) contrast(1.3); }
+body.kc-aufbau .kc-bereich.kopf .header-status > button { width: 38px; min-width: 38px !important; height: 38px !important; min-height: 38px !important; font-size: 16px; }
+body.kc-aufbau .kc-bereich.kopf .header-status > #timeClockBtn { min-width: 48px !important; font-size: 17px !important; }
+body.kc-aufbau .kc-bereich.kopf .header-status > #kcProgramStatusBtn { max-width: 40px; }
+body.kc-aufbau .kc-bereich.kopf .header-status > #kcLedBlock, body.kc-aufbau .kc-bereich.kopf .header-status > .supabase-led-group { zoom: .66; height: 56px !important; order: 93 !important; }
+body.kc-aufbau .kc-bereich.kopf .header-status > .supabase-led-group { order: 94 !important; }
+body.kc-aufbau .kc-bereich.kopf .header-status > #kcHerz { order: 92 !important; width: 34px; font-size: 26px; }
+.kc-bereich.kopf.kompakt .kc-kopf-zeile2.nur-meldung { flex: 0 0 30px; min-height: 30px; padding: 0 4px; background: transparent; }
+.kc-bereich.kopf.kompakt .kc-kopf-zeile2.nur-meldung > .mode-message-center { flex: 1; }
+.kc-bereich.kopf.kompakt .kc-kopf-zeile2.nur-meldung > .mode-message-center #notificationBar { font-size: 13px; padding: 3px 8px; }
+.kc-bereich.kopf.kompakt .kc-kopf-zeile2 > .mode-message-center > button { width: 40px !important; min-width: 40px !important; height: 28px !important; padding: 0 !important; }
+.kc-bereich.kopf.kompakt .kc-kopf-zeile2 > .mode-message-center > button::before { content: '↶'; font-size: 18px; font-weight: 800; }
+/* Statuszeile: alle vier exakt gleich */
+.kc-statuszeile > button, .kc-statuszeile > #operatorBtn { height: 42px !important; min-height: 42px !important; max-height: 42px !important; }
+body.kc-aufbau .kc-bereich.kopf .header-status { gap: 2px !important; }
+body.kc-aufbau .kc-bereich.kopf .header-status > button { width: 36px; min-width: 36px !important; height: 36px !important; min-height: 36px !important; font-size: 15px; }
+body.kc-aufbau .kc-bereich.kopf .header-status > #timeClockBtn { min-width: 44px !important; width: 44px; font-size: 16px !important; }
+body.kc-aufbau .kc-bereich.kopf .header-status > #timeClockBtn * { font-size: 15px !important; }
+body.kc-aufbau .kc-bereich.kopf .header-status > #kcProgramStatusBtn { max-width: 36px; width: 36px; font-size: 8px; }
+body.kc-aufbau .kc-bereich.kopf .header-status > #kcHerz { width: 30px; font-size: 24px; }
+.kc-bereich.kopf.kompakt > header.app-header { padding: 3px 4px !important; gap: 2px; }
+body.kc-aufbau .kc-bereich.kopf .header-status > button[id] { width: 36px !important; max-width: 36px !important; min-width: 36px !important; flex: 0 0 36px !important; }
+body.kc-aufbau .kc-bereich.kopf .header-status > button#timeClockBtn { width: 44px !important; max-width: 44px !important; min-width: 44px !important; flex: 0 0 44px !important; }
+body.kc-aufbau .kc-bereich.kopf .header-status > button#kcHerz { width: 30px !important; max-width: 30px !important; min-width: 30px !important; flex: 0 0 30px !important; }
+/* styles.css:68 setzt die Kopfknoepfe per ID auf 52/40 px !important - hier mit ID + Klassen ueberstimmt */
+body.kc-aufbau .kc-bereich.kopf .header-status #screenLockBtn, body.kc-aufbau .kc-bereich.kopf .header-status #cashSoundBtn, body.kc-aufbau .kc-bereich.kopf .header-status #menuBtn, body.kc-aufbau .kc-bereich.kopf .header-status #headerExitBtn, body.kc-aufbau .kc-bereich.kopf .header-status #kcProgramStatusBtn, body.kc-aufbau .kc-bereich.kopf .header-status #mirrorLayoutBtn {
+  width: 36px !important; min-width: 36px !important; max-width: 36px !important; height: 36px !important; min-height: 36px !important; flex: 0 0 36px !important; font-size: 15px !important; padding: 0 !important;
+}
+body.kc-aufbau .kc-bereich.kopf .header-status #timeClockBtn { width: 44px !important; min-width: 44px !important; max-width: 44px !important; height: 36px !important; min-height: 36px !important; flex: 0 0 44px !important; font-size: 15px !important; padding: 0 !important; }
+body.kc-aufbau .kc-bereich.kopf .header-status #kcProgramStatusBtn { font-size: 8px !important; line-height: 1 !important; }
+body.kc-aufbau .kc-bereich.kopf.kompakt > header.app-header > .header-status { width: auto !important; flex: 1 1 auto !important; min-width: 0 !important; margin-left: 0 !important; }
+/* Fussleiste der Sammelbestellung in EINER Reihe */
+.kc-sammel-fuss { flex-wrap: nowrap; }
+.kc-sammel-fuss > .kc-taste-zurueck { flex: 0 0 56px; height: 56px; font-size: 26px; }
+.kc-sammel-fuss > .kc-sammel-abbruch { flex: 1 1 0; height: 56px; font-size: 13px; }
+.kc-sammel-fuss > .kc-sammel-uebernehmen { flex: 1.3 1 0 !important; height: 56px; font-size: 14px; }
+.kc-sammel-fuss > .kc-sammel-bar, .kc-sammel-fuss > .kc-sammel-rueckgeld { flex: 1.1 1 0; height: 56px; font-size: 12px; }
+.kc-sammel-fuss > .kc-sammel-mehr { flex: 0.8 1 0; height: 56px; font-size: 13px; }
+
+/* Trainingsmodus in der GESAMT-Zeile (08.09.): Wort mit Doktorhut, Zeile orange */
+.kc-bereich.bon .grand-total-label { font-size: 0 !important; }
+.kc-bereich.bon .grand-total-label::before { content: attr(data-kc-text); font-size: 26px; font-weight: 800; white-space: nowrap; }
+.kc-bereich.bon .grand-total-label.kc-klein::before { font-size: 20px; }
+.kc-bereich.bon .grand-total-label > em { display: none !important; }
+body.kc-aufbau.kc-training .kc-bereich.bon .grand-total { background: #ffedd5 !important; border-color: #ea580c !important; color: #9a3412 !important; }
+body.kc-aufbau.kc-training .kc-bereich.bon .grand-total strong { color: #c2410c !important; }
+body.kc-aufbau.kc-training .kc-bereich.bon .grand-total::before { color: #ea580c; }
+body.kc-aufbau.kc-training:not(.kc-bon-leer) .kc-bereich.bon { box-shadow: inset 0 0 0 4px #f97316, 0 2px 8px rgba(0,0,0,.12) !important; }
+/* Zahlen-Seite: Positionszeile im Berechnungsfeld traegt die Kennzeichnung mit */
+body.kc-aufbau.kc-training #kcZahlenEbene .kc-pos-zeile-zahlen::before { content: '🎓 TRAININGSMODUS · '; font-weight: 800; }
+
+/* 10.09.2026 (Betreiber: "nur auf Seite 2, nicht auf Seite 1, da ist er richtig"): das alte
+   Pfeilfeld hier sass im Kartenkopf, neben dem WORT "RÜCKGELD"/"AUSZAHLUNG" - nicht neben der
+   Zahl selbst, wie es der Betreiber inzwischen fuer beide Seiten einheitlich haben moechte.
+   Umgebaut auf dasselbe einfache, bewaehrte Muster wie beim BAR-Knopf (::after mit content) -
+   direkt am Betrag (#changeDisplay) selbst, kein separates, per JS gepflegtes Element mehr
+   noetig. app.js setzt die Klassen payment-insufficient/payment-sufficient/payment-payout auf
+   .change-card bereits selbst (unveraendert) - hier nur ausgelesen. Das alte Kopf-Pfeilfeld
+   bleibt im JS bestehen (aendert nichts an der App-Logik), wird aber ausgeblendet, damit nicht
+   zwei Pfeile gleichzeitig laufen. */
+.kc-pfeilfeld-klein { display: none !important; }
+#changeDisplay { position: relative; }
+.change-card.payment-insufficient #changeDisplay::before { content: '◀◀'; display: inline-block; margin-right: 8px; font-size: .6em; color: #16a34a; animation: kcPfeilLinks 1.1s linear infinite; }
+.change-card.payment-sufficient #changeDisplay::after, .change-card.payment-payout #changeDisplay::after { content: '▶▶'; display: inline-block; margin-left: 8px; font-size: .6em; color: #b91c1c; animation: kcPfeilRechts 1.1s linear infinite; }
+/* Bei Auszahlung ist die Karte selbst schon dunkelrot - dieselbe Pfeilfarbe waere darauf kaum
+   zu erkennen (im Test bestaetigt). Auf dieser einen dunklen Kartenfarbe daher weisse Pfeile. */
+.change-card.payment-payout #changeDisplay::after { color: #fff; }

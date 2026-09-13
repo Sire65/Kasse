@@ -1,0 +1,23 @@
+{
+  "name": "KC Bildrechner - SCHULUNG",
+  "short_name": "KC Schulung",
+  "start_url": "./index.html?schulung=1",
+  "display": "standalone",
+  "background_color": "#07111f",
+  "theme_color": "#07111f",
+  "icons": [],
+  "scope": "./",
+  "orientation": "any",
+  "id": "./?schulung=1",
+  "lang": "de-DE",
+  "description": "KC Bildrechner - Schulungsversion, keine echten Verkaufsdaten",
+  "categories": [
+    "business",
+    "productivity"
+  ],
+  "display_override": [
+    "fullscreen",
+    "standalone",
+    "minimal-ui"
+  ]
+}
