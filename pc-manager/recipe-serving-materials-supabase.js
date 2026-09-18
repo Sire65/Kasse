@@ -41,7 +41,7 @@
   async function pull(){
     const mats=await request(`/rest/v1/kc_manager_serving_materials?org_id=eq.${ORG_ID}&active=eq.true&select=*`);
     const links=await request(`/rest/v1/kc_manager_recipe_serving_materials?org_id=eq.${ORG_ID}&active=eq.true&select=*`);
-    if(Array.isArray(mats)&&mats.length)write(MATERIAL_STORE,mats.map(fromDb));
+    if(Array.isArray(mats))write(MATERIAL_STORE,mats.map(fromDb));
     if(Array.isArray(links)){
       const a={};links.forEach(x=>{(a[x.product_code]||(a[x.product_code]=[])).push({materialId:x.material_id,qtyPerPortion:Number(x.qty_per_portion||1),role:x.role||'Ausgabegefäß'})});
       write(ASSIGN_STORE,a);
