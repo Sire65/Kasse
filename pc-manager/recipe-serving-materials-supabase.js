@@ -6,6 +6,7 @@
   const ORG_ID='KC_WERNE';
   const MATERIAL_STORE='kcm_consumables_v1';
   const ASSIGN_STORE='kcm_recipe_serving_materials_v1';
+  const PENDING_STORE='kcm_serving_materials_pending_v1';
   let ready=false,lastSnapshot='',busy=false;
 
   const read=(key,fallback)=>{try{const v=JSON.parse(localStorage.getItem(key)||'null');return v??fallback}catch{return fallback}};
@@ -38,6 +39,21 @@
     image_path:x.image||null,source_note:x.sourceNote||null,active:x.active!==false,updated_at:new Date().toISOString()
   }}
   function snapshot(){return JSON.stringify([read(MATERIAL_STORE,[]),read(ASSIGN_STORE,{})])}
+  function pending(){const x=read(PENDING_STORE,null);return x&&typeof x==='object'?x:null}
+  function capturePending(reason='offline-change'){
+    const payload={capturedAt:new Date().toISOString(),reason,materials:read(MATERIAL_STORE,[]),assignments:read(ASSIGN_STORE,{})};
+    write(PENDING_STORE,payload);
+    global.dispatchEvent(new CustomEvent('kc-serving-materials-pending',{detail:{pending:true,reason}}));
+    return payload;
+  }
+  function clearPending(){localStorage.removeItem(PENDING_STORE);global.dispatchEvent(new CustomEvent('kc-serving-materials-pending',{detail:{pending:false}}))}
+  function restorePendingLocal(){
+    const p=pending();if(!p)return false;
+    write(MATERIAL_STORE,Array.isArray(p.materials)?p.materials:[]);
+    write(ASSIGN_STORE,p.assignments&&typeof p.assignments==='object'?p.assignments:{});
+    global.dispatchEvent(new CustomEvent('kc-serving-materials-synced',{detail:{direction:'pending-restore'}}));
+    return true;
+  }
   async function pull(){
     const mats=await request(`/rest/v1/kc_manager_serving_materials?org_id=eq.${ORG_ID}&active=eq.true&select=*`);
     const links=await request(`/rest/v1/kc_manager_recipe_serving_materials?org_id=eq.${ORG_ID}&active=eq.true&select=*`);
@@ -58,9 +74,30 @@
     lastSnapshot=snapshot();
     global.dispatchEvent(new CustomEvent('kc-serving-materials-synced',{detail:{direction:'push'}}));
   }
-  async function syncNow(forcePush=false){if(busy||!config())return false;busy=true;try{if(!ready&&!forcePush)await pull();else await push();return true}catch(e){console.warn('Ausgabegefäß-Sync:',e.message);return false}finally{busy=false}}
-  function watch(){setInterval(()=>{if(!ready||busy||!config()||!navigator.onLine)return;const now=snapshot();if(now!==lastSnapshot)syncNow(true)},1500)}
-  async function boot(){await syncNow(false);watch()}
+  async function pushPending(){
+    if(busy||!config()||!navigator.onLine||!pending())return false;
+    busy=true;
+    try{
+      // Erst den aktuellen Cloud-Stand holen. Pending bleibt separat erhalten.
+      await pull();
+      if(!restorePendingLocal())return false;
+      await push();
+      clearPending();
+      return true;
+    }catch(e){console.warn('Ausgabegefäß-Pending:',e.message);return false}
+    finally{busy=false}
+  }
+  async function syncNow(forcePush=false){if(busy||!config())return false;busy=true;try{if(!ready&&!forcePush)await pull();else if(forcePush&&!pending())await push();else if(!forcePush)await pull();return true}catch(e){console.warn('Ausgabegefäß-Sync:',e.message);return false}finally{busy=false}}
+  function watch(){setInterval(()=>{
+    if(busy||!config())return;
+    const now=snapshot();
+    if(!navigator.onLine){if(now!==lastSnapshot)capturePending('offline-change');return}
+    if(!ready){syncNow(false);return}
+    if(pending())return;
+    if(now!==lastSnapshot)syncNow(true);
+  },1500)}
+  async function boot(){lastSnapshot=snapshot();await syncNow(false);watch()}
+  global.addEventListener('online',()=>{ready=false;syncNow(false)});
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot,{once:true});else setTimeout(boot,0);
-  global.KCServingMaterialsSupabase=Object.freeze({VERSION,syncNow,pull,push});
+  global.KCServingMaterialsSupabase=Object.freeze({VERSION,syncNow,pull,push,pending,hasPending:()=>!!pending(),restorePendingLocal,pushPending});
 })(window);
