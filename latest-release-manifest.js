@@ -3,7 +3,7 @@
   global.KC_DISABLE_LEGACY_TV_EDITORS = true;
   global.KC_CENTRAL_RELEASE_MANIFEST = Object.freeze({
     schema: 'KC_CENTRAL_RELEASE_MANIFEST_V2',
-    product: 'KC Bilderrechner',
+    product: 'KC MarktKasse',
     releaseVersion: '0.31.3.6.63-symbol-job-code-parity',
     displayVersion: 'V0.31.3.6 Repair 63 · Symbol- und Aktivierungscode-Parität Candidate',
     productBaseVersion: '0.31.3.6.19',
@@ -33,7 +33,7 @@
       timeClockManager: Object.freeze({ requiredVersion: '0.3.0', label: 'Zeiterfassung im PC-Manager' }),
       timeClockDutyRosterAdapter: Object.freeze({ requiredVersion: '0.2.0', label: 'Dienstplan Soll-/Ist-Schnittstelle' }),
       timeClockPOS: Object.freeze({ requiredVersion: '0.1.1', label: 'Schnellerfassung an der Kasse mit Candidate-Testzugang', runtimeRequired: false }),
-      recipeManager: Object.freeze({ requiredVersion: '0.1.1', label: 'Rezepturpflege mit Grünkohl-/Sauerkraut-Arbeitsständen' }),
+      recipeManager: Object.freeze({ requiredVersion: '0.2.1', label: 'Rezepturpflege mit Grünkohl-/Sauerkraut-Arbeitsständen' }),
       managerMessageCore: Object.freeze({ requiredVersion: '0.2.0', label: 'Zentrales sichtbares Manager-Meldungswesen' }),
       salesInventoryAnalysisCore: Object.freeze({ requiredVersion: '0.1.1', label: 'Studio Umsatz-, Kunden- und BestandsanalyseCore mit deutschen Folientypen' }),
       managerSalesInventoryDashboard: Object.freeze({ requiredVersion: '0.1.1', label: 'PC-Manager Analyse- und Bestandsdashboard mit Legende und Listenaktionen' }),
@@ -47,6 +47,7 @@
     verification: Object.freeze({ practicalVisualCheck: 'PENDING_TARGET_DEVICE', checkedBy: 'Codex Static and Regression Tests', checkedAt: '2026-07-24T18:00:00+02:00' }),
     sourceOfTruth: 'latest-release-manifest.js',
     sourceRelease: 'KC_MarktKasse_Suite_V0_31_3_6_Repair_15_Fluid_Text_Input_Candidate',
-    updatedAt: '2026-07-24T19:35:00+02:00'
+    updatedAt: '2026-09-18T17:58:00+02:00',
+    update: Object.freeze({ schema: 'KC_UPDATE_V1', buildId: 2026091803, channel: 'candidate', source: 'github-main', checkUrl: 'https://raw.githubusercontent.com/Sire65/Kasse/main/latest-release-manifest.json' })
   });
 })(window);
