@@ -1309,32 +1309,16 @@ class SupabaseBackendAdapter extends BackendAdapter{
     };
   }
   async test(){
-    const url=`${this.settings.url.replace(/\/$/,"")}/rest/v1/sync_events?select=id&limit=1`;
+    const url=`${this.settings.url.replace(/\/$/,"")}/rest/v1/kc_manager_state_sections?select=section_key&limit=1`;
     const r=await fetch(url,{headers:this.headers()});
     if(!r.ok)throw new Error(`Supabase HTTP ${r.status}`);
-    return {ok:true,message:"Supabase erreichbar"}
+    return {ok:true,message:"Supabase erreichbar · zentraler KC-Manager-Speicher lesbar"}
   }
   async push(items){
-    const rows=items.map(x=>({
-      id:x.key,
-      project_id:this.settings.project,
-      entity_type:x.entity,
-      entity_id:x.entityId,
-      operation:x.operation,
-      payload:x.payload,
-      queued_at:x.queuedAt,
-      client_version:VERSION
-    }));
-    const url=`${this.settings.url.replace(/\/$/,"")}/rest/v1/sync_events?on_conflict=id`;
-    const r=await fetch(url,{method:"POST",headers:this.headers(),body:JSON.stringify(rows)});
-    if(!r.ok)throw new Error(`Supabase HTTP ${r.status}`);
-    return {ok:true,accepted:items.map(x=>x.key),conflicts:[]}
+    throw new Error(`Legacy-Supabase-Event-Sync gesperrt: ${items?.length||0} lokale Änderung(en) bleiben sicher in der Warteschlange. Zentrale Fachmodule synchronisieren Cloud-first.`);
   }
   async pull(){
-    const url=`${this.settings.url.replace(/\/$/,"")}/rest/v1/sync_events?project_id=eq.${encodeURIComponent(this.settings.project)}&select=*&order=queued_at.asc`;
-    const r=await fetch(url,{headers:this.headers()});
-    if(!r.ok)throw new Error(`Supabase HTTP ${r.status}`);
-    return await r.json();
+    return [];
   }
 }
 function backendAdapter(){
@@ -1351,6 +1335,11 @@ async function testConnection(){
   return result;
 }
 async function runSync(){
+  if(syncSettings.provider==="supabase"){
+    const held=syncQueue.filter(x=>x.status==="pending").length;
+    addSyncLog("sync","held",`Supabase-first Schutz aktiv · ${held} lokale Änderung(en) bleiben in der Legacy-Warteschlange und werden nicht automatisch übertragen`);
+    saveAll();renderSyncState();return {held};
+  }
   if(syncSettings.mode!=="online"){
     addSyncLog("sync","skipped","Lokaler Betrieb aktiv");
     return;
@@ -1384,7 +1373,7 @@ async function runSync(){
 }
 function configureAutoSync(){
   clearInterval(syncTimer);
-  if(syncSettings.mode==="online"&&syncSettings.auto){
+  if(syncSettings.mode==="online"&&syncSettings.auto&&syncSettings.provider!=="supabase"){
     syncTimer=setInterval(runSync,Math.max(1,syncSettings.interval||5)*60000);
   }
 }
@@ -1403,7 +1392,7 @@ el("exportSyncDiagnostics").onclick=()=>{
   };
   download("KC_Sync_Diagnose.json",JSON.stringify(diagnostics,null,2));
 };
-window.addEventListener("online",()=>{renderSyncState();if(syncSettings.auto)runSync()});
+window.addEventListener("online",()=>{renderSyncState();if(syncSettings.auto&&syncSettings.provider!=="supabase")runSync()});
 window.addEventListener("offline",renderSyncState);
 
 function queueAllCurrentData(){
