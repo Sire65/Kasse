@@ -45,7 +45,7 @@
       const original=startupStoredRecipes.find(x=>x?.productId===productId);
       const fallback=recipes.find(x=>x.productId===productId);
       const recipe=original||fallback;
-      if(recipe){payloads[productId]=core.normalizeRecipe(recipe);changed=true}
+      if(recipe){payloads[productId]=JSON.parse(JSON.stringify(recipe));changed=true}
     }
     if(changed)setPendingPayloads(payloads);
     return payloads;
