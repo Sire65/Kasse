@@ -1,12 +1,15 @@
 (function(global){
   'use strict';
-  const VERSION='0.2.0';
+  const VERSION='0.2.1';
   const STORE='kcm_recipes_v1';
   const PENDING_STORE='kcm_recipes_pending_v1';
+  const PENDING_DATA_STORE='kcm_recipes_pending_payloads_v2';
+  const PRECLOUD_BACKUP_STORE='kcm_recipes_precloud_backup_v1';
   const ORG_ID='KC_WERNE';
   const core=global.KCRecipeCalculationCore;
   if(!core)return;
 
+  const startupStoredRecipes=readStore().map(x=>JSON.parse(JSON.stringify(x)));
   let recipes=seedKnownRecipes(readStore()), currentRows=[];
   let cloudReady=false, cloudLoading=false;
   const $=id=>document.getElementById(id);
@@ -17,8 +20,46 @@
   function saveStore(){localStorage.setItem(STORE,JSON.stringify(recipes))}
   function pendingIds(){const value=readJson(PENDING_STORE,[]);return Array.isArray(value)?value:[]}
   function setPending(ids){localStorage.setItem(PENDING_STORE,JSON.stringify([...new Set(ids.filter(Boolean))]))}
-  function markPending(productId){setPending([...pendingIds(),productId])}
-  function clearPending(productId){setPending(pendingIds().filter(id=>id!==productId))}
+  function pendingPayloads(){const value=readJson(PENDING_DATA_STORE,{});return value&&typeof value==='object'&&!Array.isArray(value)?value:{}}
+  function setPendingPayloads(value){localStorage.setItem(PENDING_DATA_STORE,JSON.stringify(value&&typeof value==='object'?value:{}))}
+  function markPending(recipeOrId){
+    const productId=typeof recipeOrId==='string'?recipeOrId:recipeOrId?.productId;
+    if(!productId)return;
+    setPending([...pendingIds(),productId]);
+    if(recipeOrId&&typeof recipeOrId==='object'){
+      const payloads=pendingPayloads();
+      payloads[productId]=core.normalizeRecipe(recipeOrId);
+      setPendingPayloads(payloads);
+    }
+  }
+  function clearPending(productId){
+    setPending(pendingIds().filter(id=>id!==productId));
+    const payloads=pendingPayloads();
+    if(Object.prototype.hasOwnProperty.call(payloads,productId)){delete payloads[productId];setPendingPayloads(payloads)}
+  }
+  function capturePendingFromLocal(){
+    const payloads=pendingPayloads();
+    let changed=false;
+    for(const productId of pendingIds()){
+      if(payloads[productId])continue;
+      const original=startupStoredRecipes.find(x=>x?.productId===productId);
+      const fallback=recipes.find(x=>x.productId===productId);
+      const recipe=original||fallback;
+      if(recipe){payloads[productId]=JSON.parse(JSON.stringify(recipe));changed=true}
+    }
+    if(changed)setPendingPayloads(payloads);
+    return payloads;
+  }
+  function savePreCloudBackup(){
+    const previous=readJson(PRECLOUD_BACKUP_STORE,null);
+    if(previous?.recipes)return;
+    localStorage.setItem(PRECLOUD_BACKUP_STORE,JSON.stringify({
+      capturedAt:new Date().toISOString(),
+      recipes:startupStoredRecipes,
+      pendingIds:pendingIds(),
+      pendingPayloads:pendingPayloads()
+    }));
+  }
 
   function seedKnownRecipes(records){
     const common=[
@@ -107,27 +148,30 @@
     recipes=heads.map(row=>dbRecipeToLocal(row,Array.isArray(lines)?lines:[]));
     saveStore();cloudReady=true;
   }
-  async function flushPending(){
-    for(const id of pendingIds()){
-      const recipe=recipes.find(x=>x.productId===id);if(!recipe){clearPending(id);continue}
-      await pushRecipe(recipe);
-    }
-  }
   async function initializeCloud(){
     if(cloudLoading)return;cloudLoading=true;
     try{
       if(!cloudConfig())return;
-      await flushPending();
-      const before=recipes.slice();
+      savePreCloudBackup();
+      capturePendingFromLocal();
+      const openPending=pendingIds().length;
       await pullAll();
-      if(!recipes.length&&before.length){
-        recipes=before;
-        for(const recipe of before){await pushRecipe(recipe)}
-        await pullAll();
-      }
-      load();status(`Supabase verbunden · ${recipes.length} Rezepturen zentral geladen.`);
+      load();
+      status(openPending
+        ? `Supabase zuerst geladen · ${recipes.length} Rezepturen. ${openPending} lokale Änderung${openPending===1?' ist':'en sind'} sicher in der Warteschlange erhalten und wurde${openPending===1?'':'n'} NICHT automatisch übertragen.`
+        : `Supabase zuerst geladen · ${recipes.length} Rezepturen zentral geladen. Keine lokalen Änderungen wurden hochgeladen.`,
+        openPending>0);
     }catch(error){cloudReady=false;status(`Offline-Cache aktiv: ${error.message}`,true)}
     finally{cloudLoading=false}
+  }
+
+  function loadPendingForCurrentArticle(){
+    const productId=articleId(),draft=pendingPayloads()[productId];
+    if(!draft)return status(`Für Artikel „${productId||articleName()}“ liegt keine offene lokale Rezeptänderung vor.`,true);
+    const index=recipes.findIndex(x=>x.productId===productId);
+    if(index>=0)recipes[index]=core.normalizeRecipe(draft);else recipes.push(core.normalizeRecipe(draft));
+    saveStore();load();
+    status('Lokale Warteschlangen-Version geladen. Supabase wurde NICHT verändert. Bitte prüfen; erst „Rezeptur in Supabase speichern“ übernimmt diese Version zentral.',true);
   }
 
   function articleId(){return $('aId')?.value.trim()||''}
@@ -142,7 +186,7 @@
     const tab=document.createElement('button');tab.type='button';tab.dataset.atab='recipe-core';tab.textContent='Rezeptur & Kalkulation';tabs.append(tab);
     const panel=document.createElement('div');panel.id='recipePanel';panel.className='atab';panel.dataset.apanel='recipe-core';
     panel.innerHTML=`<div class="recipe-card">
-      <p class="recipe-public-note"><strong>Zentrale Speicherung:</strong> Supabase ist die führende Rezeptdatenbank. Der Browser hält nur einen Offline-Cache; offene Änderungen werden beim nächsten Online-Kontakt automatisch übertragen.</p>
+      <p class="recipe-public-note"><strong>Zentrale Speicherung:</strong> Supabase ist die führende Rezeptdatenbank. Beim Start wird Supabase zuerst gelesen. Lokale Offline-Änderungen bleiben sicher in der Warteschlange und werden niemals automatisch über einen neueren Supabase-Stand geschrieben.</p>
       <div class="form-grid">
         <label>Rezeptname<input id="recipeName"></label><label>Version<input id="recipeVersion" value="1.0.0"></label>
         <label>Status<select id="recipeApproval"><option value="draft">Entwurf</option><option value="review">In Prüfung</option><option value="approved">Freigegeben</option><option value="outdated">Veraltet</option><option value="blocked">Gesperrt</option></select></label>
@@ -153,7 +197,7 @@
       </div>
       <div class="recipe-scroll"><table class="recipe-table"><thead><tr><th>Zutat</th><th>Menge</th><th>Einheit</th><th>Vorbereitung</th><th>Verlust %</th><th>öffentlich</th><th></th></tr></thead><tbody id="recipeRows"></tbody></table></div>
       <fieldset><legend>Rückwärtsrechnung aus vorhandenem Bestand</legend><div class="form-grid"><label>Bezugszutat<select id="recipeReference"></select></label><label>Vorhandene Menge<input id="recipeAvailable" type="number" min="0" step=".001"></label><label>Einheit<select id="recipeAvailableUnit">${core.UNITS.map(u=>`<option>${u}</option>`).join('')}</select></label><button type="button" id="recipeReverse">Aus Bestand berechnen</button></div></fieldset>
-      <div class="recipe-toolbar"><button id="recipeAdd">＋ Zutat</button><button id="recipeCalculate">Neu berechnen</button><button id="recipeSave" class="primary">Rezeptur in Supabase speichern</button><button id="recipeCloudReload">↻ Aus Supabase laden</button><button id="recipeExportAdmin">Verwaltungs-/Einkaufsexport</button><button id="recipeExportPos">Nur Informationen für Kasse</button></div>
+      <div class="recipe-toolbar"><button id="recipeAdd">＋ Zutat</button><button id="recipeCalculate">Neu berechnen</button><button id="recipeSave" class="primary">Rezeptur in Supabase speichern</button><button id="recipeCloudReload">↻ Aus Supabase laden</button><button id="recipePendingReview">Lokale Änderung prüfen</button><button id="recipeExportAdmin">Verwaltungs-/Einkaufsexport</button><button id="recipeExportPos">Nur Informationen für Kasse</button></div>
       <div id="recipeSummary" class="recipe-summary"></div><div id="recipeStatus" class="recipe-result">Rezeptur bereit.</div>
     </div>`;
     editor.append(panel);
@@ -164,6 +208,7 @@
     $('recipeRows').addEventListener('click',event=>{const button=event.target.closest('[data-recipe-remove]');if(!button)return;currentRows.splice(+button.dataset.recipeRemove,1);renderRows();calculate()});
     $('recipeCalculate').onclick=calculate;$('recipeReverse').onclick=calculateReverse;$('recipeSave').onclick=save;
     $('recipeCloudReload').onclick=initializeCloud;
+    $('recipePendingReview').onclick=loadPendingForCurrentArticle;
     $('recipeExportAdmin').onclick=()=>download(`Rezepturen_Verwaltung_${new Date().toISOString().slice(0,10)}.json`,{schema:'KC_RECIPE_PACKAGE_V1',version:VERSION,createdAt:new Date().toISOString(),recipes});
     $('recipeExportPos').onclick=exportPublic;
     document.getElementById('articleBody')?.addEventListener('click',()=>setTimeout(()=>{if(panel.classList.contains('active'))load()},0));
@@ -202,16 +247,17 @@
     try{
       recipe=formRecipe();check=core.validate(recipe);if(!check.ok)throw new Error(check.errors.join(' '));
       const index=recipes.findIndex(x=>x.productId===recipe.productId);if(index>=0)recipes[index]=recipe;else recipes.push(recipe);
-      saveStore();markPending(recipe.productId);calculate();
+      saveStore();markPending(recipe);calculate();
       if(!cloudConfig())return status(`Rezeptur „${recipe.name}“ lokal zwischengespeichert. Supabase-Teammodus ist noch nicht eingerichtet.`,true);
-      status(`Rezeptur „${recipe.name}“ wird in Supabase gespeichert …`);
+      if(!cloudReady)return status(`Rezeptur „${recipe.name}“ lokal in der Warteschlange gesichert. Vor einem zentralen Speichern muss zuerst der aktuelle Supabase-Stand erfolgreich geladen werden.`,true);
+      status(`Rezeptur „${recipe.name}“ wird nach ausdrücklicher Bestätigung in Supabase gespeichert …`);
       await pushRecipe(recipe);cloudReady=true;
       status(`Rezeptur „${recipe.name}“ zentral in Supabase gespeichert.${check.warnings.length?' Hinweise: '+check.warnings.join(' '):''}`,check.warnings.length>0);
-    }catch(error){if(recipe?.productId)markPending(recipe.productId);status(`Speichern vorgemerkt: ${error.message}`,true)}
+    }catch(error){if(recipe?.productId)markPending(recipe);status(`Speichern vorgemerkt: ${error.message}`,true)}
   }
   function exportPublic(){const articles=JSON.parse(localStorage.getItem('kcm_articles')||'[]'),infoById=new Map(articles.map(a=>[a.id,a.info||{}]));const approved=recipes.filter(r=>r.status==='approved');if(!approved.length)return status('Keine freigegebene Rezeptur für die Kasse vorhanden.',true);const payload=core.makePublicPackage(approved.map(recipe=>({recipe,info:infoById.get(recipe.productId)||{}})));download(`Kasseninformationen_${new Date().toISOString().slice(0,10)}.json`,payload);status(`${payload.products.length} freigegebene Informationsdatensätze wurden ohne Mengen, Kosten und Lieferantendaten exportiert.`)}
   function load(){const recipe=existing()||core.normalizeRecipe({productId:articleId(),name:`${articleName()} Grundrezept`,outputAmount:1,outputUnit:'kg',portionAmount:250,portionUnit:'g'});$('recipeName').value=recipe.name;$('recipeVersion').value=recipe.version;$('recipeApproval').value=recipe.status;$('recipeOutput').value=recipe.outputAmount||'';$('recipeOutputUnit').value=recipe.outputUnit;$('recipePortion').value=recipe.portionAmount||250;$('recipePortionUnit').value=recipe.portionUnit;$('recipeReserve').value=recipe.reservePercent||0;currentRows=(recipe.ingredients||[]).map(core.normalizeIngredient);renderRows();calculate()}
 
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',mount);else mount();
-  global.KCRecipeManager={version:VERSION,reload:load,refreshFromSupabase:initializeCloud,isCloudReady:()=>cloudReady};
+  global.KCRecipeManager={version:VERSION,reload:load,refreshFromSupabase:initializeCloud,isCloudReady:()=>cloudReady,pendingIds:()=>pendingIds().slice(),pendingPayloads:()=>JSON.parse(JSON.stringify(pendingPayloads())),loadPendingForCurrentArticle};
 })(window);
