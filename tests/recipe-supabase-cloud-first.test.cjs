@@ -7,6 +7,9 @@ const recipe=fs.readFileSync(path.join(root,'pc-manager/recipe-manager.js'),'utf
 assert.match(recipe,/const VERSION='0\.2\.1'/);
 assert.match(recipe,/PENDING_DATA_STORE='kcm_recipes_pending_payloads_v2'/);
 assert.match(recipe,/PRECLOUD_BACKUP_STORE='kcm_recipes_precloud_backup_v1'/);
+assert.match(recipe,/const startupStoredRecipes=readStore\(\)\.map/);
+assert.match(recipe,/const original=startupStoredRecipes\.find/);
+assert.match(recipe,/recipes:startupStoredRecipes/);
 assert.match(recipe,/savePreCloudBackup\(\);\s*capturePendingFromLocal\(\);[\s\S]{0,300}await pullAll\(\)/);
 assert.doesNotMatch(recipe,/initializeCloud\(\)[\s\S]{0,800}await flushPending\(\)/);
 assert.doesNotMatch(recipe,/if\(!recipes\.length&&before\.length\)[\s\S]{0,400}pushRecipe/);
