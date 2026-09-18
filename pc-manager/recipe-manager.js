@@ -9,6 +9,7 @@
   const core=global.KCRecipeCalculationCore;
   if(!core)return;
 
+  const startupStoredRecipes=readStore().map(x=>JSON.parse(JSON.stringify(x)));
   let recipes=seedKnownRecipes(readStore()), currentRows=[];
   let cloudReady=false, cloudLoading=false;
   const $=id=>document.getElementById(id);
@@ -41,7 +42,9 @@
     let changed=false;
     for(const productId of pendingIds()){
       if(payloads[productId])continue;
-      const recipe=recipes.find(x=>x.productId===productId);
+      const original=startupStoredRecipes.find(x=>x?.productId===productId);
+      const fallback=recipes.find(x=>x.productId===productId);
+      const recipe=original||fallback;
       if(recipe){payloads[productId]=core.normalizeRecipe(recipe);changed=true}
     }
     if(changed)setPendingPayloads(payloads);
@@ -49,10 +52,10 @@
   }
   function savePreCloudBackup(){
     const previous=readJson(PRECLOUD_BACKUP_STORE,null);
-    if(previous?.recipes?.length)return;
+    if(previous?.recipes)return;
     localStorage.setItem(PRECLOUD_BACKUP_STORE,JSON.stringify({
       capturedAt:new Date().toISOString(),
-      recipes:readStore(),
+      recipes:startupStoredRecipes,
       pendingIds:pendingIds(),
       pendingPayloads:pendingPayloads()
     }));
