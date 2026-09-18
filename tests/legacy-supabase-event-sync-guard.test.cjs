@@ -1,0 +1,12 @@
+const assert=require('node:assert/strict');
+const fs=require('node:fs');
+const path=require('node:path');
+const root=path.resolve(__dirname,'..');
+const code=fs.readFileSync(path.join(root,'pc-manager/app.js'),'utf8');
+assert.match(code,/kc_manager_state_sections\?select=section_key&limit=1/);
+assert.match(code,/Legacy-Supabase-Event-Sync gesperrt/);
+assert.match(code,/if\(syncSettings\.provider==="supabase"\)\{/);
+assert.match(code,/provider!=="supabase"\)\{/);
+assert.match(code,/syncSettings\.auto&&syncSettings\.provider!=="supabase"/);
+assert.doesNotMatch(code,/rest\/v1\/sync_events\?on_conflict=id/);
+console.log('PC Manager Legacy-Sync: Supabase nur lesend geprüft, alte Queue wird nicht automatisch hochgeladen.');
