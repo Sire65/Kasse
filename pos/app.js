@@ -3492,7 +3492,16 @@ el("tipBtn").onclick=()=>{
   const due=total();
   if(state.cart.length&&toCents(due)<0)return pfandAlsTrinkgeldVerbuchen();
   if(state.cart.length&&toCents(due)>0&&toCents(state.given)>toCents(due))return wechselgeldAlsTrinkgeldVerbuchen();
-  const staged=state.given>0?state.given:0;
+  // Reines Trinkgeld ohne offenen Bon: erfassten Geldbetrag mit einem Tipp direkt buchen.
+  if(!state.cart.length&&toCents(state.given)>0){
+    const betrag=+state.given.toFixed(2),record=saveTipRecord(betrag,"manual-direct",null,"Trinkgeld ohne offenen Verkaufsbon");
+    if(!record)return setSystemHint("Trinkgeld konnte nicht gespeichert werden","warn");
+    setGiven(0);state.keypadBuffer="";renderKeypadDisplay();
+    return setSystemHint(`${money(betrag)} Trinkgeld verbucht`,"success","ein");
+  }
+  // Bei offenem Bon darf ein bereits erfasster Zahlbetrag nicht versehentlich komplett als
+  // Trinkgeld vorbelegt werden. Ein Mehrbetrag wurde oben bereits eindeutig behandelt.
+  const staged=!state.cart.length&&state.given>0?state.given:0;
   el("tipCustomAmount").value=staged?staged.toFixed(2):"";
   el("tipBonNumber").value=state.cart.length?bonText():"";
   el("tipNote").value="";
@@ -4208,7 +4217,7 @@ el("exactCashBtn")?.addEventListener("click",async()=>{
   const bonNumber=bonText();
   const record=await completeSale("cash-exact-tip",{silent:true,changeTarget:received});
   if(!record)return;
-  if(toCents(tip)>0)saveTipRecord(tip,"stimmt-so",bonNumber,`${money(received)} erhalten · ${money(due)} zu zahlen · kein Rückgeld`);
+  if(toCents(tip)>0)saveTipRecord(tip,"stimmt-so",record.bon||bonNumber,`${money(received)} erhalten · ${money(due)} zu zahlen · kein Rückgeld`);
   showExactCashSettlementNotice({due,received,tip});
   setSystemHint(tip>0?`${money(due)} zahlen · ${money(received)} erhalten · kein Rückgeld · ${money(tip)} Trinkgeld verbucht`:`${money(due)} zahlen · ${money(received)} erhalten · passend bezahlt`);
 });
