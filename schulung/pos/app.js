@@ -1340,7 +1340,7 @@ function tipRecords(){
 async function pfandAlsTrinkgeldVerbuchen(){
   if(!state.cart.length||toCents(total())>=0)return;
   const betrag=+Math.abs(total()).toFixed(2);
-  const rec=await completeSale("pfand-trinkgeld",{silent:true});
+  const rec=await completeSale("pfand-trinkgeld",{silent:true,payoutHandledWithoutCash:true});
   if(!rec)return;
   saveTipRecord(betrag,"pfand-behalten",rec.bon,"Pfandrückgabe - Kunde wollte kein Geld zurück");
   // 10.09.2026 (Betreiber: "nach jeder Buchung ein Fenster mit grünem Haken... Pfeile nutzen,
@@ -1358,7 +1358,7 @@ async function pfandAlsTrinkgeldVerbuchen(){
 async function pfandAlsSpendeVerbuchen(){
   if(!state.cart.length||toCents(total())>=0)return;
   const betrag=+Math.abs(total()).toFixed(2);
-  const rec=await completeSale("pfand-spende",{silent:true});
+  const rec=await completeSale("pfand-spende",{silent:true,payoutHandledWithoutCash:true});
   if(!rec)return;
   saveDonationRecord(betrag,"pfand-spende",rec.bon,"Pfandrückgabe - Kunde wollte als Spende für den Verein");
   setSystemHint(`${money(betrag)} Spende verbucht`,"success","aus");
@@ -1490,7 +1490,7 @@ function playCompletedSaleSound(){
 }
 
 function canonicalTransaction(row){const copy=cloneData(row);delete copy.recordHash;return JSON.stringify(copy)}
-async function completeSale(method,{type="sale",silent=false,changeTarget=null,directSettlement=false}={}){
+async function completeSale(method,{type="sale",silent=false,changeTarget=null,directSettlement=false,payoutHandledWithoutCash=false}={}){
   if(!state.cart.length)return showMessage("Kein Bon","0,00 €","Bitte zuerst Artikel wählen.");
   if(state.saleInProgress)return;
   state.saleInProgress=true;
@@ -1499,7 +1499,7 @@ async function completeSale(method,{type="sale",silent=false,changeTarget=null,d
     const training=!!state.master.trainingMode,endTime=new Date().toISOString();
     const trainingCounter=Number(localStorage.getItem("kc_training_next_bon_v018")||1);
     const current=training?`T-${String(trainingCounter).padStart(6,"0")}`:bonText();
-    const grossDue=+grossTotal().toFixed(2),globalDiscountValue=+globalDiscountAmount().toFixed(2),positionDiscountValue=+totalPositionDiscountAmount().toFixed(2),discountValue=+(globalDiscountValue+positionDiscountValue).toFixed(2),due=+total().toFixed(2),given=type==="personal"?0:+state.given.toFixed(2),settlementTarget=changeTarget!==null&&Number.isFinite(Number(changeTarget))?Number(changeTarget):due,isPayout=toCents(due)<0,payout=isPayout?+Math.abs(due).toFixed(2):0,change=type==="personal"?0:(isPayout?payout:+Math.max(0,given-settlementTarget).toFixed(2));
+    const grossDue=+grossTotal().toFixed(2),globalDiscountValue=+globalDiscountAmount().toFixed(2),positionDiscountValue=+totalPositionDiscountAmount().toFixed(2),discountValue=+(globalDiscountValue+positionDiscountValue).toFixed(2),due=+total().toFixed(2),given=type==="personal"?0:+state.given.toFixed(2),settlementTarget=changeTarget!==null&&Number.isFinite(Number(changeTarget))?Number(changeTarget):due,isPayout=toCents(due)<0,payout=isPayout&&!payoutHandledWithoutCash?+Math.abs(due).toFixed(2):0,change=type==="personal"||payoutHandledWithoutCash?0:(isPayout?payout:+Math.max(0,given-settlementTarget).toFixed(2));
     const rows=training?readTrainingTransactions():readTransactions(),previousHash=rows[rows.length-1]?.recordHash||null;
     const items=state.cart.map(item=>({...cloneData(item),unitTotal:+(lineUnit(item)+(state.master.depositRule==="automatic"?item.deposits.reduce((sum,d)=>sum+Number(d.price||0),0):0)).toFixed(2),lineTotal:+((lineUnit(item)+(state.master.depositRule==="automatic"?item.deposits.reduce((sum,d)=>sum+Number(d.price||0),0):0))*item.qty).toFixed(2)}));
     if(globalDiscountValue>0)items.push({id:"DISCOUNT",name:`Rabatt ${Number(state.discount.percent).toLocaleString("de-DE")} %${state.discount.reason?` · ${state.discount.reason}`:""}`,category:"Rabatt",price:-globalDiscountValue,qty:1,unitTotal:-globalDiscountValue,lineTotal:-globalDiscountValue,discountLine:true});
