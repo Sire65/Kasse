@@ -2896,7 +2896,14 @@ function closingSnapshot(){
   // in Trinkgeld umgewidmet. Sie darf den erwarteten Kassenbestand daher nicht erhöhen.
   const cashTipsDrawer=tips.filter(t=>!String(t.source||"").startsWith("pfand-behalten")).reduce((sum,t)=>sum+Number(t.amount||0),0);
   const cashOut=withdrawals.reduce((sum,m)=>sum+Number(m.amount||0),0);
-  return {startAt,tx,movements,withdrawals,tips,staffCount:staffTx.length,staffTotal:+staffTotal.toFixed(2),cashIn:+cashIn.toFixed(2),cashSales:+cashSales.toFixed(2),cashTips:+cashTipsDrawer.toFixed(2),tipTotal:+cashTips.toFixed(2),cashOut:+cashOut.toFixed(2),expectedCash:+(cashIn+cashSales+cashTipsDrawer-cashOut).toFixed(2)};
+  // Kontobuchungen sind Umsatz, aber kein Bargeld. Trainingsdaten und andere Kassen
+  // bleiben aus dieser lokalen Abschlussperiode heraus.
+  const accountTx=tx.filter(t=>t.type!=="personal"&&String(t.method||t.payment)==="account-charge");
+  const accountSales=accountTx.reduce((sum,t)=>sum+Number(t.due??t.total??0),0);
+  const accountBreakdown=(()=>{const je={};kcEvents().filter(e=>e.status!=="void"&&!e.training&&(!e.registerId||e.registerId===state.master.registerId)&&(!startAt||e.date>=startAt)).forEach(e=>{const k=e.accountName||e.accountId;je[k]=(je[k]||0)+Number(e.amount||0)});return Object.entries(je).map(([name,amount])=>({name,amount:+amount.toFixed(2)}))})();
+  const totalSales=tx.filter(t=>t.type!=="personal").reduce((sum,t)=>sum+Number(t.due??t.total??0),0);
+  const receiptExpected=withdrawals.filter(w=>w.receiptAvailable===true).length;
+  return {startAt,tx,movements,withdrawals,tips,staffCount:staffTx.length,staffTotal:+staffTotal.toFixed(2),cashIn:+cashIn.toFixed(2),cashSales:+cashSales.toFixed(2),accountSales:+accountSales.toFixed(2),accountBreakdown,totalSales:+totalSales.toFixed(2),cashTips:+cashTipsDrawer.toFixed(2),tipTotal:+cashTips.toFixed(2),cashOut:+cashOut.toFixed(2),expectedCash:+(cashIn+cashSales+cashTipsDrawer-cashOut).toFixed(2),receiptExpected};
 }
 // Ruhiger Hinweis im Abschluss, wenn fuer heute kein Anfangsbestand eingelesen wurde. Der
 // Uebergabecode gilt den ganzen Tag - er kann an dieser Stelle also noch nachgeholt werden,
