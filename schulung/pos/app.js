@@ -1460,10 +1460,10 @@ async function applyRoundUp(target){
   const received=state.given>0?state.given:Number(target);
   if(received<Number(target))return setSystemHint(`Für ${money(target)} fehlen noch ${money(Number(target)-received)}`,"warn");
   const change=Math.max(0,received-Number(target));
-  const bon=bonText();
-  saveTipRecord(tip,"aufrunden",bon,`Aufgerundet auf ${money(target)}`);
   state.given=received;
-  await completeSale("cash-roundup",{silent:true,changeTarget:Number(target)});
+  const rec=await completeSale("cash-roundup",{silent:true,changeTarget:Number(target)});
+  if(!rec)return;
+  saveTipRecord(tip,"aufrunden",rec.bon,`Aufgerundet auf ${money(target)}`);
   el("roundUpDialog").close();
   // 10.09.2026: dieselbe kurze, von-selbst-verschwindende Meldungszeile wie bei den anderen
   // Buchungen, statt eines Fensters zum Wegtippen.
