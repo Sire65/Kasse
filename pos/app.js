@@ -1057,6 +1057,8 @@ function updateBarPaymentButton(snapshot=null){
   button.classList.toggle("pay-change",cashEntered);
   button.classList.toggle("pay-ready",cashEntered&&sufficient);
   button.classList.toggle("pay-insufficient",cashEntered&&!sufficient);
+  const tipStattAuszahlungBtn=el("keepAsTipBtn");
+  if(tipStattAuszahlungBtn)tipStattAuszahlungBtn.hidden=!(isPayout&&state.cart.length);
   if(isPayout){
     title.textContent="AUSZAHLEN";
     detail.textContent=`${money(Math.abs(due))} AN KUNDEN`;
@@ -3782,6 +3784,7 @@ el("payBtn").onclick=()=>checkoutSale("button");
 // Derselbe Vorgang wie der grosse BAR-Knopf - nur eben dort erreichbar, wo beim Rueckgeld
 // ohnehin hingeschaut wird. Bewusst dieselbe Funktion, keine zweite Abrechnungslogik.
 el("cashChangeBtn")?.addEventListener("click",()=>checkoutSale("button"));
+el("keepAsTipBtn")?.addEventListener("click",pfandAlsTrinkgeldVerbuchen);
 el("cardBtn").onclick=()=>setSystemHint("EC-Kartenzahlung ist noch nicht verfügbar","warn");
 el("staffBtn").onclick=()=>{
   if(!state.cart.length)return showMessage("Kein Bon","0,00 €","Bitte zuerst Artikel wählen.");
