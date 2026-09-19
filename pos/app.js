@@ -2836,7 +2836,7 @@ function closingSnapshot(){
   // in Trinkgeld umgewidmet. Sie darf den erwarteten Kassenbestand daher nicht erhöhen.
   const cashTipsDrawer=tips.filter(t=>t.source!=="pfand-behalten").reduce((sum,t)=>sum+Number(t.amount||0),0);
   const cashOut=withdrawals.reduce((sum,m)=>sum+Number(m.amount||0),0);
-  return {startAt,tx,movements,withdrawals,tips,staffCount:staffTx.length,staffTotal:+staffTotal.toFixed(2),cashIn:+cashIn.toFixed(2),cashSales:+cashSales.toFixed(2),cashTips:+cashTips.toFixed(2),cashOut:+cashOut.toFixed(2),expectedCash:+(cashIn+cashSales+cashTipsDrawer-cashOut).toFixed(2)};
+  return {startAt,tx,movements,withdrawals,tips,staffCount:staffTx.length,staffTotal:+staffTotal.toFixed(2),cashIn:+cashIn.toFixed(2),cashSales:+cashSales.toFixed(2),cashTips:+cashTipsDrawer.toFixed(2),tipTotal:+cashTips.toFixed(2),cashOut:+cashOut.toFixed(2),expectedCash:+(cashIn+cashSales+cashTipsDrawer-cashOut).toFixed(2)};
 }
 // Ruhiger Hinweis im Abschluss, wenn fuer heute kein Anfangsbestand eingelesen wurde. Der
 // Uebergabecode gilt den ganzen Tag - er kann an dieser Stelle also noch nachgeholt werden,
