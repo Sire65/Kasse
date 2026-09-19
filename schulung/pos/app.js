@@ -1337,7 +1337,7 @@ function tipRecords(){
 // die Kasse verlassen), verringert aber wie jede Auszahlung den Gesamtumsatz - das ist richtig
 // so: der Pfandwert war nie echter Verkaufsumsatz. Der Betrag geht stattdessen als Trinkgeld
 // an das Team.
-async function pfandAlsTrinkgeldVerbuchen(){
+async async function pfandAlsTrinkgeldVerbuchen(){
   if(!state.cart.length||toCents(total())>=0)return;
   const betrag=+Math.abs(total()).toFixed(2);
   const rec=await completeSale("pfand-trinkgeld",{silent:true});
