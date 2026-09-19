@@ -3029,7 +3029,7 @@ function closingSnapshot(){
   const cashTips=tips.reduce((sum,t)=>sum+Number(t.amount||0),0);
   // Pfandrückgabe als Trinkgeld bewegt kein Bargeld: die geschuldete Auszahlung wird nur
   // in Trinkgeld umgewidmet. Sie darf den erwarteten Kassenbestand daher nicht erhöhen.
-  const cashTipsDrawer=tips.filter(t=>t.source!=="pfand-behalten").reduce((sum,t)=>sum+Number(t.amount||0),0);
+  const cashTipsDrawer=tips.filter(t=>!String(t.source||"").startsWith("pfand-behalten")).reduce((sum,t)=>sum+Number(t.amount||0),0);
   const cashOut=withdrawals.reduce((sum,m)=>sum+Number(m.amount||0),0);
   // 08.09.2026 (Betreiber): Kontobuchungen zaehlen am Verkaufstag als Umsatz, sind aber kein
   // Bargeld - bisher tauchten sie im Abschluss nirgends auf. Jetzt eigene Zeile mit Aufteilung
