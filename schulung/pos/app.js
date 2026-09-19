@@ -2721,8 +2721,10 @@ async function reverseCompletedTransaction(original,reason){
 function requestCompletedReversal(no){
   if(state.role!=="superadmin"||!adminSession)return showMessage("Nicht erlaubt","!","Gebuchte Bons dürfen nur im Superadmin-Bereich storniert werden.");
   const original=allTransactions().find(row=>String(row.bon||row.bonNumber)===String(no));if(!original)return showMessage("Bon nicht gefunden","!",String(no));
+  if(original.type==="reversal")return showMessage("Storno nicht möglich","!","Ein Gegenbon kann nicht nochmals vollständig storniert werden.");
   const reason=prompt("Grund für die vollständige Stornierung:","Fehlbuchung");if(!reason)return;
-  askConfirm("Gebuchten Bon stornieren",`Für Bon ${no} wird ein protokollierter Gegenbon über ${money(-Math.abs(Number(original.due??original.total??0)))} erzeugt.`,async()=>{try{const rec=await reverseCompletedTransaction(original,reason);el("bonPrintDialog").close();showMessage("Storno gebucht",money(rec.due),`Gegenbon ${rec.bon} wurde gespeichert.`)}catch(err){showMessage("Storno abgelehnt","!",err.message)}});
+  const gegenbetrag=-Number(original.due??original.total??0);
+  askConfirm("Gebuchten Bon stornieren",`Für Bon ${no} wird ein protokollierter Gegenbon über ${money(gegenbetrag)} erzeugt.`,async()=>{try{const rec=await reverseCompletedTransaction(original,reason);el("bonPrintDialog").close();showMessage("Storno gebucht",money(rec.due),`Gegenbon ${rec.bon} wurde gespeichert.`)}catch(err){showMessage("Storno abgelehnt","!",err.message)}});
 }
 function decodeCashPayload(text){if(!text.startsWith("KCASH1:"))throw new Error("Ungültiger Bargeld-QR-Code");return JSON.parse(decodeURIComponent(escape(atob(text.slice(7)))))}
 function localBusinessDate(date=new Date()){return `${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,"0")}-${String(date.getDate()).padStart(2,"0")}`}
