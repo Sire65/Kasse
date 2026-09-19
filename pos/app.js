@@ -1195,6 +1195,79 @@ el("exitDiscountModeBtn")?.addEventListener("click",()=>{const hadDiscount=disco
 function tipRecords(){
   return JSON.parse(localStorage.getItem("kc_tip_records")||"[]");
 }
+// 09.09.2026 (Betreiber, Pfandrückgabe): "Kunde sagt: kannste behalten als Trinkgeld." - EIN
+// Tipp statt Umweg über die Zahlen-Seite. Der Bon wird normal gespeichert (Nachweis, dass das
+// Pfandglas zurückgenommen wurde), nur mit einer eigenen Zahlart ("pfand-trinkgeld"), die NICHT
+// mit "cash" beginnt - dadurch zaehlt sie im Tagesabschluss nicht als Bargeld (kein Geld hat
+// die Kasse verlassen), verringert aber wie jede Auszahlung den Gesamtumsatz - das ist richtig
+// so: der Pfandwert war nie echter Verkaufsumsatz. Der Betrag geht stattdessen als Trinkgeld
+// an das Team.
+async function pfandAlsTrinkgeldVerbuchen(){
+  if(!state.cart.length||toCents(total())>=0)return;
+  const betrag=+Math.abs(total()).toFixed(2);
+  const rec=await completeSale("pfand-trinkgeld",{silent:true});
+  if(!rec)return;
+  saveTipRecord(betrag,"pfand-behalten",rec.bon,"Pfandrückgabe - Kunde wollte kein Geld zurück");
+  // 10.09.2026 (Betreiber: "nach jeder Buchung ein Fenster mit grünem Haken... Pfeile nutzen,
+  // rechts für Ausgabe"): statt eines Fensters zum Wegtippen jetzt dieselbe Meldungszeile wie
+  // überall - verschwindet von selbst/durch die nächste Buchung, kein Tippen nötig.
+  setSystemHint(`${money(betrag)} Trinkgeld verbucht`,"success","aus");
+}
+// 10.09.2026 (Betreiber: "ein Kunde bringt ein Pfandglas zurück und sagt als Spende für den
+// Köcheclub - das ist kein Trinkgeld für Personal, sondern eine Spende an den Club. Muss
+// getrennt werden"): fast derselbe Ablauf wie pfandAlsTrinkgeldVerbuchen() oben - EIGENE
+// Zahlart ("pfand-spende", ebenfalls kein Bargeld verlassen die Kasse) UND, entscheidend,
+// eine KOMPLETT EIGENE, von Trinkgeld getrennte Speicherung (kc_donation_records statt
+// kc_tip_records) - eine Spende darf in keiner Auswertung/keinem Dashboard als Trinkgeld
+// mitgezählt werden (z.B. Personal-Einkommen).
+async function pfandAlsSpendeVerbuchen(){
+  if(!state.cart.length||toCents(total())>=0)return;
+  const betrag=+Math.abs(total()).toFixed(2);
+  const rec=await completeSale("pfand-spende",{silent:true});
+  if(!rec)return;
+  saveDonationRecord(betrag,"pfand-spende",rec.bon,"Pfandrückgabe - Kunde wollte als Spende für den Verein");
+  setSystemHint(`${money(betrag)} Spende verbucht`,"success","aus");
+}
+// 10.09.2026 (Betreiber: "ein Kunde gibt mir 2 Euro und sagt Trinkgeld, ich klicke auf den
+// Trinkgeld-Button, dann muss der Betrag SOFORT gebucht werden, kein Fenster erst"): fast
+// derselbe Ablauf wie pfandAlsTrinkgeldVerbuchen() oben, nur fuer den umgekehrten Fall - ein
+// normaler Verkauf, bei dem mehr gegeben wurde als noetig, und genau diese Differenz
+// (das Ruckgeld) als Trinkgeld behalten werden soll statt es auszuzahlen. Schliesst den Bon
+// wie eine normale Barzahlung ab (der Kunde hat ja tatsaechlich diesen Betrag gegeben),
+// verbucht aber das Ruckgeld als Trinkgeld statt es dem Kassenbestand als Rueckgeld zu
+// entnehmen.
+async function wechselgeldAlsTrinkgeldVerbuchen(){
+  const due=total();
+  if(!state.cart.length||toCents(due)<=0||toCents(state.given)<=toCents(due))return;
+  const betrag=+(state.given-due).toFixed(2);
+  const rec=await completeSale("cash-trinkgeld",{silent:true});
+  if(!rec)return;
+  saveTipRecord(betrag,"wechselgeld-behalten",rec.bon,"Kunde wollte das Wechselgeld als Trinkgeld");
+  setSystemHint(`${money(betrag)} Trinkgeld verbucht`,"success","aus");
+}
+function donationRecords(){
+  return JSON.parse(localStorage.getItem("kc_donation_records")||"[]");
+}
+function saveDonationRecord(amount,source,bonNumber=null,note=""){
+  const value=Number(amount||0);
+  if(value<=0)return null;
+  const record={
+    id:crypto.randomUUID(),
+    time:new Date().toISOString(),
+    registerId:state.master.registerId||"KASSE-01",
+    registerName:state.master.registerName||"Kasse 1",
+    operator:state.master.operatorName||"Hans",
+    amount:+value.toFixed(2),
+    source,
+    bonNumber:bonNumber||null,
+    note:note||"",
+    training:!!state.master.trainingMode
+  };
+  const list=donationRecords();
+  list.push(record);
+  localStorage.setItem("kc_donation_records",JSON.stringify(list));
+  return record;
+}
 function saveTipRecord(amount,source,bonNumber=null,note=""){
   const value=Number(amount||0);
   if(value<=0)return null;
@@ -1225,10 +1298,23 @@ function roundTargets(due){
   values.add(Math.ceil(due/10)*10);
   return [...values].filter(v=>v>due).sort((a,b)=>a-b).slice(0,4);
 }
+// 10.09.2026 (Betreiber, echter Test: "man weiss nicht ob alles geklappt hat... das Programm
+// weiss nicht was ich evtl. an Geld angenommen habe"): zwei Dinge unsichtbar, die es laengst
+// gab - was bereits ueber Scheine/Muenzen erfasst wurde (state.given), und wie sich das auf
+// Trinkgeld/Ruckgeld aufteilt. Beides jetzt VOR dem Bestaetigen im Fenster sichtbar, nicht
+// erst danach erraten muessen.
 function openRoundUp(){
   const due=total();if(due<=0)return setSystemHint("Kein offener Bon","warn");
   el("roundUpDue").textContent=money(due);
-  el("roundUpChoices").innerHTML=roundTargets(due).map(v=>`<button type="button" data-target="${v}">${money(v)}</button>`).join("");
+  const bereits=state.given>0?state.given:0;
+  const gegebenFeld=el("roundUpGegeben");
+  gegebenFeld.hidden=!bereits;
+  gegebenFeld.textContent=bereits?`Bereits über Scheine/Münzen erfasst: ${money(bereits)}`:"";
+  el("roundUpChoices").innerHTML=roundTargets(due).map(v=>{
+    const empfangen=bereits>0?bereits:v,trinkgeld=Math.max(0,v-due),ruckgeld=Math.max(0,empfangen-v);
+    const zeile=ruckgeld>0?`Trinkgeld ${money(trinkgeld)} · Rückgeld ${money(ruckgeld)}`:`Trinkgeld ${money(trinkgeld)}`;
+    return `<button type="button" data-target="${v}"><b>${money(v)}</b><small>${zeile}</small></button>`;
+  }).join("");
   el("roundUpChoices").querySelectorAll("button").forEach(b=>b.onclick=()=>applyRoundUp(Number(b.dataset.target)));
   el("roundUpCustom").value="";
   el("roundUpDialog").showModal();
@@ -1239,11 +1325,14 @@ async function applyRoundUp(target){
   const received=state.given>0?state.given:Number(target);
   if(received<Number(target))return setSystemHint(`Für ${money(target)} fehlen noch ${money(Number(target)-received)}`,"warn");
   const change=Math.max(0,received-Number(target));
-  saveTipRecord(tip,"aufrunden",bonText(),`Aufgerundet auf ${money(target)}`);
+  const bon=bonText();
+  saveTipRecord(tip,"aufrunden",bon,`Aufgerundet auf ${money(target)}`);
   state.given=received;
   await completeSale("cash-roundup",{silent:true,changeTarget:Number(target)});
   el("roundUpDialog").close();
-  setSystemHint(`Aufgerundet · Trinkgeld ${money(tip)} · Rückgeld ${money(change)}`);
+  // 10.09.2026: dieselbe kurze, von-selbst-verschwindende Meldungszeile wie bei den anderen
+  // Buchungen, statt eines Fensters zum Wegtippen.
+  setSystemHint(`${money(tip)} Trinkgeld verbucht${change>0?` · ${money(change)} Rückgeld`:""}`,"success","aus");
 }
 
 
@@ -3397,6 +3486,9 @@ function saveManualTip(amount){
   setSystemHint(`${money(record.amount)} Trinkgeld gespeichert`);
 }
 el("tipBtn").onclick=()=>{
+  const due=total();
+  if(state.cart.length&&toCents(due)<0)return pfandAlsTrinkgeldVerbuchen();
+  if(state.cart.length&&toCents(due)>0&&toCents(state.given)>toCents(due))return wechselgeldAlsTrinkgeldVerbuchen();
   const staged=state.given>0?state.given:0;
   el("tipCustomAmount").value=staged?staged.toFixed(2):"";
   el("tipBonNumber").value=state.cart.length?bonText():"";
