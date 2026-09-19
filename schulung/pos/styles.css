@@ -3760,3 +3760,19 @@ body:not(.group-color-mode) .category-tabs button.active{background:linear-gradi
 
 /* BV2: das vollstaendige Motiv auch in breiten Tablet-Kacheln erhalten. */
 .product-tile>img[src$="_bv2.webp"],.product-info-image[src$="_bv2.webp"]{object-fit:contain!important}
+
+
+/* KC adaptive Artikelraster 19.09.2026
+   Nur Darstellung: Reihenfolge und sortOrder werden nicht veraendert. */
+body.kc-layout-neu .sales-area>.product-grid{
+  grid-template-columns:repeat(var(--kc-spalten,5),minmax(0,1fr))!important;
+  grid-template-rows:repeat(var(--kc-zeilen,1),minmax(0,1fr))!important;
+  align-content:start!important;
+}
+body.kc-layout-neu .sales-area>.product-grid>.product-tile-wrap{
+  width:100%!important;min-width:0!important;min-height:0!important;height:100%!important;
+  max-height:235px!important;
+}
+body.kc-layout-neu .sales-area>.product-grid>.product-tile-wrap>.product-tile{
+  width:100%!important;height:100%!important;min-height:0!important;max-height:235px!important;
+}
