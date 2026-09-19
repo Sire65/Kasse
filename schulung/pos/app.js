@@ -2707,6 +2707,17 @@ el("bonSearchBtn").onclick=()=>{const n=el("bonSearchInput").value.trim(),t=allT
 async function reverseCompletedTransaction(original,reason){
   await _txHydrated;
   const rows=readTransactions();if(rows.some(row=>row.type==="reversal"&&row.originalTransactionId===original.transactionId))throw new Error("Dieser Bon wurde bereits vollständig storniert.");
+  const originalMethod=String(original.method||original.payment||"");
+  let linkedAccountEvent=null;
+  if(originalMethod==="account-charge"){
+    const accountEvents=kcEvents();
+    linkedAccountEvent=accountEvents.find(e=>e.transactionId===original.transactionId)||null;
+    if(linkedAccountEvent&&["invoiced","paid"].includes(linkedAccountEvent.status)){
+      throw new Error(linkedAccountEvent.status==="paid"
+        ?"Diese Kontobuchung ist bereits bezahlt. Dafür ist eine Gutschrift erforderlich; ein Vollstorno ist gesperrt."
+        :"Diese Kontobuchung ist bereits in Rechnung gestellt. Dafür ist eine Gutschrift erforderlich; ein Vollstorno ist gesperrt.");
+    }
+  }
   const current=bonText(),endTime=new Date().toISOString(),previousHash=rows[rows.length-1]?.recordHash||null,due=-Number(original.due??original.total??0);
   const rec={transactionId:crypto.randomUUID(),formatVersion:4,bon:current,bonNumber:current,startTime:endTime,time:endTime,endTime,registerId:state.master.registerId,registerName:state.master.registerName,operator:state.master.operatorName,type:"reversal",training:false,method:original.method||original.payment||"reversal",payment:original.payment||original.method||"reversal",due,total:due,dueCents:toCents(due),given:0,givenCents:0,change:0,changeCents:0,depositRule:original.depositRule,items:(original.items||[]).map(item=>{const originalQty=Number(item.qty||0),originalLine=Number(item.lineTotal??Number(item.price||0)*originalQty);return {...cloneData(item),qty:-originalQty,lineTotal:-originalLine}}),originalTransactionId:original.transactionId,originalBon:original.bon||original.bonNumber,reason:safeText(reason,300),previousHash};
   rec.recordHash=await sha256Hex(canonicalTransaction(rec));rows.push(rec);saveTransactions(rows);
@@ -2741,6 +2752,14 @@ async function reverseCompletedTransaction(original,reason){
       note:`Storno zu Reklamationsbon ${originalBon}: ${reason}`
     });
     if(linkedWithdrawals.length)localStorage.setItem(WITHDRAWAL_KEY,JSON.stringify(withdrawals));
+    if(linkedAccountEvent){
+      const accountEvents=kcEvents();
+      const accountIndex=accountEvents.findIndex(e=>e.eventId===linkedAccountEvent.eventId);
+      if(accountIndex>=0){
+        accountEvents[accountIndex]={...accountEvents[accountIndex],status:"void",voidedAt:endTime,voidReason:safeText(reason,300),voidReversalTransactionId:rec.transactionId};
+        kcWrite(KC_ACCOUNT_EVENTS_KEY,accountEvents);
+      }
+    }
   }
   state.master.nextBon++;saveMaster();recordAdminChange("transaction","reversal",rec.transactionId,original,rec);renderHeader();return rec;
 }
