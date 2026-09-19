@@ -2621,7 +2621,7 @@ body.kc-layout-neu .sales-area>.pager{flex:0 0 auto!important}
    546 hoch, also schmale Tuerme. Die Zeilenhoehe bekommt jetzt eine Obergrenze; der Rest
    bleibt frei, statt die Kacheln zu strecken. Bei vielen Artikeln entstehen dadurch mehrere
    Reihen statt einer ueberhohen. */
-body.kc-layout-neu .sales-area>.product-grid{
+body.kc-layout-neu:not(.kc-aufbau) .sales-area>.product-grid{
   flex:1 1 auto!important;height:auto!important;min-height:0!important;
   grid-template-columns:repeat(auto-fill,minmax(170px,1fr))!important;
   grid-template-rows:none!important;grid-auto-rows:minmax(105px,1fr)!important;
@@ -3148,14 +3148,14 @@ body.kc-layout-neu #coins{gap:7px!important;align-content:center!important}
 
 /* Kachelhoehe begrenzen statt der Reihe: bei fuenf Artikeln in einer Reihe entstehen so keine
    schmalen Tuerme, bei neun Artikeln passen trotzdem zwei Reihen ins Bild. */
-body.kc-layout-neu .sales-area>.product-grid>.product-tile-wrap{max-height:235px!important}
-body.kc-layout-neu .sales-area>.product-grid>.product-tile-wrap>.product-tile{max-height:235px!important}
+body.kc-layout-neu:not(.kc-aufbau) .sales-area>.product-grid>.product-tile-wrap{max-height:235px!important}
+body.kc-layout-neu:not(.kc-aufbau) .sales-area>.product-grid>.product-tile-wrap>.product-tile{max-height:235px!important}
 
 /* Die Kacheln tragen aus dem Bestand eine feste Mindesthöhe. Dadurch ragten zwei Reihen aus
    dem sichtbaren Bereich, statt sich den Platz zu teilen. Im neuen Layout bestimmt allein das
    Gitter die Höhe - so passen zwei Reihen ins Bild, ohne dass gescrollt werden muss. */
-body.kc-layout-neu .sales-area>.product-grid>.product-tile-wrap,
-body.kc-layout-neu .sales-area>.product-grid>.product-tile-wrap>.product-tile{
+body.kc-layout-neu:not(.kc-aufbau) .sales-area>.product-grid>.product-tile-wrap,
+body.kc-layout-neu:not(.kc-aufbau) .sales-area>.product-grid>.product-tile-wrap>.product-tile{
   min-height:0!important;height:100%!important;
 }
 
@@ -3764,15 +3764,15 @@ body:not(.group-color-mode) .category-tabs button.active{background:linear-gradi
 
 /* KC adaptive Artikelraster 19.09.2026
    Nur Darstellung: Reihenfolge und sortOrder werden nicht veraendert. */
-body.kc-layout-neu .sales-area>.product-grid{
+body.kc-layout-neu:not(.kc-aufbau) .sales-area>.product-grid{
   grid-template-columns:repeat(var(--kc-spalten,5),minmax(0,1fr))!important;
   grid-template-rows:repeat(var(--kc-zeilen,1),minmax(0,1fr))!important;
   align-content:start!important;
 }
-body.kc-layout-neu .sales-area>.product-grid>.product-tile-wrap{
+body.kc-layout-neu:not(.kc-aufbau) .sales-area>.product-grid>.product-tile-wrap{
   width:100%!important;min-width:0!important;min-height:0!important;height:100%!important;
   max-height:235px!important;
 }
-body.kc-layout-neu .sales-area>.product-grid>.product-tile-wrap>.product-tile{
+body.kc-layout-neu:not(.kc-aufbau) .sales-area>.product-grid>.product-tile-wrap>.product-tile{
   width:100%!important;height:100%!important;min-height:0!important;max-height:235px!important;
 }
