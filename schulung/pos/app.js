@@ -69,12 +69,12 @@ const OPTIONS={
   ]}
 };
 const DEFAULT_PRODUCTS=[
- {id:"grot",name:"Glühwein rot",price:3.50,category:"Getränke",sortOrder:2,image:"assets/gluehwein_rot_11-09.webp",color:"#8b1e24",info:{status:"approved",shortDescription:"Heißer roter Glühwein",ingredients:"Rotwein, Zucker, Gewürze",additives:"Keine Angaben",allergens:{sulphites:"contained"},important:"Alkoholhaltig. Optional mit Rum oder Amaretto.",nutrition:{energyKj:355,energyKcal:85,fat:0,saturates:0,carbohydrate:9.5,sugars:9.5,protein:0.1,salt:0.01},source:"Lieferantenangabe",approvedAt:"2026-07-17"},optionGroup:"shot",depositComponents:[{id:"glass",name:"Glaspfand",price:2}]},
- {id:"gweiss",name:"Glühwein weiß",price:3.50,category:"Getränke",sortOrder:3,image:"assets/gluehwein_weiss_auth.webp",color:"#a36a20",info:{status:"approved",shortDescription:"Heißer weißer Glühwein",ingredients:"Weißwein, Zucker, Gewürze",additives:"Keine Angaben",allergens:{sulphites:"contained"},important:"Alkoholhaltig. Optional mit Rum oder Amaretto.",nutrition:{energyKj:350,energyKcal:84,fat:0,saturates:0,carbohydrate:9.2,sugars:9.2,protein:0.1,salt:0.01},source:"Lieferantenangabe",approvedAt:"2026-07-17"},optionGroup:"shot",depositComponents:[{id:"glass",name:"Glaspfand",price:2}]},
- {id:"feuer",name:"Feuerzangenbowle",price:5.00,category:"Getränke",sortOrder:4,image:"assets/feuerzangenbowle_gewuerze_11-09.webp",color:"#a43f18",info:{ingredients:"Rotwein, Gewürze, Zuckerhut, Rum",allergens:"Enthält Sulfite",important:"Alkoholhaltig. Zusätzlich Glaspfand und Feuerzangenpfand beachten."},depositComponents:[{id:"glass",name:"Glaspfand",price:2},{id:"tong",name:"Feuerzangenpfand",price:2}]},
- {id:"apfel",name:"Apfelpunsch",price:2.50,category:"Getränke",sortOrder:6,image:"assets/apfelpunsch_apfel_oben_11-09.webp",depositComponents:[{id:"glass",name:"Glaspfand",price:2}]},
- {id:"roterfeger",name:"Roter Feger",price:2.50,category:"Getränke",sortOrder:5,image:"assets/roter_feger_kirschen_11-09.webp",color:"#b3202a",info:{status:"approved",shortDescription:"Alkoholfreier roter Kirschpunsch",ingredients:"Kirschsaft, Gewürze, Zucker",additives:"Keine Angaben",important:"Alkoholfrei - auch für Kinder geeignet.",source:"Vereinsangabe"},optionGroup:"shot",depositComponents:[{id:"glass",name:"Glaspfand",price:2}]},
- {id:"eier",name:"Eierlikörpunsch",price:4.50,category:"Getränke",sortOrder:1,image:"assets/eierlikoerpunsch_auth.webp",depositComponents:[{id:"glass",name:"Glaspfand",price:2}]},
+ {id:"grot",name:"Glühwein rot",price:3.50,category:"Getränke",sortOrder:2,image:"assets/gluehwein_rot_bv2.webp",color:"#8b1e24",info:{status:"approved",shortDescription:"Heißer roter Glühwein",ingredients:"Rotwein, Zucker, Gewürze",additives:"Keine Angaben",allergens:{sulphites:"contained"},important:"Alkoholhaltig. Optional mit Rum oder Amaretto.",nutrition:{energyKj:355,energyKcal:85,fat:0,saturates:0,carbohydrate:9.5,sugars:9.5,protein:0.1,salt:0.01},source:"Lieferantenangabe",approvedAt:"2026-07-17"},optionGroup:"shot",depositComponents:[{id:"glass",name:"Glaspfand",price:2}]},
+ {id:"gweiss",name:"Glühwein weiß",price:3.50,category:"Getränke",sortOrder:3,image:"assets/gluehwein_weiss_bv2.webp",color:"#a36a20",info:{status:"approved",shortDescription:"Heißer weißer Glühwein",ingredients:"Weißwein, Zucker, Gewürze",additives:"Keine Angaben",allergens:{sulphites:"contained"},important:"Alkoholhaltig. Optional mit Rum oder Amaretto.",nutrition:{energyKj:350,energyKcal:84,fat:0,saturates:0,carbohydrate:9.2,sugars:9.2,protein:0.1,salt:0.01},source:"Lieferantenangabe",approvedAt:"2026-07-17"},optionGroup:"shot",depositComponents:[{id:"glass",name:"Glaspfand",price:2}]},
+ {id:"feuer",name:"Feuerzangenbowle",price:5.00,category:"Getränke",sortOrder:4,image:"assets/feuerzangenbowle_bv2.webp",color:"#a43f18",info:{ingredients:"Rotwein, Gewürze, Zuckerhut, Rum",allergens:"Enthält Sulfite",important:"Alkoholhaltig. Zusätzlich Glaspfand und Feuerzangenpfand beachten."},depositComponents:[{id:"glass",name:"Glaspfand",price:2},{id:"tong",name:"Feuerzangenpfand",price:2}]},
+ {id:"apfel",name:"Apfelpunsch",price:2.50,category:"Getränke",sortOrder:6,image:"assets/apfelpunsch_bv2.webp",depositComponents:[{id:"glass",name:"Glaspfand",price:2}]},
+ {id:"roterfeger",name:"Roter Feger",price:2.50,category:"Getränke",sortOrder:5,image:"assets/roter_feger_bv2.webp",color:"#b3202a",info:{status:"approved",shortDescription:"Alkoholfreier roter Kirschpunsch",ingredients:"Kirschsaft, Gewürze, Zucker",additives:"Keine Angaben",important:"Alkoholfrei - auch für Kinder geeignet.",source:"Vereinsangabe"},optionGroup:"shot",depositComponents:[{id:"glass",name:"Glaspfand",price:2}]},
+ {id:"eier",name:"Eierlikörpunsch",price:4.50,category:"Getränke",sortOrder:1,image:"assets/eierlikoerpunsch_bv2.webp",depositComponents:[{id:"glass",name:"Glaspfand",price:2}]},
  // 09.09.2026 (Betreiber): "Schuss Rum" und "Schuss Amaretto" gab es bisher NUR als
  // Zusatzwahl (optionGroup:"shot") zu Glühwein/Rotem Feger, nicht als eigenen, einzeln
  // verkaufbaren Artikel. Beides jetzt zusätzlich als eigene Kachel bei Getränke - die
@@ -82,27 +82,27 @@ const DEFAULT_PRODUCTS=[
  // damit beide IMMER ganz am Ende der Gruppe stehen, auch nach allen unsortierten Artikeln.
  // Kein Glaspfand angenommen (Schuss wird nicht im Pfandglas ausgegeben) - bei Bedarf einfach
  // im Manager ergänzen.
- {id:"schussrum",name:"Schuss Rum",price:1.00,category:"Getränke",sortOrder:9000,image:"assets/rum_flasche_11-09.webp"},
- {id:"schussamaretto",name:"Schuss Amaretto",price:1.00,category:"Getränke",sortOrder:9001,image:"assets/amaretto_flasche_11-09.webp"},
- {id:"sauerkraut",name:"Sauerkrauteintopf",price:5.50,category:"Speisen",sortOrder:4,image:"assets/sauerkraut_auth.webp",color:"#77643d",info:{ingredients:"Sauerkraut, Kartoffeln, Speck, Gewürze",allergens:"Kann Sellerie und Senf enthalten",important:"Heiß ausgegeben."}},
- {id:"sauerkrautmett",name:"Sauerkrauteintopf + Mettwurst",price:7.00,halfAllowed:true,halfPrice:4.00,sortOrder:3,/* 08.09.2026 (Betreiber): ein Artikel als halbe Portion freigegeben */category:"Speisen",image:"assets/sauerkraut_mettwurst_auth.webp",color:"#785332",info:{ingredients:"Sauerkrauteintopf mit Mettwurst",allergens:"Kann Sellerie, Senf und Spuren von Gluten enthalten",important:"Mettwurst separat im Bestand geführt."}},
- {id:"gruenkohl",name:"Grünkohl",price:5.50,category:"Speisen",sortOrder:2,image:"assets/gruenkohl_auth.webp",color:"#315e35",info:{ingredients:"Grünkohl, Kartoffeln, Zwiebeln, Gewürze",allergens:"Kann Senf und Sellerie enthalten",important:"Heiß ausgegeben."}},
- {id:"gruenkohlmett",name:"Grünkohl + Mettwurst",price:7.00,category:"Speisen",sortOrder:1,image:"assets/gruenkohl_mettwurst_auth.webp",color:"#365d36",info:{ingredients:"Grünkohlgericht mit Mettwurst",allergens:"Kann Senf, Sellerie und Spuren von Gluten enthalten",important:"Mettwurst separat im Bestand geführt."}},
- {id:"mettwurst",name:"Mettwurst",price:1.50,category:"Speisen",sortOrder:7,image:"assets/mettwurst_auth.webp"},
- {id:"hering",name:"Kartoffel mit Hering",price:4.50,category:"Speisen",sortOrder:5,image:"assets/hering_kartoffeln_auth.webp"},
+ {id:"schussrum",name:"Schuss Rum",price:1.00,category:"Getränke",sortOrder:9000,image:"assets/rum_flasche_bv2.webp"},
+ {id:"schussamaretto",name:"Schuss Amaretto",price:1.00,category:"Getränke",sortOrder:9001,image:"assets/amaretto_flasche_bv2.webp"},
+ {id:"sauerkraut",name:"Sauerkrauteintopf",price:5.50,category:"Speisen",sortOrder:4,image:"assets/sauerkraut_bv2.webp",color:"#77643d",info:{ingredients:"Sauerkraut, Kartoffeln, Speck, Gewürze",allergens:"Kann Sellerie und Senf enthalten",important:"Heiß ausgegeben."}},
+ {id:"sauerkrautmett",name:"Sauerkrauteintopf + Mettwurst",price:7.00,halfAllowed:true,halfPrice:4.00,sortOrder:3,/* 08.09.2026 (Betreiber): ein Artikel als halbe Portion freigegeben */category:"Speisen",image:"assets/sauerkraut_mettwurst_bv2.webp",color:"#785332",info:{ingredients:"Sauerkrauteintopf mit Mettwurst",allergens:"Kann Sellerie, Senf und Spuren von Gluten enthalten",important:"Mettwurst separat im Bestand geführt."}},
+ {id:"gruenkohl",name:"Grünkohl",price:5.50,category:"Speisen",sortOrder:2,image:"assets/gruenkohl_bv2.webp",color:"#315e35",info:{ingredients:"Grünkohl, Kartoffeln, Zwiebeln, Gewürze",allergens:"Kann Senf und Sellerie enthalten",important:"Heiß ausgegeben."}},
+ {id:"gruenkohlmett",name:"Grünkohl + Mettwurst",price:7.00,category:"Speisen",sortOrder:1,image:"assets/gruenkohl_mettwurst_bv2.webp",color:"#365d36",info:{ingredients:"Grünkohlgericht mit Mettwurst",allergens:"Kann Senf, Sellerie und Spuren von Gluten enthalten",important:"Mettwurst separat im Bestand geführt."}},
+ {id:"mettwurst",name:"Mettwurst",price:1.50,category:"Speisen",sortOrder:7,image:"assets/mettwurst_bv2.webp"},
+ {id:"hering",name:"Kartoffel mit Hering",price:4.50,category:"Speisen",sortOrder:5,image:"assets/hering_kartoffeln_bv2.webp"},
 
 
- {id:"knirpsecreme",name:"Kartoffel mit Kartoffelcreme",price:3.50,category:"Speisen",sortOrder:6,image:"assets/kartoffelcreme_auth.webp",color:"#a66e24",info:{ingredients:"Kartoffeln, \u00d6l, Gew\u00fcrze, Kartoffelcreme",allergens:"Creme kann Milch und Milchprodukte enthalten"}},
+ {id:"knirpsecreme",name:"Kartoffel mit Kartoffelcreme",price:3.50,category:"Speisen",sortOrder:6,image:"assets/kartoffelcreme_bv2.webp",color:"#a66e24",info:{ingredients:"Kartoffeln, \u00d6l, Gew\u00fcrze, Kartoffelcreme",allergens:"Creme kann Milch und Milchprodukte enthalten"}},
  // Wertmarke als eigener Artikel: der VERKAUF einer Wertmarke laeuft damit ueber die
  // Kasse und ist zaehlbar. Das Einloesen ist etwas anderes - dafuer gibt es den
  // Zahlungsknopf unter MEHR, der noch nicht freigeschaltet ist.
  {id:"wertmarke",name:"Wertmarke",price:5.00,category:"Sonstiges",image:"assets/wertmarke.svg",color:"#7c3aed",info:{important:"Vorab verkaufte Wertmarke. Das Einl\u00f6sen erfolgt sp\u00e4ter \u00fcber die Bezahlfunktion Wertmarke."}},
- {id:"glasplus",name:"Glaspfand",price:2.00,category:"Pfand",image:"assets/pfandglas_geben_12-09.webp",manualDeposit:true},
+ {id:"glasplus",name:"Glaspfand",price:2.00,category:"Pfand",image:"assets/pfandglas_geben_bv2.webp",manualDeposit:true},
  {id:"zangeplus",name:"Feuerzangenpfand",price:2.00,category:"Pfand",image:"assets/feuerzange_placeholder.svg",manualDeposit:true},
- {id:"glasminus",name:"Glasrückgabe",price:-2.00,category:"Pfand",image:"assets/pfandglas_rueckgabe_12-09.webp"},
+ {id:"glasminus",name:"Glasrückgabe",price:-2.00,category:"Pfand",image:"assets/pfandglas_rueckgabe_bv2.webp"},
  {id:"zangeminus",name:"Feuerzange Rückgabe",price:-2.00,category:"Pfand",image:"assets/feuerzange_placeholder.svg"},
  {id:"glaszangebundleminus",name:"Glas + Feuerzange Rückgabe",price:-4.00,category:"Pfand",image:"assets/pfand_bundle_placeholder.svg",color:"#9f1239",info:{shortDescription:"Komplettrückgabe von Pfandglas und Feuerzange"}},
- {id:"becher",name:"Außer-Haus-Becher",price:1.00,category:"Speisen",sortOrder:8,image:"assets/becher_auth.webp"}
+ {id:"becher",name:"Außer-Haus-Becher",price:1.00,category:"Speisen",sortOrder:8,image:"assets/becher_bv2.webp"}
 ];
 let PRODUCTS=JSON.parse(localStorage.getItem("kc_products_v050")||"null")||DEFAULT_PRODUCTS;
 // 09.09.2026 (Betreiber, echter Fund am Stand): der Barcode-Scanner las "KCA:01003" korrekt
@@ -141,7 +141,7 @@ function rollenLesen(wert,rolle){
   return{rolls,coinsPerRoll};
 }
 const REQUIRED_DEPOSIT_RETURNS=[
- {id:"glasminus",name:"Glasrückgabe",price:-2.00,category:"Pfand",image:"assets/pfandglas_rueckgabe_12-09.webp",color:"#9f1239"},
+ {id:"glasminus",name:"Glasrückgabe",price:-2.00,category:"Pfand",image:"assets/pfandglas_rueckgabe_bv2.webp",color:"#9f1239"},
  {id:"zangeminus",name:"Feuerzange Rückgabe",price:-2.00,category:"Pfand",image:"assets/feuerzange_placeholder.svg",color:"#9f1239",info:{shortDescription:"Einzelrückgabe Feuerzange"}},
  {id:"glaszangebundleminus",name:"Glas + Feuerzange Rückgabe",price:-4.00,category:"Pfand",image:"assets/pfand_bundle_placeholder.svg",color:"#9f1239",info:{shortDescription:"Komplettrückgabe von Pfandglas und Feuerzange"}}
 ];
@@ -153,7 +153,7 @@ if(depositReturnMigration)localStorage.setItem("kc_products_v050",JSON.stringify
 // Ohne das behielte eine Kasse, die den Artikel schon im Speicher hat, das alte
 // Ersatzbild und den alten Preis - der Neustand waere nur auf einem frischen Geraet zu
 // sehen. Es werden ausschliesslich diese Felder gesetzt, sonst nichts.
-{const patches={mettwurst:{image:"assets/mettwurst_auth.webp"},hering:{image:"assets/hering_kartoffeln_auth.webp",price:4.50},knirpsecreme:{image:"assets/kartoffelcreme_auth.webp",price:3.50},
+{const patches={mettwurst:{image:"assets/mettwurst_bv2.webp"},hering:{image:"assets/hering_kartoffeln_bv2.webp",price:4.50},knirpsecreme:{image:"assets/kartoffelcreme_bv2.webp",price:3.50},
 // 03.09.2026, vom Betreiber bestaetigt: Bei diesen vier Getraenken stand der Preis MIT Pfand
 // als Artikelpreis. Weil die Kasse das Pfand automatisch draufrechnet, wurde es zweimal
 // berechnet - der Gast zahlte 2,00 EUR zu viel je Glas. Hier stehen jetzt die Getraenkepreise
@@ -174,6 +174,38 @@ if(changed)localStorage.setItem("kc_products_v050",JSON.stringify(PRODUCTS));}
 {const n=window.KCArtikelnummern;if(n){const bericht=n.eintragen(PRODUCTS);if(bericht.gesetzt)localStorage.setItem("kc_products_v050",JSON.stringify(PRODUCTS));
  if(bericht.abweichend.length)console.warn("Artikelnummern weichen vom gemeinsamen Stand ab:",bericht.abweichend);
  if(bericht.ohneNummer.length)console.warn("Artikel ohne Artikelnummer (nicht scannbar):",bericht.ohneNummer);}}
+// Bilderversion 2: nur bekannte alte Bildpfade ersetzen; eigene Bilder und Artikeldaten erhalten.
+const TRAINING_BV2_IMAGES={
+  "assets/eierlikoerpunsch_auth.webp": "assets/eierlikoerpunsch_bv2.webp",
+  "assets/gluehwein_rot_11-09.webp": "assets/gluehwein_rot_bv2.webp",
+  "assets/gluehwein_weiss_auth.webp": "assets/gluehwein_weiss_bv2.webp",
+  "assets/feuerzangenbowle_gewuerze_11-09.webp": "assets/feuerzangenbowle_bv2.webp",
+  "assets/apfelpunsch_apfel_oben_11-09.webp": "assets/apfelpunsch_bv2.webp",
+  "assets/roter_feger_kirschen_11-09.webp": "assets/roter_feger_bv2.webp",
+  "assets/rum_flasche_11-09.webp": "assets/rum_flasche_bv2.webp",
+  "assets/amaretto_flasche_11-09.webp": "assets/amaretto_flasche_bv2.webp",
+  "assets/pfandglas_geben_12-09.webp": "assets/pfandglas_geben_bv2.webp",
+  "assets/pfandglas_rueckgabe_12-09.webp": "assets/pfandglas_rueckgabe_bv2.webp",
+  "assets/pfandglas_auth.webp": "assets/pfandglas_bv2.webp",
+  "assets/becher_auth.webp": "assets/becher_bv2.webp",
+  "assets/sauerkraut_auth.webp": "assets/sauerkraut_bv2.webp",
+  "assets/sauerkraut_mettwurst_auth.webp": "assets/sauerkraut_mettwurst_bv2.webp",
+  "assets/gruenkohl_auth.webp": "assets/gruenkohl_bv2.webp",
+  "assets/gruenkohl_mettwurst_auth.webp": "assets/gruenkohl_mettwurst_bv2.webp",
+  "assets/hering_kartoffeln_auth.webp": "assets/hering_kartoffeln_bv2.webp",
+  "assets/kartoffelcreme_auth.webp": "assets/kartoffelcreme_bv2.webp",
+  "assets/mettwurst_auth.webp": "assets/mettwurst_bv2.webp",
+  "assets/gluehwein_rot_auth.webp": "assets/gluehwein_rot_bv2.webp",
+  "assets/gluehwein_rot.webp": "assets/gluehwein_rot_bv2.webp",
+  "assets/gluehwein_weiss.webp": "assets/gluehwein_weiss_bv2.webp",
+  "assets/feuerzangenbowle_auth.webp": "assets/feuerzangenbowle_bv2.webp",
+  "assets/apfelpunsch_auth.webp": "assets/apfelpunsch_bv2.webp",
+  "assets/roter_feger.webp": "assets/roter_feger_bv2.webp",
+  "assets/amaretto_auth.webp": "assets/amaretto_flasche_bv2.webp"
+};
+function trainingBv2Image(image){return TRAINING_BV2_IMAGES[image]||image}
+{let changed=false;for(const p of PRODUCTS){const image=trainingBv2Image(p.image);if(image!==p.image){p.image=image;changed=true}}if(changed)localStorage.setItem("kc_products_v050",JSON.stringify(PRODUCTS));}
+
 const DEFAULT_GROUPS=[{id:"WG01",name:"Getränke",shortName:"Getränke",sortOrder:10,color:"#173765",active:true,notes:"Warme und kalte Getränke"},{id:"WG02",name:"Speisen",shortName:"Speisen",sortOrder:20,color:"#8b4a23",active:true,notes:"Speisen und Eintöpfe"},{id:"WG03",name:"Pfand",shortName:"Pfand",sortOrder:30,color:"#29689a",active:true,notes:"Pfand und Rückgaben"},{id:"WG04",name:"Sonstiges",shortName:"Sonstiges",sortOrder:40,color:"#596675",active:true,notes:"Weitere Artikel"}];
 let GROUPS=JSON.parse(localStorage.getItem("kc_groups_v050")||"null")||DEFAULT_GROUPS;
 
@@ -319,7 +351,7 @@ const fromCents=value=>Number(value||0)/100;
 function safeArray(key){try{const value=JSON.parse(localStorage.getItem(key)||"[]");return Array.isArray(value)?value:[]}catch{return []}}
 function safeText(value,max=300){return String(value??"").replace(/[<>"'\u0000-\u001f]/g,"").trim().slice(0,max)}
 function safeId(value,fallback){const id=String(value??"").replace(/[^A-Za-z0-9._:-]/g,"-").slice(0,80);return id||fallback}
-function safeImage(value){const image=String(value||"").trim();return /^(assets\/[A-Za-z0-9._/-]+|data:image\/(png|jpeg|webp|gif);base64,)/i.test(image)?image:"assets/logo.webp"}
+function safeImage(value){const image=trainingBv2Image(String(value||"").trim());return /^(assets\/[A-Za-z0-9._/-]+|data:image\/(png|jpeg|webp|gif);base64,)/i.test(image)?image:"assets/logo.webp"}
 function operatorSlug(value,index=0){return safeId(String(value||"").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,""),`bediener-${index+1}`)}
 function normalizeOperatorProfiles(){
   const raw=Array.isArray(state.master.operatorProfiles)&&state.master.operatorProfiles.length?state.master.operatorProfiles:(state.master.operators||DEFAULTS.operators).map(name=>({name}));

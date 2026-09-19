@@ -3757,3 +3757,6 @@ body:not(.group-color-mode) .category-tabs button.active{background:linear-gradi
     width:48px!important;height:48px!important;min-width:48px!important;min-height:48px!important
   }
 }
+
+/* BV2: das vollstaendige Motiv auch in breiten Tablet-Kacheln erhalten. */
+.product-tile>img[src$="_bv2.webp"],.product-info-image[src$="_bv2.webp"]{object-fit:contain!important}
