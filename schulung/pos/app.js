@@ -3014,6 +3014,9 @@ function closingSnapshot(){
   const cashIn=movements.reduce((sum,m)=>sum+Number(m.total||0),0);
   const cashSales=tx.filter(t=>t.type!=="personal"&&String(t.method||t.payment).startsWith("cash")).reduce((sum,t)=>sum+Number(t.due??t.total??0),0);
   const cashTips=tips.reduce((sum,t)=>sum+Number(t.amount||0),0);
+  // Pfandrückgabe als Trinkgeld bewegt kein Bargeld: die geschuldete Auszahlung wird nur
+  // in Trinkgeld umgewidmet. Sie darf den erwarteten Kassenbestand daher nicht erhöhen.
+  const cashTipsDrawer=tips.filter(t=>t.source!=="pfand-behalten").reduce((sum,t)=>sum+Number(t.amount||0),0);
   const cashOut=withdrawals.reduce((sum,m)=>sum+Number(m.amount||0),0);
   // 08.09.2026 (Betreiber): Kontobuchungen zaehlen am Verkaufstag als Umsatz, sind aber kein
   // Bargeld - bisher tauchten sie im Abschluss nirgends auf. Jetzt eigene Zeile mit Aufteilung
@@ -3027,7 +3030,7 @@ function closingSnapshot(){
   // Verkaufsbons. Soll = wie viele Entnahmen des Zeitraums als "Bon/Quittung vorhanden" markiert
   // waren - Money Butler zeigt das der zaehlenden Person direkt an, ganz ohne den PC-Manager.
   const receiptExpected=withdrawals.filter(w=>w.receiptAvailable===true).length;
-  return {startAt,tx,movements,withdrawals,tips,staffCount:staffTx.length,staffTotal:+staffTotal.toFixed(2),cashIn:+cashIn.toFixed(2),cashSales:+cashSales.toFixed(2),accountSales:+accountSales.toFixed(2),accountBreakdown,totalSales:+totalSales.toFixed(2),cashTips:+cashTips.toFixed(2),cashOut:+cashOut.toFixed(2),expectedCash:+(cashIn+cashSales+cashTips-cashOut).toFixed(2),receiptExpected};
+  return {startAt,tx,movements,withdrawals,tips,staffCount:staffTx.length,staffTotal:+staffTotal.toFixed(2),cashIn:+cashIn.toFixed(2),cashSales:+cashSales.toFixed(2),accountSales:+accountSales.toFixed(2),accountBreakdown,totalSales:+totalSales.toFixed(2),cashTips:+cashTips.toFixed(2),cashOut:+cashOut.toFixed(2),expectedCash:+(cashIn+cashSales+cashTipsDrawer-cashOut).toFixed(2),receiptExpected};
 }
 // Ruhiger Hinweis im Abschluss, wenn fuer heute kein Anfangsbestand eingelesen wurde. Der
 // Uebergabecode gilt den ganzen Tag - er kann an dieser Stelle also noch nachgeholt werden,
