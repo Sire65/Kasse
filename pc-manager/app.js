@@ -64,7 +64,7 @@ window.KCImagesV3.apply(articles);
 // 19.09.2026: gemeinsame Kassen-Reihenfolge auch im PC-Manager absichern. Alte Managerdaten
 // ohne sortOrder bekommen nur fuer die bekannten Standardartikel die feste Bedienreihenfolge.
 // Bereits bewusst gesetzte Sortierungen anderer Artikel bleiben erhalten.
-{const bekannt={eier:1,grot:2,gweiss:3,feuer:4,roterfeger:5,apfel:6,schussrum:9000,schussamaretto:9001,gruenkohlmett:1,gruenkohl:2,sauerkrautmett:3,sauerkraut:4,hering:5,knirpsecreme:6};
+{const bekannt={eier:1,grot:2,gweiss:3,feuer:4,roterfeger:5,apfel:6,schussrum:9000,schussamaretto:9001,gruenkohlmett:1,gruenkohl:2,sauerkrautmett:3,sauerkraut:4,hering:5,knirpsecreme:6,mettwurst:7};
  articles.forEach(a=>{if(!(a.sortOrder>0)&&bekannt[a.id])a.sortOrder=bekannt[a.id]});}
 localStorage.setItem("kcm_articles",JSON.stringify(articles));
 // Bedienerstamm des Managers - identisch mit dem der Kasse. Angezeigt und an die Kassen
