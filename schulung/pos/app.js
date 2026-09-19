@@ -1375,7 +1375,7 @@ async function wechselgeldAlsTrinkgeldVerbuchen(){
   const due=total();
   if(!state.cart.length||toCents(due)<=0||toCents(state.given)<=toCents(due))return;
   const betrag=+(state.given-due).toFixed(2);
-  const rec=await completeSale("cash-trinkgeld",{silent:true});
+  const rec=await completeSale("cash-trinkgeld",{silent:true,changeTarget:state.given});
   if(!rec)return;
   saveTipRecord(betrag,"wechselgeld-behalten",rec.bon,"Kunde wollte das Wechselgeld als Trinkgeld");
   setSystemHint(`${money(betrag)} Trinkgeld verbucht`,"success","aus");
@@ -3802,6 +3802,12 @@ el("tipBtn").onclick=()=>{
   }
   const due=total();
   if(state.cart.length&&toCents(due)<0)return pfandAlsTrinkgeldVerbuchen();
+  // Offener positiver Bon + mehr Geld als Zahlbetrag: TRINKGELD bedeutet hier nicht den
+  // kompletten erfassten Betrag als separaten Tipp, sondern genau das vorhandene Wechselgeld.
+  // Beispiel 6,00 EUR Bon + 10,00 EUR erfasst -> Verkauf abschliessen, 4,00 EUR Trinkgeld,
+  // kein Rueckgeld. STIMMT SO bleibt als eigener Bedienweg fuer denselben wirtschaftlichen
+  // Abschluss erhalten; diese Abzweigung verhindert vor allem die gefaehrliche 10-EUR-Tippbuchung.
+  if(state.cart.length&&toCents(due)>0&&toCents(state.given)>toCents(due))return wechselgeldAlsTrinkgeldVerbuchen();
   // Bedienregel am Stand: Sobald ueber Muenz-/Scheintaste ODER Ziffernblock ein Betrag
   // erfasst wurde, bedeutet der anschliessende TRINKGELD-Knopf eindeutig: GENAU DIESEN
   // Betrag sofort als Trinkgeld buchen. Kein Dialog und keine Interpretation als Zahlbetrag.
