@@ -21,6 +21,10 @@ test('telemetry posts directly without wrapper recursion',()=>{
  assert.ok(fn.includes('/rest/v1/rpc/kicc_report_program_flow'));
  assert.ok(!fn.includes('rufeFunktionAuf('));
  assert.ok(fn.includes('catch (e)'));
+ assert.ok(fn.includes('if (!token) return'));
+ assert.ok(fn.includes('if (!antwort.ok)'));
+ assert.ok(fn.includes("Authorization: 'Bearer ' + token"));
+ assert.ok(!fn.includes("accessToken() || SUPABASE_ANON_KEY"));
 });
 
 test('flow identity is PC Manager to KC Core Supabase',()=>{
