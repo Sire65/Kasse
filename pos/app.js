@@ -128,7 +128,7 @@ if(changed)localStorage.setItem("kc_products_v050",JSON.stringify(PRODUCTS));}
 // 19.09.2026: feste Bedienreihenfolge der bekannten Hauptartikel. Fehlende
 // sortOrder-Werte aus alten Kassen-/Managerdaten werden nachgetragen; vorhandene
 // individuelle Sortierungen bleiben unangetastet.
-const SORTORDER_BEKANNT={eier:1,grot:2,gweiss:3,feuer:4,roterfeger:5,apfel:6,schussrum:9000,schussamaretto:9001,gruenkohlmett:1,gruenkohl:2,sauerkrautmett:3,sauerkraut:4,hering:5,knirpsecreme:6};
+const SORTORDER_BEKANNT={eier:1,grot:2,gweiss:3,feuer:4,roterfeger:5,apfel:6,schussrum:9000,schussamaretto:9001,gruenkohlmett:1,gruenkohl:2,sauerkrautmett:3,sauerkraut:4,hering:5,knirpsecreme:6,mettwurst:7};
 function sortOrderNachtragen(liste){(liste||[]).forEach(p=>{if(p&&!(p.sortOrder>0)&&SORTORDER_BEKANNT[p.id])p.sortOrder=SORTORDER_BEKANNT[p.id]})}
 sortOrderNachtragen(PRODUCTS);
 window.KCImagesV3.apply(PRODUCTS);
