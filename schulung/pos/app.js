@@ -1496,7 +1496,7 @@ function playCompletedSaleSound(){
 }
 
 function canonicalTransaction(row){const copy=cloneData(row);delete copy.recordHash;return JSON.stringify(copy)}
-async function completeSale(method,{type="sale",silent=false,changeTarget=null,directSettlement=false,payoutHandledWithoutCash=false}={}){
+async function completeSale(method,{type="sale",silent=false,changeTarget=null,directSettlement=false,payoutHandledWithoutCash=false,member=null}={}){
   if(!state.cart.length)return showMessage("Kein Bon","0,00 €","Bitte zuerst Artikel wählen.");
   if(state.saleInProgress)return;
   state.saleInProgress=true;
@@ -1510,7 +1510,7 @@ async function completeSale(method,{type="sale",silent=false,changeTarget=null,d
     const items=state.cart.map(item=>({...cloneData(item),unitTotal:+(lineUnit(item)+(state.master.depositRule==="automatic"?item.deposits.reduce((sum,d)=>sum+Number(d.price||0),0):0)).toFixed(2),lineTotal:+((lineUnit(item)+(state.master.depositRule==="automatic"?item.deposits.reduce((sum,d)=>sum+Number(d.price||0),0):0))*item.qty).toFixed(2)}));
     if(globalDiscountValue>0)items.push({id:"DISCOUNT",name:`Rabatt ${Number(state.discount.percent).toLocaleString("de-DE")} %${state.discount.reason?` · ${state.discount.reason}`:""}`,category:"Rabatt",price:-globalDiscountValue,qty:1,unitTotal:-globalDiscountValue,lineTotal:-globalDiscountValue,discountLine:true});
     state.cart.filter(item=>item.positionDiscount?.percent).forEach(item=>{const value=+positionDiscountAmount(item).toFixed(2);if(value>0)items.push({id:`POSITION-DISCOUNT-${item.id}`,name:`Positionsrabatt ${Number(item.positionDiscount.percent).toLocaleString("de-DE")} % · ${item.name}`,category:"Positionsrabatt",price:-value,qty:1,unitTotal:-value,lineTotal:-value,discountLine:true,sourceItemKey:item.key,reason:item.positionDiscount.reason||null,note:item.positionDiscount.note||null})});
-    const rec={transactionId:crypto.randomUUID(),formatVersion:6,bon:current,bonNumber:current,startTime:state.cartStartedAt||endTime,time:endTime,endTime,registerId:state.master.registerId,registerName:state.master.registerName,operator:state.master.operatorName,type,training,method,payment:method,grossDue,grossDueCents:toCents(grossDue),discount:{percent:Number(state.discount.percent||0),amount:discountValue,amountCents:toCents(discountValue),globalAmount:globalDiscountValue,positionAmount:positionDiscountValue,base:discountBase(),reason:state.discount.reason||null,note:state.discount.note||null,keys:Array.isArray(state.discount.keys)?state.discount.keys:[],positions:state.cart.filter(item=>item.positionDiscount?.percent).map(item=>({key:item.key,id:item.id,name:item.name,percent:Number(item.positionDiscount.percent),amount:positionDiscountAmount(item),reason:item.positionDiscount.reason||null}))},due,total:due,dueCents:toCents(due),given,givenCents:toCents(given),settlementTarget:+settlementTarget.toFixed(2),isPayout,payout,payoutCents:toCents(payout),change,changeCents:toCents(change),depositRule:state.master.depositRule,items,previousHash};
+    const rec={transactionId:crypto.randomUUID(),formatVersion:6,bon:current,bonNumber:current,startTime:state.cartStartedAt||endTime,time:endTime,endTime,registerId:state.master.registerId,registerName:state.master.registerName,operator:state.master.operatorName,member:member?{id:member.id||null,name:member.name||"",memberNo:member.memberNo||null}:null,type,training,method,payment:method,grossDue,grossDueCents:toCents(grossDue),discount:{percent:Number(state.discount.percent||0),amount:discountValue,amountCents:toCents(discountValue),globalAmount:globalDiscountValue,positionAmount:positionDiscountValue,base:discountBase(),reason:state.discount.reason||null,note:state.discount.note||null,keys:Array.isArray(state.discount.keys)?state.discount.keys:[],positions:state.cart.filter(item=>item.positionDiscount?.percent).map(item=>({key:item.key,id:item.id,name:item.name,percent:Number(item.positionDiscount.percent),amount:positionDiscountAmount(item),reason:item.positionDiscount.reason||null}))},due,total:due,dueCents:toCents(due),given,givenCents:toCents(given),settlementTarget:+settlementTarget.toFixed(2),isPayout,payout,payoutCents:toCents(payout),change,changeCents:toCents(change),depositRule:state.master.depositRule,items,previousHash};
     rec.recordHash=await sha256Hex(canonicalTransaction(rec));rows.push(rec);saveTransactions(rows,training);
     // KC Sync Live-Monitor: rein zur Anzeige im PC Manager, kein Archiv, keine Auswirkung auf
     // die Buchung selbst (siehe kc-sync-live-event.js für die Begründung). NICHT awaited.
@@ -4197,10 +4197,31 @@ el("cardBtn").onclick=()=>setSystemHint("EC-Kartenzahlung ist noch nicht verfüg
 // Warenkorb-Betrag) uebernimmt derselbe Knopf stattdessen "ALS SPENDE" - eine Spende an den
 // Verein, ausdruecklich GETRENNT von Trinkgeld gebucht (siehe pfandAlsSpendeVerbuchen). Bei
 // einem normalen Verkauf ist es unveraendert der PERSONAL-Knopf von vorher.
+let mitgliederBuchungWartet=false;
+function beendeMitgliederWartezustand(){
+  mitgliederBuchungWartet=false;
+  const button=el("staffBtn");
+  if(button){button.classList.remove("active","awaiting-member");button.removeAttribute("aria-busy")}
+}
+async function mitgliederVerbrauchBuchen(profile){
+  if(!mitgliederBuchungWartet||!profile)return false;
+  if(!state.cart.length){beendeMitgliederWartezustand();return showMessage("Kein Bon","0,00 €","Bitte zuerst Artikel wählen.")}
+  const gesperrt=staffBlockedCartItems();
+  if(gesperrt.length){beendeMitgliederWartezustand();return showMessage("Mitgliederbuchung nicht möglich",money(total()),`Nicht auf Mitglied buchbar: ${gesperrt.join(", ")}.`)}
+  const rec=await completeSale("internal-personal",{type:"personal",member:profile,silent:true});
+  if(!rec)return false;
+  beendeMitgliederWartezustand();
+  setSystemHint(`${money(rec.due)} auf Mitglied ${profile.name} (${profile.memberNo||profile.id}) gebucht`,"success");
+  return true;
+}
 el("staffBtn").onclick=()=>{
   if(!state.cart.length)return showMessage("Kein Bon","0,00 €","Bitte zuerst Artikel wählen.");
   if(toCents(total())<0)return pfandAlsSpendeVerbuchen();
-  const gesperrt=staffBlockedCartItems();if(gesperrt.length)return showMessage("Personalverbrauch nicht möglich",money(total()),`Nicht auf Personal buchbar: ${gesperrt.join(", ")}. Bitte diese Position${gesperrt.length>1?"en":""} entfernen oder normal abrechnen.`);askConfirm("Personalverbrauch speichern",`${money(total())} als Personalverbrauch protokollieren?`,()=>completeSale("internal-personal",{type:"personal"}))
+  const gesperrt=staffBlockedCartItems();
+  if(gesperrt.length)return showMessage("Mitgliederbuchung nicht möglich",money(total()),`Nicht auf Mitglied buchbar: ${gesperrt.join(", ")}. Bitte diese Position${gesperrt.length>1?"en":""} entfernen oder normal abrechnen.`);
+  mitgliederBuchungWartet=true;
+  const button=el("staffBtn");if(button){button.classList.add("active","awaiting-member");button.setAttribute("aria-busy","true")}
+  setSystemHint("Mitgliederbuchung: jetzt Mitgliedsausweis scannen","info");
 };
 el("depositBtn").onclick=()=>{state.activeCategory="Pfand";renderCategories();renderProducts()};
 el("complaintBtn").onclick=()=>{window.KCReklamation?window.KCReklamation.oeffnen():openWithdrawal()};   /* 09.09.2026: eigener schneller Ablauf, Rückfall auf alt falls das Modul fehlt */
@@ -4280,11 +4301,20 @@ document.addEventListener("keydown",async e=>{if(["INPUT","TEXTAREA","SELECT"].i
     // Mitgliedsnummer wird aus dem GANZEN Code gezogen statt aus einem Feld hinter einem "|".
     // Damit funktioniert der Ausweis auch dann, wenn genau dieses Zeichen unterwegs kaputtgeht.
     const bediener=ersterTreffer(c=>istBedienerausweis(c)?operatorFromCode(c):null);
-    if(bediener){confirmOperator(bediener.wert,"qr");layoutHinweis();return}
+    if(bediener){
+      if(mitgliederBuchungWartet){showMessage("Mitgliedsausweis erwartet","!","Für diese Buchung bitte den Mitgliedsausweis scannen. Der Bediener bleibt unverändert.");return}
+      confirmOperator(bediener.wert,"qr");layoutHinweis();return
+    }
     if(schreibweisen.some(istBedienerausweis)){showMessage("Ausweis nicht bekannt","!",`Dieser Bedienerausweis steht nicht in der Bedienerliste dieser Kasse. Der PC-Manager muss die Bediener einmal an die Kassen senden.\n\nGelesen wurde: ${code}`);return}
     const mitglied=ersterTreffer(c=>istMitgliedsausweis(c)?operatorFromKngQr(c):null);
-    if(mitglied){confirmOperator(mitglied.wert,"qr");layoutHinweis();return}
-    if(schreibweisen.some(istMitgliedsausweis)){showMessage("Ausweis nicht bekannt","!",`Dieses Mitglied ist an dieser Kasse nicht als Bediener hinterlegt. Im PC-Manager unter Bediener eintragen und an die Kassen senden.\n\nGelesen wurde: ${code}`);return}
+    if(mitglied){
+      layoutHinweis();
+      if(mitgliederBuchungWartet){await mitgliederVerbrauchBuchen(mitglied.wert);return}
+      confirmOperator(mitglied.wert,"qr");return
+    }
+    if(schreibweisen.some(istMitgliedsausweis)){
+      showMessage("Mitgliedsausweis nicht bekannt","!",`Dieses Mitglied ist an dieser Kasse nicht hinterlegt. Im PC-Manager unter Bediener/Mitglieder eintragen und an die Kassen senden.\n\nGelesen wurde: ${code}`);return
+    }
     if(code.startsWith("KCASH1:")){
       // 09.09.2026 (Betreiber): "Beim Einlesen des Geldübergabe-Codes muss sofort das
       // Bearbeitungsfenster aufgehen und nur das Resultat zeigen - keine weiteren
