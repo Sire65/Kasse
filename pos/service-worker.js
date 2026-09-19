@@ -1,7 +1,7 @@
 // Build V0.31.3.6 Repair 16 / Content- und Objektkern
 // 11.09.2026: Speichername gewechselt (Baukasten-Vorlagen, Rueckfallebene ohne CSS-Grid) - ein
 // Tablet mit altem Speicher bekaeme sonst weiter die alte index.html und saehe nichts davon.
-const CACHE="kc-bildrechner-2026-09-19-montag-rc11";
+const CACHE="kc-bildrechner-2026-09-19-montag-rc12";
 // BEFUND: diese Liste war stehengeblieben. Sie enthielt index.html, app.js, styles.css und
 // eine Handvoll Kerne - es fehlten Startpruefung, Layout, Gutscheine, Stechuhr, Meldeweg,
 // Ausverkauft und saemtliche Produktbilder. Nachgeladenes landete zwar beim ersten Aufruf
