@@ -831,7 +831,15 @@
     kreuzeEinbauen();
     eingebauteVorlagenLaden().then(() => {
       wahlEinbauen();
-      if (P && P.gewaehlte()) anwenden(); else setTimeout(hinweisNeueOberflaeche, 4000);
+      if (P && P.gewaehlte()) { anwenden(); return; }
+      // Montag-Freigabe: auf iPads ohne gespeicherte Auswahl den bewaehrten
+      // Koecheclub-Aufbau passend zur Breite starten. "Standard" und KC001-KC019
+      // bleiben ueber die Oberflaechenauswahl jederzeit manuell erreichbar.
+      const passt = (id) => P && P.liste().some((o) => o.id === id);
+      const breit = global.innerWidth || document.documentElement.clientWidth || 1024;
+      const vorschlagId = breit >= 1200 ? 'vorlage-vl-koecheclub-gross' : 'vorlage-vl-koecheclub-9';
+      if (P && passt(vorschlagId)) anwenden(vorschlagId);
+      else setTimeout(hinweisNeueOberflaeche, 4000);
     });
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start); else start();
