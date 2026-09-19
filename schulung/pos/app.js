@@ -3796,13 +3796,16 @@ function saveManualTip(amount){
 el("tipBtn").onclick=()=>{
   const due=total();
   if(state.cart.length&&toCents(due)<0)return pfandAlsTrinkgeldVerbuchen();
-  if(state.cart.length&&toCents(due)>0&&toCents(state.given)>toCents(due))return wechselgeldAlsTrinkgeldVerbuchen();
-  // Reines Trinkgeld ohne offenen Bon: erfassten Geldbetrag mit einem Tipp direkt buchen.
-  if(!state.cart.length&&toCents(state.given)>0){
-    const betrag=+state.given.toFixed(2),record=saveTipRecord(betrag,"manual-direct",null,"Trinkgeld ohne offenen Verkaufsbon");
+  // Bedienregel am Stand: Sobald ueber Muenz-/Scheintaste ODER Ziffernblock ein Betrag
+  // erfasst wurde, bedeutet der anschliessende TRINKGELD-Knopf eindeutig: GENAU DIESEN
+  // Betrag sofort als Trinkgeld buchen. Kein Dialog und keine Interpretation als Zahlbetrag.
+  if(toCents(state.given)>0){
+    const betrag=+state.given.toFixed(2);
+    const bon=state.cart.length?bonText():null;
+    const record=saveTipRecord(betrag,"manual-direct",bon,state.cart.length?"Direkt erfasster Trinkgeldbetrag bei offenem Bon":"Trinkgeld ohne offenen Verkaufsbon");
     if(!record)return setSystemHint("Trinkgeld konnte nicht gespeichert werden","warn");
     setGiven(0);state.keypadBuffer="";renderKeypadDisplay();
-    return setSystemHint(`${money(betrag)} Trinkgeld verbucht`,"success","ein");
+    return setSystemHint(`${money(betrag)} Trinkgeld sofort verbucht`,"success","ein");
   }
   // Bei offenem Bon darf ein bereits erfasster Zahlbetrag nicht versehentlich komplett als
   // Trinkgeld vorbelegt werden. Ein Mehrbetrag wurde oben bereits eindeutig behandelt.
