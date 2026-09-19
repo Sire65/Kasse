@@ -325,7 +325,10 @@
   function anwenden(id) {
     const P = global.KCOberflaechen;
     if (!P) return { ok: false, grund: 'kc-oberflaechen-pos.js fehlt' };
-    if (id) P.waehlen(id);
+    if (id) {
+      P.waehlen(id);
+      try { localStorage.removeItem('kc.kassenoberflaeche.standard.v1'); } catch (e) { /* egal */ }
+    }
     const o = P.gewaehlte();
     if (!o) return zuruecksetzen();
     if (!hauptRaster) {
@@ -377,10 +380,12 @@
     const nummerMuetze = document.getElementById('kcAufbauNummerMuetze');
     if (nummerMuetze) nummerMuetze.hidden = true;
     // "Standard (wie bisher)" ist ebenfalls eine bewusste manuelle Wahl. Die alte
-    // KC-Auswahl muss deshalb wirklich aus dem Speicher verschwinden; waehlen('') konnte das
-    // nicht, weil eine leere ID keine Oberflaeche ist. Sonst sprang die Kasse nach Neustart
-    // wieder auf die vorherige KC003/KC004-Ansicht.
-    try { localStorage.removeItem('kc.kassenoberflaeche.gewaehlt.v1'); } catch (e) { /* egal */ }
+    // KC-Auswahl wird entfernt und ein eigener Standard-Marker gesetzt. Ohne Marker bedeutet
+    // "keine ID" weiterhin: frisches Geraet -> passende KC003/KC004-Ansicht automatisch waehlen.
+    try {
+      localStorage.removeItem('kc.kassenoberflaeche.gewaehlt.v1');
+      localStorage.setItem('kc.kassenoberflaeche.standard.v1', '1');
+    } catch (e) { /* egal */ }
     nachbauen();
     return { ok: true, oberflaeche: null };
   }
@@ -836,6 +841,11 @@
     eingebauteVorlagenLaden().then(() => {
       wahlEinbauen();
       if (P && P.gewaehlte()) { anwenden(); return; }
+      // Eine bewusst gewaehlte Standardansicht bleibt auch nach Neustart Standard.
+      // Nur ein wirklich frisches Geraet ohne Auswahl UND ohne Standard-Marker nutzt Auto-KC003/004.
+      let standardManuell = false;
+      try { standardManuell = localStorage.getItem('kc.kassenoberflaeche.standard.v1') === '1'; } catch (e) { /* egal */ }
+      if (standardManuell) { zuruecksetzen(); return; }
       // Montag-Freigabe: auf iPads ohne gespeicherte Auswahl den bewaehrten
       // Koecheclub-Aufbau passend zur Breite starten. "Standard" und KC001-KC019
       // bleiben ueber die Oberflaechenauswahl jederzeit manuell erreichbar.
