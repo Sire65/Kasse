@@ -4219,7 +4219,7 @@ function kcAccountEvents(id){return kcEvents().filter(x=>x.accountId===id&&x.sta
 function kcAccountOpenAmount(id){
   return +kcAccountEvents(id).filter(x=>["open","invoiced"].includes(x.status)).reduce((s,x)=>s+Number(x.amount||0),0).toFixed(2)
 }
-function kcLocalUnsynced(id){return +kcAccountEvents(id).filter(x=>x.syncStatus!=="confirmed"&&["open","invoiced"].includes(x.status)).reduce((s,x)=>s+Number(x.amount||0),0).toFixed(2)}
+function kcLocalUnsynced(id){return +kcAccountEvents(id).filter(x=>x.syncStatus!=="confirmed"&&!x.training&&["open","invoiced"].includes(x.status)).reduce((s,x)=>s+Number(x.amount||0),0).toFixed(2)}
 function kcBalanceView(id){
   const a=kcAccounts().find(x=>x.id===id),snap=kcRead(KC_ACCOUNT_SYNC_KEY,{accounts:{},fetchedAt:null});
   const central=Number(snap.accounts?.[id]?.openAmount||0),unsynced=kcLocalUnsynced(id);
@@ -4232,6 +4232,7 @@ function kcAccountValid(a){
 }
 function kcRuleCheck(a,item){
   if((a.blockProducts||[]).includes(item.id))return {ok:false,reason:`${item.name}: Artikel gesperrt`};
+  if(Number(item.price||0)<0)return {ok:true};
   if((a.allowProducts||[]).includes(item.id))return {ok:true};
   if(!(a.allowedGroups||[]).includes(item.category))return {ok:false,reason:`${item.name}: Warengruppe ${item.category} nicht freigegeben`};
   return {ok:true};
@@ -4267,7 +4268,7 @@ async function kcPostAccount(){
   if(!el("accountAcknowledge").checked)return setSystemHint("Bitte Kontenauswahl und Buchung bestätigen","warn");
   const cartCopy=cloneData(state.cart),amount=+total().toFixed(2);
   const rec=await completeSale("account-charge",{silent:true});
-  const events=kcEvents();events.push({eventId:crypto.randomUUID(),accountId:a.id,accountName:a.name,transactionId:rec.transactionId,bon:rec.bon,amount,date:rec.endTime,registerId:rec.registerId,operator:rec.operator,items:cartCopy.map(i=>({id:i.id,name:i.name,category:i.category,qty:i.qty,price:i.price})),status:"open",syncStatus:"pending",configVersion:a.version||1});kcWrite(KC_ACCOUNT_EVENTS_KEY,events);
+  const events=kcEvents();events.push({eventId:crypto.randomUUID(),accountId:a.id,accountName:a.name,transactionId:rec.transactionId,bon:rec.bon,amount,date:rec.endTime,registerId:rec.registerId,operator:rec.operator,items:cartCopy.map(i=>({id:i.id,name:i.name,category:i.category,qty:i.qty,price:i.price})),status:"open",syncStatus:"pending",configVersion:a.version||1,training:!!state.master.trainingMode});kcWrite(KC_ACCOUNT_EVENTS_KEY,events);
   el("accountChargeDialog").close();showMessage("Auf Konto gebucht",money(amount),`${a.name} · neuer lokaler Gesamtstand ${money(kcBalanceView(a.id).total)}`);
 }
 function kcOpenBalance(){
