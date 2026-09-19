@@ -1,0 +1,67 @@
+name: Golden Master Guard
+on:
+  pull_request:
+    branches: [ main ]
+    paths:
+      - 'pc-manager/**'
+      - 'pos/**'
+      - 'latest-release-manifest.json'
+      - 'latest-release-manifest.js'
+      - 'GOLDEN_MASTER.md'
+      - '.github/workflows/golden-master-guard.yml'
+jobs:
+  golden-master:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Required Golden Master files
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -f GOLDEN_MASTER.md
+          test -f latest-release-manifest.json
+          test -f latest-release-manifest.js
+          test -f pc-manager/app.js
+          test -f pc-manager/index.html
+          test -f pc-manager/kc-manager-supabase-status.js
+          test -f pc-manager/recipe-manager.js
+          test -f pc-manager/recipe-serving-materials.js
+          test -f pc-manager/recipe-serving-materials-thermocup.js
+          test -f pc-manager/recipe-procurement-catalog.js
+      - name: Recipe and vessel fingerprints
+        shell: bash
+        run: |
+          set -euo pipefail
+          grep -q "gruenkohl" pc-manager/recipe-serving-materials.js
+          grep -q "sauerkraut" pc-manager/recipe-serving-materials.js
+          grep -q "CONSUMABLE-BOWL-BAGASSE-500-WM" pc-manager/recipe-serving-materials.js
+          grep -q "SERVING-GLASS-020-WM" pc-manager/recipe-serving-materials.js
+          grep -q "CONSUMABLE-SOUP-CUP-PAPER-PE-750-WM" pc-manager/recipe-serving-materials-thermocup.js
+      - name: Manifest parity
+        shell: bash
+        run: |
+          set -euo pipefail
+          node - <<'NODE'
+          const fs=require('fs'),vm=require('vm');
+          const json=JSON.parse(fs.readFileSync('latest-release-manifest.json','utf8'));
+          const code=fs.readFileSync('latest-release-manifest.js','utf8');
+          const ctx={window:{}}; vm.createContext(ctx); vm.runInContext(code,ctx);
+          const js=ctx.window.KC_CENTRAL_RELEASE_MANIFEST;
+          const keys=['schema','product','releaseVersion','displayVersion','productBaseVersion','uiSchemaVersion','status','releaseName','sourceRelease','updatedAt'];
+          const bad=keys.filter(k=>JSON.stringify(json[k])!==JSON.stringify(js[k]));
+          if(bad.length) throw new Error('Manifest-Abweichung: '+bad.join(', '));
+          if(json.update?.buildId!==js.update?.buildId) throw new Error('Manifest-Abweichung: update.buildId');
+          console.log('Manifest-Parität OK');
+          NODE
+      - name: JavaScript syntax
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --check pc-manager/kc-manager-supabase-status.js
+          node --check pc-manager/recipe-manager.js
+          node --check pc-manager/recipe-serving-materials.js
+          node --check pc-manager/recipe-serving-materials-thermocup.js
+          node --check pc-manager/recipe-procurement-catalog.js
