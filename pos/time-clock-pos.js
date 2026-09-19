@@ -207,7 +207,7 @@
       <h2 class="tc-titel">Kommen &amp; Gehen</h2>
 
       <section id="tcPosSchritt1" class="tc-schritt">
-        <p class="tc-anleitung">Mitgliedsausweis scannen.<br><span class="tc-klein">Ausweis vergessen? Geburtstag als sechsstellige Zahl eingeben (TTMMJJ).</span></p>
+        <p class="tc-anleitung">Ausweis scannen.<br><span class="tc-klein">Ausweis vergessen? Geburtstag als sechsstellige Zahl eingeben (TTMMJJ).</span></p>
         <input id="tcPosCredential" class="tc-eingabe" autocomplete="off" inputmode="text" placeholder="Ausweis scannen oder TTMMJJ">
         <button type="button" id="tcPosIdentify" class="tc-knopf-gross">Weiter</button>
       </section>
