@@ -294,9 +294,9 @@
   function zeigeSupabaseInfo() {
     const alter = document.getElementById('kcSupabaseInfoOverlay');
     if (alter) alter.remove();
-    const overlay = document.createElement('div');
+    const overlay = document.createElement('dialog');
     overlay.id = 'kcSupabaseInfoOverlay';
-    overlay.style.cssText = 'position:fixed;inset:0;background:rgba(7,17,31,.6);z-index:99996;display:flex;align-items:center;justify-content:center;';
+    overlay.style.cssText = 'position:fixed;inset:0;width:100vw;height:100vh;max-width:none;max-height:none;margin:0;padding:0;border:0;background:rgba(7,17,31,.6);align-items:center;justify-content:center;';
     const box = document.createElement('div');
     box.style.cssText = 'background:#fff;border-radius:12px;padding:22px 26px;min-width:340px;max-width:90vw;box-shadow:0 10px 40px rgba(0,0,0,.3);';
     box.innerHTML = `
@@ -314,8 +314,12 @@
     `;
     overlay.appendChild(box);
     document.body.appendChild(overlay);
-    document.getElementById('kcSupabaseInfoClose').addEventListener('click', () => overlay.remove());
-    overlay.addEventListener('click', (e) => { if (e.target === overlay) overlay.remove(); });
+    overlay.showModal();
+    overlay.style.display = 'flex';
+    const schliessen = () => { if (overlay.open) overlay.close(); overlay.remove(); };
+    document.getElementById('kcSupabaseInfoClose').addEventListener('click', schliessen);
+    overlay.addEventListener('click', (e) => { if (e.target === overlay) schliessen(); });
+    overlay.addEventListener('cancel', (e) => { e.preventDefault(); schliessen(); });
 
     const loginBereich = document.getElementById('kcSupabaseLoginBereich');
     if (!session?.user) {
