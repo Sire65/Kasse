@@ -83,16 +83,16 @@ const DEFAULT_PRODUCTS=[
  // Kasse und ist zaehlbar. Das Einloesen ist etwas anderes - dafuer gibt es den
  // Zahlungsknopf unter MEHR, der noch nicht freigeschaltet ist.
  {id:"wertmarke",name:"Wertmarke",price:5.00,category:"Sonstiges",image:"assets/wertmarke.svg",color:"#7c3aed",info:{important:"Vorab verkaufte Wertmarke. Das Einl\u00f6sen erfolgt sp\u00e4ter \u00fcber die Bezahlfunktion Wertmarke."}},
- {id:"glasplus",name:"Glaspfand",price:2.00,category:"Pfand",image:"assets/pfandglas_auth.webp",manualDeposit:true},
+ {id:"glasplus",name:"Glaspfand",price:2.00,category:"Pfand",image:"assets/pfand_aufschlag_version_3.png",manualDeposit:true},
  {id:"zangeplus",name:"Feuerzangenpfand",price:2.00,category:"Pfand",image:"assets/amaretto_auth.webp",manualDeposit:true},
- {id:"glasminus",name:"Glasrückgabe",price:-2.00,category:"Pfand",image:"assets/pfandglas_auth.webp"},
+ {id:"glasminus",name:"Glasrückgabe",price:-2.00,category:"Pfand",image:"assets/pfandrueckgabe_version_3.png"},
  {id:"zangeminus",name:"Feuerzange Rückgabe",price:-2.00,category:"Pfand",image:"assets/amaretto_auth.webp"},
  {id:"glaszangebundleminus",name:"Glas + Feuerzange Rückgabe",price:-4.00,category:"Pfand",image:"assets/pfand_bundle_placeholder.svg",color:"#9f1239",info:{shortDescription:"Komplettrückgabe von Pfandglas und Feuerzange"}},
  {id:"becher",name:"Außer-Haus-Becher",price:1.00,category:"Sonstiges",image:"assets/becher_auth.webp"}
 ];
 let PRODUCTS=JSON.parse(localStorage.getItem("kc_products_v050")||"null")||DEFAULT_PRODUCTS;
 const REQUIRED_DEPOSIT_RETURNS=[
- {id:"glasminus",name:"Glasrückgabe",price:-2.00,category:"Pfand",image:"assets/pfandglas_auth.webp",color:"#9f1239"},
+ {id:"glasminus",name:"Glasrückgabe",price:-2.00,category:"Pfand",image:"assets/pfandrueckgabe_version_3.png",color:"#9f1239"},
  {id:"zangeminus",name:"Feuerzange Rückgabe",price:-2.00,category:"Pfand",image:"assets/feuerzange_placeholder.svg",color:"#9f1239",info:{shortDescription:"Einzelrückgabe Feuerzange"}},
  {id:"glaszangebundleminus",name:"Glas + Feuerzange Rückgabe",price:-4.00,category:"Pfand",image:"assets/pfand_bundle_placeholder.svg",color:"#9f1239",info:{shortDescription:"Komplettrückgabe von Pfandglas und Feuerzange"}}
 ];

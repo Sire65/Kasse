@@ -1,6 +1,6 @@
 /* Freigegebene Bilderversion 3: nur Bildfelder bekannter Standardartikel migrieren. */
 (function(g){'use strict';
-const entries={
+const entries={"glasplus":{"image":"assets/pfand_aufschlag_version_3.png","legacy":["pfandglas_auth.webp","pfandglas_bv2.webp","pfandglas_geben_bv2.webp","pfandglas_geben_12-09.webp"]},"glasminus":{"image":"assets/pfandrueckgabe_version_3.png","legacy":["pfandglas_auth.webp","pfandglas_bv2.webp","pfandglas_rueckgabe_bv2.webp","pfandglas_rueckgabe_12-09.webp"]},
   "eier": {
     "image": "assets/eierpunsch_version_3.png",
     "legacy": [
@@ -111,7 +111,7 @@ const entries={
     ]
   }
 };
-function migrate(p){if(!p||p.embeddedImage)return p;const e=entries[p.id];if(!e)return p;const current=String(p.image||'');const file=current.split('/').pop();if(!current||e.legacy.includes(file)||current===e.image)p.image=e.image;return p}
+function migrate(p){if(!p)return p;(p.depositComponents||[]).forEach(d=>{if(d.id==='glass'&&(!d.image||entries.glasplus.legacy.includes(String(d.image).split('/').pop())))d.image=entries.glasplus.image});if(p.embeddedImage)return p;const e=entries[p.id];if(!e)return p;const current=String(p.image||'');const file=current.split('/').pop();if(!current||e.legacy.includes(file)||current===e.image)p.image=e.image;return p}
 function apply(items){(items||[]).forEach(migrate);return items}
 function isV3(p){return !p.isPackage&&/_version_3\.png$/.test(p.image||'')}
 g.KCImagesV3={entries,migrate,apply,isV3};
