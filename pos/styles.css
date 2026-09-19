@@ -3580,3 +3580,19 @@ body:not(.group-color-mode) .category-tabs button.active{background:linear-gradi
 .product-tile .kombi-bild .kombi-linie{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
 .product-tile .kombi-bild .kombi-linie line{stroke:#fff;stroke-width:3}
 .product-tile-wrap.package-tile .product-label strong:before{content:"";font-size:1em}
+
+
+/* KC adaptive Artikelraster 19.09.2026
+   Nur Darstellung: Reihenfolge und sortOrder werden nicht veraendert. */
+body.kc-layout-neu .sales-area>.product-grid{
+  grid-template-columns:repeat(var(--kc-spalten,5),minmax(0,1fr))!important;
+  grid-template-rows:repeat(var(--kc-zeilen,1),minmax(0,1fr))!important;
+  align-content:start!important;
+}
+body.kc-layout-neu .sales-area>.product-grid>.product-tile-wrap{
+  width:100%!important;min-width:0!important;min-height:0!important;height:100%!important;
+  max-height:235px!important;
+}
+body.kc-layout-neu .sales-area>.product-grid>.product-tile-wrap>.product-tile{
+  width:100%!important;height:100%!important;min-height:0!important;max-height:235px!important;
+}
