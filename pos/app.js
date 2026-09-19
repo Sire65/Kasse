@@ -2561,9 +2561,22 @@ el("bonSearchBtn").onclick=()=>{const n=el("bonSearchInput").value.trim(),t=allT
 async function reverseCompletedTransaction(original,reason){
   await _txHydrated;
   const rows=readTransactions();if(rows.some(row=>row.type==="reversal"&&row.originalTransactionId===original.transactionId))throw new Error("Dieser Bon wurde bereits vollständig storniert.");
-  const current=bonText(),endTime=new Date().toISOString(),previousHash=rows[rows.length-1]?.recordHash||null,due=-Math.abs(Number(original.due??original.total??0));
+  const current=bonText(),endTime=new Date().toISOString(),previousHash=rows[rows.length-1]?.recordHash||null,due=-Number(original.due??original.total??0);
   const rec={transactionId:crypto.randomUUID(),formatVersion:4,bon:current,bonNumber:current,startTime:endTime,time:endTime,endTime,registerId:state.master.registerId,registerName:state.master.registerName,operator:state.master.operatorName,type:"reversal",training:false,method:original.method||original.payment||"reversal",payment:original.payment||original.method||"reversal",due,total:due,dueCents:toCents(due),given:0,givenCents:0,change:0,changeCents:0,depositRule:original.depositRule,items:(original.items||[]).map(item=>({...cloneData(item),qty:-Math.abs(Number(item.qty||0)),lineTotal:-Math.abs(Number(item.lineTotal??Number(item.price||0)*Number(item.qty||0)))})),originalTransactionId:original.transactionId,originalBon:original.bon||original.bonNumber,reason:safeText(reason,300),previousHash};
-  rec.recordHash=await sha256Hex(canonicalTransaction(rec));rows.push(rec);saveTransactions(rows);state.master.nextBon++;saveMaster();recordAdminChange("transaction","reversal",rec.transactionId,original,rec);renderHeader();return rec;
+  rec.recordHash=await sha256Hex(canonicalTransaction(rec));rows.push(rec);saveTransactions(rows);
+  // Zu einem vollstaendig stornierten Bon gehoerende Trinkgeld-/Spendendatensaetze werden
+  // nicht geloescht, sondern mit einer negativen Gegenbuchung neutralisiert. So bleibt die
+  // Historie pruefbar und Tages-/Bargeldsummen werden exakt zurueckgedreht.
+  const originalBon=String(original.bon||original.bonNumber||"");
+  if(originalBon){
+    const tips=tipRecords(),linkedTips=tips.filter(t=>String(t.bonNumber||"")===originalBon&&Number(t.amount||0)>0&&!t.reversalOf);
+    for(const t of linkedTips)tips.push({...cloneData(t),id:crypto.randomUUID(),time:endTime,amount:-Math.abs(Number(t.amount||0)),source:`${t.source}-storno`,bonNumber:rec.bon,reversalOf:t.id,originalBon,note:`Storno zu ${originalBon}: ${reason}`});
+    if(linkedTips.length)localStorage.setItem("kc_tip_records",JSON.stringify(tips));
+    const donations=donationRecords(),linkedDonations=donations.filter(d=>String(d.bonNumber||"")===originalBon&&Number(d.amount||0)>0&&!d.reversalOf);
+    for(const d of linkedDonations)donations.push({...cloneData(d),id:crypto.randomUUID(),time:endTime,amount:-Math.abs(Number(d.amount||0)),source:`${d.source}-storno`,bonNumber:rec.bon,reversalOf:d.id,originalBon,note:`Storno zu ${originalBon}: ${reason}`});
+    if(linkedDonations.length)localStorage.setItem("kc_donation_records",JSON.stringify(donations));
+  }
+  state.master.nextBon++;saveMaster();recordAdminChange("transaction","reversal",rec.transactionId,original,rec);renderHeader();return rec;
 }
 function requestCompletedReversal(no){
   if(state.role!=="superadmin"||!adminSession)return showMessage("Nicht erlaubt","!","Gebuchte Bons dürfen nur im Superadmin-Bereich storniert werden.");
