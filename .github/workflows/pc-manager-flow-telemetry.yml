@@ -1,0 +1,19 @@
+name: PC Manager Real Flow Telemetry TÜV
+on:
+  pull_request:
+    paths:
+      - 'pc-manager/kc-manager-supabase-status.js'
+      - 'tests/pc-manager-flow-telemetry.test.cjs'
+      - '.github/workflows/pc-manager-flow-telemetry.yml'
+jobs:
+  pc-manager-flow:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Syntax
+        run: node --check pc-manager/kc-manager-supabase-status.js
+      - name: Regression real PC Manager flow
+        run: node --test tests/pc-manager-flow-telemetry.test.cjs

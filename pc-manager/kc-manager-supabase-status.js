@@ -16,6 +16,42 @@
 
   function accessToken() { return session?.access_token || null; }
 
+  // KC System Check: nur NACH einem erfolgreichen echten Supabase-I/O melden.
+  // Die Telemetrie selbst darf den eigentlichen Manager-Vorgang niemals fehlschlagen lassen.
+  async function meldeEchtenDatenfluss(flowType, requestBody, responseBody) {
+    try {
+      // Die DB-Funktion akzeptiert absichtlich nur angemeldete Benutzer/service_role.
+      // Ohne echte Manager-Sitzung gar keinen Telemetrieversuch erzeugen.
+      const token = accessToken();
+      if (!token) return;
+      const enc = new TextEncoder();
+      const bytes = enc.encode(requestBody == null ? '' : String(requestBody)).byteLength
+        + enc.encode(responseBody == null ? '' : String(responseBody)).byteLength;
+      const antwort = await fetch(`${SUPABASE_URL}/rest/v1/rpc/kicc_report_program_flow`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          apikey: SUPABASE_ANON_KEY,
+          Authorization: 'Bearer ' + token,
+        },
+        body: JSON.stringify({
+          p_program_id: 'kc-pc-manager',
+          p_instance_id: 'browser',
+          p_source_id: 'pc-manager',
+          p_target_id: 'supabase-kc-core',
+          p_flow_type: flowType,
+          p_event_count: 1,
+          p_byte_count: bytes,
+          p_status: 'OK',
+          p_measured_at: new Date().toISOString(),
+        }),
+      });
+      if (!antwort.ok) throw new Error(`Flow-Telemetrie HTTP ${antwort.status}`);
+    } catch (e) {
+      console.warn('KC Datenfluss-Telemetrie:', e?.message || e);
+    }
+  }
+
   // Ruft eine Postgres-Funktion über die normale Supabase-REST-Schnittstelle auf (kein
   // zusätzliches supabase-js nötig, passt zum bestehenden Stil des restlichen PC-Managers,
   // der überall mit einfachem fetch() arbeitet statt mit einer zusätzlichen Bibliothek).
@@ -41,6 +77,7 @@
       });
       const daten = await antwort.json().catch(() => null);
       if (!antwort.ok) { const fehler = new Error(daten?.message || `Fehler ${antwort.status}`); fehler.istAbgelaufen = /jwt expired|invalid jwt/i.test(daten?.message || ''); throw fehler; }
+      void meldeEchtenDatenfluss('rpc', JSON.stringify(argumente), JSON.stringify(daten));
       return daten;
     };
     try {
