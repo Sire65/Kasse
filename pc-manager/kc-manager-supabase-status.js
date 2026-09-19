@@ -20,15 +20,19 @@
   // Die Telemetrie selbst darf den eigentlichen Manager-Vorgang niemals fehlschlagen lassen.
   async function meldeEchtenDatenfluss(flowType, requestBody, responseBody) {
     try {
+      // Die DB-Funktion akzeptiert absichtlich nur angemeldete Benutzer/service_role.
+      // Ohne echte Manager-Sitzung gar keinen Telemetrieversuch erzeugen.
+      const token = accessToken();
+      if (!token) return;
       const enc = new TextEncoder();
       const bytes = enc.encode(requestBody == null ? '' : String(requestBody)).byteLength
         + enc.encode(responseBody == null ? '' : String(responseBody)).byteLength;
-      await fetch(`${SUPABASE_URL}/rest/v1/rpc/kicc_report_program_flow`, {
+      const antwort = await fetch(`${SUPABASE_URL}/rest/v1/rpc/kicc_report_program_flow`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           apikey: SUPABASE_ANON_KEY,
-          Authorization: 'Bearer ' + (accessToken() || SUPABASE_ANON_KEY),
+          Authorization: 'Bearer ' + token,
         },
         body: JSON.stringify({
           p_program_id: 'kc-pc-manager',
@@ -42,6 +46,7 @@
           p_measured_at: new Date().toISOString(),
         }),
       });
+      if (!antwort.ok) throw new Error(`Flow-Telemetrie HTTP ${antwort.status}`);
     } catch (e) {
       console.warn('KC Datenfluss-Telemetrie:', e?.message || e);
     }
