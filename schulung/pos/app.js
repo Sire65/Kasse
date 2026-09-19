@@ -122,7 +122,7 @@ try{window.KCArtikelnummern?.eintragen(PRODUCTS)}catch(e){}
 // frisch gestartetes Tablet bekommt dadurch die alte, unsortierte Reihenfolge. Deshalb hier
 // (und beim Live-Empfang der Manager-Daten, siehe kc-sync-master-data.js) fehlende sortOrder-
 // Werte fuer bekannte Artikel IMMER nachtragen - unabhaengig davon, woher die Liste kam.
-const SORTORDER_BEKANNT={eier:1,grot:2,gweiss:3,feuer:4,roterfeger:5,apfel:6,schussrum:9000,schussamaretto:9001,gruenkohlmett:1,gruenkohl:2,sauerkrautmett:3,sauerkraut:4,hering:5,knirpsecreme:6};
+const SORTORDER_BEKANNT={eier:1,grot:2,gweiss:3,feuer:4,roterfeger:5,apfel:6,schussrum:9000,schussamaretto:9001,gruenkohlmett:1,gruenkohl:2,sauerkrautmett:3,sauerkraut:4,hering:5,knirpsecreme:6,mettwurst:7};
 function sortOrderNachtragen(liste){(liste||[]).forEach(p=>{if(p&&!(p.sortOrder>0)&&SORTORDER_BEKANNT[p.id])p.sortOrder=SORTORDER_BEKANNT[p.id]})}
 sortOrderNachtragen(PRODUCTS);
 // 10.09.2026 (Betreiber, nach echten Scan-Problemen mit dem Money-Butler-QR-Code): der Code
