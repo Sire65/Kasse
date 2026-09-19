@@ -3491,6 +3491,12 @@ function saveManualTip(amount){
   setSystemHint(`${money(record.amount)} Trinkgeld gespeichert`);
 }
 el("tipBtn").onclick=()=>{
+  // Im Bargeldmodus darf TRINKGELD direkt auf den gerade eingetippten Ziffernblockwert reagieren.
+  // Der Bediener muss dafuer NICHT erst OK druecken: 2,00 eintippen -> TRINKGELD = 2,00 Trinkgeld.
+  if((state.keypadMode||"cash")==="cash"&&state.keypadBuffer){
+    const direkt=keypadNumber();
+    if(Number.isFinite(direkt)&&toCents(direkt)>0)setGiven(direkt);
+  }
   const due=total();
   if(state.cart.length&&toCents(due)<0)return pfandAlsTrinkgeldVerbuchen();
   // Bedienregel am Stand: Sobald ueber Muenz-/Scheintaste ODER Ziffernblock ein Betrag
