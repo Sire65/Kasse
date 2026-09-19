@@ -2339,7 +2339,7 @@ el("exportConfigPackage").onclick=async()=>{
 el("exportEncryptedSales").onclick=async()=>{
   if(!secureAuthOk())return showMessage("Nicht erlaubt","!","Bitte zuerst als Superadmin anmelden.");
   const password=el("salesExportPassword").value;if(!password)return showMessage("Passwort fehlt","!","Bitte Dateipasswort eingeben.");
-  const payload={format:"KC_SALES_EXPORT",version:5,createdAt:new Date().toISOString(),registerId:state.master.registerId||"KASSE-01",registerName:state.master.registerName||"Kasse 1",transactions:readTransactions(),tips:tipRecords(),withdrawals:safeArray(WITHDRAWAL_KEY),discountAudit:safeArray("kc_discount_audit_v020"),cashMovements:safeArray("kc_cash_movements"),cashImportAudit:safeArray("kc_cash_import_audit")};
+  const payload={format:"KC_SALES_EXPORT",version:5,createdAt:new Date().toISOString(),registerId:state.master.registerId||"KASSE-01",registerName:state.master.registerName||"Kasse 1",transactions:readTransactions(),tips:tipRecords(),donations:donationRecords(),withdrawals:safeArray(WITHDRAWAL_KEY),discountAudit:safeArray("kc_discount_audit_v020"),cashMovements:safeArray("kc_cash_movements"),cashImportAudit:safeArray("kc_cash_import_audit")};
   const encrypted=await encryptObject(payload,password);
   downloadText(`${payload.registerId}_Umsaetze_${new Date().toISOString().slice(0,10)}.kcsales`,JSON.stringify(encrypted),"application/octet-stream");
 };
@@ -2350,7 +2350,7 @@ function posExchangeChecksumPayload(pkg){const c=JSON.parse(JSON.stringify(pkg))
 function posExchangeChecksum(text){let h1=0x811c9dc5,h2=0x9e3779b9;for(let i=0;i<text.length;i++){const c=text.charCodeAt(i);h1^=c;h1=Math.imul(h1,0x01000193);h2^=(c+i);h2=Math.imul(h2,0x85ebca6b)}return `${(h1>>>0).toString(16).padStart(8,"0")}${(h2>>>0).toString(16).padStart(8,"0")}`}
 function sealExchangePackage(pkg){pkg.integrity={algorithm:"KCB-CHECK-1",value:""};pkg.integrity.value=posExchangeChecksum(posExchangeChecksumPayload(pkg));return pkg}
 function buildPosExchangeSales(){
-  const source={transactions:readTransactions(),trainingTransactions:readTrainingTransactions(),tips:tipRecords(),withdrawals:safeArray(WITHDRAWAL_KEY),discountAudit:safeArray("kc_discount_audit_v020"),cashMovements:JSON.parse(localStorage.getItem("kc_cash_movements")||"[]"),closings:JSON.parse(localStorage.getItem("kc_closings")||"[]")};
+  const source={transactions:readTransactions(),trainingTransactions:readTrainingTransactions(),tips:tipRecords(),donations:donationRecords(),withdrawals:safeArray(WITHDRAWAL_KEY),discountAudit:safeArray("kc_discount_audit_v020"),cashMovements:JSON.parse(localStorage.getItem("kc_cash_movements")||"[]"),closings:JSON.parse(localStorage.getItem("kc_closings")||"[]")};
   return sealExchangePackage({schema:"KCB-EVENT-1",packageId:crypto.randomUUID(),sourceId:state.master.registerId||"KASSE-01",createdAt:new Date().toISOString(),events:KCBExchange.buildEventPayload(source)});
 }
 function buildPosAdminChangeSet(){
@@ -3774,7 +3774,11 @@ el("payBtn").onclick=()=>checkoutSale("button");
 // ohnehin hingeschaut wird. Bewusst dieselbe Funktion, keine zweite Abrechnungslogik.
 el("cashChangeBtn")?.addEventListener("click",()=>checkoutSale("button"));
 el("cardBtn").onclick=()=>setSystemHint("EC-Kartenzahlung ist noch nicht verfügbar","warn");
-el("staffBtn").onclick=()=>{if(!state.cart.length)return showMessage("Kein Bon","0,00 €","Bitte zuerst Artikel wählen.");const gesperrt=staffBlockedCartItems();if(gesperrt.length)return showMessage("Personalverbrauch nicht möglich",money(total()),`Nicht auf Personal buchbar: ${gesperrt.join(", ")}. Bitte diese Position${gesperrt.length>1?"en":""} entfernen oder normal abrechnen.`);askConfirm("Personalverbrauch speichern",`${money(total())} als Personalverbrauch protokollieren?`,()=>completeSale("internal-personal",{type:"personal"}))};
+el("staffBtn").onclick=()=>{
+  if(!state.cart.length)return showMessage("Kein Bon","0,00 €","Bitte zuerst Artikel wählen.");
+  if(toCents(total())<0)return pfandAlsSpendeVerbuchen();
+  const gesperrt=staffBlockedCartItems();if(gesperrt.length)return showMessage("Personalverbrauch nicht möglich",money(total()),`Nicht auf Personal buchbar: ${gesperrt.join(", ")}. Bitte diese Position${gesperrt.length>1?"en":""} entfernen oder normal abrechnen.`);askConfirm("Personalverbrauch speichern",`${money(total())} als Personalverbrauch protokollieren?`,()=>completeSale("internal-personal",{type:"personal"}))
+};
 el("depositBtn").onclick=()=>{state.activeCategory="Pfand";renderCategories();renderProducts()};
 el("complaintBtn").onclick=()=>{openWithdrawal();setTimeout(()=>document.querySelector('[data-withdraw-reason="Reklamation"]')?.click(),40)};
 el("moreBtn").onclick=()=>el("moreDialog").showModal();el("menuBtn").onclick=()=>el("moreDialog").showModal();
