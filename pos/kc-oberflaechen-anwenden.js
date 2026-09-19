@@ -376,7 +376,11 @@
     if (nummerFeld) nummerFeld.hidden = true;
     const nummerMuetze = document.getElementById('kcAufbauNummerMuetze');
     if (nummerMuetze) nummerMuetze.hidden = true;
-    try { global.KCOberflaechen && global.KCOberflaechen.waehlen(''); } catch (e) { /* egal */ }
+    // "Standard (wie bisher)" ist ebenfalls eine bewusste manuelle Wahl. Die alte
+    // KC-Auswahl muss deshalb wirklich aus dem Speicher verschwinden; waehlen('') konnte das
+    // nicht, weil eine leere ID keine Oberflaeche ist. Sonst sprang die Kasse nach Neustart
+    // wieder auf die vorherige KC003/KC004-Ansicht.
+    try { localStorage.removeItem('kc.kassenoberflaeche.gewaehlt.v1'); } catch (e) { /* egal */ }
     nachbauen();
     return { ok: true, oberflaeche: null };
   }
