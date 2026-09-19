@@ -3083,7 +3083,7 @@ function closingSnapshot(){
   // je Konto, dazu der Gesamtumsatz, damit Bargeld + Konto + Personal aufgeht.
   const accountTx=tx.filter(t=>t.type!=="personal"&&String(t.method||t.payment)==="account-charge");
   const accountSales=accountTx.reduce((sum,t)=>sum+Number(t.due??t.total??0),0);
-  const accountBreakdown=(()=>{const je={};kcEvents().filter(e=>e.status!=="void"&&(!startAt||e.date>=startAt)).forEach(e=>{const k=e.accountName||e.accountId;je[k]=(je[k]||0)+Number(e.amount||0)});return Object.entries(je).map(([name,amount])=>({name,amount:+amount.toFixed(2)}))})();
+  const accountBreakdown=(()=>{const je={};kcEvents().filter(e=>e.status!=="void"&&!e.training&&(!e.registerId||e.registerId===state.master.registerId)&&(!startAt||e.date>=startAt)).forEach(e=>{const k=e.accountName||e.accountId;je[k]=(je[k]||0)+Number(e.amount||0)});return Object.entries(je).map(([name,amount])=>({name,amount:+amount.toFixed(2)}))})();
   const totalSales=tx.filter(t=>t.type!=="personal").reduce((sum,t)=>sum+Number(t.due??t.total??0),0);
   // 09.09.2026 (Betreiber): "Anzahl Bons/Quittungen" bei der Abendzaehlung meint die
   // EINKAUFSBELEGE aus den Entnahmen (Lebensmittel/Reinigungsmittel/Baumarkt/...), nicht die
