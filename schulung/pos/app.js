@@ -3030,7 +3030,7 @@ function closingSnapshot(){
   // Verkaufsbons. Soll = wie viele Entnahmen des Zeitraums als "Bon/Quittung vorhanden" markiert
   // waren - Money Butler zeigt das der zaehlenden Person direkt an, ganz ohne den PC-Manager.
   const receiptExpected=withdrawals.filter(w=>w.receiptAvailable===true).length;
-  return {startAt,tx,movements,withdrawals,tips,staffCount:staffTx.length,staffTotal:+staffTotal.toFixed(2),cashIn:+cashIn.toFixed(2),cashSales:+cashSales.toFixed(2),accountSales:+accountSales.toFixed(2),accountBreakdown,totalSales:+totalSales.toFixed(2),cashTips:+cashTips.toFixed(2),cashOut:+cashOut.toFixed(2),expectedCash:+(cashIn+cashSales+cashTipsDrawer-cashOut).toFixed(2),receiptExpected};
+  return {startAt,tx,movements,withdrawals,tips,staffCount:staffTx.length,staffTotal:+staffTotal.toFixed(2),cashIn:+cashIn.toFixed(2),cashSales:+cashSales.toFixed(2),accountSales:+accountSales.toFixed(2),accountBreakdown,totalSales:+totalSales.toFixed(2),cashTips:+cashTipsDrawer.toFixed(2),tipTotal:+cashTips.toFixed(2),cashOut:+cashOut.toFixed(2),expectedCash:+(cashIn+cashSales+cashTipsDrawer-cashOut).toFixed(2),receiptExpected};
 }
 // Ruhiger Hinweis im Abschluss, wenn fuer heute kein Anfangsbestand eingelesen wurde. Der
 // Uebergabecode gilt den ganzen Tag - er kann an dieser Stelle also noch nachgeholt werden,
