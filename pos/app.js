@@ -905,6 +905,9 @@ function toggleSelectedHalfPortion(){
   const halfPrice=Number(item.halfPrice||product?.halfPrice||0);
   if(!allowed||halfPrice<=0)return setSystemHint("Für diesen Artikel ist im Manager keine ½ Portion freigegeben","warn");
   const isHalf=Number(item.portionFactor||1)===0.5;
+  const rabattKeys=Array.isArray(state.discount?.keys)?state.discount.keys:null;
+  const alterKey=item.key;
+  const globalRabattAufZeile=!!rabattKeys&&rabattKeys.includes(alterKey);
   /* Stehen mehrere Stueck auf einer Zeile, wird EINES abgetrennt und halbiert - sonst
      wuerde aus "3x Gruenkohl" mit einem Tipp "3x halber Gruenkohl". So sind gemischte
      Bons moeglich: ein halber und ein ganzer Gluehwein stehen als zwei Zeilen da. */
@@ -914,12 +917,15 @@ function toggleSelectedHalfPortion(){
       qty:1,portionFactor:0.5,normalPrice:Number(item.normalPrice||item.price),price:halfPrice};
     /* Direkt UNTER die Ursprungszeile, nicht ans Bonende - der halbe und der ganze
        Gluehwein gehoeren beim Vorlesen nebeneinander. */
-    state.cart.splice(state.cart.indexOf(item)+1,0,half);state.selectedCartKey=half.key;
+    state.cart.splice(state.cart.indexOf(item)+1,0,half);
+    if(globalRabattAufZeile&&!state.discount.keys.includes(half.key))state.discount.keys.push(half.key);
+    state.selectedCartKey=half.key;
   }else{
     item.normalPrice=Number(item.normalPrice||item.price);
     item.portionFactor=isHalf?1:0.5;
     item.price=isHalf?Number(item.normalPrice):halfPrice;
     item.key=`${item.id}:${item.option?.id||"base"}:${item.offerId||"normal"}:${item.portionFactor===0.5?"half":"full"}:${crypto.randomUUID()}`;
+    if(globalRabattAufZeile)state.discount.keys=state.discount.keys.map(key=>key===alterKey?item.key:key);
     state.selectedCartKey=item.key;
   }
   renderCart();setSystemHint(`${item.name}: ${isHalf?"ganze":"½"} Portion gewählt`,"ok");
