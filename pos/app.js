@@ -687,35 +687,12 @@ function allProductsForCategory(){
   return list;
 }
 function productsPerPage(){
-  // BEFUND aus dem Betrieb: die Zahl war fest verdrahtet (6 bei mittlerer Knopfgroesse). Bei
-  // neun Speisen wurden nur sechs gezeigt, drei landeten auf Seite 2 - obwohl auf einem
-  // breiten Bildschirm noch Platz frei war. Am Stand ist Blaettern das Letzte, was man will:
-  // wer den Artikel nicht sieht, sucht ihn, und dahinter steht die Schlange.
-  // Deshalb wird im NEUEN Layout gezaehlt, wie viele Kacheln tatsaechlich hineinpassen.
-  // Im alten Layout bleibt es bei den festen Zahlen, damit sich dort nichts aendert.
+  // 19.09.2026: Im neuen Layout bleiben alle Artikel der aktuellen Warengruppe sichtbar.
+  // Die Kachelgroesse wird erst nach dem Rendern aus der Artikelzahl bestimmt. Damit kann
+  // keine Live-Messung an einer Scrollbalken-Kippschwelle einzelne Artikel auf eine
+  // unerwartete zweite Seite verschieben. Die Sortierung der Artikel bleibt unveraendert.
   if(document.body.classList.contains("kc-layout-neu")){
-    const grid=el("productGrid");
-    if(grid){
-      const flaeche=grid.getBoundingClientRect();
-      const stil=getComputedStyle(grid);
-      const abstand=parseFloat(stil.gap)||9;
-      // Mindestmasse wie im Stylesheet: 170px breit, 130px hoch.
-      const spalten=Math.max(1,Math.floor((flaeche.width+abstand)/(170+abstand)));
-      const blaetter=document.querySelector(".pager");
-      const zusatz=(blaetter&&!blaetter.hidden)?blaetter.getBoundingClientRect().height:0;
-      const gesamt=allProductsForCategory().length;
-      const zeilenFuer=(hoehe)=>Math.max(1,Math.floor((hoehe+abstand)/(105+abstand)));
-      // Zwei Faelle durchrechnen:
-      // 1) Es passt alles auf eine Seite - dann verschwindet die Blaetterleiste und ihre Hoehe
-      //    steht zusaetzlich zur Verfuegung.
-      // 2) Es passt nicht - dann bleibt die Leiste sichtbar und die Flaeche ist kleiner.
-      // Ohne diese Unterscheidung wurde mit Platz gerechnet, den es gar nicht gab, und die
-      // zweite Kachelreihe ragte aus dem Bild.
-      const ohneLeiste=spalten*zeilenFuer(flaeche.height+zusatz);
-      if(gesamt<=ohneLeiste)return ohneLeiste;
-      const mitLeiste=spalten*zeilenFuer(flaeche.height);
-      if(mitLeiste>0)return mitLeiste;
-    }
+    return allProductsForCategory().length||1;
   }
   if(state.master.buttonSize==="compact")return 8;
   if(state.master.buttonSize==="large")return 4;
@@ -791,10 +768,24 @@ function renderProducts(){
   grid.querySelectorAll(".product-variant-button").forEach(b=>b.onclick=e=>{e.stopPropagation();openProductVariants(b.dataset.variantId)});
   grid.querySelectorAll(".product-info-button").forEach(b=>b.onclick=e=>{e.stopPropagation();openProductInfo(b.dataset.infoId)});
   renderProductPager();
+  passeArtikelgroesseAn();
 }
 /* Auf der Kachel ist nur wenig Platz. "zzgl. Pfand automatisch" passte nicht hinein und
    wurde mitten im Wort abgeschnitten ("zzgl. Pfand automatis"). Die Kachel zeigt deshalb
    die kurze Form, der vollstaendige Text steht als Tooltip daran. */
+function passeArtikelgroesseAn(){
+  const grid=el("productGrid");
+  if(!grid)return;
+  const n=productSet().length;
+  if(!n){grid.style.removeProperty("--kc-spalten");grid.style.removeProperty("--kc-zeilen");return}
+  const neuesLayout=document.body.classList.contains("kc-layout-neu");
+  const maxSpalten=neuesLayout?6:{compact:6,standard:5,large:4}[state.master.buttonSize]||5;
+  const maxZeilen=3;
+  const zeilen=Math.max(1,Math.min(maxZeilen,Math.ceil(n/maxSpalten)));
+  const spalten=Math.max(1,Math.min(maxSpalten,Math.ceil(n/zeilen)));
+  grid.style.setProperty("--kc-spalten",spalten);
+  grid.style.setProperty("--kc-zeilen",zeilen);
+}
 function depositKurz(p){if(state.master.depositRule==="automatic")return "zzgl. Pfand";if(state.master.depositRule==="included")return "inkl. Pfand";return "Pfand manuell"}
 function depositHint(p){if(state.master.depositRule==="automatic")return "zzgl. Pfand automatisch";if(state.master.depositRule==="included")return "inkl. Pfand";return "Pfand manuell"}
 
