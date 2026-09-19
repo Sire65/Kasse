@@ -2581,6 +2581,26 @@ async function reverseCompletedTransaction(original,reason){
     const donations=donationRecords(),linkedDonations=donations.filter(d=>String(d.bonNumber||"")===originalBon&&Number(d.amount||0)>0&&!d.reversalOf);
     for(const d of linkedDonations)donations.push({...cloneData(d),id:crypto.randomUUID(),time:endTime,amount:-Math.abs(Number(d.amount||0)),source:`${d.source}-storno`,bonNumber:rec.bon,reversalOf:d.id,originalBon,note:`Storno zu ${originalBon}: ${reason}`});
     if(linkedDonations.length)localStorage.setItem("kc_donation_records",JSON.stringify(donations));
+    // Separate Reklamationsauszahlungen liegen zusaetzlich im Entnahme-Protokoll. Wird der
+    // zugehoerige Refund-Bon voll storniert, muss auch genau diese Bargeldbewegung neutralisiert
+    // werden. Nicht loeschen: negative Gegenbuchung fuer eine pruefbare Historie.
+    const withdrawals=safeArray(WITHDRAWAL_KEY);
+    const linkedWithdrawals=withdrawals.filter(w=>w.reason==="Reklamation"
+      &&w.complaint?.refundTransactionId===original.transactionId
+      &&Number(w.amount||0)>0&&!w.reversalOf);
+    for(const w of linkedWithdrawals)withdrawals.push({
+      ...cloneData(w),
+      withdrawalId:crypto.randomUUID(),
+      time:endTime,
+      amount:-Math.abs(Number(w.amount||0)),
+      amountCents:-Math.abs(toCents(Number(w.amount||0))),
+      receiptAvailable:false,
+      receiptAttachment:null,
+      reversalOf:w.withdrawalId,
+      originalBon,
+      note:`Storno zu Reklamationsbon ${originalBon}: ${reason}`
+    });
+    if(linkedWithdrawals.length)localStorage.setItem(WITHDRAWAL_KEY,JSON.stringify(withdrawals));
   }
   state.master.nextBon++;saveMaster();recordAdminChange("transaction","reversal",rec.transactionId,original,rec);renderHeader();return rec;
 }
