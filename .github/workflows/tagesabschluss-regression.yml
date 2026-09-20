@@ -43,6 +43,13 @@ jobs:
         working-directory: Kasse
         run: node tests/tagesabschluss-system.test.cjs
 
+      - name: JavaScript Syntaxprüfung
+        run: |
+          node --check Kasse/pc-manager/kc-tagesabschluss-zentrale.js
+          node --check Kasse/pc-manager/kc-abschluesse-manager.js
+          node --check Kasse/pc-manager/kc-finance-bridge.js
+          node --check KC-Verwaltung/js/86_finance_closing_reports.js
+
       - name: KC Verwaltung Integration
         run: |
           grep -q 'js/86_finance_closing_reports.js?v=1.0.0' KC-Verwaltung/index.html
