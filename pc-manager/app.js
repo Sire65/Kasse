@@ -1208,7 +1208,8 @@ function baueCashTransferPayload(){
   return{payload};
 }
 async function queueCashTransferPayload(payload){
-  const ziele=payload.scope==="split"
+  const mehrere=Array.isArray(payload.registerIds)&&(payload.scope==="split"||payload.scope==="shared");
+  const ziele=mehrere
     ?payload.registerIds.map(kasse=>({kasse,queueId:`${payload.transferId}#${kasse}`}))
     :[{kasse:payload.registerId,queueId:payload.transferId}];
   for(const ziel of ziele){
