@@ -91,6 +91,24 @@ const DEFAULT_PRODUCTS=[
  {id:"becher",name:"Außer-Haus-Becher",price:1.00,category:"Sonstiges",image:"assets/becher_auth.webp"}
 ];
 let PRODUCTS=JSON.parse(localStorage.getItem("kc_products_v050")||"null")||DEFAULT_PRODUCTS;
+// 20.09.2026: Betreiberregel fuer halbe Portionen.
+// Alle Speisen und Getraenke bekommen den 1/2-Knopf. Pfand und Außer-Haus-Gefaesse bleiben
+// ausgeschlossen. Bereits bewusst gepflegte Halbpreise bleiben bestehen; fehlt einer, wird
+// einmalig 50 % des normalen Verkaufspreises gesetzt.
+{
+  let geaendert=false;
+  const ausgeschlossen=p=>{const text=`${p?.id||""} ${p?.name||""}`.toLowerCase();return p?.category==="Pfand"||/außer[- ]?haus|ausser[- ]?haus|becher|gefäß|gefaess/.test(text)};
+  PRODUCTS.forEach(p=>{
+    const erlaubt=(p.category==="Speisen"||p.category==="Getränke")&&!ausgeschlossen(p)&&Number(p.price||0)>0;
+    if(erlaubt){
+      if(p.halfAllowed!==true){p.halfAllowed=true;geaendert=true}
+      if(!(Number(p.halfPrice||0)>0)){p.halfPrice=Math.round(Number(p.price||0)*50)/100;geaendert=true}
+    }else if(p.halfAllowed===true||Number(p.halfPrice||0)!==0){
+      p.halfAllowed=false;p.halfPrice=0;geaendert=true;
+    }
+  });
+  if(geaendert)localStorage.setItem("kc_products_v050",JSON.stringify(PRODUCTS));
+}
 const REQUIRED_DEPOSIT_RETURNS=[
  {id:"glasminus",name:"Glasrückgabe",price:-2.00,category:"Pfand",image:"assets/pfandrueckgabe_version_3.png",color:"#9f1239"},
  {id:"zangeminus",name:"Feuerzange Rückgabe",price:-2.00,category:"Pfand",image:"assets/feuerzange_placeholder.svg",color:"#9f1239",info:{shortDescription:"Einzelrückgabe Feuerzange"}},
