@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>KC Marktstart 2026</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<main class="shell">
+  <header class="hero">
+    <img src="../pos/assets/logo.webp" alt="Köcheclub Werne">
+    <div><span>KÖCHECLUB WERNE</span><h1>Marktstart 2026 vorbereiten</h1><p>Lokale Test- und Bewegungsdaten auf diesem Gerät kontrolliert bereinigen.</p></div>
+  </header>
+
+  <section class="panel warning">
+    <h2>Was wird bereinigt?</h2>
+    <p>Nur lokale Umsatz-, Kassen-, Zähl-, Abschluss-, Trinkgeld-, Storno-, Rabatt- und Testbewegungen. Stammdaten und Einstellungen bleiben erhalten.</p>
+    <div class="chips">
+      <b>Bleibt erhalten:</b><span>Artikel</span><span>Warengruppen</span><span>Konten</span><span>Benutzer</span><span>Geräte</span><span>Gewichtstabellen</span><span>Admin-/Auditdaten</span>
+    </div>
+  </section>
+
+  <section class="panel">
+    <div class="panel-head"><h2>1. Vorschau dieses Geräts</h2><button id="previewBtn" type="button">Prüfen</button></div>
+    <div class="grid">
+      <article><span>POS-Umsätze</span><strong id="posSales">–</strong><small>IndexedDB + Altbestand</small></article>
+      <article><span>POS-Training</span><strong id="posTraining">–</strong><small>IndexedDB + Altbestand</small></article>
+      <article><span>POS-Bewegungslisten</span><strong id="posMovement">–</strong><small>Kasse / Abschlüsse / Storno usw.</small></article>
+      <article><span>Manager-Bewegungen</span><strong id="managerMovement">–</strong><small>Importe / Abschlüsse / Zählungen</small></article>
+      <article class="protected"><span>Geschützte Datenbereiche</span><strong id="protectedCount">–</strong><small>werden nicht verändert</small></article>
+    </div>
+    <div id="previewDetails" class="details">Noch keine Vorschau geladen.</div>
+  </section>
+
+  <section class="panel danger">
+    <h2>2. Lokalen Marktstart ausführen</h2>
+    <label>Bestätigung<input id="confirmText" autocomplete="off" placeholder="MARKTSTART 2026"></label>
+    <div class="actions">
+      <button id="executeBtn" class="danger-btn" type="button" disabled>Lokale Bewegungsdaten bereinigen</button>
+      <button id="backBtn" type="button">Zurück</button>
+    </div>
+    <div id="status" class="status info">Vorschau erforderlich.</div>
+  </section>
+
+  <section class="panel note">
+    <h2>Wichtig</h2>
+    <p>Dieses Werkzeug wirkt nur auf <strong>diesem Browser auf diesem Gerät</strong>. Deshalb vor Marktstart einmal auf Kasse 1, Kasse 2 und dem PC-Manager-Rechner ausführen. Beim Money Butler gibt es keine dauerhafte lokale Bewegungs-Historie; dort dient die Prüfung als Kontrolle.</p>
+  </section>
+</main>
+<script src="app.js"></script>
+</body>
+</html>
