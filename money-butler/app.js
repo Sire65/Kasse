@@ -86,6 +86,9 @@ el("coinRolls").innerHTML=COIN_ROLLS.map(r=>`<label class="coin-roll-row" data-r
 function clearTransferOutput(){
   currentPayload="";el("payload").value="";el("handoverType").textContent="—";el("handoverRegister").textContent="—";el("handoverDate").textContent="—";
   const ctx=el("qrCanvas").getContext("2d");ctx.clearRect(0,0,el("qrCanvas").width,el("qrCanvas").height);
+  el("handoverOutputQr")?.setAttribute("hidden","");
+  el("handoverOutputShortcode")?.setAttribute("hidden","");
+  el("communicatorSettings")?.setAttribute("hidden","");
 }
 
 // --- Geldkassette: eine Erfassung, zwei Geldladen ----------------------------------------
@@ -169,6 +172,103 @@ function drawQR(canvas,text){
   if(!ergebnis.ok)throw new Error(ergebnis.grund||"QR-Code konnte nicht erzeugt werden.");
   return ergebnis;
 }
+let selectedHandoverMethod=null;
+const HANDOVER_METHODS={
+  qr:{label:"QR-Code",description:"QR-Code anzeigen und an Kasse oder PC-Manager scannen."},
+  shortcode:{label:"Kurzcode",description:"Kurzcode anzeigen und an der Kasse von Hand eingeben."},
+  file:{label:"Datei",description:".kccash-Datei speichern und zum PC-Manager oder Kassengerät übertragen."},
+  communicator:{label:"KC Communicator",description:"Von zuhause über KC Communicator an den PC-Manager senden."}
+};
+function decodeCurrentTransfer(){
+  if(!currentPayload)throw new Error("Zuerst die Übergabe erzeugen.");
+  const prefix=currentPayload.startsWith("KCASH1:")?"KCASH1:":currentPayload.startsWith("KCOUNT1:")?"KCOUNT1:":null;
+  if(!prefix)throw new Error("Unbekannter Übertragungscode.");
+  return{prefix,payload:JSON.parse(decodeURIComponent(escape(atob(currentPayload.slice(prefix.length)))))};
+}
+function setConfirmationRequested(wanted){
+  const{prefix,payload}=decodeCurrentTransfer();
+  delete payload.checksum;
+  if(wanted){
+    payload.confirmationRequested=true;
+    payload.confirmationRequestedAt=new Date().toISOString();
+  }else{
+    delete payload.confirmationRequested;
+    delete payload.confirmationRequestedAt;
+  }
+  payload.checksum=checksum(JSON.stringify(payload));
+  currentPayload=prefix+btoa(unescape(encodeURIComponent(JSON.stringify(payload))));
+  el("payload").value=currentPayload;
+  try{drawQR(el("qrCanvas"),currentPayload)}catch{}
+  return payload;
+}
+function openHandoverStart(method){
+  if(!currentPayload)return alert("Zuerst die Übergabe erzeugen.");
+  const def=HANDOVER_METHODS[method];if(!def)return;
+  selectedHandoverMethod=method;
+  el("handoverStartTitle").textContent=def.label+" starten";
+  el("handoverStartRoute").textContent=def.description;
+  el("handoverStartTarget").textContent=el("handoverRegister").textContent;
+  el("handoverStartAmount").textContent=el("handoverTotal").textContent;
+  el("handoverStartDate").textContent=el("handoverDate").textContent;
+  el("handoverStartStatus").textContent="";
+  const confirm=el("handoverConfirmationWanted");
+  confirm.checked=false;
+  confirm.disabled=method==="shortcode";
+  el("handoverConfirmationHint").textContent=method==="shortcode"
+    ?"Beim Kurzcode ist keine automatische Empfangsbestätigung möglich, weil dieser Notweg keine Zusatzdaten überträgt."
+    :"Optional: Der Transfer enthält dann die Anforderung, den Eingang des Geldes zu bestätigen.";
+  const auth=el("handoverCommunicatorAuth");
+  auth.hidden=method!=="communicator";
+  if(method==="communicator"){
+    const token=window.KCMoneyButlerCommunicator?.tokenLesen?.()||"";
+    el("handoverCommToken").value=token;
+  }
+  el("handoverStartDialog").showModal();
+}
+document.querySelectorAll("[data-handover-method]").forEach(button=>button.addEventListener("click",()=>openHandoverStart(button.dataset.handoverMethod)));
+el("handoverStartCancel")?.addEventListener("click",()=>el("handoverStartDialog").close());
+el("handoverStartButton")?.addEventListener("click",async()=>{
+  if(!selectedHandoverMethod)return;
+  const status=el("handoverStartStatus"),wantConfirmation=!!el("handoverConfirmationWanted").checked;
+  status.textContent="Wird gestartet …";
+  try{
+    if(selectedHandoverMethod!=="shortcode")setConfirmationRequested(wantConfirmation);
+    el("handoverOutputQr").hidden=true;
+    el("handoverOutputShortcode").hidden=true;
+    el("communicatorSettings").hidden=true;
+    if(selectedHandoverMethod==="qr"){
+      el("handoverStartDialog").close();
+      el("handoverOutputQr").hidden=false;
+      el("handoverOutputQr").scrollIntoView({block:"nearest",behavior:"smooth"});
+      return;
+    }
+    if(selectedHandoverMethod==="shortcode"){
+      el("handoverStartDialog").close();
+      el("handoverOutputShortcode").hidden=false;
+      el("handoverOutputShortcode").scrollIntoView({block:"nearest",behavior:"smooth"});
+      return;
+    }
+    if(selectedHandoverMethod==="file"){
+      el("handoverStartDialog").close();
+      el("save").click();
+      return;
+    }
+    if(selectedHandoverMethod==="communicator"){
+      if(currentType==="count")throw new Error("Die Abendzählung ist noch nicht als KC-Communicator-Ereignis freigeschaltet.");
+      const token=String(el("handoverCommToken").value||"").trim();
+      if(!token)throw new Error("Bitte den KC-Communicator Zugriffstoken eintragen.");
+      el("commToken").value=token;
+      localStorage.setItem("kc_money_butler_communication_token_v1",token);
+      const result=await window.KCMoneyButlerCommunicator?.senden?.();
+      if(!result)throw new Error(el("commSendStatus")?.textContent||"KC Communicator hat die Übergabe nicht bestätigt.");
+      status.textContent=wantConfirmation
+        ?"Gesendet. Empfangsbestätigung wurde angefordert."
+        :"Gesendet. Der PC-Manager erhält die Übergabe über KC Communicator.";
+      setTimeout(()=>el("handoverStartDialog").close(),700);
+    }
+  }catch(err){status.textContent="Nicht gestartet: "+(err?.message||String(err));}
+});
+
 el("generate").onclick=()=>{const c=getData(),effectiveDate=el("effectiveDate").value;if(!isBusinessDate(effectiveDate))return alert("Bitte das gültige Einsatzdatum im Kalender auswählen.");if(currentType!=="count"&&effectiveDate<localBusinessDate())return alert("Anfangsbestand und Nachfüllung dürfen nicht in der Vergangenheit liegen.");if(c.total<=0)return alert("Bitte mindestens eine Stückelung eingeben.");const payload={
   format:currentType==="count"?"KC_CASH_COUNT":"KC_CASH_TRANSFER",
   version:currentType==="count"?3:4,
@@ -215,6 +315,10 @@ currentPayload=(currentType==="count"?"KCOUNT1:":"KCASH1:")+btoa(unescape(encode
     stift.fillText("bitte Kurzcode oder Datei nutzen",flaeche.width/2,flaeche.height/2+14);
   }
   setMoneySection(document.querySelector('[data-money-section="handover"]'),true);
+  el("handoverOutputQr").hidden=true;
+  el("handoverOutputShortcode").hidden=true;
+  el("communicatorSettings").hidden=true;
+  selectedHandoverMethod=null;
   const kurzcodeFeld=el("kurzcode");
   if(kurzcodeFeld){
     if(currentType==="count"){kurzcodeFeld.textContent="Für die Abendzählung nicht verfügbar - bitte den vollständigen Code verwenden."}
