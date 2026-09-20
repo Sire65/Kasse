@@ -4251,7 +4251,7 @@ function kcRead(key,fallback=[]){try{return JSON.parse(localStorage.getItem(key)
 function kcWrite(key,value){localStorage.setItem(key,JSON.stringify(value))}
 function kcSeedAccounts(){
   if(localStorage.getItem(KC_ACCOUNT_KEY))return;
-  kcWrite(KC_ACCOUNT_KEY,[{id:"ACC-STADTMARKETING",name:"Stadtmarketing Werne",status:"active",validFrom:"2026-12-01",validUntil:"2026-12-31",limit:500,allowedGroups:["Essen"],allowProducts:[],blockProducts:[],version:1,approvedAt:new Date().toISOString()}]);
+  kcWrite(KC_ACCOUNT_KEY,[{id:"ACC-STADTMARKETING",name:"Stadtmarketing Werne",status:"active",validFrom:"2026-09-01",validUntil:"2027-01-31",limit:500,allowedGroups:["Speisen","Getränke"],allowProducts:[],blockProducts:[],version:2,approvedAt:new Date().toISOString()}]);
 }
 function kcAccounts(){kcSeedAccounts();return kcRead(KC_ACCOUNT_KEY)}
 function kcEvents(){return kcRead(KC_ACCOUNT_EVENTS_KEY)}
