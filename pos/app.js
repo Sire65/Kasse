@@ -972,7 +972,7 @@ function renderCart(){const list=el("cartList");if(state.cart.length)setCartNoti
   const withDeposit=state.cart.filter(item=>item.category==="Pfand"||item.manualDeposit||item.deposits?.length).length;
   const withPositionDiscount=state.cart.filter(item=>Number(item.positionDiscount?.percent||0)>0).length;
   el("positionCount").innerHTML=`<b>${positions}</b> ${positions===1?"POSITION":"POSITIONEN"} <i aria-hidden="true">│</i> <b>${withDeposit}</b> ${withDeposit===1?"POSITION MIT PFAND":"POSITIONEN MIT PFAND"} <i aria-hidden="true">│</i> <b>${withPositionDiscount}</b> ${withPositionDiscount===1?"POSITION MIT RABATT":"POSITIONEN MIT RABATT"}`;
-}renderDiscountSummary();const currentTotal=total(),isPayout=toCents(currentTotal)<0,totalBox=el("grandTotal")?.closest(".grand-total"),totalLabel=el("grandTotalLabel");if(totalLabel)totalLabel.childNodes[0].nodeValue=isPayout?"AUSZAHLUNG ":"GESAMT ";if(el("grandTotal"))el("grandTotal").textContent=isPayout?money(Math.abs(currentTotal)):money(currentTotal);if(totalBox)totalBox.classList.toggle("is-payout",isPayout);if(el("dueDisplay"))el("dueDisplay").textContent=isPayout?money(Math.abs(currentTotal)):money(currentTotal);const dueCaption=el("dueCaption");if(dueCaption)dueCaption.textContent=isPayout?"Auszahlung:":"Zu zahlen:";updateChange();updateStaffButtonState()}
+}renderDiscountSummary();const currentTotal=total(),isPayout=toCents(currentTotal)<0,totalBox=el("grandTotal")?.closest(".grand-total"),totalLabel=el("grandTotalLabel");if(totalLabel)totalLabel.childNodes[0].nodeValue=isPayout?"AUSZAHLUNG ":"GESAMT ";if(el("grandTotal"))el("grandTotal").textContent=isPayout?money(Math.abs(currentTotal)):money(currentTotal);if(totalBox)totalBox.classList.toggle("is-payout",isPayout);document.body.classList.toggle("kc-bon-auszahlung",state.cart.length>0&&isPayout);if(el("dueDisplay"))el("dueDisplay").textContent=isPayout?money(Math.abs(currentTotal)):money(currentTotal);const dueCaption=el("dueCaption");if(dueCaption)dueCaption.textContent=isPayout?"Auszahlung:":"Zu zahlen:";updateChange();updateStaffButtonState()}
 // Personalverbrauch-Ausschluss: pro Artikel laesst sich im Stammdatenblatt "Personalverbrauch
 // erlaubt" abwaehlen (Feld allowStaff, gedacht z.B. fuer alkoholische Getraenke). Der Wert wurde
 // bisher zwar gespeichert, geladen und im Formular angezeigt - aber an KEINER Stelle geprueft:
@@ -1016,6 +1016,38 @@ function cartAction(a,i){
   renderCart()
 }
 function askConfirm(t,txt,act){el("confirmTitle").textContent=t;el("confirmText").textContent=txt;el("confirmAction").onclick=e=>{e.preventDefault();el("confirmDialog").close();act()};el("confirmDialog").showModal()}
+function zahlungsPfeilePflegen({due,isPayout,hasDue,sufficient}={}){
+  const gesamt=el("grandTotal")?.closest(".grand-total");
+  if(gesamt){
+    let feld=gesamt.querySelector(".kc-pfeilfeld");
+    if(!feld){feld=document.createElement("span");feld.className="kc-pfeilfeld";feld.setAttribute("aria-hidden","true");const lab=gesamt.querySelector(".grand-total-label");if(lab&&lab.nextSibling)gesamt.insertBefore(feld,lab.nextSibling);else gesamt.appendChild(feld)}
+    const richtung=toCents(Number(due??total()))<0?"aus":"ein";
+    const pfeil=richtung==="aus"?"▶":"◀";
+    const anzahl=Math.max(1,Math.min(4,Math.floor((gesamt.clientWidth||240)/85)));
+    const key=`${richtung}:${anzahl}`;
+    if(feld.dataset.kcZahlungsfluss!==key){
+      feld.dataset.kcZahlungsfluss=key;
+      feld.classList.toggle("kc-pfeilfeld-rot",richtung==="aus");
+      feld.classList.toggle("kc-pfeil-ein",richtung==="ein");
+      feld.classList.toggle("kc-pfeil-aus",richtung==="aus");
+      feld.innerHTML=Array.from({length:anzahl},()=>`<span>${pfeil}</span>`).join("");
+    }
+  }
+  const card=el("changeDisplay")?.closest(".change-card"),kopf=card?.querySelector(".change-card-head");
+  if(kopf){
+    let feld=kopf.querySelector(".kc-pfeilfeld");
+    if(!feld){feld=document.createElement("span");feld.className="kc-pfeilfeld kc-pfeilfeld-klein";feld.setAttribute("aria-hidden","true");kopf.appendChild(feld)}
+    const richtung=isPayout||sufficient?"aus":hasDue?"ein":null;
+    const key=richtung||"ausblenden";
+    if(feld.dataset.kcZahlungsfluss!==key){
+      feld.dataset.kcZahlungsfluss=key;
+      feld.classList.toggle("kc-pfeilfeld-rot",richtung==="aus");
+      feld.classList.toggle("kc-pfeil-ein",richtung==="ein");
+      feld.classList.toggle("kc-pfeil-aus",richtung==="aus");
+      feld.innerHTML=richtung?Array.from({length:2},()=>`<span>${richtung==="aus"?"▶":"◀"}</span>`).join(""):"";
+    }
+  }
+}
 function updateChange(){
   const due=total(),isPayout=toCents(due)<0,payout=Math.abs(due),change=isPayout?payout:Math.max(0,state.given-due),card=el("changeDisplay").closest(".change-card"),paymentState=el("changePaymentState"),hasDue=toCents(due)>0,sufficient=hasDue&&toCents(state.given)>=toCents(due);paymentState.classList.remove("direct-settlement");
   el("givenDisplay").textContent=money(state.given);
@@ -1050,6 +1082,7 @@ function updateChange(){
       changeBtn.title=`Bon abschließen und ${money(change)} Rückgeld herausgeben`;
     }
   }
+  zahlungsPfeilePflegen({due,isPayout,hasDue,sufficient});
 }
 function updateBarPaymentButton(snapshot=null){
   const button=el("payBtn"),title=el("payModeTitle"),detail=el("payModeDetail");
