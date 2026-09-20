@@ -10,7 +10,8 @@ const intake=read('pc-manager/kc-money-butler-cloud-intake.js');
 const manager=read('pc-manager/app.js');
 
 const expected=['2:8.50','1:7.50','.5:7.80','.2:5.74','.1:4.10','.05:3.92','.02:3.06','.01:2.30'];
-for(const marker of expected) ok(app.includes(marker),'Offizielles Münzgewicht fehlt: '+marker);
+const settingsSource=read('shared/kc-cash-measure-settings.js');
+for(const marker of expected) ok(settingsSource.includes(marker),'Offizielles Münzgewicht fehlt: '+marker);
 ok(html.includes('Münzen sortenrein wiegen'),'Wägeoberfläche fehlt');
 ok(html.includes('Nur lose Euro-Münzen.'),'Wäge-Sicherheitsregel fehlt');
 ok(app.includes('Tagesabschluss vom *'),'Nachzählung ist nicht auf den Abschluss-Tag bezogen');
