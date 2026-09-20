@@ -6,6 +6,8 @@ const COIN_ROLLS=[
   {value:.5,coins:40},{value:.2,coins:40},{value:.1,coins:40},
   {value:.05,coins:50},{value:.02,coins:50},{value:.01,coins:50}
 ];
+// Offizielle nominale Stückgewichte der Euro-Umlaufmünzen (Bundesbank/EZB), in Gramm.
+const COIN_WEIGHTS_G={2:8.50,1:7.50,.5:7.80,.2:5.74,.1:4.10,.05:3.92,.02:3.06,.01:2.30};
 let currentType="opening",currentPayload="";
 // Anteile der zuletzt erzeugten Kassette - fuer Anzeige, Kurzcodes und Protokoll.
 let letzteTeile=null;
@@ -50,6 +52,21 @@ document.querySelectorAll(".date-quick").forEach(button=>button.addEventListener
   el("effectiveDate").dispatchEvent(new Event("input",{bubbles:true}));
   document.querySelectorAll(".date-quick").forEach(x=>x.classList.toggle("active",x===button));
 }));
+function updateCountDateHint(){
+  const hint=el("countDateHint");
+  if(!hint)return;
+  if(currentType!=="count"){hint.hidden=true;hint.textContent="";return;}
+  const value=el("effectiveDate").value,heute=localBusinessDate();
+  hint.hidden=false;
+  if(!isBusinessDate(value)){hint.textContent="Bitte den Geschäftstag des zugehörigen Kassenabschlusses auswählen.";return;}
+  if(value<heute){
+    hint.textContent=`Nachzählung zum Tagesabschluss vom ${displayBusinessDate(value)}. Der tatsächliche Zählzeitpunkt wird zusätzlich gespeichert.`;
+  }else if(value===heute){
+    hint.textContent=`Abendzählung zum Tagesabschluss vom ${displayBusinessDate(value)}.`;
+  }else{
+    hint.textContent="Eine Zählung kann keinem zukünftigen Tagesabschluss zugeordnet werden.";
+  }
+}
 el("effectiveDate").addEventListener("input",()=>{
   const heute=new Date();
   const offsets=[-1,0,1];
@@ -58,6 +75,7 @@ el("effectiveDate").addEventListener("input",()=>{
     const d=new Date(heute);d.setDate(d.getDate()+offsets[index]);
     button.classList.toggle("active",value===localBusinessDate(d));
   });
+  updateCountDateHint();
 });
 
 const MUENZ_FOTOS={2:"assets/muenze_2.webp",1:"assets/muenze_1.webp",.5:"assets/muenze_0.5.webp",.2:"assets/muenze_0.2.webp",.1:"assets/muenze_0.1.webp",.05:"assets/muenze_0.05.webp",.02:"assets/muenze_0.02.webp",.01:"assets/muenze_0.01.webp"}; // wird nach und nach ergänzt, sobald weitere echte Münzbilder vorliegen
@@ -83,6 +101,39 @@ el("coinRolls").innerHTML=COIN_ROLLS.map(r=>`<label class="coin-roll-row" data-r
   <span>${money(r.value*r.coins)}</span>
   <b data-roll-total="${r.value}">${money(0)}</b>
 </label>`).join("");
+el("coinWeighing").innerHTML=Object.entries(COIN_WEIGHTS_G).sort((a,b)=>Number(b[0])-Number(a[0])).map(([wertText,gewicht])=>{
+  const wert=Number(wertText);
+  return `<div class="coin-weigh-row" data-weigh-row="${wert}">
+    <strong>${denomLabel(wert)}</strong>
+    <span>${gewicht.toFixed(2).replace(".",",")} g/Stück</span>
+    <label><input type="number" min="0" step="0.01" inputmode="decimal" data-weigh-grams="${wert}" placeholder="0,00"><small>g netto</small></label>
+    <span data-weigh-result="${wert}">—</span>
+    <b data-weigh-amount="${wert}">—</b>
+    <button type="button" data-weigh-apply="${wert}" disabled>Übernehmen</button>
+  </div>`;
+}).join("");
+function updateWeighRow(input){
+  const wert=Number(input.dataset.weighGrams),gewicht=COIN_WEIGHTS_G[wert],gramm=Number(String(input.value||"").replace(",","."));
+  const result=el("coinWeighing").querySelector(`[data-weigh-result="${wert}"]`);
+  const amount=el("coinWeighing").querySelector(`[data-weigh-amount="${wert}"]`);
+  const apply=el("coinWeighing").querySelector(`[data-weigh-apply="${wert}"]`);
+  if(!Number.isFinite(gramm)||gramm<=0){result.textContent="—";amount.textContent="—";apply.disabled=true;apply.dataset.pieces="";return;}
+  const roh=gramm/gewicht,stueck=Math.max(0,Math.round(roh)),soll=stueck*gewicht,abweichung=gramm-soll;
+  result.textContent=`≈ ${stueck} Stück · Rest ${abweichung>=0?"+":""}${abweichung.toFixed(2).replace(".",",")} g`;
+  amount.textContent=money(stueck*wert);
+  apply.disabled=stueck<=0;apply.dataset.pieces=String(stueck);
+}
+el("coinWeighing").querySelectorAll("[data-weigh-grams]").forEach(input=>input.addEventListener("input",()=>updateWeighRow(input)));
+el("coinWeighing").querySelectorAll("[data-weigh-apply]").forEach(button=>button.addEventListener("click",()=>{
+  const wert=Number(button.dataset.weighApply),stueck=Number(button.dataset.pieces||0);
+  const ziel=[...document.querySelectorAll("[data-value]")].find(n=>Number(n.dataset.value)===wert);
+  if(!ziel||!stueck)return;
+  ziel.value=String(stueck);
+  ziel.dispatchEvent(new Event("input",{bubbles:true}));
+  button.textContent="Übernommen";
+  setTimeout(()=>button.textContent="Übernehmen",900);
+}));
+
 function clearTransferOutput(){
   currentPayload="";el("payload").value="";el("handoverType").textContent="—";el("handoverRegister").textContent="—";el("handoverDate").textContent="—";
   const ctx=el("qrCanvas").getContext("2d");ctx.clearRect(0,0,el("qrCanvas").width,el("qrCanvas").height);
@@ -123,7 +174,10 @@ function zeichneAufteilung(){
   bereich.hidden=!istKassette();
   if(istKassette())kassette.zeichnen();
 }
-function setDatePurpose(){el("effectiveDateLabel").textContent=currentType==="count"?"Zähltag *":"Gültig für *"}
+function setDatePurpose(){
+  el("effectiveDateLabel").textContent=currentType==="count"?"Tagesabschluss vom *":"Gültig für *";
+  updateCountDateHint();
+}
 // Die Abendzaehlung gilt immer genau einer Geldlade - eine gemeinsame Kassette gibt es dabei
 // nicht. Deshalb wird das Kassetten-Ziel dann gesperrt und auf Kasse 1 zurueckgestellt.
 function pflegeKassettenAuswahl(){
@@ -269,15 +323,19 @@ el("handoverStartButton")?.addEventListener("click",async()=>{
   }catch(err){status.textContent="Nicht gestartet: "+(err?.message||String(err));}
 });
 
-el("generate").onclick=()=>{const c=getData(),effectiveDate=el("effectiveDate").value;if(!isBusinessDate(effectiveDate))return alert("Bitte das gültige Einsatzdatum im Kalender auswählen.");if(currentType!=="count"&&effectiveDate<localBusinessDate())return alert("Anfangsbestand und Nachfüllung dürfen nicht in der Vergangenheit liegen.");if(c.total<=0)return alert("Bitte mindestens eine Stückelung eingeben.");const payload={
+el("generate").onclick=()=>{const c=getData(),effectiveDate=el("effectiveDate").value,heute=localBusinessDate();if(!isBusinessDate(effectiveDate))return alert("Bitte das gültige Einsatzdatum im Kalender auswählen.");if(currentType!=="count"&&effectiveDate<heute)return alert("Anfangsbestand und Nachfüllung dürfen nicht in der Vergangenheit liegen.");if(currentType==="count"&&effectiveDate>heute)return alert("Eine Zählung kann keinem zukünftigen Tagesabschluss zugeordnet werden.");if(c.total<=0)return alert("Bitte mindestens eine Stückelung eingeben.");const countedAt=new Date().toISOString(),istNachzaehlung=currentType==="count"&&effectiveDate<heute;const payload={
   format:currentType==="count"?"KC_CASH_COUNT":"KC_CASH_TRANSFER",
   version:currentType==="count"?3:4,
   transferId:crypto.randomUUID(),
   countId:currentType==="count"?crypto.randomUUID():undefined,
   registerId:el("register").value,
   type:currentType,
-  time:new Date().toISOString(),
+  time:countedAt,
+  countedAt:currentType==="count"?countedAt:undefined,
   effectiveDate,
+  countForBusinessDate:currentType==="count"?effectiveDate:undefined,
+  countKind:currentType==="count"?(istNachzaehlung?"late":"same-day"):undefined,
+  countLabel:currentType==="count"?(istNachzaehlung?`Nachzählung zum Tagesabschluss vom ${displayBusinessDate(effectiveDate)}`:`Abendzählung zum Tagesabschluss vom ${displayBusinessDate(effectiveDate)}`):undefined,
   breakdown:c.breakdown,
   looseBreakdown:c.looseBreakdown,
   coinRolls:c.coinRolls,
@@ -303,7 +361,7 @@ const raw=JSON.stringify(payload);payload.checksum=checksum(raw);
 // Fuer die Statistik bekommt er trotzdem eine lesbare Kennung, sonst faellt er aus jedem
 // Kassen-Filter im PC-Manager heraus und waere dort praktisch unsichtbar.
 global.KCBargeldStatistik?.melden?.(payload.scope==="split"?{...payload,registerId:"KASSETTE"}:payload, 'money-butler');
-currentPayload=(currentType==="count"?"KCOUNT1:":"KCASH1:")+btoa(unescape(encodeURIComponent(JSON.stringify(payload))));el("payload").value=currentPayload;el("handoverType").textContent=currentType==="opening"?"Anfangsbestand":currentType==="topup"?"Nachfüllung":"Abendzählung";el("handoverRegister").textContent=istKassette()?`Kassette – Kasse 1 ${money(letzteTeile["KASSE-01"].total)} / Kasse 2 ${money(letzteTeile["KASSE-02"].total)}`:(el("register").selectedOptions[0]?.textContent||el("register").value);el("kassetteHinweis").hidden=!istKassette();el("handoverDate").textContent=displayBusinessDate(effectiveDate);
+currentPayload=(currentType==="count"?"KCOUNT1:":"KCASH1:")+btoa(unescape(encodeURIComponent(JSON.stringify(payload))));el("payload").value=currentPayload;el("handoverType").textContent=currentType==="opening"?"Anfangsbestand":currentType==="topup"?"Nachfüllung":(istNachzaehlung?"Nachzählung":"Abendzählung");el("handoverRegister").textContent=istKassette()?`Kassette – Kasse 1 ${money(letzteTeile["KASSE-01"].total)} / Kasse 2 ${money(letzteTeile["KASSE-02"].total)}`:(el("register").selectedOptions[0]?.textContent||el("register").value);el("kassetteHinweis").hidden=!istKassette();el("handoverDate").textContent=displayBusinessDate(effectiveDate);
   // Der QR-Code hat eine harte Groessengrenze. Faellt sie, darf NICHT still abgebrochen werden -
   // sonst stehen Kurzcode und Protokoll auf altem Stand und niemand merkt es (echter Fund im Test).
   try{drawQR(el("qrCanvas"),currentPayload)}
@@ -352,7 +410,7 @@ currentPayload=(currentType==="count"?"KCOUNT1:":"KCASH1:")+btoa(unescape(encode
   }
   zeichneProtokoll(payload,c);
 };
-el("reset").onclick=()=>{document.querySelectorAll("[data-value],[data-roll-value]").forEach(n=>n.value=0);el("effectiveDate").value="";el("note").value="";updateTotal();clearTransferOutput()};
+el("reset").onclick=()=>{document.querySelectorAll("[data-value],[data-roll-value]").forEach(n=>n.value=0);document.querySelectorAll("[data-weigh-grams]").forEach(n=>{n.value="";updateWeighRow(n)});el("effectiveDate").value="";el("note").value="";updateCountDateHint();updateTotal();clearTransferOutput()};
 el("print").onclick=()=>{if(!currentPayload)return alert("Zuerst QR-Code erzeugen.");window.print()};
 el("copy").onclick=async()=>{if(!currentPayload)return alert("Zuerst QR-Code erzeugen.");await navigator.clipboard.writeText(currentPayload);alert("Code kopiert.")};
 el("save").onclick=()=>{if(!currentPayload)return alert("Zuerst QR-Code erzeugen.");const blob=new Blob([currentPayload],{type:"text/plain"}),a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=`${el("register").value}_${currentType}_${el("effectiveDate").value}.kccash`;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),300)};
