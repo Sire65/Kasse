@@ -199,13 +199,14 @@ function renderSettings(){
   el("settingsRolls").innerHTML=s.rolls.map(x=>`<div class="settings-money-row">
     <div class="closing-roll-symbol">▰</div><strong>${denomLabel(Number(x.value))}</strong>
     <label>Münzen/Rolle<input type="number" min="1" step="1" data-setting-roll="${x.value}" value="${x.coins}"></label>
-    <label class="settings-extra">Rollengewicht g<input type="number" min="0" step=".01" data-setting-roll-grams="${x.value}" value="${x.grams??""}" placeholder="optional"></label>
+    <label class="settings-extra">Aktiver Zählwert g<input type="number" min="0" step=".01" data-setting-roll-grams="${x.value}" value="${x.grams??""}" placeholder="${x.referenceGrams??"optional"}"></label>
+    <small class="settings-extra">Referenz: ${x.referenceGrams??"—"} g · ${x.referenceBasis||""}</small>
   </div>`).join("");
   el("settingsNotes").innerHTML=s.notes.map(x=>`<div class="settings-money-row">
     <img src="${settingsImagePath(x,"note")}" alt="">
     <strong>${denomLabel(Number(x.value))}</strong>
-    <label>Gewicht g<input type="number" min="0" step="0.01" data-setting-note="${x.value}" value="${x.grams??""}" placeholder="nicht gesetzt"></label>
-    <span class="settings-extra">${x.grams==null?"eigener Prüfwert":"gepflegt"}</span>
+    <label>Aktiver Zählwert g<input type="number" min="0" step="0.01" data-setting-note="${x.value}" value="${x.grams??""}" placeholder="${x.referenceGrams??"nicht gesetzt"}"></label>
+    <small class="settings-extra">Referenz: ${x.referenceGrams??"—"} g · ${x.referenceBasis||""}</small>
   </div>`).join("");
 }
 function collectSettings(){
