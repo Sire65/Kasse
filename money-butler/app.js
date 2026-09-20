@@ -168,6 +168,26 @@ function settingsImagePath(item,type){
   if(type==="note")return item.image||`assets/schein_${item.value}.jpg`;
   return "";
 }
+async function cashMeasureCloudClient(){
+  const token=window.KCMoneyButlerCommunicator?.tokenLesen?.()||"";
+  if(!token||typeof KCCommunicationClient!=="function")return null;
+  return new KCCommunicationClient({sourceProgram:"kc-money-butler",getAccessToken:async()=>token,defaultTestOnly:false});
+}
+async function pullCashMeasureSettings(){
+  try{
+    const client=await cashMeasureCloudClient();if(!client)return false;
+    const data=await client._request("kc-finance-bridge",{action:"cash_measure_settings_get"});
+    if(!data?.settings)return false;
+    CASH_MEASURE.save(data.settings);reloadCashMeasureSettings();renderCashMeasureInputs();updateTotal();
+    return true;
+  }catch(e){console.warn("Zentrale Gewichtseinstellungen konnten nicht geladen werden:",e?.message||e);return false}
+}
+async function pushCashMeasureSettings(settingsToSave){
+  const client=await cashMeasureCloudClient();
+  if(!client)throw new Error("Kein KC-Communicator-Zugriffstoken gespeichert.");
+  const data=await client._request("kc-finance-bridge",{action:"cash_measure_settings_upsert",sourceProgram:"kc-money-butler",settings:settingsToSave});
+  return data;
+}
 function renderSettings(){
   const s=CASH_MEASURE.read();
   el("settingsCoins").innerHTML=s.coins.map(x=>`<div class="settings-money-row coin">
@@ -201,10 +221,20 @@ function activateSettingsTab(name){
   document.querySelectorAll("[data-settings-panel]").forEach(p=>p.hidden=p.dataset.settingsPanel!==name);
 }
 document.querySelectorAll("[data-settings-tab]").forEach(b=>b.addEventListener("click",()=>activateSettingsTab(b.dataset.settingsTab)));
-el("settingsBtn")?.addEventListener("click",()=>{renderSettings();activateSettingsTab("coins");el("settingsDialog").showModal()});
-el("saveCashSettings")?.addEventListener("click",()=>{
-  CASH_MEASURE.save(collectSettings());reloadCashMeasureSettings();renderCashMeasureInputs();updateTotal();renderSettings();
-  el("saveCashSettings").textContent="Gespeichert ✓";setTimeout(()=>el("saveCashSettings").textContent="Speichern",1000);
+el("settingsBtn")?.addEventListener("click",async()=>{await pullCashMeasureSettings();renderSettings();activateSettingsTab("coins");el("settingsDialog").showModal()});
+el("saveCashSettings")?.addEventListener("click",async()=>{
+  const button=el("saveCashSettings"),neu=collectSettings();
+  button.disabled=true;button.textContent="Speichert …";
+  try{
+    CASH_MEASURE.save(neu);reloadCashMeasureSettings();renderCashMeasureInputs();updateTotal();
+    await pushCashMeasureSettings(neu);
+    renderSettings();button.textContent="Zentral gespeichert ✓";
+  }catch(e){
+    button.textContent="Lokal gespeichert · Cloudfehler";
+    console.warn("Zentrale Gewichtseinstellungen nicht gespeichert:",e?.message||e);
+  }finally{
+    button.disabled=false;setTimeout(()=>button.textContent="Speichern",1600);
+  }
 });
 el("resetCashSettings")?.addEventListener("click",()=>{
   if(!confirm("Standardwerte wirklich wiederherstellen?"))return;
@@ -629,3 +659,5 @@ window.addEventListener("DOMContentLoaded",()=>{let tab=1;document.querySelector
   document.querySelector('[data-money-section="statistik"] .section-lock')
     ?.addEventListener('click',()=>setTimeout(zeichneStatistik,120));
 })();
+
+setTimeout(()=>pullCashMeasureSettings(),1800);
