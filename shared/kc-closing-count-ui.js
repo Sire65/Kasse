@@ -117,5 +117,6 @@
     document.querySelectorAll('[data-closing-count-mode]').forEach(b=>b.addEventListener('click',()=>setMode(b.dataset.closingCountMode)));
     setMode('defer');
   }
+  global.addEventListener?.('kc-cash-measure-settings-updated',()=>{if($('closingCountInputs'))render();});
   global.KCClosingCountUI={init,setMode,buildPayload,read:readLines,get mode(){return mode}};
 })(typeof window!=='undefined'?window:globalThis);
