@@ -27,7 +27,7 @@ ok(!/smtp/i.test(mbBridge),'Money Butler must not contain SMTP delivery');
 
 ok(defs.includes("cash_transfer_ready:{required:['registerId','amount'],recipient:'central'}"),'central cash_transfer_ready definition missing');
 
-ok(managerHtml.includes('KC Communicator Eingang'),'PC Manager Communicator intake missing');
+ok(managerHtml.includes('Money-Butler Eingang')&&managerHtml.includes('KC-Communicator-Anhang'),'PC Manager Communicator intake missing');
 ok(managerHtml.includes('communicatorCashFile'),'PC Manager communicator file input missing');
 ok(managerApp.includes('decodeCommunicatorCashFile'),'PC Manager communicator cash validation missing');
 ok(managerApp.includes('queueCashTransferPayload'),'PC Manager cash forward helper missing');
