@@ -187,9 +187,11 @@
         zu.innerHTML = '<span aria-hidden="true">←</span><span class="kc-nur-vorlesen">Zurück zur Kasse</span>';
         zu.addEventListener('click', () => zahlenSeite(false));
         r.appendChild(zu);
-        /* #cashChangeBtn = "BAR KASSIEREN · Rückgeld geben" - erscheint nur, wenn Rückgeld ansteht;
-           #payBtn = BAR mit QR für den direkten Abschluss. Beide bleiben, wie die Kasse sie kennt. */
-        ['#printBonBtn', '#tipBtn', '#roundUpBtn', '#exactCashBtn', '#cashChangeBtn', '#payBtn', '#cardBtn', '#accountChargeBtn'].forEach((sel) => $$(sel).forEach((k) => { merkeHeimat(k); r.appendChild(k); }));
+        /* Seite 2 hat genau EINEN sichtbaren BAR-Abschluss: #payBtn mit QR.
+           #cashChangeBtn bleibt technisch vollständig erhalten, wird hier aber bewusst NICHT
+           umgehängt. Damit kann er auf anderen/alten Oberflächen weiter genutzt werden, ohne
+           auf der Zahlen-Seite einen zweiten Bezahlknopf zu erzeugen. */
+        ['#printBonBtn', '#tipBtn', '#roundUpBtn', '#exactCashBtn', '#payBtn', '#cardBtn', '#accountChargeBtn'].forEach((sel) => $(sel).forEach((k) => { merkeHeimat(k); r.appendChild(k); }));
         bericht.zugeordnet++;
       } else if (z && z.eigen === 'bedienblock') {
         const status = document.createElement('div'); status.className = 'kc-statuszeile';
