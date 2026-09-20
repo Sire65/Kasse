@@ -18,10 +18,14 @@ ok(mb.includes('payload.confirmationRequested=true'),'Money Butler confirmation 
 ok(mgr.includes('payload.confirmationRequested===true'),'Manager confirmation routing missing');
 ok(mgr.includes('/api/v1/finance-transfer/queue'),'Manager Finance Bridge queue missing');
 ok(mgr.includes('/api/v1/cash-transfer/queue'),'Normal cash queue must remain');
-ok(posHtml.includes('kc-finance-transfer-kasse.js?build=1.0.0'),'Live POS Finance Bridge script missing');
+ok(posHtml.includes('kc-finance-transfer-kasse.js?build=1.0.1'),'Live POS Finance Bridge script missing');
 ok(live.includes('kcFinanceTransferUebernehmen'),'Live POS explicit confirmation button missing');
 ok(live.includes("'cash_transfer_confirmed'"),'Live POS confirmation event missing');
 ok(live.includes('confirmationRequested: payload.confirmationRequested === true'),'Live POS confirmation flag return missing');
+ok(live.includes("const BESTAETIGT_KEY = 'kc_finance_transfer_bestaetigt_v1'"),'Separate confirmation state missing');
+ok(live.includes('if (!bestaetigteIds().includes(transferId))'),'Confirmation retry guard missing');
+ok(live.includes("throw new Error('Meldeweg für die Empfangsbestätigung ist nicht verfügbar.')"),'Missing confirmation path must remain retryable');
+ok(live.includes('merkeBestaetigt(transferId);'),'Successful confirmation must be persisted separately');
 ok(live===train,'Live and training Finance Bridge must be identical');
 ok(companion.includes("type = 'cash_transfer_confirmed'"),'Companion confirmation query missing');
 ok(companion.includes("/cash-transfer-confirmations"),'Companion local confirmation endpoint missing');
@@ -33,8 +37,8 @@ ok(notifier.includes("b.confirmationRequested!==true"),'Push must only run when 
 ok(notifier.includes("cash-confirmed-"),'Push correlation id missing');
 ok(notifier.includes('SENT_KEY'),'Push duplicate protection missing');
 ok(notifier.includes('setInterval(pruefe,POLL_MS)'),'Confirmation retry polling missing');
-ok(posSw.includes('kc-bildrechner-2026-09-20-montag-rc28'),'Live POS cache not bumped');
-ok(posSw.includes('./kc-finance-transfer-kasse.js?build=1.0.0'),'Live Finance Bridge not precached');
-ok(trSw.includes('kc-schulung-2026-09-20-montag-rc30'),'Training cache not bumped');
+ok(posSw.includes('kc-bildrechner-2026-09-20-montag-rc29'),'Live POS cache not bumped');
+ok(posSw.includes('./kc-finance-transfer-kasse.js?build=1.0.1'),'Live Finance Bridge not precached');
+ok(trSw.includes('kc-schulung-2026-09-20-montag-rc31'),'Training cache not bumped');
 
-console.log('Money Butler confirmation + push route: 22/22 checks passed');
+console.log('Money Butler confirmation + push route: 26/26 checks passed');
