@@ -24,6 +24,7 @@
       if (Array.isArray(daten.groups) && daten.groups.length) localStorage.setItem('kc_groups_v050', JSON.stringify(daten.groups));
       if (Array.isArray(daten.articles) && daten.articles.length) localStorage.setItem('kc_products_v050', JSON.stringify(daten.articles));
       if (Array.isArray(daten.packages)) localStorage.setItem('kc_packages_v100', JSON.stringify(daten.packages));
+      if (Array.isArray(daten.accounts) && daten.accounts.length) localStorage.setItem('kc_accounts_v1', JSON.stringify(daten.accounts));
 
       // Darstellung übernehmen: Knopfgrößen, Bild oder Text, Farben, welche Sondertasten es
       // gibt, Vereinsname, Bedienerliste. Das entscheidet der Betreiber, nicht das Gerät.
