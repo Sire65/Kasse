@@ -105,6 +105,24 @@ const DEFAULT_PRODUCTS=[
  {id:"becher",name:"Außer-Haus-Becher",price:1.00,category:"Speisen",sortOrder:8,image:"assets/becher_bv2.webp"}
 ];
 let PRODUCTS=JSON.parse(localStorage.getItem("kc_products_v050")||"null")||DEFAULT_PRODUCTS;
+// 20.09.2026: Betreiberregel fuer halbe Portionen.
+// Alle Speisen und Getraenke bekommen den 1/2-Knopf. Pfand und Außer-Haus-Gefaesse bleiben
+// ausgeschlossen. Bereits bewusst gepflegte Halbpreise bleiben bestehen; fehlt einer, wird
+// einmalig 50 % des normalen Verkaufspreises gesetzt.
+{
+  let geaendert=false;
+  const ausgeschlossen=p=>{const text=`${p?.id||""} ${p?.name||""}`.toLowerCase();return p?.category==="Pfand"||/außer[- ]?haus|ausser[- ]?haus|becher|gefäß|gefaess/.test(text)};
+  PRODUCTS.forEach(p=>{
+    const erlaubt=(p.category==="Speisen"||p.category==="Getränke")&&!ausgeschlossen(p)&&Number(p.price||0)>0;
+    if(erlaubt){
+      if(p.halfAllowed!==true){p.halfAllowed=true;geaendert=true}
+      if(!(Number(p.halfPrice||0)>0)){p.halfPrice=Math.round(Number(p.price||0)*50)/100;geaendert=true}
+    }else if(p.halfAllowed===true||Number(p.halfPrice||0)!==0){
+      p.halfAllowed=false;p.halfPrice=0;geaendert=true;
+    }
+  });
+  if(geaendert)localStorage.setItem("kc_products_v050",JSON.stringify(PRODUCTS));
+}
 // 09.09.2026 (Betreiber, echter Fund am Stand): der Barcode-Scanner las "KCA:01003" korrekt
 // (piepste auch), aber die Kasse fand nichts - das Feld "barcode" der Artikel war leer. Das
 // Nummernmodul (shared/kc-artikelnummern-core.js) existierte und die Suche danach war schon
