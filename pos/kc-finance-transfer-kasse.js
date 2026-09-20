@@ -110,12 +110,19 @@
       const registerId = global.state?.master?.registerId || payload.registerId;
       const betrag=betragFuerKasse(payload, registerId);
       if(!Number.isFinite(betrag)||betrag<=0)throw new Error('Betrag für diese Kasse ist ungültig oder die Kassenaufteilung ist beschädigt.');
+      const sharedMeta = payload?.scope === 'shared' ? {
+        scope: 'shared',
+        poolId: payload.poolId || ('POOL-' + (payload.transferId || String(transferId).split('#')[0])),
+        poolName: payload.poolName || 'Gemeinsamer Wechselgeldbestand',
+        registerIds: Array.isArray(payload.registerIds) ? payload.registerIds.slice() : [],
+      } : {};
       const eintrag = {
         type: warBereitsEroeffnet ? 'topup' : 'opening',
         registerId,
         total: betrag,
         effectiveDate: datumFuerKasse(payload, heute),
         transferId,
+        ...sharedMeta,
         importSource: 'finance-bridge',
         importedAt: new Date().toISOString(),
       };
