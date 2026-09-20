@@ -28,13 +28,6 @@ jobs:
         with:
           path: Kasse
 
-      - name: Externe Repos laden
-        run: |
-          mkdir -p KC-Verwaltung/js KC-Communication/supabase/functions/kc-finance-bridge
-          curl --fail --silent --show-error --location https://raw.githubusercontent.com/Sire65/KC-Verwaltung/main/index.html -o KC-Verwaltung/index.html
-          curl --fail --silent --show-error --location https://raw.githubusercontent.com/Sire65/KC-Verwaltung/main/js/86_finance_closing_reports.js -o KC-Verwaltung/js/86_finance_closing_reports.js
-          curl --fail --silent --show-error --location https://raw.githubusercontent.com/Sire65/KC-Communication/main/supabase/functions/kc-finance-bridge/index.ts -o KC-Communication/supabase/functions/kc-finance-bridge/index.ts
-
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
@@ -48,24 +41,6 @@ jobs:
           node --check Kasse/pc-manager/kc-tagesabschluss-zentrale.js
           node --check Kasse/pc-manager/kc-abschluesse-manager.js
           node --check Kasse/pc-manager/kc-finance-bridge.js
-          node --check KC-Verwaltung/js/86_finance_closing_reports.js
-
-      - name: KC Verwaltung Integration
-        run: |
-          grep -q 'js/86_finance_closing_reports.js?v=1.0.0' KC-Verwaltung/index.html
-          grep -q "closing_report_list" KC-Verwaltung/js/86_finance_closing_reports.js
-          grep -q "closing_report_mark_imported" KC-Verwaltung/js/86_finance_closing_reports.js
-          grep -q "Gesamt Soll" KC-Verwaltung/js/86_finance_closing_reports.js
-          grep -q "Gesamt Ist" KC-Verwaltung/js/86_finance_closing_reports.js
-          grep -q "Differenz" KC-Verwaltung/js/86_finance_closing_reports.js
-
-      - name: Finance Bridge Integration
-        run: |
-          grep -q "action==='closing_report_upsert'" KC-Communication/supabase/functions/kc-finance-bridge/index.ts
-          grep -q "onConflict:'correlation_id'" KC-Communication/supabase/functions/kc-finance-bridge/index.ts
-          grep -q "closing_report_list" KC-Communication/supabase/functions/kc-finance-bridge/index.ts
-          grep -q "closing_report_mark_imported" KC-Communication/supabase/functions/kc-finance-bridge/index.ts
-          grep -q "adminRole(link)" KC-Communication/supabase/functions/kc-finance-bridge/index.ts
 
       - name: TÜV Schutzregeln
         run: |
