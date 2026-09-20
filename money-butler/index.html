@@ -104,33 +104,69 @@
 
     <section class="card result money-section" data-money-section="handover" data-default-open="false">
       <div class="collapse-heading">
-        <h2>4. An die Kasse übergeben</h2>
+        <h2>4. Übertragungsweg wählen</h2>
         <button type="button" class="section-lock" aria-expanded="false" aria-controls="money-handover-body" title="Bereich ausklappen"><span class="lock-icon" aria-hidden="true">🔒</span><span class="lock-label">Ausklappen</span></button>
       </div>
       <div class="money-section-body" id="money-handover-body" hidden>
         <div class="handover-check"><span>Vorgang <b id="handoverType">—</b></span><span>Ziel <b id="handoverRegister">—</b></span><span>Gültig für <b id="handoverDate">—</b></span></div>
         <div class="handover-summary"><span>Lose <b id="handoverLooseTotal">0,00 €</b></span><span>Rollen <b id="handoverRollTotal">0,00 €</b></span><span>Gesamt <strong id="handoverTotal">0,00 €</strong></span></div>
-        <canvas id="qrCanvas" width="360" height="360"></canvas>
-        <div class="kurzcode-box"><small>Rückfall ohne Scanner - an der Kasse von Hand eingeben:</small><div id="kurzcode" class="kurzcode-anzeige">—</div></div>
-        <textarea id="payload" readonly placeholder="Der Übertragungscode erscheint hier."></textarea>
-        <div class="result-actions">
-          <button id="print">Drucken</button>
-          <button id="copy">Code kopieren</button>
-          <button id="save">Datei speichern</button>
-          <button id="commSend" class="primary">📨 Über KC Communicator an PC-Manager</button>
-          <button id="protokoll" hidden>Übergabeprotokoll</button>
+        <p class="handover-prompt"><strong>Wie soll die Übergabe übertragen werden?</strong></p>
+        <div class="handover-methods" role="group" aria-label="Übertragungsweg wählen">
+          <button type="button" class="handover-method" data-handover-method="qr">▦<span>QR-Code</span><small>An Kasse oder PC-Manager scannen</small></button>
+          <button type="button" class="handover-method" data-handover-method="shortcode">⌨<span>Kurzcode</span><small>Notweg ohne Scanner</small></button>
+          <button type="button" class="handover-method" data-handover-method="file">📄<span>Datei</span><small>.kccash speichern / übertragen</small></button>
+          <button type="button" class="handover-method" data-handover-method="communicator">📨<span>KC Communicator</span><small>Von zuhause an den PC-Manager</small></button>
         </div>
-        <div class="communicator-send-box">
+
+        <div id="handoverOutputQr" class="handover-output" hidden>
+          <canvas id="qrCanvas" width="360" height="360"></canvas>
+          <button id="print">QR-Code drucken</button>
+          <button id="copy">Code kopieren</button>
+        </div>
+        <div id="handoverOutputShortcode" class="handover-output" hidden>
+          <div class="kurzcode-box"><small>Rückfall ohne Scanner – an der Kasse von Hand eingeben:</small><div id="kurzcode" class="kurzcode-anzeige">—</div></div>
+        </div>
+        <textarea id="payload" readonly hidden></textarea>
+        <button id="save" hidden>Datei speichern</button>
+        <button id="commSend" hidden>Über KC Communicator senden</button>
+        <div class="communicator-send-box" id="communicatorSettings" hidden>
           <label>KC-Communicator Zugriffstoken
             <input id="commToken" type="password" autocomplete="off" placeholder="Zugriffstoken des Kassenwarts">
           </label>
           <button id="commTokenSave" type="button">Zugang auf diesem PC speichern</button>
           <p id="commSendStatus" class="hint">Der PC-Manager ist die zentrale Annahmestelle und gibt die Übergabe anschließend an die Kassen weiter.</p>
         </div>
-        <p class="hint">QR-Code an der Kasse scannen, Datei speichern oder über KC Communicator an den PC-Manager senden.</p>
-        <p id="kassetteHinweis" class="kckass-doppelhinweis" hidden><strong>An BEIDEN Kassen einlesen.</strong> Jede Kasse bucht nur ihren eigenen Anteil – doppelt gezählt wird nichts. Wird der Code nur an einer Kasse eingelesen, fehlt der anderen der Anfangsbestand und ihre Abrechnung geht abends nicht auf.</p>
+        <button id="protokoll" hidden>Übergabeprotokoll</button>
+        <p id="kassetteHinweis" class="kckass-doppelhinweis" hidden><strong>An BEIDEN Kassen einlesen.</strong> Jede Kasse bucht nur ihren eigenen Anteil – doppelt gezählt wird nichts.</p>
       </div>
     </section>
+
+    <dialog id="handoverStartDialog" class="handover-start-dialog">
+      <form method="dialog">
+        <h3 id="handoverStartTitle">Übertragung starten</h3>
+        <p id="handoverStartRoute">—</p>
+        <div class="handover-start-summary">
+          <span>Ziel <b id="handoverStartTarget">—</b></span>
+          <span>Betrag <b id="handoverStartAmount">—</b></span>
+          <span>Datum <b id="handoverStartDate">—</b></span>
+        </div>
+        <label class="handover-confirm-check">
+          <input type="checkbox" id="handoverConfirmationWanted">
+          <span>Bestätigung anfordern, dass das Geld angekommen ist</span>
+        </label>
+        <p id="handoverConfirmationHint" class="hint"></p>
+        <div id="handoverCommunicatorAuth" hidden>
+          <label>KC-Communicator Zugriffstoken
+            <input id="handoverCommToken" type="password" autocomplete="off" placeholder="Zugriffstoken des Kassenwarts">
+          </label>
+        </div>
+        <div class="dialog-actions">
+          <button type="button" id="handoverStartCancel">Abbrechen</button>
+          <button type="button" id="handoverStartButton" class="primary">Start</button>
+        </div>
+        <p id="handoverStartStatus" class="hint" aria-live="polite"></p>
+      </form>
+    </dialog>
 
     <!-- Uebergabeprotokoll fuer die Geldkassette (Bringen/Abholen, zwei Unterschriftszeilen).
          Vollstaendig gebaut, aber ueber KC_RUNTIME_FLAGS.uebergabeProtokoll abgeschaltet -
