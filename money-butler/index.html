@@ -112,9 +112,17 @@
           <button id="print">Drucken</button>
           <button id="copy">Code kopieren</button>
           <button id="save">Datei speichern</button>
+          <button id="commSend" class="primary">📨 Über KC Communicator an PC-Manager</button>
           <button id="protokoll" hidden>Übergabeprotokoll</button>
         </div>
-        <p class="hint">QR-Code an der Kasse scannen oder die erzeugte Datei auf das Kassengerät übertragen.</p>
+        <div class="communicator-send-box">
+          <label>KC-Communicator Zugriffstoken
+            <input id="commToken" type="password" autocomplete="off" placeholder="Zugriffstoken des Kassenwarts">
+          </label>
+          <button id="commTokenSave" type="button">Zugang auf diesem PC speichern</button>
+          <p id="commSendStatus" class="hint">Der PC-Manager ist die zentrale Annahmestelle und gibt die Übergabe anschließend an die Kassen weiter.</p>
+        </div>
+        <p class="hint">QR-Code an der Kasse scannen, Datei speichern oder über KC Communicator an den PC-Manager senden.</p>
         <p id="kassetteHinweis" class="kckass-doppelhinweis" hidden><strong>An BEIDEN Kassen einlesen.</strong> Jede Kasse bucht nur ihren eigenen Anteil – doppelt gezählt wird nichts. Wird der Code nur an einer Kasse eingelesen, fehlt der anderen der Anfangsbestand und ihre Abrechnung geht abends nicht auf.</p>
       </div>
     </section>
@@ -156,6 +164,8 @@
 <script src="../shared/kc-bargeld-statistik.js"></script>
 <script src="../shared/kc-geldkassette.js"></script>
 <script src="../shared/kc-uebergabeprotokoll.js"></script>
+<script src="../pc-manager/kc-communication-client.js"></script>
 <script src="app.js"></script>
+<script src="kc-communicator-bridge.js"></script>
 </body>
 </html>
