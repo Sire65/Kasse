@@ -1,7 +1,7 @@
 // Build V0.31.3.6 Repair 16 / Content- und Objektkern
 // 08.09.2026: Speichername gewechselt (Aufbau, Zahlen-Seite, Parken, Kopfzeile) - ein Tablet mit
 // altem Speicher bekam sonst weiter die alte index.html und sah nichts vom Umbau.
-const CACHE="kc-schulung-2026-09-20-montag-rc28";
+const CACHE="kc-schulung-2026-09-20-montag-rc29";
 // BEFUND: diese Liste war stehengeblieben. Sie enthielt index.html, app.js, styles.css und
 // eine Handvoll Kerne - es fehlten Startpruefung, Layout, Gutscheine, Stechuhr, Meldeweg,
 // Ausverkauft und saemtliche Produktbilder. Nachgeladenes landete zwar beim ersten Aufruf
