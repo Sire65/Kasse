@@ -1927,6 +1927,14 @@ body.training-mode .exact-button:not(:disabled){background:#7c2fd6!important;bor
 .account-list{display:grid;gap:8px;max-height:320px;overflow:auto}
 .account-list button,.balance-row{display:flex;justify-content:space-between;align-items:center;text-align:left;padding:12px;border:1px solid #b8c4d1;border-radius:10px;background:#fff}
 .account-list small,.balance-row small{display:block;color:#526173;margin-top:3px}
+.balance-detail-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:8px;padding-bottom:8px;border-bottom:1px solid #d8e0e7}
+.balance-detail-head>div{text-align:right}.balance-detail-head strong{display:block;font-size:1.15rem}.balance-back{padding:8px 10px;min-height:38px}
+.balance-detail-list{display:grid;gap:4px;max-height:285px;overflow:auto}
+.balance-detail-row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:8px 4px;border-bottom:1px solid #e7ebef}
+.balance-detail-row b{font-size:.98rem}.balance-detail-row small{display:block;color:#5d6875;margin-top:2px;font-size:.78rem}
+.balance-detail-state{white-space:nowrap;text-transform:capitalize}.balance-detail-note{display:block;margin-top:8px;color:#667483;font-size:.76rem}
+.balance-empty{margin:10px 0;color:#667483}
+@media(max-width:760px){.account-card{max-width:min(94vw,620px)}.balance-detail-list{max-height:240px}.balance-detail-row{padding:7px 2px}}
 .account-selected{margin-top:12px;padding:14px;border:1px solid #9fb2c5;border-radius:12px;background:#f7fafc}
 .validation-error{padding:10px;background:#fff0f0;color:#9f1d1d;border-radius:8px}
 .validation-ok{padding:10px;background:#eefbf1;color:#166534;border-radius:8px}
