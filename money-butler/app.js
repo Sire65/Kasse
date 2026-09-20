@@ -43,7 +43,23 @@ function initMoneySections(){
 }
 initMoneySections();
 el("moneyToolTestHint").hidden=!window.KC_RUNTIME_FLAGS?.testPhaseToolGuidance;
-el("effectiveDate").min=localBusinessDate();
+document.querySelectorAll(".date-quick").forEach(button=>button.addEventListener("click",()=>{
+  const offset=Number(button.dataset.dateOffset||0),date=new Date();
+  date.setDate(date.getDate()+offset);
+  el("effectiveDate").value=localBusinessDate(date);
+  el("effectiveDate").dispatchEvent(new Event("input",{bubbles:true}));
+  document.querySelectorAll(".date-quick").forEach(x=>x.classList.toggle("active",x===button));
+}));
+el("effectiveDate").addEventListener("input",()=>{
+  const heute=new Date();
+  const offsets=[-1,0,1];
+  const value=el("effectiveDate").value;
+  document.querySelectorAll(".date-quick").forEach((button,index)=>{
+    const d=new Date(heute);d.setDate(d.getDate()+offsets[index]);
+    button.classList.toggle("active",value===localBusinessDate(d));
+  });
+});
+
 const MUENZ_FOTOS={2:"assets/muenze_2.webp",1:"assets/muenze_1.webp",.5:"assets/muenze_0.5.webp",.2:"assets/muenze_0.2.webp",.1:"assets/muenze_0.1.webp",.05:"assets/muenze_0.05.webp",.02:"assets/muenze_0.02.webp",.01:"assets/muenze_0.01.webp"}; // wird nach und nach ergänzt, sobald weitere echte Münzbilder vorliegen
 el("denoms").innerHTML=DENOMS.map(v=>{
   if(v>=5){
