@@ -49,6 +49,7 @@
             <button type="button" class="date-quick" data-date-offset="1">Morgen</button>
           </div>
           <small>Der Code kann an der Kasse nur an diesem Tag übernommen werden.</small>
+          <small id="countDateHint" class="count-date-hint" hidden></small>
         </label>
         <label>Notiz
           <input id="note" placeholder="z. B. zusätzliches Wechselgeld">
@@ -62,6 +63,21 @@
         <button type="button" class="section-lock" aria-expanded="true" aria-controls="money-loose-body" title="Bereich einklappen"><span class="lock-icon" aria-hidden="true">🔓</span><span class="lock-label">Einklappen</span></button>
       </div>
       <div class="money-section-body" id="money-loose-body"><div id="denoms" class="denoms"></div></div>
+    </section>
+
+    <section class="card entry-card weighing-card money-section" data-money-section="weighing" data-default-open="false">
+      <div class="section-heading collapse-heading">
+        <div>
+          <h2>2b. Münzen sortenrein wiegen</h2>
+          <p>Optional für die Abend-/Nachzählung: Behälter auf der Waage tarieren, nur eine Münzsorte einfüllen und das Nettogewicht eingeben. Grundlage sind die offiziellen Stückgewichte von Bundesbank/EZB.</p>
+        </div>
+        <div class="section-heading-actions"><span class="weigh-badge">Waage</span><button type="button" class="section-lock" aria-expanded="false" aria-controls="money-weighing-body" title="Bereich ausklappen"><span class="lock-icon" aria-hidden="true">🔒</span><span class="lock-label">Ausklappen</span></button></div>
+      </div>
+      <div class="money-section-body" id="money-weighing-body" hidden>
+        <p class="weigh-note"><strong>Nur lose Euro-Münzen.</strong> Banknoten und Münzrollen bitte weiterhin zählen; dafür wird hier kein angenommener Gewichtswert verwendet.</p>
+        <div class="weigh-table-head" aria-hidden="true"><span>Münze</span><span>Offiziell</span><span>Nettogewicht</span><span>Ergebnis</span><span>Betrag</span><span></span></div>
+        <div id="coinWeighing" class="coin-weighing"></div>
+      </div>
     </section>
 
     <section class="card entry-card roll-card money-section" data-money-section="rolls" data-default-open="false">
