@@ -79,3 +79,9 @@ console.log('Zentrale Gewichtseinstellungen MB -> Cloud -> PC Manager -> Kassen:
 const managerApp=read('pc-manager/app.js');
 ok(managerApp.includes("KCCashMeasureCentralSync?.pull?.({publish:false})"),'PC Manager aktualisiert Gewichte vor Stammdaten-Push nicht');
 console.log('PC Manager Stammdaten-Push nutzt immer den aktuellen Zentralstand: OK');
+
+ok(settingsSource.includes("referenceGrams:212.5"),'Referenzgewicht 2-Euro-Rolle fehlt');
+ok(settingsSource.includes("referenceGrams:187.5"),'Referenzgewicht 1-Euro-Rolle fehlt');
+ok(settingsSource.includes("referenceGrams:1.02"),'Referenzgewicht 100-Euro-Schein fehlt');
+ok(settingsSource.includes("referenceGrams:.71"),'Referenzgewicht 5-Euro-Schein fehlt');
+console.log('Referenzgewichtstabellen für Rollen und Scheine: OK');
