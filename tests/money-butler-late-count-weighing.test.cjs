@@ -31,3 +31,30 @@ ok(pieces===100,'2-Euro-Wiegeprobe ergibt falsche Stückzahl');
 ok((pieces*2)===200,'2-Euro-Wiegeprobe ergibt falschen Betrag');
 
 console.log('Money Butler Nachzählung + offizielles Münzwiegen + Cloud-Übernahme: OK');
+
+const sharedSettings=read('shared/kc-cash-measure-settings.js');
+const closingUi=read('shared/kc-closing-count-ui.js');
+const posIndex=read('pos/index.html');
+const trainingIndex=read('schulung/pos/index.html');
+const companionDb=read('markt-kasse-suite/backend-source/manager-companion/db.js');
+const companion=read('markt-kasse-suite/backend-source/manager-companion/index.js');
+const closingMgr=read('pc-manager/kc-abschluesse-manager.js');
+
+ok(html.includes('id="settingsBtn"'),'Zahnrad/Voreinstellungen fehlt');
+for(const tab of ['coins','rolls','notes','tests']) ok(html.includes('data-settings-tab="'+tab+'"'),'Einstellungsreiter fehlt: '+tab);
+ok(html.includes('data-entry-mode="count"')&&html.includes('data-entry-mode="weigh"'),'Frontschalter Zählen/Wiegen fehlt');
+ok(sharedSettings.includes("const KEY='kc_cash_measure_settings_v1'"),'Gemeinsamer Bargeld-Voreinstellungsschlüssel fehlt');
+ok(sharedSettings.includes("{value:2,grams:8.50"),'Offizieller 2-Euro-Standard fehlt im gemeinsamen Modul');
+ok(sharedSettings.includes("grams:null"),'Optionale eigene Rollen-/Scheingewichte fehlen');
+ok(app.includes('runConnectionTests'),'Testcenter-Logik fehlt');
+for(const label of ['Datenbank / KC Cloud','KC Communicator','PC Manager / Finance Bridge','KC Verwaltung / Tagesabschlüsse']) ok(app.includes(label),'Testcenter-Prüfung fehlt: '+label);
+for(const idx of [posIndex,trainingIndex]){
+  ok(idx.includes('data-closing-count-mode="defer"'),'Kassenabschluss Option Später fehlt');
+  ok(idx.includes('data-closing-count-mode="count"'),'Kassenabschluss Option Zählen fehlt');
+  ok(idx.includes('data-closing-count-mode="weigh"'),'Kassenabschluss Option Wiegen fehlt');
+}
+ok(closingUi.includes("format:'KC_CASH_COUNT'"),'Separate Ist-Zählung aus Kassenabschluss fehlt');
+ok(closingUi.includes("measurements:data.measurements"),'Rohmesswerte werden nicht übertragen');
+ok(companionDb.includes("cash_count_json"),'Companion speichert Ist-Zählung nicht getrennt');
+ok(companion.includes("cashCount:"),'Companion liefert Ist-Zählung nicht an PC Manager');
+ok(closingMgr.includes("ingestCashCountPayload?.(abschluss.cashCount"),'PC Manager übernimmt Kassen-Ist-Zählung nicht automatisch');
