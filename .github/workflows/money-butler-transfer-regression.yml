@@ -44,3 +44,10 @@ jobs:
         run: node tests/money-butler-push-dedup.test.cjs
       - name: PC Manager Money Butler integration
         run: node tests/money-butler-manager-integration.test.cjs
+      - name: Late count and coin weighing
+        run: node tests/money-butler-late-count-weighing.test.cjs
+      - name: Money Butler syntax
+        run: |
+          node --check money-butler/app.js
+          node --check money-butler/kc-communicator-bridge.js
+          node --check pc-manager/kc-money-butler-cloud-intake.js
