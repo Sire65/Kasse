@@ -36,7 +36,11 @@ function openTxDb(){
   return new Promise((resolve,reject)=>{
     if(!('indexedDB' in window)){resolve(null);return}
     const req=indexedDB.open('kc_pos_transactions_v1',1);
-    req.onupgradeneeded=()=>{};
+    req.onupgradeneeded=event=>{
+      const db=event.target.result;
+      if(!db.objectStoreNames.contains('transactions'))db.createObjectStore('transactions',{keyPath:'transactionId'});
+      if(!db.objectStoreNames.contains('trainingTransactions'))db.createObjectStore('trainingTransactions',{keyPath:'transactionId'});
+    };
     req.onsuccess=()=>resolve(req.result);
     req.onerror=()=>reject(req.error);
   });
