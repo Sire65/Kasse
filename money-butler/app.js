@@ -169,7 +169,7 @@ function drawQR(canvas,text){
   if(!ergebnis.ok)throw new Error(ergebnis.grund||"QR-Code konnte nicht erzeugt werden.");
   return ergebnis;
 }
-el("generate").onclick=()=>{const c=getData(),effectiveDate=el("effectiveDate").value;if(!isBusinessDate(effectiveDate))return alert("Bitte das gültige Einsatzdatum im Kalender auswählen.");if(effectiveDate<localBusinessDate())return alert("Das Einsatzdatum darf nicht in der Vergangenheit liegen.");if(c.total<=0)return alert("Bitte mindestens eine Stückelung eingeben.");const payload={
+el("generate").onclick=()=>{const c=getData(),effectiveDate=el("effectiveDate").value;if(!isBusinessDate(effectiveDate))return alert("Bitte das gültige Einsatzdatum im Kalender auswählen.");if(currentType!=="count"&&effectiveDate<localBusinessDate())return alert("Anfangsbestand und Nachfüllung dürfen nicht in der Vergangenheit liegen.");if(c.total<=0)return alert("Bitte mindestens eine Stückelung eingeben.");const payload={
   format:currentType==="count"?"KC_CASH_COUNT":"KC_CASH_TRANSFER",
   version:currentType==="count"?3:4,
   transferId:crypto.randomUUID(),
