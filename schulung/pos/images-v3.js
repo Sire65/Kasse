@@ -1,6 +1,6 @@
 /* Freigegebene Bilderversion 3: nur Bildfelder bekannter Standardartikel migrieren. */
 (function(g){'use strict';
-const entries={"glasplus":{"image":"assets/pfand_aufschlag_version_3.png","legacy":["pfandglas_auth.webp","pfandglas_bv2.webp","pfandglas_geben_bv2.webp","pfandglas_geben_12-09.webp"]},"glasminus":{"image":"assets/pfandrueckgabe_version_3.png","legacy":["pfandglas_auth.webp","pfandglas_bv2.webp","pfandglas_rueckgabe_bv2.webp","pfandglas_rueckgabe_12-09.webp"]},
+const entries={"glasplus":{"image":"assets/pfand_aufschlag_version_3.png","legacy":["pfandglas_auth.webp","pfandglas_bv2.webp","pfandglas_geben_bv2.webp","pfandglas_geben_12-09.webp"]},"glasminus":{"image":"assets/pfandrueckgabe_version_3.png","legacy":["pfandglas_auth.webp","pfandglas_bv2.webp","pfandglas_rueckgabe_bv2.webp","pfandglas_rueckgabe_12-09.webp"]},"zangeplus":{"image":"assets/feuerzange_version_3.png","legacy":["feuerzange_placeholder.svg","amaretto_auth.webp"]},"zangeminus":{"image":"assets/feuerzange_version_3.png","legacy":["feuerzange_placeholder.svg","amaretto_auth.webp"]},"glaszangebundleminus":{"image":"assets/pfand_glas_feuerzange_version_3.png","legacy":["pfand_bundle_placeholder.svg"]},
   "eier": {
     "image": "assets/eierpunsch_version_3.png",
     "legacy": [
