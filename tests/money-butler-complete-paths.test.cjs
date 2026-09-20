@@ -25,6 +25,8 @@ ok(mbApp.includes('confirm.disabled=method==="shortcode"'),'Shortcode confirmati
 ok(mbComm.includes('cashPayload:payload'),'Communicator must carry structured KCASH1 payload');
 ok(mbComm.includes("emitEvent('cash_transfer_ready'"),'Communicator ready event missing');
 ok(mbComm.includes('uploadAttachment(file'),'Communicator .kccash fallback attachment missing');
+ok(mbComm.includes("payload.scope==='split'||payload.scope==='shared'"),'shared/split Communicator target routing missing');
+ok(mbComm.includes("?Array.from(payload.registerIds||[])"),'Communicator multi-register ids missing');
 
 ok(mgrHtml.includes('incomingCashCode'),'Manager QR/KCASH1 intake missing');
 ok(mgrHtml.includes('incomingCashShortCode'),'Manager shortcode intake missing');
@@ -66,4 +68,4 @@ ok(notifier.includes("channels:['push']"),'Push channel missing');
 ok(notifier.includes("recipientLabels:['Kassenwart','Admin']"),'Kassenwart/Admin recipients missing');
 ok(notifier.includes('SENT_KEY'),'Notifier duplicate guard missing');
 
-console.log('Money Butler complete transfer paths: 43/43 checks passed');
+console.log('Money Butler complete transfer paths: 48/48 checks passed');
