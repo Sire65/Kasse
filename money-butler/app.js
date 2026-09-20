@@ -308,7 +308,6 @@ el("handoverStartButton")?.addEventListener("click",async()=>{
       return;
     }
     if(selectedHandoverMethod==="communicator"){
-      if(currentType==="count")throw new Error("Die Abendzählung ist noch nicht als KC-Communicator-Ereignis freigeschaltet.");
       const token=String(el("handoverCommToken").value||"").trim();
       if(!token)throw new Error("Bitte den KC-Communicator Zugriffstoken eintragen.");
       el("commToken").value=token;
