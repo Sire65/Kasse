@@ -84,7 +84,7 @@ const DEFAULT_PRODUCTS=[
  // Zahlungsknopf unter MEHR, der noch nicht freigeschaltet ist.
  {id:"wertmarke",name:"Wertmarke",price:5.00,category:"Sonstiges",image:"assets/wertmarke.svg",color:"#7c3aed",info:{important:"Vorab verkaufte Wertmarke. Das Einl\u00f6sen erfolgt sp\u00e4ter \u00fcber die Bezahlfunktion Wertmarke."}},
  {id:"glasplus",name:"Glaspfand",price:2.00,category:"Pfand",image:"assets/pfand_aufschlag_version_3.png",manualDeposit:true},
- {id:"zangeplus",name:"Feuerzangenpfand",price:2.00,category:"Pfand",image:"assets/amaretto_auth.webp",manualDeposit:true},
+ {id:"zangeplus",name:"Feuerzangenpfand",price:2.00,category:"Pfand",image:"assets/feuerzange_placeholder.svg",manualDeposit:true},
  {id:"glasminus",name:"Glasrückgabe",price:-2.00,category:"Pfand",image:"assets/pfandrueckgabe_version_3.png"},
  {id:"zangeminus",name:"Feuerzange Rückgabe",price:-2.00,category:"Pfand",image:"assets/amaretto_auth.webp"},
  {id:"glaszangebundleminus",name:"Glas + Feuerzange Rückgabe",price:-4.00,category:"Pfand",image:"assets/pfand_bundle_placeholder.svg",color:"#9f1239",info:{shortDescription:"Komplettrückgabe von Pfandglas und Feuerzange"}},
