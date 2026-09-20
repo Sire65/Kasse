@@ -79,7 +79,6 @@
 
   el('closingCentralSync')?.addEventListener('click',()=>sync(true));
   document.querySelectorAll('[data-view="closing"]').forEach(b=>b.addEventListener('click',()=>setTimeout(()=>sync(false),400)));
-  setInterval(()=>sync(false),60000);
   setTimeout(()=>sync(false),8000);
   global.KCTagesabschlussZentrale={sync};
 })(window);
