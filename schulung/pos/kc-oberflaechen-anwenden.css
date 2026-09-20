@@ -791,8 +791,10 @@ body.kc-aufbau.kc-bon-leer .kc-pfeilfeld { display: none; }
   flex-basis: 0 !important; max-width: 0 !important; min-width: 0 !important; width: 0 !important;
   opacity: 0; margin-left: 0 !important; margin-right: 0 !important; padding-left: 0 !important; padding-right: 0 !important; border-width: 0 !important;
 }
-.kc-sammel-karte img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: .55; }
-.kc-sammel-karte > span { position: relative; text-shadow: 0 1px 3px #000; }
+.kc-sammel-karte img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; object-position: center; opacity: .92; background: #f8fafc; }
+.kc-sammel-karte > span { position: relative; z-index: 1; text-shadow: 0 1px 3px #000; }
+.kc-sammel-karte.ansicht-bild::after { content:""; position:absolute; inset:45% 0 0; background:linear-gradient(transparent,rgba(15,23,42,.86) 55%); pointer-events:none; }
+.kc-sammel-karte.ansicht-bild .kc-sammel-name,.kc-sammel-karte.ansicht-bild .kc-sammel-preis,.kc-sammel-karte.ansicht-bild .kc-sammel-pfand{z-index:2;color:#fff;}
 .kc-sammel-name { font-weight: 700; font-size: 15px; line-height: 1.2; white-space: normal; overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; }
 .kc-sammel-preis { font-size: 11px; opacity: .85; }
 .kc-sammel-pfand { font-size: 11px; color: #bfdbfe; }
