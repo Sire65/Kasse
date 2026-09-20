@@ -25,6 +25,37 @@
 
   function geld(n) { return Number(n || 0).toLocaleString('de-DE', { style: 'currency', currency: 'EUR' }); }
 
+  // KCASH1 nutzt total/effectiveDate. Ältere Finance-Bridge-Datensätze nutzten
+  // amount/businessDate. Beide Formen werden akzeptiert. Bei einer Geldkassette (scope=split)
+  // wird aus der kompakten Aufteilung exakt der Anteil DIESER Kasse berechnet; niemals der
+  // Gesamtbetrag an beide Kassen gebucht.
+  function betragFuerKasse(payload, registerId) {
+    if (payload?.scope !== 'split') return Number(payload?.amount ?? payload?.total ?? 0);
+    const teilung = payload?.split;
+    if (!teilung || !Array.isArray(payload?.registerIds) || !payload.registerIds.includes(registerId)) return 0;
+    const erste = registerId === teilung.ersteKasse;
+    let summe = 0;
+    const lose = payload.looseBreakdown || {};
+    for (const [rawWert, rawGesamt] of Object.entries(lose)) {
+      const wert = Number(rawWert), gesamt = Math.max(0, Number(rawGesamt) || 0);
+      const beiErster = Math.min(Math.max(0, Number(teilung.lose?.[rawWert]) || 0), gesamt);
+      const anzahl = erste ? beiErster : gesamt - beiErster;
+      summe += anzahl * wert;
+    }
+    const rollen = payload.coinRolls || {};
+    for (const [rawWert, rolle] of Object.entries(rollen)) {
+      const wert = Number(rawWert), gesamt = Math.max(0, Number(rolle?.rolls) || 0);
+      const coinsPerRoll = Math.max(0, Number(rolle?.coinsPerRoll) || 0);
+      const beiErster = Math.min(Math.max(0, Number(teilung.rollen?.[rawWert]) || 0), gesamt);
+      const anzahl = erste ? beiErster : gesamt - beiErster;
+      summe += anzahl * coinsPerRoll * wert;
+    }
+    return +summe.toFixed(2);
+  }
+  function datumFuerKasse(payload, fallback) {
+    return payload?.businessDate || payload?.effectiveDate || fallback;
+  }
+
   function zeigeMeldung(transferId, payload) {
     if (document.getElementById('kcFinanceTransferOverlay')) return; // schon eine offen
     const heute = typeof localBusinessDate === 'function' ? localBusinessDate() : null;
@@ -40,9 +71,9 @@
       <div style="background:#fff;border-radius:14px;padding:28px;max-width:400px;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,.3);">
         <div style="font-size:2.6rem;">💶</div>
         <h2 style="margin:10px 0 6px;font-size:1.3rem;">Neue Kassenfüllung vom PC Manager</h2>
-        <p style="color:#475569;margin:0 0 4px;">${art}: <strong>${geld(payload.amount)}</strong></p>
+        <p style="color:#475569;margin:0 0 4px;">${art}: <strong>${geld(betragFuerKasse(payload, global.state?.master?.registerId || payload.registerId))}</strong></p>
         <p style="color:#475569;margin:0 0 4px;">Für: <strong>${payload.registerId || (global.state?.master?.registerId) || ''}</strong></p>
-        <p style="color:#475569;margin:0 0 18px;">Datum: <strong>${payload.businessDate || heute || ''}</strong></p>
+        <p style="color:#475569;margin:0 0 18px;">Datum: <strong>${datumFuerKasse(payload, heute) || ''}</strong></p>
         <div style="display:flex;gap:10px;justify-content:center;">
           <button type="button" id="kcFinanceTransferSpaeter" style="padding:12px 18px;border-radius:8px;border:1px solid #cbd5e1;background:#fff;font-size:1rem;">Später</button>
           <button type="button" id="kcFinanceTransferUebernehmen" style="padding:12px 22px;border-radius:8px;border:0;background:#166534;color:#fff;font-weight:700;font-size:1rem;">Übernehmen</button>
@@ -74,8 +105,8 @@
       const eintrag = {
         type: warBereitsEroeffnet ? 'topup' : 'opening',
         registerId,
-        total: Number(payload.amount) || 0,
-        effectiveDate: payload.businessDate || heute,
+        total: betragFuerKasse(payload, registerId),
+        effectiveDate: datumFuerKasse(payload, heute),
         transferId,
         importSource: 'finance-bridge',
         importedAt: new Date().toISOString(),
