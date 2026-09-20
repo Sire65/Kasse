@@ -191,7 +191,14 @@ function artikelBildPfad(pfad){
   if(!p||p.startsWith("data:")||p.startsWith("http")||p.startsWith("../")||p.startsWith("/"))return p;
   return "../pos/"+p;
 }
-function cleanArticle(article,index=0){article=window.KCImagesV3.migrate({...article});return {...article,id:cleanId(article?.id,`ART-${index+1}`),name:cleanText(article?.name||`Artikel ${index+1}`,100),shortName:cleanText(article?.shortName,60),receiptText:cleanText(article?.receiptText||article?.name,100),category:cleanText(article?.category,80),barcode:cleanText(article?.barcode,80),image:/^(assets\/[A-Za-z0-9._/-]+|data:image\/(png|jpeg|webp|gif);base64,)/i.test(article?.image||"")?article.image:"",price:Number(article?.price||0),sortOrder:Number(article?.sortOrder||0),halfAllowed:article?.halfAllowed===true,halfPrice:Number(article?.halfPrice||0),purchasePrice:Number(article?.purchasePrice||0),active:article?.active!==false,priceListVisible:article?.priceListVisible!==false,info:cleanProductInfo(article?.info||{})}}
+function istHalbpreisAusgeschlossen(article={}){const text=`${article.id||""} ${article.name||""} ${article.shortName||""}`.toLowerCase();return article.category==="Pfand"||/außer[- ]?haus|ausser[- ]?haus|becher|gefäß|gefaess/.test(text)}
+function cleanArticle(article,index=0){
+  article=window.KCImagesV3.migrate({...article});
+  const price=Number(article?.price||0),category=cleanText(article?.category,80);
+  const halbKategorie=(category==="Speisen"||category==="Getränke")&&!istHalbpreisAusgeschlossen({...article,category})&&price>0;
+  const vorhandenerHalbpreis=Number(article?.halfPrice||0);
+  return {...article,id:cleanId(article?.id,`ART-${index+1}`),name:cleanText(article?.name||`Artikel ${index+1}`,100),shortName:cleanText(article?.shortName,60),receiptText:cleanText(article?.receiptText||article?.name,100),category,barcode:cleanText(article?.barcode,80),image:/^(assets\/[A-Za-z0-9._/-]+|data:image\/(png|jpeg|webp|gif);base64,)/i.test(article?.image||"")?article.image:"",price,sortOrder:Number(article?.sortOrder||0),halfAllowed:halbKategorie,halfPrice:halbKategorie?(vorhandenerHalbpreis>0?vorhandenerHalbpreis:Math.round(price*50)/100):0,purchasePrice:Number(article?.purchasePrice||0),active:article?.active!==false,priceListVisible:article?.priceListVisible!==false,info:cleanProductInfo(article?.info||{})}
+
 function cleanTransaction(row){return window.KCSalesImportCore?.transaction?.(row)||{...row,registerId:cleanId(row?.registerId,"UNKNOWN"),registerName:cleanText(row?.registerName,80),operator:cleanText(row?.operator,80),method:cleanText(row?.method||row?.payment,40),payment:cleanText(row?.payment||row?.method,40),items:Array.isArray(row?.items)?row.items.map((item,index)=>({...item,id:cleanId(item?.id,`ITEM-${index+1}`),name:cleanText(item?.name,100),qty:Number(item?.qty||0),price:Number(item?.price||0)})):[]}}
 
 const MANAGER_FEATURES=[
