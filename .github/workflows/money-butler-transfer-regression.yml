@@ -1,0 +1,38 @@
+name: Money Butler Transfer Regression
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'money-butler/**'
+      - 'pc-manager/**'
+      - 'pos/**'
+      - 'schulung/pos/**'
+      - 'markt-kasse-suite/backend-source/manager-companion/**'
+      - 'tests/money-butler-*.test.cjs'
+      - '.github/workflows/money-butler-transfer-regression.yml'
+  pull_request:
+    branches: [ main ]
+    paths:
+      - 'money-butler/**'
+      - 'pc-manager/**'
+      - 'pos/**'
+      - 'schulung/pos/**'
+      - 'markt-kasse-suite/backend-source/manager-companion/**'
+      - 'tests/money-butler-*.test.cjs'
+      - '.github/workflows/money-butler-transfer-regression.yml'
+
+jobs:
+  transfer-regression:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Money Butler Communicator route
+        run: node tests/money-butler-communicator-route.test.cjs
+      - name: Money Butler complete transfer paths
+        run: node tests/money-butler-complete-paths.test.cjs
+      - name: Confirmation and push route
+        run: node tests/money-butler-confirmation-push.test.cjs
