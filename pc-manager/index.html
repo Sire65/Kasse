@@ -444,8 +444,20 @@
 </section>
 
 <section class="view" data-view-panel="cashprep">
-  <div class="page-head"><div><h1>Money Butler</h1><p>Startbestand oder Nachfüllung erfassen und direkt an die Kasse übertragen.</p></div><a class="standalone-link" href="../money-butler/index.html" target="_blank">Als eigene Money-Butler-App öffnen</a></div>
-  <p id="managerCashTestHint" class="test-phase-note" hidden><strong>So ist es gedacht:</strong> Reines Wechselgeld bereitet man in der eigenständigen Money-Butler-App vor. Dieser Manager bleibt der geschützte Verwaltungsbereich.</p>
+  <div class="page-head"><div><h1>Money Butler</h1><p>Die aktuelle Money-Butler-App ist hier direkt eingebettet. Damit arbeiten PC-Manager und Kassenwart-PC immer mit derselben Version.</p></div><a class="standalone-link" href="../money-butler/index.html" target="_blank">Money Butler in eigenem Fenster öffnen</a></div>
+  <p id="managerCashTestHint" class="test-phase-note" hidden><strong>Ein gemeinsamer Stand:</strong> Gestern / Heute / Morgen, Übergabe vorbereiten, QR, Kurzcode, Datei, KC Communicator und Empfangsbestätigung kommen direkt aus der aktuellen Money-Butler-App.</p>
+
+  <article class="secure-card money-butler-integrated-card">
+    <div class="money-butler-integrated-head">
+      <div><h3>Money Butler – aktuelle Version</h3><p class="hint">Direkt im PC-Manager. Änderungen an der Money-Butler-App erscheinen hier automatisch ebenfalls.</p></div>
+      <span class="money-butler-integrated-badge">1 gemeinsame Version</span>
+    </div>
+    <iframe id="moneyButlerIntegrated" class="money-butler-integrated-frame" src="../money-butler/index.html" title="Money Butler – aktuelle Version im PC-Manager" loading="lazy"></iframe>
+  </article>
+
+  <details class="secure-card money-butler-fallback">
+    <summary>Manager-Notfallwerkzeug / bisherige Bargeldmaske</summary>
+    <p class="hint">Nur als Rückfallweg erhalten. Für die normale Vorbereitung bitte den oben eingebetteten Money Butler verwenden. Der Eingang Money Butler → PC-Manager → Kasse bleibt hier weiterhin verfügbar.</p>
   <div class="cashprep-layout">
     <form class="secure-card cash-form">
       <section class="manager-cash-section" data-manager-cash-section="target" data-default-open="true">
@@ -512,6 +524,7 @@
       </div>
     </article>
   </div>
+  </details>
 
   <!-- Statistik ueber die Zeit: welche Stueckelung wurde tatsaechlich gebraucht.
        Gleiches Modul wie in der eigenstaendigen Money-Butler-App, damit beide Stellen
