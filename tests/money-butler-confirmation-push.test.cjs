@@ -33,7 +33,7 @@ ok(notifier.includes("b.confirmationRequested!==true"),'Push must only run when 
 ok(notifier.includes("cash-confirmed-"),'Push correlation id missing');
 ok(notifier.includes('SENT_KEY'),'Push duplicate protection missing');
 ok(notifier.includes('setInterval(pruefe,POLL_MS)'),'Confirmation retry polling missing');
-ok(posSw.includes('kc-bildrechner-2026-09-20-montag-rc26'),'Live POS cache not bumped');
+ok(posSw.includes('kc-bildrechner-2026-09-20-montag-rc28'),'Live POS cache not bumped');
 ok(posSw.includes('./kc-finance-transfer-kasse.js?build=1.0.0'),'Live Finance Bridge not precached');
 ok(trSw.includes('kc-schulung-2026-09-20-montag-rc28'),'Training cache not bumped');
 
