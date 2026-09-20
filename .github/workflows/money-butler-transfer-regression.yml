@@ -42,3 +42,5 @@ jobs:
         run: node tests/money-butler-finance-spaeter.test.cjs
       - name: Confirmation push retry and dedup
         run: node tests/money-butler-push-dedup.test.cjs
+      - name: PC Manager Money Butler integration
+        run: node tests/money-butler-manager-integration.test.cjs
