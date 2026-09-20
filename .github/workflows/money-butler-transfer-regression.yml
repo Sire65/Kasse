@@ -53,5 +53,10 @@ jobs:
           node --check shared/kc-cash-measure-settings.js
           node --check shared/kc-closing-count-ui.js
           node --check pc-manager/kc-money-butler-cloud-intake.js
+          node --check pc-manager/kc-cash-measure-central-sync.js
+          node --check shared/kc-cash-measure-settings.js
+          node --check shared/kc-closing-count-ui.js
+          node --check pos/kc-sync-master-data.js
+          node --check schulung/pos/kc-sync-master-data.js
           node --check markt-kasse-suite/backend-source/manager-companion/index.js
           node --check markt-kasse-suite/backend-source/manager-companion/db.js
