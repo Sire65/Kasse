@@ -1538,30 +1538,54 @@ function validateClosingPayload(prefix,payload){
   if(prefix==="KCOUNT1:"&&(!payload.countId&&!payload.transferId))throw new Error("Ungültige Abendzählung.");
   if(!Number.isFinite(Number(prefix==="KCLOSE1:"?payload.expectedCash:payload.total)))throw new Error("Ungültiger Betrag.");
 }
+function closingBusinessDate(item){
+  return String(item?.businessDate||item?.effectiveDate||item?.periodEnd||item?.createdAt||item?.time||"").slice(0,10);
+}
+function ingestClosingPayload(payload,source="automatic"){
+  if(!payload||payload.format!=="KC_CASH_CLOSING"||!payload.closingId||!payload.registerId)throw new Error("Ungültiger Kassenabschluss.");
+  if(!Number.isFinite(Number(payload.expectedCash)))throw new Error("Ungültiger Sollbestand.");
+  const vorhanden=closings.find(x=>x.closingId===payload.closingId);
+  if(vorhanden)return vorhanden;
+  const closingRecord={...payload,source,importedAt:new Date().toISOString()};
+  closings.push(closingRecord);queueSync("closing","upsert",closingRecord);saveAll();renderClosings();
+  setTimeout(()=>window.KCTagesabschlussZentrale?.sync?.(),0);
+  return closingRecord;
+}
+function ingestCashCountPayload(payload,source="automatic"){
+  const id=payload?.countId||payload?.transferId;
+  if(!payload||!id||!payload.registerId||!Number.isFinite(Number(payload.total)))throw new Error("Ungültige Abendzählung.");
+  const vorhanden=cashCounts.find(x=>(x.countId||x.transferId)===id);
+  if(vorhanden)return vorhanden;
+  const countRecord={...payload,source,importedAt:new Date().toISOString()};
+  cashCounts.push(countRecord);queueSync("cash-count","upsert",countRecord);saveAll();renderClosings();
+  setTimeout(()=>window.KCTagesabschlussZentrale?.sync?.(),0);
+  return countRecord;
+}
 function processClosingCode(text,source="manual"){
   const {prefix,payload}=decodePrefixedCode(text);
   validateClosingPayload(prefix,payload);
   if(prefix==="KCLOSE1:"){
     if(closings.some(x=>x.closingId===payload.closingId))throw new Error("Dieser Kassenabschluss wurde bereits eingelesen.");
-    const closingRecord={...payload,source,importedAt:new Date().toISOString()};closings.push(closingRecord);queueSync("closing","upsert",closingRecord);
+    ingestClosingPayload(payload,source);
   }else if(prefix==="KCOUNT1:"){
     const id=payload.countId||payload.transferId;
     if(cashCounts.some(x=>(x.countId||x.transferId)===id))throw new Error("Diese Abendzählung wurde bereits eingelesen.");
-    const countRecord={...payload,source,importedAt:new Date().toISOString()};cashCounts.push(countRecord);queueSync("cash-count","upsert",countRecord);
+    ingestCashCountPayload(payload,source);
   }else{
     throw new Error("Für den Kassenabschluss wird KCLOSE1 oder KCOUNT1 benötigt.");
   }
-  saveAll();renderClosings();
 }
 function closingRows(){
   return closings.map(c=>{
-    const candidates=cashCounts.filter(x=>x.registerId===c.registerId);
-    const count=candidates.sort((a,b)=>String(b.time).localeCompare(String(a.time)))[0]||null;
+    const tag=closingBusinessDate(c);
+    const candidates=cashCounts.filter(x=>x.registerId===c.registerId&&closingBusinessDate(x)===tag);
+    const count=candidates.sort((a,b)=>String(b.time||b.importedAt||"").localeCompare(String(a.time||a.importedAt||"")))[0]||null;
     const actual=count?Number(count.total||0):null;
     const diff=actual===null?null:+(actual-Number(c.expectedCash||0)).toFixed(2);
-    return {closing:c,count,actual,diff};
+    return {closing:c,count,actual,diff,businessDate:tag};
   });
 }
+window.KCClosingCore={ingestClosingPayload,ingestCashCountPayload,rows:closingRows,businessDate:closingBusinessDate};
 function renderClosings(){
   const rows=closingRows();
   el("closingBody").innerHTML=rows.map(r=>`<tr><td>${r.closing.registerName||r.closing.registerId}</td><td>${String(r.closing.createdAt).slice(0,10)}</td><td>${money(r.closing.expectedCash)}</td><td>${r.actual===null?"—":money(r.actual)}</td><td class="${r.diff===0?"diff-ok":"diff-warn"}">${r.diff===null?"—":money(r.diff)}</td><td>${Number(r.closing.staffTotal||0)?`${money(r.closing.staffTotal)} (${r.closing.staffCount||0})`:"—"}</td><td>${r.count?(r.diff===0?"Stimmt":"Differenz"):"Zählung fehlt"}</td></tr>`).join("");
