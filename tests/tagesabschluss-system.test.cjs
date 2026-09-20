@@ -55,6 +55,6 @@ for(const [name,src] of [['Live-POS',livePos],['Schulungs-POS',trainingPos]]){
 }
 ok(liveIndex.includes('app.js?build=0.31.3.6-r14'),'Live-POS App-Build nicht auf r14');
 ok(trainingIndex.includes('app.js?build=0.31.3.6-r14'),'Schulungs-POS App-Build nicht auf r14');
-ok(liveSw.includes('kc-bildrechner-2026-09-20-montag-rc31')&&liveSw.includes('./app.js?build=0.31.3.6-r14'),'Live Offline-Cache nicht auf rc31/r14');
-ok(trainingSw.includes('kc-schulung-2026-09-20-montag-rc33')&&trainingSw.includes('./app.js?build=0.31.3.6-r14'),'Schulung Offline-Cache nicht auf rc33/r14');
+ok(liveSw.includes('kc-bildrechner-2026-09-20-montag-rc32')&&liveSw.includes('./app.js?build=0.31.3.6-r14'),'Live Offline-Cache nicht auf rc31/r14');
+ok(trainingSw.includes('kc-schulung-2026-09-20-montag-rc34')&&trainingSw.includes('./app.js?build=0.31.3.6-r14'),'Schulung Offline-Cache nicht auf rc33/r14');
 console.log('Live- und Schulungs-POS Tagesabschluss/Offline-Rollout: OK');
