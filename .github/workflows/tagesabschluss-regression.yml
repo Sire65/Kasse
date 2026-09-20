@@ -28,17 +28,12 @@ jobs:
         with:
           path: Kasse
 
-      - name: KC Verwaltung auschecken
-        uses: actions/checkout@v4
-        with:
-          repository: Sire65/KC-Verwaltung
-          path: KC-Verwaltung
-
-      - name: KC Communication auschecken
-        uses: actions/checkout@v4
-        with:
-          repository: Sire65/KC-Communication
-          path: KC-Communication
+      - name: Externe Repos laden
+        run: |
+          mkdir -p KC-Verwaltung/js KC-Communication/supabase/functions/kc-finance-bridge
+          curl --fail --silent --show-error --location https://raw.githubusercontent.com/Sire65/KC-Verwaltung/main/index.html -o KC-Verwaltung/index.html
+          curl --fail --silent --show-error --location https://raw.githubusercontent.com/Sire65/KC-Verwaltung/main/js/86_finance_closing_reports.js -o KC-Verwaltung/js/86_finance_closing_reports.js
+          curl --fail --silent --show-error --location https://raw.githubusercontent.com/Sire65/KC-Communication/main/supabase/functions/kc-finance-bridge/index.ts -o KC-Communication/supabase/functions/kc-finance-bridge/index.ts
 
       - uses: actions/setup-node@v4
         with:
