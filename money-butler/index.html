@@ -16,11 +16,18 @@
       <h1>KC Money Butler</h1>
       <p>Wechselgeld vorbereiten – einfach und sicher</p>
     </div>
-    <span>V0.24.0</span>
+    <div class="header-tools"><span>V0.25.0</span><button type="button" id="settingsBtn" class="settings-gear" title="Voreinstellungen und Testcenter" aria-label="Voreinstellungen öffnen">⚙</button></div>
   </header>
 
   <main>
     <p id="moneyToolTestHint" class="test-phase-note" hidden><strong>So ist es gedacht:</strong> Wechselgeld wird hier im Money Butler vorbereitet. Der PC-Manager ist ausschließlich für den geschützten Verwaltungsbereich da.</p>
+    <section class="entry-mode-card">
+      <div><strong>Eingabeart</strong><small>Für Abend-/Nachzählung und Ist-Erfassung</small></div>
+      <div class="entry-mode-switch" role="group" aria-label="Eingabeart wählen">
+        <button type="button" class="active" data-entry-mode="count">🔢 Zählen</button>
+        <button type="button" data-entry-mode="weigh">⚖ Wiegen</button>
+      </div>
+    </section>
     <section class="card setup money-section" data-money-section="target" data-default-open="true">
       <div class="collapse-heading">
         <h2>1. Ziel auswählen</h2>
@@ -213,6 +220,45 @@
     </section>
   </main>
 </div>
+
+<dialog id="settingsDialog" class="settings-dialog">
+  <form method="dialog" class="settings-card">
+    <div class="settings-head">
+      <div><span class="info-kicker">MONEY BUTLER</span><h2>Voreinstellungen & Testcenter</h2></div>
+      <button value="close" class="icon-close" aria-label="Schließen">×</button>
+    </div>
+    <div class="settings-tabs" role="tablist">
+      <button type="button" class="active" data-settings-tab="coins">Münzen</button>
+      <button type="button" data-settings-tab="rolls">Rollen</button>
+      <button type="button" data-settings-tab="notes">Scheine</button>
+      <button type="button" data-settings-tab="tests">Testcenter</button>
+    </div>
+    <section data-settings-panel="coins">
+      <p class="hint">Offizielle Stückgewichte der Euro-Umlaufmünzen. Diese Werte können bei Bedarf gepflegt werden.</p>
+      <div id="settingsCoins" class="settings-money-grid"></div>
+    </section>
+    <section data-settings-panel="rolls" hidden>
+      <p class="hint">Inhalt vollständiger Münzrollen. Angebrochene Rollen werden als lose Münzen behandelt.</p>
+      <div id="settingsRolls" class="settings-money-grid"></div>
+    </section>
+    <section data-settings-panel="notes" hidden>
+      <p class="hint">Für Banknoten ist standardmäßig kein offizielles Stückgewicht hinterlegt. Eigene, geprüfte Waagenwerte können hier optional gepflegt werden.</p>
+      <div id="settingsNotes" class="settings-money-grid"></div>
+    </section>
+    <section data-settings-panel="tests" hidden>
+      <p class="hint">Prüft die wichtigsten Datenwege vom Money-Butler-PC. Ein rotes Ergebnis verändert keine Daten.</p>
+      <div class="testcenter-actions">
+        <button type="button" id="runAllTests">Alle Prüfungen starten</button>
+      </div>
+      <div id="testcenterResults" class="testcenter-results"></div>
+    </section>
+    <div class="settings-actions">
+      <button type="button" id="resetCashSettings">Standard wiederherstellen</button>
+      <button type="button" id="saveCashSettings" class="primary">Speichern</button>
+      <button value="close">Schließen</button>
+    </div>
+  </form>
+</dialog>
 <script src="../pc-manager/vendor/qrcode-generator.js"></script>
 <!-- Ein QR-Zeichner fuer die ganze Suite: frueher hatte jedes Programm einen eigenen,
      und derselbe Rundungsfehler musste dreimal repariert werden. -->
@@ -220,6 +266,7 @@
 <script src="../shared/runtime-flags.js"></script>
 <script src="../shared/kc-bargeld-statistik.js"></script>
 <script src="../shared/kc-geldkassette.js"></script>
+<script src="../shared/kc-cash-measure-settings.js?build=1.0.0"></script>
 <script src="../shared/kc-uebergabeprotokoll.js"></script>
 <script src="../pc-manager/kc-communication-client.js"></script>
 <script src="app.js"></script>
