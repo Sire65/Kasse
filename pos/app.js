@@ -1037,7 +1037,8 @@ function zahlungsPfeilePflegen({due,isPayout,hasDue,sufficient}={}){
   if(kopf){
     let feld=kopf.querySelector(".kc-pfeilfeld");
     if(!feld){feld=document.createElement("span");feld.className="kc-pfeilfeld kc-pfeilfeld-klein";feld.setAttribute("aria-hidden","true");kopf.appendChild(feld)}
-    const richtung=isPayout||sufficient?"aus":hasDue?"ein":null;
+    const rueckgeld=!isPayout&&hasDue&&sufficient&&toCents(Math.max(0,state.given-Number(due||0)))>0;
+    const richtung=isPayout||rueckgeld?"aus":hasDue?"ein":null;
     const key=richtung||"ausblenden";
     if(feld.dataset.kcZahlungsfluss!==key){
       feld.dataset.kcZahlungsfluss=key;
