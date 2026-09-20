@@ -624,6 +624,31 @@ class ManagerCompanion {
         res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
         res.writeHead(204); res.end(); return;
       }
+      // Bestätigte Finance-Bridge-Geldübergaben für den lokalen PC-Manager.
+      // Nur bereits zuverlässig aus der Kassen-Outbox empfangene Ereignisse werden geliefert.
+      if (req.method === 'GET' && url.pathname === '/cash-transfer-confirmations') {
+        const addr = req.socket.remoteAddress || '';
+        const isLoopback = addr === '127.0.0.1' || addr === '::1' || addr === '::ffff:127.0.0.1';
+        if (req.headers.origin) res.setHeader('Access-Control-Allow-Origin', req.headers.origin);
+        if (!isLoopback) { res.writeHead(403, { 'Content-Type': 'application/json' }); res.end(JSON.stringify({ error: 'loopback_only' })); return; }
+        const seit = url.searchParams.get('since');
+        const zeilen = seit
+          ? this.db.prepare(`SELECT event_id, device_instance_id, payload, received_at FROM received_events WHERE type = 'cash_transfer_confirmed' AND received_at > ? ORDER BY received_at ASC`).all(seit)
+          : this.db.prepare(`SELECT event_id, device_instance_id, payload, received_at FROM received_events WHERE type = 'cash_transfer_confirmed' ORDER BY received_at ASC LIMIT 200`).all();
+        const bestaetigungen = [];
+        for (const z of zeilen) {
+          try { bestaetigungen.push({ eventId:z.event_id, deviceInstanceId:z.device_instance_id, receivedAt:z.received_at, ...JSON.parse(z.payload) }); }
+          catch (e) { /* einzelnen defekten Datensatz überspringen */ }
+        }
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ bestaetigungen, anzahl:bestaetigungen.length, abgefragtUm:new Date().toISOString() }));
+        return;
+      }
+      if (req.method === 'OPTIONS' && url.pathname === '/cash-transfer-confirmations') {
+        if (req.headers.origin) res.setHeader('Access-Control-Allow-Origin', req.headers.origin);
+        res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
+        res.writeHead(204); res.end(); return;
+      }
       // 10.09.2026 (Betreiber: "wenn die Daten schon da sind, können sie ja auch direkt
       // angezeigt werden, am besten auch ein Knopf um die Daten manuell zu holen"): Verkäufe
       // kommen über den zuverlässigen Sync-Kanal schon lange sicher hier an (received_events)
