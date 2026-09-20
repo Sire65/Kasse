@@ -37,8 +37,8 @@ ok(notifier.includes("b.confirmationRequested!==true"),'Push must only run when 
 ok(notifier.includes("cash-confirmed-"),'Push correlation id missing');
 ok(notifier.includes('SENT_KEY'),'Push duplicate protection missing');
 ok(notifier.includes('setInterval(pruefe,POLL_MS)'),'Confirmation retry polling missing');
-ok(posSw.includes('kc-bildrechner-2026-09-20-montag-rc31'),'Live POS cache not bumped');
+ok(posSw.includes('kc-bildrechner-2026-09-20-montag-rc32'),'Live POS cache not bumped');
 ok(posSw.includes('./kc-finance-transfer-kasse.js?build=1.0.1'),'Live Finance Bridge not precached');
-ok(trSw.includes('kc-schulung-2026-09-20-montag-rc33'),'Training cache not bumped');
+ok(trSw.includes('kc-schulung-2026-09-20-montag-rc34'),'Training cache not bumped');
 
 console.log('Money Butler confirmation + push route: 26/26 checks passed');
