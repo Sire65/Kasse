@@ -68,7 +68,8 @@
           actualCash:Number(payload.total),
           countedAt:payload.countedAt||payload.time,
           countKind:payload.countKind||'same-day',
-          payload:{...payload,attachmentId:uploaded.id,fileName:file.name}
+          attachmentIds:[uploaded.id],
+          payload
         });
         status.textContent=`${payload.countKind==='late'?'Nachzählung':'Abendzählung'} gesendet: ${Number(payload.total).toLocaleString('de-DE',{style:'currency',currency:'EUR'})} · Abschluss vom ${payload.effectiveDate} → PC-Manager. Es wird keine neue Geldbewegung erzeugt.`;
         return result;
