@@ -30,7 +30,7 @@
  */
 'use strict';
 (function () {
-  const VERSION = '0.6.0';
+  const VERSION = '0.6.1';
 
   /* Die Zahlenseite ist bei allen Vorlagen gleich aufgebaut - sie hängt nicht am Geschmack,
      sondern an der Rechenaufgabe: Rückgeld sehen, Geld auswählen, Betrag eintippen, Zahlart. */
@@ -44,8 +44,9 @@
     ['kc-zahlen-rueckgeld', 0, 0, 6, 2],
     ['kc-zahlen-scheine', 0, 2, 6, 4],
     ['kc-zahlen-block', 0, 6, 3, 4],
-    ['kc-zahlen-arten', 3, 6, 3, 2],
-    ['kn-bar', 3, 8, 3, 2],
+    /* kc-zahlen-arten enthält bereits den einzigen sichtbaren BAR+QR-Button.
+       Kein zweites kn-bar auf der Zahlenseite. */
+    ['kc-zahlen-arten', 3, 6, 3, 4],
     ['kn-stimmtso', 0, 10, 6, 1],
     ['kn-aufrunden', 0, 11, 6, 1],
   ];
@@ -53,10 +54,11 @@
     ['kc-zahlen-rueckgeld', 0, 0, 12, 2],
     ['kc-zahlen-scheine', 0, 2, 7, 4],
     ['kc-zahlen-block', 7, 2, 5, 3],
+    /* kc-zahlen-arten enthält bereits BAR+QR/Konto. Der separate kn-bar würde denselben
+       #payBtn ein zweites Mal modellieren und ist deshalb aus den Standardvorlagen entfernt. */
     ['kc-zahlen-arten', 7, 5, 5, 1],
-    ['kn-bar', 0, 6, 4, 2],
-    ['kn-stimmtso', 4, 6, 4, 2],
-    ['kn-aufrunden', 8, 6, 4, 2],
+    ['kn-stimmtso', 0, 6, 6, 2],
+    ['kn-aufrunden', 6, 6, 6, 2],
   ];
 
   const VORLAGEN = [
