@@ -5,6 +5,7 @@ on:
     branches: [ main ]
     paths:
       - 'pos/**'
+      - 'schulung/pos/**'
       - 'money-butler/**'
       - 'pc-manager/**'
       - 'tests/tagesabschluss-system.test.cjs'
@@ -13,6 +14,7 @@ on:
     branches: [ main ]
     paths:
       - 'pos/**'
+      - 'schulung/pos/**'
       - 'money-butler/**'
       - 'pc-manager/**'
       - 'tests/tagesabschluss-system.test.cjs'
