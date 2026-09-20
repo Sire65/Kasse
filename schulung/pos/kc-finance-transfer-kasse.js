@@ -91,7 +91,12 @@
       // ebenfalls als "an Kasse uebergeben" markiert werden kann - derselbe Meldeweg wie
       // Verkauf/Abschluss, kein neuer Kanal.
       await global.KCMeldeweg?.ueberCompanion?.('cash_transfer_confirmed', {
-        transferId, registerId, amount: eintrag.total, businessDate: eintrag.effectiveDate, confirmedAt: eintrag.importedAt,
+        transferId,
+        registerId,
+        amount: eintrag.total,
+        businessDate: eintrag.effectiveDate,
+        confirmedAt: eintrag.importedAt,
+        confirmationRequested: payload.confirmationRequested === true
       });
     }
     // ERST NACHDEM lokal gespeichert wurde (oder schon vorher gespeichert war, z.B. bei einem
