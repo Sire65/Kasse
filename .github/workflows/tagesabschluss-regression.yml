@@ -1,0 +1,73 @@
+name: Tagesabschluss Regression und TÜV
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'pos/**'
+      - 'money-butler/**'
+      - 'pc-manager/**'
+      - 'tests/tagesabschluss-system.test.cjs'
+      - '.github/workflows/tagesabschluss-regression.yml'
+  pull_request:
+    branches: [ main ]
+    paths:
+      - 'pos/**'
+      - 'money-butler/**'
+      - 'pc-manager/**'
+      - 'tests/tagesabschluss-system.test.cjs'
+      - '.github/workflows/tagesabschluss-regression.yml'
+  workflow_dispatch:
+
+jobs:
+  tagesabschluss-tuev:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Kasse auschecken
+        uses: actions/checkout@v4
+        with:
+          path: Kasse
+
+      - name: KC Verwaltung auschecken
+        uses: actions/checkout@v4
+        with:
+          repository: Sire65/KC-Verwaltung
+          path: KC-Verwaltung
+
+      - name: KC Communication auschecken
+        uses: actions/checkout@v4
+        with:
+          repository: Sire65/KC-Communication
+          path: KC-Communication
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Kasse und PC Manager Regression
+        working-directory: Kasse
+        run: node tests/tagesabschluss-system.test.cjs
+
+      - name: KC Verwaltung Integration
+        run: |
+          grep -q 'js/86_finance_closing_reports.js?v=1.0.0' KC-Verwaltung/index.html
+          grep -q "closing_report_list" KC-Verwaltung/js/86_finance_closing_reports.js
+          grep -q "closing_report_mark_imported" KC-Verwaltung/js/86_finance_closing_reports.js
+          grep -q "Gesamt Soll" KC-Verwaltung/js/86_finance_closing_reports.js
+          grep -q "Gesamt Ist" KC-Verwaltung/js/86_finance_closing_reports.js
+          grep -q "Differenz" KC-Verwaltung/js/86_finance_closing_reports.js
+
+      - name: Finance Bridge Integration
+        run: |
+          grep -q "action==='closing_report_upsert'" KC-Communication/supabase/functions/kc-finance-bridge/index.ts
+          grep -q "onConflict:'correlation_id'" KC-Communication/supabase/functions/kc-finance-bridge/index.ts
+          grep -q "closing_report_list" KC-Communication/supabase/functions/kc-finance-bridge/index.ts
+          grep -q "closing_report_mark_imported" KC-Communication/supabase/functions/kc-finance-bridge/index.ts
+          grep -q "adminRole(link)" KC-Communication/supabase/functions/kc-finance-bridge/index.ts
+
+      - name: TÜV Schutzregeln
+        run: |
+          grep -q "status:\"fertig\"" Kasse/pos/app.js
+          grep -q "kc_closings_gemeldet_v1" Kasse/pos/app.js
+          grep -q "closingBusinessDate(x)===tag" Kasse/pc-manager/app.js
+          ! grep -q "kc-finance-uebergaben.js?build=1.0.0" Kasse/pc-manager/index.html
