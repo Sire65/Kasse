@@ -1588,7 +1588,7 @@ function closingRows(){
 window.KCClosingCore={ingestClosingPayload,ingestCashCountPayload,rows:closingRows,businessDate:closingBusinessDate};
 function renderClosings(){
   const rows=closingRows();
-  el("closingBody").innerHTML=rows.map(r=>`<tr><td>${r.closing.registerName||r.closing.registerId}</td><td>${String(r.closing.createdAt).slice(0,10)}</td><td>${money(r.closing.expectedCash)}</td><td>${r.actual===null?"—":money(r.actual)}</td><td class="${r.diff===0?"diff-ok":"diff-warn"}">${r.diff===null?"—":money(r.diff)}</td><td>${Number(r.closing.staffTotal||0)?`${money(r.closing.staffTotal)} (${r.closing.staffCount||0})`:"—"}</td><td>${r.count?(r.diff===0?"Stimmt":"Differenz"):"Zählung fehlt"}</td></tr>`).join("");
+  el("closingBody").innerHTML=rows.map(r=>{const countStatus=!r.count?"Zählung fehlt":`${r.count.countKind==="late"?"Nachzählung · ":""}${r.diff===0?"Stimmt":"Differenz"}`;return `<tr><td>${r.closing.registerName||r.closing.registerId}</td><td>${r.businessDate||String(r.closing.createdAt).slice(0,10)}</td><td>${money(r.closing.expectedCash)}</td><td>${r.actual===null?"—":money(r.actual)}</td><td class="${r.diff===0?"diff-ok":"diff-warn"}">${r.diff===null?"—":money(r.diff)}</td><td>${Number(r.closing.staffTotal||0)?`${money(r.closing.staffTotal)} (${r.closing.staffCount||0})`:"—"}</td><td>${countStatus}</td></tr>`}).join("");
   el("closingPairs").innerHTML=rows.filter(r=>!r.count).map(r=>`<div class="closing-pair"><strong>${r.closing.registerName||r.closing.registerId}</strong><br>Soll ${money(r.closing.expectedCash)} · Zählcode fehlt</div>`).join("")||"<p>Keine offenen Abschlüsse.</p>";
   renderCashMovementsOverview();
 }
