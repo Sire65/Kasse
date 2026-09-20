@@ -1252,6 +1252,62 @@ el("sendCashDirect").onclick=()=>requireAuth(async()=>{
     el("sendCashDirectResult").textContent="Konnte nicht gesendet werden - ist der Kassen-Companion auf diesem Rechner gestartet und im selben WLAN wie die Kasse? Ersatzweise QR-Code oder Kurzcode verwenden.";
   }
 });
+function decodeIncomingCashShortCode(eingabe){
+  const bereinigt=String(eingabe||"").trim().replace(/\s+/g,"");
+  const teile=bereinigt.split("-");
+  if(teile.length!==4)throw new Error("Kurzcode-Format muss Vorgangsart-Kasse-Betrag-Prüfziffer sein.");
+  const [typZiffer,kasseZiffer,betragCent,pruefzifferEingegeben]=teile;
+  if(!/^[12]$/.test(typZiffer))throw new Error("Erste Ziffer muss 1 (Anfangsbestand) oder 2 (Nachfüllung) sein.");
+  if(!/^[1-9]$/.test(kasseZiffer))throw new Error("Zweite Ziffer muss Kassennummer 1–8 oder 9 für gemeinsam sein.");
+  if(!/^\d{6}$/.test(betragCent)||!/^\d$/.test(pruefzifferEingegeben))throw new Error("Betrag/Prüfziffer im Kurzcode sind ungültig.");
+  const ziffern=typZiffer+kasseZiffer+betragCent;
+  let quersumme=0;for(let i=0;i<ziffern.length;i++)quersumme+=Number(ziffern[i])*(i+2);
+  if(String(quersumme%10)!==pruefzifferEingegeben)throw new Error("Prüfziffer des Kurzcode stimmt nicht.");
+  const total=Number(betragCent)/100;
+  if(!(total>0))throw new Error("Kurzcode-Betrag muss größer als 0 sein.");
+  const payload={
+    format:"KC_CASH_TRANSFER",version:4,
+    transferId:`KURZCODE-${ziffern}-${localBusinessDate()}`,
+    time:new Date().toISOString(),effectiveDate:localBusinessDate(),
+    type:typZiffer==="1"?"opening":"topup",
+    breakdown:{[total]:1},looseBreakdown:{[total]:1},coinRolls:{},
+    looseTotal:total,rollTotal:0,total,
+    note:"Money Butler Kurzcode über PC-Manager"
+  };
+  if(kasseZiffer==="9"){payload.scope="shared";payload.registerIds=["KASSE-01","KASSE-02"];}
+  else payload.registerId="KASSE-0"+kasseZiffer;
+  payload.checksum=checksum(JSON.stringify(payload));
+  return payload;
+}
+async function uebernehmeIncomingCashPayload(payload,quelle){
+  const status=el("communicatorCashResult");
+  const ziele=await queueCashTransferPayload(payload);
+  status.textContent=payload.scope==="split"||payload.scope==="shared"
+    ?`${quelle}: ${money(payload.total)} → ${ziele.map(z=>z.kasse).join(" und ")}. Übergabe an die Kassen ist eingereiht.`
+    :`${quelle}: ${money(payload.total)} → ${payload.registerId}. Übergabe an die Kasse ist eingereiht.`;
+  return ziele;
+}
+el("acceptIncomingCashCode")?.addEventListener("click",async()=>{
+  const status=el("communicatorCashResult");
+  try{
+    status.textContent="QR-/KCASH1-Code wird geprüft …";
+    const payload=decodeCommunicatorCashFile(el("incomingCashCode").value);
+    await uebernehmeIncomingCashPayload(payload,"QR / KCASH1 übernommen");
+    el("incomingCashCode").value="";
+  }catch(err){status.textContent="Nicht übernommen: "+(err?.message||String(err));}
+});
+el("acceptIncomingCashShortCode")?.addEventListener("click",async()=>{
+  const status=el("communicatorCashResult");
+  try{
+    status.textContent="Kurzcode wird geprüft …";
+    const payload=decodeIncomingCashShortCode(el("incomingCashShortCode").value);
+    await uebernehmeIncomingCashPayload(payload,"Kurzcode übernommen");
+    el("incomingCashShortCode").value="";
+  }catch(err){status.textContent="Nicht übernommen: "+(err?.message||String(err));}
+});
+el("incomingCashCode")?.addEventListener("keydown",e=>{if(e.key==="Enter"){e.preventDefault();el("acceptIncomingCashCode")?.click();}});
+el("incomingCashShortCode")?.addEventListener("keydown",e=>{if(e.key==="Enter"){e.preventDefault();el("acceptIncomingCashShortCode")?.click();}});
+
 el("selectCommunicatorCashFile")?.addEventListener("click",()=>el("communicatorCashFile")?.click());
 el("communicatorCashFile")?.addEventListener("change",async e=>{
   const file=e.target.files?.[0];if(!file)return;
@@ -1259,10 +1315,7 @@ el("communicatorCashFile")?.addEventListener("change",async e=>{
   try{
     status.textContent="Communicator-Datei wird geprüft und an die Kasse(n) weitergegeben …";
     const payload=decodeCommunicatorCashFile(await file.text());
-    const ziele=await queueCashTransferPayload(payload);
-    status.textContent=payload.scope==="split"
-      ?`Vom KC Communicator übernommen: ${money(payload.total)} → ${ziele.map(z=>z.kasse).join(" und ")}. Übergabe an die Kassen ist eingereiht.`
-      :`Vom KC Communicator übernommen: ${money(payload.total)} → ${payload.registerId}. Übergabe an die Kasse ist eingereiht.`;
+    await uebernehmeIncomingCashPayload(payload,"Datei / KC Communicator übernommen");
   }catch(err){
     status.textContent="Nicht übernommen: "+(err?.message||String(err));
   }finally{e.target.value="";}
