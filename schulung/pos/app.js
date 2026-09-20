@@ -98,10 +98,10 @@ const DEFAULT_PRODUCTS=[
  // Zahlungsknopf unter MEHR, der noch nicht freigeschaltet ist.
  {id:"wertmarke",name:"Wertmarke",price:5.00,category:"Sonstiges",image:"assets/wertmarke.svg",color:"#7c3aed",info:{important:"Vorab verkaufte Wertmarke. Das Einl\u00f6sen erfolgt sp\u00e4ter \u00fcber die Bezahlfunktion Wertmarke."}},
  {id:"glasplus",name:"Glaspfand",price:2.00,category:"Pfand",image:"assets/pfand_aufschlag_version_3.png",manualDeposit:true},
- {id:"zangeplus",name:"Feuerzangenpfand",price:2.00,category:"Pfand",image:"assets/feuerzange_placeholder.svg",manualDeposit:true},
+ {id:"zangeplus",name:"Feuerzangenpfand",price:2.00,category:"Pfand",image:"assets/feuerzange_version_3.png",manualDeposit:true},
  {id:"glasminus",name:"Glasrückgabe",price:-2.00,category:"Pfand",image:"assets/pfandrueckgabe_version_3.png"},
- {id:"zangeminus",name:"Feuerzange Rückgabe",price:-2.00,category:"Pfand",image:"assets/feuerzange_placeholder.svg"},
- {id:"glaszangebundleminus",name:"Glas + Feuerzange Rückgabe",price:-4.00,category:"Pfand",image:"assets/pfand_bundle_placeholder.svg",color:"#9f1239",info:{shortDescription:"Komplettrückgabe von Pfandglas und Feuerzange"}},
+ {id:"zangeminus",name:"Feuerzange Rückgabe",price:-2.00,category:"Pfand",image:"assets/feuerzange_version_3.png"},
+ {id:"glaszangebundleminus",name:"Glas + Feuerzange Rückgabe",price:-4.00,category:"Pfand",image:"assets/pfand_glas_feuerzange_version_3.png",color:"#9f1239",info:{shortDescription:"Komplettrückgabe von Pfandglas und Feuerzange"}},
  {id:"becher",name:"Außer-Haus-Becher",price:1.00,category:"Speisen",sortOrder:8,image:"assets/becher_bv2.webp"}
 ];
 let PRODUCTS=JSON.parse(localStorage.getItem("kc_products_v050")||"null")||DEFAULT_PRODUCTS;
@@ -172,8 +172,8 @@ function rollenLesen(wert,rolle){
 }
 const REQUIRED_DEPOSIT_RETURNS=[
  {id:"glasminus",name:"Glasrückgabe",price:-2.00,category:"Pfand",image:"assets/pfandrueckgabe_version_3.png",color:"#9f1239"},
- {id:"zangeminus",name:"Feuerzange Rückgabe",price:-2.00,category:"Pfand",image:"assets/feuerzange_placeholder.svg",color:"#9f1239",info:{shortDescription:"Einzelrückgabe Feuerzange"}},
- {id:"glaszangebundleminus",name:"Glas + Feuerzange Rückgabe",price:-4.00,category:"Pfand",image:"assets/pfand_bundle_placeholder.svg",color:"#9f1239",info:{shortDescription:"Komplettrückgabe von Pfandglas und Feuerzange"}}
+ {id:"zangeminus",name:"Feuerzange Rückgabe",price:-2.00,category:"Pfand",image:"assets/feuerzange_version_3.png",color:"#9f1239",info:{shortDescription:"Einzelrückgabe Feuerzange"}},
+ {id:"glaszangebundleminus",name:"Glas + Feuerzange Rückgabe",price:-4.00,category:"Pfand",image:"assets/pfand_glas_feuerzange_version_3.png",color:"#9f1239",info:{shortDescription:"Komplettrückgabe von Pfandglas und Feuerzange"}}
 ];
 let depositReturnMigration=false;
 for(const required of REQUIRED_DEPOSIT_RETURNS){const existing=PRODUCTS.find(p=>p.id===required.id);if(!existing){PRODUCTS.push(required);depositReturnMigration=true}else if(required.id!=="glasminus"&&String(existing.image||"").includes("amaretto_auth")){existing.image=required.image;existing.info=required.info;depositReturnMigration=true}}
@@ -183,7 +183,7 @@ if(depositReturnMigration)localStorage.setItem("kc_products_v050",JSON.stringify
 // Ohne das behielte eine Kasse, die den Artikel schon im Speicher hat, das alte
 // Ersatzbild und den alten Preis - der Neustand waere nur auf einem frischen Geraet zu
 // sehen. Es werden ausschliesslich diese Felder gesetzt, sonst nichts.
-{const patches={zangeplus:{image:"assets/feuerzange_placeholder.svg"},mettwurst:{image:"assets/mettwurst_bv2.webp"},hering:{image:"assets/hering_kartoffeln_bv2.webp",price:4.50},knirpsecreme:{image:"assets/kartoffelcreme_bv2.webp",price:3.50},
+{const patches={zangeplus:{image:"assets/feuerzange_version_3.png"},zangeminus:{image:"assets/feuerzange_version_3.png"},glaszangebundleminus:{image:"assets/pfand_glas_feuerzange_version_3.png"},mettwurst:{image:"assets/mettwurst_bv2.webp"},hering:{image:"assets/hering_kartoffeln_bv2.webp",price:4.50},knirpsecreme:{image:"assets/kartoffelcreme_bv2.webp",price:3.50},
 // 03.09.2026, vom Betreiber bestaetigt: Bei diesen vier Getraenken stand der Preis MIT Pfand
 // als Artikelpreis. Weil die Kasse das Pfand automatisch draufrechnet, wurde es zweimal
 // berechnet - der Gast zahlte 2,00 EUR zu viel je Glas. Hier stehen jetzt die Getraenkepreise
