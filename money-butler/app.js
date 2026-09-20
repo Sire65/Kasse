@@ -95,6 +95,21 @@ el("denoms").innerHTML=DENOMS.map(v=>{
   </svg></span>`;
   return `<label class="denom" data-muenze="${v}">${symbol}<strong>${label}</strong><input type="number" min="0" step="1" value="0" data-value="${v}"></label>`;
 }).join("");
+function weighRows(items,target){
+  return items.map(item=>{
+    const wert=Number(item.value),gewicht=Number(item.grams)||0,has=gewicht>0;
+    const label=target==="roll"?`${denomLabel(wert)} Rolle`:denomLabel(wert);
+    const amountFactor=target==="roll"?(Number(item.coins)||0)*wert:wert;
+    return `<div class="coin-weigh-row" data-weigh-row="${target}-${wert}">
+      <strong>${label}</strong>
+      <span>${has?`${gewicht.toFixed(2).replace(".",",")} g/${target==="roll"?"Rolle":"Stück"}`:"kein Gewicht gepflegt"}</span>
+      <label><input type="number" min="0" step="0.01" inputmode="decimal" data-weigh-target="${target}" data-weigh-value="${wert}" data-weigh-unit="${gewicht}" data-weigh-factor="${amountFactor}" ${has?"":"disabled"} placeholder="0,00"><small>g netto</small></label>
+      <span data-weigh-result="${target}-${wert}">—</span>
+      <b data-weigh-amount="${target}-${wert}">—</b>
+      <button type="button" data-weigh-apply="${target}-${wert}" disabled>Übernehmen</button>
+    </div>`;
+  }).join("");
+}
 function renderCashMeasureInputs(){
   el("coinRolls").innerHTML=COIN_ROLLS.map(r=>`<label class="coin-roll-row" data-rolle="${r.value}">
     <span class="roll-icon" aria-hidden="true"><svg viewBox="0 0 40 68" width="34" height="58"><rect x="3" y="10" width="34" height="52" rx="7" class="roll-body"/><rect x="3" y="10" width="34" height="11" rx="6" class="roll-cap"/><text x="20" y="42" class="roll-text">${denomLabel(r.value)}</text></svg></span>
@@ -104,39 +119,31 @@ function renderCashMeasureInputs(){
     <span>${money(r.value*r.coins)}</span>
     <b data-roll-total="${r.value}">${money(0)}</b>
   </label>`).join("");
-
-  el("coinWeighing").innerHTML=Object.entries(COIN_WEIGHTS_G).sort((a,b)=>Number(b[0])-Number(a[0])).map(([wertText,gewicht])=>{
-    const wert=Number(wertText);
-    return `<div class="coin-weigh-row" data-weigh-row="${wert}">
-      <strong>${denomLabel(wert)}</strong>
-      <span>${Number(gewicht).toFixed(2).replace(".",",")} g/Stück</span>
-      <label><input type="number" min="0" step="0.01" inputmode="decimal" data-weigh-grams="${wert}" placeholder="0,00"><small>g netto</small></label>
-      <span data-weigh-result="${wert}">—</span>
-      <b data-weigh-amount="${wert}">—</b>
-      <button type="button" data-weigh-apply="${wert}" disabled>Übernehmen</button>
-    </div>`;
-  }).join("");
+  el("coinWeighing").innerHTML=weighRows(cashMeasureSettings.coins,"coin");
+  el("noteWeighing").innerHTML=weighRows(cashMeasureSettings.notes,"note");
+  el("rollWeighing").innerHTML=weighRows(cashMeasureSettings.rolls,"roll");
   bindMeasureInputs();
 }
 function updateWeighRow(input){
-  const wert=Number(input.dataset.weighGrams),gewicht=Number(COIN_WEIGHTS_G[wert]),gramm=Number(String(input.value||"").replace(",","."));
-  const result=el("coinWeighing").querySelector(`[data-weigh-result="${wert}"]`);
-  const amount=el("coinWeighing").querySelector(`[data-weigh-amount="${wert}"]`);
-  const apply=el("coinWeighing").querySelector(`[data-weigh-apply="${wert}"]`);
-  if(!Number.isFinite(gramm)||gramm<=0||!gewicht){result.textContent="—";amount.textContent="—";apply.disabled=true;apply.dataset.pieces="";return;}
-  const roh=gramm/gewicht,stueck=Math.max(0,Math.round(roh)),soll=stueck*gewicht,abweichung=gramm-soll;
-  result.textContent=`≈ ${stueck} Stück · Rest ${abweichung>=0?"+":""}${abweichung.toFixed(2).replace(".",",")} g`;
-  amount.textContent=money(stueck*wert);
-  apply.disabled=stueck<=0;apply.dataset.pieces=String(stueck);
+  const target=input.dataset.weighTarget,wert=Number(input.dataset.weighValue),gewicht=Number(input.dataset.weighUnit),factor=Number(input.dataset.weighFactor),gramm=Number(String(input.value||"").replace(",","."));
+  const key=`${target}-${wert}`,result=document.querySelector(`[data-weigh-result="${key}"]`),amount=document.querySelector(`[data-weigh-amount="${key}"]`),apply=document.querySelector(`[data-weigh-apply="${key}"]`);
+  if(!Number.isFinite(gramm)||gramm<=0||!gewicht){result.textContent="—";amount.textContent="—";apply.disabled=true;apply.dataset.units="";return;}
+  const roh=gramm/gewicht,units=Math.max(0,Math.round(roh)),soll=units*gewicht,abweichung=gramm-soll;
+  result.textContent=`≈ ${units} ${target==="roll"?"Rollen":"Stück"} · Rest ${abweichung>=0?"+":""}${abweichung.toFixed(2).replace(".",",")} g`;
+  amount.textContent=money(units*factor);
+  apply.disabled=units<=0;apply.dataset.units=String(units);apply.dataset.target=target;apply.dataset.value=String(wert);
 }
 function bindMeasureInputs(){
   document.querySelectorAll("[data-roll-value]").forEach(n=>n.oninput=()=>{updateTotal();zeichneAufteilung();clearTransferOutput()});
-  el("coinWeighing").querySelectorAll("[data-weigh-grams]").forEach(input=>input.addEventListener("input",()=>updateWeighRow(input)));
-  el("coinWeighing").querySelectorAll("[data-weigh-apply]").forEach(button=>button.addEventListener("click",()=>{
-    const wert=Number(button.dataset.weighApply),stueck=Number(button.dataset.pieces||0);
-    const ziel=[...document.querySelectorAll("[data-value]")].find(n=>Number(n.dataset.value)===wert);
-    if(!ziel||!stueck)return;
-    ziel.value=String(stueck);
+  document.querySelectorAll("[data-weigh-target]").forEach(input=>input.addEventListener("input",()=>updateWeighRow(input)));
+  document.querySelectorAll("[data-weigh-apply]").forEach(button=>button.addEventListener("click",()=>{
+    const wert=Number(button.dataset.value),units=Number(button.dataset.units||0),target=button.dataset.target;
+    if(!units)return;
+    const ziel=target==="roll"
+      ?[...document.querySelectorAll("[data-roll-value]")].find(n=>Number(n.dataset.rollValue)===wert)
+      :[...document.querySelectorAll("[data-value]")].find(n=>Number(n.dataset.value)===wert);
+    if(!ziel)return;
+    ziel.value=String(units);
     ziel.dispatchEvent(new Event("input",{bubbles:true}));
     button.textContent="Übernommen";
     setTimeout(()=>button.textContent="Übernehmen",900);
