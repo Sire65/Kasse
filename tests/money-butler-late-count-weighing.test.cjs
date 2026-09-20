@@ -13,7 +13,9 @@ const expected=['value:2,grams:8.50','value:1,grams:7.50','value:.5,grams:7.80',
 const settingsSource=read('shared/kc-cash-measure-settings.js');
 for(const marker of expected) ok(settingsSource.includes(marker),'Offizielles Münzgewicht fehlt: '+marker);
 ok(html.includes('Münzen sortenrein wiegen'),'Wägeoberfläche fehlt');
-ok(html.includes('Nur lose Euro-Münzen.'),'Wäge-Sicherheitsregel fehlt');
+ok(html.includes('Sortenrein wiegen.'),'Wäge-Hinweis fehlt');
+ok(html.includes('id="noteWeighing"'),'Scheine fehlen in der Wägeoberfläche');
+ok(html.includes('id="rollWeighing"'),'Rollen fehlen in der Wägeoberfläche');
 ok(app.includes('Tagesabschluss vom *'),'Nachzählung ist nicht auf den Abschluss-Tag bezogen');
 ok(app.includes('countKind:currentType==="count"?(istNachzaehlung?"late":"same-day")'),'Nachzählungskennzeichen fehlt');
 ok(app.includes('countedAt:currentType==="count"?countedAt:undefined'),'Tatsächlicher Zählzeitpunkt fehlt');
@@ -56,6 +58,9 @@ for(const idx of [posIndex,trainingIndex]){
 }
 ok(closingUi.includes("format:'KC_CASH_COUNT'"),'Separate Ist-Zählung aus Kassenabschluss fehlt');
 ok(closingUi.includes("measurements:data.measurements"),'Rohmesswerte werden nicht übertragen');
+ok(closingUi.includes("measureSettingsSnapshot:settings()"),'Messparameter-Snapshot fehlt');
 ok(companionDb.includes("cash_count_json"),'Companion speichert Ist-Zählung nicht getrennt');
 ok(companion.includes("cashCount:"),'Companion liefert Ist-Zählung nicht an PC Manager');
 ok(closingMgr.includes("ingestCashCountPayload?.(abschluss.cashCount"),'PC Manager übernimmt Kassen-Ist-Zählung nicht automatisch');
+
+console.log('Money Butler Zahnrad/Testcenter + Kassen-Tagesabschluss Zählen/Wiegen + Companion: OK');
