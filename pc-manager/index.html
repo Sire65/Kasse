@@ -893,7 +893,13 @@
 </section>
 
 <section class="view" data-view-panel="closing">
-  <div class="page-head"><div><h1>Kassenabschluss</h1><p>Abschlusscode der Kasse und Zählcode des Kassenwarts zusammenführen.</p></div></div>
+  <div class="page-head"><div><h1>Kassenabschluss</h1><p>Kassen-Soll und Abendzählung werden automatisch nach Kasse und Geschäftstag zusammengeführt und anschließend zentral für KC Verwaltung bereitgestellt.</p></div></div>
+  <article class="secure-card">
+    <div class="report-actions">
+      <button type="button" id="closingCentralSync" class="secondary">Zentrale Übergabe prüfen</button>
+    </div>
+    <p id="closingCentralStatus" class="tc-status">Vollständige Soll/Ist-Abschlüsse werden automatisch zentral synchronisiert.</p>
+  </article>
 
   <!-- Von den Kassen selbst gemeldete Abschluesse. Erspart das Einsammeln von QR-Codes am
        Stand und funktioniert auch ueber die Fernstrecke. Siehe kc-abschluesse-manager.js. -->
@@ -1185,6 +1191,9 @@
 <script src="../cores/sales-inventory-analysis-core/sales-inventory-analysis-core.js"></script><script src="manager-sales-inventory-dashboard.js"></script><script src="manager-event-simulation-adapter.js"></script>
 
 <script src="kc-communication-client.js?build=0.2.0"></script>
+<script src="kc-finance-bridge.js?build=1.1.0"></script>
+<script src="kc-finance-uebergaben.js?build=1.0.0"></script>
+<script src="kc-tagesabschluss-zentrale.js?build=1.0.0"></script>
 <script src="kc-cash-confirmation-notifier.js?build=1.0.0"></script>
 <script src="kc-money-butler-cloud-intake.js?build=1.0.0"></script>
 <script src="kc-live-monitor.js"></script>
