@@ -9,7 +9,7 @@ const bridge=read('money-butler/kc-communicator-bridge.js');
 const intake=read('pc-manager/kc-money-butler-cloud-intake.js');
 const manager=read('pc-manager/app.js');
 
-const expected=['2:8.50','1:7.50','.5:7.80','.2:5.74','.1:4.10','.05:3.92','.02:3.06','.01:2.30'];
+const expected=['value:2,grams:8.50','value:1,grams:7.50','value:.5,grams:7.80','value:.2,grams:5.74','value:.1,grams:4.10','value:.05,grams:3.92','value:.02,grams:3.06','value:.01,grams:2.30'];
 const settingsSource=read('shared/kc-cash-measure-settings.js');
 for(const marker of expected) ok(settingsSource.includes(marker),'Offizielles Münzgewicht fehlt: '+marker);
 ok(html.includes('Münzen sortenrein wiegen'),'Wägeoberfläche fehlt');
