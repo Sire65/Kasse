@@ -81,9 +81,14 @@
         <div class="section-heading-actions"><span class="weigh-badge">Waage</span><button type="button" class="section-lock" aria-expanded="false" aria-controls="money-weighing-body" title="Bereich ausklappen"><span class="lock-icon" aria-hidden="true">🔒</span><span class="lock-label">Ausklappen</span></button></div>
       </div>
       <div class="money-section-body" id="money-weighing-body" hidden>
-        <p class="weigh-note"><strong>Nur lose Euro-Münzen.</strong> Banknoten und Münzrollen bitte weiterhin zählen; dafür wird hier kein angenommener Gewichtswert verwendet.</p>
-        <div class="weigh-table-head" aria-hidden="true"><span>Münze</span><span>Offiziell</span><span>Nettogewicht</span><span>Ergebnis</span><span>Betrag</span><span></span></div>
+        <p class="weigh-note"><strong>Sortenrein wiegen.</strong> Münzen nutzen die gepflegten offiziellen Standardgewichte. Scheine und Rollen werden nur berechnet, wenn im Zahnrad ein eigener geprüfter Gewichtswert hinterlegt ist.</p>
+        <h3>Münzen</h3>
+        <div class="weigh-table-head" aria-hidden="true"><span>Sorte</span><span>Gewicht</span><span>Nettogewicht</span><span>Ergebnis</span><span>Betrag</span><span></span></div>
         <div id="coinWeighing" class="coin-weighing"></div>
+        <h3>Scheine</h3>
+        <div id="noteWeighing" class="coin-weighing"></div>
+        <h3>Rollen</h3>
+        <div id="rollWeighing" class="coin-weighing"></div>
       </div>
     </section>
 
