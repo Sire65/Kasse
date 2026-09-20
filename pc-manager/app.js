@@ -30,9 +30,10 @@ const DEFAULT_ARTICLES=[
 // Wertmarke: der VERKAUF laeuft als normaler Artikel ueber die Kasse. Das Einloesen ist
 // etwas anderes und haengt am noch nicht freigeschalteten Zahlungsknopf unter MEHR.
 {id:"wertmarke",name:"Wertmarke",category:"Sonstiges",price:5,receiptText:"Wertmarke",color:"#7c3aed",active:true,quantity:1,unit:"Stück",taxRate:0},
+{id:"zangeplus",name:"Feuerzangenpfand",category:"Pfand",price:2,receiptText:"Feuerzangenpfand",image:"assets/feuerzange_version_3.png",color:"#29689a",active:true,quantity:1,unit:"Stück",taxRate:0,manualDeposit:true,info:{}},
 {id:"glasminus",name:"Glasrückgabe",category:"Pfand",price:-2,receiptText:"Glasrückgabe",image:"assets/pfandrueckgabe_version_3.png",color:"#9f1239",active:true,quantity:1,unit:"Stück",taxRate:0},
-{id:"zangeminus",name:"Feuerzange Rückgabe",category:"Pfand",price:-2,receiptText:"Feuerzange Rückgabe",image:"assets/feuerzange_placeholder.svg",color:"#9f1239",active:true,quantity:1,unit:"Stück",taxRate:0,info:{}},
-{id:"glaszangebundleminus",name:"Glas + Feuerzange Rückgabe",category:"Pfand",price:-4,receiptText:"Komplettrückgabe Glas + Feuerzange",image:"assets/pfand_bundle_placeholder.svg",color:"#9f1239",active:true,quantity:1,unit:"Bundle",taxRate:0,info:{}}
+{id:"zangeminus",name:"Feuerzange Rückgabe",category:"Pfand",price:-2,receiptText:"Feuerzange Rückgabe",image:"assets/feuerzange_version_3.png",color:"#9f1239",active:true,quantity:1,unit:"Stück",taxRate:0,info:{}},
+{id:"glaszangebundleminus",name:"Glas + Feuerzange Rückgabe",category:"Pfand",price:-4,receiptText:"Komplettrückgabe Glas + Feuerzange",image:"assets/pfand_glas_feuerzange_version_3.png",color:"#9f1239",active:true,quantity:1,unit:"Bundle",taxRate:0,info:{}}
 ];
 let groups=JSON.parse(localStorage.getItem("kcm_groups")||"null")||DEFAULT_GROUPS;
 let articles=JSON.parse(localStorage.getItem("kcm_articles")||"null")||DEFAULT_ARTICLES;
