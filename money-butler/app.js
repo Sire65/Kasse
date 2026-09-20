@@ -170,9 +170,9 @@ function renderSettings(){
     <span class="settings-extra">offizieller Standard</span>
   </div>`).join("");
   el("settingsRolls").innerHTML=s.rolls.map(x=>`<div class="settings-money-row">
-    <div></div><strong>${denomLabel(Number(x.value))}</strong>
+    <div class="closing-roll-symbol">▰</div><strong>${denomLabel(Number(x.value))}</strong>
     <label>Münzen/Rolle<input type="number" min="1" step="1" data-setting-roll="${x.value}" value="${x.coins}"></label>
-    <span class="settings-extra">${money(Number(x.value)*Number(x.coins))}</span>
+    <label class="settings-extra">Rollengewicht g<input type="number" min="0" step=".01" data-setting-roll-grams="${x.value}" value="${x.grams??""}" placeholder="optional"></label>
   </div>`).join("");
   el("settingsNotes").innerHTML=s.notes.map(x=>`<div class="settings-money-row">
     <img src="${settingsImagePath(x,"note")}" alt="">
@@ -185,6 +185,7 @@ function collectSettings(){
   const s=CASH_MEASURE.read();
   document.querySelectorAll("[data-setting-coin]").forEach(n=>{const x=s.coins.find(v=>Number(v.value)===Number(n.dataset.settingCoin));if(x)x.grams=Math.max(.01,Number(n.value)||0)});
   document.querySelectorAll("[data-setting-roll]").forEach(n=>{const x=s.rolls.find(v=>Number(v.value)===Number(n.dataset.settingRoll));if(x)x.coins=Math.max(1,Math.round(Number(n.value)||1))});
+  document.querySelectorAll("[data-setting-roll-grams]").forEach(n=>{const x=s.rolls.find(v=>Number(v.value)===Number(n.dataset.settingRollGrams));if(x)x.grams=n.value===""?null:Math.max(.01,Number(n.value)||0)});
   document.querySelectorAll("[data-setting-note]").forEach(n=>{const x=s.notes.find(v=>Number(v.value)===Number(n.dataset.settingNote));if(x)x.grams=n.value===""?null:Math.max(.01,Number(n.value)||0)});
   return s;
 }
