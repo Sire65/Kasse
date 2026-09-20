@@ -183,7 +183,7 @@ if(depositReturnMigration)localStorage.setItem("kc_products_v050",JSON.stringify
 // Ohne das behielte eine Kasse, die den Artikel schon im Speicher hat, das alte
 // Ersatzbild und den alten Preis - der Neustand waere nur auf einem frischen Geraet zu
 // sehen. Es werden ausschliesslich diese Felder gesetzt, sonst nichts.
-{const patches={mettwurst:{image:"assets/mettwurst_bv2.webp"},hering:{image:"assets/hering_kartoffeln_bv2.webp",price:4.50},knirpsecreme:{image:"assets/kartoffelcreme_bv2.webp",price:3.50},
+{const patches={zangeplus:{image:"assets/feuerzange_placeholder.svg"},mettwurst:{image:"assets/mettwurst_bv2.webp"},hering:{image:"assets/hering_kartoffeln_bv2.webp",price:4.50},knirpsecreme:{image:"assets/kartoffelcreme_bv2.webp",price:3.50},
 // 03.09.2026, vom Betreiber bestaetigt: Bei diesen vier Getraenken stand der Preis MIT Pfand
 // als Artikelpreis. Weil die Kasse das Pfand automatisch draufrechnet, wurde es zweimal
 // berechnet - der Gast zahlte 2,00 EUR zu viel je Glas. Hier stehen jetzt die Getraenkepreise
