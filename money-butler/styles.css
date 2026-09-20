@@ -101,3 +101,8 @@ body.nur-protokoll .app>header,body.nur-protokoll main>section:not(.protokoll-bl
 @media(max-width:700px){.protokoll-kopf{flex-direction:column}.protokoll-qr{align-self:flex-start}}
 /* Auf Papier muss der Beleg-QR gross genug sein, um ihn wirklich abscannen zu koennen. */
 @media print{.protokoll-qr canvas{width:46mm;height:46mm}}
+
+.date-quick-row{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-top:8px}
+.date-quick{min-height:40px;padding:8px 10px;border-radius:9px;border:1px solid #b8c4d1;background:#f8fafc;font:inherit;font-weight:700;cursor:pointer}
+.date-quick.active{outline:3px solid rgba(37,99,235,.18);border-color:#2563eb}
+@media(max-width:520px){.date-quick-row{gap:6px}.date-quick{padding:7px 6px;font-size:.92rem}}
