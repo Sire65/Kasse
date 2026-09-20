@@ -9,7 +9,7 @@
 'use strict';
 const { DatabaseSync } = require('node:sqlite');
 
-const SCHEMA_VERSION = 24;
+const SCHEMA_VERSION = 25;
 
 function hasColumn(db, table, column) {
   return db.prepare(`PRAGMA table_info(${table})`).all().some((c) => c.name === column);
@@ -574,6 +574,13 @@ MIGRATIONS.push((db) => {
   if (!hasColumn(db, 'master_data', 'accounts_json')) {
     db.exec("ALTER TABLE master_data ADD COLUMN accounts_json TEXT NOT NULL DEFAULT '[]'");
   }
+});
+
+
+// Version 25 (20.09.2026): optionale Ist-Erfassung direkt beim Tagesabschluss.
+// Die Zählung bleibt fachlich getrennt vom Soll-Abschluss und reist nur als eigener JSON-Block mit.
+MIGRATIONS.push((db) => {
+  if (!hasColumn(db, 'closings', 'cash_count_json')) db.exec('ALTER TABLE closings ADD COLUMN cash_count_json TEXT');
 });
 
 module.exports = { openManagerDb, SCHEMA_VERSION };
