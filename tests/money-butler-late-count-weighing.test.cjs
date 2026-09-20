@@ -75,3 +75,7 @@ ok(centralSync.includes("master-data/push"),'PC Manager verteilt Gewichtseinstel
 ok(liveMaster.includes("kc_cash_measure_settings_v1"),'Live-Kasse übernimmt zentrale Gewichtseinstellungen nicht');
 ok(trainingMaster.includes("kc_cash_measure_settings_v1"),'Schulung übernimmt zentrale Gewichtseinstellungen nicht');
 console.log('Zentrale Gewichtseinstellungen MB -> Cloud -> PC Manager -> Kassen: OK');
+
+const managerApp=read('pc-manager/app.js');
+ok(managerApp.includes("KCCashMeasureCentralSync?.pull?.({publish:false})"),'PC Manager aktualisiert Gewichte vor Stammdaten-Push nicht');
+console.log('PC Manager Stammdaten-Push nutzt immer den aktuellen Zentralstand: OK');
