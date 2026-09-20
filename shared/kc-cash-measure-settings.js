@@ -14,8 +14,8 @@
       {value:.01,grams:2.30,image:'assets/muenze_0.01.webp'}
     ],
     rolls:[
-      {value:2,coins:25},{value:1,coins:25},{value:.5,coins:40},{value:.2,coins:40},
-      {value:.1,coins:40},{value:.05,coins:50},{value:.02,coins:50},{value:.01,coins:50}
+      {value:2,coins:25,grams:null},{value:1,coins:25,grams:null},{value:.5,coins:40,grams:null},{value:.2,coins:40,grams:null},
+      {value:.1,coins:40,grams:null},{value:.05,coins:50,grams:null},{value:.02,coins:50,grams:null},{value:.01,coins:50,grams:null}
     ],
     notes:[
       {value:100,grams:null,image:'assets/schein_100.jpg'},
