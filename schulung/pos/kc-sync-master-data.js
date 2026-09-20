@@ -53,6 +53,10 @@
             master[schluessel] = wert;
             geaendert = true;
           }
+          if (daten.settings.cashMeasureSettings && typeof daten.settings.cashMeasureSettings === 'object') {
+            localStorage.setItem('kc_cash_measure_settings_v1', JSON.stringify(daten.settings.cashMeasureSettings));
+            global.dispatchEvent(new CustomEvent('kc-cash-measure-settings-updated',{detail:daten.settings.cashMeasureSettings}));
+          }
           if (geaendert) {
             localStorage.setItem('kc_master_v040', JSON.stringify(master));
             // Die Kasse liest die Darstellung beim Start ein - damit die Änderung ohne
