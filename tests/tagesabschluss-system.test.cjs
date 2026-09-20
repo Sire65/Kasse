@@ -51,10 +51,10 @@ const trainingIndex=read('schulung/pos/index.html');
 const liveSw=read('pos/service-worker.js');
 const trainingSw=read('schulung/pos/service-worker.js');
 for(const [name,src] of [['Live-POS',livePos],['Schulungs-POS',trainingPos]]){
-  ok(src.includes('businessDate:localBusinessDate(),createdAt'), name+' Tagesabschluss enthält kein explizites Geschäftsdatum');
+  ok(src.includes('businessDate,createdAt'), name+' Tagesabschluss enthält kein explizites Geschäftsdatum');
 }
-ok(liveIndex.includes('app.js?build=0.31.3.6-r14'),'Live-POS App-Build nicht auf r13');
-ok(trainingIndex.includes('app.js?build=0.31.3.6-r14'),'Schulungs-POS App-Build nicht auf r13');
-ok(liveSw.includes('kc-bildrechner-2026-09-20-montag-rc31')&&liveSw.includes('./app.js?build=0.31.3.6-r14'),'Live Offline-Cache nicht auf rc30/r13');
-ok(trainingSw.includes('kc-schulung-2026-09-20-montag-rc33')&&trainingSw.includes('./app.js?build=0.31.3.6-r14'),'Schulung Offline-Cache nicht auf rc32/r13');
+ok(liveIndex.includes('app.js?build=0.31.3.6-r14'),'Live-POS App-Build nicht auf r14');
+ok(trainingIndex.includes('app.js?build=0.31.3.6-r14'),'Schulungs-POS App-Build nicht auf r14');
+ok(liveSw.includes('kc-bildrechner-2026-09-20-montag-rc31')&&liveSw.includes('./app.js?build=0.31.3.6-r14'),'Live Offline-Cache nicht auf rc31/r14');
+ok(trainingSw.includes('kc-schulung-2026-09-20-montag-rc33')&&trainingSw.includes('./app.js?build=0.31.3.6-r14'),'Schulung Offline-Cache nicht auf rc33/r14');
 console.log('Live- und Schulungs-POS Tagesabschluss/Offline-Rollout: OK');
