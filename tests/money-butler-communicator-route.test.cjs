@@ -10,7 +10,7 @@ const managerHtml=read('pc-manager/index.html');
 const managerApp=read('pc-manager/app.js');
 const defs=read('pc-manager/kc-communication-adapters.js');
 
-ok(mbHtml.includes('Über KC Communicator an PC-Manager'),'Money Butler Communicator button missing');
+ok(mbHtml.includes('data-handover-method="communicator"')&&mbHtml.includes('<span>KC Communicator</span>'),'Money Butler Communicator button missing');
 ok(mbHtml.includes('kc-communication-client.js'),'Money Butler communication client not loaded');
 ok(mbHtml.includes('kc-communicator-bridge.js'),'Money Butler bridge not loaded');
 ok(mbHtml.includes('V0.24.0'),'Money Butler version not current');
