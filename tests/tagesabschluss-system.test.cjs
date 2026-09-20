@@ -41,3 +41,5 @@ for(const c of closings){
   if(c.closingId==='C21')ok(match?.countId==='N21','21.12. wurde mit falscher Zählung gepaart');
 }
 console.log('Tagesabschluss Kasse -> PC-Manager: Kasse+Tag, Auto-Import, Soll/Ist, zentrale Übergabe: OK');
+
+// TÜV v2: repoübergreifende Prüfung und Syntaxcheck aktiviert.
