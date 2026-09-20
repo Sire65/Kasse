@@ -14,15 +14,21 @@
       {value:.01,grams:2.30,image:'assets/muenze_0.01.webp'}
     ],
     rolls:[
-      {value:2,coins:25,grams:null},{value:1,coins:25,grams:null},{value:.5,coins:40,grams:null},{value:.2,coins:40,grams:null},
-      {value:.1,coins:40,grams:null},{value:.05,coins:50,grams:null},{value:.02,coins:50,grams:null},{value:.01,coins:50,grams:null}
+      {value:2,coins:25,grams:null,referenceGrams:212.5,referenceBasis:'Münzinhalt ohne Rollenpapier'},
+      {value:1,coins:25,grams:null,referenceGrams:187.5,referenceBasis:'Münzinhalt ohne Rollenpapier'},
+      {value:.5,coins:40,grams:null,referenceGrams:312.0,referenceBasis:'Münzinhalt ohne Rollenpapier'},
+      {value:.2,coins:40,grams:null,referenceGrams:229.6,referenceBasis:'Münzinhalt ohne Rollenpapier'},
+      {value:.1,coins:40,grams:null,referenceGrams:164.0,referenceBasis:'Münzinhalt ohne Rollenpapier'},
+      {value:.05,coins:50,grams:null,referenceGrams:196.0,referenceBasis:'Münzinhalt ohne Rollenpapier'},
+      {value:.02,coins:50,grams:null,referenceGrams:153.0,referenceBasis:'Münzinhalt ohne Rollenpapier'},
+      {value:.01,coins:50,grams:null,referenceGrams:115.0,referenceBasis:'Münzinhalt ohne Rollenpapier'}
     ],
     notes:[
-      {value:100,grams:null,image:'assets/schein_100.jpg'},
-      {value:50,grams:null,image:'assets/schein_50.jpg'},
-      {value:20,grams:null,image:'assets/schein_20.jpg'},
-      {value:10,grams:null,image:'assets/schein_10.jpg'},
-      {value:5,grams:null,image:'assets/schein_5.jpg'}
+      {value:100,grams:null,referenceGrams:1.02,referenceBasis:'Banknoten-Referenz; Serie/Zustand kann abweichen',image:'assets/schein_100.jpg'},
+      {value:50,grams:null,referenceGrams:.92,referenceBasis:'Banknoten-Referenz; Serie/Zustand kann abweichen',image:'assets/schein_50.jpg'},
+      {value:20,grams:null,referenceGrams:.81,referenceBasis:'Banknoten-Referenz; Serie/Zustand kann abweichen',image:'assets/schein_20.jpg'},
+      {value:10,grams:null,referenceGrams:.72,referenceBasis:'Banknoten-Referenz; Serie/Zustand kann abweichen',image:'assets/schein_10.jpg'},
+      {value:5,grams:null,referenceGrams:.71,referenceBasis:'Banknoten-Referenz; Serie/Zustand kann abweichen',image:'assets/schein_5.jpg'}
     ]
   };
   const clone=v=>JSON.parse(JSON.stringify(v));
