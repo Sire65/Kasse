@@ -7,6 +7,7 @@
   <title>KC MarktKasse · Kasse</title>
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="stylesheet" href="styles.css?build=training-ui2">
+  <link rel="stylesheet" href="../../shared/kc-closing-count-ui.css?build=1.0.0">
   <link rel="stylesheet" href="pos-ui-profile-consumer.css">
   <link rel="stylesheet" href="event-program-display.css">
   <link rel="stylesheet" href="time-clock-pos.css">
@@ -1080,6 +1081,17 @@
       <article><span>Kontoumsatz (kein Bargeld, offen)</span><strong id="closingAccountSales">0,00 €</strong></article>
       <article><span>Umsatz gesamt (ohne Personalverbrauch)</span><strong id="closingTotalSales">0,00 €</strong></article>
     </div>
+    <section class="closing-count-section">
+      <div class="closing-count-head">
+        <div><h3>Ist-Bestand erfassen</h3><p>Optional. Der Soll-Abschluss wird immer unabhängig davon gespeichert.</p></div>
+      </div>
+      <div class="closing-count-mode" role="group" aria-label="Ist-Bestand erfassen">
+        <button type="button" class="active" data-closing-count-mode="defer">Später im Money Butler</button>
+        <button type="button" data-closing-count-mode="count">🔢 Zählen</button>
+        <button type="button" data-closing-count-mode="weigh">⚖ Wiegen</button>
+      </div>
+      <div id="closingCountInputs"></div>
+    </section>
     <label>Abschlussnotiz<textarea id="closingNote" rows="3" placeholder="z. B. Schichtende Weihnachtsmarkt"></textarea></label>
     <div class="dialog-actions">
       <button value="cancel">Abbrechen</button>
@@ -1417,6 +1429,8 @@
 <script src="../shared/kc-qr.js?build=0.1.0"></script>
 <script src="../shared/kc-cash-denoms.js?build=1.0.0"></script>
 <script src="../shared/kc-allergene.js?build=0.1.0"></script>
+<script src="../../shared/kc-cash-measure-settings.js?build=1.0.0"></script>
+<script src="../../shared/kc-closing-count-ui.js?build=1.0.0"></script>
 <script src="../shared/runtime-flags.js"></script>
 <script src="../shared/event-program-exchange-core-v010.js"></script>
 <script src="../cores/security-core/security-core.js"></script>
