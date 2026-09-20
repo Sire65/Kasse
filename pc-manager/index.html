@@ -479,6 +479,12 @@
           <button type="button" id="generateCashQr" class="primary">QR-Code erzeugen</button>
           <button type="button" id="sendCashDirect" class="secondary">📶 Direkt an Kasse senden (nur im selben WLAN)</button>
           <div id="sendCashDirectResult" class="hint"></div>
+          <hr>
+          <h4>KC Communicator Eingang</h4>
+          <p class="hint">Money Butler beim Kassenwart zuhause → KC Communicator → PC-Manager. Hier die vom Communicator empfangene .kccash-Datei übernehmen und danach an die Zielkasse(n) weitergeben.</p>
+          <input id="communicatorCashFile" type="file" accept=".kccash,.txt" hidden>
+          <button type="button" id="selectCommunicatorCashFile" class="secondary">📨 KC-Communicator-Datei übernehmen</button>
+          <div id="communicatorCashResult" class="hint"></div>
         </div>
       </section>
     </form>
