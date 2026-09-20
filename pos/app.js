@@ -91,6 +91,18 @@ const DEFAULT_PRODUCTS=[
  {id:"becher",name:"Außer-Haus-Becher",price:1.00,category:"Sonstiges",image:"assets/becher_auth.webp"}
 ];
 let PRODUCTS=JSON.parse(localStorage.getItem("kc_products_v050")||"null")||DEFAULT_PRODUCTS;
+// Außer-Haus-Becher als Zweitplatzierung: Stammdaten/Auswertung bleiben "Sonstiges",
+// zusaetzlich erscheint derselbe Artikel unter "Speisen" als Schnellzugriff.
+{
+  const becher=PRODUCTS.find(p=>p.id==="becher");
+  if(becher){
+    let geaendert=false;
+    if(becher.category!=="Sonstiges"){becher.category="Sonstiges";geaendert=true}
+    const extra=Array.isArray(becher.displayCategories)?becher.displayCategories:[];
+    if(!extra.includes("Speisen")){becher.displayCategories=[...new Set([...extra,"Speisen"])];geaendert=true}
+    if(geaendert)localStorage.setItem("kc_products_v050",JSON.stringify(PRODUCTS));
+  }
+}
 // 20.09.2026: Betreiberregel fuer halbe Portionen.
 // Alle Speisen und Getraenke bekommen den 1/2-Knopf. Pfand und Außer-Haus-Gefaesse bleiben
 // ausgeschlossen. Bereits bewusst gepflegte Halbpreise bleiben bestehen; fehlt einer, wird
@@ -679,12 +691,13 @@ function gruppenFarben(farbe){
   return {kraeftig:alsHex(rgb),flaeche:alsHex(hell),vordergrund:vorder,
           aktivVorder:farbHelligkeit(rgb)>150?"#10233f":"#ffffff"};
 }
+function productInCategory(p,category){return p?.category===category||(Array.isArray(p?.displayCategories)&&p.displayCategories.includes(category))}
 function renderCategories(){
   ensureActiveCategory();
   el("categories").innerHTML=categories().map(c=>{
     const g=GROUPS.find(x=>x.name===c);
     const count=c==="Favoriten"?productsForSale().filter(p=>["grot","gweiss","feuer","sauerkrautmett","gruenkohlmett"].includes(p.id)||p.favorite).length:
-      c==="Angebote"?dynamicOfferProducts("offer").length:c==="Happy Hour"?dynamicOfferProducts("happyhour").length:productsForSale().filter(p=>p.category===c).length;
+      c==="Angebote"?dynamicOfferProducts("offer").length:c==="Happy Hour"?dynamicOfferProducts("happyhour").length:productsForSale().filter(p=>productInCategory(p,c)).length;
     const f=gruppenFarben(g?.color||"#173765");
     return `<button class="${c===state.activeCategory?"active":""}" data-cat="${c}" title="${c}" style="--group-color:${f.kraeftig};--group-flaeche:${f.flaeche};--group-vorder:${f.vordergrund};--group-aktiv-vorder:${f.aktivVorder}"><span class="kategorie-symbol" aria-hidden="true">${kategorieSymbol(c)}</span><span class="kategorie-name">${escapeHtml(c)}</span><b class="category-count" aria-label="${count} Artikel">${count}</b></button>`;
   }).join("");el("categories").querySelectorAll("button").forEach(b=>b.onclick=()=>{state.activeCategory=b.dataset.cat;state.productPage=0;el("productSearchInput").value="";renderCategories();renderProducts();window.__kcRenderExpandedProducts?.()})}
@@ -693,7 +706,7 @@ function allProductsForCategory(){
     ? productsForSale().filter(p=>["grot","gweiss","feuer","sauerkrautmett","gruenkohlmett"].includes(p.id)||p.favorite)
     : state.activeCategory==="Angebote"?dynamicOfferProducts("offer")
     : state.activeCategory==="Happy Hour"?dynamicOfferProducts("happyhour")
-    : productsForSale().filter(p=>p.category===state.activeCategory);
+    : productsForSale().filter(p=>productInCategory(p,state.activeCategory));
   // Feste Bedienreihenfolge: sortOrder bestimmt die Position, nicht die Kachelgroesse.
   list=list.map((p,i)=>({p,i})).sort((a,b)=>{const oa=a.p.sortOrder>0?a.p.sortOrder:1000+a.i,ob=b.p.sortOrder>0?b.p.sortOrder:1000+b.i;return oa-ob}).map(x=>x.p);
   const q=(el("productSearchInput")?.value||"").trim().toLowerCase();
