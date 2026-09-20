@@ -64,3 +64,14 @@ ok(companion.includes("cashCount:"),'Companion liefert Ist-Zählung nicht an PC 
 ok(closingMgr.includes("ingestCashCountPayload?.(abschluss.cashCount"),'PC Manager übernimmt Kassen-Ist-Zählung nicht automatisch');
 
 console.log('Money Butler Zahnrad/Testcenter + Kassen-Tagesabschluss Zählen/Wiegen + Companion: OK');
+
+const centralSync=read('pc-manager/kc-cash-measure-central-sync.js');
+const liveMaster=read('pos/kc-sync-master-data.js');
+const trainingMaster=read('schulung/pos/kc-sync-master-data.js');
+ok(app.includes('cash_measure_settings_get'),'Money Butler lädt zentrale Gewichtseinstellungen nicht');
+ok(app.includes('cash_measure_settings_upsert'),'Money Butler speichert Gewichtseinstellungen nicht zentral');
+ok(centralSync.includes("action:'cash_measure_settings_get'"),'PC Manager zieht zentrale Gewichtseinstellungen nicht');
+ok(centralSync.includes("master-data/push"),'PC Manager verteilt Gewichtseinstellungen nicht über Stammdaten');
+ok(liveMaster.includes("kc_cash_measure_settings_v1"),'Live-Kasse übernimmt zentrale Gewichtseinstellungen nicht');
+ok(trainingMaster.includes("kc_cash_measure_settings_v1"),'Schulung übernimmt zentrale Gewichtseinstellungen nicht');
+console.log('Zentrale Gewichtseinstellungen MB -> Cloud -> PC Manager -> Kassen: OK');
