@@ -36,3 +36,5 @@ jobs:
         run: node tests/money-butler-complete-paths.test.cjs
       - name: Confirmation and push route
         run: node tests/money-butler-confirmation-push.test.cjs
+      - name: Finance confirmation retry
+        run: node tests/money-butler-finance-retry.test.cjs
