@@ -109,7 +109,8 @@
       registerId,businessDate,effectiveDate:businessDate,closingId:closingId||null,
       type:'count',countKind:'same-day',countLabel:`Zählung zum Tagesabschluss vom ${businessDate}`,
       time:now,countedAt:now,inputMode:mode,total:data.total,breakdown:data.breakdown,coinRolls:data.coinRolls,
-      measurements:data.measurements,measureSettingsVersion:settings()?.version||1
+      measurements:data.measurements,measureSettingsVersion:settings()?.version||1,
+      measureSettingsSnapshot:settings()
     };
   }
   function init(){
