@@ -34,8 +34,11 @@
       if (!antwort.ok) throw new Error(String(antwort.status));
       const liste = (await antwort.json()).abschluesse || [];
       for (const abschluss of liste) {
-        try { global.KCClosingCore?.ingestClosingPayload?.(abschluss, 'companion-auto'); }
-        catch (e) { console.warn('Automatische Abschlussübernahme übersprungen:', e?.message || e); }
+        try {
+          global.KCClosingCore?.ingestClosingPayload?.(abschluss, 'companion-auto');
+          if (abschluss.cashCount) global.KCClosingCore?.ingestCashCountPayload?.(abschluss.cashCount, 'companion-closing-count');
+        }
+        catch (e) { console.warn('Automatische Abschluss-/Zählübernahme übersprungen:', e?.message || e); }
       }
       zeichne(liste);
       fuelleKassen(liste);
