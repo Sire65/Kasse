@@ -57,6 +57,8 @@
           scope:payload.scope||'register',
           targetRegisterIds,
           fileName:file.name,
+          cashPayload:payload,
+          confirmationRequested:payload.confirmationRequested===true,
           handoverRoute:'money-butler->kc-communicator->pc-manager'
         },
         attachmentIds:[uploaded.id],
