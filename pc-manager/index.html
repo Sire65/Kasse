@@ -480,10 +480,20 @@
           <button type="button" id="sendCashDirect" class="secondary">📶 Direkt an Kasse senden (nur im selben WLAN)</button>
           <div id="sendCashDirectResult" class="hint"></div>
           <hr>
-          <h4>KC Communicator Eingang</h4>
-          <p class="hint">Money Butler beim Kassenwart zuhause → KC Communicator → PC-Manager. Hier die vom Communicator empfangene .kccash-Datei übernehmen und danach an die Zielkasse(n) weitergeben.</p>
+          <h4>Money-Butler Eingang</h4>
+          <p class="hint">Kassenwart → PC-Manager → Kasse. Hier QR-Code scannen, Kurzcode eingeben oder eine .kccash-Datei übernehmen. KC-Communicator-Anhänge landen ebenfalls über diesen Dateiweg.</p>
+          <label>QR / vollständiger KCASH1-Code
+            <input id="incomingCashCode" type="text" autocomplete="off" placeholder="QR scannen oder KCASH1:… einfügen">
+          </label>
+          <label>Kurzcode
+            <input id="incomingCashShortCode" type="text" autocomplete="off" placeholder="z. B. 2-1-001234-…">
+          </label>
+          <div class="report-actions">
+            <button type="button" id="acceptIncomingCashCode" class="secondary">▦ QR / Code übernehmen</button>
+            <button type="button" id="acceptIncomingCashShortCode" class="secondary">⌨ Kurzcode übernehmen</button>
+          </div>
           <input id="communicatorCashFile" type="file" accept=".kccash,.txt" hidden>
-          <button type="button" id="selectCommunicatorCashFile" class="secondary">📨 KC-Communicator-Datei übernehmen</button>
+          <button type="button" id="selectCommunicatorCashFile" class="secondary">📄 Datei / KC-Communicator-Anhang übernehmen</button>
           <div id="communicatorCashResult" class="hint"></div>
         </div>
       </section>
