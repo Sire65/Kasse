@@ -2999,11 +2999,16 @@ function pflegeAnfangsbestandHinweis(){
 }
 function openClosingDialog(){
   pflegeAnfangsbestandHinweis();
+  window.KCClosingCountUI?.setMode?.("defer");
   const s=closingSnapshot();el("closingCashIn").textContent=money(s.cashIn);el("closingCashSales").textContent=money(s.cashSales);el("closingCashTips").textContent=money(s.cashTips);el("closingCashOut").textContent=money(s.cashOut);el("closingExpected").textContent=money(s.expectedCash);if(el("closingAccountSales"))el("closingAccountSales").innerHTML=`${money(s.accountSales)}${s.accountBreakdown.length?`<small class="closing-konten">${s.accountBreakdown.map(k=>`${escapeHtml(k.name)}: ${money(k.amount)}`).join(" · ")}</small>`:""}`;if(el("closingTotalSales"))el("closingTotalSales").textContent=money(s.totalSales);if(el("closingStaffTotal"))el("closingStaffTotal").textContent=`${money(s.staffTotal)} (${s.staffCount} ${s.staffCount===1?"Vorgang":"Vorgänge"})`;if(el("closingReceiptExpected"))el("closingReceiptExpected").textContent=`${s.receiptExpected} ${s.receiptExpected===1?"Beleg":"Belege"}`;el("closingPayload").value="";el("closingQrCanvas").classList.remove("ready");el("closingDialog").showModal();
 }
 function createClosing(){
-  const s=closingSnapshot(),createdAt=new Date().toISOString();
-  const payload={format:"KC_CASH_CLOSING",version:3,closingId:crypto.randomUUID(),registerId:state.master.registerId,registerName:state.master.registerName,operator:state.master.operatorName,businessDate:localBusinessDate(),createdAt,periodStart:s.startAt,periodEnd:createdAt,cashIn:s.cashIn,cashSales:s.cashSales,cashTips:s.cashTips,cashOut:s.cashOut,expectedCash:s.expectedCash,staffTotal:s.staffTotal,staffCount:s.staffCount,accountSales:s.accountSales,accountBreakdown:s.accountBreakdown,totalSales:s.totalSales,transactionCount:s.tx.length,receiptExpected:s.receiptExpected,firstTransactionId:s.tx[0]?.transactionId||null,lastTransactionId:s.tx[s.tx.length-1]?.transactionId||null,note:el("closingNote").value.trim()};
+  const s=closingSnapshot(),createdAt=new Date().toISOString(),businessDate=localBusinessDate(),closingId=crypto.randomUUID();
+  let cashCount=null;
+  try{cashCount=window.KCClosingCountUI?.buildPayload?.({registerId:state.master.registerId,businessDate,closingId})||null}
+  catch(err){setSystemHint(err.message||String(err),"warn");return null}
+  if(cashCount)cashCount.checksum=checksumObject(cashCount);
+  const payload={format:"KC_CASH_CLOSING",version:4,closingId,registerId:state.master.registerId,registerName:state.master.registerName,operator:state.master.operatorName,businessDate,createdAt,periodStart:s.startAt,periodEnd:createdAt,cashIn:s.cashIn,cashSales:s.cashSales,cashTips:s.cashTips,cashOut:s.cashOut,expectedCash:s.expectedCash,staffTotal:s.staffTotal,staffCount:s.staffCount,accountSales:s.accountSales,accountBreakdown:s.accountBreakdown,totalSales:s.totalSales,transactionCount:s.tx.length,receiptExpected:s.receiptExpected,firstTransactionId:s.tx[0]?.transactionId||null,lastTransactionId:s.tx[s.tx.length-1]?.transactionId||null,note:el("closingNote").value.trim(),cashCount};
   payload.checksum=checksumObject(payload);const code=encodePayload("KCLOSE1:",payload);
   const closings=safeArray(CLOSING_KEY);closings.push(payload);localStorage.setItem(CLOSING_KEY,JSON.stringify(closings));el("closingPayload").value=code;
   try{drawRealQr(el("closingQrCanvas"),code);el("closingQrCanvas").classList.add("ready")}catch(err){setSystemHint(`Abschluss gespeichert, QR nicht darstellbar: ${err.message}`,"warn")}
@@ -3052,6 +3057,7 @@ window.KCAbschlussSicherung={meldeAbschluss,sichereOffeneAbschluesse,
     return safeArray(CLOSING_KEY).filter(c=>c?.registerId===state.master.registerId
       &&String(c.createdAt||"").slice(0,10)===heute).sort((a,b)=>String(b.createdAt).localeCompare(String(a.createdAt)))[0]||null;
   }};
+window.KCClosingCountUI?.init?.();
 el("createClosingCode").onclick=createClosing;
 el("copyClosingCode").onclick=async()=>{const code=el("closingPayload").value;if(!code)return setSystemHint("Zuerst Abschlusscode erzeugen","warn");try{await navigator.clipboard.writeText(code);setSystemHint("Abschlusscode kopiert")}catch{setSystemHint("Kopieren nicht möglich – bitte Datei speichern","warn")}};
 el("saveClosingFile").onclick=()=>{const code=el("closingPayload").value;if(!code)return setSystemHint("Zuerst Abschlusscode erzeugen","warn");downloadText(`${state.master.registerId}_Abschluss_${new Date().toISOString().slice(0,10)}.kcclosing`,code)};
