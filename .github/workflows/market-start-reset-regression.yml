@@ -1,0 +1,35 @@
+name: Marktstart 2026 Reset Regression
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'market-start-reset/**'
+      - 'pc-manager/index.html'
+      - 'pos/index.html'
+      - 'money-butler/index.html'
+      - 'tests/market-start-reset.test.cjs'
+      - '.github/workflows/market-start-reset-regression.yml'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'market-start-reset/**'
+      - 'pc-manager/index.html'
+      - 'pos/index.html'
+      - 'money-butler/index.html'
+      - 'tests/market-start-reset.test.cjs'
+      - '.github/workflows/market-start-reset-regression.yml'
+  workflow_dispatch:
+
+jobs:
+  reset-regression:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: JavaScript syntax
+        run: node --check market-start-reset/app.js
+      - name: Marktstart reset protection
+        run: node tests/market-start-reset.test.cjs
