@@ -106,3 +106,26 @@ body.nur-protokoll .app>header,body.nur-protokoll main>section:not(.protokoll-bl
 .date-quick{min-height:40px;padding:8px 10px;border-radius:9px;border:1px solid #b8c4d1;background:#f8fafc;font:inherit;font-weight:700;cursor:pointer}
 .date-quick.active{outline:3px solid rgba(37,99,235,.18);border-color:#2563eb}
 @media(max-width:520px){.date-quick-row{gap:6px}.date-quick{padding:7px 6px;font-size:.92rem}}
+
+.handover-prompt{margin:18px 0 10px}
+.handover-methods{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.handover-method{min-height:108px;display:flex;flex-direction:column;align-items:flex-start;justify-content:center;gap:5px;padding:16px;border:1px solid #cbd5e1;border-radius:12px;background:#fff;font:inherit;cursor:pointer;text-align:left}
+.handover-method>span{font-weight:800;font-size:1.05rem}
+.handover-method>small{color:#475569;line-height:1.25}
+.handover-output{margin-top:16px;padding-top:14px;border-top:1px solid #dbe3ec}
+.handover-output[hidden]{display:none!important}
+.handover-start-dialog{width:min(560px,calc(100% - 28px));border:0;border-radius:16px;padding:0}
+.handover-start-dialog::backdrop{background:rgba(15,23,42,.5)}
+.handover-start-dialog form{padding:22px}
+.handover-start-dialog h3{margin-top:0}
+.handover-start-summary{display:grid;grid-template-columns:1fr 1fr;gap:8px 14px;margin:14px 0;padding:12px;border-radius:10px;background:#f8fafc}
+.handover-start-summary span:last-child{grid-column:1/-1}
+.handover-confirm-check{display:flex;align-items:flex-start;gap:10px;margin:16px 0}
+.handover-confirm-check input{width:20px;height:20px;margin-top:2px}
+.dialog-actions{display:flex;justify-content:flex-end;gap:10px;margin-top:18px}
+@media(max-width:620px){
+  .handover-methods{grid-template-columns:1fr}
+  .handover-method{min-height:88px}
+  .handover-start-summary{grid-template-columns:1fr}
+  .handover-start-summary span:last-child{grid-column:auto}
+}
