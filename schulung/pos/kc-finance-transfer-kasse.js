@@ -88,9 +88,15 @@
       // (er wurde ja server-seitig nicht als "delivered" markiert, siehe pruefeAufUebergabe).
     });
     document.getElementById('kcFinanceTransferUebernehmen').addEventListener('click', async () => {
-      overlay.querySelector('button').disabled = true;
-      await uebernehmeUndBestaetige(transferId, payload, eroeffnungHeuteVorhanden);
-      overlay.remove();
+      const knoepfe=overlay.querySelectorAll('button');
+      knoepfe.forEach(b=>b.disabled=true);
+      try{
+        await uebernehmeUndBestaetige(transferId, payload, eroeffnungHeuteVorhanden);
+        overlay.remove();
+      }catch(err){
+        knoepfe.forEach(b=>b.disabled=false);
+        if(typeof setSystemHint==='function')setSystemHint('Kassenfüllung nicht übernommen: '+(err?.message||String(err)),'error');
+      }
     });
   }
 
@@ -102,10 +108,12 @@
     if (!verarbeiteteIds().includes(transferId)) {
       const heute = typeof localBusinessDate === 'function' ? localBusinessDate() : new Date().toISOString().slice(0, 10);
       const registerId = global.state?.master?.registerId || payload.registerId;
+      const betrag=betragFuerKasse(payload, registerId);
+      if(!Number.isFinite(betrag)||betrag<=0)throw new Error('Betrag für diese Kasse ist ungültig oder die Kassenaufteilung ist beschädigt.');
       const eintrag = {
         type: warBereitsEroeffnet ? 'topup' : 'opening',
         registerId,
-        total: betragFuerKasse(payload, registerId),
+        total: betrag,
         effectiveDate: datumFuerKasse(payload, heute),
         transferId,
         importSource: 'finance-bridge',
