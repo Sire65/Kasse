@@ -1212,7 +1212,10 @@ async function queueCashTransferPayload(payload){
     ?payload.registerIds.map(kasse=>({kasse,queueId:`${payload.transferId}#${kasse}`}))
     :[{kasse:payload.registerId,queueId:payload.transferId}];
   for(const ziel of ziele){
-    const antwort=await fetch("https://127.0.0.1:8543/api/v1/cash-transfer/queue",{
+    const endpoint=payload.confirmationRequested===true
+      ?"https://127.0.0.1:8543/api/v1/finance-transfer/queue"
+      :"https://127.0.0.1:8543/api/v1/cash-transfer/queue";
+    const antwort=await fetch(endpoint,{
       method:"POST",headers:{"Content-Type":"application/json"},
       body:JSON.stringify({transferId:ziel.queueId,registerLabel:ziel.kasse,payload})
     });
