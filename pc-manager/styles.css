@@ -749,3 +749,20 @@ tr:has(.tc-teilnahme select option[value="nein"]:checked){background:#fffbeb}
   body.print-protokoll-cash .protokoll-blatt{position:absolute;left:0;top:0;width:100%;border:0;box-shadow:none}
   .protokoll-qr canvas{width:46mm;height:46mm}
 }
+
+/* Money Butler – gemeinsame eingebettete Version im PC-Manager */
+.money-butler-integrated-card{padding:14px;margin-bottom:16px}
+.money-butler-integrated-head{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin-bottom:10px}
+.money-butler-integrated-head h3{margin:0 0 4px}
+.money-butler-integrated-head p{margin:0}
+.money-butler-integrated-badge{display:inline-flex;align-items:center;white-space:nowrap;padding:7px 10px;border-radius:999px;background:#e7f7ed;color:#166534;font-size:.78rem;font-weight:900;border:1px solid #b8e0c6}
+.money-butler-integrated-frame{display:block;width:100%;height:1180px;border:1px solid #cfd8e3;border-radius:12px;background:#fff}
+.money-butler-fallback{margin:0 0 16px;padding:0;overflow:hidden}
+.money-butler-fallback>summary{cursor:pointer;padding:14px 16px;font-weight:900;background:#f3f6f9;border-bottom:1px solid #dbe3ec}
+.money-butler-fallback>p{padding:0 16px;margin:12px 0}
+.money-butler-fallback>.cashprep-layout{padding:0 16px 16px}
+@media(max-width:900px){
+  .money-butler-integrated-head{display:grid}
+  .money-butler-integrated-badge{justify-self:start}
+  .money-butler-integrated-frame{height:1350px}
+}
