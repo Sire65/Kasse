@@ -1059,7 +1059,7 @@ class ManagerCompanion {
         const zeilen = this.db.prepare(`
           SELECT closing_id, register_id, register_name, created_at, period_start, period_end, status,
                  cash_in, cash_sales, cash_tips, cash_out, expected_cash, staff_total, staff_count,
-                 transaction_count, note, received_at, account_sales, total_sales, account_breakdown
+                 transaction_count, note, received_at, account_sales, total_sales, account_breakdown, cash_count_json
           FROM closings ORDER BY created_at DESC LIMIT 500
         `).all();
         res.writeHead(200, { 'Content-Type': 'application/json' });
@@ -1071,6 +1071,7 @@ class ManagerCompanion {
           transactionCount: z.transaction_count, note: z.note, receivedAt: z.received_at,
           accountSales: z.account_sales, totalSales: z.total_sales,
           accountBreakdown: (() => { try { return JSON.parse(z.account_breakdown || '[]'); } catch (e) { return []; } })(),
+          cashCount: (() => { try { return z.cash_count_json ? JSON.parse(z.cash_count_json) : null; } catch (e) { return null; } })(),
         })) }));
         return;
       }
@@ -1248,9 +1249,9 @@ class ManagerCompanion {
         INSERT INTO closings (closing_id, register_id, register_name, created_at, period_start, period_end,
           status, cash_in, cash_sales, cash_tips, cash_out, expected_cash,
           staff_total, staff_count, transaction_count, note, payload, received_at,
-          account_sales, total_sales, account_breakdown)
-        VALUES (?, ?, ?, ?, ?, ?, 'fertig', ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-        ON CONFLICT(closing_id) DO UPDATE SET received_at=excluded.received_at
+          account_sales, total_sales, account_breakdown, cash_count_json)
+        VALUES (?, ?, ?, ?, ?, ?, 'fertig', ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        ON CONFLICT(closing_id) DO UPDATE SET received_at=excluded.received_at, cash_count_json=COALESCE(excluded.cash_count_json,closings.cash_count_json)
       `).run(String(p.closingId), p.registerId || null, p.registerName || null,
         String(p.createdAt || jetzt), p.periodStart || null, p.periodEnd || null,
         Number(p.cashIn || 0), Number(p.cashSales || 0), Number(p.cashTips || 0),
@@ -1258,7 +1259,8 @@ class ManagerCompanion {
         Number(p.staffCount || 0), Number(p.transactionCount || 0), p.note || null,
         JSON.stringify(p), jetzt,
         /* 08.09.2026: Kontoumsatz (kein Bargeld), Gesamtumsatz, Aufteilung je Konto */
-        Number(p.accountSales || 0), Number(p.totalSales || 0), JSON.stringify(p.accountBreakdown || []));
+        Number(p.accountSales || 0), Number(p.totalSales || 0), JSON.stringify(p.accountBreakdown || []),
+        p.cashCount ? JSON.stringify(p.cashCount) : null);
     }
   }
 
