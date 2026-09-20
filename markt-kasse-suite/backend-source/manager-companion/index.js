@@ -1072,6 +1072,7 @@ class ManagerCompanion {
           accountSales: z.account_sales, totalSales: z.total_sales,
           accountBreakdown: (() => { try { return JSON.parse(z.account_breakdown || '[]'); } catch (e) { return []; } })(),
           cashCount: (() => { try { return z.cash_count_json ? JSON.parse(z.cash_count_json) : null; } catch (e) { return null; } })(),
+          cashCount: (() => { try { return z.cash_count_json ? JSON.parse(z.cash_count_json) : null; } catch (e) { return null; } })(),
         })) }));
         return;
       }
