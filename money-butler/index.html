@@ -16,7 +16,7 @@
       <h1>KC Money Butler</h1>
       <p>Wechselgeld vorbereiten – einfach und sicher</p>
     </div>
-    <span>V0.23.0</span>
+    <span>V0.24.0</span>
   </header>
 
   <main>
@@ -112,9 +112,9 @@
         <div class="handover-summary"><span>Lose <b id="handoverLooseTotal">0,00 €</b></span><span>Rollen <b id="handoverRollTotal">0,00 €</b></span><span>Gesamt <strong id="handoverTotal">0,00 €</strong></span></div>
         <p class="handover-prompt"><strong>Wie soll die Übergabe übertragen werden?</strong></p>
         <div class="handover-methods" role="group" aria-label="Übertragungsweg wählen">
-          <button type="button" class="handover-method" data-handover-method="qr">▦<span>QR-Code</span><small>An Kasse oder PC-Manager scannen</small></button>
-          <button type="button" class="handover-method" data-handover-method="shortcode">⌨<span>Kurzcode</span><small>Notweg ohne Scanner</small></button>
-          <button type="button" class="handover-method" data-handover-method="file">📄<span>Datei</span><small>.kccash speichern / übertragen</small></button>
+          <button type="button" class="handover-method" data-handover-method="qr">▦<span>QR-Code</span><small>Am PC-Manager scannen</small></button>
+          <button type="button" class="handover-method" data-handover-method="shortcode">⌨<span>Kurzcode</span><small>Im PC-Manager eingeben</small></button>
+          <button type="button" class="handover-method" data-handover-method="file">📄<span>Datei</span><small>.kccash zum PC-Manager übertragen</small></button>
           <button type="button" class="handover-method" data-handover-method="communicator">📨<span>KC Communicator</span><small>Von zuhause an den PC-Manager</small></button>
         </div>
 
@@ -124,7 +124,7 @@
           <button id="copy">Code kopieren</button>
         </div>
         <div id="handoverOutputShortcode" class="handover-output" hidden>
-          <div class="kurzcode-box"><small>Rückfall ohne Scanner – an der Kasse von Hand eingeben:</small><div id="kurzcode" class="kurzcode-anzeige">—</div></div>
+          <div class="kurzcode-box"><small>Rückfall ohne Scanner – im PC-Manager von Hand eingeben:</small><div id="kurzcode" class="kurzcode-anzeige">—</div></div>
         </div>
         <textarea id="payload" readonly hidden></textarea>
         <button id="save" hidden>Datei speichern</button>
