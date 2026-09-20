@@ -4312,10 +4312,29 @@ async function kcPostAccount(){
   const events=kcEvents();events.push({eventId:crypto.randomUUID(),accountId:a.id,accountName:a.name,transactionId:rec.transactionId,bon:rec.bon,amount,date:rec.endTime,registerId:rec.registerId,operator:rec.operator,items:cartCopy.map(i=>({id:i.id,name:i.name,category:i.category,qty:i.qty,price:i.price})),status:"open",syncStatus:"pending",configVersion:a.version||1,training:!!state.master.trainingMode});kcWrite(KC_ACCOUNT_EVENTS_KEY,events);
   el("accountChargeDialog").close();showMessage("Auf Konto gebucht",money(amount),`${a.name} · neuer lokaler Gesamtstand ${money(kcBalanceView(a.id).total)}`);
 }
-function kcOpenBalance(){
+function kcRenderBalanceOverview(){
   const accounts=kcAccounts().filter(kcAccountValid);
   el("balanceDialogTitle").textContent="Kontostände";
-  el("balanceDialogBody").innerHTML=accounts.map(a=>{const b=kcBalanceView(a.id);return `<button type="button" class="balance-row" data-balance-account="${a.id}"><span><b>${escapeHtml(a.name)}</b><small>${escapeHtml(b.quality)}</small></span><strong>${money(b.total)}</strong></button>`}).join("");
+  el("balanceDialogBody").innerHTML=accounts.map(a=>{const b=kcBalanceView(a.id);return `<button type="button" class="balance-row" data-balance-account="${a.id}"><span><b>${escapeHtml(a.name)}</b><small>${escapeHtml(b.quality)}</small></span><strong>${money(b.total)}</strong></button>`}).join("")||'<p class="balance-empty">Keine aktiven Konten vorhanden.</p>';
+  el("balanceDialogBody").querySelectorAll("[data-balance-account]").forEach(btn=>btn.onclick=()=>kcRenderBalanceDetail(btn.dataset.balanceAccount));
+}
+function kcRenderBalanceDetail(id){
+  const a=kcAccounts().find(x=>x.id===id);if(!a)return kcRenderBalanceOverview();
+  const b=kcBalanceView(id);
+  const rows=kcAccountEvents(id).filter(e=>!e.training).sort((x,y)=>String(y.date||"").localeCompare(String(x.date||""))).slice(0,12);
+  el("balanceDialogTitle").textContent=a.name;
+  const items=rows.map(e=>{
+    const d=e.date?new Date(e.date):null;
+    const when=d&&!Number.isNaN(d.getTime())?d.toLocaleString("de-DE",{day:"2-digit",month:"2-digit",hour:"2-digit",minute:"2-digit"}):"";
+    const bon=e.bon?"Bon "+escapeHtml(String(e.bon)):"";
+    const state=e.status==="invoiced"?"berechnet":e.status==="paid"?"bezahlt":"offen";
+    return `<div class="balance-detail-row"><span><b>${money(Number(e.amount||0))}</b><small>${escapeHtml(when)}${when&&bon?" · ":""}${bon}</small></span><small class="balance-detail-state">${escapeHtml(state)}</small></div>`;
+  }).join("");
+  el("balanceDialogBody").innerHTML=`<div class="balance-detail-head"><button type="button" class="balance-back" id="balanceBackBtn">← Zurück</button><div><small>Aktueller Stand</small><strong>${money(b.total)}</strong></div></div><div class="balance-detail-list">${items||'<p class="balance-empty">Noch keine Buchungen vorhanden.</p>'}</div><small class="balance-detail-note">${escapeHtml(b.quality)}${rows.length===12?" · letzte 12 Buchungen":""}</small>`;
+  el("balanceBackBtn").onclick=kcRenderBalanceOverview;
+}
+function kcOpenBalance(){
+  kcRenderBalanceOverview();
   el("accountBalanceDialog").showModal();
 }
 function kcRenderAccountControl(){
