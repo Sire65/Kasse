@@ -43,13 +43,13 @@
       const file=new File([text],dateiname(payload),{type:'text/plain'});
       const uploaded=await client.uploadAttachment(file,{expiresInHours:168});
       if(!uploaded?.id)throw new Error('KC Communicator hat den Anhang nicht bestätigt.');
-      const targetRegisterIds=payload.scope==='split'
+      const targetRegisterIds=(payload.scope==='split'||payload.scope==='shared')
         ?Array.from(payload.registerIds||[])
         :[payload.registerId].filter(Boolean);
       const result=await client.emitEvent('cash_transfer_ready',{
         recipients:[],
         variables:{
-          registerId:payload.scope==='split'?'KASSETTE':payload.registerId,
+          registerId:(payload.scope==='split'||payload.scope==='shared')?'KASSETTE':payload.registerId,
           amount:Number(payload.total),
           transferId:payload.transferId,
           transferType:payload.type,
