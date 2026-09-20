@@ -1207,30 +1207,62 @@ function baueCashTransferPayload(){
   payload.checksum=checksum(JSON.stringify(payload));
   return{payload};
 }
+async function queueCashTransferPayload(payload){
+  const ziele=payload.scope==="split"
+    ?payload.registerIds.map(kasse=>({kasse,queueId:`${payload.transferId}#${kasse}`}))
+    :[{kasse:payload.registerId,queueId:payload.transferId}];
+  for(const ziel of ziele){
+    const antwort=await fetch("https://127.0.0.1:8543/api/v1/cash-transfer/queue",{
+      method:"POST",headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({transferId:ziel.queueId,registerLabel:ziel.kasse,payload})
+    });
+    if(!antwort.ok)throw new Error("Companion antwortete mit Fehler "+antwort.status);
+  }
+  return ziele;
+}
+function decodeCommunicatorCashFile(text){
+  const value=String(text||"").trim();
+  if(!value.startsWith("KCASH1:"))throw new Error("Die Datei enthält keine KC-Bargeldübergabe.");
+  const payload=JSON.parse(decodeURIComponent(escape(atob(value.slice(7)))));
+  if(payload?.format!=="KC_CASH_TRANSFER")throw new Error("Ungültiges Bargeldformat.");
+  const copy=JSON.parse(JSON.stringify(payload)),supplied=copy.checksum;delete copy.checksum;
+  if(!supplied||checksum(JSON.stringify(copy))!==supplied)throw new Error("Prüfsumme falsch – Datei beschädigt oder verändert.");
+  if(!payload.transferId)throw new Error("Transfer-ID fehlt.");
+  if(!["opening","topup"].includes(payload.type))throw new Error("Ungültige Vorgangsart.");
+  if(!isBusinessDate(payload.effectiveDate))throw new Error("Einsatzdatum fehlt oder ist ungültig.");
+  if(!Number.isFinite(Number(payload.total))||Number(payload.total)<=0)throw new Error("Ungültiger Übergabebetrag.");
+  if(payload.scope==="split"){
+    if(!Array.isArray(payload.registerIds)||payload.registerIds.length<2)throw new Error("Kassenaufteilung fehlt.");
+  }else if(!payload.registerId)throw new Error("Zielkasse fehlt.");
+  return payload;
+}
 el("sendCashDirect").onclick=()=>requireAuth(async()=>{
   const{payload,fehler}=baueCashTransferPayload();
   if(fehler)return alert(fehler);
   el("sendCashDirectResult").textContent="Wird gesendet …";
   try{
-    // Bei der Kassette geht DERSELBE Code an beide Kassen - jede holt sich daraus ihren
-    // eigenen Anteil. Eingereiht wird zweimal, mit je eigener Warteschlangen-Kennung, sonst
-    // wuerde die zweite Einreihung als Doppelung verworfen.
-    const ziele=payload.scope==="split"
-      ?payload.registerIds.map(kasse=>({kasse,queueId:`${payload.transferId}#${kasse}`}))
-      :[{kasse:payload.registerId,queueId:payload.transferId}];
-    for(const ziel of ziele){
-      const antwort=await fetch("https://127.0.0.1:8543/api/v1/cash-transfer/queue",{
-        method:"POST",headers:{"Content-Type":"application/json"},
-        body:JSON.stringify({transferId:ziel.queueId,registerLabel:ziel.kasse,payload})
-      });
-      if(!antwort.ok)throw new Error("Companion antwortete mit Fehler "+antwort.status);
-    }
+    const ziele=await queueCashTransferPayload(payload);
     el("sendCashDirectResult").textContent=payload.scope==="split"
       ?`Geldkassette über ${money(payload.total)} an ${ziele.map(z=>z.kasse).join(" und ")} gesendet - jede Kasse holt sich innerhalb von 15 Sekunden ihren eigenen Anteil.`
       :`Übergabe über ${money(payload.total)} an ${el("cashRegister").selectedOptions[0]?.textContent||payload.registerId} gesendet - wird von der Kasse innerhalb von 15 Sekunden abgeholt.`;
   }catch(e){
     el("sendCashDirectResult").textContent="Konnte nicht gesendet werden - ist der Kassen-Companion auf diesem Rechner gestartet und im selben WLAN wie die Kasse? Ersatzweise QR-Code oder Kurzcode verwenden.";
   }
+});
+el("selectCommunicatorCashFile")?.addEventListener("click",()=>el("communicatorCashFile")?.click());
+el("communicatorCashFile")?.addEventListener("change",async e=>{
+  const file=e.target.files?.[0];if(!file)return;
+  const status=el("communicatorCashResult");
+  try{
+    status.textContent="Communicator-Datei wird geprüft und an die Kasse(n) weitergegeben …";
+    const payload=decodeCommunicatorCashFile(await file.text());
+    const ziele=await queueCashTransferPayload(payload);
+    status.textContent=payload.scope==="split"
+      ?`Vom KC Communicator übernommen: ${money(payload.total)} → ${ziele.map(z=>z.kasse).join(" und ")}. Übergabe an die Kassen ist eingereiht.`
+      :`Vom KC Communicator übernommen: ${money(payload.total)} → ${payload.registerId}. Übergabe an die Kasse ist eingereiht.`;
+  }catch(err){
+    status.textContent="Nicht übernommen: "+(err?.message||String(err));
+  }finally{e.target.value="";}
 });
 el("printCashQr").onclick=()=>{document.body.classList.add("print-cash-qr");setManagerCashSection(document.querySelector('[data-manager-cash-section="result"]'),true,false);window.print();setTimeout(()=>document.body.classList.remove("print-cash-qr"),500)}
 window.addEventListener("afterprint",()=>document.body.classList.remove("print-cash-qr"));
