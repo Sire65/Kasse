@@ -12,6 +12,7 @@
 (function (global) {
   'use strict';
   const VERARBEITET_KEY = 'kc_finance_transfer_verarbeitet_v1';
+  const BESTAETIGT_KEY = 'kc_finance_transfer_bestaetigt_v1';
   let wartendeUebergabe = null; // {transferId, payload} - liegt an, bis Uebernehmen/Spaeter
   let pruefeGeradeSchon = false;
 
@@ -21,6 +22,13 @@
   function merkeVerarbeitet(id) {
     const liste = verarbeiteteIds();
     if (!liste.includes(id)) { liste.push(id); localStorage.setItem(VERARBEITET_KEY, JSON.stringify(liste.slice(-500))); }
+  }
+  function bestaetigteIds() {
+    try { return JSON.parse(localStorage.getItem(BESTAETIGT_KEY) || '[]'); } catch (e) { return []; }
+  }
+  function merkeBestaetigt(id) {
+    const liste = bestaetigteIds();
+    if (!liste.includes(id)) { liste.push(id); localStorage.setItem(BESTAETIGT_KEY, JSON.stringify(liste.slice(-500))); }
   }
 
   function geld(n) { return Number(n || 0).toLocaleString('de-DE', { style: 'currency', currency: 'EUR' }); }
@@ -105,19 +113,22 @@
   // Finance Bridge liefert nur einen Gesamtbetrag, keine Schein-/Münz-Stückelung). Danach die
   // Kasse ueber den bewaehrten Meldeweg zurückmelden UND beim Companion als erledigt bestätigen.
   async function uebernehmeUndBestaetige(transferId, payload, warBereitsEroeffnet) {
+    const heute = typeof localBusinessDate === 'function' ? localBusinessDate() : new Date().toISOString().slice(0, 10);
+    const registerId = global.state?.master?.registerId || payload.registerId;
+    const betrag=betragFuerKasse(payload, registerId);
+    if(!Number.isFinite(betrag)||betrag<=0)throw new Error('Betrag für diese Kasse ist ungültig oder die Kassenaufteilung ist beschädigt.');
+    const effectiveDate=datumFuerKasse(payload, heute);
+    let confirmedAt=new Date().toISOString();
+
     if (!verarbeiteteIds().includes(transferId)) {
-      const heute = typeof localBusinessDate === 'function' ? localBusinessDate() : new Date().toISOString().slice(0, 10);
-      const registerId = global.state?.master?.registerId || payload.registerId;
-      const betrag=betragFuerKasse(payload, registerId);
-      if(!Number.isFinite(betrag)||betrag<=0)throw new Error('Betrag für diese Kasse ist ungültig oder die Kassenaufteilung ist beschädigt.');
       const eintrag = {
         type: warBereitsEroeffnet ? 'topup' : 'opening',
         registerId,
         total: betrag,
-        effectiveDate: datumFuerKasse(payload, heute),
+        effectiveDate,
         transferId,
         importSource: 'finance-bridge',
-        importedAt: new Date().toISOString(),
+        importedAt: confirmedAt,
       };
       const bewegungen = JSON.parse(localStorage.getItem('kc_cash_movements') || '[]');
       bewegungen.push(eintrag);
@@ -126,17 +137,26 @@
       if (typeof setSystemHint === 'function') {
         setSystemHint(`Kassenfüllung übernommen: ${geld(eintrag.total)} (${eintrag.type === 'opening' ? 'Anfangsbestand' : 'Nachfüllung'}).`, 'ok');
       }
-      // Zuverlaessig an den Manager zurueckmelden, damit die zentrale Finance Bridge (Supabase)
-      // ebenfalls als "an Kasse uebergeben" markiert werden kann - derselbe Meldeweg wie
-      // Verkauf/Abschluss, kein neuer Kanal.
-      await global.KCMeldeweg?.ueberCompanion?.('cash_transfer_confirmed', {
+    } else {
+      const bewegungen = JSON.parse(localStorage.getItem('kc_cash_movements') || '[]');
+      const vorhanden = bewegungen.find(e => e.transferId === transferId);
+      if(vorhanden?.importedAt)confirmedAt=vorhanden.importedAt;
+    }
+
+    // Lokale Buchung und Rueckmeldung sind absichtlich getrennte Zustände:
+    // Ist das Geld schon gebucht, aber der Meldeweg war kurz nicht erreichbar, wird NUR die
+    // Bestaetigung erneut versucht. So gibt es weder Doppelbuchungen noch verlorene Quittungen.
+    if (!bestaetigteIds().includes(transferId)) {
+      if(typeof global.KCMeldeweg?.ueberCompanion!=='function')throw new Error('Meldeweg für die Empfangsbestätigung ist nicht verfügbar.');
+      await global.KCMeldeweg.ueberCompanion('cash_transfer_confirmed', {
         transferId,
         registerId,
-        amount: eintrag.total,
-        businessDate: eintrag.effectiveDate,
-        confirmedAt: eintrag.importedAt,
+        amount: betrag,
+        businessDate: effectiveDate,
+        confirmedAt,
         confirmationRequested: payload.confirmationRequested === true
       });
+      merkeBestaetigt(transferId);
     }
     // ERST NACHDEM lokal gespeichert wurde (oder schon vorher gespeichert war, z.B. bei einem
     // zweiten Versuch nach einem Absturz) wird beim Companion bestaetigt - sonst koennte ein
