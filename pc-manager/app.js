@@ -1545,6 +1545,10 @@ function ingestClosingPayload(payload,source="automatic"){
   if(!payload||payload.format!=="KC_CASH_CLOSING"||!payload.closingId||!payload.registerId)throw new Error("Ungültiger Kassenabschluss.");
   if(!Number.isFinite(Number(payload.expectedCash)))throw new Error("Ungültiger Sollbestand.");
   const vorhanden=closings.find(x=>x.closingId===payload.closingId);
+  if(payload.cashCount){
+    try{ingestCashCountPayload(payload.cashCount,source+"-cash-count");}
+    catch(e){console.warn("Mitgelieferte Ist-Zählung konnte nicht übernommen werden:",e?.message||e);}
+  }
   if(vorhanden)return vorhanden;
   const closingRecord={...payload,source,importedAt:new Date().toISOString()};
   closings.push(closingRecord);queueSync("closing","upsert",closingRecord);saveAll();renderClosings();
