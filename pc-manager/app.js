@@ -2032,6 +2032,7 @@ document.addEventListener('DOMContentLoaded',()=>setTimeout(initTv296,0));
 // den Manager-Companion (loopback, derselbe Rechner), der es beim nächsten Sync jeder Kasse
 // zur Verfügung stellt. PC-Manager bleibt dadurch die alleinige Pflegestelle.
 document.getElementById('masterDataPushBtn')?.addEventListener('click', () => requireAuth(async () => {
+  await window.KCCashMeasureCentralSync?.pull?.({publish:false});
   const statusFeld = document.getElementById('masterDataPushStatus');
   statusFeld.textContent = 'Wird gesendet …';
   try {
