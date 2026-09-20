@@ -43,3 +43,18 @@ for(const c of closings){
 console.log('Tagesabschluss Kasse -> PC-Manager: Kasse+Tag, Auto-Import, Soll/Ist, zentrale Übergabe: OK');
 
 // TÜV v2: repoübergreifende Prüfung und Syntaxcheck aktiviert.
+
+const livePos=read('pos/app.js');
+const trainingPos=read('schulung/pos/app.js');
+const liveIndex=read('pos/index.html');
+const trainingIndex=read('schulung/pos/index.html');
+const liveSw=read('pos/service-worker.js');
+const trainingSw=read('schulung/pos/service-worker.js');
+for(const [name,src] of [['Live-POS',livePos],['Schulungs-POS',trainingPos]]){
+  ok(src.includes('businessDate:localBusinessDate(),createdAt'), name+' Tagesabschluss enthält kein explizites Geschäftsdatum');
+}
+ok(liveIndex.includes('app.js?build=0.31.3.6-r13'),'Live-POS App-Build nicht auf r13');
+ok(trainingIndex.includes('app.js?build=0.31.3.6-r13'),'Schulungs-POS App-Build nicht auf r13');
+ok(liveSw.includes('kc-bildrechner-2026-09-20-montag-rc30')&&liveSw.includes('./app.js?build=0.31.3.6-r13'),'Live Offline-Cache nicht auf rc30/r13');
+ok(trainingSw.includes('kc-schulung-2026-09-20-montag-rc32')&&trainingSw.includes('./app.js?build=0.31.3.6-r13'),'Schulung Offline-Cache nicht auf rc32/r13');
+console.log('Live- und Schulungs-POS Tagesabschluss/Offline-Rollout: OK');
