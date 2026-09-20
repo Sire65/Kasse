@@ -32,6 +32,13 @@
       });
     }
 
+    async upsertClosingReport({correlationId,registerId,businessDate,expectedCash,actualCash,difference,payload={},orgId=null}={}){
+      return this.client._request('kc-finance-bridge',{
+        action:'closing_report_upsert',
+        correlationId,registerId,businessDate,expectedCash,actualCash,difference,payload,orgId
+      });
+    }
+
     async listClosingReports({onlyUnimported=true,limit=100,orgId=null}={}){
       return this.client._request('kc-finance-bridge',{
         action:'closing_report_list',onlyUnimported,limit,orgId
