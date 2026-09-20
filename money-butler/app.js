@@ -267,10 +267,12 @@ function openHandoverStart(method){
   el("handoverStartStatus").textContent="";
   const confirm=el("handoverConfirmationWanted");
   confirm.checked=false;
-  confirm.disabled=method==="shortcode";
-  el("handoverConfirmationHint").textContent=method==="shortcode"
-    ?"Beim Kurzcode ist keine automatische Empfangsbestätigung möglich, weil dieser Notweg keine Zusatzdaten überträgt."
-    :"Optional: Der Transfer enthält dann die Anforderung, den Eingang des Geldes zu bestätigen.";
+  confirm.disabled=method==="shortcode"||currentType==="count";
+  el("handoverConfirmationHint").textContent=currentType==="count"
+    ?"Bei einer Zählung wird kein Geld übertragen. Deshalb ist keine Geld-Empfangsbestätigung erforderlich."
+    :method==="shortcode"
+      ?"Beim Kurzcode ist keine automatische Empfangsbestätigung möglich, weil dieser Notweg keine Zusatzdaten überträgt."
+      :"Optional: Der Transfer enthält dann die Anforderung, den Eingang des Geldes zu bestätigen.";
   const auth=el("handoverCommunicatorAuth");
   auth.hidden=method!=="communicator";
   if(method==="communicator"){
