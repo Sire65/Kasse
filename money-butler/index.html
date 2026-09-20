@@ -43,6 +43,11 @@
         </label>
         <label><span id="effectiveDateLabel">Gültig für <span class="required-star">*</span></span>
           <input id="effectiveDate" type="date" required autocomplete="off">
+          <div class="date-quick-row" role="group" aria-label="Datum schnell auswählen">
+            <button type="button" class="date-quick" data-date-offset="-1">Gestern</button>
+            <button type="button" class="date-quick" data-date-offset="0">Heute</button>
+            <button type="button" class="date-quick" data-date-offset="1">Morgen</button>
+          </div>
           <small>Der Code kann an der Kasse nur an diesem Tag übernommen werden.</small>
         </label>
         <label>Notiz
