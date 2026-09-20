@@ -1,13 +1,15 @@
 const global=window;
 
 const DENOMS=[100,50,20,10,5,2,1,.5,.2,.1,.05,.02,.01];
-const COIN_ROLLS=[
-  {value:2,coins:25},{value:1,coins:25},
-  {value:.5,coins:40},{value:.2,coins:40},{value:.1,coins:40},
-  {value:.05,coins:50},{value:.02,coins:50},{value:.01,coins:50}
-];
-// Offizielle nominale Stückgewichte der Euro-Umlaufmünzen (Bundesbank/EZB), in Gramm.
-const COIN_WEIGHTS_G={2:8.50,1:7.50,.5:7.80,.2:5.74,.1:4.10,.05:3.92,.02:3.06,.01:2.30};
+const CASH_MEASURE=window.KCCashMeasureSettings;
+let cashMeasureSettings=CASH_MEASURE.read();
+let COIN_ROLLS=cashMeasureSettings.rolls.map(x=>({value:Number(x.value),coins:Number(x.coins)}));
+let COIN_WEIGHTS_G=Object.fromEntries(cashMeasureSettings.coins.map(x=>[Number(x.value),Number(x.grams)]));
+function reloadCashMeasureSettings(){
+  cashMeasureSettings=CASH_MEASURE.read();
+  COIN_ROLLS=cashMeasureSettings.rolls.map(x=>({value:Number(x.value),coins:Number(x.coins)}));
+  COIN_WEIGHTS_G=Object.fromEntries(cashMeasureSettings.coins.map(x=>[Number(x.value),Number(x.grams)]));
+}
 let currentType="opening",currentPayload="";
 // Anteile der zuletzt erzeugten Kassette - fuer Anzeige, Kurzcodes und Protokoll.
 let letzteTeile=null;
@@ -93,46 +95,134 @@ el("denoms").innerHTML=DENOMS.map(v=>{
   </svg></span>`;
   return `<label class="denom" data-muenze="${v}">${symbol}<strong>${label}</strong><input type="number" min="0" step="1" value="0" data-value="${v}"></label>`;
 }).join("");
-el("coinRolls").innerHTML=COIN_ROLLS.map(r=>`<label class="coin-roll-row" data-rolle="${r.value}">
-  <span class="roll-icon" aria-hidden="true"><svg viewBox="0 0 40 68" width="34" height="58"><rect x="3" y="10" width="34" height="52" rx="7" class="roll-body"/><rect x="3" y="10" width="34" height="11" rx="6" class="roll-cap"/><text x="20" y="42" class="roll-text">${denomLabel(r.value)}</text></svg></span>
-  <strong>${denomLabel(r.value)}</strong>
-  <span class="roll-input"><input type="number" min="0" step="1" value="0" inputmode="numeric" data-roll-value="${r.value}" data-roll-coins="${r.coins}" aria-label="Anzahl Rollen ${denomLabel(r.value)}"><small>Rollen</small></span>
-  <span>${r.coins} Münzen</span>
-  <span>${money(r.value*r.coins)}</span>
-  <b data-roll-total="${r.value}">${money(0)}</b>
-</label>`).join("");
-el("coinWeighing").innerHTML=Object.entries(COIN_WEIGHTS_G).sort((a,b)=>Number(b[0])-Number(a[0])).map(([wertText,gewicht])=>{
-  const wert=Number(wertText);
-  return `<div class="coin-weigh-row" data-weigh-row="${wert}">
-    <strong>${denomLabel(wert)}</strong>
-    <span>${gewicht.toFixed(2).replace(".",",")} g/Stück</span>
-    <label><input type="number" min="0" step="0.01" inputmode="decimal" data-weigh-grams="${wert}" placeholder="0,00"><small>g netto</small></label>
-    <span data-weigh-result="${wert}">—</span>
-    <b data-weigh-amount="${wert}">—</b>
-    <button type="button" data-weigh-apply="${wert}" disabled>Übernehmen</button>
-  </div>`;
-}).join("");
+function renderCashMeasureInputs(){
+  el("coinRolls").innerHTML=COIN_ROLLS.map(r=>`<label class="coin-roll-row" data-rolle="${r.value}">
+    <span class="roll-icon" aria-hidden="true"><svg viewBox="0 0 40 68" width="34" height="58"><rect x="3" y="10" width="34" height="52" rx="7" class="roll-body"/><rect x="3" y="10" width="34" height="11" rx="6" class="roll-cap"/><text x="20" y="42" class="roll-text">${denomLabel(r.value)}</text></svg></span>
+    <strong>${denomLabel(r.value)}</strong>
+    <span class="roll-input"><input type="number" min="0" step="1" value="0" inputmode="numeric" data-roll-value="${r.value}" data-roll-coins="${r.coins}" aria-label="Anzahl Rollen ${denomLabel(r.value)}"><small>Rollen</small></span>
+    <span>${r.coins} Münzen</span>
+    <span>${money(r.value*r.coins)}</span>
+    <b data-roll-total="${r.value}">${money(0)}</b>
+  </label>`).join("");
+
+  el("coinWeighing").innerHTML=Object.entries(COIN_WEIGHTS_G).sort((a,b)=>Number(b[0])-Number(a[0])).map(([wertText,gewicht])=>{
+    const wert=Number(wertText);
+    return `<div class="coin-weigh-row" data-weigh-row="${wert}">
+      <strong>${denomLabel(wert)}</strong>
+      <span>${Number(gewicht).toFixed(2).replace(".",",")} g/Stück</span>
+      <label><input type="number" min="0" step="0.01" inputmode="decimal" data-weigh-grams="${wert}" placeholder="0,00"><small>g netto</small></label>
+      <span data-weigh-result="${wert}">—</span>
+      <b data-weigh-amount="${wert}">—</b>
+      <button type="button" data-weigh-apply="${wert}" disabled>Übernehmen</button>
+    </div>`;
+  }).join("");
+  bindMeasureInputs();
+}
 function updateWeighRow(input){
-  const wert=Number(input.dataset.weighGrams),gewicht=COIN_WEIGHTS_G[wert],gramm=Number(String(input.value||"").replace(",","."));
+  const wert=Number(input.dataset.weighGrams),gewicht=Number(COIN_WEIGHTS_G[wert]),gramm=Number(String(input.value||"").replace(",","."));
   const result=el("coinWeighing").querySelector(`[data-weigh-result="${wert}"]`);
   const amount=el("coinWeighing").querySelector(`[data-weigh-amount="${wert}"]`);
   const apply=el("coinWeighing").querySelector(`[data-weigh-apply="${wert}"]`);
-  if(!Number.isFinite(gramm)||gramm<=0){result.textContent="—";amount.textContent="—";apply.disabled=true;apply.dataset.pieces="";return;}
+  if(!Number.isFinite(gramm)||gramm<=0||!gewicht){result.textContent="—";amount.textContent="—";apply.disabled=true;apply.dataset.pieces="";return;}
   const roh=gramm/gewicht,stueck=Math.max(0,Math.round(roh)),soll=stueck*gewicht,abweichung=gramm-soll;
   result.textContent=`≈ ${stueck} Stück · Rest ${abweichung>=0?"+":""}${abweichung.toFixed(2).replace(".",",")} g`;
   amount.textContent=money(stueck*wert);
   apply.disabled=stueck<=0;apply.dataset.pieces=String(stueck);
 }
-el("coinWeighing").querySelectorAll("[data-weigh-grams]").forEach(input=>input.addEventListener("input",()=>updateWeighRow(input)));
-el("coinWeighing").querySelectorAll("[data-weigh-apply]").forEach(button=>button.addEventListener("click",()=>{
-  const wert=Number(button.dataset.weighApply),stueck=Number(button.dataset.pieces||0);
-  const ziel=[...document.querySelectorAll("[data-value]")].find(n=>Number(n.dataset.value)===wert);
-  if(!ziel||!stueck)return;
-  ziel.value=String(stueck);
-  ziel.dispatchEvent(new Event("input",{bubbles:true}));
-  button.textContent="Übernommen";
-  setTimeout(()=>button.textContent="Übernehmen",900);
-}));
+function bindMeasureInputs(){
+  document.querySelectorAll("[data-roll-value]").forEach(n=>n.oninput=()=>{updateTotal();zeichneAufteilung();clearTransferOutput()});
+  el("coinWeighing").querySelectorAll("[data-weigh-grams]").forEach(input=>input.addEventListener("input",()=>updateWeighRow(input)));
+  el("coinWeighing").querySelectorAll("[data-weigh-apply]").forEach(button=>button.addEventListener("click",()=>{
+    const wert=Number(button.dataset.weighApply),stueck=Number(button.dataset.pieces||0);
+    const ziel=[...document.querySelectorAll("[data-value]")].find(n=>Number(n.dataset.value)===wert);
+    if(!ziel||!stueck)return;
+    ziel.value=String(stueck);
+    ziel.dispatchEvent(new Event("input",{bubbles:true}));
+    button.textContent="Übernommen";
+    setTimeout(()=>button.textContent="Übernehmen",900);
+  }));
+}
+renderCashMeasureInputs();
+
+const ENTRY_MODE_KEY="kc_money_butler_entry_mode_v1";
+let entryMode=localStorage.getItem(ENTRY_MODE_KEY)==="weigh"?"weigh":"count";
+function setEntryMode(mode){
+  entryMode=mode==="weigh"?"weigh":"count";
+  localStorage.setItem(ENTRY_MODE_KEY,entryMode);
+  document.body.classList.toggle("entry-mode-count",entryMode==="count");
+  document.body.classList.toggle("entry-mode-weigh",entryMode==="weigh");
+  document.querySelectorAll("[data-entry-mode]").forEach(b=>b.classList.toggle("active",b.dataset.entryMode===entryMode));
+}
+document.querySelectorAll("[data-entry-mode]").forEach(b=>b.addEventListener("click",()=>setEntryMode(b.dataset.entryMode)));
+setEntryMode(entryMode);
+
+function settingsImagePath(item,type){
+  if(type==="coin")return item.image||`assets/muenze_${item.value}.webp`;
+  if(type==="note")return item.image||`assets/schein_${item.value}.jpg`;
+  return "";
+}
+function renderSettings(){
+  const s=CASH_MEASURE.read();
+  el("settingsCoins").innerHTML=s.coins.map(x=>`<div class="settings-money-row coin">
+    <img src="${settingsImagePath(x,"coin")}" alt="">
+    <strong>${denomLabel(Number(x.value))}</strong>
+    <label>Gewicht g<input type="number" min="0.01" step="0.01" data-setting-coin="${x.value}" value="${x.grams??""}"></label>
+    <span class="settings-extra">offizieller Standard</span>
+  </div>`).join("");
+  el("settingsRolls").innerHTML=s.rolls.map(x=>`<div class="settings-money-row">
+    <div></div><strong>${denomLabel(Number(x.value))}</strong>
+    <label>Münzen/Rolle<input type="number" min="1" step="1" data-setting-roll="${x.value}" value="${x.coins}"></label>
+    <span class="settings-extra">${money(Number(x.value)*Number(x.coins))}</span>
+  </div>`).join("");
+  el("settingsNotes").innerHTML=s.notes.map(x=>`<div class="settings-money-row">
+    <img src="${settingsImagePath(x,"note")}" alt="">
+    <strong>${denomLabel(Number(x.value))}</strong>
+    <label>Gewicht g<input type="number" min="0" step="0.01" data-setting-note="${x.value}" value="${x.grams??""}" placeholder="nicht gesetzt"></label>
+    <span class="settings-extra">${x.grams==null?"eigener Prüfwert":"gepflegt"}</span>
+  </div>`).join("");
+}
+function collectSettings(){
+  const s=CASH_MEASURE.read();
+  document.querySelectorAll("[data-setting-coin]").forEach(n=>{const x=s.coins.find(v=>Number(v.value)===Number(n.dataset.settingCoin));if(x)x.grams=Math.max(.01,Number(n.value)||0)});
+  document.querySelectorAll("[data-setting-roll]").forEach(n=>{const x=s.rolls.find(v=>Number(v.value)===Number(n.dataset.settingRoll));if(x)x.coins=Math.max(1,Math.round(Number(n.value)||1))});
+  document.querySelectorAll("[data-setting-note]").forEach(n=>{const x=s.notes.find(v=>Number(v.value)===Number(n.dataset.settingNote));if(x)x.grams=n.value===""?null:Math.max(.01,Number(n.value)||0)});
+  return s;
+}
+function activateSettingsTab(name){
+  document.querySelectorAll("[data-settings-tab]").forEach(b=>b.classList.toggle("active",b.dataset.settingsTab===name));
+  document.querySelectorAll("[data-settings-panel]").forEach(p=>p.hidden=p.dataset.settingsPanel!==name);
+}
+document.querySelectorAll("[data-settings-tab]").forEach(b=>b.addEventListener("click",()=>activateSettingsTab(b.dataset.settingsTab)));
+el("settingsBtn")?.addEventListener("click",()=>{renderSettings();activateSettingsTab("coins");el("settingsDialog").showModal()});
+el("saveCashSettings")?.addEventListener("click",()=>{
+  CASH_MEASURE.save(collectSettings());reloadCashMeasureSettings();renderCashMeasureInputs();updateTotal();renderSettings();
+  el("saveCashSettings").textContent="Gespeichert ✓";setTimeout(()=>el("saveCashSettings").textContent="Speichern",1000);
+});
+el("resetCashSettings")?.addEventListener("click",()=>{
+  if(!confirm("Standardwerte wirklich wiederherstellen?"))return;
+  CASH_MEASURE.reset();reloadCashMeasureSettings();renderCashMeasureInputs();updateTotal();renderSettings();
+});
+
+function testResult(name,state,detail){
+  return `<div class="test-result ${state}"><span>${state==="ok"?"●":state==="warn"?"●":"●"}</span><strong>${name}</strong><small>${detail}</small></div>`;
+}
+async function runConnectionTests(){
+  const out=el("testcenterResults");out.innerHTML=testResult("Prüfung","warn","läuft …");
+  const token=window.KCMoneyButlerCommunicator?.tokenLesen?.()||"";
+  if(!token){out.innerHTML=testResult("KC Communicator","warn","Kein Zugriffstoken gespeichert.")+testResult("Datenbank","warn","Ohne Anmeldung nicht prüfbar.")+testResult("PC Manager","warn","Cloudweg ohne Anmeldung nicht prüfbar.")+testResult("KC Verwaltung","warn","Finanzweg ohne Anmeldung nicht prüfbar.");return;}
+  const client=new KCCommunicationClient({sourceProgram:"kc-money-butler",getAccessToken:async()=>token,defaultTestOnly:false});
+  const rows=[];
+  try{await client.health();rows.push(testResult("Datenbank / KC Cloud","ok","erreichbar"));}catch(e){rows.push(testResult("Datenbank / KC Cloud","fail",e?.message||String(e)))}
+  try{const a=await client.checkAccess();rows.push(testResult("KC Communicator",a?.canSend?"ok":"warn",a?.canSend?"Senden freigegeben":"erreichbar, aber Senden nicht freigegeben"));}catch(e){rows.push(testResult("KC Communicator","fail",e?.message||String(e)))}
+  async function protectedCheck(name,action){
+    try{await client._request("kc-finance-bridge",{action,limit:1,onlyUnimported:true,statuses:["pending_manager"]});rows.push(testResult(name,"ok","Cloudweg erreichbar und berechtigt"))}
+    catch(e){if(Number(e?.status)===403)rows.push(testResult(name,"warn","Cloudweg erreichbar, aber diesem Benutzer fehlen Verwaltungsrechte"));else rows.push(testResult(name,"fail",e?.message||String(e)))}
+  }
+  await protectedCheck("PC Manager / Finance Bridge","cash_count_list");
+  await protectedCheck("KC Verwaltung / Tagesabschlüsse","closing_report_list");
+  out.innerHTML=rows.join("");
+}
+el("runAllTests")?.addEventListener("click",runConnectionTests);
 
 function clearTransferOutput(){
   currentPayload="";el("payload").value="";el("handoverType").textContent="—";el("handoverRegister").textContent="—";el("handoverDate").textContent="—";
@@ -189,7 +279,7 @@ function pflegeKassettenAuswahl(){
   if(gesperrt&&istKassette())el("register").value="KASSE-01";
 }
 document.querySelectorAll(".choice").forEach(b=>b.onclick=()=>{document.querySelectorAll(".choice").forEach(x=>x.classList.toggle("active",x===b));currentType=b.dataset.type;setDatePurpose();pflegeKassettenAuswahl();zeichneAufteilung();clearTransferOutput()});
-document.querySelectorAll("[data-value],[data-roll-value]").forEach(n=>n.oninput=()=>{updateTotal();zeichneAufteilung();clearTransferOutput()});
+document.querySelectorAll("[data-value]").forEach(n=>n.oninput=()=>{updateTotal();zeichneAufteilung();clearTransferOutput()});
 ["register","effectiveDate","note"].forEach(id=>el(id).addEventListener("input",clearTransferOutput));
 el("register").addEventListener("change",()=>{zeichneAufteilung();clearTransferOutput()});
 function getData(){
