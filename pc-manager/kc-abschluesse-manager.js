@@ -33,8 +33,13 @@
         {signal: AbortSignal.timeout(4000), cache: 'no-store'});
       if (!antwort.ok) throw new Error(String(antwort.status));
       const liste = (await antwort.json()).abschluesse || [];
+      for (const abschluss of liste) {
+        try { global.KCClosingCore?.ingestClosingPayload?.(abschluss, 'companion-auto'); }
+        catch (e) { console.warn('Automatische Abschlussübernahme übersprungen:', e?.message || e); }
+      }
       zeichne(liste);
       fuelleKassen(liste);
+      setTimeout(() => global.KCTagesabschlussZentrale?.sync?.(), 0);
       stand(liste.length
         ? `${liste.length} gemeldete(r) Abschluss/Abschlüsse.`
         : 'Es wurde noch kein Abschluss gemeldet.', liste.length ? 'ok' : '');
