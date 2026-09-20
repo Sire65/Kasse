@@ -129,3 +129,23 @@ body.nur-protokoll .app>header,body.nur-protokoll main>section:not(.protokoll-bl
   .handover-start-summary{grid-template-columns:1fr}
   .handover-start-summary span:last-child{grid-column:auto}
 }
+
+/* Sortenreines Münzwiegen – offizielle Stückgewichte, manuelle Übernahme nach Sichtprüfung */
+.weigh-badge{background:#5b3f8c;color:#fff;border-radius:999px;padding:7px 11px;font-size:.76rem;font-weight:900;white-space:nowrap}
+.weigh-note{margin:0 0 10px;padding:10px 12px;border-left:4px solid #5b3f8c;background:#f5f1fb;border-radius:8px;color:#4a3a66;font-size:.84rem;line-height:1.45}
+.weigh-table-head,.coin-weigh-row{display:grid;grid-template-columns:.65fr .9fr 1fr 1.5fr .85fr .95fr;gap:9px;align-items:center}
+.weigh-table-head{padding:8px 10px;color:#667085;font-size:.74rem;font-weight:900}
+.coin-weighing{display:grid;gap:7px}
+.coin-weigh-row{padding:9px 10px;border:1px solid #d4dae0;border-radius:9px;background:#fafbfc}
+.coin-weigh-row label{display:grid;grid-template-columns:1fr auto;align-items:center;gap:5px}
+.coin-weigh-row input{text-align:right;min-width:0}
+.coin-weigh-row small{white-space:nowrap}
+.coin-weigh-row b{color:#0b315d}
+.coin-weigh-row button{padding:9px 10px;border:1px solid #b8c4d1;border-radius:8px;background:#fff;font-weight:800;cursor:pointer}
+.coin-weigh-row button:disabled{opacity:.45;cursor:not-allowed}
+.count-date-hint{display:block;margin-top:6px;padding:7px 9px;border-radius:7px;background:#eef6ff;color:#174a7c;font-weight:700}
+@media(max-width:760px){
+  .weigh-table-head{display:none}
+  .coin-weigh-row{grid-template-columns:1fr 1fr}
+  .coin-weigh-row>*:nth-child(4),.coin-weigh-row>*:nth-child(5),.coin-weigh-row>*:nth-child(6){grid-column:auto}
+}
