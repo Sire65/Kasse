@@ -1029,9 +1029,13 @@ function selectedCartItem(){return state.cart.find(x=>x.key===state.selectedCart
    "automatic" (Pfand als eigener Betrag neben dem Artikel), "included" (Pfand im
    Zeilenpreis - lineUnit() addiert ihn ungekuerzt dazu) und "manual" (Pfand als eigene
    Bonzeile, die selbst gar keinen ½-Knopf bekommt). */
+function istHalbpreisArtikelAusgeschlossen(item={}){
+  const text=`${item.id||""} ${item.name||""}`.toLowerCase();
+  return item.category==="Pfand"||item.manualDeposit||item.refund||item.discountLine||/außer[- ]?haus|ausser[- ]?haus|becher|gefäß|gefaess/.test(text);
+}
 function halbePortionMoeglich(item){
   if(!item) return false;
-  if(item.category==="Pfand"||item.manualDeposit||item.refund||item.discountLine) return false;
+  if(istHalbpreisArtikelAusgeschlossen(item)) return false;
   const produkt=PRODUCTS.find(p=>p.id===item.id);
   const frei=item.halfAllowed===true||produkt?.halfAllowed===true;
   return frei && Number(item.halfPrice||produkt?.halfPrice||0)>0;
@@ -1053,7 +1057,7 @@ function mengeAnzeige(item){
 function toggleSelectedHalfPortion(){
   const item=selectedCartItem();
   if(!item)return setSystemHint("Zuerst genau eine Einkaufswagenzeile antippen","warn");
-  if(item.category==="Pfand"||item.manualDeposit||item.refund||item.discountLine)return setSystemHint("Für diese Position ist keine halbe Portion möglich","warn");
+  if(istHalbpreisArtikelAusgeschlossen(item))return setSystemHint("Für diese Position ist keine halbe Portion möglich","warn");
   const product=PRODUCTS.find(p=>p.id===item.id);
   const allowed=item.halfAllowed===true||product?.halfAllowed===true;
   const halfPrice=Number(item.halfPrice||product?.halfPrice||0);
