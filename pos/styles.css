@@ -3596,3 +3596,16 @@ body.kc-layout-neu:not(.kc-aufbau) .sales-area>.product-grid>.product-tile-wrap{
 body.kc-layout-neu:not(.kc-aufbau) .sales-area>.product-grid>.product-tile-wrap>.product-tile{
   width:100%!important;height:100%!important;min-height:0!important;max-height:235px!important;
 }
+
+/* Zahlungsfluss-Pfeile: auf Standard, KC003/KC004 und Schulung identisch.
+   ◀ = Geld kommt zur Kasse, ▶ = Geld geht zum Kunden (Rückgeld/Auszahlung/Pfandrückgabe). */
+.kc-pfeilfeld{display:inline-flex;align-items:center;justify-content:center;gap:3px;min-width:34px;flex:1 1 auto;overflow:hidden;white-space:nowrap;color:#15803d;font-weight:1000;line-height:1}
+.kc-pfeilfeld-klein{flex:0 1 auto;min-width:42px;margin-left:auto}
+.kc-pfeilfeld span{display:inline-block;will-change:transform,opacity;animation-duration:1.05s;animation-timing-function:linear;animation-iteration-count:infinite}
+.kc-pfeilfeld span:nth-child(2){animation-delay:.13s}.kc-pfeilfeld span:nth-child(3){animation-delay:.26s}.kc-pfeilfeld span:nth-child(4){animation-delay:.39s}
+.kc-pfeil-ein span{animation-name:kcZahlungsPfeilEin}
+.kc-pfeil-aus span{animation-name:kcZahlungsPfeilAus}
+.kc-pfeilfeld-rot{color:#c62828}
+@keyframes kcZahlungsPfeilEin{0%{transform:translateX(8px);opacity:.15}35%{opacity:1}100%{transform:translateX(-8px);opacity:.15}}
+@keyframes kcZahlungsPfeilAus{0%{transform:translateX(-8px);opacity:.15}35%{opacity:1}100%{transform:translateX(8px);opacity:.15}}
+@media (prefers-reduced-motion:reduce){.kc-pfeilfeld span{animation:none!important}}
