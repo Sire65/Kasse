@@ -44,7 +44,13 @@
       transactionCount:Number(c.transactionCount||0),
       receiptExpected:Number(c.receiptExpected||0),
       note:c.note||'',
-      countNote:k?.note||''
+      countNote:k?.note||'',
+      countInputMode:k?.inputMode||null,
+      countKind:k?.countKind||null,
+      countedAt:k?.countedAt||k?.time||null,
+      countBreakdown:k?.breakdown||{},
+      countCoinRolls:k?.coinRolls||{},
+      countMeasurements:Array.isArray(k?.measurements)?k.measurements:[]
     };
   }
 
