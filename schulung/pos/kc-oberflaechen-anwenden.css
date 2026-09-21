@@ -349,7 +349,13 @@ body.kc-aufbau.kc-kassenfunktionen-offen #moreDialog .more-grid > button[data-ac
 /* ---- Korrektur: Zurück (Stapel, bis 10x) und Löschen ---- */
 #kcZahlenEbene .kc-bereich.korrektur { gap: 8px; }
 #kcZahlenEbene .kc-bereich.korrektur > button { flex: 1 1 0; min-height: 0; width: 100%; border: 0; border-radius: 10px; display: flex !important; flex-direction: column; align-items: center; justify-content: center; gap: 4px; color: #fff; font-weight: 800; cursor: pointer; }
-#kcZahlenEbene .kc-bereich.korrektur > #undoCashBtn { background: #1f2937; font-size: 22px; padding: 0 !important; text-align: center; }
+/* 21.09.2026 (Betreiber: "Aktion rückgängig machen neben dem Ziffernblock zu schmal"):
+   ECHTER FUND - auf echten Tablets (body.tablet-fit) zwingt eine ältere Regel aus der
+   Grund-Kasse (.cash-undo{width:29px!important}, dort für die kleine "LETZTE GELDWAHL"-Taste
+   gedacht) denselben Knopf hier auf der Zahlen-Seite auf 29px zusammen, obwohl er hier über
+   die volle Spaltenbreite gehen soll wie LÖSCHEN darunter. Ohne eigenes !important+width
+   verlor die allgemeine width:100%-Regel oben gegen die !important-Regel der Grund-Kasse. */
+#kcZahlenEbene .kc-bereich.korrektur > #undoCashBtn { background: #1f2937; font-size: 22px; padding: 0 !important; text-align: center; width: 100% !important; min-width: 0 !important; height: auto !important; min-height: 0 !important; }
 #kcZahlenEbene .kc-bereich.korrektur > #undoCashBtn::after { white-space: normal; padding: 0 6px; }
 #kcZahlenEbene .kc-bereich.korrektur > #undoCashBtn > b { font-size: 34px !important; line-height: 1; }
 #kcZahlenEbene .kc-bereich.korrektur > #undoCashBtn > span { display: none; }
@@ -360,8 +366,14 @@ body.kc-aufbau.kc-kassenfunktionen-offen #moreDialog .more-grid > button[data-ac
 #kcZahlenEbene .kc-bereich.korrektur > .kc-korrektur-loeschen small { font-size: 12px; opacity: .85; }
 
 /* ---- Berechnung: Positionszeile · Trennlinie · Zu zahlen · Gegeben · RÜCKGELD groß ---- */
-#kcZahlenEbene .kc-bereich.berechnung > .change-card { height: 100%; display: flex !important; flex-direction: column; padding: 8px 10px !important; gap: 2px; min-height: 0; }
-#kcZahlenEbene .kc-bereich.berechnung .kc-pos-zeile-zahlen { font-size: 12px; opacity: .85; border-bottom: 1px solid rgba(255,255,255,.35); padding-bottom: 3px; margin-bottom: 4px; white-space: nowrap; overflow: hidden; }
+#kcZahlenEbene .kc-bereich.berechnung > .change-card { height: 100%; display: flex !important; flex-direction: column; padding: 5px 10px !important; gap: 0; min-height: 0; }
+#kcZahlenEbene .kc-bereich.berechnung .kc-pos-zeile-zahlen { font-size: 12px; opacity: .85; border-bottom: 1px solid rgba(255,255,255,.35); padding-bottom: 2px; margin-bottom: 2px; white-space: nowrap; overflow: hidden; }
+/* 21.09.2026: die größere Schrift unten (Rückmeldung "kann man nicht erkennen") brauchte mehr
+   Höhe, als die Karte fest hatte - der Statusbalken wurde am unteren Rand abgeschnitten
+   (overflow:hidden). Zeilenabstand statt Schriftgröße verkleinert, das reicht wieder aus. */
+#kcZahlenEbene .kc-bereich.berechnung > .change-card > small { line-height: 1.15 !important; }
+#kcZahlenEbene .kc-bereich.berechnung > .change-card > small > b { line-height: 1 !important; }
+#kcZahlenEbene .kc-bereich.berechnung > .change-card > #changePaymentState { margin: 0 !important; min-height: 0 !important; padding: 4px 8px !important; line-height: 1.2 !important; }
 /* 11.09.2026 (Betreiber: "Seite 2 - Zahlen-Seite - bei kleinen/alten Tablets nachbessern"):
    ECHTER FUND bei kleiner Bildschirmhoehe (getestet 1024x600): die change-card war insgesamt
    ca. 10px hoeher als ihr zugeteilter Platz - die Positionszeile (order:0, ganz oben) wurde
@@ -378,12 +390,14 @@ body.kc-aufbau.kc-kassenfunktionen-offen #moreDialog .more-grid > button[data-ac
      Regel hier an dieser Stelle wurde von der spaeteren, unbedingten 48px-Regel ueberstimmt). */
 }
 #kcZahlenEbene .kc-bereich.berechnung .change-card-head { order: 5; display: flex; justify-content: space-between; align-items: baseline; margin: 0; }
-#kcZahlenEbene .kc-bereich.berechnung .change-card-head > span { font-size: 13px; opacity: .85; }
+#kcZahlenEbene .kc-bereich.berechnung .change-card-head > span { font-size: 22px; opacity: .85; }
 #kcZahlenEbene .kc-bereich.berechnung .change-card-head > #undoCashBtn { display: none; } /* sitzt im Korrekturfeld */
 #kcZahlenEbene .kc-bereich.berechnung .change-card-divider { display: none; }
-#kcZahlenEbene .kc-bereich.berechnung > .change-card > small { order: 2; display: flex; justify-content: space-between; align-items: baseline; font-size: 13px; }
-#kcZahlenEbene .kc-bereich.berechnung > .change-card > small > b { font-size: 26px; font-weight: 800; }
-#kcZahlenEbene .kc-bereich.berechnung > .change-card > small { font-size: 15px; }
+/* 21.09.2026 (Betreiber, zweite Rückmeldung: "Beträge müssen noch größer, sonst erkennt man
+   nicht"): "Zu zahlen"/"Gegeben" waren mit 13-15px deutlich kleiner als jede andere Zahl auf
+   der Zahlen-Seite; auf 20/34px angehoben reichte laut Rückmeldung noch nicht. */
+#kcZahlenEbene .kc-bereich.berechnung > .change-card > small { order: 2; display: flex; justify-content: space-between; align-items: baseline; font-size: 24px; }
+#kcZahlenEbene .kc-bereich.berechnung > .change-card > small > b { font-size: 40px; font-weight: 800; }
 #kcZahlenEbene .kc-bereich.berechnung > .change-card > small:last-of-type { order: 1; }
 #kcZahlenEbene .kc-bereich.berechnung > .change-card > #changeDisplay { order: 6; font-size: 48px !important; line-height: 1.05; text-align: right; margin-top: auto; }
 /* 11.09.2026: bei wenig Bildschirmhoehe (siehe Fund weiter oben) ist 48px zu gross fuer das
@@ -393,10 +407,26 @@ body.kc-aufbau.kc-kassenfunktionen-offen #moreDialog .more-grid > button[data-ac
 @media (max-height: 700px) {
   #kcZahlenEbene .kc-bereich.berechnung > .change-card > #changeDisplay { font-size: 24px !important; line-height: 1.1 !important; }
 }
-#kcZahlenEbene .kc-bereich.berechnung > .change-card > #changePaymentState { order: 7; font-size: 11px; text-align: right; }
-/* Zustände: fehlt -> rot, passt -> grün, Auszahlung -> alles rot */
+#kcZahlenEbene .kc-bereich.berechnung > .change-card > #changePaymentState { order: 7; font-size: 15px; text-align: right; }
+/* Zustände: fehlt -> rot, passt -> grün, Auszahlung -> alles rot.
+   21.09.2026 (Betreiber: "Einnahme grüner Hintergrund, Auszahlung roter Hintergrund"):
+   ECHTER FUND - der Kommentar hier sagte "passt -> grün" schon lange, umgesetzt war davon
+   aber nur eine hellgrüne Ziffernfarbe (#86efac), keine grüne Fläche. Die Auszahlung bekam
+   ihre rote Fläche bereits (Zeile darunter); "passt" (Kunde zahlt genug, Kasse zahlt Rückgeld
+   zurück = Einnahme abgeschlossen) bekommt jetzt symmetrisch dieselbe grüne Behandlung. */
 #kcZahlenEbene .kc-bereich.berechnung > .change-card.payment-insufficient #changeDisplay { color: #fca5a5; }
-#kcZahlenEbene .kc-bereich.berechnung > .change-card.payment-sufficient #changeDisplay { color: #86efac; }
+#kcZahlenEbene .kc-bereich.berechnung > .change-card.payment-sufficient { background: #14532d !important; color: #fff !important; box-shadow: 0 0 0 3px #22c55e inset; }
+#kcZahlenEbene .kc-bereich.berechnung > .change-card.payment-sufficient #changeDisplay,
+#kcZahlenEbene .kc-bereich.berechnung > .change-card.payment-sufficient #dueDisplay,
+#kcZahlenEbene .kc-bereich.berechnung > .change-card.payment-sufficient #givenDisplay { color: #fff !important; }
+/* 21.09.2026 (Betreiber, zweite Rückmeldung: "die Schrift im weißen Balken kann man nicht
+   erkennen"): ECHTER FUND - die Statuszeile (der runde "Betrag ausreichend"-Balken) bekam nur
+   weiße Schrift verordnet, ihr eigener Hintergrund blieb aber die helle Pille aus der
+   Grundansicht (#dcfce7 bzw. #eef1f4) - weiße Schrift auf hellem Grund. Der Balken bekommt
+   jetzt selbst einen dunklen, zur Fläche passenden Hintergrund statt hell/durchsichtig. */
+#kcZahlenEbene .kc-bereich.berechnung > .change-card.payment-sufficient #changePaymentState { background: #0b3d1f !important; color: #fff !important; font-size: 19px !important; font-weight: 900 !important; }
+#kcZahlenEbene .kc-bereich.berechnung > .change-card.payment-sufficient small { font-size: 24px !important; }
+#kcZahlenEbene .kc-bereich.berechnung > .change-card.payment-sufficient small b { font-size: 40px !important; }
 #kcZahlenEbene .kc-bereich.berechnung > .change-card.payment-payout { background: #991b1b !important; color: #fff !important; box-shadow: 0 0 0 3px #ef4444 inset; }
 /* 10.09.2026 (Betreiber: "die Schrift im roten Rueckgeld-Bereich muss groesser und
    kontrastreicher sein"): ECHTER FUND - der dunkelrote Text (#c41717, aus der Grundansicht
@@ -408,12 +438,14 @@ body.kc-aufbau.kc-kassenfunktionen-offen #moreDialog .more-grid > button[data-ac
    weiss mit !important (die Grundansicht-Regel nutzt ebenfalls !important, ohne das eigene
    waere sie unterlegen), und die kleine Statuszeile deutlich groesser. */
 #kcZahlenEbene .kc-bereich.berechnung > .change-card.payment-payout #changeDisplay,
-#kcZahlenEbene .kc-bereich.berechnung > .change-card.payment-payout #changePaymentState,
 #kcZahlenEbene .kc-bereich.berechnung > .change-card.payment-payout #dueDisplay,
 #kcZahlenEbene .kc-bereich.berechnung > .change-card.payment-payout #givenDisplay { color: #fff !important; }
-#kcZahlenEbene .kc-bereich.berechnung > .change-card.payment-payout #changePaymentState { font-size: 17px !important; font-weight: 900 !important; }
-#kcZahlenEbene .kc-bereich.berechnung > .change-card.payment-payout small { font-size: 15px !important; }
-#kcZahlenEbene .kc-bereich.berechnung > .change-card.payment-payout small b { font-size: 1.1em !important; }
+/* 21.09.2026: derselbe Kontrastfehler wie bei "payment-sufficient" oben (siehe dortiger
+   Kommentar) steckte auch hier - der Statusbalken bekam weisse Schrift ohne eigenen dunklen
+   Hintergrund. */
+#kcZahlenEbene .kc-bereich.berechnung > .change-card.payment-payout #changePaymentState { background: #5c1010 !important; color: #fff !important; font-size: 19px !important; font-weight: 900 !important; }
+#kcZahlenEbene .kc-bereich.berechnung > .change-card.payment-payout small { font-size: 24px !important; }
+#kcZahlenEbene .kc-bereich.berechnung > .change-card.payment-payout small b { font-size: 40px !important; }
 
 /* ---- Bon wie im Ausdruck, mit sichtbarem Scrollbalken ---- */
 #kcZahlenEbene .kc-bereich.beleg { background: #fff; border: 1px solid #cbd5e1; }
@@ -814,7 +846,13 @@ body.kc-aufbau.kc-bon-leer .kc-pfeilfeld { display: none; }
   flex-basis: 0 !important; max-width: 0 !important; min-width: 0 !important; width: 0 !important;
   opacity: 0; margin-left: 0 !important; margin-right: 0 !important; padding-left: 0 !important; padding-right: 0 !important; border-width: 0 !important;
 }
-.kc-sammel-karte img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; object-position: center; opacity: .92; background: #f8fafc; }
+/* 21.09.2026 (Betreiber: "schwarze Balken müssen weg, Bilder müssen gut und klar erkennbar
+   sein"): ECHTER FUND - die Karten sind breite, flache Reihen (52-80px hoch, ~190px breit),
+   die Artikelfotos aber quadratisch. object-fit:contain zeigte das Foto dadurch nur schmal in
+   der Mitte, links und rechts blieb die dunkle Kartenfläche (#1f2937) als "schwarzer Balken"
+   sichtbar. object-fit:cover füllt die ganze Karte ohne Rand; es beschneidet das Foto oben/
+   unten statt es zu verkleinern - dadurch bleibt das Motiv gross und erkennbar. */
+.kc-sammel-karte img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: center 25%; opacity: .92; background: #f8fafc; }
 .kc-sammel-karte > span { position: relative; z-index: 1; text-shadow: 0 1px 3px #000; }
 .kc-sammel-karte.ansicht-bild::after { content:""; position:absolute; inset:45% 0 0; background:linear-gradient(transparent,rgba(15,23,42,.86) 55%); pointer-events:none; }
 .kc-sammel-karte.ansicht-bild .kc-sammel-name,.kc-sammel-karte.ansicht-bild .kc-sammel-preis,.kc-sammel-karte.ansicht-bild .kc-sammel-pfand{z-index:2;color:#fff;}
