@@ -3387,6 +3387,10 @@ body.kc-zahl-zoom .cart-area .qty-box{pointer-events:none;opacity:.45}
 .change-button b{font-size:.95rem;letter-spacing:.01em}
 .change-button small{font-size:.82rem;font-weight:800;opacity:.92}
 .bottom-layout .cash-finish-row .change-button{min-height:34px!important}
+/* Betreiber: "wenn Rückgeld gegeben werden muss, muss der Zahlbutton rot sein" - derselbe Rot-Ton
+   wie an anderer Stelle bereits fuer "Betrag fehlt/Auszahlung" verwendet (siehe payment-insufficient
+   / payment-payout), damit Rueckgeld-Faelle app-weit einheitlich als Warnung aussehen. */
+.change-button.change-button-rueckgeld{background:linear-gradient(#d8352e,#7f1616);border-color:#7f1616}
 
 
 /* --- Warengruppen-Knoepfe (gilt fuer BEIDE Ansichten) ------------------------------------

@@ -798,6 +798,14 @@ body.kc-aufbau.kc-bon-leer .kc-pfeilfeld { display: none; }
 .kc-sammel-karte.ansicht-text .kc-sammel-name, .kc-sammel-karte.ansicht-farbe .kc-sammel-name { text-shadow: none; font-size: 16px; }
 .kc-sammel-karte.ansicht-text .kc-sammel-preis, .kc-sammel-karte.ansicht-farbe .kc-sammel-preis { text-shadow: none; font-weight: 800; }
 .kc-sammel-karte.ansicht-text .kc-sammel-pfand { color: #4b5563; }
+/* Betreiber: "in der Sammelbestellung muss der weisse Text raus, komplett, wenn ich Bilder
+   einsetze, sonst erkennt man die Bilder nicht" - Name/Preis/Pfand lagen bislang als weisser
+   Text mit Schlagschatten IMMER ueber dem Bild, in der Bild-Ansicht war das Motiv darunter oft
+   nicht mehr zu erkennen. Die Auswahl-Anzahl (kc-sammel-anzahl) bleibt sichtbar - das ist keine
+   Beschriftung, sondern die eigentliche Bedieninformation (wie oft ausgewaehlt). */
+.kc-sammel-karte.ansicht-bild .kc-sammel-name,
+.kc-sammel-karte.ansicht-bild .kc-sammel-preis,
+.kc-sammel-karte.ansicht-bild .kc-sammel-pfand { display: none !important; }
 /* die blaue Info-Ecke (i) - in ALLEN drei Ansichten vorhanden */
 /* 10.09.2026: .kc-sammel-info-Regel entfernt - der zugehoerige Knopf existiert nicht mehr
    (war ohnehin nie klickbar, siehe kc-oberflaechen-anwenden.js). */

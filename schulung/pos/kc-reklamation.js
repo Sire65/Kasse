@@ -51,7 +51,11 @@
 
   function zeichneSchritt1() {
     $('.kc-rek-titel', ebene).textContent = 'Reklamation · Schritt 1 von 3 – Welcher Artikel?';
-    $('.kc-rek-zurueck', ebene).textContent = '✕'; $('.kc-rek-zurueck', ebene).dataset.rek = 'schliessen';
+    // Betreiber: "oben rechts 2x Schließkreuz, das irritiert" - Schritt 1 hatte hier links
+    // ein zweites, redundantes ✕ (dasselbe wie das echte Schließen-Kreuz rechts). "Zurück"
+    // ergibt auf dem ersten Schritt ohnehin keinen Sinn, also blenden wir den Knopf hier
+    // einfach aus, statt ihn zu einem zweiten Schliessen-Kreuz umzufunktionieren.
+    $('.kc-rek-zurueck', ebene).hidden = true;
     const gruppen = kategorien();
     const liste = artikelDerGruppe(gruppe);
     $('.kc-rek-inhalt', ebene).innerHTML =
@@ -64,14 +68,14 @@
   function zeichneSchritt2() {
     const p = PRODUCTS.find((x) => x.id === artikel);
     $('.kc-rek-titel', ebene).textContent = `Reklamation · Schritt 2 von 3 – Warum? (${p ? p.name : ''})`;
-    $('.kc-rek-zurueck', ebene).textContent = '←'; $('.kc-rek-zurueck', ebene).dataset.rek = 'zurueck';
+    $('.kc-rek-zurueck', ebene).hidden = false; $('.kc-rek-zurueck', ebene).textContent = '←'; $('.kc-rek-zurueck', ebene).dataset.rek = 'zurueck';
     $('.kc-rek-inhalt', ebene).innerHTML = '<div class="kc-rek-gruende">' +
       GRUENDE.map(([g, i]) => `<button type="button" data-rek-grund="${g}"><span class="kc-rek-grund-icon">${i}</span><span>${g}</span></button>`).join('') + '</div>';
   }
   function zeichneSchritt3() {
     const p = PRODUCTS.find((x) => x.id === artikel);
     $('.kc-rek-titel', ebene).textContent = `Reklamation · Schritt 3 von 3 – Was bekommt der Kunde?`;
-    $('.kc-rek-zurueck', ebene).textContent = '←'; $('.kc-rek-zurueck', ebene).dataset.rek = 'zurueck';
+    $('.kc-rek-zurueck', ebene).hidden = false; $('.kc-rek-zurueck', ebene).textContent = '←'; $('.kc-rek-zurueck', ebene).dataset.rek = 'zurueck';
     $('.kc-rek-inhalt', ebene).innerHTML =
       `<div class="kc-rek-zusammenfassung">${p ? p.name : ''} · ${grund}${p ? ' · ' + geld(p.price) : ''}</div>` +
       '<div class="kc-rek-ergebnisse">' +

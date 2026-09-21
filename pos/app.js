@@ -810,46 +810,37 @@ function renderProducts(){
   passeArtikelgroesseAn();
   syncImageV3RowSpans();
 }
-// image-v3-Kacheln sind quadratisch (Spaltenbreite hoch) und damit fast immer hoeher als eine
-// einzelne Gitterzeile (die je nach Ansicht/Aufloesung 96-160px hoch ist). Ohne eigenen
-// Zeilenumfang haben sie trotzdem nur eine Zeile belegt und in die naechste Zeile hineinragt -
-// dort ueberlappten sie dann die dort platzierte Kachel. Misst die tatsaechliche Zeilenhoehe an
-// einer normalen (nicht image-v3) Nachbarkachel und reserviert so viele Zeilen, wie die
-// image-v3-Kachel wirklich braucht - funktioniert dadurch in jeder Warengruppe, Aufloesung und
-// Oberflaeche, ohne die genaue Zeilenhoehe fest verdrahten zu muessen.
+// image-v3-Kacheln sind quadratisch (Spaltenbreite hoch) und passen dadurch so gut wie nie exakt
+// in ein Vielfaches der grob eingestellten Zeilenhoehe (96-160px je Ansicht/Aufloesung). Ganze
+// Zeilen zusaetzlich reservieren liess eine Luecke darunter frei (die Kachel blieb kleiner als
+// der reservierte Platz); die Kachel auf den reservierten Platz strecken schloss die Luecke,
+// machte sie dabei aber sichtbar groesser als noetig (Betreiber: "etwas zu gross, nicht so
+// gross dass man viel scrollen muss"). Der eigentliche Fehler steckt im groben Zeilenraster
+// selbst - darin passt fast keine Hoehe exakt. Deshalb baut diese Funktion das Raster bei jedem
+// Render kurz auf ein sehr feines Mass (2px) um und gibt JEDER Kachel - nicht nur image-v3 -
+// genau so viele Feinzeilen, wie sie fuer ihre eigene, unveraenderte Hoehe plus den ueblichen
+// Reihenabstand braucht. Normale Kacheln behalten dadurch pixelgenau ihre bisherige Groesse,
+// image-v3-Kacheln bleiben bei ihrer natuerlichen (quadratischen) Groesse statt gestreckt zu
+// werden, und beide Faelle enden mit demselben kleinen, echten Abstand statt einer Luecke.
 function syncImageV3RowSpans(){
   const grid=el("productGrid");
   if(!grid)return;
-  const cs=getComputedStyle(grid);
-  const rowGap=parseFloat(cs.rowGap)||0;
-  const reference=[...grid.children].find(t=>t.classList?.contains("product-tile-wrap")&&!t.classList.contains("image-v3"));
-  let rowHeight=reference?reference.getBoundingClientRect().height:0;
-  if(!rowHeight){
-    const match=/([\d.]+)px/.exec(cs.gridAutoRows);
-    rowHeight=match?parseFloat(match[1]):110;
-  }
-  if(!rowHeight)return;
-  // TOLERANZ: ein paar Subpixel Rundungsdifferenz reichten, um eine ganze Zeile zu viel zu
-  // reservieren (echte Kachelhoehe z.B. 220,3px bei genau 2 Zeilen à 110px - ohne Toleranz
-  // wurde daraus Zeile 3 statt 2). 4px Toleranz schluckt das.
-  const TOLERANZ=4;
-  // ECHTER FUND (Betreiber: "die Luecken zwischen den Buttons sind immer noch da"): eine
-  // quadratische Kachel (Spaltenbreite hoch, z.B. 174px) passt so gut wie nie exakt in ein
-  // Vielfaches der 110px-Zeilenhoehe - span:2 reserviert 226px (2×110+Zeilenabstand), die
-  // Kachel selbst bleibt aber bei ihren eigenen 174px und liess darunter eine Luecke frei
-  // (den Unterschied). Ganzzahlige Zeilen sind unvermeidbar (CSS Grid kennt keine "1,58
-  // Zeilen"), also fuellt die Kachel jetzt stattdessen den reservierten Platz komplett aus -
-  // das eingebettete Bild ist object-fit:cover und passt sich dabei einfach an, ohne verzerrt
-  // zu werden.
-  grid.querySelectorAll(".product-tile-wrap.image-v3").forEach(tile=>{
-    tile.style.removeProperty("grid-row");
-    tile.style.removeProperty("height");
-    const rows=Math.max(1,Math.ceil((tile.getBoundingClientRect().height+rowGap-TOLERANZ)/(rowHeight+rowGap)));
-    const reserviert=rows*rowHeight+(rows-1)*rowGap;
-    tile.style.setProperty("grid-row",`span ${rows}`,"important");
-    tile.style.setProperty("height",`${reserviert}px`,"important");
-    const innen=tile.querySelector(".product-tile");
-    if(innen)innen.style.setProperty("height",`${reserviert}px`,"important");
+  const wraps=[...grid.querySelectorAll(".product-tile-wrap")];
+  if(!wraps.length)return;
+  // Alles zuruecksetzen, BEVOR gemessen wird - sonst wuerde ab dem zweiten Durchlauf unter dem
+  // bereits feinen Raster von vorher gemessen, und jede Kachel ohne eigenen Zeilenumfang wuerde
+  // auf eine einzelne 2px-Zeile zusammenfallen.
+  grid.style.removeProperty("grid-auto-rows");
+  grid.style.removeProperty("row-gap");
+  wraps.forEach(w=>{w.style.removeProperty("grid-row");w.style.removeProperty("height")});
+  const gap=parseFloat(getComputedStyle(grid).rowGap)||6;
+  const heights=wraps.map(w=>w.getBoundingClientRect().height);
+  const FEINEINHEIT=2;
+  grid.style.setProperty("grid-auto-rows",`${FEINEINHEIT}px`,"important");
+  grid.style.setProperty("row-gap","0px","important");
+  wraps.forEach((w,i)=>{
+    const spanne=Math.max(1,Math.round((heights[i]+gap)/FEINEINHEIT));
+    w.style.setProperty("grid-row",`span ${spanne}`,"important");
   });
 }
 window.addEventListener("adaptive-layout-change",()=>requestAnimationFrame(syncImageV3RowSpans));
@@ -1157,6 +1148,12 @@ function updateChange(){
     const zeigen=!isPayout&&hasDue&&sufficient&&toCents(state.given)>0;
     changeBtn.hidden=!zeigen;
     finishRow.classList.toggle("mit-rueckgeld",zeigen);
+    // Betreiber: "wenn Rückgeld gegeben werden muss, muss der Zahlbutton rot sein" - bisher war
+    // dieser Knopf immer gruen, egal ob passend bezahlt oder tatsaechlich Rueckgeld faellig war.
+    // Genau das Rueckgeld-Herausgeben ist die fehleranfaellige Stelle am Stand, nicht das simple
+    // Entgegennehmen eines passenden Betrags - daher jetzt ein eigener, roter Warnhinweis nur
+    // dann, wenn wirklich Geld zurueckgegeben werden muss (change > 0).
+    changeBtn.classList.toggle("change-button-rueckgeld",zeigen&&toCents(change)>0);
     if(zeigen){
       changeBtn.innerHTML=`<b>BAR KASSIEREN</b><small>${money(change)} zurück</small>`;
       changeBtn.title=`Bon abschließen und ${money(change)} Rückgeld herausgeben`;
