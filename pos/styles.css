@@ -506,9 +506,7 @@ body.rush-mode .product-label strong{font-size:1.15rem}
 body.rush-mode .main-layout{height:660px}
 body.training-mode{box-shadow:inset 0 0 0 8px #e3a008}
 body.training-mode .app-header{background:linear-gradient(180deg,#4a3510,#2f2209)}
-/* Favoritenstern links, direkt unter dem Info-Button (nicht rechts oben - der Preis sitzt
-   dort und wuerde ihn sonst verdecken). */
-.auto-favorite-star{position:absolute;left:7px;right:auto;top:39px;z-index:8;background:#f6c344;color:#583b00;border-radius:50%;width:27px;height:27px;display:flex;align-items:center;justify-content:center;font-weight:1000}
+.auto-favorite-star{position:absolute;right:7px;top:7px;z-index:8;background:#f6c344;color:#583b00;border-radius:50%;width:27px;height:27px;display:flex;align-items:center;justify-content:center;font-weight:1000}
 
 .tip{background:linear-gradient(#c7528a,#8c2d5d)}
 .tip-card{max-width:620px}
@@ -1113,11 +1111,10 @@ html,body{width:100%;max-width:100%;overflow-x:hidden}
   transform:none!important;
 }
 
-/* Favoritenstern links, direkt unter dem Info-Dreieck (das ist 48px hoch). */
+/* Favoritenstern dezent rechts oben. */
 .auto-favorite-star{
-  left:6px!important;
-  right:auto!important;
-  top:52px!important;
+  right:6px!important;
+  top:6px!important;
   width:23px!important;
   height:23px!important;
   font-size:14px!important;
