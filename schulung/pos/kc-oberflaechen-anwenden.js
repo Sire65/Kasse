@@ -191,7 +191,7 @@
            #cashChangeBtn bleibt technisch vollständig erhalten, wird hier aber bewusst NICHT
            umgehängt. Damit kann er auf anderen/alten Oberflächen weiter genutzt werden, ohne
            auf der Zahlen-Seite einen zweiten Bezahlknopf zu erzeugen. */
-        ['#printBonBtn', '#tipBtn', '#roundUpBtn', '#exactCashBtn', '#payBtn', '#cardBtn', '#accountChargeBtn'].forEach((sel) => $(sel).forEach((k) => { merkeHeimat(k); r.appendChild(k); }));
+        ['#printBonBtn', '#tipBtn', '#roundUpBtn', '#exactCashBtn', '#payBtn', '#cardBtn', '#accountChargeBtn'].forEach((sel) => $$(sel).forEach((k) => { merkeHeimat(k); r.appendChild(k); }));
         bericht.zugeordnet++;
       } else if (z && z.eigen === 'bedienblock') {
         const status = document.createElement('div'); status.className = 'kc-statuszeile';
@@ -324,6 +324,32 @@
   if (typeof urProductsPerPage === 'function') global.productsPerPage = aufbauProductsPerPage;
 
   /* ------------------------------------------------------------------ Anwenden */
+  /* ECHTER FUND (21.09.2026, Betreiber: "auf dem Schulungs-iPad läuft die Rückgeldseite nicht"):
+     Mehrere Vorlagen im Kassendesigner (u.a. "9 Zoll quer · platzsparend", "9 Zoll hochkant")
+     platzieren auf Seite 1 weder eine eigene Rückgeld-Taste (kc-zahlen-taste) noch einen festen
+     Zahlbereich im Bild (kc-zahlen-fest) - die Zahlen-Seite ist im Datensatz zwar vorhanden,
+     aber es gibt keinen Knopf, der sie öffnet. Ohne Gegenmaßnahme bleibt das Rückgeld auf genau
+     diesen Vorlagen unerreichbar, ohne dass beim Aufbauen ein Fehler oder Platzhalter auffällt.
+     Prüft nach jedem Aufbau, ob eine Rückgeld-Taste oder ein fester Zahlbereich tatsächlich im
+     Bild steht; fehlt beides, blendet eine schwebende Notfall-Taste ein, die nichts Bestehendes
+     verdrängt (eigene Ecke, kein Rasterplatz nötig) und trotzdem auf Seite 2 führt. */
+  function sorgeFuerRueckgeldZugang(o) {
+    const schweber = document.getElementById('kcZahlenTasteSchwebend');
+    if (!seiteFinden(o, 'zahlen') || $('#kcZahlenTaste') || $('.cash-card', hauptRaster) || $('.change-card', hauptRaster)) {
+      if (schweber) schweber.hidden = true;
+      return;
+    }
+    let k = schweber;
+    if (!k) {
+      k = document.createElement('button');
+      k.type = 'button'; k.id = 'kcZahlenTasteSchwebend'; k.className = 'kc-zahlen-taste-schwebend';
+      k.innerHTML = '<strong>💶 RÜCKGELD</strong>';
+      k.title = 'Zahlen-Seite öffnen';
+      k.addEventListener('click', () => zahlenSeite(true));
+      document.body.appendChild(k);
+    }
+    k.hidden = false;
+  }
   function anwenden(id) {
     const P = global.KCOberflaechen;
     if (!P) return { ok: false, grund: 'kc-oberflaechen-pos.js fehlt' };
@@ -357,6 +383,7 @@
     document.body.classList.toggle('kc-aufbau-ohne-zahlenseite', !seiteFinden(o, 'zahlen'));
     const b = verteile(seiteFinden(o, 'kasse') || { bausteine: [] }, hauptRaster, o);
     hauptRaster.dataset.oberflaeche = o.id;
+    sorgeFuerRueckgeldZugang(o);
     // 10.09.2026 (Betreiber: "unauffällig einen Code einbauen der die Nummer der Oberfläche
     // zeigt, damit man nicht immer fragen muss, welche es ist"): kleine Kennung unten in der
     // Fußzeile - die einzige Stelle, die bei JEDER der (aktuell 19) Vorlagen unverändert
@@ -373,6 +400,7 @@
 
   function zuruecksetzen() {
     if (zahlenEbene) { zahlenEbene.hidden = true; document.body.classList.remove('kc-zahlenseite-offen'); }
+    const schweber = document.getElementById('kcZahlenTasteSchwebend'); if (schweber) schweber.hidden = true;
     allesHeim();
     if (hauptRaster) hauptRaster.innerHTML = '';
     aktiv = null;
