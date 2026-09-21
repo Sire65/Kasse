@@ -23,8 +23,24 @@
   const core = global.KCTimeClockCore;
   if (!core) return;
   const read = (key, fallback) => { try { return JSON.parse(localStorage.getItem(key) || 'null') ?? fallback; } catch { return fallback; } };
+  // ECHTER FUND (Betreiber: "Ausweis erkannt (KC-0010), aber keine passende Person hinterlegt"):
+  // die Stechuhr fuehrt ihre eigene Personenliste, getrennt von der Bedienerliste der Kasse,
+  // und die startete bislang immer leer - sie erwartet eine Uebernahme vom PC-Manager
+  // (uebernimmPersonen). Ohne PC-Manager in der Naehe (z.B. Schulung/Vorfuehrung) blieb jeder
+  // Mitgliedsausweis unbekannt, obwohl dieselbe Nummer beim Bedieneranmelden laengst funktioniert.
+  // Standardbesetzung deckt genau dieselben KC-00xx-Nummern ab wie die Bedienerliste (Pseudonyme,
+  // keine Klarnamen - siehe Grundregel oben) und wird nur verwendet, solange keine echte
+  // Personenliste vom PC-Manager uebernommen wurde.
+  const STANDARD_PERSONEN=[
+    ["kc-0001","Maja","KC-0001"],["kc-0002","Heidi","KC-0002"],["kc-0003","Puhbär","KC-0003"],
+    ["kc-0004","Balu","KC-0004"],["kc-0005","Bibi","KC-0005"],["kc-0006","Willi","KC-0006"],
+    ["kc-0007","Einhorn","KC-0007"],["kc-0008","Spock","KC-0008"],["kc-0009","Tigger","KC-0009"],
+    ["kc-0010","Pumuckl","KC-0010"],["kc-0011","Wickie","KC-0011"],["kc-0012","Nemo","KC-0012"],
+    ["kc-0013","Yoda","KC-0013"],["kc-0014","Bambi","KC-0014"],["kc-0015","Lillifee","KC-0015"],
+    ["kc-0016","Maus","KC-0016"],["kc-0017","Sandmann","KC-0017"],["kc-0018","Simba","KC-0018"]
+  ].map(([id,name,memberNo])=>({id,type:"member",displayName:name,credential:memberNo,active:true,role:"Mitglied"}));
   let config = read(CONFIG_KEY, {enabled:false,eventId:'WM-2026',allowBirthCode:true,allowManualTime:true});
-  let people = read(PEOPLE_KEY, []), events = read(EVENTS_KEY, []);
+  let people = read(PEOPLE_KEY, STANDARD_PERSONEN), events = read(EVENTS_KEY, []);
   let selected = null, source = 'id', erfasstAm = null, vorschlag = null, gerundeterVorschlag = null;
   let schichtgrund = '';
   // Gruende beim GEHEN. Bewusst sechs Stueck in zwei Reihen - genug fuer den echten Betrieb,

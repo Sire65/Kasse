@@ -35,7 +35,7 @@ const KC_BEDIENERSTAMM=[
   {id:"kc-0007",name:"Einhorn",memberNo:"KC-0007"},
   {id:"kc-0008",name:"Spock",memberNo:"KC-0008"},
   {id:"kc-0009",name:"Tigger",memberNo:"KC-0009"},
-  {id:"kc-0010",name:"Hans-Joachim Koch",memberNo:"KC-0010"},
+  {id:"kc-0010",name:"Pumuckl",memberNo:"KC-0010"},
   {id:"kc-0011",name:"Wickie",memberNo:"KC-0011"},
   {id:"kc-0012",name:"Nemo",memberNo:"KC-0012"},
   {id:"kc-0013",name:"Yoda",memberNo:"KC-0013"},
