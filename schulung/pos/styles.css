@@ -3797,3 +3797,39 @@ body.kc-layout-neu:not(.kc-aufbau) .sales-area>.product-grid>.product-tile-wrap>
 @keyframes kcZahlungsPfeilEin{0%{transform:translateX(8px);opacity:.15}35%{opacity:1}100%{transform:translateX(-8px);opacity:.15}}
 @keyframes kcZahlungsPfeilAus{0%{transform:translateX(-8px);opacity:.15}35%{opacity:1}100%{transform:translateX(8px);opacity:.15}}
 @media (prefers-reduced-motion:reduce){.kc-pfeilfeld span{animation:none!important}}
+
+/* ECHTER FUND (21.09.2026, Betreiber: "der Reklamation-Button muss eine Seite aufrufen, geht
+   aber nicht"): kc-reklamation.js baut sein eigenes Overlay (.kc-reklamation-ebene) und haengt
+   es ans Ende von <body>, aber es gab dafuer nie eine CSS-Regel - ohne position:fixed blieb es
+   ein ganz normaler Block am Dokumentenende und stand damit weit unterhalb des sichtbaren
+   Bildschirms. Der Tipp loeste also durchaus die Reklamation aus (kein Fehler in der Konsole),
+   nur zu sehen war davon nichts. */
+.kc-reklamation-ebene{position:fixed;inset:0;z-index:150;background:#e8e8e8;display:flex;flex-direction:column}
+.kc-reklamation-ebene[hidden]{display:none!important}
+.kc-rek-kopf{display:flex;align-items:center;gap:10px;padding:12px 14px;background:#0c1726;color:#fff}
+.kc-rek-titel{flex:1;font-size:17px;font-weight:800}
+.kc-rek-zurueck,.kc-rek-schliessen{border:0;border-radius:8px;background:#334155;color:#fff;font-size:18px;font-weight:800;width:40px;height:40px;cursor:pointer}
+.kc-rek-schliessen{background:#7f1d1d}
+.kc-rek-inhalt{flex:1;overflow:auto;padding:16px}
+.kc-rek-schritt1{display:flex;flex-direction:column;gap:14px;height:100%}
+.kc-rek-gruppen{display:flex;flex-wrap:wrap;gap:8px}
+.kc-rek-gruppen button{padding:10px 16px;border:2px solid #334155;border-radius:999px;background:#fff;font-weight:700;cursor:pointer}
+.kc-rek-gruppen button.aktiv{background:#123a5c;color:#fff;border-color:#123a5c}
+.kc-rek-artikel{flex:1;overflow:auto;display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px;align-content:start}
+.kc-rek-artikel button{display:flex;flex-direction:column;gap:6px;padding:14px;border:2px solid #334155;border-radius:12px;background:#fff;cursor:pointer;text-align:left}
+.kc-rek-art-name{font-weight:800}
+.kc-rek-art-preis{color:#475569}
+.kc-rek-leer{color:#64748b;padding:20px}
+.kc-rek-gruende{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:10px}
+.kc-rek-gruende button{display:flex;align-items:center;gap:10px;padding:16px;border:2px solid #334155;border-radius:12px;background:#fff;font-weight:700;font-size:16px;cursor:pointer}
+.kc-rek-grund-icon{font-size:26px}
+.kc-rek-zusammenfassung{padding:12px 14px;background:#fff;border:2px solid #334155;border-radius:10px;font-weight:700;margin-bottom:14px}
+.kc-rek-ergebnisse{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px}
+.kc-rek-ergebnisse button{display:flex;flex-direction:column;align-items:center;gap:4px;padding:18px;border:0;border-radius:12px;background:#1e6848;color:#fff;cursor:pointer}
+.kc-rek-ergebnisse button:disabled{opacity:.6;cursor:not-allowed}
+.kc-rek-ergebnisse button[data-rek-ergebnis="nichts"]{background:#334155}
+.kc-rek-erg-icon{font-size:30px}
+.kc-rek-ergebnisse b{font-size:16px}
+.kc-rek-ergebnisse small{opacity:.85}
+.kc-rek-bonfeld{display:block;margin-top:16px;font-weight:700;color:#334155}
+.kc-rek-bonfeld input{display:block;margin-top:6px;width:100%;max-width:320px;padding:10px;border:2px solid #334155;border-radius:8px;font-size:15px}

@@ -829,9 +829,14 @@ function syncImageV3RowSpans(){
     rowHeight=match?parseFloat(match[1]):110;
   }
   if(!rowHeight)return;
+  // TOLERANZ (Betreiber: "zwischen den Getraenkereihen ist jetzt eine Luecke"): ein paar
+  // Subpixel Rundungsdifferenz reichten, um eine ganze Zeile zu viel zu reservieren (echte
+  // Kachelhoehe z.B. 220,3px bei genau 2 Zeilen à 110px - ohne Toleranz wurde daraus Zeile 3
+  // statt 2). 4px Toleranz schluckt das, ohne dass wieder eine echte naechste Zeile fehlt.
+  const TOLERANZ=4;
   grid.querySelectorAll(".product-tile-wrap.image-v3").forEach(tile=>{
     tile.style.removeProperty("grid-row");
-    const rows=Math.max(1,Math.ceil((tile.getBoundingClientRect().height+rowGap)/(rowHeight+rowGap)));
+    const rows=Math.max(1,Math.ceil((tile.getBoundingClientRect().height+rowGap-TOLERANZ)/(rowHeight+rowGap)));
     tile.style.setProperty("grid-row",`span ${rows}`,"important");
   });
 }
