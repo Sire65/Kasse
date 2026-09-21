@@ -3,7 +3,9 @@
 .product-grid .image-v3>.product-tile{position:relative!important;width:100%!important;height:auto!important;aspect-ratio:1!important;min-height:0!important;max-height:none!important;padding:0!important;border:0!important;background:#eee!important}
 .product-grid .image-v3>.product-tile>img{position:absolute!important;inset:0!important;width:100%!important;height:100%!important;max-height:none!important;object-fit:contain!important}
 .product-grid .image-v3>.product-tile:after{display:none!important}
-.product-grid .image-v3 .product-label{position:absolute!important;inset:2% 2% auto auto!important;z-index:5!important;text-shadow:none!important;pointer-events:none}
+/* Preis unten links, ueber dem eingebrannten (im Bild enthaltenen) farbigen Namensband -
+   dort steht er direkt neben dem Artikelbild, statt oben rechts frei in der Luft. */
+.product-grid .image-v3 .product-label{position:absolute!important;inset:auto auto 2% 2%!important;z-index:5!important;text-shadow:none!important;pointer-events:none}
 .product-grid .image-v3 .product-label strong,.product-grid .image-v3 .product-label>.option-tag,.product-grid .image-v3 .product-label>.deposit-tag{display:none!important}
 .product-grid .image-v3 .product-label>span{position:static!important;display:block!important;background:#111a29!important;color:white!important;border-radius:5px!important;padding:4px 6px!important;font-size:clamp(11px,1.2vw,17px)!important;height:auto!important;min-height:0!important;margin:0!important}
 .product-grid .image-v3>.product-info-button{position:absolute!important;top:1%!important;left:1%!important;right:auto!important;bottom:auto!important;width:21%!important;height:21%!important;min-width:0!important;min-height:0!important;background:transparent!important;border:0!important;box-shadow:none!important;color:transparent!important;text-shadow:none!important;z-index:10!important}

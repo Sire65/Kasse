@@ -112,7 +112,7 @@ body.kc-spiegel-modus .main-layout>.cart-area{direction:ltr}
 .cart-empty{color:var(--muted);padding:40px 10px;text-align:center}
 .cart-row{display:grid;grid-template-columns:48px 1fr 105px 90px 45px;align-items:center;gap:10px;min-height:65px;border-bottom:1px solid #d8dde3;cursor:pointer;border-radius:7px;padding:2px 4px}.cart-row:hover{background:#eef5fb}.cart-row.selected{background:#dcecff;box-shadow:inset 5px 0 #176bb0;outline:2px solid #176bb0;outline-offset:-2px}
 .cart-thumb{width:43px;height:43px;border-radius:5px;object-fit:cover}
-.cart-name strong{display:block;font-size:1rem}.cart-name small{color:#5f6876}
+.cart-name strong{display:block;font-size:1.12rem}.cart-name small{color:#5f6876;font-size:.9rem}
 .qty-box{display:grid;grid-template-columns:32px 40px 32px;border:1px solid #c7cdd4;border-radius:6px;overflow:hidden}
 .qty-box button,.qty-box span{height:34px;border:0;background:#f2f3f5;display:flex;align-items:center;justify-content:center;font-weight:800}
 .qty-box span{background:white}
@@ -208,7 +208,7 @@ dialog::backdrop{background:rgba(0,0,0,.72)}
   .status-footer{flex-wrap:wrap;height:auto;gap:10px;padding:12px}
 }
 
-.option-card{max-width:520px}.option-subtitle{color:#667085;margin-top:-8px}.option-grid{display:grid;grid-template-columns:1fr;gap:12px;margin:18px 0}.option-choice{display:grid;grid-template-columns:54px 1fr auto;align-items:center;gap:12px;border:1px solid #cfd4da;border-radius:10px;background:linear-gradient(#fff,#f0f2f4);padding:12px;text-align:left}.option-choice .option-icon{width:46px;height:46px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:#17243a;color:white;font-size:1.4rem}.option-choice strong{display:block;font-size:1.05rem}.option-choice small{color:#667085}.option-choice b{font-size:1.1rem}.dialog-close{width:100%;border:0;border-radius:8px;padding:12px;background:#e5e7eb;font-weight:800}.settings-card{max-width:580px}.setting-line{display:grid;gap:8px;margin:18px 0}.setting-line span{font-weight:900}.setting-line select{padding:12px;border:1px solid #cfd4da;border-radius:8px;background:white}.setting-help{color:#667085;font-size:.9rem;line-height:1.5}.option-tag{display:block;font-size:.78rem;color:#f3b63f;margin-top:2px;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.deposit-tag{display:block;font-size:.72rem;color:#fff;background:rgba(0,0,0,.48);padding:2px 5px;border-radius:4px;margin:4px auto 0;width:max-content;max-width:100%;box-sizing:border-box;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.cart-option{display:block;color:#7a4c00;font-size:.78rem;font-weight:700}.cart-deposit{display:block;color:#1264ad;font-size:.76rem}.rule-chip{font-size:.72rem;background:#f3b63f;color:#111827;border-radius:4px;padding:2px 5px;margin-left:5px}
+.option-card{max-width:520px}.option-subtitle{color:#667085;margin-top:-8px}.option-grid{display:grid;grid-template-columns:1fr;gap:12px;margin:18px 0}.option-choice{display:grid;grid-template-columns:54px 1fr auto;align-items:center;gap:12px;border:1px solid #cfd4da;border-radius:10px;background:linear-gradient(#fff,#f0f2f4);padding:12px;text-align:left}.option-choice .option-icon{width:46px;height:46px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:#17243a;color:white;font-size:1.4rem}.option-choice strong{display:block;font-size:1.05rem}.option-choice small{color:#667085}.option-choice b{font-size:1.1rem}.dialog-close{width:100%;border:0;border-radius:8px;padding:12px;background:#e5e7eb;font-weight:800}.settings-card{max-width:580px}.setting-line{display:grid;gap:8px;margin:18px 0}.setting-line span{font-weight:900}.setting-line select{padding:12px;border:1px solid #cfd4da;border-radius:8px;background:white}.setting-help{color:#667085;font-size:.9rem;line-height:1.5}.option-tag{display:block;font-size:.78rem;color:#f3b63f;margin-top:2px;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.deposit-tag{display:block;font-size:.72rem;color:#fff;background:rgba(0,0,0,.48);padding:2px 5px;border-radius:4px;margin:4px auto 0;width:max-content;max-width:100%;box-sizing:border-box;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.cart-option{display:block;color:#7a4c00;font-size:.86rem;font-weight:700}.cart-deposit{display:block;color:#1264ad;font-size:.84rem}.rule-chip{font-size:.78rem;background:#f3b63f;color:#111827;border-radius:4px;padding:2px 5px;margin-left:5px}
 
 
 /* V0.4.0 – Artikelinformationen und Layoutprofile */
@@ -506,7 +506,9 @@ body.rush-mode .product-label strong{font-size:1.15rem}
 body.rush-mode .main-layout{height:660px}
 body.training-mode{box-shadow:inset 0 0 0 8px #e3a008}
 body.training-mode .app-header{background:linear-gradient(180deg,#4a3510,#2f2209)}
-.auto-favorite-star{position:absolute;right:7px;top:7px;z-index:8;background:#f6c344;color:#583b00;border-radius:50%;width:27px;height:27px;display:flex;align-items:center;justify-content:center;font-weight:1000}
+/* Favoritenstern links, direkt unter dem Info-Button (nicht rechts oben - der Preis sitzt
+   dort und wuerde ihn sonst verdecken). */
+.auto-favorite-star{position:absolute;left:7px;right:auto;top:39px;z-index:8;background:#f6c344;color:#583b00;border-radius:50%;width:27px;height:27px;display:flex;align-items:center;justify-content:center;font-weight:1000}
 
 .tip{background:linear-gradient(#c7528a,#8c2d5d)}
 .tip-card{max-width:620px}
@@ -1111,10 +1113,11 @@ html,body{width:100%;max-width:100%;overflow-x:hidden}
   transform:none!important;
 }
 
-/* Favoritenstern dezent rechts oben. */
+/* Favoritenstern links, direkt unter dem Info-Dreieck (das ist 48px hoch). */
 .auto-favorite-star{
-  right:6px!important;
-  top:6px!important;
+  left:6px!important;
+  right:auto!important;
+  top:52px!important;
   width:23px!important;
   height:23px!important;
   font-size:14px!important;
@@ -1741,13 +1744,16 @@ body.rush-mode .main-actions #moreBtn{grid-column:2/span 2!important;grid-row:3!
    halbe Portion kennt: so stehen alle Knoepfe genau untereinander. */
 .cart-row{
   display:grid!important;
-  grid-template-columns:48px minmax(0,1fr) 62px 76px 96px 80px 42px!important;
+  grid-template-columns:40px minmax(84px,1fr) 64px 58px 74px 60px 30px!important;
   gap:8px!important;
   align-items:center!important;
 }
 .cart-row .cart-thumb{grid-column:1}
 .cart-row .cart-name{grid-column:2;min-width:0}
-.cart-row .half-portion-cell{grid-column:3;margin-right:6px}
+/* Der ½-Knopf bekommt mehr Spalte als er braucht und haengt links in ihr, statt zentriert zu
+   sein - so ruecken die Knoepfe sichtbar auseinander und der ½-Knopf liegt nicht mehr am
+   Rabattknopf an. */
+.cart-row .half-portion-cell{grid-column:3;justify-content:flex-start!important;margin-right:0}
 .cart-row .position-discount-button{grid-column:4}
 .cart-row .qty-box{grid-column:5}
 .cart-row .row-total{grid-column:6;text-align:right;white-space:nowrap}
@@ -1766,7 +1772,7 @@ body.rush-mode .main-actions #moreBtn{grid-column:2/span 2!important;grid-row:3!
 }
 .cart-line-price .net-price{
   color:#0b6f35;
-  font-size:.95rem;
+  font-size:1.08rem;
   font-weight:1000;
 }
 .cart-line-price.no-discount .net-price{
@@ -1778,8 +1784,10 @@ body.rush-mode .main-actions #moreBtn{grid-column:2/span 2!important;grid-row:3!
 }
 @media(max-width:1050px){
   .cart-column-head{grid-template-columns:minmax(0,1fr) 78px 96px 90px 38px}
-  .cart-row{grid-template-columns:42px minmax(0,1fr) 78px 96px 90px 38px!important}
-  .position-discount-button{min-width:70px!important;font-size:.61rem!important}
+  .cart-row{grid-template-columns:36px minmax(64px,1fr) 56px 44px 62px 48px 26px!important}
+  .cart-row .half-portion-cell{justify-content:flex-start!important}
+  .cart-row .position-discount-button{min-width:0!important;font-size:0!important;padding:0!important}
+  .cart-row .position-discount-button::before{content:"%"!important;font-size:1.1rem!important;font-weight:900!important}
 }
 
 /* QR-Code sichtbar und ohne leere Innenfläche */
@@ -1923,10 +1931,15 @@ body.training-mode .exact-button:not(:disabled){background:#7c2fd6!important;bor
 .currency-card{width:min(920px,94vw);max-height:92vh;overflow:auto}.currency-head{display:flex;justify-content:space-between;gap:16px;align-items:flex-start}.currency-status{padding:7px 11px;border-radius:999px;background:#fff3cd;color:#704d00;font-weight:800}.currency-status.online{background:#dcfce7;color:#166534}.currency-grid{display:grid;grid-template-columns:1fr 1.35fr auto 1.35fr;gap:12px;align-items:end;margin:16px 0}.currency-grid label{display:grid;gap:5px;font-weight:750}.currency-grid input,.currency-grid select{min-height:46px;padding:8px;border:1px solid #9fb0c2;border-radius:9px;background:#fff;font-size:1rem}.currency-swap{height:46px;min-width:48px;font-size:1.3rem}.currency-result{display:grid;gap:5px;text-align:center;background:#eef5fb;border:1px solid #bfd2e2;border-radius:14px;padding:17px}.currency-result strong{font-size:2rem}.currency-result small{font-weight:750}.currency-meta{display:flex;flex-wrap:wrap;gap:10px 22px;margin:12px 0;font-size:.9rem}.currency-actions{display:flex;flex-wrap:wrap;gap:10px}.currency-history{margin-top:15px;border-top:1px solid #ced9e3;padding-top:10px}.currency-table-wrap{overflow:auto;max-height:240px}.currency-history table{width:100%;border-collapse:collapse}.currency-history th,.currency-history td{padding:8px;border-bottom:1px solid #d8e0e7;text-align:left;white-space:nowrap}.currency-disclaimer{margin-top:16px;padding:12px 14px;border-left:5px solid #b7791f;background:#fff8df;font-size:.88rem;line-height:1.45}.source-link{align-self:center;font-weight:750}.quiet-danger{margin-top:9px}.dialog-actions{align-items:center}@media(max-width:760px){.currency-grid{grid-template-columns:1fr 1fr}.currency-swap{grid-column:1/-1;width:100%}.currency-result strong{font-size:1.55rem}}
 
 .account-charge{background:#4c2d73;color:#fff}
+.account-charge-confirm{min-height:64px;font-size:1.25rem;margin-top:10px}
 .account-card{max-width:720px}.account-control-card{max-width:1120px}
 .account-list{display:grid;gap:8px;max-height:320px;overflow:auto}
 .account-list button,.balance-row{display:flex;justify-content:space-between;align-items:center;text-align:left;padding:12px;border:1px solid #b8c4d1;border-radius:10px;background:#fff}
 .account-list small,.balance-row small{display:block;color:#526173;margin-top:3px}
+/* Konten-Fenster: abwechselnd eingefaerbte Zeilen, damit man beim schnellen Ueberfliegen
+   sofort erkennt, wo ein Konto endet und das naechste beginnt. */
+#accountList button:nth-child(odd){background:#eaf2fb}
+#accountList button:nth-child(even){background:#fdf3e1}
 .balance-detail-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:8px;padding-bottom:8px;border-bottom:1px solid #d8e0e7}
 .balance-detail-head>div{text-align:right}.balance-detail-head strong{display:block;font-size:1.15rem}.balance-back{padding:8px 10px;min-height:38px}
 .balance-detail-list{display:grid;gap:4px;max-height:285px;overflow:auto}
@@ -2273,12 +2286,14 @@ body.tablet-fit .cart-quantity-bar span{display:none!important}
 body.tablet-fit .cart-quantity-bar button{width:auto!important;min-width:22px!important;height:34px!important;min-height:34px!important;padding:0 2px!important;font-size:.68rem!important}
 body.tablet-fit .void-bon{min-width:58px!important;max-width:100px!important;width:auto!important;height:34px!important;min-height:34px!important;padding:2px 5px!important;font-size:.66rem!important}
 body.tablet-fit .cart-list{min-height:0!important;overflow-y:auto!important;overflow-x:hidden!important}
-body.tablet-fit .cart-row{min-height:46px!important;padding:2px 3px!important;gap:4px!important;grid-template-columns:36px minmax(70px,1fr) 54px 72px 60px 32px!important}
-body.tablet-fit .cart-row .position-discount-button{font-size:.62rem!important;padding:2px 3px!important}
-body.tablet-fit .cart-row .row-total{font-size:.78rem!important}
+body.tablet-fit .cart-row{min-height:46px!important;padding:2px 3px!important;gap:6px!important;grid-template-columns:34px minmax(72px,1fr) 52px 40px 62px 54px 28px!important}
+body.tablet-fit .cart-row .half-portion-cell{justify-content:flex-start!important}
+body.tablet-fit .cart-row .position-discount-button{min-width:0!important;font-size:0!important;padding:0!important}
+body.tablet-fit .cart-row .position-discount-button::before{content:"%"!important;font-size:1rem!important;font-weight:900!important}
+body.tablet-fit .cart-row .row-total{font-size:.9rem!important}
 body.tablet-fit .cart-thumb{width:32px!important;height:32px!important}
-body.tablet-fit .cart-name strong{font-size:.78rem!important;line-height:1.02!important}
-body.tablet-fit .cart-name small{font-size:.62rem!important}
+body.tablet-fit .cart-name strong{font-size:.92rem!important;line-height:1.05!important}
+body.tablet-fit .cart-name small{font-size:.76rem!important}
 body.tablet-fit .qty-box button,body.tablet-fit .delete-row{height:38px!important;min-height:38px!important;min-width:34px!important}
 body.tablet-fit .summary-meta{min-height:30px!important;padding:3px 6px!important;font-size:.68rem!important}
 body.tablet-fit .grand-total{height:46px!important;min-height:46px!important;padding:3px 7px!important}
@@ -3652,9 +3667,10 @@ body:not(.group-color-mode) .category-tabs button.active{background:linear-gradi
   letter-spacing:-.015em!important;
   overflow-wrap:anywhere!important;
 }
+/* Preis unten links, ueber dem farbigen Namensband (statt oben links frei in der Luft). */
 .product-label>span{
   position:absolute!important;
-  top:8px!important;
+  bottom:8px!important;
   left:8px!important;
   z-index:15!important;
   display:flex!important;
@@ -3715,13 +3731,13 @@ body:not(.group-color-mode) .category-tabs button.active{background:linear-gradi
   color:#fff!important;
 }
 
-/* Favoritenstern oben mittig, klar sichtbar, aber kleiner als der Info-Button. */
+/* Favoritenstern direkt unter dem Info-Button (der sitzt hier oben rechts, 50px hoch). */
 .auto-favorite-star{
   position:absolute!important;
-  top:7px!important;
-  left:50%!important;
-  right:auto!important;
-  transform:translateX(-50%)!important;
+  top:61px!important;
+  left:auto!important;
+  right:7px!important;
+  transform:none!important;
   width:36px!important;
   height:36px!important;
   display:grid!important;

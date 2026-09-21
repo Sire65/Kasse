@@ -4746,7 +4746,6 @@ function kcSelectAccount(id){
   el("accountRuleInfo").innerHTML=`<p>Erlaubt: ${(a.allowedGroups||[]).join(", ")||"nur Einzelartikel"} · Höchstbetrag: ${a.limit?money(a.limit):"unbegrenzt"}</p>`;
   el("accountCartValidation").innerHTML=v.denied.length?`<div class="validation-error">${v.denied.map(x=>escapeHtml(x.reason)).join("<br>")}</div>`:`<div class="validation-ok">Alle Positionen freigegeben · neuer Stand ${money(v.newAmount)}</div>`;
   el("postToAccountBtn").disabled=!v.allOk;
-  el("accountAcknowledge").checked=false;
 }
 function kcOpenAccountCharge(){
   if(!state.cart.length)return showMessage("Kein Bon","0,00 €","Bitte zuerst Artikel wählen.");
@@ -4755,7 +4754,6 @@ function kcOpenAccountCharge(){
 async function kcPostAccount(){
   const a=kcAccounts().find(x=>x.id===kcSelectedAccountId);if(!a)return;
   const v=kcValidateAccountCart(a);if(!v.allOk)return setSystemHint(v.denied[0]?.reason||"Kontobuchung abgelehnt - Limit oder Gültigkeit verletzt.","error");
-  if(!el("accountAcknowledge").checked)return setSystemHint("Bitte Kontenauswahl und Buchung bestätigen","warn");
   const cartCopy=cloneData(state.cart),amount=+total().toFixed(2);
   const rec=await completeSale("account-charge",{silent:true});
   // 10.09.2026 (Betreiber: "Manager-abhaengige Sachen sauber im Testmodus loesen"): ECHTER FUND

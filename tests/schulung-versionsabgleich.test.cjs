@@ -6,8 +6,9 @@
  *
  * DREI FEHLER, die dahinter steckten - der letzte ist der eigentliche:
  *   1. Kapitel 11 sagte, die Infotaste sitze "oben rechts". Sie sitzt oben LINKS
- *      (styles.css: .product-info-button{top:7px;left:7px}); oben rechts sitzt der
- *      Favoritenstern (.auto-favorite-star{top:7px;right:7px}). Zwei Knoepfe, ein Platz.
+ *      (styles.css: .product-info-button{top:7px;left:7px}); direkt darunter sitzt der
+ *      Favoritenstern (.auto-favorite-star{left:7px;top:39px} - Stand 21.09.2026: vorher
+ *      rechts oben, dort verdeckte ihn aber der Preis der Artikelkachel). Zwei Knoepfe, ein Platz.
  *   2. latest-release-manifest.json stand auf Repair 76, die .js (die sich selbst als
  *      sourceOfTruth fuehrt) auf Repair 63. Zwei Quellen fuer dieselbe Angabe, eine veraltet.
  *   3. Der Vergleich las actual.version. Ein PRODUKT-Manifest hat dieses Feld, ein
@@ -82,9 +83,9 @@ const p = (n, b, z = '') => { b ? ok++ : rot++; console.log(`${b ? '  OK  ' : 'F
   const app = fs.readFileSync(path.join(WURZEL, 'training-video', 'app.js'), 'utf-8');
   const css = fs.readFileSync(path.join(WURZEL, 'pos', 'styles.css'), 'utf-8');
   const infoLinks = /\.product-info-button\{[^}]*left:\s*7px/.test(css.replace(/\s+/g, ' ').replace(/\.product-info-button\s*\{/, '.product-info-button{'));
-  const sternRechts = /\.auto-favorite-star\{[^}]*right:\s*7px/.test(css);
+  const sternLinksDarunter = /\.auto-favorite-star\{[^}]*left:\s*7px/.test(css);
   p('in der Kasse sitzt die Infotaste wirklich oben LINKS', infoLinks);
-  p('und der Favoritenstern oben RECHTS', sternRechts);
+  p('und der Favoritenstern LINKS DARUNTER (21.09.2026: nicht mehr oben rechts, der Preis verdeckte ihn dort)', sternLinksDarunter);
   p('Kapitel 11 sagt jetzt "oben links" fuer die Infotaste',
     /Oben links auf entsprechend vorbereiteten Artikeltasten/.test(app));
   p('und nennt den Unterschied zum Stern ausdruecklich',

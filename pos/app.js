@@ -4379,7 +4379,6 @@ function kcSelectAccount(id){
   el("accountRuleInfo").innerHTML=`<p>Erlaubt: ${(a.allowedGroups||[]).join(", ")||"nur Einzelartikel"} · Höchstbetrag: ${a.limit?money(a.limit):"unbegrenzt"}</p>`;
   el("accountCartValidation").innerHTML=v.denied.length?`<div class="validation-error">${v.denied.map(x=>escapeHtml(x.reason)).join("<br>")}</div>`:`<div class="validation-ok">Alle Positionen freigegeben · neuer Stand ${money(v.newAmount)}</div>`;
   el("postToAccountBtn").disabled=!v.allOk;
-  el("accountAcknowledge").checked=false;
 }
 function kcOpenAccountCharge(){
   if(!state.cart.length)return showMessage("Kein Bon","0,00 €","Bitte zuerst Artikel wählen.");
@@ -4388,7 +4387,6 @@ function kcOpenAccountCharge(){
 async function kcPostAccount(){
   const a=kcAccounts().find(x=>x.id===kcSelectedAccountId);if(!a)return;
   const v=kcValidateAccountCart(a);if(!v.allOk)return showMessage("Kontobuchung abgelehnt","!",v.denied[0]?.reason||"Limit oder Gültigkeit verletzt.");
-  if(!el("accountAcknowledge").checked)return setSystemHint("Bitte Kontenauswahl und Buchung bestätigen","warn");
   const cartCopy=cloneData(state.cart),amount=+total().toFixed(2);
   const rec=await completeSale("account-charge",{silent:true});
   const events=kcEvents();events.push({eventId:crypto.randomUUID(),accountId:a.id,accountName:a.name,transactionId:rec.transactionId,bon:rec.bon,amount,date:rec.endTime,registerId:rec.registerId,operator:rec.operator,items:cartCopy.map(i=>({id:i.id,name:i.name,category:i.category,qty:i.qty,price:i.price})),status:"open",syncStatus:"pending",configVersion:a.version||1,training:!!state.master.trainingMode});kcWrite(KC_ACCOUNT_EVENTS_KEY,events);
