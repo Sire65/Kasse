@@ -829,15 +829,27 @@ function syncImageV3RowSpans(){
     rowHeight=match?parseFloat(match[1]):110;
   }
   if(!rowHeight)return;
-  // TOLERANZ (Betreiber: "zwischen den Getraenkereihen ist jetzt eine Luecke"): ein paar
-  // Subpixel Rundungsdifferenz reichten, um eine ganze Zeile zu viel zu reservieren (echte
-  // Kachelhoehe z.B. 220,3px bei genau 2 Zeilen à 110px - ohne Toleranz wurde daraus Zeile 3
-  // statt 2). 4px Toleranz schluckt das, ohne dass wieder eine echte naechste Zeile fehlt.
+  // TOLERANZ: ein paar Subpixel Rundungsdifferenz reichten, um eine ganze Zeile zu viel zu
+  // reservieren (echte Kachelhoehe z.B. 220,3px bei genau 2 Zeilen à 110px - ohne Toleranz
+  // wurde daraus Zeile 3 statt 2). 4px Toleranz schluckt das.
   const TOLERANZ=4;
+  // ECHTER FUND (Betreiber: "die Luecken zwischen den Buttons sind immer noch da"): eine
+  // quadratische Kachel (Spaltenbreite hoch, z.B. 174px) passt so gut wie nie exakt in ein
+  // Vielfaches der 110px-Zeilenhoehe - span:2 reserviert 226px (2×110+Zeilenabstand), die
+  // Kachel selbst bleibt aber bei ihren eigenen 174px und liess darunter eine Luecke frei
+  // (den Unterschied). Ganzzahlige Zeilen sind unvermeidbar (CSS Grid kennt keine "1,58
+  // Zeilen"), also fuellt die Kachel jetzt stattdessen den reservierten Platz komplett aus -
+  // das eingebettete Bild ist object-fit:cover und passt sich dabei einfach an, ohne verzerrt
+  // zu werden.
   grid.querySelectorAll(".product-tile-wrap.image-v3").forEach(tile=>{
     tile.style.removeProperty("grid-row");
+    tile.style.removeProperty("height");
     const rows=Math.max(1,Math.ceil((tile.getBoundingClientRect().height+rowGap-TOLERANZ)/(rowHeight+rowGap)));
+    const reserviert=rows*rowHeight+(rows-1)*rowGap;
     tile.style.setProperty("grid-row",`span ${rows}`,"important");
+    tile.style.setProperty("height",`${reserviert}px`,"important");
+    const innen=tile.querySelector(".product-tile");
+    if(innen)innen.style.setProperty("height",`${reserviert}px`,"important");
   });
 }
 window.addEventListener("adaptive-layout-change",()=>requestAnimationFrame(syncImageV3RowSpans));
