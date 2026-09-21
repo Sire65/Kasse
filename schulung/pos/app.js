@@ -921,7 +921,34 @@ function renderProducts(){
   grid.querySelectorAll(".product-info-button").forEach(b=>b.onclick=e=>{e.stopPropagation();openProductInfo(b.dataset.infoId)});
   renderProductPager();
   passeArtikelgroesseAn();
+  syncImageV3RowSpans();
 }
+// image-v3-Kacheln sind quadratisch (Spaltenbreite hoch) und damit fast immer hoeher als eine
+// einzelne Gitterzeile (die je nach Ansicht/Aufloesung 96-160px hoch ist). Ohne eigenen
+// Zeilenumfang haben sie trotzdem nur eine Zeile belegt und in die naechste Zeile hineinragt -
+// dort ueberlappten sie dann die dort platzierte Kachel. Misst die tatsaechliche Zeilenhoehe an
+// einer normalen (nicht image-v3) Nachbarkachel und reserviert so viele Zeilen, wie die
+// image-v3-Kachel wirklich braucht - funktioniert dadurch in jeder Warengruppe, Aufloesung und
+// Oberflaeche, ohne die genaue Zeilenhoehe fest verdrahten zu muessen.
+function syncImageV3RowSpans(){
+  const grid=el("productGrid");
+  if(!grid)return;
+  const cs=getComputedStyle(grid);
+  const rowGap=parseFloat(cs.rowGap)||0;
+  const reference=[...grid.children].find(t=>t.classList?.contains("product-tile-wrap")&&!t.classList.contains("image-v3"));
+  let rowHeight=reference?reference.getBoundingClientRect().height:0;
+  if(!rowHeight){
+    const match=/([\d.]+)px/.exec(cs.gridAutoRows);
+    rowHeight=match?parseFloat(match[1]):110;
+  }
+  if(!rowHeight)return;
+  grid.querySelectorAll(".product-tile-wrap.image-v3").forEach(tile=>{
+    tile.style.removeProperty("grid-row");
+    const rows=Math.max(1,Math.ceil((tile.getBoundingClientRect().height+rowGap)/(rowHeight+rowGap)));
+    tile.style.setProperty("grid-row",`span ${rows}`,"important");
+  });
+}
+window.addEventListener("adaptive-layout-change",()=>requestAnimationFrame(syncImageV3RowSpans));
 // 11.09.2026 (Betreiber: "Artikelbuttons sollen den verfuegbaren Platz ausnutzen - bei 3
 // Artikeln in einer Warengruppe groesser als bei 6, aber mit einer Obergrenze, damit sie nicht
 // riesig werden"): setzt --kc-spalten/--kc-zeilen passend zur TATSAECHLICHEN Artikelzahl der
