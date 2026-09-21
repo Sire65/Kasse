@@ -1,5 +1,5 @@
 /* V3 assets contain a name band and info icon. A real button sits on that icon. */
-.product-grid .product-tile-wrap.image-v3{position:relative!important;aspect-ratio:1;align-self:start!important;min-height:0!important;max-height:none!important}
+.product-grid .product-tile-wrap.image-v3{position:relative!important;aspect-ratio:1;align-self:start!important;min-height:0!important;max-height:none!important;grid-row:span 2!important}
 .product-grid .image-v3>.product-tile{position:relative!important;width:100%!important;height:auto!important;aspect-ratio:1!important;min-height:0!important;max-height:none!important;padding:0!important;border:0!important;background:#eee!important}
 .product-grid .image-v3>.product-tile>img{position:absolute!important;inset:0!important;width:100%!important;height:100%!important;max-height:none!important;object-fit:contain!important}
 .product-grid .image-v3>.product-tile:after{display:none!important}
