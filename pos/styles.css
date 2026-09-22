@@ -364,6 +364,8 @@ body.role-admin .superadmin-only,body.role-superadmin .superadmin-only{display:i
 }
 
 .print-bon{background:linear-gradient(#5b6f86,#35485d)}.recent-bons{display:grid;gap:8px;margin:10px 0}.recent-bon{display:flex;justify-content:space-between;align-items:center;border:1px solid #d4d9df;border-radius:7px;padding:10px}.recent-bon button{padding:7px 10px}.bon-print-card input,.bon-print-card textarea{width:100%;padding:9px}
+.recent-bon-view{cursor:pointer;text-decoration:underline;text-underline-offset:3px;padding:4px 2px}
+.recent-bon-view:hover,.recent-bon-view:focus-visible{color:#0b315d}
 body.hide-staff #staffBtn,body.hide-tip #tipBtn,body.hide-deposit #depositBtn,body.hide-print #printBonBtn,body.hide-more #moreBtn,body.hide-change .change-card{display:none!important}
 
 .service-error{min-height:22px;color:#c9231f;font-weight:800;margin-top:6px}
@@ -1713,7 +1715,7 @@ body.rush-mode .main-actions #moreBtn{grid-column:2 / span 2!important;grid-row:
 }
 .position-discount-button.active{
   background:#efaa20!important;
-  color:#fff!important;
+  color:#000!important;
   border-color:#915600!important;
   box-shadow:0 0 0 2px rgba(239,170,32,.22);
 }

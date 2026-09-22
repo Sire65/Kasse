@@ -2673,14 +2673,24 @@ el("applyBackupImport").onclick=()=>{
 function allTransactions(){return readTransactions()}
 function renderRecentBons(){
   const tx=allTransactions().slice(-5).reverse();
-  el("recentBons").innerHTML=tx.map(t=>`<div class="recent-bon"><span>Bon ${String(t.bon||t.bonNumber||"").padStart(6,"0")} · ${money(t.due||t.total||0)}</span><button type="button" data-print-bon="${t.bon||t.bonNumber}">Drucken</button>${t.type!=="reversal"?`<button type="button" class="superadmin-only" data-reverse-bon="${t.bon||t.bonNumber}">Stornieren</button>`:""}</div>`).join("")||"<p>Keine Bons vorhanden.</p>";
+  el("recentBons").innerHTML=tx.map(t=>`<div class="recent-bon"><span class="recent-bon-view" data-view-bon="${t.bon||t.bonNumber}" role="button" tabindex="0" title="Bon ansehen">Bon ${String(t.bon||t.bonNumber||"").padStart(6,"0")} · ${money(t.due||t.total||0)}</span><button type="button" data-print-bon="${t.bon||t.bonNumber}">Drucken</button>${t.type!=="reversal"?`<button type="button" class="superadmin-only" data-reverse-bon="${t.bon||t.bonNumber}">Stornieren</button>`:""}</div>`).join("")||"<p>Keine Bons vorhanden.</p>";
+  // Betreiber: "Letzten Bon anklicken muss ihn oeffnen" - die Bonzeile selbst oeffnet jetzt die
+  // Ansicht (kein Druck), der Drucken-Knopf daneben bleibt fuer den tatsaechlichen Ausdruck.
+  el("recentBons").querySelectorAll("[data-view-bon]").forEach(s=>{
+    const oeffnen=()=>openBonView(s.dataset.viewBon);
+    s.onclick=oeffnen;
+    s.onkeydown=e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();oeffnen()}};
+  });
   el("recentBons").querySelectorAll("[data-print-bon]").forEach(b=>b.onclick=()=>printBonByNumber(b.dataset.printBon));
   el("recentBons").querySelectorAll("[data-reverse-bon]").forEach(b=>b.onclick=()=>requestCompletedReversal(b.dataset.reverseBon));
 }
-function printBonByNumber(no){
-  const t=allTransactions().find(x=>String(x.bon||x.bonNumber)===String(no));
-  if(!t)return showMessage("Bon nicht gefunden","!",`Bon ${no} wurde nicht gefunden.`);
-
+// Betreiber: "Letzten Bon anklicken muss ihn oeffnen, damit man bei Kundenfragen nachsehen
+// kann, was drauf steht" - vorher gab es nur den Drucken-Knopf, der sofort den echten
+// Druckdialog aufriss. Jetzt erzeugt eine gemeinsame Funktion die Bon-Seite; das Ansehen
+// (openBonView) oeffnet sie OHNE automatischen Druck, mit einem eigenen Drucken-Knopf darin
+// fuer den Fall, dass doch ein Ausdruck gebraucht wird. printBonByNumber (bestehende
+// Drucken-Knoepfe) verhaelt sich unveraendert wie vorher - sofortiger Druck.
+function bonSeite(t,autoPrint){
   const r=state.master.receipt||{};
   const esc=value=>String(value??"").replace(/[&<>"']/g,ch=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[ch]));
   const items=(t.items||[]).filter(item=>!item.discountLine&&item.id!=="DISCOUNT");
@@ -2719,8 +2729,9 @@ function printBonByNumber(no){
     .total strong{font-size:13pt}
     footer{text-align:center;margin-top:4mm;font-size:9pt}
     @media screen{body{margin:8px auto;border:1px solid #ccc;padding:4mm;box-shadow:0 2px 12px #0002}}
-    @media print{html,body{width:72mm!important;max-width:72mm!important;margin:0!important;padding:0!important;border:0!important;box-shadow:none!important}}
-  </style></head><body><main class="bon">
+    @media print{html,body{width:72mm!important;max-width:72mm!important;margin:0!important;padding:0!important;border:0!important;box-shadow:none!important}.kc-bon-druckknopf{display:none!important}}
+    .kc-bon-druckknopf{position:fixed;top:8px;right:8px;padding:10px 16px;font-size:14px;font-weight:800;border:0;border-radius:8px;background:#166534;color:#fff;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,.3)}
+  </style></head><body>${autoPrint?"":'<button type="button" class="kc-bon-druckknopf" onclick="window.print()">🖨 Drucken</button>'}<main class="bon">
     <header>${r.header!==false?`<h1>${esc(r.head1||state.master.clubName)}</h1><h2>${esc(r.head2||state.master.eventName)}</h2>`:""}</header>
     <section class="meta">
       <div>${esc(state.master.registerName)} · Bon ${esc(t.bon||t.bonNumber)}</div>
@@ -2737,16 +2748,23 @@ function printBonByNumber(no){
     ${change>0?`<div class="line"><span>Rückgeld</span><span>${money(change)}</span></div>`:""}
     ${t.type==="refund"?`<div class="rule"></div><strong>REKLAMATION: ${esc(t.complaint?.reason||t.reason||"")}</strong>`:""}
     <footer>${esc(r.foot1||"Vielen Dank!")}</footer>
-  </main><script>window.onload=()=>setTimeout(()=>window.print(),120)<\/script></body></html>`;
-
+  </main>${autoPrint?'<script>window.onload=()=>setTimeout(()=>window.print(),120)<\/script>':""}</body></html>`;
+  return page;
+}
+function oeffneBonFenster(no,autoPrint){
+  const t=allTransactions().find(x=>String(x.bon||x.bonNumber)===String(no));
+  if(!t)return showMessage("Bon nicht gefunden","!",`Bon ${no} wurde nicht gefunden.`);
+  const page=bonSeite(t,autoPrint);
   const w=window.open("","_blank","width=420,height=760");
-  if(!w)return setSystemHint("Bondruck wurde vom Browser blockiert","warn");
+  if(!w)return setSystemHint("Bon konnte nicht geöffnet werden - Popup wurde vom Browser blockiert","warn");
   w.document.open();w.document.write(page);w.document.close();
 }
+function printBonByNumber(no){oeffneBonFenster(no,true)}
+function openBonView(no){oeffneBonFenster(no,false)}
 el("productInfoDetailsBtn").onclick=openFullProductInfo;
 
 el("printBonBtn").onclick=()=>{renderRecentBons();el("bonSearchResult").innerHTML="";el("bonPrintDialog").showModal()};
-el("bonSearchBtn").onclick=()=>{const n=el("bonSearchInput").value.trim(),t=allTransactions().find(x=>String(x.bon||x.bonNumber).padStart(6,"0")===n.padStart(6,"0"));el("bonSearchResult").innerHTML=t?`<div class="recent-bon"><span>Bon ${n.padStart(6,"0")} · ${money(t.due||t.total||0)}</span><button type="button" id="printFoundBon">Drucken</button>${t.type!=="reversal"?'<button type="button" id="reverseFoundBon" class="superadmin-only">Stornieren</button>':""}</div>`:"<p>Bon nicht gefunden.</p>";if(t){el("printFoundBon").onclick=()=>printBonByNumber(t.bon||t.bonNumber);if(el("reverseFoundBon"))el("reverseFoundBon").onclick=()=>requestCompletedReversal(t.bon||t.bonNumber)}};
+el("bonSearchBtn").onclick=()=>{const n=el("bonSearchInput").value.trim(),t=allTransactions().find(x=>String(x.bon||x.bonNumber).padStart(6,"0")===n.padStart(6,"0"));el("bonSearchResult").innerHTML=t?`<div class="recent-bon"><span class="recent-bon-view" id="foundBonView" role="button" tabindex="0" title="Bon ansehen">Bon ${n.padStart(6,"0")} · ${money(t.due||t.total||0)}</span><button type="button" id="printFoundBon">Drucken</button>${t.type!=="reversal"?'<button type="button" id="reverseFoundBon" class="superadmin-only">Stornieren</button>':""}</div>`:"<p>Bon nicht gefunden.</p>";if(t){const oeffnen=()=>openBonView(t.bon||t.bonNumber);el("foundBonView").onclick=oeffnen;el("foundBonView").onkeydown=e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();oeffnen()}};el("printFoundBon").onclick=()=>printBonByNumber(t.bon||t.bonNumber);if(el("reverseFoundBon"))el("reverseFoundBon").onclick=()=>requestCompletedReversal(t.bon||t.bonNumber)}};
 async function reverseCompletedTransaction(original,reason){
   await _txHydrated;
   const rows=readTransactions();if(rows.some(row=>row.type==="reversal"&&row.originalTransactionId===original.transactionId))throw new Error("Dieser Bon wurde bereits vollständig storniert.");

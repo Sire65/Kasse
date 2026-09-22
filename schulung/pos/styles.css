@@ -1713,7 +1713,7 @@ body.rush-mode .main-actions #moreBtn{grid-column:2 / span 2!important;grid-row:
 }
 .position-discount-button.active{
   background:#efaa20!important;
-  color:#fff!important;
+  color:#000!important;
   border-color:#915600!important;
   box-shadow:0 0 0 2px rgba(239,170,32,.22);
 }

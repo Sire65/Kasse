@@ -866,7 +866,11 @@
   /* 08.09. (Betreiber): "Schließen in den Fenstern nach oben neben die Überschrift, nicht als
      Zeile unten" - jedes Fenster ohne Kreuz oben bekommt eins. Wirkt wie der Schließen-Knopf. */
   function kreuzOben(dlg) {
-    if (!dlg || dlg.querySelector('.dialog-close-x, .kc-dialog-x')) return;
+    // BEFUND (Betreiber: "in vielen Fenstern doppelte Schliesskreuze"): die Pruefung kannte nur
+    // .dialog-close-x und .kc-dialog-x, nicht aber .icon-close - die von den meisten Fenstern
+    // ueberhaupt benutzte Klasse (admin-home-head-Muster). Ergebnis: praktisch jedes Fenster mit
+    // .icon-close bekam hier ein ZWEITES, ueberfluessiges Kreuz obendrauf.
+    if (!dlg || dlg.querySelector('.dialog-close-x, .kc-dialog-x, .icon-close')) return;
     const x = document.createElement('button'); x.type = 'button'; x.className = 'kc-dialog-x'; x.setAttribute('aria-label', 'Schließen'); x.textContent = '×';
     x.addEventListener('click', () => { const u = [...dlg.querySelectorAll('button')].find((b) => /^(schlie(ß|ss)en|abbrechen|zurück|fertig)$/i.test(b.textContent.trim())); if (u) u.click(); else dlg.close(); });
     (dlg.querySelector('form') || dlg).prepend(x);
