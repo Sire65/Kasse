@@ -1159,7 +1159,7 @@ html,body{width:100%;max-width:100%;overflow-x:hidden}
 .product-price-tag{
   position:absolute;
   left:6px;
-  bottom:44px;
+  bottom:37%;
   z-index:3;
   background:#111827dd;
   color:#fff;

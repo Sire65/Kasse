@@ -26,5 +26,15 @@
 /* Override legacy full-row sizing so square images stay inside their grid column. */
 body.kc-layout-neu .sales-area>.product-grid>.product-tile-wrap.image-v3,body .product-grid>.product-tile-wrap.image-v3{width:100%!important;min-width:0!important;height:auto!important;max-height:none!important;aspect-ratio:1!important}
 body.kc-layout-neu .sales-area>.product-grid>.product-tile-wrap.image-v3>.product-tile,body .product-grid>.image-v3>.product-tile{width:100%!important;min-width:0!important;height:auto!important;max-height:none!important;aspect-ratio:1!important}
+/* BEFUND (22.09.2026): Betreiber - "die Buttons ohne eigenes Bild-Icon sind viel zu klein,
+   wieso hast du sie nicht an die Größe der anderen angepasst" (Sonstiges, Pakete). Ursache:
+   nur .image-v3-Kacheln bekommen oben width:100%+aspect-ratio:1 mit genug Spezifitaet, um die
+   Baukasten-Zonenregel ".kc-bereich.artikel .product-tile-wrap{height:100%}" zu schlagen -
+   Kacheln OHNE _version_3.png-Bild (Wertmarke, Freie Zahlung, Außer-Haus-Becher, Pakete)
+   blieben dadurch bei ihrer kleinen natuerlichen Groesse haengen statt die volle Spaltenbreite
+   zu bekommen. Jetzt dieselbe Regel auch fuer sie - alle Kacheln sind ab jetzt gleich gross,
+   unabhaengig davon, ob sie ein Bild-Icon eingebrannt haben oder nicht. */
+body .product-grid>.product-tile-wrap:not(.image-v3){width:100%!important;min-width:0!important;height:auto!important;max-height:none!important;aspect-ratio:1!important}
+body .product-grid>.product-tile-wrap:not(.image-v3)>.product-tile{width:100%!important;min-width:0!important;height:100%!important;max-height:none!important}
 .product-grid .image-v3>.product-info-button{clip-path:none!important}
 .product-grid .image-v3>.product-info-button::before,.product-grid .image-v3>.product-info-button::after{display:none!important}
