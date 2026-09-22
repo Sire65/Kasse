@@ -168,6 +168,7 @@ body.kc-spiegel-modus .main-layout>.cart-area{direction:ltr}
 .keypad{grid-area:keypad;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:4px;padding:5px}
 .keypad button{border:1px solid #cbd0d6;border-radius:6px;background:linear-gradient(#fff,#ececec);font-size:1.35rem;font-weight:800}
 .keypad .ok-key{background:linear-gradient(#31b63f,#158d22);color:white}
+.keypad.keypad-no-decimal button[data-key=","],.keypad.keypad-no-decimal button[data-key="."]{opacity:.35;pointer-events:none}
 .main-actions{grid-area:actions;border:0;box-shadow:none;background:transparent;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));grid-template-rows:repeat(3,minmax(46px,1fr));gap:7px}
 .main-actions button{min-width:0;border:0;border-radius:7px;color:white;font-size:clamp(.82rem,.85vw,1rem);font-weight:900;line-height:1.12;overflow-wrap:anywhere;box-shadow:0 2px 5px rgba(0,0,0,.18)}
 .main-actions .pay{display:flex;align-items:center;justify-content:center;gap:8px;padding:5px}.main-actions .pay span{font-size:clamp(.9rem,1vw,1.12rem)}.main-actions .pay canvas{width:50px;height:50px;border-radius:4px;background:#fff;image-rendering:pixelated;flex:0 0 auto}

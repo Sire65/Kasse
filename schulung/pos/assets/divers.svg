@@ -1,0 +1,14 @@
+<!-- Divers / Freie Zahlung.
+     Fuer Artikel ohne eigene Kassentaste (z.B. eine einzelne Feuerzange, eine Tuete
+     Plaetzchen): der Betrag wird am Zahlenblock eingegeben statt fuer jeden Einzelfall
+     einen eigenen Knopf anzulegen. Ein Fragezeichen statt eines Preises im Bild, damit
+     nichts hier bei einer Preisaenderung schief gehen kann - es gibt ja keinen festen Preis. -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 520" role="img" aria-label="Divers / Freie Zahlung">
+  <rect width="800" height="520" fill="#eef0f2"/>
+  <g transform="translate(400 260)">
+    <circle r="170" fill="#596675"/>
+    <circle r="170" fill="none" stroke="#3f4a55" stroke-width="16"/>
+    <path d="M-55 -70 a70 66 0 1 1 100 62 c-24 14 -34 28 -34 48 v8" fill="none" stroke="#fff" stroke-width="26" stroke-linecap="round" stroke-linejoin="round"/>
+    <circle cx="0" cy="92" r="15" fill="#fff"/>
+  </g>
+</svg>

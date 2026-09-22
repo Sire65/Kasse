@@ -103,6 +103,14 @@ let PRODUCTS=JSON.parse(localStorage.getItem("kc_products_v050")||"null")||DEFAU
     if(geaendert)localStorage.setItem("kc_products_v050",JSON.stringify(PRODUCTS));
   }
 }
+// 22.09.2026 (Betreiber-Wunsch): "Freie Zahlung" fuer Artikel ohne eigene Kassentaste (z.B.
+// eine einzelne Feuerzange, eine Tuete Plaetzchen) - Betrag am Zahlenblock eingeben statt fuer
+// jeden Einzelfall einen eigenen Knopf anzulegen. Bereits gespeicherte Artikellisten kennen
+// diesen Artikel noch nicht - wird hier einmalig nachgetragen, ohne sonst etwas anzufassen.
+if(!PRODUCTS.find(p=>p.id==="freie-zahlung")){
+  PRODUCTS.push({id:"freie-zahlung",name:"Freie Zahlung",price:0,category:"Sonstiges",image:"assets/divers.svg",color:"#596675",isFreieZahlung:true,info:{important:"Öffnet die Betragseingabe für Artikel ohne eigene Taste. Der Warenkorb zeigt dafür „Divers“."}});
+  localStorage.setItem("kc_products_v050",JSON.stringify(PRODUCTS));
+}
 // 20.09.2026: Betreiberregel fuer halbe Portionen.
 // Alle Speisen und Getraenke bekommen den 1/2-Knopf. Pfand und Außer-Haus-Gefaesse bleiben
 // ausgeschlossen. Bereits bewusst gepflegte Halbpreise bleiben bestehen; fehlt einer, wird
@@ -288,6 +296,14 @@ function normalizeDisplayProfile(){
   displayProfile.productIds=selectedProducts.length?selectedProducts:activeProducts;
 }
 function saveDisplayProfile(){localStorage.setItem(DISPLAY_PROFILE_KEY,JSON.stringify(displayProfile))}
+// Ein bereits eingeschraenktes Anzeigeprofil (der Betreiber hat nur einen Teil der Artikel
+// ausgewaehlt) wuerde den neuen Artikel "Freie Zahlung" sonst dauerhaft verstecken, obwohl er
+// oben in PRODUCTS bereits nachgetragen wurde - hier wird er in ein bestehendes, nicht leeres
+// Profil ergaenzt. Ein leeres Profil braucht das nicht: das zeigt ohnehin schon alle Artikel.
+if(Array.isArray(displayProfile.productIds)&&displayProfile.productIds.length&&!displayProfile.productIds.includes("freie-zahlung")){
+  displayProfile.productIds=[...displayProfile.productIds,"freie-zahlung"];
+  saveDisplayProfile();
+}
 function visibleGroups(){normalizeDisplayProfile();return GROUPS.filter(g=>isActiveRecord(g)&&displayProfile.groupIds.includes(g.id)).sort((a,b)=>a.sortOrder-b.sortOrder)}
 function visibleProducts(){normalizeDisplayProfile();return PRODUCTS.filter(p=>isActiveRecord(p)&&displayProfile.productIds.includes(p.id))}
 function productsForSale(){return [...promotedBaseProducts(),...activePackageProducts()]}
@@ -807,7 +823,7 @@ function renderProducts(){
           <img class="kombi-unten" src="${p.kombiBilder.unten}" alt="">
           <svg class="kombi-linie" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"><line x1="0" y1="100" x2="100" y2="0" vector-effect="non-scaling-stroke"/></svg>
         </span>`:`<img src="${p.image}" alt="">`}
-        <span class="product-label"><strong>${p.name}</strong><span class="${p.isOffer?"offer-price-line":""}">${p.isOffer?`<small class="offer-old-price">${money(p.originalPrice)}</small>`:""}${money(displayPrice(p))}</span>${p.isOffer?`<small class="offer-badge" title="${escapeHtml(p.offerName)}">${p.isHappyHour?"HH":"ANGEBOT"}</small>`:""}${p.isPackage?'<small class="package-tag">beides zusammen</small>':""}${p.optionGroup?'<small class="option-tag" title="Auf den Artikel tippen verkauft die Standardausführung. Das + daneben öffnet die Varianten.">+ = Varianten</small>':""}${p.depositComponents?`<small class="deposit-tag" title="${depositHint(p)}">${depositKurz(p)}</small>`:""}</span>
+        <span class="product-label"><strong>${p.name}</strong><span class="${p.isOffer?"offer-price-line":""}">${p.isOffer?`<small class="offer-old-price">${money(p.originalPrice)}</small>`:""}${p.isFreieZahlung?"Betrag frei":money(displayPrice(p))}</span>${p.isOffer?`<small class="offer-badge" title="${escapeHtml(p.offerName)}">${p.isHappyHour?"HH":"ANGEBOT"}</small>`:""}${p.isPackage?'<small class="package-tag">beides zusammen</small>':""}${p.optionGroup?'<small class="option-tag" title="Auf den Artikel tippen verkauft die Standardausführung. Das + daneben öffnet die Varianten.">+ = Varianten</small>':""}${p.depositComponents?`<small class="deposit-tag" title="${depositHint(p)}">${depositKurz(p)}</small>`:""}</span>
       </button>
       ${p.optionGroup?`<button class="product-variant-button" data-variant-id="${p.id}" title="Varianten zu ${p.name}" aria-label="Varianten zu ${p.name} öffnen">+</button>`:""}
       ${infoVisible?`<button class="product-info-button" data-info-id="${p.id}" title="Artikelinformationen" aria-label="Informationen zu ${p.name}">i</button>`:""}
@@ -900,7 +916,19 @@ function openFullProductInfo(){const p=currentInfoProduct;if(!p)return;const r=p
   el('productDetailsContent').innerHTML=`<section class="info-section"><h3>Übersicht</h3><p>${escapeHtml(r.shortDescription||'Keine Kurzbeschreibung hinterlegt.')}</p></section><section class="info-section"><h3>Zutaten</h3><p>${escapeHtml(r.ingredients||'Nicht hinterlegt')}</p></section><section class="info-section"><h3>Zusatzstoffe</h3><p>${escapeHtml(r.additives||'Nicht hinterlegt')}</p></section><section class="info-section"><h3>Big 14 – Allergene</h3><table class="allergen-table"><thead><tr><th>Allergen</th><th>Status</th></tr></thead><tbody>${allergenRows}</tbody></table></section><section class="info-section"><h3>Nährwerte je 100 g / 100 ml</h3><table class="nutrition-table"><tbody>${nutritionRows}</tbody></table></section><section class="info-section"><h3>Verantwortung, Quelle und Freigabe</h3><p>Hersteller: ${escapeHtml(r.manufacturer||'Nicht hinterlegt')}<br>Lieferant: ${escapeHtml(r.supplier||'Nicht hinterlegt')}<br>Quelle: ${escapeHtml(r.source||'Nicht hinterlegt')}<br>Gültig ab: ${escapeHtml(r.validAt||'Nicht hinterlegt')}<br>Freigegeben von: ${escapeHtml(r.approvedBy||'Nicht hinterlegt')}<br>Freigabe: ${escapeHtml(r.approvedAt||'Nicht hinterlegt')}<br>Datensatz-Version: ${escapeHtml(r.version||'1.0.0')}</p></section>`;el('productDetailsDialog').showModal();}
 function notify(type,message,key='',duration){setSystemHint(message,type==='error'?'error':type==='warning'?'warn':type==='info'?'info':'ok');return true;}
 function operatorReadyForArticle(){if(state.master.requireOperatorConfirmation!==true||state.operatorConfirmedForSale)return true;showMessage("Bediener bestätigen","👤","Bitte vor dem ersten Artikel den Bediener-QR scannen oder oben die Bedienertaste verwenden.");el("operatorBtn").classList.add("needs-confirmation");return false}
-function selectProduct(id){if(!operatorReadyForArticle())return;const p=productsForSale().find(x=>x.id===id);if(!p)return;state.lastSelectedProduct=id;addConfiguredProduct(p,null)}
+function selectProduct(id){if(!operatorReadyForArticle())return;const p=productsForSale().find(x=>x.id===id);if(!p)return;if(p.isFreieZahlung)return openFreieZahlung();state.lastSelectedProduct=id;addConfiguredProduct(p,null)}
+// Freie Zahlung: kein fester Preis wie bei einem normalen Artikel, deshalb kein
+// addConfiguredProduct - stattdessen wird derselbe Zahlenblock unten (Cent-Eingabe) auf die
+// Erfassung eines Divers-Postens umgeschaltet.
+function openFreieZahlung(){if(!operatorReadyForArticle())return;setKeypadMode("freibetrag")}
+function addDiversItem(betrag){
+  const cents=toCents(betrag),key=`divers:${cents}`,found=state.cart.find(x=>x.key===key);
+  const item={key,id:"divers",name:"Divers",price:fromCents(cents),normalPrice:fromCents(cents),halfAllowed:false,halfPrice:0,portionFactor:1,originalPrice:fromCents(cents),offerId:null,offerName:"",offerType:"",category:"Sonstiges",image:"assets/divers.svg",manualDeposit:false,qty:1,option:null,deposits:[]};
+  if(!state.cart.length)state.cartStartedAt=new Date().toISOString();
+  if(found)found.qty++;else state.cart.push(item);
+  state.lastAdded=key;state.selectedCartKey=key;renderProducts();renderCart();
+  notify("success",found?`Divers ${money(fromCents(cents))} – Menge jetzt ${found.qty}`:`Divers ${money(fromCents(cents))} wurde dem Einkaufswagen hinzugefügt`,`add:${key}`);
+}
 function openProductVariants(id){if(!operatorReadyForArticle())return;const p=PRODUCTS.find(x=>x.id===id);if(!p?.optionGroup)return;state.lastSelectedProduct=id;renderProducts();openOptions(p)}
 function openOptions(p){state.pendingProduct=p;const group=OPTIONS[p.optionGroup];el("optionTitle").textContent=group.title;el("optionSubtitle").textContent=p.name;el("optionButtons").innerHTML=group.choices.map(o=>`<button type="button" class="option-choice" data-option="${o.id}"><span class="option-icon">${o.icon}</span><span><strong>${o.name}</strong><small>${o.price?`Aufpreis ${money(o.price)}`:"ohne Aufpreis"}</small></span><b>${o.price?`+ ${money(o.price)}`:""}</b></button>`).join("");el("optionButtons").querySelectorAll("button").forEach(b=>b.onclick=()=>{const o=group.choices.find(x=>x.id===b.dataset.option);el("optionDialog").close();addConfiguredProduct(p,o)});el("optionDialog").showModal()}
 function addConfiguredProduct(p,option){
@@ -3853,7 +3881,8 @@ const KEYPAD_MODES={
   discount:{label:"POSITIONSRABATT",help:"Position markieren, Rabatt in Prozent eingeben und OK drücken."},
   article:{label:"ARTIKELNUMMER / BARCODE",help:"Artikelnummer oder Barcode eingeben und mit OK in den Bon übernehmen."},
   bon:{label:"BONNUMMER SUCHEN",help:"Bonnummer eingeben und mit OK suchen."},
-  price:{label:"PREIS ÄNDERN",help:"Nur mit Serviceberechtigung: Position markieren, neuen Einzelpreis eingeben und OK drücken."}
+  price:{label:"PREIS ÄNDERN",help:"Nur mit Serviceberechtigung: Position markieren, neuen Einzelpreis eingeben und OK drücken."},
+  freibetrag:{label:"FREIE ZAHLUNG",help:"Betrag eingeben und OK legt „Divers“ zu diesem Preis in den Warenkorb."}
 };
 function setKeypadMode(mode){
   if(!KEYPAD_MODES[mode])mode="cash";
@@ -3864,9 +3893,20 @@ function setKeypadMode(mode){
   document.querySelectorAll("[data-keypad-mode]").forEach(button=>button.classList.toggle("active",button.dataset.keypadMode===mode));
   el("keypadModeLabel").textContent=KEYPAD_MODES[mode].label;
   el("keypadHelp").textContent=KEYPAD_MODES[mode].help;
+  document.querySelector(".keypad")?.classList.toggle("keypad-no-decimal",keypadIstCentEingabe(mode));
   renderKeypadDisplay();
 }
-function keypadNumber(){return Number(String(state.keypadBuffer||"0").replace(",","."))}
+// Bargeld und Preis sind Geldbetraege: Ziffern ruecken von rechts nach, die letzten zwei
+// Stellen sind immer die Cent - wie an jeder echten Kasse/jedem Taschenrechner. Vorher wurde
+// der getippte Text woertlich als Zahl gelesen ("5","0" ergab 50,00 EUR statt 0,50 EUR) - schon
+// zwei Tastendruecke reichten fuer versehentlich sehr hohe Betraege. Menge/Rabatt/Artikel/Bon
+// sind keine Centbetraege und bleiben bei der woertlichen Eingabe.
+function keypadIstCentEingabe(mode){return mode==="cash"||mode==="price"||mode==="freibetrag"}
+function keypadNumber(){
+  const mode=state.keypadMode||"cash";
+  if(keypadIstCentEingabe(mode))return (Number(state.keypadBuffer||"0")||0)/100;
+  return Number(String(state.keypadBuffer||"0").replace(",","."));
+}
 function renderKeypadDisplay(){
   const value=keypadNumber(),display=el("keypadDisplay");if(!display)return;
   if(state.keypadMode==="cash"||state.keypadMode==="price")display.textContent=money(Number.isFinite(value)?value:0);
@@ -3879,6 +3919,9 @@ function applyKeypadValue(){
   if(mode==="cash"){
     if(!Number.isFinite(value)||value<=0)return setSystemHint("Ungültigen Bargeldbetrag korrigieren","warn");
     setGiven(value);setSystemHint(`Gegeben ${money(state.given)} · Rückgeld ${money(Math.max(0,state.given-total()))} · BAR-Taste zum Abschließen`);
+  }else if(mode==="freibetrag"){
+    if(!Number.isFinite(value)||value<=0)return setSystemHint("Ungültigen Betrag korrigieren","warn");
+    addDiversItem(value);setKeypadMode("cash");return;
   }else if(mode==="quantity"){
     const item=selectedCartItem(),qty=Math.trunc(value);
     if(!item)return setSystemHint("Bitte zuerst eine Bonposition markieren","warn");
@@ -3915,6 +3958,12 @@ function handleKeypad(key){
   if(key==="back"){state.keypadBuffer=state.keypadBuffer.slice(0,-1);renderKeypadDisplay();return}
   if(key==="ok"){applyKeypadValue();return}
   if(!/^\d$|^00$|^[,.]$/.test(key))return;
+  if(keypadIstCentEingabe(state.keypadMode||"cash")){
+    if(key===","||key===".")return;// Cent-Eingabe: die letzten zwei Stellen sind immer die Cent, kein Komma noetig
+    if(state.keypadBuffer.length>=9)return;
+    state.keypadBuffer=(state.keypadBuffer+key).replace(/^0+(?=\d)/,"");
+    renderKeypadDisplay();return;
+  }
   const part=(key==="."||key===",")?",":key;
   if(part===","&&(state.keypadBuffer.includes(",")||["quantity","article","bon"].includes(state.keypadMode)))return;
   if(state.keypadBuffer.replace(/\D/g,"").length>=12)return;
