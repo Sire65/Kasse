@@ -382,6 +382,8 @@ class DeviceCompanion {
     try { await this._syncMasterData(); await this._syncDataKey(); } catch (e) { /* nächster Versuch beim nächsten Sync-Zyklus */ }
     try { await this._syncRemoteCommand(); } catch (e) { /* nächster Versuch beim nächsten Sync-Zyklus */ }
     try { await this._syncSoldOutStatus(); } catch (e) { /* nächster Versuch beim nächsten Sync-Zyklus */ }
+    try { await this._syncZeiterfassungStatus(); } catch (e) { /* nächster Versuch beim nächsten Sync-Zyklus */ }
+    try { await this._syncDienstplan(); } catch (e) { /* nächster Versuch beim nächsten Sync-Zyklus */ }
     try { await this._syncVoucherNumbers(); } catch (e) { /* nächster Versuch beim nächsten Sync-Zyklus */ }
     return result;
   }
@@ -473,6 +475,32 @@ class DeviceCompanion {
     const antwort = await this._request(target, 'GET', '/api/v1/sold-out-status', undefined, { 'X-KC-Credential': pinned.credentialId }, pinned.fingerprint);
     if (!antwort || !Array.isArray(antwort.ausverkauft)) return;
     this._ausverkauftListe = antwort.ausverkauft;
+  }
+
+  // Anwesenheits-Ampel: holt die Zeitbuchungen ALLER Kassen vom Manager, damit die eigene
+  // Kasse eine LED je Pseudonym zeigen kann, die auch weiss, wer an einer ANDEREN Kasse
+  // gestempelt hat - nicht nur an sich selbst. Bleibt bei Fehlschlag beim zuletzt bekannten
+  // Stand (kein Absturz, keine leere Anzeige nur wegen eines einzelnen verpassten Zyklus).
+  async _syncZeiterfassungStatus() {
+    const pinned = this.pinned;
+    if (!pinned.credentialId) return;
+    const target = this.knownManagerHost;
+    if (!target) return;
+    const antwort = await this._request(target, 'GET', '/api/v1/zeiterfassung-status', undefined, { 'X-KC-Credential': pinned.credentialId }, pinned.fingerprint);
+    if (!antwort || !Array.isArray(antwort.ereignisse)) return;
+    this._zeiterfassungEreignisse = antwort.ereignisse;
+  }
+
+  // Dienstplan (Sollplan aus dp2, ueber den PC-Manager) - fuer die Kalender-/Blaetterpfeil-
+  // Ansicht in der Kasse, frei einsehbar fuer alle Kollegen.
+  async _syncDienstplan() {
+    const pinned = this.pinned;
+    if (!pinned.credentialId) return;
+    const target = this.knownManagerHost;
+    if (!target) return;
+    const antwort = await this._request(target, 'GET', '/api/v1/dienstplan', undefined, { 'X-KC-Credential': pinned.credentialId }, pinned.fingerprint);
+    if (!antwort || !Array.isArray(antwort.schichten)) return;
+    this._dienstplanSchichten = antwort.schichten;
   }
 
   // Baustufe 3: liefert den Zustand für die Ampel neben dem Hamburger-Menü. Grün = online und
@@ -601,6 +629,16 @@ class DeviceCompanion {
       if (req.method === 'GET' && req.url.split('?')[0] === '/kc-sync-sold-out-status') {
         res.writeHead(200, { 'Content-Type': 'application/json' });
         res.end(JSON.stringify({ ausverkauft: this._ausverkauftListe || [] }));
+        return;
+      }
+      if (req.method === 'GET' && req.url.split('?')[0] === '/kc-sync-team-status') {
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ ereignisse: this._zeiterfassungEreignisse || [] }));
+        return;
+      }
+      if (req.method === 'GET' && req.url.split('?')[0] === '/kc-sync-dienstplan') {
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ schichten: this._dienstplanSchichten || [] }));
         return;
       }
       if (req.method === 'POST' && req.url.split('?')[0] === '/kc-sync-sold-out-melden') {

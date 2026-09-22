@@ -1,0 +1,78 @@
+/* Dienstplan-Knopf im Kopf, Blaetterpfeil-Ansicht im Dialog. Frei zugaenglich fuer alle
+   Kollegen (kein PIN-Bereich), deshalb bewusst einfach und ohne Verwaltungs-Optik. */
+.dienstplan-button {
+  font-size: 1.15rem;
+}
+
+.dienstplan-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+.dienstplan-head button {
+  min-width: 44px;
+  min-height: 44px;
+  border: 1px solid #c7ced6;
+  border-radius: 8px;
+  background: linear-gradient(#fff, #e7ebef);
+  font-size: 1.3rem;
+  font-weight: 900;
+}
+.dienstplan-datum {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  flex: 1;
+}
+.dienstplan-datum b {
+  font-size: 1.1rem;
+}
+.dienstplan-datum button {
+  min-height: 30px;
+  min-width: 0;
+  padding: 2px 12px;
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+.dienstplan-liste {
+  display: grid;
+  gap: 8px;
+  max-height: 55vh;
+  overflow: auto;
+}
+.dienstplan-zeile {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border: 1px solid #d7ddd9;
+  border-radius: 9px;
+  background: #f8faf9;
+}
+.dienstplan-zeile b {
+  font-size: 1.05rem;
+}
+.dienstplan-zeile small {
+  display: block;
+  color: #636b66;
+}
+.dienstplan-zeit {
+  font-weight: 900;
+  white-space: nowrap;
+}
+.dienstplan-leer {
+  padding: 20px;
+  text-align: center;
+  color: #667085;
+}
+.dienstplan-stand {
+  display: block;
+  margin-top: 10px;
+  color: #667085;
+  text-align: center;
+}

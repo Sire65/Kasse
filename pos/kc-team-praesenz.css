@@ -1,0 +1,39 @@
+/* Anwesenheits-LED vor jedem Pseudonym in der Bedienerliste (#operatorList).
+   Bewusst an die bestehende .kc-sync-led-Konvention angelehnt (siehe kc-sync-status-leds.css)
+   - dieselben Farb-Tokens --green/--yellow/--red, dieselbe Kreisform, nur kleiner, weil hier
+   viele Punkte nebeneinander in einer Liste stehen statt zwei einzelne im Kopfbereich. */
+#operatorList button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.operator-led {
+  display: inline-block; /* noetig ausserhalb von #operatorList button (dort flex) - z.B.
+                             im Kopf-Knopf #operatorBtnLed steht in einem normalen <span> */
+  width: 12px;
+  height: 12px;
+  min-width: 12px;
+  border-radius: 50%;
+  border: 1px solid #fff;
+  background: var(--muted, #78848e);
+  box-shadow: 0 0 0 1px #56636e;
+  flex-shrink: 0;
+  vertical-align: middle;
+}
+/* Nur die LED am Kopf-Bediener-Knopf braucht einen eigenen Abstand zum Namen davor -
+   in #operatorList sorgt bereits der flex-gap der Liste selbst fuer den Abstand. */
+#operatorBtnLed {
+  margin-left: 6px;
+}
+.operator-led-gruen {
+  background: var(--green, #19d36f);
+  box-shadow: 0 0 0 1px #0b7a34, 0 0 6px 2px rgba(26, 163, 51, .45);
+}
+.operator-led-gelb {
+  background: var(--yellow, #f2a900);
+  box-shadow: 0 0 0 1px #a06f00, 0 0 6px 2px rgba(242, 169, 0, .45);
+}
+.operator-led-rot {
+  background: var(--red, #c9231f);
+  box-shadow: 0 0 0 1px #7a1512, 0 0 6px 2px rgba(201, 35, 31, .45);
+}

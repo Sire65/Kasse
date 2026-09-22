@@ -9,7 +9,7 @@
 'use strict';
 const { DatabaseSync } = require('node:sqlite');
 
-const SCHEMA_VERSION = 25;
+const SCHEMA_VERSION = 26;
 
 function hasColumn(db, table, column) {
   return db.prepare(`PRAGMA table_info(${table})`).all().some((c) => c.name === column);
@@ -581,6 +581,24 @@ MIGRATIONS.push((db) => {
 // Die Zählung bleibt fachlich getrennt vom Soll-Abschluss und reist nur als eigener JSON-Block mit.
 MIGRATIONS.push((db) => {
   if (!hasColumn(db, 'closings', 'cash_count_json')) db.exec('ALTER TABLE closings ADD COLUMN cash_count_json TEXT');
+});
+
+// Version 26 (22.09.2026): Dienstplan-Bruecke zu dp2 - derselbe Aufbau wie master_data
+// (Version 10): EINE Zeile mit dem jeweils vollstaendigen, aktuellen Stand als JSON, vom
+// PC-Manager ueber eine reine Loopback-Route (siehe index.js) hineingeschrieben, nachdem er
+// den Sollplan aus Supabase (kc_dp_plan_published) geholt und auf Pseudonyme uebersetzt hat -
+// die Kasse bekommt NIE Klarnamen zu sehen, auch nicht auf diesem Weg. Jede Kasse holt sich
+// diesen Stand ueber den bestehenden, bewaehrten Sync-Kanal ab (device-companion), genau wie
+// bei den Stammdaten.
+MIGRATIONS.push((db) => {
+  db.exec(`
+    CREATE TABLE IF NOT EXISTS dienstplan (
+      id INTEGER PRIMARY KEY CHECK (id = 1),
+      schichten_json TEXT NOT NULL DEFAULT '[]',
+      revision INTEGER NOT NULL DEFAULT 0,
+      updated_at TEXT
+    );
+  `);
 });
 
 module.exports = { openManagerDb, SCHEMA_VERSION };

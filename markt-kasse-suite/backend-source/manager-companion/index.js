@@ -195,12 +195,20 @@ class ManagerCompanion {
     }
     if (req.method === 'POST' && url.pathname === '/api/v1/sync/push') return this._push(req, res, body);
     if (req.method === 'GET' && url.pathname === '/api/v1/master-data') return this._masterDataGet(req, res);
+    // Dienstplan (Sollplan aus dp2, siehe Dienstplan-Bruecke): dieselbe Authentisierung wie
+    // Stammdaten - jede gekoppelte Kasse darf ihn abrufen, er soll fuer ALLE Kollegen frei
+    // einsehbar sein (kein PIN-Bereich), nur eben nur ueber eine echt gekoppelte Kasse.
+    if (req.method === 'GET' && url.pathname === '/api/v1/dienstplan') return this._dienstplanGet(req, res);
     // Datenschluessel der anfragenden Kasse - laeuft ueber denselben angemeldeten und
     // verschluesselten Kanal wie die Stammdaten. Jede Kasse bekommt ausschliesslich ihren
     // eigenen; die Zuordnung kommt aus der Kopplung, nicht aus der Anfrage.
     if (req.method === 'GET' && url.pathname === '/api/v1/data-key') return this._dataKeyGet(req, res);
     if (req.method === 'GET' && url.pathname === '/api/v1/remote-command') return this._remoteCommandPoll(req, res);
     if (req.method === 'GET' && url.pathname === '/api/v1/sold-out-status') return this._soldOutStatusGet(req, res);
+    // Anwesenheits-Ampel (LED neben dem Pseudonym in der Bedienerliste, kassenuebergreifend):
+    // liefert die rohen Zeitbuchungen, die Kasse rechnet mit derselben summarize()-Logik wie
+    // der PC-Manager selbst den Status aus - beide Seiten zeigen dadurch immer denselben Stand.
+    if (req.method === 'GET' && url.pathname === '/api/v1/zeiterfassung-status') return this._zeiterfassungStatusGet(req, res);
     // Nummernvorrat fuer die Kassen. Laeuft ueber denselben angemeldeten, verschluesselten
     // Kanal wie die Stammdaten - das Geheimnis selbst verlaesst den Manager dabei NICHT, es
     // gehen nur fertig signierte Nummern raus.
@@ -534,6 +542,26 @@ class ManagerCompanion {
         return;
       }
       if (req.method === 'OPTIONS' && url.pathname === '/master-data/push') {
+        if (req.headers.origin) res.setHeader('Access-Control-Allow-Origin', req.headers.origin);
+        res.setHeader('Access-Control-Allow-Methods', 'POST');
+        res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+        res.writeHead(204); res.end();
+        return;
+      }
+      // Dienstplan-Bruecke: der PC-Manager (Browser, dort ist die Supabase-Anmeldung vorhanden)
+      // holt den Sollplan aus dp2 (kc_dp_plan_published), uebersetzt person_id -> Pseudonym
+      // und legt das Ergebnis HIER ab - genau dasselbe Loopback-Muster wie /master-data/push.
+      if (req.method === 'POST' && url.pathname === '/dienstplan/push') {
+        const addr = req.socket.remoteAddress || '';
+        const isLoopback = addr === '127.0.0.1' || addr === '::1' || addr === '::ffff:127.0.0.1';
+        if (req.headers.origin) res.setHeader('Access-Control-Allow-Origin', req.headers.origin);
+        if (!isLoopback) { res.writeHead(403, { 'Content-Type': 'application/json' }); res.end(JSON.stringify({ error: 'loopback_only' })); return; }
+        let koerper = '';
+        req.on('data', (c) => { koerper += c; if (koerper.length > 2_000_000) req.destroy(); });
+        req.on('end', () => { try { this._dienstplanPush(req, res, JSON.parse(koerper)); } catch (e) { res.writeHead(400, { 'Content-Type': 'application/json' }); res.end(JSON.stringify({ error: 'payload_invalid' })); } });
+        return;
+      }
+      if (req.method === 'OPTIONS' && url.pathname === '/dienstplan/push') {
         if (req.headers.origin) res.setHeader('Access-Control-Allow-Origin', req.headers.origin);
         res.setHeader('Access-Control-Allow-Methods', 'POST');
         res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
@@ -1413,6 +1441,38 @@ class ManagerCompanion {
     }
   }
 
+  // Dienstplan-Bruecke (siehe /dienstplan/push oben): eine Zeile mit dem vollstaendigen,
+  // aktuellen Sollplan als JSON - Pseudonyme, NIE Klarnamen (das erledigt der PC-Manager beim
+  // Abholen aus Supabase, bevor er hier ankommt).
+  _dienstplanPush(req, res, body) {
+    const addr = req.socket.remoteAddress || '';
+    const isLoopback = addr === '127.0.0.1' || addr === '::1' || addr === '::ffff:127.0.0.1';
+    if (!isLoopback) return this._json(res, 403, { error: 'loopback_only' });
+    if (!Array.isArray(body?.schichten)) return this._json(res, 400, { error: 'payload_invalid' });
+    const bisher = this.db.prepare('SELECT revision FROM dienstplan WHERE id = 1').get();
+    const neueRevision = (bisher?.revision || 0) + 1;
+    this.db.prepare(`
+      INSERT INTO dienstplan (id, schichten_json, revision, updated_at) VALUES (1, ?, ?, ?)
+      ON CONFLICT(id) DO UPDATE SET schichten_json=excluded.schichten_json, revision=excluded.revision, updated_at=excluded.updated_at
+    `).run(JSON.stringify(body.schichten), neueRevision, new Date().toISOString());
+    this._json(res, 200, { received: true, revision: neueRevision, anzahl: body.schichten.length });
+  }
+
+  // Abruf durch die Kassen (ueber den device-companion, siehe dort) - dieselbe Authentisierung
+  // wie Stammdaten. Der Inhalt selbst ist bewusst fuer ALLE Bediener einsehbar (kein PIN-
+  // Bereich in der Kasse), nur der Transportweg braucht eine echte Kopplung.
+  _dienstplanGet(req, res) {
+    const auth = this._authenticate(req);
+    if (!auth.ok) return this._json(res, 401, { error: auth.error });
+    const zeile = this.db.prepare('SELECT schichten_json, revision, updated_at FROM dienstplan WHERE id = 1').get();
+    if (!zeile) return this._json(res, 200, { schichten: [], revision: 0, updatedAt: null });
+    this._json(res, 200, {
+      schichten: (() => { try { return JSON.parse(zeile.schichten_json || '[]'); } catch (e) { return []; } })(),
+      revision: zeile.revision,
+      updatedAt: zeile.updated_at,
+    });
+  }
+
   _masterDataGet(req, res) {
     const auth = this._authenticate(req);
     if (!auth.ok) return this._json(res, 401, { error: auth.error });
@@ -1451,6 +1511,23 @@ class ManagerCompanion {
     if (!auth.ok) return this._json(res, 401, { error: auth.error });
     const zeilen = this.db.prepare('SELECT article_id, sold_out FROM sold_out_status WHERE sold_out = 1').all();
     this._json(res, 200, { ausverkauft: zeilen.map((z) => z.article_id) });
+  }
+
+  // Liefert die Zeitbuchungen aller Kassen fuer die Anwesenheits-Ampel. Bewusst dieselbe
+  // Begrenzung (2000, neueste zuerst) wie /zeiterfassung/liste fuer den PC-Manager selbst -
+  // hier zusaetzlich angemeldet, weil die Anfrage ueber echtes Netzwerk (Kasse -> Companion ->
+  // Manager) laeuft, nicht nur lokal auf demselben Rechner.
+  _zeiterfassungStatusGet(req, res) {
+    const auth = this._authenticate(req);
+    if (!auth.ok) return this._json(res, 401, { error: auth.error });
+    const zeilen = this.db.prepare(`
+      SELECT event_id, person_id, person_type, kind, effective_at, voided_at
+      FROM time_clock_events ORDER BY effective_at DESC LIMIT 2000
+    `).all();
+    this._json(res, 200, { ereignisse: zeilen.map((z) => ({
+      id: z.event_id, personId: z.person_id, personType: z.person_type,
+      kind: z.kind, effectiveAt: z.effective_at, voidedAt: z.voided_at,
+    })) });
   }
 
   // Liefert die gespeicherte Verlaufsliste der Live-Ereignisse (neueste zuerst) - für PC-Manager,
