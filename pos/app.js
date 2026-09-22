@@ -1208,12 +1208,14 @@ function zahlungsPfeilePflegen({due,isPayout,hasDue,sufficient}={}){
 }
 function updateChange(){
   const due=total(),isPayout=toCents(due)<0,payout=Math.abs(due),change=isPayout?payout:Math.max(0,state.given-due),card=el("changeDisplay").closest(".change-card"),paymentState=el("changePaymentState"),hasDue=toCents(due)>0,sufficient=hasDue&&toCents(state.given)>=toCents(due);paymentState.classList.remove("direct-settlement");
+  const freieZahlung=state.keypadMode==="freibetrag";
   el("givenDisplay").textContent=money(state.given);
-  el("changeDisplay").textContent=money(change);
+  // Waehrend "Freie Zahlung" zeigt die grosse Zahl den bereits getippten Betrag statt der
+  // (hier bedeutungslosen) Rueckgeldberechnung - siehe renderKeypadDisplay().
+  if(!freieZahlung)el("changeDisplay").textContent=money(change);
   card.classList.toggle("payment-insufficient",!isPayout&&hasDue&&!sufficient);
   card.classList.toggle("payment-sufficient",!isPayout&&sufficient);
   card.classList.toggle("payment-payout",isPayout);
-  const freieZahlung=state.keypadMode==="freibetrag";
   const changeTitle=card.querySelector(".change-card-head>span");if(changeTitle)changeTitle.textContent=freieZahlung?"FREIE ZAHLUNG":isPayout?"AUSZAHLUNG":"RÜCKGELD";
   if(freieZahlung)paymentState.textContent="Betrag eingeben, dann OK → wird als „Divers“ in den Warenkorb gelegt";
   else if(isPayout)paymentState.textContent=`AN KUNDEN AUSZAHLEN · ${money(payout)}`;
@@ -4054,10 +4056,23 @@ function keypadNumber(){
   return Number(String(state.keypadBuffer||"0").replace(",","."));
 }
 function renderKeypadDisplay(){
-  const value=keypadNumber(),display=el("keypadDisplay");if(!display)return;
-  if(state.keypadMode==="cash"||state.keypadMode==="price")display.textContent=money(Number.isFinite(value)?value:0);
-  else if(state.keypadMode==="discount")display.textContent=`${Number.isFinite(value)?value:0} %`;
-  else display.textContent=state.keypadBuffer||"0";
+  const value=keypadNumber(),display=el("keypadDisplay");
+  if(display){
+    if(state.keypadMode==="cash"||state.keypadMode==="price")display.textContent=money(Number.isFinite(value)?value:0);
+    else if(state.keypadMode==="discount")display.textContent=`${Number.isFinite(value)?value:0} %`;
+    else display.textContent=state.keypadBuffer||"0";
+  }
+  // Betreiber: "kann keinen Betrag eingeben" bei Freier Zahlung - #keypadDisplay steckt
+  // (wie #keypadModeLabel/#keypadHelp) in .keypad-display, die auf der Baukasten-Zahlen-
+  // Seite ausgeblendet ist (die eigene RÜCKGELD-Karte ersetzt sie). Ohne sichtbare
+  // Rueckmeldung beim Tippen wirkte es, als würde nichts passieren - weitergetippte Ziffern
+  // haeuften sich unsichtbar im Speicher an, bis beim Bestaetigen ein voellig falscher, viel
+  // zu hoher Betrag im Bon auftauchte. Waehrend der Eingabe zeigt die IMMER sichtbare grosse
+  // Zahl (sonst RÜCKGELD/AUSZAHLUNG) den bereits eingegebenen Betrag deshalb live mit an.
+  if(state.keypadMode==="freibetrag"){
+    const cd=el("changeDisplay");
+    if(cd)cd.textContent=money(Number.isFinite(value)?value:0);
+  }
 }
 function applyKeypadValue(){
   const mode=state.keypadMode||"cash",value=keypadNumber();
@@ -4106,7 +4121,11 @@ function handleKeypad(key){
   if(!/^\d$|^00$|^[,.]$/.test(key))return;
   if(keypadIstCentEingabe(state.keypadMode||"cash")){
     if(key===","||key===".")return;// Cent-Eingabe: die letzten zwei Stellen sind immer die Cent, kein Komma noetig
-    if(state.keypadBuffer.length>=9)return;
+    // Betreiber: bei "Freie Zahlung" ohne sichtbare Rueckmeldung (siehe renderKeypadDisplay)
+    // wurde einmal versehentlich bis 3.002.874,12 EUR weitergetippt - 9 Stellen liessen das
+    // rechnerisch zu. Fuer einen Marktstand reichen 6 Stellen (bis 9.999,99 EUR) bei weitem
+    // und begrenzen einen Fehlgriff auf einen sofort erkennbaren, nicht mehr absurden Betrag.
+    if(state.keypadBuffer.length>=6)return;
     state.keypadBuffer=(state.keypadBuffer+key).replace(/^0+(?=\d)/,"");
     renderKeypadDisplay();return;
   }

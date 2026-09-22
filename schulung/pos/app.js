@@ -1337,12 +1337,14 @@ function zahlungsPfeilePflegen({due,isPayout,hasDue,sufficient}={}){
 }
 function updateChange(){
   const due=total(),isPayout=toCents(due)<0,payout=Math.abs(due),change=isPayout?payout:Math.max(0,state.given-due),card=el("changeDisplay").closest(".change-card"),paymentState=el("changePaymentState"),hasDue=toCents(due)>0,sufficient=hasDue&&toCents(state.given)>=toCents(due);paymentState.classList.remove("direct-settlement");
+  const freieZahlung=state.keypadMode==="freibetrag";
   el("givenDisplay").textContent=money(state.given);
-  el("changeDisplay").textContent=money(change);
+  // Waehrend "Freie Zahlung" zeigt die grosse Zahl den bereits getippten Betrag statt der
+  // (hier bedeutungslosen) Rueckgeldberechnung - siehe renderKeypadDisplay().
+  if(!freieZahlung)el("changeDisplay").textContent=money(change);
   card.classList.toggle("payment-insufficient",!isPayout&&hasDue&&!sufficient);
   card.classList.toggle("payment-sufficient",!isPayout&&sufficient);
   card.classList.toggle("payment-payout",isPayout);
-  const freieZahlung=state.keypadMode==="freibetrag";
   const changeTitle=card.querySelector(".change-card-head>span");if(changeTitle)changeTitle.textContent=freieZahlung?"FREIE ZAHLUNG":isPayout?"AUSZAHLUNG":"RÜCKGELD";
   if(freieZahlung)paymentState.textContent="Betrag eingeben, dann OK → wird als „Divers“ in den Warenkorb gelegt";
   else if(isPayout)paymentState.textContent=`AN KUNDEN AUSZAHLEN · ${money(payout)}`;
@@ -4341,6 +4343,18 @@ function renderKeypadDisplay(){
   // wuerde gar nichts passieren, bis man extra auf OK tippt.
   if(state.keypadMode==="cash"&&state.keypadBuffer&&Number.isFinite(value)&&value>=0)zeigeGegebenVorschau(value);
   else if(state.keypadMode==="cash"&&!state.keypadBuffer)try{updateChange()}catch(e){/* Kasse evtl. noch nicht bereit */}
+  // Betreiber: "kann keinen Betrag eingeben" bei Freier Zahlung - dieselbe Ursache wie beim
+  // 10.09.-Befund oben, nur fuer den Modus "freibetrag" nie behoben: #keypadDisplay steckt in
+  // .keypad-display, die auf der Baukasten-Zahlen-Seite ausgeblendet ist. Ohne sichtbare
+  // Rueckmeldung beim Tippen wirkte es, als würde nichts passieren - weitergetippte Ziffern
+  // haeuften sich unsichtbar an, bis beim Bestaetigen ein voellig falscher, viel zu hoher
+  // Betrag im Bon auftauchte (einmal live beobachtet: 3.002.874,12 EUR). Dieselbe
+  // "Vorschau"-Anzeige wie beim Bargeld jetzt auch hier.
+  if(state.keypadMode==="freibetrag"){
+    const cd=el("changeDisplay"),ps=el("changePaymentState");
+    if(cd)cd.textContent=money(Number.isFinite(value)?value:0);
+    if(ps)ps.textContent=state.keypadBuffer?`Wird als „Divers“ gebucht: ${money(Number.isFinite(value)?value:0)} (Vorschau)`:"Betrag eingeben, dann OK → wird als „Divers“ in den Warenkorb gelegt";
+  }
 }
 function zeigeGegebenVorschau(vorschauWert){
   const gd=el("givenDisplay"),cd=el("changeDisplay"),ps=el("changePaymentState");
@@ -4398,7 +4412,11 @@ function handleKeypad(key){
   if(!/^\d$|^00$|^[,.]$/.test(key))return;
   if(keypadIstCentEingabe(state.keypadMode||"cash")){
     if(key===","||key===".")return;// Cent-Eingabe: die letzten zwei Stellen sind immer die Cent, kein Komma noetig
-    if(state.keypadBuffer.length>=9)return;
+    // Betreiber: bei "Freie Zahlung" ohne sichtbare Rueckmeldung (siehe renderKeypadDisplay)
+    // wurde einmal versehentlich bis 3.002.874,12 EUR weitergetippt - 9 Stellen liessen das
+    // rechnerisch zu. Fuer einen Marktstand reichen 6 Stellen (bis 9.999,99 EUR) bei weitem
+    // und begrenzen einen Fehlgriff auf einen sofort erkennbaren, nicht mehr absurden Betrag.
+    if(state.keypadBuffer.length>=6)return;
     state.keypadBuffer=(state.keypadBuffer+key).replace(/^0+(?=\d)/,"");
     renderKeypadDisplay();return;
   }
