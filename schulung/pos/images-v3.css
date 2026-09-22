@@ -15,7 +15,7 @@
    Datei laedt zuletzt (siehe index.html) und wuerde die dortigen Regeln sonst per Ladereihen-
    folge ueberstimmen - deshalb hier dieselben Werte, nicht die der normalen Kasse. */
 .product-grid .image-v3>.auto-favorite-star{top:7px!important;left:50%!important;right:auto!important;transform:translateX(-50%)!important}
-.product-grid .image-v3>.product-price-tag{position:absolute!important;top:8px!important;left:8px!important;bottom:auto!important;right:auto!important}
+.product-grid .image-v3 .product-price-tag{position:absolute!important;top:8px!important;left:8px!important;bottom:auto!important;right:auto!important}
 .product-info-image[src$="_version_3.png"]{object-fit:contain!important}
 
 /* Override legacy full-row sizing so square images stay inside their grid column. */

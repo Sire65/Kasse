@@ -33,7 +33,7 @@
       .app-header{position:static}.main-layout{grid-template-columns:1fr}.cart-area{min-height:250px}.status-footer{overflow-x:auto}
     }
   </style>
-<link rel="stylesheet" href="images-v3.css?build=4">
+<link rel="stylesheet" href="images-v3.css?build=5">
 </head>
 <body class="public-beta">
 <div id="app" class="app-shell">
@@ -315,6 +315,17 @@
   </form>
 </dialog>
 
+<dialog id="salesTimeDialog">
+  <form method="dialog" class="dialog-card sales-time-card">
+    <div class="admin-home-head">
+      <div><span class="info-kicker">VERKAUFSZEITEN HEUTE</span><h2 id="salesTimeTitle">Artikel</h2></div>
+      <button value="close" class="icon-close" aria-label="Schließen">×</button>
+    </div>
+    <p id="salesTimeSubtitle" class="sales-time-subtitle"></p>
+    <div id="salesTimeList" class="sales-time-list"></div>
+    <div class="dialog-actions"><button value="close">Schließen</button></div>
+  </form>
+</dialog>
 
 <dialog id="productInfoDialog">
   <form method="dialog" class="dialog-card product-info-card">
@@ -1480,7 +1491,7 @@
     document.body.appendChild(s);
   }
   window.KCMasterDataSync.bereit.finally(() => {
-    ladeNacheinander(['images-v3.js?build=3-pfand', 'app.js?build=0.31.3.6-r20', '../shared/kc-happyhour.js?build=0.1.0', 'kc-happyhour-pos.js?build=0.1.0', 'kc-meldeweg.js?build=0.1.0', '../shared/kc-security-card.js?build=0.1.0', 'kc-security-card-pos.js?build=0.1.0', 'kc-zahl-zoom.js?build=0.1.0', 'kc-ansicht-umschalter.js?build=0.1.0', 'kc-startup-check.js?build=0.1.0', 'kc-pin-lock.js?build=0.1.0', 'kc-layout-neu.js?build=0.1.0', 'kc-erfassung-getrennt.js?build=0.1.0', 'kc-gutschein.js?build=0.1.0', 'kc-vorfuehrdaten.js?build=0.1.0', '../shared/kc-oberflaechen-format.js?build=0.1.0', 'kc-oberflaechen-pos.js?build=0.1.0', 'kc-oberflaechen-anwenden.js?build=0.9.0', 'kc-kopfzeile.js?build=0.3.0', 'kc-schulung.js?build=0.1.0', 'kc-reklamation.js?build=0.1.2']);
+    ladeNacheinander(['images-v3.js?build=3-pfand', 'app.js?build=0.31.3.6-r21', '../shared/kc-happyhour.js?build=0.1.0', 'kc-happyhour-pos.js?build=0.1.0', 'kc-meldeweg.js?build=0.1.0', '../shared/kc-security-card.js?build=0.1.0', 'kc-security-card-pos.js?build=0.1.0', 'kc-zahl-zoom.js?build=0.1.0', 'kc-ansicht-umschalter.js?build=0.1.0', 'kc-startup-check.js?build=0.1.0', 'kc-pin-lock.js?build=0.1.0', 'kc-layout-neu.js?build=0.1.0', 'kc-erfassung-getrennt.js?build=0.1.0', 'kc-gutschein.js?build=0.1.0', 'kc-vorfuehrdaten.js?build=0.1.0', '../shared/kc-oberflaechen-format.js?build=0.1.0', 'kc-oberflaechen-pos.js?build=0.1.0', 'kc-oberflaechen-anwenden.js?build=0.9.0', 'kc-kopfzeile.js?build=0.3.0', 'kc-schulung.js?build=0.1.0', 'kc-reklamation.js?build=0.1.2']);
   });
 </script>
 <script src="pos-ui-profile-consumer.js?build=0.1.0"></script>

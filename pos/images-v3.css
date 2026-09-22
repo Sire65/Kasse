@@ -14,10 +14,12 @@
    Pixelbreite, keine %-Breite) wird auf genau diese Mitte zentriert statt nur linksbuendig
    an den Button angelegt zu werden. */
 .product-grid .image-v3>.auto-favorite-star{top:24%!important;left:11.5%!important;right:auto!important;transform:translateX(-50%)!important}
-/* Preisschild jetzt unten links (kompakt, ohne Eurozeichen - siehe app.js renderProducts),
-   nicht mehr oben rechts im (jetzt leeren) product-label. Eigenstaendiges Element, siehe
-   .product-price-tag in styles.css - hier nur die image-v3-spezifische Position/Optik. */
-.product-grid .image-v3>.product-price-tag{position:absolute!important;left:2%!important;bottom:2%!important;top:auto!important;right:auto!important;background:#111a29!important;color:#fff!important;border-radius:5px!important;padding:4px 6px!important;font-size:clamp(11px,1.2vw,17px)!important;z-index:5!important;pointer-events:none!important}
+/* Preisschild unten links, DIREKT am linken Rand (left:0) und DIREKT ueber der Namensflaeche
+   an - kein Eurozeichen (siehe app.js renderProducts). Die "Namensflaeche" ist bei den
+   Version-3-Bildern ins Bild selbst eingebrannt (dunkelblaues Band), kein HTML-Element -
+   per Pixelmessung an mehreren Assets beginnt dieses Band bei ca. 84-85% der Bildhoehe, also
+   bottom:15% legt das Schild exakt buendig darueber. */
+.product-grid .image-v3 .product-price-tag{position:absolute!important;left:0!important;bottom:15%!important;top:auto!important;right:auto!important;background:#111a29!important;color:#fff!important;border-radius:0 5px 5px 0!important;padding:4px 7px!important;font-size:clamp(11px,1.2vw,17px)!important;z-index:5!important;pointer-events:none!important}
 .product-info-image[src$="_version_3.png"]{object-fit:contain!important}
 
 /* Override legacy full-row sizing so square images stay inside their grid column. */

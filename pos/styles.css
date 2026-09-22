@@ -483,6 +483,15 @@ body:not(.admin-open) .settings-card{visibility:visible}
 .closing-kpis span{display:block;color:#667085;font-size:.8rem}
 .closing-kpis strong{display:block;font-size:1.45rem;color:#0b315d;margin-top:4px}
 .closing-card textarea{width:100%;padding:9px;border:1px solid #c7ced6;border-radius:7px}
+/* Verkaufszeiten-Aufstellung (Klick auf den Favoritenstern) - grosszuegige Zeilen fuer
+   Tablet-Bedienung, auch wenn hier nichts angetippt werden muss (reine Anzeige). */
+.auto-favorite-star{cursor:pointer}
+.sales-time-card{max-width:480px}
+.sales-time-subtitle{color:#5f6876;font-weight:800;margin:2px 0 12px}
+.sales-time-list{display:flex;flex-direction:column;gap:8px;max-height:60vh;overflow:auto}
+.sales-time-row{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;border:1px solid #d4dae0;border-radius:9px;background:#fafbfc;font-size:1.05rem}
+.sales-time-row b{font-size:1.25rem;color:#0b315d}
+.sales-time-empty{color:#5f6876;padding:14px 2px}
 .closing-qr{display:none;width:min(260px,70vw);height:auto;margin:14px auto;border:10px solid #fff;box-shadow:0 0 0 1px #c7ced6}
 .closing-qr.ready{display:block}
 @media(max-width:700px){.closing-kpis{grid-template-columns:1fr}}

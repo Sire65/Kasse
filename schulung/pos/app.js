@@ -941,15 +941,48 @@ function renderProducts(){
       </button>
       ${p.optionGroup?`<button class="product-variant-button" data-variant-id="${p.id}" title="Varianten zu ${p.name}" aria-label="Varianten zu ${p.name} öffnen">+</button>`:""}
       ${infoVisible?`<button class="product-info-button" data-info-id="${p.id}" title="Artikelinformationen" aria-label="Informationen zu ${p.name}">i</button>`:""}
-      ${autoFav?'<span class="auto-favorite-star" title="Automatischer Favorit">★</span>':""}
+      ${autoFav?`<span class="auto-favorite-star" data-star-product-id="${p.id}" title="Automatischer Favorit - antippen für Verkaufszeiten" role="button" tabindex="0">★</span>`:""}
     </div>`;
   }).join("");
   grid.querySelectorAll(".product-tile").forEach(b=>b.onclick=()=>selectProduct(b.dataset.id));
   grid.querySelectorAll(".product-variant-button").forEach(b=>b.onclick=e=>{e.stopPropagation();openProductVariants(b.dataset.variantId)});
   grid.querySelectorAll(".product-info-button").forEach(b=>b.onclick=e=>{e.stopPropagation();openProductInfo(b.dataset.infoId)});
+  grid.querySelectorAll("[data-star-product-id]").forEach(b=>{
+    const oeffnen=e=>{e.stopPropagation();openSalesTimeBreakdown(b.dataset.starProductId)};
+    b.onclick=oeffnen;
+    b.onkeydown=e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();oeffnen(e)}};
+  });
   renderProductPager();
   passeArtikelgroesseAn();
   syncImageV3RowSpans();
+}
+// Verkaufszeiten eines Artikels heute, stundenweise - antippen des Favoritensterns oeffnet
+// das. Stornos/Reklamationen desselben Artikels (negative Menge) ziehen von der jeweiligen
+// Stunde wieder ab, damit die Anzeige den tatsaechlichen Nettoabsatz zeigt, nicht nur Verkaeufe.
+function produktVerkaufszeiten(productId,datumIso=localBusinessDate()){
+  const stunden=new Map();
+  readTransactions().forEach(t=>{
+    if(t.training)return;
+    if(String(t.time||t.endTime||"").slice(0,10)!==datumIso)return;
+    const stunde=new Date(t.time||t.endTime).getHours();
+    (t.items||[]).forEach(item=>{
+      if(item.id!==productId)return;
+      stunden.set(stunde,(stunden.get(stunde)||0)+Number(item.qty||0));
+    });
+  });
+  return [...stunden.entries()].filter(([,menge])=>menge!==0).sort((a,b)=>a[0]-b[0])
+    .map(([stunde,menge])=>({label:`${String(stunde).padStart(2,"0")}:00–${String((stunde+1)%24).padStart(2,"0")}:00`,menge}));
+}
+function openSalesTimeBreakdown(productId){
+  const p=PRODUCTS.find(x=>x.id===productId);
+  const zeilen=produktVerkaufszeiten(productId);
+  el("salesTimeTitle").textContent=p?p.name:"Artikel";
+  const gesamt=zeilen.reduce((sum,z)=>sum+z.menge,0);
+  el("salesTimeSubtitle").textContent=zeilen.length?`Heute insgesamt ${gesamt}× verkauft`:"Heute noch keine Verkäufe";
+  el("salesTimeList").innerHTML=zeilen.length
+    ? zeilen.map(z=>`<div class="sales-time-row"><span>${z.label}</span><b>${z.menge}×</b></div>`).join("")
+    : `<p class="sales-time-empty">Für ${escapeHtml(p?.name||"diesen Artikel")} liegen heute noch keine Verkäufe vor.</p>`;
+  el("salesTimeDialog").showModal();
 }
 // image-v3-Kacheln sind quadratisch (Spaltenbreite hoch) und passen dadurch so gut wie nie exakt
 // in ein Vielfaches der grob eingestellten Zeilenhoehe (96-160px je Ansicht/Aufloesung). Ganze
