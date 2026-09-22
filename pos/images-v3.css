@@ -21,7 +21,7 @@
    per Pixelmessung an mehreren Assets beginnt dieses Band bei ca. 84-85% der Bildhoehe, also
    bottom:15% legt das Schild exakt buendig darueber. */
 .product-grid .image-v3 .product-price-tag{position:absolute!important;left:0!important;bottom:15%!important;top:auto!important;right:auto!important;background:#111a29!important;color:#fff!important;border-radius:0 5px 5px 0!important;padding:4px 7px!important;font-size:clamp(11px,1.2vw,17px)!important;z-index:5!important;pointer-events:none!important}
-.product-info-image[src$="_version_3.png"]{object-fit:contain!important}
+.product-info-image[src$="_version_3.png"],.product-info-image[src$="_version_3.webp"]{object-fit:contain!important}
 
 /* Override legacy full-row sizing so square images stay inside their grid column. */
 body.kc-layout-neu .sales-area>.product-grid>.product-tile-wrap.image-v3,body .product-grid>.product-tile-wrap.image-v3{width:100%!important;min-width:0!important;height:auto!important;max-height:none!important;aspect-ratio:1!important}
