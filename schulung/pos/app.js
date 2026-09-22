@@ -1698,7 +1698,7 @@ function playCompletedSaleSound(){
 
 function canonicalTransaction(row){const copy=cloneData(row);delete copy.recordHash;return JSON.stringify(copy)}
 async function completeSale(method,{type="sale",silent=false,changeTarget=null,directSettlement=false,payoutHandledWithoutCash=false}={}){
-  if(!state.cart.length)return showMessage("Kein Bon","0,00 €","Bitte zuerst Artikel wählen.");
+  if(!state.cart.length)return keinBonMeldung();
   if(state.saleInProgress)return;
   state.saleInProgress=true;
   await _txHydrated; // Sicherheitsnetz: garantiert vollständig geladenen Umsatzspeicher vor der ersten echten Buchung
@@ -1776,6 +1776,15 @@ function kcBonDruckAnbieten(bonNummer){
   const uhr=setTimeout(weg,12000);
 }
 function showMessage(t,v,txt){el("messageTitle").textContent=t;el("messageValue").textContent=v;el("messageText").textContent=txt;el("messageDialog").showModal()}
+// Betreiber: bei "Freie Zahlung" mitten in der Eingabe (Betrag getippt, aber OK noch nicht
+// gedrueckt) zeigte ein Tipp auf BAR/PERSONAL/etc. das allgemeine "Bitte zuerst Artikel
+// wählen" - fachlich richtig (der Warenkorb ist ja noch leer), aber irrefuehrend in genau
+// diesem Moment: man hat ja gerade einen Artikel "gemacht", nur eben den letzten Schritt
+// (OK) noch nicht abgeschlossen. Eigene, treffendere Meldung fuer diesen Sonderfall.
+function keinBonMeldung(){
+  if(state.keypadMode==="freibetrag")return showMessage("Betrag noch nicht bestätigt","0,00 €","Zuerst den Betrag eingeben und mit OK bestätigen - erst danach steht „Divers“ im Bon.");
+  return showMessage("Kein Bon","0,00 €","Bitte zuerst Artikel wählen.");
+}
 function renderMoney(){const notes=[5,10,20,50,100,200]; // 08.09.2026 (Betreiber): 200 EUR dazu; 22.09.2026: Platzhalter durch echtes EZB-Specimen-Bild ersetzt
 el("banknotes").innerHTML=notes.map(v=>`<button class="banknote-button" data-value="${v}" data-cash-label="${v} €"><span class="banknote-visual banknote-foto n${v}" style="background-image:url('assets/schein_${v}.jpg')"><small>${v} €</small></span></button>`).join("");el("banknotes").querySelectorAll("button").forEach(button=>button.onclick=()=>addCashSelection(Number(button.dataset.value),button.dataset.cashLabel));const MUENZ_FOTOS={2:"assets/muenze_2.webp",1:"assets/muenze_1.webp",.5:"assets/muenze_0.5.webp",.2:"assets/muenze_0.2.webp",.1:"assets/muenze_0.1.webp",.05:"assets/muenze_0.05.webp",.02:"assets/muenze_0.02.webp",.01:"assets/muenze_0.01.webp"};const coins=[{v:2,l:"2 €",c:"gold"},{v:1,l:"1 €",c:""},{v:.5,l:"50 ct",c:"gold"},{v:.2,l:"20 ct",c:"gold"},{v:.1,l:"10 ct",c:"gold"},{v:.05,l:"5 ct",c:"gold"},{v:.02,l:"2 ct",c:""},{v:.01,l:"1 ct",c:""}];el("coins").innerHTML=coins.map(c=>`<button class="coin-button" data-value="${c.v}" data-cash-label="${c.l}">${MUENZ_FOTOS[c.v]?`<span class="coin coin-foto" style="background-image:url('${MUENZ_FOTOS[c.v]}')"></span>`:`<span class="coin ${c.c}">${c.l.split(" ")[0]}</span>`}${c.l}</button>`).join("");el("coins").querySelectorAll("button").forEach(button=>button.onclick=()=>addCashSelection(Number(button.dataset.value),button.dataset.cashLabel))}
 function voidBon(){if(!state.cart.length)return;askConfirm("Offenen Bon verwerfen",`Den noch nicht gebuchten Bon ${bonText()} mit allen Positionen verwerfen?`,()=>{const entry={voidId:crypto.randomUUID(),bon:bonText(),time:new Date().toISOString(),registerId:state.master.registerId,operator:state.master.operatorName,training:!!state.master.trainingMode,reason:"unbooked-cart-discarded",items:cloneData(state.cart)};
@@ -4527,7 +4536,7 @@ el("voidBonBtn").onclick=voidBon;
 })();
 el("undoLastBtn").onclick=()=>{const i=state.cart.findIndex(x=>x.key===state.lastAdded);if(i>=0){state.cart[i].qty--;if(state.cart[i].qty<=0){const removed=state.cart.splice(i,1)[0];if(state.selectedCartKey===removed.key)state.selectedCartKey=state.cart.at(-1)?.key||null}if(!state.cart.length)state.cartStartedAt=null;renderCart()}};
 async function checkoutSale(source="button"){
-  if(!state.cart.length)return showMessage("Kein Bon","0,00 €","Bitte zuerst Artikel wählen.");
+  if(!state.cart.length)return keinBonMeldung();
   const due=total(),isPayout=toCents(due)<0;
   let result;
   if(isPayout){
@@ -4565,7 +4574,7 @@ el("cardBtn").onclick=()=>setSystemHint("EC-Kartenzahlung ist noch nicht verfüg
 // Verein, ausdruecklich GETRENNT von Trinkgeld gebucht (siehe pfandAlsSpendeVerbuchen). Bei
 // einem normalen Verkauf ist es unveraendert der PERSONAL-Knopf von vorher.
 el("staffBtn").onclick=()=>{
-  if(!state.cart.length)return showMessage("Kein Bon","0,00 €","Bitte zuerst Artikel wählen.");
+  if(!state.cart.length)return keinBonMeldung();
   if(toCents(total())<0)return pfandAlsSpendeVerbuchen();
   const gesperrt=staffBlockedCartItems();if(gesperrt.length)return showMessage("Personalverbrauch nicht möglich",money(total()),`Nicht auf Personal buchbar: ${gesperrt.join(", ")}. Bitte diese Position${gesperrt.length>1?"en":""} entfernen oder normal abrechnen.`);askConfirm("Personalverbrauch speichern",`${money(total())} als Personalverbrauch protokollieren?`,()=>completeSale("internal-personal",{type:"personal"}))
 };
@@ -5016,7 +5025,7 @@ function kcSelectAccount(id){
   el("postToAccountBtn").disabled=!v.allOk;
 }
 function kcOpenAccountCharge(){
-  if(!state.cart.length)return showMessage("Kein Bon","0,00 €","Bitte zuerst Artikel wählen.");
+  if(!state.cart.length)return keinBonMeldung();
   kcSelectedAccountId=null;el("accountSelectedPanel").hidden=true;el("accountSearch").value="";kcRenderAccountList();el("accountChargeDialog").showModal();
 }
 async function kcPostAccount(){

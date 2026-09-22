@@ -191,8 +191,9 @@ dialog::backdrop{background:rgba(0,0,0,.72)}
    treffen und gut lesbar sein - groesserer Knopf, groesserer Text. Bewusst NUR fuer die
    Meldungsfenster selbst (.dialog-actions button, .primary-action), NICHT fuer .more-grid
    button (das "Mehr"-Menu hat viele kleine Knoepfe auf engem Raum, die wuerden sonst
-   ueberlaufen). */
-.dialog-actions button,.primary-action{min-height:54px;padding:15px 22px;font-size:1.05rem}
+   ueberlaufen). Betreiber (22.09.2026, zweiter Anlauf): "auf einem kleinen iPad muss der
+   zielsicher getroffen werden" - 54px reichte noch nicht, jetzt deutlich grosszuegiger. */
+.dialog-actions button,.primary-action{min-height:76px;padding:22px 26px;font-size:1.3rem}
 #confirmText,#messageText{font-size:1.2rem;line-height:1.45}
 .narrow input{width:100%;font-size:1.4rem;padding:12px}
 .more-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
