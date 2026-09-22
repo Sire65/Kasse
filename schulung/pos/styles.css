@@ -151,6 +151,7 @@ body.kc-spiegel-modus .main-layout>.cart-area{direction:ltr}
 .n20{background:linear-gradient(135deg,#7fb3e8,#d9e9f9,#4d8fce)}
 .n50{background:linear-gradient(135deg,#e7b777,#f5ddad,#ca8c32)}
 .n100{background:linear-gradient(135deg,#79c994,#d6f0df,#4eaa70)}
+.n200{background:linear-gradient(135deg,#d8bd4e,#f2e7b3,#b8952a)}
 .banknote-button b{display:block;text-align:center;margin-top:4px;font-size:1.05rem}
 .coin-row{display:flex;justify-content:center;align-items:center;gap:14px;margin-top:7px}
 .coin-button{min-width:0;border:0;background:transparent;font-size:.74rem;font-weight:bold;display:flex;align-items:center;justify-content:center;white-space:nowrap;padding:0 2px}

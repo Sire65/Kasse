@@ -1016,7 +1016,7 @@ function renderReceiptPreview(){const r=readReceipt();let s="";if(r.header)s+=`$
 ["rHeader","rHead1","rHead2","rLogo","rRegisterId","rReceiptOperator","rBonNo","rVat","rDeposit","rReceiptPayment","rChange","rFoot1","rFoot2","rAutoPrint"].forEach(id=>el(id).oninput=renderReceiptPreview)
 el("saveReceipt").onclick=()=>{receipt=readReceipt();queueSync("receipt","upsert",{id:"global",...receipt});saveAll();alert("Bonlayout gespeichert.")}
 
-const DENOMS=[100,50,20,10,5,2,1,.5,.2,.1,.05,.02,.01];
+const DENOMS=[200,100,50,20,10,5,2,1,.5,.2,.1,.05,.02,.01];
 const COIN_ROLLS=[{value:2,coins:25},{value:1,coins:25},{value:.5,coins:40},{value:.2,coins:40},{value:.1,coins:40},{value:.05,coins:50},{value:.02,coins:50},{value:.01,coins:50}];
 const cashDenomLabel=v=>v>=1?v+" €":Math.round(v*100)+" ct";
 const localBusinessDate=(date=new Date())=>`${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,"0")}-${String(date.getDate()).padStart(2,"0")}`;

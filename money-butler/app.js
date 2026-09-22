@@ -1,6 +1,6 @@
 const global=window;
 
-const DENOMS=[100,50,20,10,5,2,1,.5,.2,.1,.05,.02,.01];
+const DENOMS=[200,100,50,20,10,5,2,1,.5,.2,.1,.05,.02,.01];
 const CASH_MEASURE=window.KCCashMeasureSettings;
 let cashMeasureSettings=CASH_MEASURE.read();
 let COIN_ROLLS=cashMeasureSettings.rolls.map(x=>({value:Number(x.value),coins:Number(x.coins)}));
