@@ -819,7 +819,7 @@ body.kc-aufbau.kc-bon-leer .kc-pfeilfeld { display: none; }
    zu behalten; bei vielen Karten wurden sie dadurch immer kleiner statt dass die Spalte
    (die bereits overflow-y:auto hat) einfach scrollt. flex:0 0 auto laesst jede Karte ihre
    eigene Hoehe behalten. */
-.kc-sammel-karte { position: relative; min-height: 52px; flex: 0 0 auto; user-select: none; -webkit-user-select: none; border: 2px solid #cbd5e1; border-radius: 8px; background: #1f2937; color: #fff; overflow: hidden; display: flex; flex-direction: column; justify-content: center; padding: 4px 6px 4px 26px; text-align: left; cursor: pointer;
+.kc-sammel-karte { position: relative; min-height: 84px; flex: 0 0 auto; user-select: none; -webkit-user-select: none; border: 2px solid #cbd5e1; border-radius: 8px; background: #1f2937; color: #fff; overflow: hidden; display: flex; flex-direction: column; justify-content: center; padding: 4px 6px 4px 26px; text-align: left; cursor: pointer;
   transition: flex-basis .22s ease, max-width .22s ease, width .22s ease, opacity .18s ease, margin .22s ease, padding .22s ease, border-width .22s ease, min-width .22s ease; }
 /* Ansicht "Farbe": Kartenfläche in der Warengruppenfarbe, Kontrast berechnet (sammelKontrast) */
 .kc-sammel-karte.ansicht-farbe { background: var(--tile-color); color: var(--tile-text, #fff); }
@@ -846,7 +846,7 @@ body.kc-aufbau.kc-bon-leer .kc-pfeilfeld { display: none; }
   flex-basis: 0 !important; max-width: 0 !important; min-width: 0 !important; width: 0 !important;
   opacity: 0; margin-left: 0 !important; margin-right: 0 !important; padding-left: 0 !important; padding-right: 0 !important; border-width: 0 !important;
 }
-.kc-sammel-karte img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; object-position: center; opacity: .92; background: #f8fafc; }
+.kc-sammel-karte img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: center; opacity: .92; background: #f8fafc; }
 .kc-sammel-karte > span { position: relative; z-index: 1; text-shadow: 0 1px 3px #000; }
 .kc-sammel-karte.ansicht-bild::after { content:""; position:absolute; inset:45% 0 0; background:linear-gradient(transparent,rgba(15,23,42,.86) 55%); pointer-events:none; }
 .kc-sammel-karte.ansicht-bild .kc-sammel-name,.kc-sammel-karte.ansicht-bild .kc-sammel-preis,.kc-sammel-karte.ansicht-bild .kc-sammel-pfand{z-index:2;color:#fff;}
@@ -860,7 +860,7 @@ body.kc-aufbau.kc-bon-leer .kc-pfeilfeld { display: none; }
 .kc-sammel-var-titel { display: flex; align-items: center; gap: 8px; font-size: 15px; }
 .kc-sammel-var-titel img { width: 40px; height: 40px; object-fit: cover; border-radius: 6px; }
 .kc-sammel-varianten { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 8px; }
-.kc-sammel-karte.variante { min-height: 80px; }
+.kc-sammel-karte.variante { min-height: 84px; }
 .kc-sammel-karte.variante.ansicht-bild { background: #334155; }
 /* 10.09.2026 (Betreiber: "unten die Buttons schmal, dafuer nebeneinander, einer der MEHR heisst
    - dort Bild/Farbe/Text hin, damit sie unten keine Zeile verbrauchen"): aus der dauerhaft
