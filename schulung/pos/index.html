@@ -14,7 +14,7 @@
   <link rel="stylesheet" href="kc-sync-status-leds.css">
   <link rel="stylesheet" href="kc-team-praesenz.css">
   <link rel="stylesheet" href="kc-dienstplan-kasse.css">
-<link rel="stylesheet" href="kc-oberflaechen-anwenden.css?build=0.9.1">
+<link rel="stylesheet" href="kc-oberflaechen-anwenden.css?build=0.9.2">
 <link rel="stylesheet" href="kc-legacy-fallback.css?build=1.0.0">
   <script defer src="../cores/notification-core/notification-core.js"></script>
   <script defer src="../cores/product-info-core/product-info-core.js"></script>
@@ -33,7 +33,7 @@
       .app-header{position:static}.main-layout{grid-template-columns:1fr}.cart-area{min-height:250px}.status-footer{overflow-x:auto}
     }
   </style>
-<link rel="stylesheet" href="images-v3.css?build=3">
+<link rel="stylesheet" href="images-v3.css?build=4">
 </head>
 <body class="public-beta">
 <div class="kc-rotate-overlay" aria-hidden="true">
@@ -77,7 +77,7 @@
     <label class="product-search-wrap">🔎 <input id="productSearchInput" placeholder="Artikel suchen"></label>
     <div class="mode-quick-switches" aria-label="Betriebsmodi">
       <button id="trainingModeTopBtn" class="mode-quick-button" type="button"><span class="mode-led"></span><span>Trainingsmodus</span></button>
-      <button id="rushModeBtn" class="mode-quick-button" type="button"><span class="mode-led"></span><span>Stoßzeiten</span></button>
+      <button id="rushModeBtn" class="mode-quick-button rush-icon-button" type="button" title="Stoßzeiten" aria-label="Stoßzeiten"><svg class="mode-bomb-icon" viewBox="0 0 32 32" width="20" height="20" aria-hidden="true"><path d="M18 7 Q22 2 27 4" fill="none" stroke="#8a5a2b" stroke-width="2" stroke-linecap="round"/><circle class="mode-bomb-spark" cx="27.5" cy="3.5" r="1.7"/><circle cx="15" cy="20" r="10" fill="#20242b"/><circle cx="12" cy="17" r="2.3" fill="#fff" opacity=".22"/></svg></button>
       <button id="happyHourQuickBtn" class="mode-quick-button happy-hour-quick" type="button" hidden><span class="mode-led"></span><span id="happyHourQuickText">Happy Hour</span></button>
     </div>
     <div class="mode-message-center" aria-label="Kassenmeldungen">
@@ -1515,7 +1515,7 @@
     document.body.appendChild(s);
   }
   window.KCMasterDataSync.bereit.finally(() => {
-    ladeNacheinander(['images-v3.js?build=3-pfand', 'app.js?build=0.31.3.6-r19', '../shared/kc-happyhour.js?build=0.1.0', 'kc-happyhour-pos.js?build=0.1.0', 'kc-meldeweg.js?build=0.1.0', '../shared/kc-security-card.js?build=0.1.0', 'kc-security-card-pos.js?build=0.1.0', 'kc-zahl-zoom.js?build=0.1.0', 'kc-ansicht-umschalter.js?build=0.1.0', 'kc-startup-check.js?build=0.1.0', 'kc-pin-lock.js?build=0.1.0', 'kc-layout-neu.js?build=0.1.0', 'kc-erfassung-getrennt.js?build=0.1.0', 'kc-gutschein.js?build=0.1.0', 'kc-vorfuehrdaten.js?build=0.1.0', '../shared/kc-oberflaechen-format.js?build=0.1.0', 'kc-oberflaechen-pos.js?build=0.1.0', 'kc-oberflaechen-anwenden.js?build=0.9.0', 'kc-kopfzeile.js?build=0.3.0', 'kc-schulung.js?build=0.1.0', 'kc-reklamation.js?build=0.1.2']);
+    ladeNacheinander(['images-v3.js?build=3-pfand', 'app.js?build=0.31.3.6-r20', '../shared/kc-happyhour.js?build=0.1.0', 'kc-happyhour-pos.js?build=0.1.0', 'kc-meldeweg.js?build=0.1.0', '../shared/kc-security-card.js?build=0.1.0', 'kc-security-card-pos.js?build=0.1.0', 'kc-zahl-zoom.js?build=0.1.0', 'kc-ansicht-umschalter.js?build=0.1.0', 'kc-startup-check.js?build=0.1.0', 'kc-pin-lock.js?build=0.1.0', 'kc-layout-neu.js?build=0.1.0', 'kc-erfassung-getrennt.js?build=0.1.0', 'kc-gutschein.js?build=0.1.0', 'kc-vorfuehrdaten.js?build=0.1.0', '../shared/kc-oberflaechen-format.js?build=0.1.0', 'kc-oberflaechen-pos.js?build=0.1.0', 'kc-oberflaechen-anwenden.js?build=0.9.0', 'kc-kopfzeile.js?build=0.3.0', 'kc-schulung.js?build=0.1.0', 'kc-reklamation.js?build=0.1.2']);
   });
 </script>
 <script src="pos-ui-profile-consumer.js?build=0.1.0"></script>

@@ -9,10 +9,15 @@
 .product-grid .image-v3>.product-info-button{position:absolute!important;top:1%!important;left:1%!important;right:auto!important;bottom:auto!important;width:21%!important;height:21%!important;min-width:0!important;min-height:0!important;background:transparent!important;border:0!important;box-shadow:none!important;color:transparent!important;text-shadow:none!important;z-index:10!important}
 .product-grid .image-v3>.product-info-button:focus-visible{outline:3px solid #ffbf00!important}
 .product-grid .image-v3>.product-variant-button{top:43%!important;right:2%!important;left:auto!important;bottom:auto!important;z-index:9!important}
-/* Betreiber: "Favoriten-Stern direkt unter den Info-i-Button, sonst deckt der Preis ihn ab" -
-   der Preis sitzt oben rechts (product-label, inset 2% 2% auto auto), der Info-Button oben
-   links bei top:1%/left:1%/21% Kantenlaenge; der Stern kommt direkt darunter, gleiche Spalte. */
-.product-grid .image-v3>.auto-favorite-star{top:24%!important;left:1%!important;right:auto!important}
+/* Betreiber: "Favoriten-Stern MITTIG unter den Info-i-Button" - der Info-Button liegt bei
+   top:1%/left:1%/21% Kantenlaenge, seine Mitte also bei 1%+10.5%=11.5%. Der Stern (feste
+   Pixelbreite, keine %-Breite) wird auf genau diese Mitte zentriert statt nur linksbuendig
+   an den Button angelegt zu werden. */
+.product-grid .image-v3>.auto-favorite-star{top:24%!important;left:11.5%!important;right:auto!important;transform:translateX(-50%)!important}
+/* Preisschild jetzt unten links (kompakt, ohne Eurozeichen - siehe app.js renderProducts),
+   nicht mehr oben rechts im (jetzt leeren) product-label. Eigenstaendiges Element, siehe
+   .product-price-tag in styles.css - hier nur die image-v3-spezifische Position/Optik. */
+.product-grid .image-v3>.product-price-tag{position:absolute!important;left:2%!important;bottom:2%!important;top:auto!important;right:auto!important;background:#111a29!important;color:#fff!important;border-radius:5px!important;padding:4px 6px!important;font-size:clamp(11px,1.2vw,17px)!important;z-index:5!important;pointer-events:none!important}
 .product-info-image[src$="_version_3.png"]{object-fit:contain!important}
 
 /* Override legacy full-row sizing so square images stay inside their grid column. */

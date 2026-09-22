@@ -219,20 +219,30 @@ body.kc-zahlenseite-offen .kc-zahlen-taste-schwebend { display: none; }
 .kc-bereich.bon.tabelle #voidBonBtn, .kc-bereich.bon.kompakt #voidBonBtn { flex: 0 0 44px; width: 44px; height: 40px; padding: 0 !important; font-size: 20px; }
 .kc-bereich.bon.tabelle #voidBonBtn > span, .kc-bereich.bon.kompakt #voidBonBtn > span { display: none !important; }
 
-/* ---- Artikelzeile: zwei Zeilen. Zeile 1 Name + Knöpfe, Zeile 2 Pfand · Einzelpreis ------- */
+/* ---- Artikelzeile: Zeile 1 Name + Knöpfe, Zeile 2 Pfand · Einzelpreis nebeneinander ------
+   BEFUND: bei einem dritten <small> (z.B. Positionsrabatt zusätzlich zu Pfand) landeten
+   ALLE <small> ab dem zweiten in derselben Zelle (grid-row:2, grid-column:1/-1) übereinander -
+   Pfandtext und Rabatttext überschrieben sich sichtbar. Das dritte und vierte <small>
+   bekommen jetzt jeweils eine EIGENE Zeile (3, 4); nur die ersten beiden (der ueblichste
+   Fall: Pfand + Einzelpreis) bleiben wie gewohnt nebeneinander in Zeile 2. */
 .kc-bereich.bon.tabelle .cart-row, .kc-bereich.bon.kompakt .cart-row {
   grid-template-columns: minmax(0, 1fr) auto 40px 70px auto 26px !important;
-  grid-template-rows: auto auto !important; row-gap: 0 !important; align-items: center;
+  grid-template-rows: auto auto auto auto !important; row-gap: 0 !important; align-items: center;
 }
 .kc-bereich.bon.tabelle .cart-name, .kc-bereich.bon.kompakt .cart-name { display: contents !important; }
 .kc-bereich.bon.tabelle .cart-name > strong, .kc-bereich.bon.kompakt .cart-name > strong { grid-column: 1; grid-row: 1; }
 .kc-bereich.bon.tabelle .cart-name > small, .kc-bereich.bon.kompakt .cart-name > small {
   grid-column: 1 / -1; grid-row: 2; display: inline; font-size: 11px; line-height: 1.2; color: #4b5563; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
-.kc-bereich.bon.tabelle .cart-name > small:nth-of-type(n+2), .kc-bereich.bon.kompakt .cart-name > small:nth-of-type(n+2) { grid-column: 1 / -1; }
-/* mehrere <small> müssen in EINER Zeile stehen -> gemeinsam in Zeile 2, nebeneinander */
+/* Erste zwei <small> nebeneinander in Zeile 2 (der uebliche Fall) */
 .kc-bereich.bon.tabelle .cart-row > .cart-name > small, .kc-bereich.bon.kompakt .cart-row > .cart-name > small { justify-self: start; }
 .kc-bereich.bon.tabelle .cart-row > .cart-name > small:nth-of-type(2), .kc-bereich.bon.kompakt .cart-row > .cart-name > small:nth-of-type(2) { justify-self: end; text-align: right; }
+/* Ab dem dritten <small> (z.B. Positionsrabatt): eigene volle Zeile statt Ueberlappung */
+.kc-bereich.bon.tabelle .cart-name > small:nth-of-type(n+3), .kc-bereich.bon.kompakt .cart-name > small:nth-of-type(n+3) {
+  justify-self: start !important; text-align: left; white-space: normal;
+}
+.kc-bereich.bon.tabelle .cart-name > small:nth-of-type(3), .kc-bereich.bon.kompakt .cart-name > small:nth-of-type(3) { grid-row: 3; }
+.kc-bereich.bon.tabelle .cart-name > small:nth-of-type(4), .kc-bereich.bon.kompakt .cart-name > small:nth-of-type(4) { grid-row: 4; }
 .kc-bereich.bon.tabelle .cart-deposit .rule-chip, .kc-bereich.bon.kompakt .cart-deposit .rule-chip { font-size: 10px; padding: 0 4px; }
 .kc-bereich.bon.tabelle .half-portion-cell, .kc-bereich.bon.tabelle .position-discount-button, .kc-bereich.bon.tabelle .qty-box, .kc-bereich.bon.tabelle .row-total, .kc-bereich.bon.tabelle .delete-row,
 .kc-bereich.bon.kompakt .half-portion-cell, .kc-bereich.bon.kompakt .position-discount-button, .kc-bereich.bon.kompakt .qty-box, .kc-bereich.bon.kompakt .row-total, .kc-bereich.bon.kompakt .delete-row { grid-row: 1; }
@@ -610,8 +620,11 @@ body.kc-aufbau .kc-bedien-sonder > #printBonBtn::before { content: '🖨'; font-
 .kc-statuszeile > #happyHourQuickBtn > #happyHourQuickText { font-size: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
 /* ---- Bon: Spalten fest, damit %, −/+, Preis, Papierkorb in allen Zeilen untereinander stehen ---- */
-.kc-bereich.bon.tabelle .cart-row, .kc-bereich.bon.kompakt .cart-row { grid-template-columns: minmax(0, 1fr) 34px 40px 76px 72px 28px !important; }
-.kc-bereich.bon.tabelle .half-portion-cell, .kc-bereich.bon.kompakt .half-portion-cell { width: 34px; min-width: 34px; }
+.kc-bereich.bon.tabelle .cart-row, .kc-bereich.bon.kompakt .cart-row { grid-template-columns: minmax(0, 1fr) 44px 40px 76px 72px 28px !important; }
+/* BEFUND (Betreiber): ½-Knopf sass zu nah am %-Knopf. Zelle bleibt schmal (34px), die jetzt
+   breitere Spalte (44px statt 34px) schafft sichtbaren Abstand zum Rabattknopf daneben - da
+   die Spaltenbreite fuer jede Zeile gleich ist, stehen alle ½-Knoepfe weiterhin untereinander. */
+.kc-bereich.bon.tabelle .half-portion-cell, .kc-bereich.bon.kompakt .half-portion-cell { width: 34px; min-width: 34px; justify-content: flex-start !important; }
 .kc-bereich.bon.tabelle .row-total, .kc-bereich.bon.kompakt .row-total { text-align: right; white-space: nowrap; }
 /* Bon-Kopf: Mengen 1-6 (7 weg), breiter; Warenkorb-Symbol hell */
 .kc-bereich.bon.tabelle #cartQuantityBar > button[data-cart-qty="7"], .kc-bereich.bon.kompakt #cartQuantityBar > button[data-cart-qty="7"] { display: none !important; }
