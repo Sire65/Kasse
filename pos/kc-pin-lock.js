@@ -60,8 +60,8 @@
     const tasten = ['1','2','3','4','5','6','7','8','9','','0','⌫'];
     box.innerHTML = `
       <div style="font-size:1.2rem;font-weight:900;margin-bottom:12px;">${bereitsEingerichtet ? 'Kasse entsperren' : 'PIN für diese Kasse festlegen'}</div>
-      <input id="kcPinInput" type="password" inputmode="none" pattern="[0-9]*" maxlength="8" autocomplete="off"
-        style="font-size:1.5rem;letter-spacing:.3em;text-align:center;padding:10px;width:200px;border:2px solid #ccc;border-radius:8px;" placeholder="••••">
+      <input id="kcPinInput" type="password" inputmode="none" pattern="[0-9]*" maxlength="8" autocomplete="new-password"
+        style="font-size:1.5rem;letter-spacing:.3em;text-align:center;padding:10px;width:200px;border:2px solid #ccc;border-radius:8px;">
       <div id="kcPinError" style="color:#b91c1c;font-weight:700;margin-top:8px;min-height:1.2em;"></div>
       <div id="kcPinPad" style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:12px;">
         ${tasten.map(t=>t===''
@@ -73,10 +73,19 @@
     overlay.appendChild(box);
     document.body.appendChild(overlay);
     const input = document.getElementById('kcPinInput');
+    // BEFUND (Betreiber: "im Entsperrmodus sind immer noch alte Zeichen drin"): autocomplete="off"
+    // wird von Chrome bei type="password" bewusst IGNORIERT - der Browser fuellt trotzdem die
+    // zuletzt eingegebene PIN automatisch wieder ein. readonly bis kurz nach dem Fokussieren
+    // verhindert dieses Autofill zuverlaessig (Chrome fuellt keine readonly-Felder); erst danach
+    // wird das Feld wirklich beschreibbar. Zusaetzlich wird der Wert zweimal geleert (sofort und
+    // nach dem Autofill-Zeitfenster), damit bei jedem Aufruf garantiert leer begonnen wird.
+    input.value = '';
+    input.setAttribute('readonly', 'readonly');
+    input.focus();
+    setTimeout(() => { input.removeAttribute('readonly'); input.value = ''; input.focus(); }, 80);
     // inputmode="none" haelt die Bildschirmtastatur zu; auf einem Geraet MIT Tastatur
     // (Windows-Rechner, angeschlossene Tastatur) wird trotzdem der Fokus gesetzt, damit man
     // dort einfach lostippen kann.
-    input.focus();
 
     async function pruefen() {
       const pin = input.value.trim();
