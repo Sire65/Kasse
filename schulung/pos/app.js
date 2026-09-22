@@ -1342,8 +1342,10 @@ function updateChange(){
   card.classList.toggle("payment-insufficient",!isPayout&&hasDue&&!sufficient);
   card.classList.toggle("payment-sufficient",!isPayout&&sufficient);
   card.classList.toggle("payment-payout",isPayout);
-  const changeTitle=card.querySelector(".change-card-head>span");if(changeTitle)changeTitle.textContent=isPayout?"AUSZAHLUNG":"RÜCKGELD";
-  if(isPayout)paymentState.textContent=`AN KUNDEN AUSZAHLEN · ${money(payout)}`;
+  const freieZahlung=state.keypadMode==="freibetrag";
+  const changeTitle=card.querySelector(".change-card-head>span");if(changeTitle)changeTitle.textContent=freieZahlung?"FREIE ZAHLUNG":isPayout?"AUSZAHLUNG":"RÜCKGELD";
+  if(freieZahlung)paymentState.textContent="Betrag eingeben, dann OK → wird als „Divers“ in den Warenkorb gelegt";
+  else if(isPayout)paymentState.textContent=`AN KUNDEN AUSZAHLEN · ${money(payout)}`;
   else if(!hasDue)paymentState.textContent="Noch kein Zahlbetrag";
   else if(sufficient)paymentState.textContent=`BETRAG AUSREICHEND · ${money(change)} zurück`;
   else paymentState.textContent=`NOCH ${money(Math.max(0,due-state.given))} FEHLEN`;
@@ -4299,6 +4301,13 @@ function setKeypadMode(mode){
   el("keypadHelp").textContent=KEYPAD_MODES[mode].help;
   document.querySelector(".keypad")?.classList.toggle("keypad-no-decimal",keypadIstCentEingabe(mode));
   renderKeypadDisplay();
+  // Betreiber: "bei Freier Zahlung im Ziffernblock gelandet, aber dann steht nichts im Bon,
+  // kann nichts kassieren" - #keypadModeLabel/#keypadHelp (oben gesetzt) stecken in
+  // .keypad-display, die auf der Baukasten-Zahlen-Seite ausgeblendet ist (die eigene
+  // RÜCKGELD-Karte ersetzt sie). Ohne sichtbaren Hinweis wusste niemand, dass hier erst OK
+  // gedrueckt werden muss, bevor "Divers" in den Warenkorb kommt. updateChange() zeigt den
+  // Hinweis deshalb zusaetzlich in der IMMER sichtbaren RÜCKGELD-Karte an.
+  updateChange();
 }
 // Bargeld und Preis sind Geldbetraege: Ziffern ruecken von rechts nach, die letzten zwei
 // Stellen sind immer die Cent - wie an jeder echten Kasse/jedem Taschenrechner. Vorher wurde
