@@ -107,7 +107,7 @@ const DEFAULT_PRODUCTS=[
  {id:"glasminus",name:"Glasrückgabe",price:-2.00,category:"Pfand",image:"assets/pfandrueckgabe_version_3.png"},
  {id:"zangeminus",name:"Feuerzange Rückgabe",price:-2.00,category:"Pfand",image:"assets/feuerzange_version_3.png"},
  {id:"glaszangebundleminus",name:"Glas + Feuerzange Rückgabe",price:-4.00,category:"Pfand",image:"assets/pfand_glas_feuerzange_version_3.png",color:"#9f1239",info:{shortDescription:"Komplettrückgabe von Pfandglas und Feuerzange"}},
- {id:"becher",name:"Außer-Haus-Becher",price:1.00,category:"Speisen",sortOrder:8,image:"assets/becher_bv2.webp"}
+ {id:"becher",name:"Außer-Haus-Becher",price:1.00,category:"Speisen",sortOrder:8,image:"assets/becher_bv2.jpg"}
 ];
 let PRODUCTS=JSON.parse(localStorage.getItem("kc_products_v050")||"null")||DEFAULT_PRODUCTS;
 // Außer-Haus-Becher als Zweitplatzierung: Stammdaten/Auswertung bleiben "Sonstiges",
@@ -119,6 +119,10 @@ let PRODUCTS=JSON.parse(localStorage.getItem("kc_products_v050")||"null")||DEFAU
     if(becher.category!=="Sonstiges"){becher.category="Sonstiges";geaendert=true}
     const extra=Array.isArray(becher.displayCategories)?becher.displayCategories:[];
     if(!extra.includes("Speisen")){becher.displayCategories=[...new Set([...extra,"Speisen"])];geaendert=true}
+    // 22.09.2026 (Betreiber-Wunsch): echtes Foto des Außer-Haus-Bechers statt Platzhalterbild -
+    // bereits laufende Geraete haben den alten Bildpfad noch in ihrem localStorage gespeichert
+    // und wuerden ihn sonst dauerhaft behalten, obwohl DEFAULT_PRODUCTS laengst geaendert ist.
+    if(becher.image!=="assets/becher_bv2.jpg"){becher.image="assets/becher_bv2.jpg";geaendert=true}
     if(geaendert)localStorage.setItem("kc_products_v050",JSON.stringify(PRODUCTS));
   }
 }
@@ -230,7 +234,7 @@ const TRAINING_BV2_IMAGES={
   "assets/pfandglas_geben_12-09.webp": "assets/pfandglas_geben_bv2.webp",
   "assets/pfandglas_rueckgabe_12-09.webp": "assets/pfandglas_rueckgabe_bv2.webp",
   "assets/pfandglas_auth.webp": "assets/pfandglas_bv2.webp",
-  "assets/becher_auth.webp": "assets/becher_bv2.webp",
+  "assets/becher_auth.webp": "assets/becher_bv2.jpg",
   "assets/sauerkraut_auth.webp": "assets/sauerkraut_bv2.webp",
   "assets/sauerkraut_mettwurst_auth.webp": "assets/sauerkraut_mettwurst_bv2.webp",
   "assets/gruenkohl_auth.webp": "assets/gruenkohl_bv2.webp",
@@ -1082,7 +1086,12 @@ function selectProduct(id){if(!operatorReadyForArticle())return;const p=products
 // Freie Zahlung: kein fester Preis wie bei einem normalen Artikel, deshalb kein
 // addConfiguredProduct - stattdessen wird derselbe Zahlenblock unten (Cent-Eingabe) auf die
 // Erfassung eines Divers-Postens umgeschaltet.
-function openFreieZahlung(){if(!operatorReadyForArticle())return;setKeypadMode("freibetrag")}
+// Betreiber (22.09.2026): "Freie Zahlung hat noch keine Verdrahtung zum Ziffernblock" - der
+// Modus wurde zwar gesetzt, aber die eigentliche Zahlen-Seite (Baukasten-Layout, siehe
+// kc-oberflaechen-anwenden.js: zahlenSeite) wurde nie geoeffnet, wenn "Freie Zahlung" als
+// normale Artikelkachel angetippt wurde - anders als der RÜCKGELD-Knopf, der das selbst macht.
+// Ohne das oeffnete sich rein gar nichts sichtbares.
+function openFreieZahlung(){if(!operatorReadyForArticle())return;setKeypadMode("freibetrag");window.KCAufbau?.zahlenSeite?.(true)}
 function addDiversItem(betrag){
   const cents=toCents(betrag),key=`divers:${cents}`,found=state.cart.find(x=>x.key===key);
   const item={key,id:"divers",name:"Divers",price:fromCents(cents),normalPrice:fromCents(cents),halfAllowed:false,halfPrice:0,portionFactor:1,originalPrice:fromCents(cents),offerId:null,offerName:"",offerType:"",category:"Sonstiges",image:"assets/divers.svg",manualDeposit:false,qty:1,option:null,deposits:[]};
