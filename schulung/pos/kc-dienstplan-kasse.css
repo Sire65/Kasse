@@ -61,6 +61,24 @@
   display: block;
   color: #636b66;
 }
+/* Betreiber (22.09.2026): "Bereitschaft" muss auffallen - andersfarbig als eine normale
+   Schicht, damit man auf einen Blick sieht, wer nur auf Abruf und nicht regulaer eingeteilt
+   ist. */
+.dienstplan-zeile.bereitschaft {
+  background: #fff3cd;
+  border-color: #e0ac00;
+}
+.dienstplan-zeile.bereitschaft .dienstplan-bereitschaft-tag {
+  display: inline-block;
+  margin-left: 6px;
+  padding: 1px 7px;
+  border-radius: 999px;
+  background: #e0ac00;
+  color: #3d2c00;
+  font-size: .72rem;
+  font-weight: 900;
+  vertical-align: middle;
+}
 .dienstplan-zeit {
   font-weight: 900;
   white-space: nowrap;

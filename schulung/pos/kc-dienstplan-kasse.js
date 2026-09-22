@@ -52,6 +52,8 @@
       { date: tag(2), pseudonym: 'Ben', area: 'Kasse', start: '10:00', end: '14:00' },
       { date: tag(2), pseudonym: 'Chris', area: 'Theke', start: '14:00', end: '19:00' },
       { date: tag(2), pseudonym: 'Dana', area: 'Küche', start: '11:00', end: '18:00' },
+      // Betreiber (22.09.2026): Beispiel fuer Bereitschaft - eigene Zeile, andersfarbig markiert.
+      { date: tag(0), pseudonym: 'Hans', area: 'Bereitschaft', start: '16:00', end: '18:00' },
     ];
   }
   async function aktualisiere() {
@@ -89,12 +91,13 @@
 
     listeEl.innerHTML = zeilenHeute.length
       ? zeilenHeute
-          .map(
-            (s) => `<div class="dienstplan-zeile">
-              <span><b>${esc(s.pseudonym)}</b>${s.area ? `<small>${esc(s.area)}</small>` : ''}</span>
+          .map((s) => {
+            const istBereitschaft = String(s.area || '').trim().toLowerCase() === 'bereitschaft';
+            return `<div class="dienstplan-zeile${istBereitschaft ? ' bereitschaft' : ''}">
+              <span><b>${esc(s.pseudonym)}</b>${s.area ? `<small>${esc(s.area)}${istBereitschaft ? '<span class="dienstplan-bereitschaft-tag">Bereitschaft</span>' : ''}</small>` : ''}</span>
               <span class="dienstplan-zeit">${esc(s.start)}–${esc(s.end)}</span>
-            </div>`
-          )
+            </div>`;
+          })
           .join('')
       : `<div class="dienstplan-leer">${schichten.length ? 'Für diesen Tag ist niemand eingeplant.' : 'Noch kein Dienstplan verfügbar.'}</div>`;
 

@@ -38,5 +38,13 @@ body.kc-layout-neu .sales-area>.product-grid>.product-tile-wrap.image-v3>.produc
    unabhaengig davon, ob sie ein Bild-Icon eingebrannt haben oder nicht. */
 body .product-grid>.product-tile-wrap:not(.image-v3){width:100%!important;min-width:0!important;height:auto!important;max-height:none!important;aspect-ratio:1!important}
 body .product-grid>.product-tile-wrap:not(.image-v3)>.product-tile{width:100%!important;min-width:0!important;height:100%!important;max-height:none!important}
+/* BEFUND (22.09.2026): Betreiber - "Beschriftungsfeld an Mettwurst orientieren" (kleiner
+   machen). Der Versuch dazu in styles.css (Bild 74%/Namensband 26% statt 70%/30%) wurde von
+   "body.kc-aufbau .kc-bereich.artikel .product-tile img{height:100%!important}" in
+   kc-oberflaechen-anwenden.css ausgehebelt - dieselbe Baukasten-Zonenregel, die schon Info-
+   Button und Kachelgroesse hier oben ueberschreiben musste. Gleiche Loesung: passende
+   Spezifitaet, hier statt dort, weil diese Datei als letzte laedt. */
+body .product-grid>.product-tile-wrap:not(.image-v3)>.product-tile>img,
+body .product-grid>.product-tile-wrap:not(.image-v3)>.product-tile>.kombi-bild{height:74%!important;max-height:none!important}
 .product-grid .image-v3>.product-info-button{clip-path:none!important}
 .product-grid .image-v3>.product-info-button::before,.product-grid .image-v3>.product-info-button::after{display:none!important}

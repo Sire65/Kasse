@@ -1159,7 +1159,7 @@ html,body{width:100%;max-width:100%;overflow-x:hidden}
 .product-price-tag{
   position:absolute;
   left:6px;
-  bottom:37%;
+  bottom:32%;
   z-index:3;
   background:#111827dd;
   color:#fff;
@@ -3659,7 +3659,13 @@ body:not(.group-color-mode) .category-tabs button.active{background:linear-gradi
 
 /* KC SCHULUNG UI2 – grosse, kontrastreiche Artikelkacheln 18.09.2026 */
 /* Nur Schulungsversion: Bild oben, klare Bezeichnung unten, Preis links oben,
-   Favorit mittig oben, Info rechts oben. Die Verkaufslogik bleibt unveraendert. */
+   Favorit mittig oben, Info rechts oben. Die Verkaufslogik bleibt unveraendert.
+   Betreiber (22.09.2026): "Beschriftungsfeld an Mettwurst orientieren" - Mettwurst ist eine
+   image-v3-Kachel mit eingebrannter Namensbande (~15% der Bildhoehe), diese Kacheln hier
+   (Artikel ohne _version_3.png-Bild) hatten mit 30% ein sichtbar hoeheres Namensfeld.
+   Auf 26% verkleinert - nicht weiter, weil zweizeilige Namen ("Außer-Haus-Becher") bei
+   unveraendertem Text/Schrift sonst am unteren Rand abgeschnitten wuerden
+   (.product-tile hat overflow:hidden). */
 .product-tile-wrap{overflow:visible}
 .product-tile{
   position:relative!important;
@@ -3672,18 +3678,18 @@ body:not(.group-color-mode) .category-tabs button.active{background:linear-gradi
 .product-tile:after{display:none!important}
 .product-tile>img{
   position:absolute!important;
-  inset:0 0 30% 0!important;
+  inset:0 0 26% 0!important;
   width:100%!important;
-  height:70%!important;
+  height:74%!important;
   object-fit:cover!important;
   object-position:center!important;
   background:#f4f5f6!important;
 }
 .product-tile .kombi-bild{
   position:absolute!important;
-  inset:0 0 30% 0!important;
+  inset:0 0 26% 0!important;
   width:100%!important;
-  height:70%!important;
+  height:74%!important;
   overflow:hidden!important;
   background:#f4f5f6!important;
 }
@@ -3698,9 +3704,9 @@ body:not(.group-color-mode) .category-tabs button.active{background:linear-gradi
   right:0!important;
   bottom:0!important;
   z-index:5!important;
-  min-height:30%!important;
-  height:30%!important;
-  padding:8px 10px!important;
+  min-height:26%!important;
+  height:26%!important;
+  padding:6px 10px!important;
   display:flex!important;
   align-items:center!important;
   justify-content:center!important;
@@ -3709,7 +3715,7 @@ body:not(.group-color-mode) .category-tabs button.active{background:linear-gradi
   background:#111a29!important;
   color:#fff!important;
   border-top:2px solid #d7a928!important;
-  font-size:clamp(1rem,1.18vw,1.42rem)!important;
+  font-size:clamp(.86rem,1.18vw,1.42rem)!important;
   line-height:1.05!important;
   font-weight:1000!important;
   letter-spacing:-.015em!important;
@@ -3836,10 +3842,13 @@ body:not(.group-color-mode) .category-tabs button.active{background:linear-gradi
   font-size:.8em!important;
 }
 
-/* Kleine Tablets: Bedienziele bleiben gross, Bezeichnungsband etwas hoeher. */
+/* Kleine Tablets: Bedienziele bleiben gross, Bezeichnungsband etwas hoeher. Betreiber
+   (22.09.2026): "an Mettwurst orientieren" (kleineres Band) - von 34%/66% auf 28%/72%
+   verkleinert, aber nicht ganz auf den Desktop-Wert (26%/74%), weil auf kleinen Tablets
+   sonst zweizeilige Namen zu knapp wuerden. */
 @media(max-width:900px){
-  .product-tile>img,.product-tile .kombi-bild{height:66%!important;inset-bottom:34%!important}
-  .product-label strong{height:34%!important;min-height:34%!important;font-size:clamp(.95rem,3.3vw,1.28rem)!important}
+  .product-tile>img,.product-tile .kombi-bild{height:72%!important;inset-bottom:28%!important}
+  .product-label strong{height:28%!important;min-height:28%!important;font-size:clamp(.95rem,3.3vw,1.28rem)!important}
   .product-info-button,.product-tile-wrap:has(.product-variant-button) .product-info-button{
     width:48px!important;height:48px!important;min-width:48px!important;min-height:48px!important
   }

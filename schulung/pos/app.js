@@ -4846,7 +4846,23 @@ window.KCHealthCore?.start?.({probes:{
   isPaymentOpen:()=>["cashDialog","cardDialog","accountChargeDialog"].some(id=>el(id)?.open),
   checkCore:async()=>({status:(PRODUCTS.length&&GROUPS.length)?"pass":"fail",message:`${PRODUCTS.length} Artikel · ${GROUPS.length} Gruppen geladen`})
 }});
-if("serviceWorker" in navigator&&location.protocol!=="file:"){window.addEventListener("load",()=>navigator.serviceWorker.register("service-worker.js").catch(()=>{}))}
+if("serviceWorker" in navigator&&location.protocol!=="file:"){
+  window.addEventListener("load",()=>navigator.serviceWorker.register("service-worker.js").catch(()=>{}));
+  // Betreiber: wiederholt Verwirrung nach einem Update ("alter Stand trotz Neuladen") - ein
+  // neuer Service-Worker uebernimmt zwar sofort (skipWaiting/clients.claim), die bereits
+  // GELADENE Seite fragt ihre Skripte/Styles deshalb aber trotzdem erst beim NAECHSTEN
+  // Neuladen erneut ab - daher die bisherige Anweisung "einmal laden, dann nochmal neu laden".
+  // Automatischer, einmaliger Reload sobald ein neuer Service-Worker die Kontrolle uebernimmt,
+  // macht das manuelle zweite Neuladen ueberfluessig. Beim ALLERERSTEN Laden (noch kein
+  // Controller vorhanden) wird NICHT automatisch neu geladen - da war ja nichts Altes im Weg.
+  const hatteBereitsController=!!navigator.serviceWorker.controller;
+  let kcSwReloadDone=false;
+  navigator.serviceWorker.addEventListener("controllerchange",()=>{
+    if(kcSwReloadDone||!hatteBereitsController)return;
+    kcSwReloadDone=true;
+    window.location.reload();
+  });
+}
 
 
 // V0.29.3 – KassenCoachCore: interaktive Schulung ohne Produktivbuchungen

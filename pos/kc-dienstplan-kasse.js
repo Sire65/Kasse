@@ -68,12 +68,13 @@
 
     listeEl.innerHTML = zeilenHeute.length
       ? zeilenHeute
-          .map(
-            (s) => `<div class="dienstplan-zeile">
-              <span><b>${esc(s.pseudonym)}</b>${s.area ? `<small>${esc(s.area)}</small>` : ''}</span>
+          .map((s) => {
+            const istBereitschaft = String(s.area || '').trim().toLowerCase() === 'bereitschaft';
+            return `<div class="dienstplan-zeile${istBereitschaft ? ' bereitschaft' : ''}">
+              <span><b>${esc(s.pseudonym)}</b>${s.area ? `<small>${esc(s.area)}${istBereitschaft ? '<span class="dienstplan-bereitschaft-tag">Bereitschaft</span>' : ''}</small>` : ''}</span>
               <span class="dienstplan-zeit">${esc(s.start)}–${esc(s.end)}</span>
-            </div>`
-          )
+            </div>`;
+          })
           .join('')
       : `<div class="dienstplan-leer">${schichten.length ? 'Für diesen Tag ist niemand eingeplant.' : 'Noch kein Dienstplan verfügbar.'}</div>`;
 
