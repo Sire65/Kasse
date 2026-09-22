@@ -1011,3 +1011,40 @@ body.kc-aufbau.kc-training #kcZahlenEbene .kc-pos-zeile-zahlen::before { content
 /* Bei Auszahlung ist die Karte selbst schon dunkelrot - dieselbe Pfeilfarbe waere darauf kaum
    zu erkennen (im Test bestaetigt). Auf dieser einen dunklen Kartenfarbe daher weisse Pfeile. */
 .change-card.payment-payout #changeDisplay::after { color: #fff; }
+
+/* Betreiber (22.09.2026): Artikel ohne eigenes Bild-Icon (z.B. unter "Sonstiges": Wertmarke,
+   Freie Zahlung, Außer-Haus-Becher) bekamen hier weiter oben eine eigene, abweichende
+   Info-Button-Form (blaue Ecke oben links, teils mit dem Preisschild ueberlappend) statt des
+   normalen blauen Kreises, den alle anderen Artikel haben - sollen aber "genau so aufgebaut
+   sein wie die anderen Buttons". Am Ende der Kaskade auf dieselbe Kreisform/Position wie
+   ueberall sonst vereinheitlicht. */
+.kc-bereich.artikel .product-info-button{
+  top:7px!important;
+  left:7px!important;
+  right:auto!important;
+  bottom:auto!important;
+  width:50px!important;
+  height:50px!important;
+  min-width:50px!important;
+  min-height:50px!important;
+  border-radius:50%!important;
+  background:#1262ad!important;
+  border:3px solid #fff!important;
+  box-shadow:0 3px 9px rgba(0,0,0,.48)!important;
+  padding:0!important;
+  display:flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+}
+.kc-bereich.artikel .product-tile-wrap:has(.product-variant-button) .product-info-button{
+  left:7px!important;right:auto!important;
+}
+.kc-bereich.artikel .product-info-button::after{
+  content:"i"!important;
+  color:#fff!important;
+  font-family:Georgia,serif!important;
+  font-size:25px!important;
+  font-weight:900!important;
+  font-style:italic;
+  line-height:1!important;
+}

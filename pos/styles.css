@@ -223,7 +223,7 @@ dialog::backdrop{background:rgba(0,0,0,.72)}
 
 
 /* V0.4.0 – Artikelinformationen und Layoutprofile */
-.product-tile-wrap{position:relative;min-width:0;min-height:0}
+.product-tile-wrap{position:relative;min-width:0;min-height:0;aspect-ratio:1}
 .product-tile-wrap .product-tile{width:100%;height:100%}
 .product-info-button{
   position:absolute;top:7px;left:7px;z-index:8;width:28px;height:28px;border:0;border-radius:50%;
@@ -1139,11 +1139,13 @@ html,body{width:100%;max-width:100%;overflow-x:hidden}
   transform:none!important;
 }
 
-/* Favoritenstern mittig unter dem Info-Dreieck (das liegt oben links, 48x48px). */
+/* Favoritenstern mittig unter dem Info-Button (Kreis, 50x50px, oben links) - Betreiber
+   (22.09.2026): merklicher Abstand, damit man Info-Button und Stern getrennt mit dem
+   Finger treffen kann, ohne den falschen zu erwischen. */
 .auto-favorite-star{
-  left:13px!important;
+  left:20px!important;
   right:auto!important;
-  top:50px!important;
+  top:65px!important;
   width:23px!important;
   height:23px!important;
   font-size:14px!important;
@@ -1159,15 +1161,15 @@ html,body{width:100%;max-width:100%;overflow-x:hidden}
 .product-price-tag{
   position:absolute;
   left:6px;
-  bottom:34px;
+  bottom:44px;
   z-index:3;
   background:#111827dd;
   color:#fff;
   font-weight:900;
-  font-size:.82rem;
+  font-size:1rem;
   line-height:1;
-  padding:3px 6px;
-  border-radius:6px;
+  padding:5px 9px;
+  border-radius:7px;
   white-space:nowrap;
 }
 .product-price-tag.offer-price-line{display:flex;align-items:center;gap:4px}
@@ -3582,12 +3584,14 @@ body:not(.group-color-mode) .category-tabs button.active{background:linear-gradi
    Mitte ab - ein Tipp auf den Artikel öffnete dann die Varianten statt zu verkaufen.
    Auf flachen Bildschirmen schrumpft er deshalb mit. Dasselbe gilt für den Info-Knopf. */
 @media (max-height:760px){
-  .product-variant-button{width:34px!important;height:34px!important;min-width:34px!important;min-height:34px!important;
-    border-radius:10px!important;border-width:2px!important;font-size:1rem!important;right:4px!important;bottom:4px!important}
+  .product-variant-button{width:40px!important;height:40px!important;min-width:40px!important;min-height:40px!important;
+    border-radius:11px!important;border-width:2px!important;font-size:1.15rem!important;right:4px!important;bottom:4px!important}
   .product-info-button{width:28px!important;height:28px!important;min-width:28px!important;min-height:28px!important;font-size:.85rem!important}
 }
 @media (max-height:660px){
-  .product-variant-button{width:28px!important;height:28px!important;min-width:28px!important;min-height:28px!important;font-size:.85rem!important}
+  /* Betreiber (22.09.2026): "sonst trifft man nicht" - 28px war zu knapp, jetzt etwas
+     grosszuegiger, auch wenn die Kachel dadurch etwas mehr abdeckt. */
+  .product-variant-button{width:34px!important;height:34px!important;min-width:34px!important;min-height:34px!important;font-size:1rem!important}
   .product-info-button{width:24px!important;height:24px!important;min-width:24px!important;min-height:24px!important}
 }
 

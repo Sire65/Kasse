@@ -12,8 +12,9 @@
 /* Betreiber: "Favoriten-Stern MITTIG unter den Info-i-Button" - der Info-Button liegt bei
    top:1%/left:1%/21% Kantenlaenge, seine Mitte also bei 1%+10.5%=11.5%. Der Stern (feste
    Pixelbreite, keine %-Breite) wird auf genau diese Mitte zentriert statt nur linksbuendig
-   an den Button angelegt zu werden. */
-.product-grid .image-v3>.auto-favorite-star{top:24%!important;left:11.5%!important;right:auto!important;transform:translateX(-50%)!important}
+   an den Button angelegt zu werden. Betreiber (22.09.2026): Abstand vergroessert (24%->27%),
+   damit man Info-Button und Stern getrennt mit dem Finger treffen kann. */
+.product-grid .image-v3>.auto-favorite-star{top:27%!important;left:11.5%!important;right:auto!important;transform:translateX(-50%)!important}
 /* Preisschild unten links, DIREKT am linken Rand (left:0) und DIREKT ueber der Namensflaeche
    an - kein Eurozeichen (siehe app.js renderProducts). Die "Namensflaeche" ist bei den
    Version-3-Bildern ins Bild selbst eingebrannt (dunkelblaues Band), kein HTML-Element -

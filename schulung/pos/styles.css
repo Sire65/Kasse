@@ -223,7 +223,7 @@ dialog::backdrop{background:rgba(0,0,0,.72)}
 
 
 /* V0.4.0 – Artikelinformationen und Layoutprofile */
-.product-tile-wrap{position:relative;min-width:0;min-height:0}
+.product-tile-wrap{position:relative;min-width:0;min-height:0;aspect-ratio:1}
 .product-tile-wrap .product-tile{width:100%;height:100%}
 .product-info-button{
   position:absolute;top:7px;left:7px;z-index:8;width:28px;height:28px;border:0;border-radius:50%;
@@ -1137,11 +1137,13 @@ html,body{width:100%;max-width:100%;overflow-x:hidden}
   transform:none!important;
 }
 
-/* Favoritenstern mittig unter dem Info-Dreieck (das liegt oben links, 48x48px). */
+/* Favoritenstern mittig unter dem Info-Button (Kreis, 50x50px, oben links) - Betreiber
+   (22.09.2026): merklicher Abstand, damit man Info-Button und Stern getrennt mit dem
+   Finger treffen kann, ohne den falschen zu erwischen. */
 .auto-favorite-star{
-  left:13px!important;
+  left:20px!important;
   right:auto!important;
-  top:50px!important;
+  top:65px!important;
   width:23px!important;
   height:23px!important;
   font-size:14px!important;
@@ -1157,15 +1159,15 @@ html,body{width:100%;max-width:100%;overflow-x:hidden}
 .product-price-tag{
   position:absolute;
   left:6px;
-  bottom:34px;
+  bottom:44px;
   z-index:3;
   background:#111827dd;
   color:#fff;
   font-weight:900;
-  font-size:.82rem;
+  font-size:1rem;
   line-height:1;
-  padding:3px 6px;
-  border-radius:6px;
+  padding:5px 9px;
+  border-radius:7px;
   white-space:nowrap;
 }
 .product-price-tag.offer-price-line{display:flex;align-items:center;gap:4px}
@@ -3580,12 +3582,14 @@ body:not(.group-color-mode) .category-tabs button.active{background:linear-gradi
    Mitte ab - ein Tipp auf den Artikel öffnete dann die Varianten statt zu verkaufen.
    Auf flachen Bildschirmen schrumpft er deshalb mit. Dasselbe gilt für den Info-Knopf. */
 @media (max-height:760px){
-  .product-variant-button{width:34px!important;height:34px!important;min-width:34px!important;min-height:34px!important;
-    border-radius:10px!important;border-width:2px!important;font-size:1rem!important;right:4px!important;bottom:4px!important}
+  .product-variant-button{width:40px!important;height:40px!important;min-width:40px!important;min-height:40px!important;
+    border-radius:11px!important;border-width:2px!important;font-size:1.15rem!important;right:4px!important;bottom:4px!important}
   .product-info-button{width:28px!important;height:28px!important;min-width:28px!important;min-height:28px!important;font-size:.85rem!important}
 }
 @media (max-height:660px){
-  .product-variant-button{width:28px!important;height:28px!important;min-width:28px!important;min-height:28px!important;font-size:.85rem!important}
+  /* Betreiber (22.09.2026): "sonst trifft man nicht" - 28px war zu knapp, jetzt etwas
+     grosszuegiger, auch wenn die Kachel dadurch etwas mehr abdeckt. */
+  .product-variant-button{width:34px!important;height:34px!important;min-width:34px!important;min-height:34px!important;font-size:1rem!important}
   .product-info-button{width:24px!important;height:24px!important;min-width:24px!important;min-height:24px!important}
 }
 
@@ -3713,23 +3717,28 @@ body:not(.group-color-mode) .category-tabs button.active{background:linear-gradi
 }
 /* Der Einzelpreis ist seit der Trennung von Name/Preis (siehe app.js renderProducts) das
    eigenstaendige .product-price-tag, kein <span> mehr in .product-label - Selektor umgestellt.
-   Betreiber (22.09.2026): weiss auf schwarz, schmal, kein Eurozeichen (das entfernt bereits
-   app.js renderProducts) - dieselbe schlichte Optik wie die normale Kasse, unten links, in
-   allen Versionen identisch. Nicht wieder auf "oben" oder auf das grosse rote Schild aendern. */
-.product-price-tag{
+   Betreiber (22.09.2026): weiss auf schwarz, schmal, kein Eurozeichen, unten links, in allen
+   Versionen identisch - nicht wieder auf "oben" oder auf das grosse rote Schild aendern.
+   BEFUND (22.09.2026): diese Regel war lange ein UNSKOPIERTES ".product-price-tag" und traf
+   dadurch auch die "Sonstiges"-Artikel ohne _version_3.png-Bild (Wertmarke, Freie Zahlung,
+   Außer-Haus-Becher) - dort ueberlagerte sie den weiter oben stehenden Basiswert (bottom:34px,
+   der absichtlich Platz zur Namenszeile laesst) mit bottom:8px und liess Preisschild und
+   Namensband ineinanderlaufen. Jetzt auf Bild-v3-Kacheln beschraenkt; die "Sonstiges"-Artikel
+   nutzen wieder den korrekten Basiswert von weiter oben in dieser Datei. */
+.product-tile-wrap.image-v3 .product-price-tag{
   position:absolute!important;
   top:auto!important;
   left:6px!important;
   bottom:8px!important;
   z-index:15!important;
   margin:0!important;
-  padding:3px 6px!important;
+  padding:5px 9px!important;
   border:0!important;
-  border-radius:6px!important;
+  border-radius:7px!important;
   background:#111827dd!important;
   color:#fff!important;
   box-shadow:none!important;
-  font-size:.82rem!important;
+  font-size:1rem!important;
   line-height:1!important;
   font-weight:900!important;
   text-shadow:none!important;
@@ -3774,18 +3783,17 @@ body:not(.group-color-mode) .category-tabs button.active{background:linear-gradi
   color:#fff!important;
 }
 
-/* Favoritenstern oben mittig, klar sichtbar, aber kleiner als der Info-Button.
-   BEFUND: images-v3.css hat fuer .product-grid .image-v3>.auto-favorite-star eine eigene,
-   spezifischere Regel (Kind-Selektor mit zwei Klassen) - die gewann bisher gegen das simple
-   ".auto-favorite-star" hier fuer "left", obwohl beide !important nutzen, und ergab einen
-   kaputten Mix (left von dort, transform von hier). Deshalb hier zusaetzlich derselbe
-   spezifischere Selektor, damit dieses Schulungs-Sonderlayout auch bei Bildkacheln (image-v3)
-   zuverlaessig gewinnt. */
-.auto-favorite-star,
+/* BEFUND (22.09.2026): die bare ".auto-favorite-star" hier oben in der Liste traf per
+   !important auch ALLE Kacheln ohne eigenes Bild-Icon ("Sonstiges": Wertmarke, Freie Zahlung,
+   Außer-Haus-Becher) und schob den Stern dort oben mittig UEBER den Info-Button - genau
+   umgekehrt zum Wunsch "Stern mittig UNTER dem Info-Button, mit Abstand". Diese Regel gilt
+   jetzt nur noch fuer Bildkacheln (image-v3); Position dort auf denselben Wert wie
+   images-v3.css gebracht (das dort wegen spaeterem Ladezeitpunkt ohnehin gewinnt). Klassische
+   Kacheln nutzen die Basis-Regel weiter oben in dieser Datei (Stern unter dem Info-Kreis). */
 .product-grid .image-v3>.auto-favorite-star{
   position:absolute!important;
-  top:7px!important;
-  left:50%!important;
+  top:27%!important;
+  left:11.5%!important;
   right:auto!important;
   transform:translateX(-50%)!important;
   width:36px!important;
@@ -3803,18 +3811,19 @@ body:not(.group-color-mode) .category-tabs button.active{background:linear-gradi
   opacity:1!important;
 }
 
-/* Varianten-Plus aus der Bezeichnungszeile heraus in die rechte Bildkante. */
+/* Varianten-Plus aus der Bezeichnungszeile heraus in die rechte Bildkante. Betreiber
+   (22.09.2026): "sonst trifft man nicht" - 40px vergroessert. */
 .product-variant-button{
-  top:64px!important;
+  top:60px!important;
   right:8px!important;
   bottom:auto!important;
   left:auto!important;
-  width:40px!important;
-  height:40px!important;
-  min-width:40px!important;
-  min-height:40px!important;
-  border-radius:10px!important;
-  font-size:28px!important;
+  width:48px!important;
+  height:48px!important;
+  min-width:48px!important;
+  min-height:48px!important;
+  border-radius:12px!important;
+  font-size:32px!important;
   z-index:18!important;
 }
 

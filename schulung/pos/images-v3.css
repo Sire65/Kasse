@@ -9,11 +9,13 @@
 .product-grid .image-v3>.product-info-button{position:absolute!important;top:1%!important;left:1%!important;right:auto!important;bottom:auto!important;width:21%!important;height:21%!important;min-width:0!important;min-height:0!important;background:transparent!important;border:0!important;box-shadow:none!important;color:transparent!important;text-shadow:none!important;z-index:10!important}
 .product-grid .image-v3>.product-info-button:focus-visible{outline:3px solid #ffbf00!important}
 .product-grid .image-v3>.product-variant-button{top:43%!important;right:2%!important;left:auto!important;bottom:auto!important;z-index:9!important}
-/* Schulungs-Sonderlayout: Info-Button sitzt hier (eigene Regel weiter unten in styles.css,
-   Kreis statt Dreieck) rechts oben statt links oben wie in der normalen Kasse, Stern oben
-   mittig. Diese Datei laedt zuletzt (siehe index.html) und wuerde die dortigen Regeln sonst
-   per Ladereihenfolge ueberstimmen - deshalb hier dieselben Werte, nicht die der normalen Kasse. */
-.product-grid .image-v3>.auto-favorite-star{top:7px!important;left:50%!important;right:auto!important;transform:translateX(-50%)!important}
+/* BEFUND (22.09.2026): der Kommentar hier behauptete einen rechts-oben-Info-Button nur fuer
+   die Schulung, den es in dieser Datei nie wirklich gab (Zeile 9 oben setzt fuer image-v3
+   ueberall top:1%/left:1%, identisch zur normalen Kasse - dieselben _version_3.png-Bilder,
+   derselbe eingebrannte Info-Kreis links oben). Der Stern stand deshalb faelschlich oben
+   mittig statt unter dem tatsaechlichen Info-Button. Jetzt wie in der normalen Kasse: mittig
+   unter dem Info-Kreis, mit Abstand zum Antippen. */
+.product-grid .image-v3>.auto-favorite-star{top:27%!important;left:11.5%!important;right:auto!important;transform:translateX(-50%)!important}
 /* Betreiber (22.09.2026): "Preisschild soll unten links sein, in allen Versionen, das soll
    jetzt so bleiben" - nach mehrfachem Hin und Her hier fest auf dieselbe POSITION wie die
    normale Kasse gesetzt (gleiche _version_3.png-Assets, gleiche Namensbande bei ca. 84-85% der

@@ -14,6 +14,11 @@ if (!crypto.randomUUID) {
 }
 const VERSION="V0.31.3.6 Repair 12";
 window.__kcVersion=VERSION;
+// Betreiber (22.09.2026): wiederholt Verwirrung, ob ein Geraet den neuesten Stand geladen hat
+// (Service-Worker-Cache) - liest die tatsaechlich geladene Build-Kennung direkt aus dem
+// eigenen <script>-Tag aus, damit hier nie eine von Hand gepflegte, ggf. veraltete Zahl steht.
+const BUILD=(document.querySelector('script[src*="app.js?build="]')?.src.match(/build=([^&"']+)/)||[])[1]||"?";
+window.__kcBuild=BUILD;
 const DEV_ADMIN_ACCESS=window.KC_RUNTIME_FLAGS?.candidateTestAccess===true;
 // Bedienerstamm der Kasse: NUR Pseudonyme, niemals Klarnamen. Die Zuordnung
 // Klarname <-> Pseudonym liegt ausschliesslich im PC-Manager bzw. im Verwaltungsprogramm.
@@ -638,7 +643,7 @@ function applyVisibility(){applyModes();
   const optionalVisible=[state.master.showStaff,state.master.showTip,state.master.showDeposit,state.master.showPrint,state.master.showMore].filter(value=>value!==false).length,actions=el("payBtn")?.closest(".main-actions");
   actions?.classList.toggle("pay-priority",optionalVisible<=3);actions?.classList.toggle("pay-minimal",optionalVisible===1);actions?.classList.toggle("pay-only",optionalVisible===0);
 }
-function renderHeader(){applyVisibility();normalizeOperatorProfiles();el("clubName").textContent=state.master.clubName;el("clubLogo").src=safeImage(state.master.clubLogo||"assets/kochmuetze-weiss.png");el("eventName").textContent=state.master.eventName;el("registerName").textContent=state.master.registerName;el("operatorName").textContent=`Bediener: ${state.master.operatorName}`;el("version").textContent=VERSION;el("operatorBtnName").textContent=state.master.operatorName;const needs=state.master.requireOperatorConfirmation===true&&!state.operatorConfirmedForSale;el("operatorConfirmState").textContent=needs?"vor Artikel bestätigen":"aktiv";el("operatorBtn").classList.toggle("needs-confirmation",needs);aktualisiereOperatorBtnLed()}
+function renderHeader(){applyVisibility();normalizeOperatorProfiles();el("clubName").textContent=state.master.clubName;el("clubLogo").src=safeImage(state.master.clubLogo||"assets/kochmuetze-weiss.png");el("eventName").textContent=state.master.eventName;el("registerName").textContent=state.master.registerName;el("operatorName").textContent=`Bediener: ${state.master.operatorName}`;el("version").textContent=`${VERSION} · Build ${BUILD}`;el("operatorBtnName").textContent=state.master.operatorName;const needs=state.master.requireOperatorConfirmation===true&&!state.operatorConfirmedForSale;el("operatorConfirmState").textContent=needs?"vor Artikel bestätigen":"aktiv";el("operatorBtn").classList.toggle("needs-confirmation",needs);aktualisiereOperatorBtnLed()}
 // Anwesenheits-LED direkt am Bediener-Knopf im Kopf (nicht nur in der aufgeklappten Liste) -
 // zeigt ohne zusaetzlichen Klick, ob der GERADE gebuchte Bediener anwesend ist. Bei "Team"
 // (kein echter Mensch) bleibt die LED ausgeblendet, genau wie in der Liste selbst.
@@ -2684,6 +2689,18 @@ function renderRecentBons(){
   el("recentBons").querySelectorAll("[data-print-bon]").forEach(b=>b.onclick=()=>printBonByNumber(b.dataset.printBon));
   el("recentBons").querySelectorAll("[data-reverse-bon]").forEach(b=>b.onclick=()=>requestCompletedReversal(b.dataset.reverseBon));
 }
+// Betreiber (22.09.2026): "Englische Begriffe im Bon" - die Zeile "Zahlart" zeigte bisher
+// einfach den internen technischen Code in Grossbuchstaben (z.B. "COMPLAINT-REFUND",
+// "CASH-BUTTON-DIRECT", "ACCOUNT-CHARGE") - nie fuer Kunden gedacht. Feste deutsche
+// Bezeichnungen dafuer; unbekannte/neue Codes fallen auf "BAR" zurueck statt roh durchzureichen.
+const ZAHLART_LABELS={"complaint-refund":"ERSTATTUNG","ersatz-reklamation":"ERSATZ (REKLAMATION)","account-charge":"KONTO","pfand-trinkgeld":"TRINKGELD","pfand-spende":"SPENDE","internal-personal":"PERSONAL"};
+function zahlartLabel(method){
+  const m=String(method||"").toLowerCase();
+  if(ZAHLART_LABELS[m])return ZAHLART_LABELS[m];
+  if(m.startsWith("cash")||m==="bar")return"BAR";
+  if(!m)return"DIREKT";
+  return m.toUpperCase();
+}
 // Betreiber: "Letzten Bon anklicken muss ihn oeffnen, damit man bei Kundenfragen nachsehen
 // kann, was drauf steht" - vorher gab es nur den Drucken-Knopf, der sofort den echten
 // Druckdialog aufriss. Jetzt erzeugt eine gemeinsame Funktion die Bon-Seite; das Ansehen
@@ -2714,9 +2731,14 @@ function bonSeite(t,autoPrint){
   <style>
     @page{size:80mm auto;margin:3mm 4mm 4mm}
     *{box-sizing:border-box}
-    html,body{width:72mm;max-width:72mm;margin:0;padding:0;background:#fff;color:#000}
+    /* Betreiber (22.09.2026): "Bon laeuft links aus dem Rahmen" - html/body/.bon waren
+       unabhaengig vom Anzeigekontext fest auf 72mm Bondrucker-Breite gesetzt. Am Bildschirm
+       (Druckvorschau UND die reine Ansehen-Funktion) ist das nicht noetig und lief bei einem
+       schmaleren Popup-Fenster als vorgesehen aus dem sichtbaren Rahmen. Jetzt am Bildschirm
+       eine bequeme, sich anpassende Breite, exakt 72mm nur noch beim tatsaechlichen Druck. */
+    html,body{width:min(92vw,380px);margin:0;padding:0;background:#fff;color:#000;overflow-x:hidden}
     body{font-family:"Courier New",monospace;font-size:10pt;line-height:1.22}
-    .bon{width:72mm;max-width:72mm}
+    .bon{width:100%}
     header{text-align:center;margin-bottom:2.5mm}
     h1{font-size:14pt;margin:0} h2{font-size:11pt;margin:1mm 0 0}
     .meta{font-size:8.8pt;margin:2mm 0}
@@ -2729,7 +2751,7 @@ function bonSeite(t,autoPrint){
     .total strong{font-size:13pt}
     footer{text-align:center;margin-top:4mm;font-size:9pt}
     @media screen{body{margin:8px auto;border:1px solid #ccc;padding:4mm;box-shadow:0 2px 12px #0002}}
-    @media print{html,body{width:72mm!important;max-width:72mm!important;margin:0!important;padding:0!important;border:0!important;box-shadow:none!important}.kc-bon-druckknopf{display:none!important}}
+    @media print{html,body{width:72mm!important;max-width:72mm!important;margin:0!important;padding:0!important;border:0!important;box-shadow:none!important}.bon{width:72mm!important}.kc-bon-druckknopf{display:none!important}}
     .kc-bon-druckknopf{position:fixed;top:8px;right:8px;padding:10px 16px;font-size:14px;font-weight:800;border:0;border-radius:8px;background:#166534;color:#fff;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,.3)}
   </style></head><body>${autoPrint?"":'<button type="button" class="kc-bon-druckknopf" onclick="window.print()">🖨 Drucken</button>'}<main class="bon">
     <header>${r.header!==false?`<h1>${esc(r.head1||state.master.clubName)}</h1><h2>${esc(r.head2||state.master.eventName)}</h2>`:""}</header>
@@ -2743,7 +2765,7 @@ function bonSeite(t,autoPrint){
     <div class="rule"></div>
     ${discount>0?`<div class="line"><span>Zwischensumme</span><span>${money(gross)}</span></div><div class="line"><span>Rabatt</span><span>− ${money(discount)}</span></div>`:""}
     <div class="line total"><strong>SUMME</strong><strong>${money(due)}</strong></div>
-    <div class="line"><span>Zahlart</span><span>${esc(String(t.method||t.payment||"DIREKT").toUpperCase())}</span></div>
+    <div class="line"><span>Zahlart</span><span>${esc(zahlartLabel(t.method||t.payment))}</span></div>
     ${given>0?`<div class="line"><span>Gegeben</span><span>${money(given)}</span></div>`:""}
     ${change>0?`<div class="line"><span>Rückgeld</span><span>${money(change)}</span></div>`:""}
     ${t.type==="refund"?`<div class="rule"></div><strong>REKLAMATION: ${esc(t.complaint?.reason||t.reason||"")}</strong>`:""}
