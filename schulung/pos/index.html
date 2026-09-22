@@ -6,12 +6,14 @@
   <meta name="theme-color" content="#07111f">
   <title>KC MarktKasse · Kasse</title>
   <link rel="manifest" href="manifest.webmanifest">
-  <link rel="stylesheet" href="styles.css?build=training-ui2">
+  <link rel="stylesheet" href="styles.css?build=training-ui3">
   <link rel="stylesheet" href="../../shared/kc-closing-count-ui.css?build=1.0.0">
   <link rel="stylesheet" href="pos-ui-profile-consumer.css">
   <link rel="stylesheet" href="event-program-display.css">
   <link rel="stylesheet" href="time-clock-pos.css">
   <link rel="stylesheet" href="kc-sync-status-leds.css">
+  <link rel="stylesheet" href="kc-team-praesenz.css">
+  <link rel="stylesheet" href="kc-dienstplan-kasse.css">
 <link rel="stylesheet" href="kc-oberflaechen-anwenden.css?build=0.9.0">
 <link rel="stylesheet" href="kc-legacy-fallback.css?build=1.0.0">
   <script defer src="../cores/notification-core/notification-core.js"></script>
@@ -65,12 +67,13 @@
       <button id="cashSoundBtn" class="cash-sound-button active" type="button" title="Kassenton ausschalten" aria-label="Kassenton eingeschaltet" aria-pressed="true"><span aria-hidden="true">🔊</span></button>
       <button class="menu-button" id="menuBtn">☰<small>MENÜ</small></button>
       <button id="mirrorLayoutBtn" class="header-tool-button mirror-layout-button" type="button" title="Verkaufsfläche spiegeln (für Linkshänder)" aria-label="Verkaufsfläche spiegeln" aria-pressed="false">⇄</button>
+      <button id="dienstplanBtn" class="header-tool-button dienstplan-button" type="button" title="Dienstplan ansehen - wer kommt wann" aria-label="Dienstplan ansehen">📅</button>
       <button id="headerExitBtn" class="header-tool-button header-exit-button" type="button" title="Programm verlassen" aria-label="Programm verlassen">🚪</button>
     </div>
   </header>
 
   <section class="mode-strip">
-    <button id="operatorBtn" class="operator-button"><span>👤 <b id="operatorBtnName">Hans</b></span><small id="operatorConfirmState">aktiv</small></button>
+    <button id="operatorBtn" class="operator-button"><span>👤 <b id="operatorBtnName">Hans</b><span class="operator-led" id="operatorBtnLed" style="display:none"></span></span><small id="operatorConfirmState">aktiv</small></button>
     <label class="product-search-wrap">🔎 <input id="productSearchInput" placeholder="Artikel suchen"></label>
     <div class="mode-quick-switches" aria-label="Betriebsmodi">
       <button id="trainingModeTopBtn" class="mode-quick-button" type="button"><span class="mode-led"></span><span>Trainingsmodus</span></button>
@@ -998,6 +1001,21 @@
     <button value="close">Schließen</button>
   </form>
 </dialog>
+<dialog id="dienstplanDialog">
+  <form method="dialog" class="dialog-card dienstplan-card">
+    <header class="dienstplan-head">
+      <button type="button" id="dienstplanZurueckBtn" aria-label="Voriger Tag">‹</button>
+      <div class="dienstplan-datum">
+        <b id="dienstplanDatumText">Heute</b>
+        <button type="button" id="dienstplanHeuteBtn">Heute</button>
+      </div>
+      <button type="button" id="dienstplanVorBtn" aria-label="Nächster Tag">›</button>
+    </header>
+    <div id="dienstplanListe" class="dienstplan-liste"></div>
+    <small id="dienstplanStand" class="dienstplan-stand"></small>
+    <button value="close">Schließen</button>
+  </form>
+</dialog>
 
 <dialog id="panicDialog">
   <form method="dialog" class="dialog-card panic-card">
@@ -1237,8 +1255,7 @@
       <div id="accountBalanceInfo"></div>
       <div id="accountRuleInfo"></div>
       <div id="accountCartValidation"></div>
-      <label><input id="accountAcknowledge" type="checkbox"> Buchung und Kontenauswahl geprüft</label>
-      <button type="button" id="postToAccountBtn" class="primary-action">AUF KONTO BUCHEN</button>
+      <button type="button" id="postToAccountBtn" class="primary-action account-charge-confirm">AUF KONTO BUCHEN</button>
     </section>
     <p class="hint">Konten und Regeln werden zentral bereitgestellt und freigegeben.</p>
   </form>
@@ -1472,7 +1489,7 @@
     document.body.appendChild(s);
   }
   window.KCMasterDataSync.bereit.finally(() => {
-    ladeNacheinander(['images-v3.js?build=3-pfand', 'app.js?build=0.31.3.6-r14', '../shared/kc-happyhour.js?build=0.1.0', 'kc-happyhour-pos.js?build=0.1.0', 'kc-meldeweg.js?build=0.1.0', '../shared/kc-security-card.js?build=0.1.0', 'kc-security-card-pos.js?build=0.1.0', 'kc-zahl-zoom.js?build=0.1.0', 'kc-ansicht-umschalter.js?build=0.1.0', 'kc-startup-check.js?build=0.1.0', 'kc-pin-lock.js?build=0.1.0', 'kc-layout-neu.js?build=0.1.0', 'kc-erfassung-getrennt.js?build=0.1.0', 'kc-gutschein.js?build=0.1.0', 'kc-vorfuehrdaten.js?build=0.1.0', '../shared/kc-oberflaechen-format.js?build=0.1.0', 'kc-oberflaechen-pos.js?build=0.1.0', 'kc-oberflaechen-anwenden.js?build=0.9.0', 'kc-kopfzeile.js?build=0.3.0', 'kc-schulung.js?build=0.1.0', 'kc-reklamation.js?build=0.1.0']);
+    ladeNacheinander(['images-v3.js?build=3-pfand', 'app.js?build=0.31.3.6-r15', '../shared/kc-happyhour.js?build=0.1.0', 'kc-happyhour-pos.js?build=0.1.0', 'kc-meldeweg.js?build=0.1.0', '../shared/kc-security-card.js?build=0.1.0', 'kc-security-card-pos.js?build=0.1.0', 'kc-zahl-zoom.js?build=0.1.0', 'kc-ansicht-umschalter.js?build=0.1.0', 'kc-startup-check.js?build=0.1.0', 'kc-pin-lock.js?build=0.1.0', 'kc-layout-neu.js?build=0.1.0', 'kc-erfassung-getrennt.js?build=0.1.0', 'kc-gutschein.js?build=0.1.0', 'kc-vorfuehrdaten.js?build=0.1.0', '../shared/kc-oberflaechen-format.js?build=0.1.0', 'kc-oberflaechen-pos.js?build=0.1.0', 'kc-oberflaechen-anwenden.js?build=0.9.0', 'kc-kopfzeile.js?build=0.3.0', 'kc-schulung.js?build=0.1.0', 'kc-reklamation.js?build=0.1.2']);
   });
 </script>
 <script src="pos-ui-profile-consumer.js?build=0.1.0"></script>
@@ -1480,6 +1497,8 @@
 <script src="time-clock-pos.js?build=0.1.0"></script>
 <script src="kc-sync-status-leds.js?build=0.2.0"></script>
 <script src="kc-sync-live-event.js?build=0.1.0"></script>
+<script src="kc-team-praesenz.js?build=0.1.0"></script>
+<script src="kc-dienstplan-kasse.js?build=0.1.0"></script>
 <script src="training-demo-bridge.js?build=0.27.0"></script>
 
   <div id="screenSaver" class="screen-saver" hidden role="button" tabindex="0" aria-label="Bildschirm gesperrt. Zum Entsperren berühren.">

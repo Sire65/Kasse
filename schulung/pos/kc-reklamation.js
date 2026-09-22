@@ -28,7 +28,10 @@
   function bauen() {
     if (ebene) return ebene;
     ebene = document.createElement('div'); ebene.id = 'kcReklamationEbene'; ebene.className = 'kc-reklamation-ebene'; ebene.hidden = true;
-    ebene.innerHTML = '<div class="kc-rek-kopf"><button type="button" class="kc-rek-zurueck" data-rek="zurueck" aria-label="Zurück">←</button><strong class="kc-rek-titel"></strong><button type="button" class="kc-rek-schliessen" data-rek="schliessen" aria-label="Abbrechen">✕</button></div><div class="kc-rek-inhalt"></div>';
+    // Betreiber-Wunsch (22.09.2026): ein klar beschrifteter Abbrechen-Weg, nicht nur ein
+    // kleines Symbol - man muss auf einen Blick sehen koennen, wie man eine begonnene
+    // Reklamation wieder verlaesst, ohne etwas zu buchen.
+    ebene.innerHTML = '<div class="kc-rek-kopf"><button type="button" class="kc-rek-zurueck" data-rek="zurueck" aria-label="Zurück"><span>←</span> Zurück</button><strong class="kc-rek-titel"></strong><button type="button" class="kc-rek-schliessen" data-rek="schliessen" aria-label="Reklamation abbrechen"><span>✕</span> Abbrechen</button></div><div class="kc-rek-inhalt"></div>';
     document.body.appendChild(ebene);
     ebene.addEventListener('click', (ev) => {
       const g = ev.target.closest('[data-rek-gruppe]'); if (g) { gruppe = g.dataset.rekGruppe; zeichneSchritt1(); return; }
@@ -68,14 +71,14 @@
   function zeichneSchritt2() {
     const p = PRODUCTS.find((x) => x.id === artikel);
     $('.kc-rek-titel', ebene).textContent = `Reklamation · Schritt 2 von 3 – Warum? (${p ? p.name : ''})`;
-    $('.kc-rek-zurueck', ebene).hidden = false; $('.kc-rek-zurueck', ebene).textContent = '←'; $('.kc-rek-zurueck', ebene).dataset.rek = 'zurueck';
+    $('.kc-rek-zurueck', ebene).hidden = false; $('.kc-rek-zurueck', ebene).dataset.rek = 'zurueck';
     $('.kc-rek-inhalt', ebene).innerHTML = '<div class="kc-rek-gruende">' +
       GRUENDE.map(([g, i]) => `<button type="button" data-rek-grund="${g}"><span class="kc-rek-grund-icon">${i}</span><span>${g}</span></button>`).join('') + '</div>';
   }
   function zeichneSchritt3() {
     const p = PRODUCTS.find((x) => x.id === artikel);
     $('.kc-rek-titel', ebene).textContent = `Reklamation · Schritt 3 von 3 – Was bekommt der Kunde?`;
-    $('.kc-rek-zurueck', ebene).hidden = false; $('.kc-rek-zurueck', ebene).textContent = '←'; $('.kc-rek-zurueck', ebene).dataset.rek = 'zurueck';
+    $('.kc-rek-zurueck', ebene).hidden = false; $('.kc-rek-zurueck', ebene).dataset.rek = 'zurueck';
     $('.kc-rek-inhalt', ebene).innerHTML =
       `<div class="kc-rek-zusammenfassung">${p ? p.name : ''} · ${grund}${p ? ' · ' + geld(p.price) : ''}</div>` +
       '<div class="kc-rek-ergebnisse">' +
@@ -92,11 +95,14 @@
       const ref = ($('#kcRekBon', ebene) || {}).value || '';
       await kcReklamationBuchen(artikel, grund, ergebnis, ref);
       const p = PRODUCTS.find((x) => x.id === artikel);
-      const text = ergebnis === 'ersatz' ? `${p ? p.name : 'Artikel'} als Ersatz gebucht - kostenlos.`
-        : ergebnis === 'auszahlung' ? `${geld(p ? p.price : 0)} als Reklamationsauszahlung gebucht.`
-        : 'Reklamation ohne Ausgleich vermerkt.';
+      const text = ergebnis === 'ersatz' ? `✔ ${p ? p.name : 'Artikel'} als Ersatz gebucht - kostenlos.`
+        : ergebnis === 'auszahlung' ? `✔ ${geld(p ? p.price : 0)} liegt im Warenkorb bereit - jetzt auszahlen.`
+        : '✔ Reklamation ohne Ausgleich vermerkt.';
+      // Betreiber-Wunsch: eine kurze, klar sichtbare Bestaetigung nach der Wahl - besonders bei
+      // Auszahlung wichtig, damit klar ist, dass die Kasse noch einen Schritt (auszahlen)
+      // erwartet und nichts von selbst schon abgeschlossen wurde.
       try { setSystemHint(text, 'ok'); } catch (e) { /* egal */ }
-      try { notify('success', 'Reklamation abgeschlossen', 'reklamation', 5000); } catch (e) { /* egal */ }
+      try { notify('success', text, 'reklamation', 5000); } catch (e) { /* egal */ }
     } catch (err) {
       try { setSystemHint(err.message || 'Reklamation konnte nicht gespeichert werden', 'error'); } catch (e) { /* egal */ }
       buttons.forEach((b) => { b.disabled = false; });

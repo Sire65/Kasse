@@ -622,7 +622,18 @@ function applyVisibility(){applyModes();
   const optionalVisible=[state.master.showStaff,state.master.showTip,state.master.showDeposit,state.master.showPrint,state.master.showMore].filter(value=>value!==false).length,actions=el("payBtn")?.closest(".main-actions");
   actions?.classList.toggle("pay-priority",optionalVisible<=3);actions?.classList.toggle("pay-minimal",optionalVisible===1);actions?.classList.toggle("pay-only",optionalVisible===0);
 }
-function renderHeader(){applyVisibility();normalizeOperatorProfiles();el("clubName").textContent=state.master.clubName;el("clubLogo").src=safeImage(state.master.clubLogo||"assets/kochmuetze-weiss.png");el("eventName").textContent=state.master.eventName;el("registerName").textContent=state.master.registerName;el("operatorName").textContent=`Bediener: ${state.master.operatorName}`;el("version").textContent=VERSION;el("operatorBtnName").textContent=state.master.operatorName;const needs=state.master.requireOperatorConfirmation===true&&!state.operatorConfirmedForSale;el("operatorConfirmState").textContent=needs?"vor Artikel bestätigen":"aktiv";el("operatorBtn").classList.toggle("needs-confirmation",needs)}
+function renderHeader(){applyVisibility();normalizeOperatorProfiles();el("clubName").textContent=state.master.clubName;el("clubLogo").src=safeImage(state.master.clubLogo||"assets/kochmuetze-weiss.png");el("eventName").textContent=state.master.eventName;el("registerName").textContent=state.master.registerName;el("operatorName").textContent=`Bediener: ${state.master.operatorName}`;el("version").textContent=VERSION;el("operatorBtnName").textContent=state.master.operatorName;const needs=state.master.requireOperatorConfirmation===true&&!state.operatorConfirmedForSale;el("operatorConfirmState").textContent=needs?"vor Artikel bestätigen":"aktiv";el("operatorBtn").classList.toggle("needs-confirmation",needs);aktualisiereOperatorBtnLed()}
+// Anwesenheits-LED direkt am Bediener-Knopf im Kopf (nicht nur in der aufgeklappten Liste) -
+// zeigt ohne zusaetzlichen Klick, ob der GERADE gebuchte Bediener anwesend ist. Bei "Team"
+// (kein echter Mensch) bleibt die LED ausgeblendet, genau wie in der Liste selbst.
+function aktualisiereOperatorBtnLed(){
+  const led=el("operatorBtnLed");
+  if(!led)return;
+  const profil=normalizeOperatorProfiles().find(p=>p.name===state.master.operatorName);
+  if(!profil||profil.id==="team"){led.style.display="none";return}
+  led.style.display="";
+  led.className=`operator-led operator-led-${window.KCTeamPraesenz?window.KCTeamPraesenz.farbe(profil.id):"rot"}`;
+}
 function tick(){const d=new Date();el("dateText").textContent=d.toLocaleDateString("de-DE");el("timeText").textContent=d.toLocaleTimeString("de-DE",{hour:"2-digit",minute:"2-digit"})}
 function categories(){
   const groups=visibleGroups(),names=groups.map(g=>g.name),base=[...offerCategoryNames(),...names,...(names.length?["Favoriten"]:[])];
@@ -3179,10 +3190,19 @@ async function kcReklamationBuchen(produktId,grund,ergebnis,bonReferenz){
   const preis=Number(produkt.price||0);
   let betrag=0,transactionId=null,bon=null;
   if(ergebnis==="auszahlung"){
-    complaintArticles=new Map([[produkt.id,1]]);complaintReason=grund;
-    const rec=await recordComplaintRefund(+preis.toFixed(2));
-    betrag=preis;transactionId=rec.transactionId;bon=rec.bon;
-    complaintArticles=new Map();complaintReason="";
+    // ECHTER FUND (Betreiber: "klappt irgendwie noch nicht"): hier stand vorher ein Aufruf von
+    // recordComplaintRefund() - der schliesst SOFORT einen eigenen, fertigen Rückerstattungs-Bon
+    // ab, komplett am laufenden Warenkorb vorbei, und liest dabei noch dazu die Eingabefelder
+    // des ALTEN, unsichtbaren Reklamations-Panels aus (#complaintBonReference/#withdrawNote) -
+    // nie die, die man im neuen 3-Schritt-Weg tatsächlich sieht. Der Betreiber wollte aber
+    // ausdruecklich: der Vorfall landet im WARENKORB, der Betrag steht dort schon als
+    // Auszahlungsbetrag - genau wie es addComplaintToCurrentCart() fuer den alten Weg bereits
+    // richtig macht. Jetzt genau dieselbe, bereits bewaehrte Buchungsart, nur direkt aus den
+    // eigenen Werten dieses Ablaufs (produkt/grund/bonReferenz), ohne Umweg über die alten
+    // Modul-Variablen oder DOM-Felder.
+    state.cart.push({key:`reklamation:${produkt.id}:${crypto.randomUUID()}`,id:`REFUND-${produkt.id}`,name:`Reklamation · ${produkt.name}`,price:-Math.abs(preis),category:"Reklamation",image:produkt.image,manualDeposit:false,qty:1,option:null,deposits:[],refund:true,lockedQuantity:true,complaint:{reason:grund,reference:bonReferenz||null,note:"",sourceProductId:produkt.id}});
+    state.selectedCartKey=state.cart.at(-1)?.key||null;renderCart();
+    betrag=preis;
   }else if(ergebnis==="ersatz"){
     // Eigener, winziger Bon nur mit dem Ersatzartikel zu 0 € - Bestand/Statistik bleiben korrekt
     // (ein ausgeschenktes Getränk zählt weiter), der laufende Warenkorb wird gesichert und danach
@@ -3798,10 +3818,27 @@ function operatorFromKngQr(raw){
 }
 el("operatorBtn").onclick=()=>{
   const profiles=normalizeOperatorProfiles();
-  el("operatorList").innerHTML=profiles.map(profile=>`<button type="button" data-operator-id="${profile.id}" class="${profile.name===state.master.operatorName?"active":""}">${profile.name}${profile.name===state.master.operatorName?" ✓":""}</button>`).join("");
+  // Anwesenheits-LED vor jedem Pseudonym (nicht vor "Team", das ist kein echter Mensch mit
+  // eigenem Stempelstatus). Farbe kommt aus kc-team-praesenz.js - zentral vom Manager, wenn
+  // erreichbar, sonst aus den rein lokalen Stempel-Daten dieser Kasse.
+  el("operatorList").innerHTML=profiles.map(profile=>`<button type="button" data-operator-id="${profile.id}" class="${profile.name===state.master.operatorName?"active":""}">${profile.id==="team"?"":`<span class="operator-led operator-led-${window.KCTeamPraesenz?window.KCTeamPraesenz.farbe(profile.id):"rot"}"></span>`}${profile.name}${profile.name===state.master.operatorName?" ✓":""}</button>`).join("");
   el("operatorList").querySelectorAll("button").forEach(button=>button.onclick=()=>{confirmOperator(profiles.find(profile=>profile.id===button.dataset.operatorId));el("operatorDialog").close()});
   el("operatorDialog").showModal();
+  window.KCTeamPraesenz?.aktualisieren();
 };
+// LEDs in der GEOEFFNETEN Bedienerliste live nachfuehren, ohne die Liste (und damit Fokus/
+// Klick-Handler) komplett neu aufzubauen - es wechselt nur die Farbe je Punkt. Ueber ein
+// Custom-Event statt eines direkten window.KCTeamPraesenz.onUpdate(...)-Aufrufs, weil
+// kc-team-praesenz.js ERST NACH app.js laedt (siehe index.html) - ein direkter Aufruf hier
+// wuerde ins Leere laufen, addEventListener funktioniert unabhaengig von der Ladereihenfolge.
+window.addEventListener("kc-team-praesenz-update",()=>{
+  aktualisiereOperatorBtnLed();
+  if(!el("operatorDialog")?.open)return;
+  el("operatorList").querySelectorAll("button[data-operator-id]").forEach(button=>{
+    const led=button.querySelector(".operator-led");
+    if(led&&window.KCTeamPraesenz)led.className=`operator-led operator-led-${window.KCTeamPraesenz.farbe(button.dataset.operatorId)}`;
+  });
+});
 el("productSearchInput").addEventListener("input",()=>{state.productPage=0;renderProducts()});
 el("panicHotspot").onclick=()=>el("panicDialog").showModal();
 el("panicReturnBtn").onclick=()=>{
@@ -4379,7 +4416,6 @@ function kcSelectAccount(id){
   el("accountRuleInfo").innerHTML=`<p>Erlaubt: ${(a.allowedGroups||[]).join(", ")||"nur Einzelartikel"} · Höchstbetrag: ${a.limit?money(a.limit):"unbegrenzt"}</p>`;
   el("accountCartValidation").innerHTML=v.denied.length?`<div class="validation-error">${v.denied.map(x=>escapeHtml(x.reason)).join("<br>")}</div>`:`<div class="validation-ok">Alle Positionen freigegeben · neuer Stand ${money(v.newAmount)}</div>`;
   el("postToAccountBtn").disabled=!v.allOk;
-  el("accountAcknowledge").checked=false;
 }
 function kcOpenAccountCharge(){
   if(!state.cart.length)return showMessage("Kein Bon","0,00 €","Bitte zuerst Artikel wählen.");
@@ -4388,7 +4424,6 @@ function kcOpenAccountCharge(){
 async function kcPostAccount(){
   const a=kcAccounts().find(x=>x.id===kcSelectedAccountId);if(!a)return;
   const v=kcValidateAccountCart(a);if(!v.allOk)return showMessage("Kontobuchung abgelehnt","!",v.denied[0]?.reason||"Limit oder Gültigkeit verletzt.");
-  if(!el("accountAcknowledge").checked)return setSystemHint("Bitte Kontenauswahl und Buchung bestätigen","warn");
   const cartCopy=cloneData(state.cart),amount=+total().toFixed(2);
   const rec=await completeSale("account-charge",{silent:true});
   const events=kcEvents();events.push({eventId:crypto.randomUUID(),accountId:a.id,accountName:a.name,transactionId:rec.transactionId,bon:rec.bon,amount,date:rec.endTime,registerId:rec.registerId,operator:rec.operator,items:cartCopy.map(i=>({id:i.id,name:i.name,category:i.category,qty:i.qty,price:i.price})),status:"open",syncStatus:"pending",configVersion:a.version||1,training:!!state.master.trainingMode});kcWrite(KC_ACCOUNT_EVENTS_KEY,events);
