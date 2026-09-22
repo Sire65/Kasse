@@ -936,7 +936,7 @@ function renderProducts(){
           <img class="kombi-unten" src="${p.kombiBilder.unten}" alt="">
           <svg class="kombi-linie" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"><line x1="0" y1="100" x2="100" y2="0" vector-effect="non-scaling-stroke"/></svg>
         </span>`:`<img src="${p.image}" alt="">`}
-        <span class="product-price-tag ${p.isOffer?"offer-price-line":""}">${p.isOffer?`<small class="offer-old-price">${money(p.originalPrice)}</small>`:""}${p.isFreieZahlung?"Betrag frei":money(kachelPreis(p))}</span>
+        <span class="product-price-tag ${p.isOffer?"offer-price-line":""}">${p.isOffer?`<small class="offer-old-price">${money(p.originalPrice)}</small>`:""}${p.isFreieZahlung?"Betrag frei":money(kachelPreis(p)).replace(/\s?€/,"")}</span>
         <span class="product-label"><strong>${p.name}</strong></span>
       </button>
       ${p.optionGroup?`<button class="product-variant-button" data-variant-id="${p.id}" title="Varianten zu ${p.name}" aria-label="Varianten zu ${p.name} öffnen">+</button>`:""}

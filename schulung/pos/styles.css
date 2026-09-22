@@ -3712,30 +3712,26 @@ body:not(.group-color-mode) .category-tabs button.active{background:linear-gradi
   overflow-wrap:anywhere!important;
 }
 /* Der Einzelpreis ist seit der Trennung von Name/Preis (siehe app.js renderProducts) das
-   eigenstaendige .product-price-tag, kein <span> mehr in .product-label - Selektor umgestellt,
-   Optik (grosses rotes Schild oben links) unveraendert beibehalten. */
+   eigenstaendige .product-price-tag, kein <span> mehr in .product-label - Selektor umgestellt.
+   Betreiber (22.09.2026): weiss auf schwarz, schmal, kein Eurozeichen (das entfernt bereits
+   app.js renderProducts) - dieselbe schlichte Optik wie die normale Kasse, unten links, in
+   allen Versionen identisch. Nicht wieder auf "oben" oder auf das grosse rote Schild aendern. */
 .product-price-tag{
   position:absolute!important;
-  top:8px!important;
-  left:8px!important;
-  bottom:auto!important;
+  top:auto!important;
+  left:6px!important;
+  bottom:8px!important;
   z-index:15!important;
-  display:flex!important;
-  align-items:center!important;
-  justify-content:center!important;
-  min-width:62px!important;
-  min-height:38px!important;
   margin:0!important;
-  padding:5px 9px!important;
-  box-sizing:border-box!important;
-  border:2px solid #f3d365!important;
-  border-radius:10px!important;
-  background:#8b1020!important;
+  padding:3px 6px!important;
+  border:0!important;
+  border-radius:6px!important;
+  background:#111827dd!important;
   color:#fff!important;
-  box-shadow:0 2px 7px rgba(0,0,0,.4)!important;
-  font-size:clamp(.82rem,.92vw,1.03rem)!important;
+  box-shadow:none!important;
+  font-size:.82rem!important;
   line-height:1!important;
-  font-weight:1000!important;
+  font-weight:900!important;
   text-shadow:none!important;
   white-space:nowrap!important;
 }
