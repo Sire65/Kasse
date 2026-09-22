@@ -35,6 +35,25 @@
     return text;
   }
 
+  // NUR in der Schulungsversion (koppelt sich laut obigem Kommentar absichtlich nie): fuer
+  // Vorfuehrungen/Praesentationen ein erfundener Beispielplan ueber ein paar Tage, statt der
+  // leeren Liste. Frei erfundene Namen, keine echten Kollegen. Die echte Kasse (pos/) bleibt
+  // unveraendert bei "Noch kein Dienstplan verfuegbar" - dort waere ein erfundener Stand
+  // genau die Vortaeuschung, die vermieden werden soll.
+  function pseudoSchichten() {
+    const tag = (delta) => verschiebeTag(heuteIso(), delta);
+    return [
+      { date: tag(0), pseudonym: 'Anna', area: 'Kasse', start: '10:00', end: '14:00' },
+      { date: tag(0), pseudonym: 'Ben', area: 'Theke', start: '14:00', end: '19:00' },
+      { date: tag(0), pseudonym: 'Chris', area: 'Küche', start: '11:00', end: '18:00' },
+      { date: tag(1), pseudonym: 'Dana', area: 'Kasse', start: '10:00', end: '15:00' },
+      { date: tag(1), pseudonym: 'Anna', area: 'Ausschank', start: '15:00', end: '20:00' },
+      { date: tag(1), pseudonym: 'Erik', area: 'Küche', start: '11:00', end: '18:00' },
+      { date: tag(2), pseudonym: 'Ben', area: 'Kasse', start: '10:00', end: '14:00' },
+      { date: tag(2), pseudonym: 'Chris', area: 'Theke', start: '14:00', end: '19:00' },
+      { date: tag(2), pseudonym: 'Dana', area: 'Küche', start: '11:00', end: '18:00' },
+    ];
+  }
   async function aktualisiere() {
     try {
       const res = await fetch(URL_DIENSTPLAN, { cache: 'no-store' });
@@ -43,8 +62,10 @@
       schichten = Array.isArray(daten?.schichten) ? daten.schichten : [];
       letzterAbruf = new Date();
     } catch (e) {
-      // Companion/Manager nicht erreichbar - alten Stand (falls vorhanden) einfach stehen
-      // lassen, kein Absturz. Die Standanzeige unten macht das fuer die Kollegen sichtbar.
+      // Companion/Manager nicht erreichbar: Vorfuehrdaten einsetzen, aber nur falls noch nie
+      // ein echter Stand geladen wurde - kam vorher schon ein echter Plan an, bleibt der
+      // stehen statt durch Beispieldaten ersetzt zu werden.
+      if (!letzterAbruf) schichten = pseudoSchichten();
     }
     rendere();
   }

@@ -3264,6 +3264,60 @@ function pflegeAnfangsbestandHinweis(){
   }
   feld.hidden=true;
 }
+// X-Bericht: derselbe Zwischenstand wie im Tagesabschluss (closingSnapshot ist rein lesend -
+// nichts wird hier gespeichert oder zurueckgesetzt), nur zum Nachschauen und Ausdrucken.
+// Bewusst OHNE Abschlusscode/QR/Notiz - das bleibt dem echten Tagesabschluss vorbehalten,
+// damit ein X-Bericht nie mit einem fertigen Abschluss verwechselt werden kann.
+function openXBerichtDialog(){
+  const s=closingSnapshot();
+  el("xBerichtCashIn").textContent=money(s.cashIn);
+  el("xBerichtCashSales").textContent=money(s.cashSales);
+  el("xBerichtCashTips").textContent=money(s.cashTips);
+  el("xBerichtCashOut").textContent=money(s.cashOut);
+  el("xBerichtExpected").textContent=money(s.expectedCash);
+  el("xBerichtStaffTotal").textContent=`${money(s.staffTotal)} (${s.staffCount} ${s.staffCount===1?"Vorgang":"Vorgänge"})`;
+  el("xBerichtAccountSales").innerHTML=`${money(s.accountSales)}${s.accountBreakdown.length?`<small class="closing-konten">${s.accountBreakdown.map(k=>`${escapeHtml(k.name)}: ${money(k.amount)}`).join(" · ")}</small>`:""}`;
+  el("xBerichtTotalSales").textContent=money(s.totalSales);
+  el("xBerichtTxCount").textContent=String(s.tx.length);
+  el("xBerichtDialog").showModal();
+}
+// Druck im selben 72mm-Bonformat wie ein normaler Kassenbon (siehe printBonByNumber) - passt
+// damit direkt auf denselben Bondrucker, statt eine eigene, abweichende Papierbreite zu
+// erzwingen. Ohne Drucker zeigt der Browser stattdessen den normalen "Als PDF speichern"-Weg.
+el("printXBericht").onclick=()=>{
+  const s=closingSnapshot(),jetzt=new Date();
+  const w=window.open("","_blank");if(!w)return setSystemHint("Popup wurde vom Browser blockiert - bitte erlauben","warn");
+  w.document.write(`<!doctype html><html lang="de"><head><meta charset="utf-8"><title>X-Bericht</title>
+  <style>
+    @page{size:80mm auto;margin:3mm 4mm 4mm}
+    *{box-sizing:border-box}
+    html,body{width:72mm;max-width:72mm;margin:0;padding:0;background:#fff;color:#000}
+    body{font-family:"Courier New",monospace;font-size:10pt;line-height:1.3}
+    header{text-align:center;margin-bottom:2.5mm}
+    h1{font-size:13pt;margin:0}h2{font-size:10pt;margin:1mm 0 0;font-weight:normal}
+    .rule{border-top:1px dashed #000;margin:2mm 0}
+    .line{display:flex;justify-content:space-between;gap:3mm;margin:.9mm 0}
+    .total{font-weight:bold;font-size:11pt}
+    footer{text-align:center;margin-top:4mm;font-size:8.5pt}
+    @media print{html,body{width:72mm!important;max-width:72mm!important;margin:0!important;padding:0!important}}
+  </style></head><body>
+    <header><h1>X-Bericht</h1><h2>${escapeHtml(state.master.registerName||state.master.registerId)}</h2><h2>${jetzt.toLocaleString("de-DE")}</h2></header>
+    <div class="rule"></div>
+    <div class="line"><span>Anfangsbestand + Nachfüllungen</span><b>${money(s.cashIn)}</b></div>
+    <div class="line"><span>Barverkäufe</span><b>${money(s.cashSales)}</b></div>
+    <div class="line"><span>Bar-Trinkgeld / Aufrundung</span><b>${money(s.cashTips)}</b></div>
+    <div class="line"><span>Entnahmen</span><b>${money(s.cashOut)}</b></div>
+    <div class="rule"></div>
+    <div class="line total"><span>Erwarteter Bestand</span><b>${money(s.expectedCash)}</b></div>
+    <div class="rule"></div>
+    <div class="line"><span>Kontoumsatz</span><b>${money(s.accountSales)}</b></div>
+    <div class="line"><span>Umsatz gesamt</span><b>${money(s.totalSales)}</b></div>
+    <div class="line"><span>Bonanzahl</span><b>${s.tx.length}</b></div>
+    <footer>Zwischenstand - kein Tagesabschluss</footer>
+    <script>window.onload=()=>window.print()<\/script>
+  </body></html>`);
+  w.document.close();
+};
 function openClosingDialog(){
   pflegeAnfangsbestandHinweis();
   window.KCClosingCountUI?.setMode?.("defer");
@@ -4436,6 +4490,7 @@ document.querySelectorAll('.more-grid button[data-action]').forEach(button=>butt
   if(action==="currency")return leaveMore(openCurrencyConverter);
   if(action==="central")return leaveMore(()=>openService());
   if(action==="opening")return leaveMore(()=>el("openingAssistantBtn").click());
+  if(action==="xbericht")return leaveMore(openXBerichtDialog);
   if(action==="closing")return leaveMore(openClosingDialog);
   if(action==="cashdeposit")return leaveMore(()=>el("cashDepositDialog").showModal());
   if(action==="withdraw")return leaveMore(openWithdrawal);
