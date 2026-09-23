@@ -4,7 +4,7 @@
 'use strict';
 const { DatabaseSync } = require('node:sqlite');
 
-const SCHEMA_VERSION = 10;
+const SCHEMA_VERSION = 11;
 
 function hasColumn(db, table, column) {
   return db.prepare(`PRAGMA table_info(${table})`).all().some((c) => c.name === column);
@@ -124,6 +124,24 @@ const MIGRATIONS = [
       db.exec("ALTER TABLE master_data_cache ADD COLUMN accounts_json TEXT NOT NULL DEFAULT '[]'");
     }
   },
+
+  // Version 11 (23.09.2026): Dienstplan lokal persistent puffern.
+  // Nach einem Neustart des Tablet-Companions bleibt der zuletzt erfolgreich vom Manager
+  // geladene Plan verfügbar, auch wenn das WLAN oder der Manager gerade nicht erreichbar ist.
+  (db) => {
+    db.exec(`
+      CREATE TABLE IF NOT EXISTS dienstplan_cache (
+        id INTEGER PRIMARY KEY CHECK (id = 1),
+        schichten_json TEXT NOT NULL DEFAULT '[]',
+        revision INTEGER NOT NULL DEFAULT 0,
+        event_id TEXT,
+        source_updated_at TEXT,
+        manager_updated_at TEXT,
+        cached_at TEXT
+      );
+    `);
+  },
+
 ];
 
 function openDeviceDb(path = ':memory:') {
