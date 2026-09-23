@@ -1,47 +1,63 @@
-// Dienstplan-Bruecke: holt den von dp2 veroeffentlichten Sollplan (Tabelle
-// kc_dp_plan_published, siehe Datenbank-Migration) ueber die bereits bestehende
-// Supabase-Anmeldung des PC-Managers (kc-manager-supabase-status.js), uebersetzt
-// person_id -> Pseudonym (Tabelle kc_core_pos_aliases, ebenfalls bereits vorhanden -
-// KEIN Klarname wird an dieser Stelle je angefasst) und legt das Ergebnis beim
-// Manager-Companion ab (loopback, dieselbe Route/derselbe Port wie /master-data/push).
-// Jede Kasse holt sich den Stand danach wie gewohnt ueber ihren Companion ab.
+// Dienstplan-Bruecke: holt den von KC DP2 veroeffentlichten Sollplan aus Supabase,
+// uebersetzt person_id -> Pseudonym und legt ausschliesslich den aktuellen Veranstaltungsplan
+// beim lokalen Manager-Companion ab. Klarnamen werden auf diesem Weg nie an die Kasse gegeben.
 (function (global) {
   'use strict';
   const ORG_ID = 'KC_WERNE';
+  const EVENT_ID = global.KC_DIENSTPLAN_EVENT_ID || 'KC-WM-2026';
   const PUSH_URL = 'http://127.0.0.1:47392/dienstplan/push';
   const AUTO_MINUTEN = 5;
+  const state = { eventId: EVENT_ID, lastSuccessAt: null, lastError: null, lastCount: null };
 
   async function holeUndVeroeffentliche() {
-    if (!global.KCSupabase?.istAngemeldet?.()) return { ok: false, grund: 'nicht_angemeldet' };
-    const [plan, aliase] = await Promise.all([
-      global.KCSupabase.rufeTabelleAuf(
-        `kc_dp_plan_published?select=person_id,work_date,start_time,end_time,break_minutes,zone,area&status=eq.published&org_id=eq.${ORG_ID}&order=work_date.asc`
-      ),
-      global.KCSupabase.rufeTabelleAuf(
-        `kc_core_pos_aliases?select=person_id,alias_name&org_id=eq.${ORG_ID}&active=is.true`
-      ),
-    ]);
-    const pseudonymFuer = new Map((Array.isArray(aliase) ? aliase : []).map((a) => [a.person_id, a.alias_name]));
-    const schichten = (Array.isArray(plan) ? plan : [])
-      .map((z) => ({
-        pseudonym: pseudonymFuer.get(z.person_id) || null,
-        date: z.work_date,
-        start: String(z.start_time || '').slice(0, 5),
-        end: String(z.end_time || '').slice(0, 5),
-        breakMinutes: z.break_minutes || 0,
-        zone: z.zone || null,
-        area: z.area || null,
-      }))
-      // Ohne bekanntes Pseudonym (z.B. eine dp2-Aushilfe ohne eigenen Kassen-Zugang) NICHT an
-      // die Kasse weitergeben - sonst muesste dort eine leere/anonyme Zeile erscheinen.
-      .filter((z) => z.pseudonym);
-    const antwort = await fetch(PUSH_URL, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ schichten }),
-    });
-    if (!antwort.ok) throw new Error(`Weitergabe an den Manager fehlgeschlagen (${antwort.status})`);
-    return { ok: true, anzahl: schichten.length };
+    if (!global.KCSupabase?.istAngemeldet?.()) {
+      state.lastError = 'nicht_angemeldet';
+      return { ok: false, grund: 'nicht_angemeldet' };
+    }
+    try {
+      const [plan, aliase] = await Promise.all([
+        global.KCSupabase.rufeTabelleAuf(
+          `kc_dp_plan_published?select=person_id,work_date,start_time,end_time,break_minutes,zone,area&status=eq.published&org_id=eq.${ORG_ID}&event_id=eq.${encodeURIComponent(EVENT_ID)}&order=work_date.asc,start_time.asc,person_id.asc`
+        ),
+        global.KCSupabase.rufeTabelleAuf(
+          `kc_core_pos_aliases?select=person_id,alias_name&org_id=eq.${ORG_ID}&active=is.true`
+        ),
+      ]);
+      const pseudonymFuer = new Map((Array.isArray(aliase) ? aliase : []).map((a) => [a.person_id, a.alias_name]));
+      const schichten = (Array.isArray(plan) ? plan : [])
+        .map((z) => ({
+          pseudonym: pseudonymFuer.get(z.person_id) || null,
+          date: z.work_date,
+          start: String(z.start_time || '').slice(0, 5),
+          end: String(z.end_time || '').slice(0, 5),
+          breakMinutes: z.break_minutes || 0,
+          zone: z.zone || null,
+          area: z.area || null,
+        }))
+        // Ohne bekanntes Pseudonym (z.B. eine Aushilfe ohne Kassen-Zugang) nicht an die Kasse
+        // weitergeben. So bleibt die Kassenansicht konsequent pseudonymisiert.
+        .filter((z) => z.pseudonym)
+        .sort((a, b) =>
+          String(a.date).localeCompare(String(b.date)) ||
+          String(a.start).localeCompare(String(b.start)) ||
+          String(a.pseudonym).localeCompare(String(b.pseudonym))
+        );
+
+      const antwort = await fetch(PUSH_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ eventId: EVENT_ID, schichten }),
+      });
+      if (!antwort.ok) throw new Error(`Weitergabe an den Manager fehlgeschlagen (${antwort.status})`);
+
+      state.lastSuccessAt = new Date().toISOString();
+      state.lastError = null;
+      state.lastCount = schichten.length;
+      return { ok: true, anzahl: schichten.length, eventId: EVENT_ID };
+    } catch (e) {
+      state.lastError = e?.message || String(e);
+      throw e;
+    }
   }
 
   let timer = null;
@@ -49,16 +65,15 @@
     if (timer) clearInterval(timer);
     timer = setInterval(() => {
       holeUndVeroeffentliche().catch(() => {
-        /* naechster Takt versucht es erneut - kein Popup fuer einen einzelnen verpassten Takt */
+        /* naechster Takt versucht es erneut; state.lastError bleibt fuer Diagnose erhalten */
       });
     }, Math.max(1, minuten) * 60000);
   }
 
-  global.KCDienstplanManager = { holeUndVeroeffentliche, starteAutoAbgleich };
+  global.KCDienstplanManager = { holeUndVeroeffentliche, starteAutoAbgleich, state, eventId: EVENT_ID };
 
   const start = () => {
     starteAutoAbgleich();
-    // Einmal gleich beim Laden versuchen, nicht erst nach 5 Minuten warten.
     setTimeout(() => holeUndVeroeffentliche().catch(() => {}), 4000);
   };
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start);
