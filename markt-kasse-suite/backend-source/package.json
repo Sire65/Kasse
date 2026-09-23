@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "KC Sync Baustufe 1 - Manager-/Kassen-Companion-Prototyp (Entwicklungsprototyp, keine TÜV/TSE/BSI/fiskalische Freigabe)",
   "scripts": {
-    "test": "node tests/stage1-integration.test.cjs"
+    "test": "node tests/stage1-integration.test.cjs && node tests/dienstplan-bridge-v2.test.cjs"
   },
   "keywords": [],
   "author": "",
