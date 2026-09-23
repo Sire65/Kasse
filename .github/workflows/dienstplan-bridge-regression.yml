@@ -1,0 +1,49 @@
+name: Dienstplan Bridge Regression
+
+on:
+  pull_request:
+    paths:
+      - 'pc-manager/kc-dienstplan-manager.js'
+      - 'pos/kc-dienstplan-kasse.js'
+      - 'schulung/pos/kc-dienstplan-kasse.js'
+      - 'pos/index.html'
+      - 'pos/service-worker.js'
+      - 'schulung/pos/index.html'
+      - 'schulung/pos/service-worker.js'
+      - 'markt-kasse-suite/backend-source/device-companion/**'
+      - 'markt-kasse-suite/backend-source/manager-companion/**'
+      - 'tests/dienstplan-pc-manager-v2.test.cjs'
+      - '.github/workflows/dienstplan-bridge-regression.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'pc-manager/kc-dienstplan-manager.js'
+      - 'pos/kc-dienstplan-kasse.js'
+      - 'schulung/pos/kc-dienstplan-kasse.js'
+      - 'markt-kasse-suite/backend-source/device-companion/**'
+      - 'markt-kasse-suite/backend-source/manager-companion/**'
+      - 'tests/dienstplan-pc-manager-v2.test.cjs'
+      - '.github/workflows/dienstplan-bridge-regression.yml'
+
+jobs:
+  pc-manager:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: node tests/dienstplan-pc-manager-v2.test.cjs
+
+  companions:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: markt-kasse-suite/backend-source
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm install --ignore-scripts --no-audit --no-fund
+      - run: node tests/dienstplan-bridge-v2.test.cjs
