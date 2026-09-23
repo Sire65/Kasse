@@ -500,6 +500,23 @@ class DeviceCompanion {
     if (!target) return;
     const antwort = await this._request(target, 'GET', '/api/v1/dienstplan', undefined, { 'X-KC-Credential': pinned.credentialId }, pinned.fingerprint);
     if (!antwort || !Array.isArray(antwort.schichten)) return;
+
+    const fetchedAt = new Date().toISOString();
+    const schichtenJson = JSON.stringify(antwort.schichten);
+    this.db.prepare(`
+      INSERT INTO dienstplan_cache (id, schichten_json, revision, updated_at, fetched_at)
+      VALUES (1, ?, ?, ?, ?)
+      ON CONFLICT(id) DO UPDATE SET
+        schichten_json=excluded.schichten_json,
+        revision=excluded.revision,
+        updated_at=excluded.updated_at,
+        fetched_at=excluded.fetched_at
+    `).run(
+      schichtenJson,
+      Number(antwort.revision || 0),
+      antwort.updatedAt || null,
+      fetchedAt
+    );
     this._dienstplanSchichten = antwort.schichten;
   }
 
@@ -637,8 +654,18 @@ class DeviceCompanion {
         return;
       }
       if (req.method === 'GET' && req.url.split('?')[0] === '/kc-sync-dienstplan') {
+        const cache = this.db.prepare(
+          'SELECT schichten_json, revision, updated_at, fetched_at FROM dienstplan_cache WHERE id = 1'
+        ).get();
+        let schichten = [];
+        try { schichten = cache ? JSON.parse(cache.schichten_json || '[]') : []; } catch (e) { schichten = []; }
         res.writeHead(200, { 'Content-Type': 'application/json' });
-        res.end(JSON.stringify({ schichten: this._dienstplanSchichten || [] }));
+        res.end(JSON.stringify({
+          schichten,
+          revision: cache?.revision || 0,
+          updatedAt: cache?.updated_at || null,
+          fetchedAt: cache?.fetched_at || null,
+        }));
         return;
       }
       if (req.method === 'POST' && req.url.split('?')[0] === '/kc-sync-sold-out-melden') {
