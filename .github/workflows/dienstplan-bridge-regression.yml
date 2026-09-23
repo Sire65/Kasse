@@ -42,9 +42,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-          cache: npm
-          cache-dependency-path: markt-kasse-suite/backend-source/package-lock.json
       - name: Backend-Abhaengigkeiten
-        run: npm ci --ignore-scripts
+        run: npm install --ignore-scripts --no-audit --no-fund
       - name: Persistenz, Revision und Offline-Fallback
         run: node tests/dienstplan-bridge-v2.test.cjs
