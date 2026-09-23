@@ -1449,13 +1449,35 @@ class ManagerCompanion {
     const isLoopback = addr === '127.0.0.1' || addr === '::1' || addr === '::ffff:127.0.0.1';
     if (!isLoopback) return this._json(res, 403, { error: 'loopback_only' });
     if (!Array.isArray(body?.schichten)) return this._json(res, 400, { error: 'payload_invalid' });
-    const bisher = this.db.prepare('SELECT revision FROM dienstplan WHERE id = 1').get();
+
+    // Nur eine echte fachliche Aenderung erzeugt eine neue Revision. Der PC-Manager fragt
+    // regelmaessig erneut ab; identische Snapshots duerfen deshalb den sichtbaren Planstand
+    // nicht alle paar Minuten kuenstlich "verjuengen".
+    const schichtenJson = JSON.stringify(body.schichten);
+    const bisher = this.db.prepare('SELECT schichten_json, revision, updated_at FROM dienstplan WHERE id = 1').get();
+    if (bisher && bisher.schichten_json === schichtenJson) {
+      return this._json(res, 200, {
+        received: true,
+        unchanged: true,
+        revision: bisher.revision,
+        anzahl: body.schichten.length,
+        updatedAt: bisher.updated_at,
+      });
+    }
+
     const neueRevision = (bisher?.revision || 0) + 1;
+    const updatedAt = new Date().toISOString();
     this.db.prepare(`
       INSERT INTO dienstplan (id, schichten_json, revision, updated_at) VALUES (1, ?, ?, ?)
       ON CONFLICT(id) DO UPDATE SET schichten_json=excluded.schichten_json, revision=excluded.revision, updated_at=excluded.updated_at
-    `).run(JSON.stringify(body.schichten), neueRevision, new Date().toISOString());
-    this._json(res, 200, { received: true, revision: neueRevision, anzahl: body.schichten.length });
+    `).run(schichtenJson, neueRevision, updatedAt);
+    this._json(res, 200, {
+      received: true,
+      unchanged: false,
+      revision: neueRevision,
+      anzahl: body.schichten.length,
+      updatedAt,
+    });
   }
 
   // Abruf durch die Kassen (ueber den device-companion, siehe dort) - dieselbe Authentisierung
