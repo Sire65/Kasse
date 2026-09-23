@@ -14,8 +14,8 @@ const context = {
       rufeTabelleAuf: async (q) => {
         queries.push(q);
         if (q.startsWith('kc_dp_plan_published')) return [
-          { person_id: 'P1', work_date: '2026-12-04', start_time: '12:00:00', end_time: '18:00:00', break_minutes: 0, zone: 'V', area: 'Kasse', event_id: 'KC_DP', published_at: '2026-09-23T04:00:00Z', updated_at: '2026-09-23T04:15:00Z' },
-          { person_id: 'P2', work_date: '2026-12-04', start_time: '16:00:00', end_time: '20:00:00', break_minutes: 0, zone: 'H', area: 'Bereitschaft', event_id: 'KC_DP', published_at: '2026-09-23T04:00:00Z', updated_at: '2026-09-23T04:10:00Z' },
+          { person_id: 'P1', work_date: '2026-12-04', start_time: '12:00:00', end_time: '18:00:00', break_minutes: 0, zone: 'V', area: 'Kasse', event_id: 'KC-WM-2026', published_at: '2026-09-23T04:00:00Z', updated_at: '2026-09-23T04:15:00Z' },
+          { person_id: 'P2', work_date: '2026-12-04', start_time: '16:00:00', end_time: '20:00:00', break_minutes: 0, zone: 'H', area: 'Bereitschaft', event_id: 'KC-WM-2026', published_at: '2026-09-23T04:00:00Z', updated_at: '2026-09-23T04:10:00Z' },
         ];
         return [{ person_id: 'P1', alias_name: 'Einhorn' }, { person_id: 'P2', alias_name: 'Puhbaer' }];
       },
@@ -38,10 +38,10 @@ vm.runInContext(source, context);
 (async () => {
   const result = await context.window.KCDienstplanManager.holeUndVeroeffentliche();
   assert.equal(result.ok, true);
-  assert.ok(queries[0].includes('event_id=eq.KC_DP'), 'PC-Manager muss auf KC_DP filtern');
+  assert.ok(queries[0].includes('event_id=eq.KC-WM-2026'), 'PC-Manager muss auf KC-WM-2026 filtern');
   assert.deepEqual(Array.from(pushed.schichten, s => s.pseudonym), ['Einhorn', 'Puhbaer']);
   assert.equal(pushed.schichten[1].area, 'Bereitschaft');
-  assert.equal(pushed.eventId, 'KC_DP');
+  assert.equal(pushed.eventId, 'KC-WM-2026');
   assert.equal(pushed.sourceUpdatedAt, '2026-09-23T04:15:00Z');
   console.log('dienstplan-pc-manager-v3: OK');
 })().catch((err) => { console.error(err); process.exit(1); });
