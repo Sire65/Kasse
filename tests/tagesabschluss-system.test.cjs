@@ -53,8 +53,8 @@ const trainingSw=read('schulung/pos/service-worker.js');
 for(const [name,src] of [['Live-POS',livePos],['Schulungs-POS',trainingPos]]){
   ok(src.includes('businessDate,createdAt'), name+' Tagesabschluss enthält kein explizites Geschäftsdatum');
 }
-const liveBuild=(liveIndex.match(/app\\.js\\?build=([^'"\\]]+)/)||[])[1]||'';
-const trainingBuild=(trainingIndex.match(/app\\.js\\?build=([^'"\\]]+)/)||[])[1]||'';
+const liveBuild=(liveIndex.match(/app\.js\?build=([^'"\]]+)/)||[])[1]||'';
+const trainingBuild=(trainingIndex.match(/app\.js\?build=([^'"\]]+)/)||[])[1]||'';
 ok(!!liveBuild,'Live-POS App-Build fehlt');
 ok(trainingBuild===liveBuild,'Live- und Schulungs-POS verwenden unterschiedliche App-Builds');
 ok(liveSw.includes(`./app.js?build=${liveBuild}`),'Live Offline-Cache enthält nicht den aktiven App-Build');
