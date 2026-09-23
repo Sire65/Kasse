@@ -1449,7 +1449,30 @@ class ManagerCompanion {
     const isLoopback = addr === '127.0.0.1' || addr === '::1' || addr === '::ffff:127.0.0.1';
     if (!isLoopback) return this._json(res, 403, { error: 'loopback_only' });
     if (!Array.isArray(body?.schichten)) return this._json(res, 400, { error: 'payload_invalid' });
-    const bisher = this.db.prepare('SELECT revision FROM dienstplan WHERE id = 1').get();
+    const schichtenJson = JSON.stringify(body.schichten);
+    const eventId = body.eventId || null;
+    const sourceUpdatedAt = body.sourceUpdatedAt || null;
+    const bisher = this.db.prepare(
+      'SELECT schichten_json, revision, updated_at, event_id, source_updated_at FROM dienstplan WHERE id = 1'
+    ).get();
+
+    if (
+      bisher &&
+      bisher.schichten_json === schichtenJson &&
+      (bisher.event_id || null) === eventId &&
+      (bisher.source_updated_at || null) === sourceUpdatedAt
+    ) {
+      return this._json(res, 200, {
+        received: true,
+        unchanged: true,
+        revision: bisher.revision,
+        anzahl: body.schichten.length,
+        eventId,
+        sourceUpdatedAt,
+        updatedAt: bisher.updated_at,
+      });
+    }
+
     const neueRevision = (bisher?.revision || 0) + 1;
     const jetzt = new Date().toISOString();
     this.db.prepare(`
@@ -1461,19 +1484,14 @@ class ManagerCompanion {
         updated_at=excluded.updated_at,
         event_id=excluded.event_id,
         source_updated_at=excluded.source_updated_at
-    `).run(
-      JSON.stringify(body.schichten),
-      neueRevision,
-      jetzt,
-      body.eventId || null,
-      body.sourceUpdatedAt || null
-    );
+    `).run(schichtenJson, neueRevision, jetzt, eventId, sourceUpdatedAt);
     this._json(res, 200, {
       received: true,
+      unchanged: false,
       revision: neueRevision,
       anzahl: body.schichten.length,
-      eventId: body.eventId || null,
-      sourceUpdatedAt: body.sourceUpdatedAt || null,
+      eventId,
+      sourceUpdatedAt,
       updatedAt: jetzt,
     });
   }
