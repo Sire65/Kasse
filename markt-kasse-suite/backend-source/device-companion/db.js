@@ -4,7 +4,7 @@
 'use strict';
 const { DatabaseSync } = require('node:sqlite');
 
-const SCHEMA_VERSION = 10;
+const SCHEMA_VERSION = 11;
 
 function hasColumn(db, table, column) {
   return db.prepare(`PRAGMA table_info(${table})`).all().some((c) => c.name === column);
@@ -123,6 +123,20 @@ const MIGRATIONS = [
     if (!hasColumn(db, 'master_data_cache', 'accounts_json')) {
       db.exec("ALTER TABLE master_data_cache ADD COLUMN accounts_json TEXT NOT NULL DEFAULT '[]'");
     }
+  },
+  // Version 11 (23.09.2026): Dienstplan persistent auf dem Kassen-Companion halten.
+  // Dadurch bleibt der zuletzt erfolgreich synchronisierte Sollplan auch nach einem Neustart
+  // des Companions verfuegbar, wenn der Manager-PC gerade nicht erreichbar ist.
+  (db) => {
+    db.exec(`
+      CREATE TABLE IF NOT EXISTS dienstplan_cache (
+        id INTEGER PRIMARY KEY CHECK (id = 1),
+        schichten_json TEXT NOT NULL DEFAULT '[]',
+        revision INTEGER NOT NULL DEFAULT 0,
+        updated_at TEXT,
+        fetched_at TEXT
+      );
+    `);
   },
 ];
 
