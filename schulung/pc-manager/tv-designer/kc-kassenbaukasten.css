@@ -1,0 +1,519 @@
+/* KC Kassenbaukasten - Aussehen der Werkstatt im Modus "Kassenoberfläche".
+   Gehört zu kc-kassenbaukasten.js, 02.09.2026.
+   Alles hier hängt an .kc-kassenmodus am <body>. Ohne diesen Modus ändert die Datei nichts
+   am Designer - das ist Absicht, zwei Tage vor der Vorführung. */
+
+/* -------------------------------------------------- Gerätewahl neben der Modus-Combobox */
+.kc-geraet-huelle {
+  display: inline-flex; align-items: center; gap: 7px;
+  margin-left: 10px; padding: 3px 9px;
+  border: 1px solid #3d6b8f; border-radius: 9px; background: #eef5fa;
+  font-size: .82rem; font-weight: 800; color: #16324a;
+}
+.kc-geraet-huelle[hidden] { display: none !important; }
+.kc-geraet-huelle select { font: inherit; padding: 3px 5px; border-radius: 6px; border: 1px solid #a9c3d6; }
+/* BEHOBEN 03.09.2026 nach der Messung mit axe-core: Die Beschriftungen erbten eine helle
+   Farbe aus der Werkzeugleiste des Designers und kamen auf 1,5 bis 1,7 : 1 - weit unter der
+   Grenze von 4,5 : 1. Ich hatte die Farbe nur am Rahmen gesetzt, nicht an den Kindern, und
+   zusätzlich mit opacity aufgehellt. Jetzt steht sie ausdrücklich an jedem Element. */
+.kc-geraet-huelle > span,
+.kc-geraet-huelle label { color: #16324a; }
+.kc-geraet-masse { font-weight: 700; color: #1d4059; font-variant-numeric: tabular-nums; }
+
+/* -------------------------------------------------- Das Bereichsraster auf der Fläche
+   Sichtbar, aber zurückhaltend: Man soll sehen, WORAN etwas einrastet, ohne dass das Netz
+   die Bausteine überstrahlt. Die Spalten- und Zeilenmaße kommen aus dem Skript. */
+.kc-raster {
+  position: absolute; inset: 0; pointer-events: none; z-index: 0;
+  background-image:
+    repeating-linear-gradient(to right, rgba(30,90,140,.30) 0 1px, transparent 1px var(--kc-spalte)),
+    repeating-linear-gradient(to bottom, rgba(30,90,140,.30) 0 1px, transparent 1px var(--kc-zeile));
+}
+/* Jede dritte Spalte kräftiger - dann sieht man Drittel und Viertel ohne Zählen. */
+.kc-kassenmodus .kc-raster::after {
+  content: ''; position: absolute; inset: 0;
+  background-image: repeating-linear-gradient(to right,
+    rgba(30,90,140,.55) 0 1px, transparent 1px calc(var(--kc-spalte) * 3));
+}
+
+/* -------------------------------------------------- Die Bausteine auf der Fläche */
+.kc-kassenmodus .designer-item.kc-baustein {
+  border-radius: 10px;
+  box-shadow: inset 0 0 0 2px rgba(255,255,255,.35);
+  display: flex; align-items: center; justify-content: center;
+  text-align: center; font-weight: 800; letter-spacing: .01em;
+  /* KEIN overflow:hidden. Hier stand es zuerst - und hat die Zieh-Anfasser abgeschnitten,
+     die an den Rändern des Bausteins sitzen und halb außerhalb liegen. Schieben ging
+     dadurch, Größerziehen nicht. Am Bildschirm sah alles richtig aus; erst die Messung hat
+     es gezeigt. Der lange Text wird stattdessen unten abgeschnitten, nicht der ganze Kasten. */
+  overflow: visible;
+}
+/* Die Anfasser gehören im Kassenmodus nach vorn, damit sie nicht unter Nachbarbausteinen
+   liegen - die Bausteine stoßen hier ja bündig aneinander. */
+.kc-kassenmodus .designer-item.selected .resize-handle { z-index: 30; }
+/* Die Ecke mit dem Rasterplatz: zeigt beim Bauen, was gespeichert wird. */
+.kc-kassenmodus .kc-marke {
+  position: absolute; left: 5px; bottom: 4px;
+  padding: 2px 6px; border-radius: 6px;
+  background: rgba(0,0,0,.42); color: #fff;
+  font-size: 10.5px; font-weight: 700; letter-spacing: .02em;
+  pointer-events: none; white-space: nowrap;
+}
+
+/* Die Bereiche farblich unterscheidbar, damit man den Aufbau auf einen Blick liest.
+   Die Farben kommen aus dem Skript (bg); hier nur der Rand, damit Gleiches gleich aussieht. */
+.kc-kassenmodus [data-type^="kc-kopf-"]    { outline: 2px solid #0d2b45; }
+.kc-kassenmodus [data-type^="kc-gruppen-"] { outline: 2px solid #1f5138; }
+.kc-kassenmodus [data-type^="kc-artikel-"] { outline: 2px solid #2a4d68; }
+.kc-kassenmodus [data-type^="kc-bon-"]     { outline: 2px solid #5a3b22; }
+.kc-kassenmodus [data-type^="kc-zahlen-"]  { outline: 2px solid #16513a; }
+.kc-kassenmodus [data-type^="kc-sonder-"]  { outline: 2px solid #4e2d4e; }
+
+/* -------------------------------------------------- Werkzeugkasten
+   Nicht erlaubte Bausteine werden ausgeblendet, nicht ausgegraut: Eine Zahltaste auf der
+   Artikelseite ist keine Möglichkeit, die man abwägt, sondern eine, die es nicht gibt. */
+.kc-kassenmodus #toolbox .tool[hidden],
+.kc-kassenmodus #toolbox .toolGroup[hidden] { display: none !important; }
+.kc-kassenmodus #toolbox .toolGroup h3 {
+  border-left: 4px solid #3d6b8f; padding-left: 7px;
+}
+
+/* -------------------------------------------------- Knopf für einen sauberen Start */
+.kc-neuer-aufbau {
+  margin-left: 4px; padding: 4px 10px; border-radius: 7px;
+  border: 1px solid #1e6848; background: #2e8b61; color: #fff;
+  font: inherit; font-weight: 800; cursor: pointer;
+}
+.kc-neuer-aufbau:hover { background: #1e6848; }
+
+/* -------------------------------------------------- Verhalten des Bausteins
+   Steht über dem Werkzeugkasten und erscheint nur, wenn ein Baustein ausgewählt ist. */
+.kc-clever-panel {
+  margin: 0 0 10px; padding: 9px 11px;
+  border: 1px solid #b8912f; border-radius: 10px; background: #fffdf5;
+}
+.kc-clever-panel[hidden] { display: none !important; }
+.kc-clever-panel h3 {
+  margin: 0 0 7px; font-size: .82rem; letter-spacing: .06em;
+  text-transform: uppercase; color: #8a6c1f;
+}
+.kc-clever-panel label {
+  display: grid; grid-template-columns: auto 1fr; gap: 3px 8px;
+  align-items: center; margin-bottom: 7px;
+  font-size: .86rem; font-weight: 700; color: #17324d; cursor: pointer;
+}
+.kc-clever-panel label small {
+  grid-column: 2; font-weight: 500; opacity: .78; font-size: .76rem;
+}
+.kc-clever-panel input { width: 17px; height: 17px; }
+
+/* -------------------------------------------------- Bibliothek im Kassenmodus aufräumen
+   Der Designer zeigt links auch Vorlagen, Themenfilter und Text-Schnellstile - alles für
+   Präsentationen gedacht. Im Kassenmodus lenkt das nur ab und bietet Dinge an, die auf einer
+   Kassenoberfläche nichts zu suchen haben. Ausgeblendet, nicht entfernt: im TV-Modus ist
+   alles unverändert da. */
+.kc-kassenmodus #templateLibrary,
+.kc-kassenmodus .quickStyleStart,
+.kc-kassenmodus #themeFilter,
+.kc-kassenmodus label:has(> #themeFilter) { display: none !important; }
+.kc-kassenmodus #modeNotice {
+  background: #eef5fa; border-left: 4px solid #2e8b61; color: #16324a;
+}
+/* Die Bausteine der Kasse zuerst - das Verhaltensfeld sitzt direkt darüber. */
+.kc-kassenmodus #kcCleverPanel { order: -1; }
+
+/* ==================================================== Teil 2: Knöpfe, Symbole, Menü ==== */
+
+/* Rasterstufe neben der Gerätewahl */
+.kc-raster-wahl { display: inline-flex; align-items: center; gap: 6px; margin-left: 8px; }
+.kc-raster-wahl > span { color: #16324a; font-weight: 800; }
+.kc-raster-wahl select { font: inherit; padding: 3px 5px; border-radius: 6px; border: 1px solid #a9c3d6; }
+
+/* Symbole in der Bibliothek: als Raster, nicht als lange Liste - 36 Zeichen untereinander
+   wären eine Wüste. */
+.kc-kassenmodus #toolbox .toolGroup:has(.tool[data-type^="sym-"]) > div,
+.kc-kassenmodus #toolbox .toolGroup:has(.tool[data-type^="sym-"]) {
+  display: block;
+}
+.kc-kassenmodus #toolbox .tool[data-type^="sym-"] {
+  display: inline-flex !important; width: auto; min-width: 44px; justify-content: center;
+  margin: 2px; padding: 7px 8px; font-size: 1.05rem;
+}
+.kc-kassenmodus #toolbox .tool[data-type^="kn-"] { font-size: .84rem; }
+
+/* ---------------------------------------------------------------- Rechtsklick-Menü */
+.kc-kontext {
+  position: fixed; z-index: 12000; width: 268px;
+  background: #fff; color: #17324d;
+  border: 1px solid #9fb6c8; border-radius: 12px;
+  box-shadow: 0 18px 46px rgba(8, 24, 40, .32);
+  font-size: .85rem; overflow: hidden;
+}
+.kc-kontext[hidden] { display: none !important; }
+.kc-kontext-kopf {
+  padding: 9px 12px; background: #123a5c; color: #fff; font-weight: 800;
+}
+.kc-kontext-kopf small { display: block; font-weight: 500; opacity: .8; font-size: .74rem; margin-top: 2px; }
+.kc-kontext-block { padding: 8px 12px; border-top: 1px solid #e3ecf3; }
+.kc-kontext-block b {
+  display: block; margin-bottom: 5px; font-size: .74rem;
+  letter-spacing: .06em; text-transform: uppercase; color: #5d7285;
+}
+.kc-kontext-block label {
+  display: grid; grid-template-columns: 1fr 92px auto; gap: 6px;
+  align-items: center; margin-bottom: 5px; font-weight: 600;
+}
+.kc-kontext-block input[type="text"] { grid-column: 1 / -1; width: 100%; }
+.kc-kontext-block input {
+  font: inherit; padding: 4px 6px; border: 1px solid #b9cad6; border-radius: 7px;
+}
+.kc-kontext-block input[type="color"] { padding: 1px; height: 28px; }
+.kc-kontext-block input[type="range"] { padding: 0; }
+.kc-kontext-block output { font-variant-numeric: tabular-nums; opacity: .8; font-size: .78rem; }
+.kc-kontext-pfeile { display: flex; gap: 5px; margin-top: 6px; }
+.kc-kontext-pfeile button {
+  flex: 1; padding: 5px; border: 1px solid #b9cad6; border-radius: 7px;
+  background: #f2f7fa; font: inherit; font-weight: 800; cursor: pointer;
+}
+.kc-kontext-pfeile button:hover { background: #dbe9f2; }
+.kc-kontext-aktionen {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 6px;
+  padding: 9px 12px; border-top: 1px solid #e3ecf3; background: #f7fafc;
+}
+.kc-kontext-aktionen button {
+  padding: 7px; border: 1px solid #9fb6c8; border-radius: 8px;
+  background: #fff; font: inherit; font-weight: 700; cursor: pointer;
+}
+.kc-kontext-aktionen button:hover { background: #eaf2f7; }
+.kc-kontext-aktionen button.rot { border-color: #c0392b; color: #a5271b; }
+.kc-kontext-aktionen button.rot:hover { background: #fdecea; }
+
+/* ==================================================== Teil 3: Baugruppen zusammenfassen == */
+
+/* Mehrfachauswahl muss im Kassenmodus sichtbar bleiben. Die Bereichsfarben oben setzen einen
+   eigenen Umriss und haben dieselbe Gewichtung wie .multi-selected aus styles.css - ohne diese
+   Zeile gewinnt die zuletzt geladene Datei, und man sieht nicht mehr, was ausgewählt ist. */
+.kc-kassenmodus .designer-item.multi-selected { outline: 3px solid #8b5cf6 !important; outline-offset: 2px; }
+.kc-kassenmodus .designer-item.grouped { box-shadow: inset 0 0 0 2px rgba(255,255,255,.35), 0 0 0 1px #8b5cf6; }
+
+/* Der Block im Rechtsklick-Menü */
+.kc-kontext-gruppe .kc-kontext-pfeile button:disabled { opacity: .45; cursor: not-allowed; }
+.kc-eigene-sichern { display: grid; grid-template-columns: 1fr auto; gap: 5px; margin-top: 6px; }
+.kc-eigene-sichern input {
+  font: inherit; padding: 4px 6px; border: 1px solid #b9cad6; border-radius: 7px; min-width: 0;
+}
+.kc-eigene-sichern button {
+  padding: 5px 8px; border: 1px solid #1e6848; border-radius: 7px;
+  background: #2e8b61; color: #fff; font: inherit; font-weight: 800; cursor: pointer;
+}
+.kc-eigene-sichern button:hover { background: #1e6848; }
+
+/* Der Knopf unter den eigenen Baugruppen in der Bibliothek */
+.kc-eigene-verwalten {
+  width: 100%; margin-top: 6px; padding: 5px; font: inherit; font-size: .78rem; font-weight: 700;
+  border: 1px dashed #9fb6c8; border-radius: 7px; background: #f2f7fa; color: #17324d; cursor: pointer;
+}
+.kc-eigene-verwalten:hover { background: #dbe9f2; }
+
+/* Das kleine Verwaltungsfenster */
+.kc-eigene-fenster {
+  position: fixed; z-index: 12500; left: 50%; top: 12%; transform: translateX(-50%);
+  width: min(460px, 92vw); max-height: 70vh; overflow: auto;
+  background: #fff; color: #17324d; border: 1px solid #9fb6c8; border-radius: 12px;
+  box-shadow: 0 18px 46px rgba(8, 24, 40, .32); font-size: .86rem;
+}
+.kc-eigene-fenster[hidden] { display: none !important; }
+.kc-eigene-kopf {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 9px 12px; background: #123a5c; color: #fff; font-weight: 800;
+}
+.kc-eigene-kopf button {
+  padding: 3px 9px; border: 1px solid #ffffff66; border-radius: 7px;
+  background: transparent; color: #fff; font: inherit; cursor: pointer;
+}
+.kc-eigene-zeile {
+  display: flex; justify-content: space-between; align-items: center; gap: 10px;
+  padding: 9px 12px; border-top: 1px solid #e3ecf3;
+}
+.kc-eigene-zeile small { display: block; opacity: .75; font-weight: 500; font-size: .76rem; }
+.kc-eigene-zeile button {
+  padding: 5px 10px; border: 1px solid #c0392b; border-radius: 7px;
+  background: #fff; color: #a5271b; font: inherit; font-weight: 700; cursor: pointer;
+}
+.kc-eigene-zeile button:hover { background: #fdecea; }
+
+/* ------------------------------- Geplante Bauteile (Teil 2, ab 03.09.2026)
+   Sie müssen sich auf der Fläche auf einen Blick von den gebauten unterscheiden - gestrichelt
+   und in Bernstein. Wer einen Aufbau ausdruckt und herumzeigt, soll nicht erklären müssen,
+   was davon es schon gibt. */
+.kc-kassenmodus [data-type^="pl-"] {
+  outline: 2px dashed #8a6c1f;
+  background-image: repeating-linear-gradient(135deg,
+    rgba(255,255,255,.10) 0 9px, transparent 9px 18px);
+}
+.kc-kassenmodus #toolbox .toolGroup h3:is([data-geplant], .kc-geplant),
+.kc-kassenmodus #toolbox .tool[data-type^="pl-"] {
+  border-left: 4px solid #b8912f;
+}
+
+/* ==================================== Teil 4: echte Artikel in der Vorschau (03.09.2026) == */
+
+/* Woher das Sortiment kommt - steht neben der Gerätewahl. Eine Vorschau, die nicht sagt,
+   woher sie kommt, ist eine Behauptung. */
+.kc-herkunft {
+  margin-left: 10px; padding: 2px 8px; border-radius: 8px;
+  background: #d7eadf; color: #0f3d24 !important;
+  font-weight: 800; font-size: .78rem;
+}
+.kc-herkunft.fehlt { background: #fbdcd8; color: #7f1d13 !important; }
+
+/* Das Kachelnetz in der Artikelfläche */
+.kc-kassenmodus .kc-artikelnetz {
+  position: absolute; inset: 3px; display: grid; gap: 3px;
+  pointer-events: none;                 /* der Baustein bleibt anfassbar, nicht die Vorschau */
+  align-content: stretch;
+}
+.kc-kassenmodus .kc-ak {
+  position: relative; overflow: hidden; border-radius: 7px;
+  display: flex; align-items: flex-end; justify-content: center;
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,.22);
+}
+.kc-kassenmodus .kc-ak-text {
+  width: 100%; padding: 2px 3px; background: rgba(0,0,0,.55); color: #fff;
+  display: flex; flex-direction: column; align-items: center; line-height: 1.05;
+}
+.kc-kassenmodus .kc-ak-name {
+  font-size: 9px; font-weight: 700; text-align: center;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 100%;
+}
+.kc-kassenmodus .kc-ak-preis { font-size: 9px; font-weight: 800; opacity: .92; }
+/* Nur Name + Preis groß: kein Bild, dafür lesbare Schrift - der Fall "schlechte Sicht". */
+.kc-kassenmodus .kc-artikelnetz[data-darstellung="text-preis"] .kc-ak-text { background: none; }
+.kc-kassenmodus .kc-artikelnetz[data-darstellung="text-preis"] .kc-ak {
+  align-items: center; background: #24405a !important;
+}
+.kc-kassenmodus .kc-artikelnetz[data-darstellung="text-preis"] .kc-ak-name,
+.kc-kassenmodus .kc-artikelnetz[data-darstellung="text-preis"] .kc-ak-preis { font-size: 12px; }
+.kc-kassenmodus .kc-artikelnetz[data-darstellung="text"] .kc-ak { align-items: center; }
+.kc-kassenmodus .kc-artikelnetz[data-darstellung="text"] .kc-ak-text { background: none; }
+/* Abgeleitete Farbe: schraffiert. Man soll sehen, welche Farbe aus den Stammdaten kommt und
+   welche der Baukasten aus der Warengruppe gebildet hat. */
+.kc-kassenmodus .kc-artikelnetz[data-darstellung="farbe"] .kc-ak.abgeleitet::after {
+  content: ''; position: absolute; inset: 0;
+  background: repeating-linear-gradient(135deg, rgba(255,255,255,.16) 0 5px, transparent 5px 10px);
+}
+
+/* Die Info-Ecke: Dreieck oben links oder rechts, sonst runder Knopf. */
+.kc-kassenmodus .kc-ak-ecke {
+  position: absolute; top: 0; width: 0; height: 0; font-size: 8px; font-weight: 800;
+  color: #fff; line-height: 1; text-align: center;
+  border-style: solid; border-color: transparent;
+}
+.kc-kassenmodus .kc-ak-ecke.ol {
+  left: 0; border-width: 17px 17px 0 0; border-top-color: rgba(20,40,60,.82);
+  padding: 0; text-indent: -14px; margin-top: 1px;
+}
+.kc-kassenmodus .kc-ak-ecke.or {
+  right: 0; border-width: 17px 0 0 17px; border-top-color: rgba(20,40,60,.82);
+  text-indent: -5px; margin-top: 1px;
+}
+.kc-kassenmodus .kc-ak-ecke.leer { border-top-color: rgba(165,39,27,.85); }
+.kc-kassenmodus .kc-ak-knopf {
+  position: absolute; top: 2px; right: 2px; width: 13px; height: 13px; border-radius: 50%;
+  background: rgba(20,40,60,.82); color: #fff; font-size: 9px; font-weight: 800;
+  display: flex; align-items: center; justify-content: center;
+}
+.kc-kassenmodus .kc-ak-knopf.leer { background: rgba(165,39,27,.85); }
+
+/* Die Fußnote am Baustein: was die Vorschau verschweigt. */
+.kc-kassenmodus .kc-artikelfuss {
+  position: absolute; right: 5px; bottom: 4px; padding: 2px 6px; border-radius: 6px;
+  background: rgba(0,0,0,.5); color: #fff; font-size: 10px; font-style: normal;
+  font-weight: 700; white-space: nowrap; pointer-events: none;
+}
+
+/* Der Knopf zur Info-Seite im Rechtsklick-Menü */
+.kc-kontext-artikel select { font: inherit; padding: 3px 5px; border-radius: 6px; border: 1px solid #b9cad6; }
+.kc-kontext-artikel label { grid-template-columns: 1fr 128px; }
+.kc-infoseite-knopf {
+  width: 100%; margin-top: 6px; padding: 6px; border: 1px solid #3d6b8f; border-radius: 8px;
+  background: #eef5fa; color: #16324a; font: inherit; font-weight: 800; cursor: pointer;
+}
+.kc-infoseite-knopf:hover { background: #dbe9f2; }
+
+/* ------------------------------- Teil 4/5, Nachtrag 03.09.2026 (roc.Kasse, Hypersoft) */
+
+/* Symbol statt Foto auf der Kachel */
+.kc-kassenmodus .kc-ak-symbol {
+  position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+  font-size: 20px; line-height: 1; opacity: .95; padding-bottom: 12px;
+}
+.kc-kassenmodus .kc-artikelnetz[data-darstellung="symbol"] .kc-ak-text { background: rgba(0,0,0,.45); }
+
+/* Die zweite Ecke: Untergruppe */
+.kc-kassenmodus .kc-ak-unter {
+  position: absolute; top: 1px; font-size: 10px; font-weight: 800; line-height: 1;
+  color: #0f2740; background: rgba(255,255,255,.86); border-radius: 4px; padding: 0 2px;
+}
+.kc-kassenmodus .kc-ak-unter.or { right: 2px; }
+.kc-kassenmodus .kc-ak-unter.ol { left: 2px; }
+
+/* Dunkles Bonfeld - der Vorschlag muss am Bildschirm zu beurteilen sein, nicht nur im Text. */
+.kc-kassenmodus .kc-dunkelbon {
+  position: absolute; inset: 3px; border-radius: 8px; background: #0b1220;
+  display: flex; flex-direction: column; justify-content: flex-start; gap: 3px;
+  padding: 7px 9px; pointer-events: none; overflow: hidden;
+}
+.kc-kassenmodus .kc-db-zeile {
+  display: flex; justify-content: space-between; color: #e6edf5;
+  font-size: 11px; font-weight: 600;
+}
+.kc-kassenmodus .kc-db-zeile b { color: #fff; font-variant-numeric: tabular-nums; }
+.kc-kassenmodus .kc-db-summe {
+  margin-top: auto; text-align: right; color: #ffd643;
+  font-size: 26px; font-weight: 800; letter-spacing: .01em; font-variant-numeric: tabular-nums;
+}
+
+/* Bedienerfeld mit Foto */
+.kc-kassenmodus .kc-bedienerfeld {
+  position: absolute; inset: 3px; display: flex; align-items: center; gap: 7px;
+  padding: 4px 7px; border-radius: 8px; background: #17324d; pointer-events: none; overflow: hidden;
+}
+.kc-kassenmodus .kc-bedienerfeld img {
+  width: 30px; height: 30px; border-radius: 50%; object-fit: cover; flex: 0 0 auto;
+  background: #0b1220;
+}
+.kc-kassenmodus .kc-bedienerfeld b { display: block; color: #fff; font-size: 11px; }
+.kc-kassenmodus .kc-bedienerfeld small { display: block; color: #b9cfe4; font-size: 9px; }
+
+/* ================================= Teil 6: Vorlagenregal (03.09.2026) ================== */
+.kc-vorlagenregal {
+  margin: 0 0 12px; padding: 9px 10px;
+  border: 1px solid #3d6b8f; border-radius: 10px; background: #f4f9fc;
+}
+.kc-vorlagenregal[hidden] { display: none !important; }
+.kc-vorlagenregal h3 {
+  margin: 0 0 2px; font-size: .82rem; letter-spacing: .06em;
+  text-transform: uppercase; color: #16324a;
+}
+.kc-vorlagen-hinweis { margin: 0 0 8px; font-size: .76rem; color: #5d7285; }
+.kc-vorlagenkarte {
+  display: grid; grid-template-columns: 74px 1fr; gap: 9px; align-items: center;
+  width: 100%; margin: 0 0 6px; padding: 6px 7px; text-align: left; cursor: pointer;
+  border: 1px solid #b9cad6; border-radius: 9px; background: #fff; font: inherit;
+}
+.kc-vorlagenkarte:hover { border-color: #3d6b8f; background: #eaf2f7; }
+.kc-vorlagenkarte b { display: block; font-size: .84rem; color: #17324d; }
+.kc-vorlagenkarte small { display: block; font-size: .72rem; color: #5d7285; line-height: 1.25; }
+.kc-vorlagenkarte em {
+  display: block; margin-top: 2px; font-size: .68rem; font-style: normal;
+  color: #3d6b8f; font-weight: 700;
+}
+/* Das Miniaturbild - dieselben Rasterfelder wie die Vorlage selbst, nur klein. */
+.kc-vorlagenbild {
+  display: grid; grid-template-columns: repeat(12, 1fr); grid-template-rows: repeat(8, 1fr);
+  gap: 1px; width: 74px; height: 52px; border-radius: 5px; overflow: hidden;
+  background: #cfdae4; padding: 1px;
+}
+.kc-vorlagenbild i { border-radius: 2px; }
+/* Hochformat-Vorlagen: schmaleres Bild, damit das Seitenverhältnis nicht lügt. */
+.kc-vorlagenbild.hoch { width: 40px; height: 62px; }
+.kc-vorlagenkarte:has(.kc-vorlagenbild.hoch) { grid-template-columns: 74px 1fr; }
+.kc-vorlagenkarte .kc-vorlagenbild.hoch { justify-self: center; }
+
+/* ============================ Teil 8: Übergabe an die Kasse (03.09.2026) ============== */
+.kc-uebergabe {
+  margin: 0 0 12px; padding: 9px 10px;
+  border: 1px solid #2e8b61; border-radius: 10px; background: #f2fbf6;
+}
+.kc-uebergabe[hidden] { display: none !important; }
+.kc-uebergabe h3 {
+  margin: 0 0 2px; font-size: .82rem; letter-spacing: .06em;
+  text-transform: uppercase; color: #14532d;
+}
+.kc-uebergabe-hinweis { margin: 0 0 8px; font-size: .76rem; color: #3f5f4c; }
+.kc-uebergabe-knoepfe { display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 8px; }
+.kc-uebergabe-knoepfe button, .kc-uebergabe-einlesen {
+  padding: 5px 9px; border: 1px solid #1e6848; border-radius: 7px;
+  background: #2e8b61; color: #fff; font: inherit; font-weight: 800; font-size: .78rem; cursor: pointer;
+}
+.kc-uebergabe-knoepfe button:hover, .kc-uebergabe-einlesen:hover { background: #1e6848; }
+.kc-uebergabe-leer { margin: 0; font-size: .76rem; color: #3f5f4c; }
+.kc-uebergabe-zeile {
+  display: flex; justify-content: space-between; align-items: flex-start; gap: 8px;
+  padding: 7px 0; border-top: 1px solid #cfe6d9;
+}
+.kc-uebergabe-zeile b { display: block; font-size: .82rem; color: #123a26; }
+.kc-uebergabe-zeile small { display: block; font-size: .71rem; color: #3f5f4c; }
+.kc-uebergabe-zeile em {
+  display: block; margin-top: 2px; font-size: .71rem; font-style: normal; font-weight: 700;
+}
+.kc-uebergabe-zeile em.gut { color: #14532d; }
+.kc-uebergabe-zeile em.luecke { color: #92400e; }
+.kc-uebergabe-tun { display: flex; gap: 4px; flex: 0 0 auto; }
+.kc-uebergabe-tun button {
+  padding: 4px 8px; border: 1px solid #9fb6c8; border-radius: 7px;
+  background: #fff; font: inherit; font-size: .74rem; font-weight: 700; cursor: pointer;
+}
+.kc-uebergabe-tun button.rot { border-color: #c0392b; color: #a5271b; }
+
+/* ================================== Teil 9: Lupe am Warenkorb (03.09.2026) =========== */
+.kc-lupen-wahl[hidden] { display: none !important; }
+.kc-lupen-warnung {
+  grid-column: 1 / -1; margin-top: 3px; font-style: normal; font-weight: 700;
+  font-size: .74rem; color: #92400e;
+}
+/* Der Griff am Baustein - oben rechts, damit er nicht mit der Rasterecke unten links kollidiert. */
+.kc-kassenmodus .kc-lupen-griff {
+  position: absolute; top: 4px; right: 4px; z-index: 20;
+  width: 22px; height: 22px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  background: #fff; color: #17324d; font-size: 12px; line-height: 1;
+  box-shadow: 0 1px 4px rgba(8, 24, 40, .35); cursor: zoom-in;
+}
+.kc-kassenmodus .kc-lupen-griff:hover { background: #dbe9f2; }
+
+/* Die große Ansicht */
+.kc-lupenfenster {
+  position: fixed; inset: 0; z-index: 13000; display: flex;
+  align-items: center; justify-content: center; background: rgba(8, 18, 32, .55);
+}
+.kc-lupenfenster[hidden] { display: none !important; }
+.kc-lupen-kasten {
+  width: min(560px, 92vw); max-height: 84vh; overflow: auto;
+  background: #0b1220; color: #e6edf5; border-radius: 14px;
+  box-shadow: 0 22px 60px rgba(4, 12, 24, .5);
+}
+.kc-lupen-kopf {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 12px 14px; border-bottom: 1px solid #1e2c42;
+}
+.kc-lupen-kopf b { font-size: 1rem; }
+.kc-lupen-kopf button {
+  padding: 5px 11px; border: 1px solid #46617f; border-radius: 8px;
+  background: transparent; color: #e6edf5; font: inherit; font-weight: 700; cursor: pointer;
+}
+.kc-lupen-zeile {
+  display: grid; grid-template-columns: 46px 1fr auto auto; gap: 10px; align-items: center;
+  padding: 11px 14px; border-bottom: 1px solid #16233a;
+}
+.kc-lupen-menge { font-size: 1.05rem; font-weight: 800; color: #ffd643; text-align: right; }
+.kc-lupen-name { font-size: 1rem; font-weight: 600; }
+.kc-lupen-preis { font-size: 1rem; font-weight: 800; font-variant-numeric: tabular-nums; }
+/* Die Bedienelemente der Zeile - der eigentliche Zweck der Lupe. Mindestens 44 px,
+   Apples eigene Vorgabe für eine Trefferfläche; darunter trifft man am Stand nicht. */
+.kc-lupen-tasten { display: flex; gap: 6px; }
+.kc-lupen-tasten i {
+  width: 44px; height: 44px; border-radius: 10px; font-style: normal; font-weight: 800;
+  display: flex; align-items: center; justify-content: center;
+  background: #1b2b44; color: #e6edf5; font-size: 1rem;
+}
+.kc-lupen-tasten i.weg { background: #7f1d13; }
+.kc-lupen-fuss {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 12px 14px; font-size: 1.05rem;
+}
+.kc-lupen-fuss b { font-size: 1.6rem; color: #ffd643; font-variant-numeric: tabular-nums; }
+.kc-lupen-hinweis {
+  margin: 0; padding: 10px 14px 14px; font-size: .78rem; color: #9db4cc; line-height: 1.35;
+}

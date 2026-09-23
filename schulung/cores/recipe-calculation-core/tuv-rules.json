@@ -1,0 +1,13 @@
+{
+  "schema":"KC_TUV_RULESET_V1",
+  "component":"recipeCalculationCore",
+  "version":"1.0.0",
+  "rules":[
+    {"id":"RC-001","severity":"block","rule":"Fertigmenge und Portionsgröße müssen positiv und einheitenkompatibel sein."},
+    {"id":"RC-002","severity":"block","rule":"Jede Zutat benötigt Name, Menge und bekannte Einheit."},
+    {"id":"RC-003","severity":"warning","rule":"Verluste über 50 Prozent müssen fachlich geprüft werden."},
+    {"id":"RC-004","severity":"block","rule":"Freigegebene Rezepturen benötigen Quelle, Freigebenden und Datum."},
+    {"id":"RC-005","severity":"block","rule":"Kassenpakete dürfen keine Rezeptmengen, Verluste, Kosten, Lieferanten- oder Einkaufsdaten enthalten."},
+    {"id":"RC-006","severity":"manual","rule":"Ausbeute, Allergene und Nährwerte benötigen vor Gold eine fachliche Freigabe."}
+  ]
+}

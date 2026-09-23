@@ -1,0 +1,6334 @@
+{
+  "schema": "kcm-tv-package-v2",
+  "version": "0.29.40",
+  "profile": {
+    "name": "Weihnachtsmarkt Werne 2026 · bearbeitbar",
+    "screenInch": 43,
+    "resolution": "1920x1080",
+    "viewingDistance": 4,
+    "loop": true,
+    "animationsEnabled": true,
+    "memberRotation": {
+      "enabled": true,
+      "perLoop": 1,
+      "minutes": 3
+    }
+  },
+  "design": {
+    "animation": "snow-light",
+    "intensity": 1
+  },
+  "master": {
+    "enabled": true,
+    "name": "Weihnachtsmarkt Werne",
+    "footer": "Köcheclub Werne · Weihnachtsmarkt"
+  },
+  "schedule": {
+    "enabled": false,
+    "week": [
+      {
+        "day": "Montag",
+        "enabled": true,
+        "start": "10:00",
+        "end": "22:00"
+      },
+      {
+        "day": "Dienstag",
+        "enabled": true,
+        "start": "10:00",
+        "end": "22:00"
+      },
+      {
+        "day": "Mittwoch",
+        "enabled": true,
+        "start": "10:00",
+        "end": "22:00"
+      },
+      {
+        "day": "Donnerstag",
+        "enabled": true,
+        "start": "10:00",
+        "end": "22:00"
+      },
+      {
+        "day": "Freitag",
+        "enabled": true,
+        "start": "10:00",
+        "end": "22:00"
+      },
+      {
+        "day": "Samstag",
+        "enabled": true,
+        "start": "10:00",
+        "end": "22:00"
+      },
+      {
+        "day": "Sonntag",
+        "enabled": true,
+        "start": "10:00",
+        "end": "22:00"
+      }
+    ],
+    "special": []
+  },
+  "weather": {
+    "days": 2,
+    "location": "Werne",
+    "source": "online",
+    "refresh": 60,
+    "lastData": []
+  },
+  "slides": [
+    {
+      "id": "wm26-001",
+      "presentationKind": "weihnachtsmarkt-2026",
+      "renderMode": "christmas-editable",
+      "type": "welcome",
+      "title": "Herzlich willkommen",
+      "text": "Der Köcheclub Werne begrüßt Sie auf dem Weihnachtsmarkt.",
+      "price": "",
+      "duration": 8,
+      "noTime": true,
+      "start": "00:00",
+      "end": "23:59",
+      "ticker": "Schön, dass Sie da sind!",
+      "theme": "dark",
+      "decorations": [
+        "🎄",
+        "⭐"
+      ],
+      "animation": "snow-light",
+      "enabled": true,
+      "backgroundPreset": "market-window-lights",
+      "backgroundDataUrl": "",
+      "backgroundOpacity": 1,
+      "presentationDesign": {
+        "palette": "warm",
+        "background": {
+          "type": "solid",
+          "color1": "#1b1815",
+          "color2": "#3b1517",
+          "opacity": 1,
+          "blur": 0,
+          "vignette": 0,
+          "image": ""
+        },
+        "typography": {
+          "fontFamily": "humanist",
+          "titleColor": "#fff8e8",
+          "textColor": "#fff8e8",
+          "priceColor": "#ffd56a",
+          "titleSize": 1.08,
+          "textSize": 1.02,
+          "priceSize": 1,
+          "titleBold": true,
+          "textBold": false,
+          "textAlign": "center",
+          "titleAutoFit": true,
+          "textAutoFit": true
+        },
+        "banner": {
+          "type": "none",
+          "text": ""
+        },
+        "shape": {
+          "type": "none",
+          "text": "",
+          "position": "right"
+        },
+        "transition": {
+          "type": "fade",
+          "duration": 800
+        },
+        "master": {
+          "useSafeArea": true,
+          "footer": "Köcheclub Werne · Weihnachtsmarkt"
+        }
+      },
+      "layout": {
+        "title": {
+          "x": 47,
+          "y": 20,
+          "w": 68,
+          "h": 13,
+          "scale": 1,
+          "rotation": 0,
+          "opacity": 1,
+          "z": 12
+        },
+        "text": {
+          "x": 50,
+          "y": 45,
+          "w": 78,
+          "h": 28,
+          "scale": 1,
+          "rotation": 0,
+          "opacity": 1,
+          "z": 11
+        },
+        "price": {
+          "x": 50,
+          "y": 69,
+          "w": 42,
+          "h": 13,
+          "scale": 1,
+          "rotation": 0,
+          "opacity": 1,
+          "z": 13
+        },
+        "symbols": {
+          "x": 90,
+          "y": 9,
+          "w": 12,
+          "h": 8,
+          "scale": 0.8,
+          "rotation": 0,
+          "opacity": 1,
+          "color": "#ffd56a",
+          "spacing": 8,
+          "z": 14
+        },
+        "ticker": {
+          "x": 50,
+          "y": 94,
+          "w": 92,
+          "h": 8,
+          "scale": 1,
+          "rotation": 0,
+          "opacity": 1,
+          "z": 16
+        },
+        "weather": {
+          "x": 50,
+          "y": 63,
+          "w": 88,
+          "h": 52,
+          "scale": 1,
+          "rotation": 0,
+          "opacity": 1,
+          "z": 10
+        },
+        "image": {
+          "x": 24,
+          "y": 53,
+          "w": 34,
+          "h": 62,
+          "scale": 1,
+          "rotation": 0,
+          "opacity": 1,
+          "z": 8
+        }
+      },
+      "sourcePresentation": {
+        "name": "Weihnachtsmarkt Werne · bearbeitbare Vorlage",
+        "templateVersion": "1.3.0"
+      },
+      "objectLifecycleVersion": 2,
+      "objectVisibility": {}
+    },
+    {
+      "id": "wm26-8fcb7845",
+      "presentationKind": "weihnachtsmarkt-2026",
+      "renderMode": "christmas-editable",
+      "type": "menu",
+      "title": "Öffnungszeiten (Platzhalter – Termine 2026 folgen)",
+      "text": "",
+      "price": "",
+      "duration": 10,
+      "noTime": true,
+      "start": "00:00",
+      "end": "23:59",
+      "ticker": "",
+      "theme": "dark",
+      "decorations": [
+        "🎄"
+      ],
+      "animation": "snow-light",
+      "enabled": true,
+      "backgroundPreset": "market-window-lights",
+      "backgroundDataUrl": "",
+      "backgroundOpacity": 1,
+      "presentationDesign": {
+        "palette": "warm",
+        "background": {
+          "type": "solid",
+          "color1": "#1b1815",
+          "color2": "#3b1517",
+          "opacity": 1,
+          "blur": 0,
+          "vignette": 0,
+          "image": ""
+        },
+        "typography": {
+          "fontFamily": "humanist",
+          "titleColor": "#fff8e8",
+          "textColor": "#fff8e8",
+          "priceColor": "#ffd56a",
+          "titleSize": 1.08,
+          "textSize": 1.02,
+          "priceSize": 1,
+          "titleBold": true,
+          "textBold": false,
+          "textAlign": "center",
+          "titleAutoFit": true,
+          "textAutoFit": true
+        },
+        "banner": {
+          "type": "none",
+          "text": ""
+        },
+        "shape": {
+          "type": "none",
+          "text": "",
+          "position": "right"
+        },
+        "transition": {
+          "type": "fade",
+          "duration": 800
+        },
+        "master": {
+          "useSafeArea": true,
+          "footer": "Köcheclub Werne · Weihnachtsmarkt"
+        }
+      },
+      "layout": {
+        "title": {
+          "x": 50,
+          "y": 20,
+          "w": 84,
+          "h": 16,
+          "scale": 1,
+          "rotation": 0,
+          "opacity": 1,
+          "z": 12
+        },
+        "text": {
+          "x": 50,
+          "y": 46,
+          "w": 78,
+          "h": 20,
+          "scale": 1,
+          "rotation": 0,
+          "opacity": 1,
+          "z": 11
+        }
+      },
+      "objectVisibility": {},
+      "tableObject": {
+        "id": "tbl-dd8442",
+        "source": "PC Manager",
+        "sheet": "Öffnungszeiten",
+        "rows": [
+          [
+            "Tag",
+            "Datum",
+            "Von",
+            "Bis"
+          ],
+          [
+            "Freitag",
+            "05.12. (Platzhalter)",
+            "10:00",
+            "22:00"
+          ],
+          [
+            "Samstag",
+            "06.12. (Platzhalter)",
+            "10:00",
+            "22:00"
+          ],
+          [
+            "Sonntag",
+            "07.12. (Platzhalter)",
+            "10:00",
+            "22:00"
+          ],
+          [
+            "Montag",
+            "08.12. (Platzhalter)",
+            "10:00",
+            "22:00"
+          ],
+          [
+            "Dienstag",
+            "09.12. (Platzhalter)",
+            "10:00",
+            "22:00"
+          ],
+          [
+            "Mittwoch",
+            "10.12. (Platzhalter)",
+            "10:00",
+            "22:00"
+          ],
+          [
+            "Donnerstag",
+            "11.12. (Platzhalter)",
+            "10:00",
+            "22:00"
+          ],
+          [
+            "Freitag",
+            "12.12. (Platzhalter)",
+            "10:00",
+            "22:00"
+          ],
+          [
+            "Samstag",
+            "13.12. (Platzhalter)",
+            "10:00",
+            "22:00"
+          ],
+          [
+            "Sonntag",
+            "14.12. (Platzhalter)",
+            "10:00",
+            "22:00"
+          ]
+        ],
+        "header": true,
+        "x": 50,
+        "y": 54,
+        "w": 88,
+        "h": 86,
+        "fontSize": 13,
+        "headerBg": "rgba(15,43,62,.78)",
+        "headerText": "#ffffff",
+        "bodyBg": "rgba(245,250,255,.62)",
+        "bodyText": "#172033",
+        "border": "#b8c4d2"
+      }
+    },
+    {
+      "id": "wm26-025",
+      "presentationKind": "weihnachtsmarkt-2026",
+      "renderMode": "catalog-price-table",
+      "type": "price",
+      "title": "Preisliste Getränke",
+      "text": "Alle Getränkepreise ohne Pfand · zzgl. 2,00 € Pfand je Glas / Feuerzange.",
+      "price": "",
+      "duration": 18,
+      "noTime": true,
+      "start": "00:00",
+      "end": "23:59",
+      "ticker": "",
+      "theme": "dark",
+      "decorations": [
+        "🍷"
+      ],
+      "animation": "none",
+      "enabled": true,
+      "backgroundPreset": "market-window-lights",
+      "backgroundDataUrl": "",
+      "backgroundOpacity": 1,
+      "presentationDesign": {
+        "palette": "warm",
+        "background": {
+          "type": "solid",
+          "color1": "#1b1815",
+          "color2": "#3b1517",
+          "opacity": 1,
+          "blur": 0,
+          "vignette": 0,
+          "image": ""
+        },
+        "typography": {
+          "fontFamily": "humanist",
+          "titleColor": "#fff8e8",
+          "textColor": "#fff8e8",
+          "priceColor": "#ffd56a",
+          "titleSize": 1.08,
+          "textSize": 1.02,
+          "priceSize": 1,
+          "titleBold": true,
+          "textBold": false,
+          "textAlign": "center",
+          "titleAutoFit": true,
+          "textAutoFit": true
+        },
+        "banner": {
+          "type": "none",
+          "text": ""
+        },
+        "shape": {
+          "type": "none",
+          "text": "",
+          "position": "right"
+        },
+        "transition": {
+          "type": "fade",
+          "duration": 800
+        },
+        "master": {
+          "useSafeArea": true,
+          "footer": "Köcheclub Werne · Weihnachtsmarkt"
+        }
+      },
+      "layout": {
+        "title": {
+          "x": 47,
+          "y": 12,
+          "w": 72,
+          "h": 10,
+          "scale": 1,
+          "rotation": 0,
+          "opacity": 1,
+          "z": 12
+        },
+        "text": {
+          "x": 50,
+          "y": 92,
+          "w": 88,
+          "h": 10,
+          "scale": 0.72,
+          "rotation": 0,
+          "opacity": 1,
+          "z": 19
+        },
+        "price": {
+          "x": 50,
+          "y": 69,
+          "w": 42,
+          "h": 13,
+          "scale": 1,
+          "rotation": 0,
+          "opacity": 1,
+          "z": 13
+        },
+        "symbols": {
+          "x": 90,
+          "y": 9,
+          "w": 12,
+          "h": 8,
+          "scale": 0.8,
+          "rotation": 0,
+          "opacity": 1,
+          "color": "#ffd56a",
+          "spacing": 8,
+          "z": 14
+        },
+        "ticker": {
+          "x": 50,
+          "y": 94,
+          "w": 92,
+          "h": 8,
+          "scale": 1,
+          "rotation": 0,
+          "opacity": 1,
+          "z": 16
+        },
+        "weather": {
+          "x": 50,
+          "y": 63,
+          "w": 88,
+          "h": 52,
+          "scale": 1,
+          "rotation": 0,
+          "opacity": 1,
+          "z": 10
+        },
+        "image": {
+          "x": 24,
+          "y": 53,
+          "w": 34,
+          "h": 62,
+          "scale": 1,
+          "rotation": 0,
+          "opacity": 1,
+          "z": 8
+        }
+      },
+      "sourcePresentation": {
+        "name": "Weihnachtsmarkt Werne · bearbeitbare Vorlage",
+        "templateVersion": "1.3.0"
+      },
+      "contentKey": "prices-alcoholic",
+      "catalogTable": {
+        "items": [
+          {
+            "ids": [
+              "grot"
+            ],
+            "name": "Glühwein rot",
+            "description": "Roter Winzerglühwein, heiß serviert",
+            "price": 3.5
+          },
+          {
+            "ids": [
+              "gweiss"
+            ],
+            "name": "Glühwein weiß",
+            "description": "Weißer Winzerglühwein, heiß serviert",
+            "price": 3.5
+          },
+          {
+            "ids": [
+              "feuer"
+            ],
+            "name": "Feuerzangenbowle",
+            "description": "Glühwein mit Zucker und brennendem Rum",
+            "price": 5
+          },
+          {
+            "ids": [
+              "eier"
+            ],
+            "name": "Eierlikörpunsch",
+            "description": "Weißwein, Eierlikör, Vanillezucker und Sahne",
+            "price": 4.5
+          }
+        ],
+        "priceIncludesDeposit": false,
+        "footnote": ""
+      },
+      "tableObject": {
+        "id": "catalog-drinks-alcoholic",
+        "source": "PC Manager · Artikelstammdaten",
+        "sheet": "Getränke",
+        "rows": [
+          [
+            "Getränk",
+            "Kurze Beschreibung",
+            "Preis"
+          ],
+          [
+            "Glühwein rot",
+            "Roter Winzerglühwein, heiß serviert",
+            "3,50 €"
+          ],
+          [
+            "Glühwein weiß",
+            "Weißer Winzerglühwein, heiß serviert",
+            "3,50 €"
+          ],
+          [
+            "Feuerzangenbowle",
+            "Glühwein mit Zucker und brennendem Rum",
+            "5,00 €"
+          ],
+          [
+            "Eierlikörpunsch",
+            "Weißwein, Eierlikör, Vanillezucker und Sahne",
+            "4,50 €"
+          ]
+        ],
+        "header": true,
+        "x": 50,
+        "y": 52,
+        "w": 88,
+        "h": 58,
+        "fontSize": 15,
+        "headerBg": "rgba(15,43,62,.78)",
+        "headerText": "#ffffff",
+        "bodyBg": "rgba(245,250,255,.62)",
+        "bodyText": "#172033",
+        "border": "#b8c4d2"
+      },
+      "objectLifecycleVersion": 2,
+      "objectVisibility": {}
+    },
+    {
+      "id": "wm26-026",
+      "presentationKind": "weihnachtsmarkt-2026",
+      "renderMode": "catalog-price-table",
+      "type": "price",
+      "title": "Preisliste alkoholfreie Getränke",
+      "text": "Alle Getränkepreise ohne Pfand · zzgl. 2,00 € Pfand je Glas.",
+      "price": "",
+      "duration": 15,
+      "noTime": true,
+      "start": "00:00",
+      "end": "23:59",
+      "ticker": "",
+      "theme": "dark",
+      "decorations": [
+        "☕"
+      ],
+      "animation": "none",
+      "enabled": true,
+      "backgroundPreset": "market-window-lights",
+      "backgroundDataUrl": "",
+      "backgroundOpacity": 1,
+      "presentationDesign": {
+        "palette": "warm",
+        "background": {
+          "type": "solid",
+          "color1": "#1b1815",
+          "color2": "#3b1517",
+          "opacity": 1,
+          "blur": 0,
+          "vignette": 0,
+          "image": ""
+        },
+        "typography": {
+          "fontFamily": "humanist",
+          "titleColor": "#fff8e8",
+          "textColor": "#fff8e8",
+          "priceColor": "#ffd56a",
+          "titleSize": 1.08,
+          "textSize": 1.02,
+          "priceSize": 1,
+          "titleBold": true,
+          "textBold": false,
+          "textAlign": "center",
+          "titleAutoFit": true,
+          "textAutoFit": true
+        },
+        "banner": {
+          "type": "none",
+          "text": ""
+        },
+        "shape": {
+          "type": "none",
+          "text": "",
+          "position": "right"
+        },
+        "transition": {
+          "type": "fade",
+          "duration": 800
+        },
+        "master": {
+          "useSafeArea": true,
+          "footer": "Köcheclub Werne · Weihnachtsmarkt"
+        }
+      },
+      "layout": {
+        "title": {
+          "x": 47,
+          "y": 13,
+          "w": 74,
+          "h": 11,
+          "scale": 0.92,
+          "rotation": 0,
+          "opacity": 1,
+          "z": 12
+        },
+        "text": {
+          "x": 50,
+          "y": 92,
+          "w": 88,
+          "h": 10,
+          "scale": 0.72,
+          "rotation": 0,
+          "opacity": 1,
+          "z": 19
+        },
+        "price": {
+          "x": 50,
+          "y": 69,
+          "w": 42,
+          "h": 13,
+          "scale": 1,
+          "rotation": 0,
+          "opacity": 1,
+          "z": 13
+        },
+        "symbols": {
+          "x": 90,
+          "y": 9,
+          "w": 12,
+          "h": 8,
+          "scale": 0.8,
+          "rotation": 0,
+          "opacity": 1,
+          "color": "#ffd56a",
+          "spacing": 8,
+          "z": 14
+        },
+        "ticker": {
+          "x": 50,
+          "y": 94,
+          "w": 92,
+          "h": 8,
+          "scale": 1,
+          "rotation": 0,
+          "opacity": 1,
+          "z": 16
+        },
+        "weather": {
+          "x": 50,
+          "y": 63,
+          "w": 88,
+          "h": 52,
+          "scale": 1,
+          "rotation": 0,
+          "opacity": 1,
+          "z": 10
+        },
+        "image": {
+          "x": 24,
+          "y": 53,
+          "w": 34,
+          "h": 62,
+          "scale": 1,
+          "rotation": 0,
+          "opacity": 1,
+          "z": 8
+        }
+      },
+      "sourcePresentation": {
+        "name": "Weihnachtsmarkt Werne · bearbeitbare Vorlage",
+        "templateVersion": "1.3.0"
+      },
+      "contentKey": "prices-non-alcoholic",
+      "catalogTable": {
+        "items": [
+          {
+            "ids": [
+              "roterfeger",
+              "kinder",
+              "kinderpunsch"
+            ],
+            "name": "Roter Feger",
+            "description": "Alkoholfreier roter Kinderpunsch, heiß serviert",
+            "price": 2.5
+          },
+          {
+            "ids": [
+              "apfel"
+            ],
+            "name": "Apfelpunsch",
+            "description": "Heißer alkoholfreier Apfelpunsch",
+            "price": 2.5
+          }
+        ],
+        "priceIncludesDeposit": false,
+        "footnote": ""
+      },
+      "tableObject": {
+        "id": "catalog-drinks-non-alcoholic",
+        "source": "PC Manager · Artikelstammdaten",
+        "sheet": "Alkoholfreie Getränke",
+        "rows": [
+          [
+            "Getränk",
+            "Kurze Beschreibung",
+            "Preis"
+          ],
+          [
+            "Roter Feger",
+            "Alkoholfreier roter Kinderpunsch, heiß serviert",
+            "2,50 €"
+          ],
+          [
+            "Apfelpunsch",
+            "Heißer alkoholfreier Apfelpunsch",
+            "2,50 €"
+          ]
+        ],
+        "header": true,
+        "x": 50,
+        "y": 48,
+        "w": 88,
+        "h": 40,
+        "fontSize": 16,
+        "headerBg": "rgba(15,43,62,.78)",
+        "headerText": "#ffffff",
+        "bodyBg": "rgba(245,250,255,.62)",
+        "bodyText": "#172033",
+        "border": "#b8c4d2"
+      },
+      "objectLifecycleVersion": 2,
+      "objectVisibility": {}
+    },
+    {
+      "id": "wm26-027",
+      "presentationKind": "weihnachtsmarkt-2026",
+      "renderMode": "catalog-price-table",
+      "type": "menu",
+      "title": "Preisliste Speisen",
+      "text": "",
+      "price": "",
+      "duration": 20,
+      "noTime": true,
+      "start": "00:00",
+      "end": "23:59",
+      "ticker": "",
+      "theme": "dark",
+      "decorations": [
+        "👨‍🍳"
+      ],
+      "animation": "none",
+      "enabled": true,
+      "backgroundPreset": "market-window-lights",
+      "backgroundDataUrl": "",
+      "backgroundOpacity": 1,
+      "presentationDesign": {
+        "palette": "warm",
+        "background": {
+          "type": "solid",
+          "color1": "#1b1815",
+          "color2": "#3b1517",
+          "opacity": 1,
+          "blur": 0,
+          "vignette": 0,
+          "image": ""
+        },
+        "typography": {
+          "fontFamily": "humanist",
+          "titleColor": "#fff8e8",
+          "textColor": "#fff8e8",
+          "priceColor": "#ffd56a",
+          "titleSize": 1.08,
+          "textSize": 1.02,
+          "priceSize": 1,
+          "titleBold": true,
+          "textBold": false,
+          "textAlign": "center",
+          "titleAutoFit": true,
+          "textAutoFit": true
+        },
+        "banner": {
+          "type": "none",
+          "text": ""
+        },
+        "shape": {
+          "type": "none",
+          "text": "",
+          "position": "right"
+        },
+        "transition": {
+          "type": "fade",
+          "duration": 800
+        },
+        "master": {
+          "useSafeArea": true,
+          "footer": "Köcheclub Werne · Weihnachtsmarkt"
+        }
+      },
+      "layout": {
+        "title": {
+          "x": 47,
+          "y": 11,
+          "w": 72,
+          "h": 10,
+          "scale": 1,
+          "rotation": 0,
+          "opacity": 1,
+          "z": 12
+        },
+        "text": {
+          "x": 50,
+          "y": 45,
+          "w": 78,
+          "h": 28,
+          "scale": 1,
+          "rotation": 0,
+          "opacity": 1,
+          "z": 11
+        },
+        "price": {
+          "x": 50,
+          "y": 69,
+          "w": 42,
+          "h": 13,
+          "scale": 1,
+          "rotation": 0,
+          "opacity": 1,
+          "z": 13
+        },
+        "symbols": {
+          "x": 90,
+          "y": 9,
+          "w": 12,
+          "h": 8,
+          "scale": 0.8,
+          "rotation": 0,
+          "opacity": 1,
+          "color": "#ffd56a",
+          "spacing": 8,
+          "z": 14
+        },
+        "ticker": {
+          "x": 50,
+          "y": 94,
+          "w": 92,
+          "h": 8,
+          "scale": 1,
+          "rotation": 0,
+          "opacity": 1,
+          "z": 16
+        },
+        "weather": {
+          "x": 50,
+          "y": 63,
+          "w": 88,
+          "h": 52,
+          "scale": 1,
+          "rotation": 0,
+          "opacity": 1,
+          "z": 10
+        },
+        "image": {
+          "x": 24,
+          "y": 53,
+          "w": 34,
+          "h": 62,
+          "scale": 1,
+          "rotation": 0,
+          "opacity": 1,
+          "z": 8
+        }
+      },
+      "sourcePresentation": {
+        "name": "Weihnachtsmarkt Werne · bearbeitbare Vorlage",
+        "templateVersion": "1.3.0"
+      },
+      "contentKey": "prices-food",
+      "catalogTable": {
+        "items": [
+          {
+            "ids": [
+              "gruenkohl"
+            ],
+            "name": "Grünkohl",
+            "description": "Herzhafter Grünkohl nach Köcheclub-Art",
+            "price": 5.5
+          },
+          {
+            "ids": [
+              "gruenkohlmett"
+            ],
+            "name": "Grünkohl + Mettwurst",
+            "description": "Grünkohlgericht mit Mettwurst",
+            "price": 7
+          },
+          {
+            "ids": [
+              "sauerkraut"
+            ],
+            "name": "Sauerkrauteintopf",
+            "description": "Sauerkraut mit Kartoffeln, Speck und Kasseler",
+            "price": 5.5
+          },
+          {
+            "ids": [
+              "sauerkrautmett"
+            ],
+            "name": "Sauerkrauteintopf + Mettwurst",
+            "description": "Sauerkrauteintopf mit Mettwurst",
+            "price": 7
+          },
+          {
+            "ids": [
+              "mettwurst",
+              "mett"
+            ],
+            "name": "Mettwurst",
+            "description": "Herzhafte Mettwurst als Beilage",
+            "price": 1.5
+          },
+          {
+            "ids": [
+              "hering"
+            ],
+            "name": "Heringsstipp mit Kartoffeln",
+            "description": "Heringsstipp mit gekochten Kartoffeln",
+            "price": 4.5
+          },
+          {
+            "ids": [
+              "becher"
+            ],
+            "name": "Außer-Haus-Becher",
+            "description": "Für Speisen zum Mitnehmen",
+            "price": 1
+          }
+        ],
+        "priceIncludesDeposit": false,
+        "footnote": ""
+      },
+      "tableObject": {
+        "id": "catalog-food",
+        "source": "PC Manager · Artikelstammdaten",
+        "sheet": "Speisen",
+        "rows": [
+          [
+            "Speise",
+            "Kurze Beschreibung",
+            "Preis"
+          ],
+          [
+            "Grünkohl",
+            "Herzhafter Grünkohl nach Köcheclub-Art",
+            "5,50 €"
+          ],
+          [
+            "Grünkohl + Mettwurst",
+            "Grünkohlgericht mit Mettwurst",
+            "7,00 €"
+          ],
+          [
+            "Sauerkrauteintopf",
+            "Sauerkraut mit Kartoffeln, Speck und Kasseler",
+            "5,50 €"
+          ],
+          [
+            "Sauerkrauteintopf + Mettwurst",
+            "Sauerkrauteintopf mit Mettwurst",
+            "7,00 €"
+          ],
+          [
+            "Mettwurst",
+            "Herzhafte Mettwurst als Beilage",
+            "1,50 €"
+          ],
+          [
+            "Heringsstipp mit Kartoffeln",
+            "Heringsstipp mit gekochten Kartoffeln",
+            "4,50 €"
+          ],
+          [
+            "Außer-Haus-Becher",
+            "Für Speisen zum Mitnehmen",
+            "1,00 €"
+          ]
+        ],
+        "header": true,
+        "x": 50,
+        "y": 54,
+        "w": 88,
+        "h": 70,
+        "fontSize": 11,
+        "headerBg": "rgba(15,43,62,.78)",
+        "headerText": "#ffffff",
+        "bodyBg": "rgba(245,250,255,.62)",
+        "bodyText": "#172033",
+        "border": "#b8c4d2"
+      },
+      "objectLifecycleVersion": 2,
+      "objectVisibility": {}
+    },
+    {
+      "id": "wm26-b6ec7665",
+      "presentationKind": "weihnachtsmarkt-2026",
+      "renderMode": "christmas-editable",
+      "type": "notice",
+      "title": "Ein Tipp vom Küchenchef",
+      "text": "Bringen Sie doch gerne Ihre eigenen Gefäße mit, wenn Sie unsere Speisen zuhause genießen möchten.\nDas spart Kosten und entlastet die Umwelt.",
+      "price": "",
+      "duration": 10,
+      "noTime": true,
+      "start": "00:00",
+      "end": "23:59",
+      "ticker": "",
+      "theme": "dark",
+      "decorations": [
+        "👨‍🍳",
+        "🥣"
+      ],
+      "animation": "glitter",
+      "enabled": true,
+      "backgroundPreset": "market-window-lights",
+      "backgroundDataUrl": "",
+      "backgroundOpacity": 1,
+      "presentationDesign": {
+        "palette": "warm",
+        "background": {
+          "type": "solid",
+          "color1": "#1b1815",
+          "color2": "#3b1517",
+          "opacity": 1,
+          "blur": 0,
+          "vignette": 0,
+          "image": ""
+        },
+        "typography": {
+          "fontFamily": "humanist",
+          "titleColor": "#fff8e8",
+          "textColor": "#fff8e8",
+          "priceColor": "#ffd56a",
+          "titleSize": 1.08,
+          "textSize": 0.85,
+          "priceSize": 1,
+          "titleBold": true,
+          "textBold": false,
+          "textAlign": "center",
+          "titleAutoFit": true,
+          "textAutoFit": true
+        },
+        "banner": {
+          "type": "none",
+          "text": ""
+        },
+        "shape": {
+          "type": "none",
+          "text": "",
+          "position": "right"
+        },
+        "transition": {
+          "type": "fade",
+          "duration": 800
+        },
+        "master": {
+          "useSafeArea": true,
+          "footer": "Köcheclub Werne · Weihnachtsmarkt"
+        }
+      },
+      "layout": {
+        "title": {
+          "x": 50,
+          "y": 20,
+          "w": 84,
+          "h": 16,
+          "scale": 1,
+          "rotation": 0,
+          "opacity": 1,
+          "z": 12
+        },
+        "text": {
+          "x": 50,
+          "y": 56,
+          "w": 86,
+          "h": 56,
+          "scale": 1,
+          "rotation": 0,
+          "opacity": 1,
+          "z": 11
+        }
+      },
+      "objectVisibility": {}
+    },
+    {
+      "id": "wm26-member-slot-a",
+      "presentationKind": "weihnachtsmarkt-2026",
+      "renderMode": "member-showcase",
+      "type": "member",
+      "title": "Frank Brösel",
+      "text": "Ich mache gerne mit, weil wir gemeinsam viel bewegen und dabei immer Spaß haben.",
+      "price": "",
+      "duration": 10,
+      "noTime": true,
+      "start": "00:00",
+      "end": "23:59",
+      "ticker": "",
+      "theme": "dark",
+      "decorations": [
+        "👨‍🍳"
+      ],
+      "animation": "none",
+      "enabled": true,
+      "backgroundPreset": "market-window-lights",
+      "backgroundDataUrl": "",
+      "backgroundOpacity": 1,
+      "presentationDesign": {
+        "palette": "warm",
+        "background": {
+          "type": "solid",
+          "color1": "#1b1815",
+          "color2": "#3b1517",
+          "opacity": 1,
+          "blur": 0,
+          "vignette": 0,
+          "image": ""
+        },
+        "typography": {
+          "fontFamily": "humanist",
+          "titleColor": "#fff8e8",
+          "textColor": "#fff8e8",
+          "priceColor": "#ffd56a",
+          "titleSize": 1.08,
+          "textSize": 1.02,
+          "priceSize": 1,
+          "titleBold": true,
+          "textBold": false,
+          "textAlign": "center",
+          "titleAutoFit": true,
+          "textAutoFit": true
+        },
+        "banner": {
+          "type": "none",
+          "text": ""
+        },
+        "shape": {
+          "type": "none",
+          "text": "",
+          "position": "right"
+        },
+        "transition": {
+          "type": "fade",
+          "duration": 800
+        },
+        "master": {
+          "useSafeArea": true,
+          "footer": "Köcheclub Werne · Weihnachtsmarkt"
+        }
+      },
+      "layout": {
+        "title": {
+          "x": 66,
+          "y": 37,
+          "w": 56,
+          "h": 15,
+          "scale": 1,
+          "rotation": 0,
+          "opacity": 1,
+          "z": 12
+        },
+        "text": {
+          "x": 66,
+          "y": 58,
+          "w": 56,
+          "h": 28,
+          "scale": 1,
+          "rotation": 0,
+          "opacity": 1,
+          "z": 12
+        },
+        "price": {
+          "x": 50,
+          "y": 69,
+          "w": 42,
+          "h": 13,
+          "scale": 1,
+          "rotation": 0,
+          "opacity": 1,
+          "z": 13
+        },
+        "symbols": {
+          "x": 88,
+          "y": 11,
+          "w": 16,
+          "h": 10,
+          "scale": 0.8,
+          "rotation": 0,
+          "opacity": 1,
+          "color": "#ffd56a",
+          "spacing": 8,
+          "z": 14
+        },
+        "ticker": {
+          "x": 50,
+          "y": 94,
+          "w": 92,
+          "h": 8,
+          "scale": 1,
+          "rotation": 0,
+          "opacity": 1,
+          "z": 16
+        },
+        "weather": {
+          "x": 50,
+          "y": 63,
+          "w": 88,
+          "h": 52,
+          "scale": 1,
+          "rotation": 0,
+          "opacity": 1,
+          "z": 10
+        },
+        "image": {
+          "x": 20,
+          "y": 51,
+          "w": 29,
+          "h": 68,
+          "scale": 1,
+          "rotation": 0,
+          "opacity": 1,
+          "z": 8
+        }
+      },
+      "sourcePresentation": {
+        "name": "Weihnachtsmarkt Werne · bearbeitbare Vorlage",
+        "templateVersion": "1.3.0"
+      },
+      "media": {
+        "name": "Frank Brösel · vorläufiges Foto austauschen",
+        "type": "image/jpeg",
+        "dataUrl": "../tv-content/weihnachtsmarkt-2026/members/mitglied-01.jpg",
+        "provisional": true
+      },
+      "objectLifecycleVersion": 2,
+      "memberSlot": "a",
+      "objectVisibility": {}
+    },
+    {
+      "id": "wm26-2cdb33a1",
+      "presentationKind": "weihnachtsmarkt-2026",
+      "renderMode": "christmas-editable",
+      "type": "notice",
+      "title": "Bühnenprogramm heute",
+      "text": "Wird automatisch nach Datum aktualisiert.",
+      "price": "",
+      "duration": 10,
+      "noTime": true,
+      "start": "00:00",
+      "end": "23:59",
+      "ticker": "",
+      "theme": "dark",
+      "decorations": [],
+      "animation": "stars",
+      "enabled": true,
+      "backgroundPreset": "market-window-lights",
+      "backgroundDataUrl": "",
+      "backgroundOpacity": 1,
+      "presentationDesign": {
+        "palette": "warm",
+        "background": {
+          "type": "solid",
+          "color1": "#1b1815",
+          "color2": "#3b1517",
+          "opacity": 1,
+          "blur": 0,
+          "vignette": 0,
+          "image": ""
+        },
+        "typography": {
+          "fontFamily": "humanist",
+          "titleColor": "#fff8e8",
+          "textColor": "#fff8e8",
+          "priceColor": "#ffd56a",
+          "titleSize": 1.08,
+          "textSize": 0.55,
+          "priceSize": 1,
+          "titleBold": true,
+          "textBold": false,
+          "textAlign": "center",
+          "titleAutoFit": true,
+          "textAutoFit": true
+        },
+        "banner": {
+          "type": "none",
+          "text": ""
+        },
+        "shape": {
+          "type": "none",
+          "text": "",
+          "position": "right"
+        },
+        "transition": {
+          "type": "fade",
+          "duration": 800
+        },
+        "master": {
+          "useSafeArea": true,
+          "footer": "Köcheclub Werne · Weihnachtsmarkt"
+        }
+      },
+      "layout": {
+        "title": {
+          "x": 50,
+          "y": 20,
+          "w": 84,
+          "h": 16,
+          "scale": 1,
+          "rotation": 0,
+          "opacity": 1,
+          "z": 12
+        },
+        "text": {
+          "x": 50,
+          "y": 58,
+          "w": 90,
+          "h": 74,
+          "scale": 1,
+          "rotation": 0,
+          "opacity": 1,
+          "z": 11
+        }
+      },
+      "objectVisibility": {},
+      "programSlot": "today"
+    },
+    {
+      "id": "wm26-f595df3c",
+      "presentationKind": "weihnachtsmarkt-2026",
+      "renderMode": "christmas-editable",
+      "type": "notice",
+      "title": "Bühnenprogramm morgen",
+      "text": "Wird automatisch nach Datum aktualisiert.",
+      "price": "",
+      "duration": 10,
+      "noTime": true,
+      "start": "00:00",
+      "end": "23:59",
+      "ticker": "",
+      "theme": "dark",
+      "decorations": [],
+      "animation": "stars",
+      "enabled": true,
+      "backgroundPreset": "market-window-lights",
+      "backgroundDataUrl": "",
+      "backgroundOpacity": 1,
+      "presentationDesign": {
+        "palette": "warm",
+        "background": {
+          "type": "solid",
+          "color1": "#1b1815",
+          "color2": "#3b1517",
+          "opacity": 1,
+          "blur": 0,
+          "vignette": 0,
+          "image": ""
+        },
+        "typography": {
+          "fontFamily": "humanist",
+          "titleColor": "#fff8e8",
+          "textColor": "#fff8e8",
+          "priceColor": "#ffd56a",
+          "titleSize": 1.08,
+          "textSize": 0.55,
+          "priceSize": 1,
+          "titleBold": true,
+          "textBold": false,
+          "textAlign": "center",
+          "titleAutoFit": true,
+          "textAutoFit": true
+        },
+        "banner": {
+          "type": "none",
+          "text": ""
+        },
+        "shape": {
+          "type": "none",
+          "text": "",
+          "position": "right"
+        },
+        "transition": {
+          "type": "fade",
+          "duration": 800
+        },
+        "master": {
+          "useSafeArea": true,
+          "footer": "Köcheclub Werne · Weihnachtsmarkt"
+        }
+      },
+      "layout": {
+        "title": {
+          "x": 50,
+          "y": 20,
+          "w": 84,
+          "h": 16,
+          "scale": 1,
+          "rotation": 0,
+          "opacity": 1,
+          "z": 12
+        },
+        "text": {
+          "x": 50,
+          "y": 58,
+          "w": 90,
+          "h": 74,
+          "scale": 1,
+          "rotation": 0,
+          "opacity": 1,
+          "z": 11
+        }
+      },
+      "objectVisibility": {},
+      "programSlot": "tomorrow"
+    },
+    {
+      "id": "wm26-gp-1",
+      "presentationKind": "weihnachtsmarkt-2026",
+      "renderMode": "christmas-editable",
+      "type": "notice",
+      "title": "Gesamtprogramm (Platzhalter 2025) – Teil 1/5",
+      "text": "• Freitag 05.12.\n   15:15–17:15 Uhr · Bläsercorps Werne\n   16:30–16:45 Uhr · Offizielle Weihnachtsmarkteröffnung\n   18:00–18:15 Uhr · Theater für Alle\n   19:00–22:30 Uhr · Burning Hearts\n• Samstag 06.12.\n   12:30–13:30 Uhr · Trompetenkinder\n   15:00–16:00 Uhr · Maxim Wartenberg und sein Trommelfloh\n   17:00–18:00 Uhr · GOLDEN TUCAN\n   18:00–18:15 Uhr · Theater für Alle\n   19:00–22:30 Uhr · Undercover",
+      "price": "",
+      "duration": 10,
+      "noTime": true,
+      "start": "00:00",
+      "end": "23:59",
+      "ticker": "",
+      "theme": "dark",
+      "decorations": [],
+      "animation": "stars",
+      "enabled": true,
+      "backgroundPreset": "market-window-lights",
+      "backgroundDataUrl": "",
+      "backgroundOpacity": 1,
+      "presentationDesign": {
+        "palette": "warm",
+        "background": {
+          "type": "solid",
+          "color1": "#1b1815",
+          "color2": "#3b1517",
+          "opacity": 1,
+          "blur": 0,
+          "vignette": 0,
+          "image": ""
+        },
+        "typography": {
+          "fontFamily": "humanist",
+          "titleColor": "#fff8e8",
+          "textColor": "#fff8e8",
+          "priceColor": "#ffd56a",
+          "titleSize": 1.08,
+          "textSize": 0.5,
+          "priceSize": 1,
+          "titleBold": true,
+          "textBold": false,
+          "textAlign": "left",
+          "titleAutoFit": true,
+          "textAutoFit": true
+        },
+        "banner": {
+          "type": "none",
+          "text": ""
+        },
+        "shape": {
+          "type": "none",
+          "text": "",
+          "position": "right"
+        },
+        "transition": {
+          "type": "fade",
+          "duration": 800
+        },
+        "master": {
+          "useSafeArea": true,
+          "footer": "Köcheclub Werne · Weihnachtsmarkt"
+        }
+      },
+      "layout": {
+        "title": {
+          "x": 50,
+          "y": 10,
+          "w": 88,
+          "h": 10,
+          "scale": 1,
+          "rotation": 0,
+          "opacity": 1,
+          "z": 12
+        },
+        "text": {
+          "x": 50,
+          "y": 58,
+          "w": 92,
+          "h": 78,
+          "scale": 1,
+          "rotation": 0,
+          "opacity": 1,
+          "z": 11
+        }
+      },
+      "objectVisibility": {}
+    },
+    {
+      "id": "wm26-gp-2",
+      "presentationKind": "weihnachtsmarkt-2026",
+      "renderMode": "christmas-editable",
+      "type": "notice",
+      "title": "Gesamtprogramm (Platzhalter 2025) – Teil 2/5",
+      "text": "• Sonntag 07.12.\n   12:30–14:00 Uhr · GUMMI-Bänd Lünen\n   15:00–16:00 Uhr · Das Zappeltier von Frank & seine Freunde\n   17:00–18:00 Uhr · Szenische Lesung mit Clemens Schlüter und Gregor A. Zumholz\n   18:00–18:15 Uhr · Theater für Alle\n• Montag 08.12.\n   16:00–16:45 Uhr · KidsKulturSpass\n   17:30–18:15 Uhr · KidsKulturSpass\n   18:00–18:15 Uhr · Theater für Alle\n   19:30–21:00 Uhr · GoodVibes",
+      "price": "",
+      "duration": 10,
+      "noTime": true,
+      "start": "00:00",
+      "end": "23:59",
+      "ticker": "",
+      "theme": "dark",
+      "decorations": [],
+      "animation": "stars",
+      "enabled": true,
+      "backgroundPreset": "market-window-lights",
+      "backgroundDataUrl": "",
+      "backgroundOpacity": 1,
+      "presentationDesign": {
+        "palette": "warm",
+        "background": {
+          "type": "solid",
+          "color1": "#1b1815",
+          "color2": "#3b1517",
+          "opacity": 1,
+          "blur": 0,
+          "vignette": 0,
+          "image": ""
+        },
+        "typography": {
+          "fontFamily": "humanist",
+          "titleColor": "#fff8e8",
+          "textColor": "#fff8e8",
+          "priceColor": "#ffd56a",
+          "titleSize": 1.08,
+          "textSize": 0.5,
+          "priceSize": 1,
+          "titleBold": true,
+          "textBold": false,
+          "textAlign": "left",
+          "titleAutoFit": true,
+          "textAutoFit": true
+        },
+        "banner": {
+          "type": "none",
+          "text": ""
+        },
+        "shape": {
+          "type": "none",
+          "text": "",
+          "position": "right"
+        },
+        "transition": {
+          "type": "fade",
+          "duration": 800
+        },
+        "master": {
+          "useSafeArea": true,
+          "footer": "Köcheclub Werne · Weihnachtsmarkt"
+        }
+      },
+      "layout": {
+        "title": {
+          "x": 50,
+          "y": 10,
+          "w": 88,
+          "h": 10,
+          "scale": 1,
+          "rotation": 0,
+          "opacity": 1,
+          "z": 12
+        },
+        "text": {
+          "x": 50,
+          "y": 58,
+          "w": 92,
+          "h": 78,
+          "scale": 1,
+          "rotation": 0,
+          "opacity": 1,
+          "z": 11
+        }
+      },
+      "objectVisibility": {}
+    },
+    {
+      "id": "wm26-gp-3",
+      "presentationKind": "weihnachtsmarkt-2026",
+      "renderMode": "christmas-editable",
+      "type": "notice",
+      "title": "Gesamtprogramm (Platzhalter 2025) – Teil 3/5",
+      "text": "• Dienstag 09.12.\n   16:00– Uhr · MS Musik\n   17:00– Uhr · MS Musik\n   18:00–18:15 Uhr · Theater für Alle\n   19:00–21:00 Uhr · Mucky Feet\n• Mittwoch 10.12.\n   18:00–18:15 Uhr · Theater für Alle\n   19:00–21:00 Uhr · The Kogs",
+      "price": "",
+      "duration": 10,
+      "noTime": true,
+      "start": "00:00",
+      "end": "23:59",
+      "ticker": "",
+      "theme": "dark",
+      "decorations": [],
+      "animation": "stars",
+      "enabled": true,
+      "backgroundPreset": "market-window-lights",
+      "backgroundDataUrl": "",
+      "backgroundOpacity": 1,
+      "presentationDesign": {
+        "palette": "warm",
+        "background": {
+          "type": "solid",
+          "color1": "#1b1815",
+          "color2": "#3b1517",
+          "opacity": 1,
+          "blur": 0,
+          "vignette": 0,
+          "image": ""
+        },
+        "typography": {
+          "fontFamily": "humanist",
+          "titleColor": "#fff8e8",
+          "textColor": "#fff8e8",
+          "priceColor": "#ffd56a",
+          "titleSize": 1.08,
+          "textSize": 0.5,
+          "priceSize": 1,
+          "titleBold": true,
+          "textBold": false,
+          "textAlign": "left",
+          "titleAutoFit": true,
+          "textAutoFit": true
+        },
+        "banner": {
+          "type": "none",
+          "text": ""
+        },
+        "shape": {
+          "type": "none",
+          "text": "",
+          "position": "right"
+        },
+        "transition": {
+          "type": "fade",
+          "duration": 800
+        },
+        "master": {
+          "useSafeArea": true,
+          "footer": "Köcheclub Werne · Weihnachtsmarkt"
+        }
+      },
+      "layout": {
+        "title": {
+          "x": 50,
+          "y": 10,
+          "w": 88,
+          "h": 10,
+          "scale": 1,
+          "rotation": 0,
+          "opacity": 1,
+          "z": 12
+        },
+        "text": {
+          "x": 50,
+          "y": 58,
+          "w": 92,
+          "h": 78,
+          "scale": 1,
+          "rotation": 0,
+          "opacity": 1,
+          "z": 11
+        }
+      },
+      "objectVisibility": {}
+    },
+    {
+      "id": "wm26-gp-4",
+      "presentationKind": "weihnachtsmarkt-2026",
+      "renderMode": "christmas-editable",
+      "type": "notice",
+      "title": "Gesamtprogramm (Platzhalter 2025) – Teil 4/5",
+      "text": "• Donnerstag 11.12.\n   16:30–18:00 Uhr · Smooth Invaders\n   18:00–18:15 Uhr · Theater für Alle\n   19:00–21:00 Uhr · Fragile Matt\n• Freitag 12.12.\n   16:30–17:15 Uhr · herrH\n   18:00–18:15 Uhr · Theater für Alle\n   19:00–21:00 Uhr · Jo Marie Dominiak",
+      "price": "",
+      "duration": 10,
+      "noTime": true,
+      "start": "00:00",
+      "end": "23:59",
+      "ticker": "",
+      "theme": "dark",
+      "decorations": [],
+      "animation": "stars",
+      "enabled": true,
+      "backgroundPreset": "market-window-lights",
+      "backgroundDataUrl": "",
+      "backgroundOpacity": 1,
+      "presentationDesign": {
+        "palette": "warm",
+        "background": {
+          "type": "solid",
+          "color1": "#1b1815",
+          "color2": "#3b1517",
+          "opacity": 1,
+          "blur": 0,
+          "vignette": 0,
+          "image": ""
+        },
+        "typography": {
+          "fontFamily": "humanist",
+          "titleColor": "#fff8e8",
+          "textColor": "#fff8e8",
+          "priceColor": "#ffd56a",
+          "titleSize": 1.08,
+          "textSize": 0.5,
+          "priceSize": 1,
+          "titleBold": true,
+          "textBold": false,
+          "textAlign": "left",
+          "titleAutoFit": true,
+          "textAutoFit": true
+        },
+        "banner": {
+          "type": "none",
+          "text": ""
+        },
+        "shape": {
+          "type": "none",
+          "text": "",
+          "position": "right"
+        },
+        "transition": {
+          "type": "fade",
+          "duration": 800
+        },
+        "master": {
+          "useSafeArea": true,
+          "footer": "Köcheclub Werne · Weihnachtsmarkt"
+        }
+      },
+      "layout": {
+        "title": {
+          "x": 50,
+          "y": 10,
+          "w": 88,
+          "h": 10,
+          "scale": 1,
+          "rotation": 0,
+          "opacity": 1,
+          "z": 12
+        },
+        "text": {
+          "x": 50,
+          "y": 58,
+          "w": 92,
+          "h": 78,
+          "scale": 1,
+          "rotation": 0,
+          "opacity": 1,
+          "z": 11
+        }
+      },
+      "objectVisibility": {}
+    },
+    {
+      "id": "wm26-gp-5",
+      "presentationKind": "weihnachtsmarkt-2026",
+      "renderMode": "christmas-editable",
+      "type": "notice",
+      "title": "Gesamtprogramm (Platzhalter 2025) – Teil 5/5",
+      "text": "• Samstag 13.12.\n   13:00–13:45 Uhr · Der Minze\n   15:00–16:30 Uhr · Nilsen\n   17:00–18:00 Uhr · Rotstiftpause\n   18:00–18:15 Uhr · Theater für Alle\n   19:00–22:30 Uhr · Björn van Andel & Svenja Kröger\n• Sonntag 14.12.\n   13:00–14:30 Uhr · Tim König & Friends\n   15:00–17:00 Uhr · Felice\n   17:00–18:30 Uhr · Querwind\n   18:00–18:15 Uhr · Theater für Alle\n   18:45–19:15 Uhr · Förderverein Stadtbücherei Werne e.V.\n   19:15–19:30 Uhr · Das leuchtende Finale",
+      "price": "",
+      "duration": 10,
+      "noTime": true,
+      "start": "00:00",
+      "end": "23:59",
+      "ticker": "",
+      "theme": "dark",
+      "decorations": [],
+      "animation": "stars",
+      "enabled": true,
+      "backgroundPreset": "market-window-lights",
+      "backgroundDataUrl": "",
+      "backgroundOpacity": 1,
+      "presentationDesign": {
+        "palette": "warm",
+        "background": {
+          "type": "solid",
+          "color1": "#1b1815",
+          "color2": "#3b1517",
+          "opacity": 1,
+          "blur": 0,
+          "vignette": 0,
+          "image": ""
+        },
+        "typography": {
+          "fontFamily": "humanist",
+          "titleColor": "#fff8e8",
+          "textColor": "#fff8e8",
+          "priceColor": "#ffd56a",
+          "titleSize": 1.08,
+          "textSize": 0.5,
+          "priceSize": 1,
+          "titleBold": true,
+          "textBold": false,
+          "textAlign": "left",
+          "titleAutoFit": true,
+          "textAutoFit": true
+        },
+        "banner": {
+          "type": "none",
+          "text": ""
+        },
+        "shape": {
+          "type": "none",
+          "text": "",
+          "position": "right"
+        },
+        "transition": {
+          "type": "fade",
+          "duration": 800
+        },
+        "master": {
+          "useSafeArea": true,
+          "footer": "Köcheclub Werne · Weihnachtsmarkt"
+        }
+      },
+      "layout": {
+        "title": {
+          "x": 50,
+          "y": 10,
+          "w": 88,
+          "h": 10,
+          "scale": 1,
+          "rotation": 0,
+          "opacity": 1,
+          "z": 12
+        },
+        "text": {
+          "x": 50,
+          "y": 58,
+          "w": 92,
+          "h": 78,
+          "scale": 1,
+          "rotation": 0,
+          "opacity": 1,
+          "z": 11
+        }
+      },
+      "objectVisibility": {}
+    },
+    {
+      "id": "wm26-3c5cd302",
+      "presentationKind": "weihnachtsmarkt-2026",
+      "renderMode": "christmas-editable",
+      "type": "weather",
+      "title": "Das Wetter heute und morgen",
+      "text": "",
+      "price": "",
+      "duration": 10,
+      "noTime": true,
+      "start": "00:00",
+      "end": "23:59",
+      "ticker": "",
+      "theme": "dark",
+      "decorations": [],
+      "animation": "none",
+      "enabled": true,
+      "backgroundPreset": "market-window-lights",
+      "backgroundDataUrl": "",
+      "backgroundOpacity": 1,
+      "presentationDesign": {
+        "palette": "warm",
+        "background": {
+          "type": "solid",
+          "color1": "#1b1815",
+          "color2": "#3b1517",
+          "opacity": 1,
+          "blur": 0,
+          "vignette": 0,
+          "image": ""
+        },
+        "typography": {
+          "fontFamily": "humanist",
+          "titleColor": "#fff8e8",
+          "textColor": "#fff8e8",
+          "priceColor": "#ffd56a",
+          "titleSize": 1.08,
+          "textSize": 1.02,
+          "priceSize": 1,
+          "titleBold": true,
+          "textBold": false,
+          "textAlign": "center",
+          "titleAutoFit": true,
+          "textAutoFit": true
+        },
+        "banner": {
+          "type": "none",
+          "text": ""
+        },
+        "shape": {
+          "type": "none",
+          "text": "",
+          "position": "right"
+        },
+        "transition": {
+          "type": "fade",
+          "duration": 800
+        },
+        "master": {
+          "useSafeArea": true,
+          "footer": "Köcheclub Werne · Weihnachtsmarkt"
+        }
+      },
+      "layout": {
+        "title": {
+          "x": 50,
+          "y": 20,
+          "w": 84,
+          "h": 16,
+          "scale": 1,
+          "rotation": 0,
+          "opacity": 1,
+          "z": 12
+        },
+        "text": {
+          "x": 50,
+          "y": 46,
+          "w": 78,
+          "h": 20,
+          "scale": 1,
+          "rotation": 0,
+          "opacity": 1,
+          "z": 11
+        }
+      },
+      "objectVisibility": {
+        "weather": true
+      }
+    },
+    {
+      "id": "wm26-53973012",
+      "presentationKind": "weihnachtsmarkt-2026",
+      "renderMode": "christmas-editable",
+      "type": "weather",
+      "title": "Wetteraussichten der nächsten Tage",
+      "text": "",
+      "price": "",
+      "duration": 10,
+      "noTime": true,
+      "start": "00:00",
+      "end": "23:59",
+      "ticker": "",
+      "theme": "dark",
+      "decorations": [],
+      "animation": "none",
+      "enabled": true,
+      "backgroundPreset": "market-window-lights",
+      "backgroundDataUrl": "",
+      "backgroundOpacity": 1,
+      "presentationDesign": {
+        "palette": "warm",
+        "background": {
+          "type": "solid",
+          "color1": "#1b1815",
+          "color2": "#3b1517",
+          "opacity": 1,
+          "blur": 0,
+          "vignette": 0,
+          "image": ""
+        },
+        "typography": {
+          "fontFamily": "humanist",
+          "titleColor": "#fff8e8",
+          "textColor": "#fff8e8",
+          "priceColor": "#ffd56a",
+          "titleSize": 1.08,
+          "textSize": 1.02,
+          "priceSize": 1,
+          "titleBold": true,
+          "textBold": false,
+          "textAlign": "center",
+          "titleAutoFit": true,
+          "textAutoFit": true
+        },
+        "banner": {
+          "type": "none",
+          "text": ""
+        },
+        "shape": {
+          "type": "none",
+          "text": "",
+          "position": "right"
+        },
+        "transition": {
+          "type": "fade",
+          "duration": 800
+        },
+        "master": {
+          "useSafeArea": true,
+          "footer": "Köcheclub Werne · Weihnachtsmarkt"
+        }
+      },
+      "layout": {
+        "title": {
+          "x": 50,
+          "y": 20,
+          "w": 84,
+          "h": 16,
+          "scale": 1,
+          "rotation": 0,
+          "opacity": 1,
+          "z": 12
+        },
+        "text": {
+          "x": 50,
+          "y": 46,
+          "w": 78,
+          "h": 20,
+          "scale": 1,
+          "rotation": 0,
+          "opacity": 1,
+          "z": 11
+        }
+      },
+      "objectVisibility": {
+        "weather": true
+      },
+      "weatherCompact": true
+    },
+    {
+      "id": "wm26-member-slot-b",
+      "presentationKind": "weihnachtsmarkt-2026",
+      "renderMode": "member-showcase",
+      "type": "member",
+      "title": "Hans-Joachim Koch",
+      "text": "Zu unseren Treffen komme ich gerne, weil der Austausch unter Kollegen einfach wertvoll ist.",
+      "price": "",
+      "duration": 10,
+      "noTime": true,
+      "start": "00:00",
+      "end": "23:59",
+      "ticker": "",
+      "theme": "dark",
+      "decorations": [
+        "👨‍🍳"
+      ],
+      "animation": "none",
+      "enabled": true,
+      "backgroundPreset": "market-window-lights",
+      "backgroundDataUrl": "",
+      "backgroundOpacity": 1,
+      "presentationDesign": {
+        "palette": "warm",
+        "background": {
+          "type": "solid",
+          "color1": "#1b1815",
+          "color2": "#3b1517",
+          "opacity": 1,
+          "blur": 0,
+          "vignette": 0,
+          "image": ""
+        },
+        "typography": {
+          "fontFamily": "humanist",
+          "titleColor": "#fff8e8",
+          "textColor": "#fff8e8",
+          "priceColor": "#ffd56a",
+          "titleSize": 1.08,
+          "textSize": 1.02,
+          "priceSize": 1,
+          "titleBold": true,
+          "textBold": false,
+          "textAlign": "center",
+          "titleAutoFit": true,
+          "textAutoFit": true
+        },
+        "banner": {
+          "type": "none",
+          "text": ""
+        },
+        "shape": {
+          "type": "none",
+          "text": "",
+          "position": "right"
+        },
+        "transition": {
+          "type": "fade",
+          "duration": 800
+        },
+        "master": {
+          "useSafeArea": true,
+          "footer": "Köcheclub Werne · Weihnachtsmarkt"
+        }
+      },
+      "layout": {
+        "title": {
+          "x": 66,
+          "y": 37,
+          "w": 56,
+          "h": 15,
+          "scale": 1,
+          "rotation": 0,
+          "opacity": 1,
+          "z": 12
+        },
+        "text": {
+          "x": 66,
+          "y": 58,
+          "w": 56,
+          "h": 28,
+          "scale": 1,
+          "rotation": 0,
+          "opacity": 1,
+          "z": 12
+        },
+        "price": {
+          "x": 50,
+          "y": 69,
+          "w": 42,
+          "h": 13,
+          "scale": 1,
+          "rotation": 0,
+          "opacity": 1,
+          "z": 13
+        },
+        "symbols": {
+          "x": 88,
+          "y": 11,
+          "w": 16,
+          "h": 10,
+          "scale": 0.8,
+          "rotation": 0,
+          "opacity": 1,
+          "color": "#ffd56a",
+          "spacing": 8,
+          "z": 14
+        },
+        "ticker": {
+          "x": 50,
+          "y": 94,
+          "w": 92,
+          "h": 8,
+          "scale": 1,
+          "rotation": 0,
+          "opacity": 1,
+          "z": 16
+        },
+        "weather": {
+          "x": 50,
+          "y": 63,
+          "w": 88,
+          "h": 52,
+          "scale": 1,
+          "rotation": 0,
+          "opacity": 1,
+          "z": 10
+        },
+        "image": {
+          "x": 20,
+          "y": 51,
+          "w": 29,
+          "h": 68,
+          "scale": 1,
+          "rotation": 0,
+          "opacity": 1,
+          "z": 8
+        }
+      },
+      "sourcePresentation": {
+        "name": "Weihnachtsmarkt Werne · bearbeitbare Vorlage",
+        "templateVersion": "1.3.0"
+      },
+      "media": {
+        "name": "Hans-Joachim Koch · vorläufiges Foto austauschen",
+        "type": "image/jpeg",
+        "dataUrl": "../tv-content/weihnachtsmarkt-2026/members/mitglied-02.jpg",
+        "provisional": true
+      },
+      "objectLifecycleVersion": 2,
+      "memberSlot": "b",
+      "objectVisibility": {}
+    },
+    {
+      "id": "wm26-002",
+      "presentationKind": "weihnachtsmarkt-2026",
+      "renderMode": "group-showcase",
+      "type": "gallery",
+      "title": "Der Köcheclub stellt sich vor",
+      "text": "Gemeinschaft · Erfahrung · Freude am Kochen",
+      "price": "",
+      "duration": 10,
+      "noTime": true,
+      "start": "00:00",
+      "end": "23:59",
+      "ticker": "",
+      "theme": "dark",
+      "decorations": [],
+      "animation": "none",
+      "enabled": true,
+      "backgroundPreset": "market-window-lights",
+      "backgroundDataUrl": "",
+      "backgroundOpacity": 1,
+      "presentationDesign": {
+        "palette": "warm",
+        "background": {
+          "type": "solid",
+          "color1": "#1b1815",
+          "color2": "#3b1517",
+          "opacity": 1,
+          "blur": 0,
+          "vignette": 0,
+          "image": ""
+        },
+        "typography": {
+          "fontFamily": "humanist",
+          "titleColor": "#fff8e8",
+          "textColor": "#fff8e8",
+          "priceColor": "#ffd56a",
+          "titleSize": 1.08,
+          "textSize": 1.02,
+          "priceSize": 1,
+          "titleBold": true,
+          "textBold": false,
+          "textAlign": "center",
+          "titleAutoFit": true,
+          "textAutoFit": true
+        },
+        "banner": {
+          "type": "none",
+          "text": ""
+        },
+        "shape": {
+          "type": "none",
+          "text": "",
+          "position": "right"
+        },
+        "transition": {
+          "type": "fade",
+          "duration": 800
+        },
+        "master": {
+          "useSafeArea": true,
+          "footer": "Köcheclub Werne · Weihnachtsmarkt"
+        }
+      },
+      "layout": {
+        "title": {
+          "x": 72,
+          "y": 38,
+          "w": 45,
+          "h": 18,
+          "scale": 1,
+          "rotation": 0,
+          "opacity": 1,
+          "z": 12
+        },
+        "text": {
+          "x": 72,
+          "y": 59,
+          "w": 42,
+          "h": 20,
+          "scale": 1,
+          "rotation": 0,
+          "opacity": 1,
+          "z": 12
+        },
+        "price": {
+          "x": 50,
+          "y": 69,
+          "w": 42,
+          "h": 13,
+          "scale": 1,
+          "rotation": 0,
+          "opacity": 1,
+          "z": 13
+        },
+        "symbols": {
+          "x": 90,
+          "y": 9,
+          "w": 12,
+          "h": 8,
+          "scale": 0.8,
+          "rotation": 0,
+          "opacity": 1,
+          "color": "#ffd56a",
+          "spacing": 8,
+          "z": 14
+        },
+        "ticker": {
+          "x": 50,
+          "y": 94,
+          "w": 92,
+          "h": 8,
+          "scale": 1,
+          "rotation": 0,
+          "opacity": 1,
+          "z": 16
+        },
+        "weather": {
+          "x": 50,
+          "y": 63,
+          "w": 88,
+          "h": 52,
+          "scale": 1,
+          "rotation": 0,
+          "opacity": 1,
+          "z": 10
+        },
+        "image": {
+          "x": 30,
+          "y": 52,
+          "w": 48,
+          "h": 68,
+          "scale": 1,
+          "rotation": 0,
+          "opacity": 1,
+          "z": 8
+        }
+      },
+      "sourcePresentation": {
+        "name": "Weihnachtsmarkt Werne · bearbeitbare Vorlage",
+        "templateVersion": "1.3.0"
+      },
+      "media": {
+        "name": "Gruppenfoto Köcheclub · vorläufig",
+        "type": "image/jpeg",
+        "dataUrl": "../tv-content/weihnachtsmarkt-2026/members/gruppenfoto-koecheclub.jpg",
+        "provisional": true
+      },
+      "objectLifecycleVersion": 2,
+      "objectVisibility": {}
+    },
+    {
+      "id": "wm26-0d5e92e8",
+      "presentationKind": "weihnachtsmarkt-2026",
+      "renderMode": "christmas-editable",
+      "type": "notice",
+      "title": "Laufende Projekte 2026",
+      "text": "• Wünsche-Wagen\n• Marga-Spiegel-Schule\n• Platzhalter – weiteres Projekt folgt",
+      "price": "",
+      "duration": 10,
+      "noTime": true,
+      "start": "00:00",
+      "end": "23:59",
+      "ticker": "",
+      "theme": "dark",
+      "decorations": [
+        "🎁"
+      ],
+      "animation": "sparkle-wave",
+      "enabled": true,
+      "backgroundPreset": "market-window-lights",
+      "backgroundDataUrl": "",
+      "backgroundOpacity": 1,
+      "presentationDesign": {
+        "palette": "warm",
+        "background": {
+          "type": "solid",
+          "color1": "#1b1815",
+          "color2": "#3b1517",
+          "opacity": 1,
+          "blur": 0,
+          "vignette": 0,
+          "image": ""
+        },
+        "typography": {
+          "fontFamily": "humanist",
+          "titleColor": "#fff8e8",
+          "textColor": "#fff8e8",
+          "priceColor": "#ffd56a",
+          "titleSize": 1.08,
+          "textSize": 0.85,
+          "priceSize": 1,
+          "titleBold": true,
+          "textBold": false,
+          "textAlign": "left",
+          "titleAutoFit": true,
+          "textAutoFit": true
+        },
+        "banner": {
+          "type": "none",
+          "text": ""
+        },
+        "shape": {
+          "type": "none",
+          "text": "",
+          "position": "right"
+        },
+        "transition": {
+          "type": "fade",
+          "duration": 800
+        },
+        "master": {
+          "useSafeArea": true,
+          "footer": "Köcheclub Werne · Weihnachtsmarkt"
+        }
+      },
+      "layout": {
+        "title": {
+          "x": 50,
+          "y": 20,
+          "w": 84,
+          "h": 16,
+          "scale": 1,
+          "rotation": 0,
+          "opacity": 1,
+          "z": 12
+        },
+        "text": {
+          "x": 50,
+          "y": 56,
+          "w": 86,
+          "h": 56,
+          "scale": 1,
+          "rotation": 0,
+          "opacity": 1,
+          "z": 11
+        }
+      },
+      "objectVisibility": {}
+    },
+    {
+      "id": "wm26-b2edaaec",
+      "presentationKind": "weihnachtsmarkt-2026",
+      "renderMode": "christmas-editable",
+      "type": "notice",
+      "title": "Dank Ihrer Unterstützung – Projekte vergangener Jahre",
+      "text": "• Kinderkrebsstation\n• Zahnarztprojekt im Ausland\n• Snoozle-Raum\n• Kinderhospiz\n• Kloster Werne\n• Kinderheim Werne",
+      "price": "",
+      "duration": 10,
+      "noTime": true,
+      "start": "00:00",
+      "end": "23:59",
+      "ticker": "",
+      "theme": "dark",
+      "decorations": [
+        "❤️"
+      ],
+      "animation": "glitter",
+      "enabled": true,
+      "backgroundPreset": "market-window-lights",
+      "backgroundDataUrl": "",
+      "backgroundOpacity": 1,
+      "presentationDesign": {
+        "palette": "warm",
+        "background": {
+          "type": "solid",
+          "color1": "#1b1815",
+          "color2": "#3b1517",
+          "opacity": 1,
+          "blur": 0,
+          "vignette": 0,
+          "image": ""
+        },
+        "typography": {
+          "fontFamily": "humanist",
+          "titleColor": "#fff8e8",
+          "textColor": "#fff8e8",
+          "priceColor": "#ffd56a",
+          "titleSize": 1.08,
+          "textSize": 0.85,
+          "priceSize": 1,
+          "titleBold": true,
+          "textBold": false,
+          "textAlign": "left",
+          "titleAutoFit": true,
+          "textAutoFit": true
+        },
+        "banner": {
+          "type": "none",
+          "text": ""
+        },
+        "shape": {
+          "type": "none",
+          "text": "",
+          "position": "right"
+        },
+        "transition": {
+          "type": "fade",
+          "duration": 800
+        },
+        "master": {
+          "useSafeArea": true,
+          "footer": "Köcheclub Werne · Weihnachtsmarkt"
+        }
+      },
+      "layout": {
+        "title": {
+          "x": 50,
+          "y": 20,
+          "w": 84,
+          "h": 16,
+          "scale": 1,
+          "rotation": 0,
+          "opacity": 1,
+          "z": 12
+        },
+        "text": {
+          "x": 50,
+          "y": 56,
+          "w": 86,
+          "h": 56,
+          "scale": 1,
+          "rotation": 0,
+          "opacity": 1,
+          "z": 11
+        }
+      },
+      "objectVisibility": {}
+    },
+    {
+      "id": "wm26-9c4bef77",
+      "presentationKind": "weihnachtsmarkt-2026",
+      "renderMode": "christmas-editable",
+      "type": "notice",
+      "title": "Weitere Projekte vergangener Jahre",
+      "text": "• Platzhalter – weiteres Projekt folgt\n• Platzhalter – weiteres Projekt folgt\n• Platzhalter – weiteres Projekt folgt",
+      "price": "",
+      "duration": 10,
+      "noTime": true,
+      "start": "00:00",
+      "end": "23:59",
+      "ticker": "",
+      "theme": "dark",
+      "decorations": [
+        "❤️"
+      ],
+      "animation": "glitter",
+      "enabled": true,
+      "backgroundPreset": "market-window-lights",
+      "backgroundDataUrl": "",
+      "backgroundOpacity": 1,
+      "presentationDesign": {
+        "palette": "warm",
+        "background": {
+          "type": "solid",
+          "color1": "#1b1815",
+          "color2": "#3b1517",
+          "opacity": 1,
+          "blur": 0,
+          "vignette": 0,
+          "image": ""
+        },
+        "typography": {
+          "fontFamily": "humanist",
+          "titleColor": "#fff8e8",
+          "textColor": "#fff8e8",
+          "priceColor": "#ffd56a",
+          "titleSize": 1.08,
+          "textSize": 0.85,
+          "priceSize": 1,
+          "titleBold": true,
+          "textBold": false,
+          "textAlign": "left",
+          "titleAutoFit": true,
+          "textAutoFit": true
+        },
+        "banner": {
+          "type": "none",
+          "text": ""
+        },
+        "shape": {
+          "type": "none",
+          "text": "",
+          "position": "right"
+        },
+        "transition": {
+          "type": "fade",
+          "duration": 800
+        },
+        "master": {
+          "useSafeArea": true,
+          "footer": "Köcheclub Werne · Weihnachtsmarkt"
+        }
+      },
+      "layout": {
+        "title": {
+          "x": 50,
+          "y": 20,
+          "w": 84,
+          "h": 16,
+          "scale": 1,
+          "rotation": 0,
+          "opacity": 1,
+          "z": 12
+        },
+        "text": {
+          "x": 50,
+          "y": 56,
+          "w": 86,
+          "h": 56,
+          "scale": 1,
+          "rotation": 0,
+          "opacity": 1,
+          "z": 11
+        }
+      },
+      "objectVisibility": {}
+    },
+    {
+      "id": "wm26-16a265fb",
+      "presentationKind": "weihnachtsmarkt-2026",
+      "renderMode": "christmas-editable",
+      "type": "qr",
+      "title": "Aktuelles offizielles Programm",
+      "text": "QR-Code scannen – Informationen der Stadt Werne",
+      "price": "",
+      "duration": 10,
+      "noTime": true,
+      "start": "00:00",
+      "end": "23:59",
+      "ticker": "",
+      "theme": "dark",
+      "decorations": [
+        "📱"
+      ],
+      "animation": "none",
+      "enabled": true,
+      "backgroundPreset": "market-window-lights",
+      "backgroundDataUrl": "",
+      "backgroundOpacity": 1,
+      "presentationDesign": {
+        "palette": "warm",
+        "background": {
+          "type": "solid",
+          "color1": "#1b1815",
+          "color2": "#3b1517",
+          "opacity": 1,
+          "blur": 0,
+          "vignette": 0,
+          "image": ""
+        },
+        "typography": {
+          "fontFamily": "humanist",
+          "titleColor": "#fff8e8",
+          "textColor": "#fff8e8",
+          "priceColor": "#ffd56a",
+          "titleSize": 1.08,
+          "textSize": 1.02,
+          "priceSize": 1,
+          "titleBold": true,
+          "textBold": false,
+          "textAlign": "center",
+          "titleAutoFit": true,
+          "textAutoFit": true
+        },
+        "banner": {
+          "type": "none",
+          "text": ""
+        },
+        "shape": {
+          "type": "none",
+          "text": "",
+          "position": "right"
+        },
+        "transition": {
+          "type": "fade",
+          "duration": 800
+        },
+        "master": {
+          "useSafeArea": true,
+          "footer": "Köcheclub Werne · Weihnachtsmarkt"
+        }
+      },
+      "layout": {
+        "title": {
+          "x": 50,
+          "y": 20,
+          "w": 84,
+          "h": 16,
+          "scale": 1,
+          "rotation": 0,
+          "opacity": 1,
+          "z": 12
+        },
+        "text": {
+          "x": 50,
+          "y": 46,
+          "w": 78,
+          "h": 20,
+          "scale": 1,
+          "rotation": 0,
+          "opacity": 1,
+          "z": 11
+        }
+      },
+      "objectVisibility": {},
+      "officialUrl": "https://www.werne.de/de/erlebnis/stadt-kultur-erleben/maerkte/weihnachtsmarkt.php",
+      "media": {
+        "name": "QR-Code Stadt Werne Programm",
+        "type": "image/png",
+        "dataUrl": "data:image/gif;base64,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"
+      }
+    },
+    {
+      "id": "wm26-488b653a",
+      "presentationKind": "weihnachtsmarkt-2026",
+      "renderMode": "christmas-editable",
+      "type": "notice",
+      "title": "Lust, dabei zu sein?",
+      "text": "",
+      "price": "",
+      "duration": 10,
+      "noTime": true,
+      "start": "00:00",
+      "end": "23:59",
+      "ticker": "",
+      "theme": "dark",
+      "decorations": [
+        "✨"
+      ],
+      "animation": "shooting-star",
+      "enabled": true,
+      "backgroundPreset": "market-window-lights",
+      "backgroundDataUrl": "",
+      "backgroundOpacity": 1,
+      "presentationDesign": {
+        "palette": "warm",
+        "background": {
+          "type": "solid",
+          "color1": "#1b1815",
+          "color2": "#3b1517",
+          "opacity": 1,
+          "blur": 0,
+          "vignette": 0,
+          "image": ""
+        },
+        "typography": {
+          "fontFamily": "humanist",
+          "titleColor": "#fff8e8",
+          "textColor": "#fff8e8",
+          "priceColor": "#ffd56a",
+          "titleSize": 1.08,
+          "textSize": 1.02,
+          "priceSize": 1,
+          "titleBold": true,
+          "textBold": false,
+          "textAlign": "center",
+          "titleAutoFit": true,
+          "textAutoFit": true
+        },
+        "banner": {
+          "type": "none",
+          "text": ""
+        },
+        "shape": {
+          "type": "none",
+          "text": "",
+          "position": "right"
+        },
+        "transition": {
+          "type": "fade",
+          "duration": 800
+        },
+        "master": {
+          "useSafeArea": true,
+          "footer": "Köcheclub Werne · Weihnachtsmarkt"
+        }
+      },
+      "layout": {
+        "title": {
+          "x": 50,
+          "y": 20,
+          "w": 84,
+          "h": 16,
+          "scale": 1,
+          "rotation": 0,
+          "opacity": 1,
+          "z": 12
+        },
+        "text": {
+          "x": 50,
+          "y": 46,
+          "w": 78,
+          "h": 20,
+          "scale": 1,
+          "rotation": 0,
+          "opacity": 1,
+          "z": 11
+        }
+      },
+      "objectVisibility": {}
+    },
+    {
+      "id": "wm26-a6ae2379",
+      "presentationKind": "weihnachtsmarkt-2026",
+      "renderMode": "christmas-editable",
+      "type": "qr",
+      "title": "Werden Sie Teil des Köcheclub Werne",
+      "text": "Wir freuen uns über jeden, der Lust hat mitzumachen – ob beim Kochen, bei Aktionen oder Projekten.\nSprechen Sie uns gerne direkt an, oder nehmen Sie über den QR-Code Kontakt auf.",
+      "price": "",
+      "duration": 10,
+      "noTime": true,
+      "start": "00:00",
+      "end": "23:59",
+      "ticker": "",
+      "theme": "dark",
+      "decorations": [
+        "🤝"
+      ],
+      "animation": "glitter",
+      "enabled": true,
+      "backgroundPreset": "market-window-lights",
+      "backgroundDataUrl": "",
+      "backgroundOpacity": 1,
+      "presentationDesign": {
+        "palette": "warm",
+        "background": {
+          "type": "solid",
+          "color1": "#1b1815",
+          "color2": "#3b1517",
+          "opacity": 1,
+          "blur": 0,
+          "vignette": 0,
+          "image": ""
+        },
+        "typography": {
+          "fontFamily": "humanist",
+          "titleColor": "#fff8e8",
+          "textColor": "#fff8e8",
+          "priceColor": "#ffd56a",
+          "titleSize": 1.08,
+          "textSize": 0.85,
+          "priceSize": 1,
+          "titleBold": true,
+          "textBold": false,
+          "textAlign": "center",
+          "titleAutoFit": true,
+          "textAutoFit": true
+        },
+        "banner": {
+          "type": "none",
+          "text": ""
+        },
+        "shape": {
+          "type": "none",
+          "text": "",
+          "position": "right"
+        },
+        "transition": {
+          "type": "fade",
+          "duration": 800
+        },
+        "master": {
+          "useSafeArea": true,
+          "footer": "Köcheclub Werne · Weihnachtsmarkt"
+        }
+      },
+      "layout": {
+        "title": {
+          "x": 50,
+          "y": 20,
+          "w": 84,
+          "h": 16,
+          "scale": 1,
+          "rotation": 0,
+          "opacity": 1,
+          "z": 12
+        },
+        "text": {
+          "x": 50,
+          "y": 52,
+          "w": 84,
+          "h": 40,
+          "scale": 1,
+          "rotation": 0,
+          "opacity": 1,
+          "z": 11
+        }
+      },
+      "objectVisibility": {},
+      "contactEmail": "zander.klaus@web.de",
+      "media": {
+        "name": "QR-Code Kontakt Köcheclub",
+        "type": "image/png",
+        "dataUrl": "data:image/gif;base64,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"
+      }
+    }
+  ],
+  "catalogSnapshot": [],
+  "backgroundAssets": {},
+  "source": {
+    "application": "KC MarktKasse Manager",
+    "integration": "editable Christmas market presentation",
+    "templateVersion": "1.3.0",
+    "memberContentVersion": "1.3.0",
+    "catalogContentVersion": "1.2.0",
+    "tvVersion": "0.29.40",
+    "createdAt": "2026-07-24",
+    "memberPool": [
+      {
+        "id": "wm26-003",
+        "presentationKind": "weihnachtsmarkt-2026",
+        "renderMode": "member-showcase",
+        "type": "member",
+        "title": "Frank Brösel",
+        "text": "Ich mache gerne mit, weil wir gemeinsam viel bewegen und dabei immer Spaß haben.",
+        "price": "",
+        "duration": 10,
+        "noTime": true,
+        "start": "00:00",
+        "end": "23:59",
+        "ticker": "",
+        "theme": "dark",
+        "decorations": [
+          "👨‍🍳"
+        ],
+        "animation": "none",
+        "enabled": true,
+        "backgroundPreset": "market-window-lights",
+        "backgroundDataUrl": "",
+        "backgroundOpacity": 1,
+        "presentationDesign": {
+          "palette": "warm",
+          "background": {
+            "type": "solid",
+            "color1": "#1b1815",
+            "color2": "#3b1517",
+            "opacity": 1,
+            "blur": 0,
+            "vignette": 0,
+            "image": ""
+          },
+          "typography": {
+            "fontFamily": "humanist",
+            "titleColor": "#fff8e8",
+            "textColor": "#fff8e8",
+            "priceColor": "#ffd56a",
+            "titleSize": 1.08,
+            "textSize": 1.02,
+            "priceSize": 1,
+            "titleBold": true,
+            "textBold": false,
+            "textAlign": "center"
+          },
+          "banner": {
+            "type": "none",
+            "text": ""
+          },
+          "shape": {
+            "type": "none",
+            "text": "",
+            "position": "right"
+          },
+          "transition": {
+            "type": "fade",
+            "duration": 800
+          },
+          "master": {
+            "useSafeArea": true,
+            "footer": "Köcheclub Werne · Weihnachtsmarkt"
+          }
+        },
+        "layout": {
+          "title": {
+            "x": 66,
+            "y": 37,
+            "w": 56,
+            "h": 15,
+            "scale": 1,
+            "rotation": 0,
+            "opacity": 1,
+            "z": 12
+          },
+          "text": {
+            "x": 66,
+            "y": 58,
+            "w": 56,
+            "h": 28,
+            "scale": 1,
+            "rotation": 0,
+            "opacity": 1,
+            "z": 12
+          },
+          "price": {
+            "x": 50,
+            "y": 69,
+            "w": 42,
+            "h": 13,
+            "scale": 1,
+            "rotation": 0,
+            "opacity": 1,
+            "z": 13
+          },
+          "symbols": {
+            "x": 88,
+            "y": 11,
+            "w": 16,
+            "h": 10,
+            "scale": 0.8,
+            "rotation": 0,
+            "opacity": 1,
+            "color": "#ffd56a",
+            "spacing": 8,
+            "z": 14
+          },
+          "ticker": {
+            "x": 50,
+            "y": 94,
+            "w": 92,
+            "h": 8,
+            "scale": 1,
+            "rotation": 0,
+            "opacity": 1,
+            "z": 16
+          },
+          "weather": {
+            "x": 50,
+            "y": 63,
+            "w": 88,
+            "h": 52,
+            "scale": 1,
+            "rotation": 0,
+            "opacity": 1,
+            "z": 10
+          },
+          "image": {
+            "x": 20,
+            "y": 51,
+            "w": 29,
+            "h": 68,
+            "scale": 1,
+            "rotation": 0,
+            "opacity": 1,
+            "z": 8
+          }
+        },
+        "sourcePresentation": {
+          "name": "Weihnachtsmarkt Werne · bearbeitbare Vorlage",
+          "templateVersion": "1.3.0"
+        },
+        "media": {
+          "name": "Frank Brösel · vorläufiges Foto austauschen",
+          "type": "image/jpeg",
+          "dataUrl": "../tv-content/weihnachtsmarkt-2026/members/mitglied-01.jpg",
+          "provisional": true
+        },
+        "objectLifecycleVersion": 2
+      },
+      {
+        "id": "wm26-004",
+        "presentationKind": "weihnachtsmarkt-2026",
+        "renderMode": "member-showcase",
+        "type": "member",
+        "title": "Hans-Joachim Koch",
+        "text": "Zu unseren Treffen komme ich gerne, weil der Austausch unter Kollegen einfach wertvoll ist.",
+        "price": "",
+        "duration": 10,
+        "noTime": true,
+        "start": "00:00",
+        "end": "23:59",
+        "ticker": "",
+        "theme": "dark",
+        "decorations": [
+          "👨‍🍳"
+        ],
+        "animation": "none",
+        "enabled": true,
+        "backgroundPreset": "market-window-lights",
+        "backgroundDataUrl": "",
+        "backgroundOpacity": 1,
+        "presentationDesign": {
+          "palette": "warm",
+          "background": {
+            "type": "solid",
+            "color1": "#1b1815",
+            "color2": "#3b1517",
+            "opacity": 1,
+            "blur": 0,
+            "vignette": 0,
+            "image": ""
+          },
+          "typography": {
+            "fontFamily": "humanist",
+            "titleColor": "#fff8e8",
+            "textColor": "#fff8e8",
+            "priceColor": "#ffd56a",
+            "titleSize": 1.08,
+            "textSize": 1.02,
+            "priceSize": 1,
+            "titleBold": true,
+            "textBold": false,
+            "textAlign": "center"
+          },
+          "banner": {
+            "type": "none",
+            "text": ""
+          },
+          "shape": {
+            "type": "none",
+            "text": "",
+            "position": "right"
+          },
+          "transition": {
+            "type": "fade",
+            "duration": 800
+          },
+          "master": {
+            "useSafeArea": true,
+            "footer": "Köcheclub Werne · Weihnachtsmarkt"
+          }
+        },
+        "layout": {
+          "title": {
+            "x": 66,
+            "y": 37,
+            "w": 56,
+            "h": 15,
+            "scale": 1,
+            "rotation": 0,
+            "opacity": 1,
+            "z": 12
+          },
+          "text": {
+            "x": 66,
+            "y": 58,
+            "w": 56,
+            "h": 28,
+            "scale": 1,
+            "rotation": 0,
+            "opacity": 1,
+            "z": 12
+          },
+          "price": {
+            "x": 50,
+            "y": 69,
+            "w": 42,
+            "h": 13,
+            "scale": 1,
+            "rotation": 0,
+            "opacity": 1,
+            "z": 13
+          },
+          "symbols": {
+            "x": 88,
+            "y": 11,
+            "w": 16,
+            "h": 10,
+            "scale": 0.8,
+            "rotation": 0,
+            "opacity": 1,
+            "color": "#ffd56a",
+            "spacing": 8,
+            "z": 14
+          },
+          "ticker": {
+            "x": 50,
+            "y": 94,
+            "w": 92,
+            "h": 8,
+            "scale": 1,
+            "rotation": 0,
+            "opacity": 1,
+            "z": 16
+          },
+          "weather": {
+            "x": 50,
+            "y": 63,
+            "w": 88,
+            "h": 52,
+            "scale": 1,
+            "rotation": 0,
+            "opacity": 1,
+            "z": 10
+          },
+          "image": {
+            "x": 20,
+            "y": 51,
+            "w": 29,
+            "h": 68,
+            "scale": 1,
+            "rotation": 0,
+            "opacity": 1,
+            "z": 8
+          }
+        },
+        "sourcePresentation": {
+          "name": "Weihnachtsmarkt Werne · bearbeitbare Vorlage",
+          "templateVersion": "1.3.0"
+        },
+        "media": {
+          "name": "Hans-Joachim Koch · vorläufiges Foto austauschen",
+          "type": "image/jpeg",
+          "dataUrl": "../tv-content/weihnachtsmarkt-2026/members/mitglied-02.jpg",
+          "provisional": true
+        },
+        "objectLifecycleVersion": 2
+      },
+      {
+        "id": "wm26-005",
+        "presentationKind": "weihnachtsmarkt-2026",
+        "renderMode": "member-showcase",
+        "type": "member",
+        "title": "Dieter Zander",
+        "text": "Ich bringe mich gerne ein, weil mir Gemeinschaft und soziales Engagement wichtig sind.",
+        "price": "",
+        "duration": 10,
+        "noTime": true,
+        "start": "00:00",
+        "end": "23:59",
+        "ticker": "",
+        "theme": "dark",
+        "decorations": [
+          "⭐"
+        ],
+        "animation": "none",
+        "enabled": true,
+        "backgroundPreset": "market-window-lights",
+        "backgroundDataUrl": "",
+        "backgroundOpacity": 1,
+        "presentationDesign": {
+          "palette": "warm",
+          "background": {
+            "type": "solid",
+            "color1": "#1b1815",
+            "color2": "#3b1517",
+            "opacity": 1,
+            "blur": 0,
+            "vignette": 0,
+            "image": ""
+          },
+          "typography": {
+            "fontFamily": "humanist",
+            "titleColor": "#fff8e8",
+            "textColor": "#fff8e8",
+            "priceColor": "#ffd56a",
+            "titleSize": 1.08,
+            "textSize": 1.02,
+            "priceSize": 1,
+            "titleBold": true,
+            "textBold": false,
+            "textAlign": "center"
+          },
+          "banner": {
+            "type": "none",
+            "text": ""
+          },
+          "shape": {
+            "type": "none",
+            "text": "",
+            "position": "right"
+          },
+          "transition": {
+            "type": "fade",
+            "duration": 800
+          },
+          "master": {
+            "useSafeArea": true,
+            "footer": "Köcheclub Werne · Weihnachtsmarkt"
+          }
+        },
+        "layout": {
+          "title": {
+            "x": 66,
+            "y": 37,
+            "w": 56,
+            "h": 15,
+            "scale": 1,
+            "rotation": 0,
+            "opacity": 1,
+            "z": 12
+          },
+          "text": {
+            "x": 66,
+            "y": 58,
+            "w": 56,
+            "h": 28,
+            "scale": 1,
+            "rotation": 0,
+            "opacity": 1,
+            "z": 12
+          },
+          "price": {
+            "x": 50,
+            "y": 69,
+            "w": 42,
+            "h": 13,
+            "scale": 1,
+            "rotation": 0,
+            "opacity": 1,
+            "z": 13
+          },
+          "symbols": {
+            "x": 88,
+            "y": 11,
+            "w": 16,
+            "h": 10,
+            "scale": 0.8,
+            "rotation": 0,
+            "opacity": 1,
+            "color": "#ffd56a",
+            "spacing": 8,
+            "z": 14
+          },
+          "ticker": {
+            "x": 50,
+            "y": 94,
+            "w": 92,
+            "h": 8,
+            "scale": 1,
+            "rotation": 0,
+            "opacity": 1,
+            "z": 16
+          },
+          "weather": {
+            "x": 50,
+            "y": 63,
+            "w": 88,
+            "h": 52,
+            "scale": 1,
+            "rotation": 0,
+            "opacity": 1,
+            "z": 10
+          },
+          "image": {
+            "x": 20,
+            "y": 51,
+            "w": 29,
+            "h": 68,
+            "scale": 1,
+            "rotation": 0,
+            "opacity": 1,
+            "z": 8
+          }
+        },
+        "sourcePresentation": {
+          "name": "Weihnachtsmarkt Werne · bearbeitbare Vorlage",
+          "templateVersion": "1.3.0"
+        },
+        "media": {
+          "name": "Dieter Zander · vorläufiges Foto austauschen",
+          "type": "image/jpeg",
+          "dataUrl": "../tv-content/weihnachtsmarkt-2026/members/mitglied-03.jpg",
+          "provisional": true
+        },
+        "objectLifecycleVersion": 2
+      },
+      {
+        "id": "wm26-006",
+        "presentationKind": "weihnachtsmarkt-2026",
+        "renderMode": "member-showcase",
+        "type": "member",
+        "title": "Andrea Spahn",
+        "text": "Beim Köcheclub bin ich dabei, weil aus guten Ideen immer wieder tolle Aktionen entstehen.",
+        "price": "",
+        "duration": 10,
+        "noTime": true,
+        "start": "00:00",
+        "end": "23:59",
+        "ticker": "",
+        "theme": "dark",
+        "decorations": [
+          "👨‍🍳"
+        ],
+        "animation": "none",
+        "enabled": true,
+        "backgroundPreset": "market-window-lights",
+        "backgroundDataUrl": "",
+        "backgroundOpacity": 1,
+        "presentationDesign": {
+          "palette": "warm",
+          "background": {
+            "type": "solid",
+            "color1": "#1b1815",
+            "color2": "#3b1517",
+            "opacity": 1,
+            "blur": 0,
+            "vignette": 0,
+            "image": ""
+          },
+          "typography": {
+            "fontFamily": "humanist",
+            "titleColor": "#fff8e8",
+            "textColor": "#fff8e8",
+            "priceColor": "#ffd56a",
+            "titleSize": 1.08,
+            "textSize": 1.02,
+            "priceSize": 1,
+            "titleBold": true,
+            "textBold": false,
+            "textAlign": "center"
+          },
+          "banner": {
+            "type": "none",
+            "text": ""
+          },
+          "shape": {
+            "type": "none",
+            "text": "",
+            "position": "right"
+          },
+          "transition": {
+            "type": "fade",
+            "duration": 800
+          },
+          "master": {
+            "useSafeArea": true,
+            "footer": "Köcheclub Werne · Weihnachtsmarkt"
+          }
+        },
+        "layout": {
+          "title": {
+            "x": 66,
+            "y": 37,
+            "w": 56,
+            "h": 15,
+            "scale": 1,
+            "rotation": 0,
+            "opacity": 1,
+            "z": 12
+          },
+          "text": {
+            "x": 66,
+            "y": 58,
+            "w": 56,
+            "h": 28,
+            "scale": 1,
+            "rotation": 0,
+            "opacity": 1,
+            "z": 12
+          },
+          "price": {
+            "x": 50,
+            "y": 69,
+            "w": 42,
+            "h": 13,
+            "scale": 1,
+            "rotation": 0,
+            "opacity": 1,
+            "z": 13
+          },
+          "symbols": {
+            "x": 88,
+            "y": 11,
+            "w": 16,
+            "h": 10,
+            "scale": 0.8,
+            "rotation": 0,
+            "opacity": 1,
+            "color": "#ffd56a",
+            "spacing": 8,
+            "z": 14
+          },
+          "ticker": {
+            "x": 50,
+            "y": 94,
+            "w": 92,
+            "h": 8,
+            "scale": 1,
+            "rotation": 0,
+            "opacity": 1,
+            "z": 16
+          },
+          "weather": {
+            "x": 50,
+            "y": 63,
+            "w": 88,
+            "h": 52,
+            "scale": 1,
+            "rotation": 0,
+            "opacity": 1,
+            "z": 10
+          },
+          "image": {
+            "x": 20,
+            "y": 51,
+            "w": 29,
+            "h": 68,
+            "scale": 1,
+            "rotation": 0,
+            "opacity": 1,
+            "z": 8
+          }
+        },
+        "sourcePresentation": {
+          "name": "Weihnachtsmarkt Werne · bearbeitbare Vorlage",
+          "templateVersion": "1.3.0"
+        },
+        "media": {
+          "name": "Andrea Spahn · vorläufiges Foto austauschen",
+          "type": "image/jpeg",
+          "dataUrl": "../tv-content/weihnachtsmarkt-2026/members/mitglied-04.jpg",
+          "provisional": true
+        },
+        "objectLifecycleVersion": 2
+      },
+      {
+        "id": "wm26-007",
+        "presentationKind": "weihnachtsmarkt-2026",
+        "renderMode": "member-showcase",
+        "type": "member",
+        "title": "Klaus Zander",
+        "text": "Ich schätze besonders den Zusammenhalt und die vielen schönen gemeinsamen Erlebnisse.",
+        "price": "",
+        "duration": 10,
+        "noTime": true,
+        "start": "00:00",
+        "end": "23:59",
+        "ticker": "",
+        "theme": "dark",
+        "decorations": [
+          "👨‍🍳"
+        ],
+        "animation": "none",
+        "enabled": true,
+        "backgroundPreset": "market-window-lights",
+        "backgroundDataUrl": "",
+        "backgroundOpacity": 1,
+        "presentationDesign": {
+          "palette": "warm",
+          "background": {
+            "type": "solid",
+            "color1": "#1b1815",
+            "color2": "#3b1517",
+            "opacity": 1,
+            "blur": 0,
+            "vignette": 0,
+            "image": ""
+          },
+          "typography": {
+            "fontFamily": "humanist",
+            "titleColor": "#fff8e8",
+            "textColor": "#fff8e8",
+            "priceColor": "#ffd56a",
+            "titleSize": 1.08,
+            "textSize": 1.02,
+            "priceSize": 1,
+            "titleBold": true,
+            "textBold": false,
+            "textAlign": "center"
+          },
+          "banner": {
+            "type": "none",
+            "text": ""
+          },
+          "shape": {
+            "type": "none",
+            "text": "",
+            "position": "right"
+          },
+          "transition": {
+            "type": "fade",
+            "duration": 800
+          },
+          "master": {
+            "useSafeArea": true,
+            "footer": "Köcheclub Werne · Weihnachtsmarkt"
+          }
+        },
+        "layout": {
+          "title": {
+            "x": 66,
+            "y": 37,
+            "w": 56,
+            "h": 15,
+            "scale": 1,
+            "rotation": 0,
+            "opacity": 1,
+            "z": 12
+          },
+          "text": {
+            "x": 66,
+            "y": 58,
+            "w": 56,
+            "h": 28,
+            "scale": 1,
+            "rotation": 0,
+            "opacity": 1,
+            "z": 12
+          },
+          "price": {
+            "x": 50,
+            "y": 69,
+            "w": 42,
+            "h": 13,
+            "scale": 1,
+            "rotation": 0,
+            "opacity": 1,
+            "z": 13
+          },
+          "symbols": {
+            "x": 88,
+            "y": 11,
+            "w": 16,
+            "h": 10,
+            "scale": 0.8,
+            "rotation": 0,
+            "opacity": 1,
+            "color": "#ffd56a",
+            "spacing": 8,
+            "z": 14
+          },
+          "ticker": {
+            "x": 50,
+            "y": 94,
+            "w": 92,
+            "h": 8,
+            "scale": 1,
+            "rotation": 0,
+            "opacity": 1,
+            "z": 16
+          },
+          "weather": {
+            "x": 50,
+            "y": 63,
+            "w": 88,
+            "h": 52,
+            "scale": 1,
+            "rotation": 0,
+            "opacity": 1,
+            "z": 10
+          },
+          "image": {
+            "x": 20,
+            "y": 51,
+            "w": 29,
+            "h": 68,
+            "scale": 1,
+            "rotation": 0,
+            "opacity": 1,
+            "z": 8
+          }
+        },
+        "sourcePresentation": {
+          "name": "Weihnachtsmarkt Werne · bearbeitbare Vorlage",
+          "templateVersion": "1.3.0"
+        },
+        "media": {
+          "name": "Klaus Zander · vorläufiges Foto austauschen",
+          "type": "image/jpeg",
+          "dataUrl": "../tv-content/weihnachtsmarkt-2026/members/mitglied-05.jpg",
+          "provisional": true
+        },
+        "objectLifecycleVersion": 2
+      },
+      {
+        "id": "wm26-008",
+        "presentationKind": "weihnachtsmarkt-2026",
+        "renderMode": "member-showcase",
+        "type": "member",
+        "title": "Marianne Bierkämper",
+        "text": "Unsere Treffen sind für mich eine gute Mischung aus Fachgesprächen, Freundschaft und Geselligkeit.",
+        "price": "",
+        "duration": 10,
+        "noTime": true,
+        "start": "00:00",
+        "end": "23:59",
+        "ticker": "",
+        "theme": "dark",
+        "decorations": [
+          "⭐"
+        ],
+        "animation": "none",
+        "enabled": true,
+        "backgroundPreset": "market-window-lights",
+        "backgroundDataUrl": "",
+        "backgroundOpacity": 1,
+        "presentationDesign": {
+          "palette": "warm",
+          "background": {
+            "type": "solid",
+            "color1": "#1b1815",
+            "color2": "#3b1517",
+            "opacity": 1,
+            "blur": 0,
+            "vignette": 0,
+            "image": ""
+          },
+          "typography": {
+            "fontFamily": "humanist",
+            "titleColor": "#fff8e8",
+            "textColor": "#fff8e8",
+            "priceColor": "#ffd56a",
+            "titleSize": 1.08,
+            "textSize": 1.02,
+            "priceSize": 1,
+            "titleBold": true,
+            "textBold": false,
+            "textAlign": "center"
+          },
+          "banner": {
+            "type": "none",
+            "text": ""
+          },
+          "shape": {
+            "type": "none",
+            "text": "",
+            "position": "right"
+          },
+          "transition": {
+            "type": "fade",
+            "duration": 800
+          },
+          "master": {
+            "useSafeArea": true,
+            "footer": "Köcheclub Werne · Weihnachtsmarkt"
+          }
+        },
+        "layout": {
+          "title": {
+            "x": 66,
+            "y": 37,
+            "w": 56,
+            "h": 15,
+            "scale": 1,
+            "rotation": 0,
+            "opacity": 1,
+            "z": 12
+          },
+          "text": {
+            "x": 66,
+            "y": 58,
+            "w": 56,
+            "h": 28,
+            "scale": 1,
+            "rotation": 0,
+            "opacity": 1,
+            "z": 12
+          },
+          "price": {
+            "x": 50,
+            "y": 69,
+            "w": 42,
+            "h": 13,
+            "scale": 1,
+            "rotation": 0,
+            "opacity": 1,
+            "z": 13
+          },
+          "symbols": {
+            "x": 88,
+            "y": 11,
+            "w": 16,
+            "h": 10,
+            "scale": 0.8,
+            "rotation": 0,
+            "opacity": 1,
+            "color": "#ffd56a",
+            "spacing": 8,
+            "z": 14
+          },
+          "ticker": {
+            "x": 50,
+            "y": 94,
+            "w": 92,
+            "h": 8,
+            "scale": 1,
+            "rotation": 0,
+            "opacity": 1,
+            "z": 16
+          },
+          "weather": {
+            "x": 50,
+            "y": 63,
+            "w": 88,
+            "h": 52,
+            "scale": 1,
+            "rotation": 0,
+            "opacity": 1,
+            "z": 10
+          },
+          "image": {
+            "x": 20,
+            "y": 51,
+            "w": 29,
+            "h": 68,
+            "scale": 1,
+            "rotation": 0,
+            "opacity": 1,
+            "z": 8
+          }
+        },
+        "sourcePresentation": {
+          "name": "Weihnachtsmarkt Werne · bearbeitbare Vorlage",
+          "templateVersion": "1.3.0"
+        },
+        "media": {
+          "name": "Marianne Bierkämper · vorläufiges Foto austauschen",
+          "type": "image/jpeg",
+          "dataUrl": "../tv-content/weihnachtsmarkt-2026/members/mitglied-06.jpg",
+          "provisional": true
+        },
+        "objectLifecycleVersion": 2
+      },
+      {
+        "id": "wm26-009",
+        "presentationKind": "weihnachtsmarkt-2026",
+        "renderMode": "member-showcase",
+        "type": "member",
+        "title": "Karla Kazik",
+        "text": "Ich helfe gerne mit, wenn wir gemeinsam etwas für andere Menschen erreichen können.",
+        "price": "",
+        "duration": 10,
+        "noTime": true,
+        "start": "00:00",
+        "end": "23:59",
+        "ticker": "",
+        "theme": "dark",
+        "decorations": [
+          "👨‍🍳"
+        ],
+        "animation": "none",
+        "enabled": true,
+        "backgroundPreset": "market-window-lights",
+        "backgroundDataUrl": "",
+        "backgroundOpacity": 1,
+        "presentationDesign": {
+          "palette": "warm",
+          "background": {
+            "type": "solid",
+            "color1": "#1b1815",
+            "color2": "#3b1517",
+            "opacity": 1,
+            "blur": 0,
+            "vignette": 0,
+            "image": ""
+          },
+          "typography": {
+            "fontFamily": "humanist",
+            "titleColor": "#fff8e8",
+            "textColor": "#fff8e8",
+            "priceColor": "#ffd56a",
+            "titleSize": 1.08,
+            "textSize": 1.02,
+            "priceSize": 1,
+            "titleBold": true,
+            "textBold": false,
+            "textAlign": "center"
+          },
+          "banner": {
+            "type": "none",
+            "text": ""
+          },
+          "shape": {
+            "type": "none",
+            "text": "",
+            "position": "right"
+          },
+          "transition": {
+            "type": "fade",
+            "duration": 800
+          },
+          "master": {
+            "useSafeArea": true,
+            "footer": "Köcheclub Werne · Weihnachtsmarkt"
+          }
+        },
+        "layout": {
+          "title": {
+            "x": 66,
+            "y": 37,
+            "w": 56,
+            "h": 15,
+            "scale": 1,
+            "rotation": 0,
+            "opacity": 1,
+            "z": 12
+          },
+          "text": {
+            "x": 66,
+            "y": 58,
+            "w": 56,
+            "h": 28,
+            "scale": 1,
+            "rotation": 0,
+            "opacity": 1,
+            "z": 12
+          },
+          "price": {
+            "x": 50,
+            "y": 69,
+            "w": 42,
+            "h": 13,
+            "scale": 1,
+            "rotation": 0,
+            "opacity": 1,
+            "z": 13
+          },
+          "symbols": {
+            "x": 88,
+            "y": 11,
+            "w": 16,
+            "h": 10,
+            "scale": 0.8,
+            "rotation": 0,
+            "opacity": 1,
+            "color": "#ffd56a",
+            "spacing": 8,
+            "z": 14
+          },
+          "ticker": {
+            "x": 50,
+            "y": 94,
+            "w": 92,
+            "h": 8,
+            "scale": 1,
+            "rotation": 0,
+            "opacity": 1,
+            "z": 16
+          },
+          "weather": {
+            "x": 50,
+            "y": 63,
+            "w": 88,
+            "h": 52,
+            "scale": 1,
+            "rotation": 0,
+            "opacity": 1,
+            "z": 10
+          },
+          "image": {
+            "x": 20,
+            "y": 51,
+            "w": 29,
+            "h": 68,
+            "scale": 1,
+            "rotation": 0,
+            "opacity": 1,
+            "z": 8
+          }
+        },
+        "sourcePresentation": {
+          "name": "Weihnachtsmarkt Werne · bearbeitbare Vorlage",
+          "templateVersion": "1.3.0"
+        },
+        "media": {
+          "name": "Karla Kazik · vorläufiges Foto austauschen",
+          "type": "image/jpeg",
+          "dataUrl": "../tv-content/weihnachtsmarkt-2026/members/mitglied-07.jpg",
+          "provisional": true
+        },
+        "objectLifecycleVersion": 2
+      },
+      {
+        "id": "wm26-010",
+        "presentationKind": "weihnachtsmarkt-2026",
+        "renderMode": "member-showcase",
+        "type": "member",
+        "title": "Wilfried Wittwer",
+        "text": "Der Köcheclub bedeutet für mich Teamgeist, Verlässlichkeit und viel Freude an gemeinsamen Projekten.",
+        "price": "",
+        "duration": 10,
+        "noTime": true,
+        "start": "00:00",
+        "end": "23:59",
+        "ticker": "",
+        "theme": "dark",
+        "decorations": [
+          "👨‍🍳"
+        ],
+        "animation": "none",
+        "enabled": true,
+        "backgroundPreset": "market-window-lights",
+        "backgroundDataUrl": "",
+        "backgroundOpacity": 1,
+        "presentationDesign": {
+          "palette": "warm",
+          "background": {
+            "type": "solid",
+            "color1": "#1b1815",
+            "color2": "#3b1517",
+            "opacity": 1,
+            "blur": 0,
+            "vignette": 0,
+            "image": ""
+          },
+          "typography": {
+            "fontFamily": "humanist",
+            "titleColor": "#fff8e8",
+            "textColor": "#fff8e8",
+            "priceColor": "#ffd56a",
+            "titleSize": 1.08,
+            "textSize": 1.02,
+            "priceSize": 1,
+            "titleBold": true,
+            "textBold": false,
+            "textAlign": "center"
+          },
+          "banner": {
+            "type": "none",
+            "text": ""
+          },
+          "shape": {
+            "type": "none",
+            "text": "",
+            "position": "right"
+          },
+          "transition": {
+            "type": "fade",
+            "duration": 800
+          },
+          "master": {
+            "useSafeArea": true,
+            "footer": "Köcheclub Werne · Weihnachtsmarkt"
+          }
+        },
+        "layout": {
+          "title": {
+            "x": 66,
+            "y": 37,
+            "w": 56,
+            "h": 15,
+            "scale": 1,
+            "rotation": 0,
+            "opacity": 1,
+            "z": 12
+          },
+          "text": {
+            "x": 66,
+            "y": 58,
+            "w": 56,
+            "h": 28,
+            "scale": 1,
+            "rotation": 0,
+            "opacity": 1,
+            "z": 12
+          },
+          "price": {
+            "x": 50,
+            "y": 69,
+            "w": 42,
+            "h": 13,
+            "scale": 1,
+            "rotation": 0,
+            "opacity": 1,
+            "z": 13
+          },
+          "symbols": {
+            "x": 88,
+            "y": 11,
+            "w": 16,
+            "h": 10,
+            "scale": 0.8,
+            "rotation": 0,
+            "opacity": 1,
+            "color": "#ffd56a",
+            "spacing": 8,
+            "z": 14
+          },
+          "ticker": {
+            "x": 50,
+            "y": 94,
+            "w": 92,
+            "h": 8,
+            "scale": 1,
+            "rotation": 0,
+            "opacity": 1,
+            "z": 16
+          },
+          "weather": {
+            "x": 50,
+            "y": 63,
+            "w": 88,
+            "h": 52,
+            "scale": 1,
+            "rotation": 0,
+            "opacity": 1,
+            "z": 10
+          },
+          "image": {
+            "x": 20,
+            "y": 51,
+            "w": 29,
+            "h": 68,
+            "scale": 1,
+            "rotation": 0,
+            "opacity": 1,
+            "z": 8
+          }
+        },
+        "sourcePresentation": {
+          "name": "Weihnachtsmarkt Werne · bearbeitbare Vorlage",
+          "templateVersion": "1.3.0"
+        },
+        "media": {
+          "name": "Wilfried Wittwer · vorläufiges Foto austauschen",
+          "type": "image/jpeg",
+          "dataUrl": "../tv-content/weihnachtsmarkt-2026/members/mitglied-08.jpg",
+          "provisional": true
+        },
+        "objectLifecycleVersion": 2
+      },
+      {
+        "id": "wm26-011",
+        "presentationKind": "weihnachtsmarkt-2026",
+        "renderMode": "member-showcase",
+        "type": "member",
+        "title": "Anne Reinkober",
+        "text": "Ich bin gerne dabei, weil jeder seine Erfahrungen, Ideen und persönlichen Stärken einbringen kann.",
+        "price": "",
+        "duration": 10,
+        "noTime": true,
+        "start": "00:00",
+        "end": "23:59",
+        "ticker": "",
+        "theme": "dark",
+        "decorations": [
+          "⭐"
+        ],
+        "animation": "none",
+        "enabled": true,
+        "backgroundPreset": "market-window-lights",
+        "backgroundDataUrl": "",
+        "backgroundOpacity": 1,
+        "presentationDesign": {
+          "palette": "warm",
+          "background": {
+            "type": "solid",
+            "color1": "#1b1815",
+            "color2": "#3b1517",
+            "opacity": 1,
+            "blur": 0,
+            "vignette": 0,
+            "image": ""
+          },
+          "typography": {
+            "fontFamily": "humanist",
+            "titleColor": "#fff8e8",
+            "textColor": "#fff8e8",
+            "priceColor": "#ffd56a",
+            "titleSize": 1.08,
+            "textSize": 1.02,
+            "priceSize": 1,
+            "titleBold": true,
+            "textBold": false,
+            "textAlign": "center"
+          },
+          "banner": {
+            "type": "none",
+            "text": ""
+          },
+          "shape": {
+            "type": "none",
+            "text": "",
+            "position": "right"
+          },
+          "transition": {
+            "type": "fade",
+            "duration": 800
+          },
+          "master": {
+            "useSafeArea": true,
+            "footer": "Köcheclub Werne · Weihnachtsmarkt"
+          }
+        },
+        "layout": {
+          "title": {
+            "x": 66,
+            "y": 37,
+            "w": 56,
+            "h": 15,
+            "scale": 1,
+            "rotation": 0,
+            "opacity": 1,
+            "z": 12
+          },
+          "text": {
+            "x": 66,
+            "y": 58,
+            "w": 56,
+            "h": 28,
+            "scale": 1,
+            "rotation": 0,
+            "opacity": 1,
+            "z": 12
+          },
+          "price": {
+            "x": 50,
+            "y": 69,
+            "w": 42,
+            "h": 13,
+            "scale": 1,
+            "rotation": 0,
+            "opacity": 1,
+            "z": 13
+          },
+          "symbols": {
+            "x": 88,
+            "y": 11,
+            "w": 16,
+            "h": 10,
+            "scale": 0.8,
+            "rotation": 0,
+            "opacity": 1,
+            "color": "#ffd56a",
+            "spacing": 8,
+            "z": 14
+          },
+          "ticker": {
+            "x": 50,
+            "y": 94,
+            "w": 92,
+            "h": 8,
+            "scale": 1,
+            "rotation": 0,
+            "opacity": 1,
+            "z": 16
+          },
+          "weather": {
+            "x": 50,
+            "y": 63,
+            "w": 88,
+            "h": 52,
+            "scale": 1,
+            "rotation": 0,
+            "opacity": 1,
+            "z": 10
+          },
+          "image": {
+            "x": 20,
+            "y": 51,
+            "w": 29,
+            "h": 68,
+            "scale": 1,
+            "rotation": 0,
+            "opacity": 1,
+            "z": 8
+          }
+        },
+        "sourcePresentation": {
+          "name": "Weihnachtsmarkt Werne · bearbeitbare Vorlage",
+          "templateVersion": "1.3.0"
+        },
+        "media": {
+          "name": "Anne Reinkober · vorläufiges Foto austauschen",
+          "type": "image/jpeg",
+          "dataUrl": "../tv-content/weihnachtsmarkt-2026/members/mitglied-09.jpg",
+          "provisional": true
+        },
+        "objectLifecycleVersion": 2
+      },
+      {
+        "id": "wm26-012",
+        "presentationKind": "weihnachtsmarkt-2026",
+        "renderMode": "member-showcase",
+        "type": "member",
+        "title": "Manfred Schoppmann",
+        "text": "Besonders der Weihnachtsmarkt zeigt, was wir als Mannschaft gemeinsam leisten können.",
+        "price": "",
+        "duration": 10,
+        "noTime": true,
+        "start": "00:00",
+        "end": "23:59",
+        "ticker": "",
+        "theme": "dark",
+        "decorations": [
+          "👨‍🍳"
+        ],
+        "animation": "none",
+        "enabled": true,
+        "backgroundPreset": "market-window-lights",
+        "backgroundDataUrl": "",
+        "backgroundOpacity": 1,
+        "presentationDesign": {
+          "palette": "warm",
+          "background": {
+            "type": "solid",
+            "color1": "#1b1815",
+            "color2": "#3b1517",
+            "opacity": 1,
+            "blur": 0,
+            "vignette": 0,
+            "image": ""
+          },
+          "typography": {
+            "fontFamily": "humanist",
+            "titleColor": "#fff8e8",
+            "textColor": "#fff8e8",
+            "priceColor": "#ffd56a",
+            "titleSize": 1.08,
+            "textSize": 1.02,
+            "priceSize": 1,
+            "titleBold": true,
+            "textBold": false,
+            "textAlign": "center"
+          },
+          "banner": {
+            "type": "none",
+            "text": ""
+          },
+          "shape": {
+            "type": "none",
+            "text": "",
+            "position": "right"
+          },
+          "transition": {
+            "type": "fade",
+            "duration": 800
+          },
+          "master": {
+            "useSafeArea": true,
+            "footer": "Köcheclub Werne · Weihnachtsmarkt"
+          }
+        },
+        "layout": {
+          "title": {
+            "x": 66,
+            "y": 37,
+            "w": 56,
+            "h": 15,
+            "scale": 1,
+            "rotation": 0,
+            "opacity": 1,
+            "z": 12
+          },
+          "text": {
+            "x": 66,
+            "y": 58,
+            "w": 56,
+            "h": 28,
+            "scale": 1,
+            "rotation": 0,
+            "opacity": 1,
+            "z": 12
+          },
+          "price": {
+            "x": 50,
+            "y": 69,
+            "w": 42,
+            "h": 13,
+            "scale": 1,
+            "rotation": 0,
+            "opacity": 1,
+            "z": 13
+          },
+          "symbols": {
+            "x": 88,
+            "y": 11,
+            "w": 16,
+            "h": 10,
+            "scale": 0.8,
+            "rotation": 0,
+            "opacity": 1,
+            "color": "#ffd56a",
+            "spacing": 8,
+            "z": 14
+          },
+          "ticker": {
+            "x": 50,
+            "y": 94,
+            "w": 92,
+            "h": 8,
+            "scale": 1,
+            "rotation": 0,
+            "opacity": 1,
+            "z": 16
+          },
+          "weather": {
+            "x": 50,
+            "y": 63,
+            "w": 88,
+            "h": 52,
+            "scale": 1,
+            "rotation": 0,
+            "opacity": 1,
+            "z": 10
+          },
+          "image": {
+            "x": 20,
+            "y": 51,
+            "w": 29,
+            "h": 68,
+            "scale": 1,
+            "rotation": 0,
+            "opacity": 1,
+            "z": 8
+          }
+        },
+        "sourcePresentation": {
+          "name": "Weihnachtsmarkt Werne · bearbeitbare Vorlage",
+          "templateVersion": "1.3.0"
+        },
+        "media": {
+          "name": "Manfred Schoppmann · vorläufiges Foto austauschen",
+          "type": "image/jpeg",
+          "dataUrl": "../tv-content/weihnachtsmarkt-2026/members/mitglied-10.jpg",
+          "provisional": true
+        },
+        "objectLifecycleVersion": 2
+      },
+      {
+        "id": "wm26-013",
+        "presentationKind": "weihnachtsmarkt-2026",
+        "renderMode": "member-showcase",
+        "type": "member",
+        "title": "Reinhilde Eggenstein",
+        "text": "Mir gefallen die freundschaftliche Atmosphäre und der offene Austausch innerhalb des Clubs.",
+        "price": "",
+        "duration": 10,
+        "noTime": true,
+        "start": "00:00",
+        "end": "23:59",
+        "ticker": "",
+        "theme": "dark",
+        "decorations": [
+          "👨‍🍳"
+        ],
+        "animation": "none",
+        "enabled": true,
+        "backgroundPreset": "market-window-lights",
+        "backgroundDataUrl": "",
+        "backgroundOpacity": 1,
+        "presentationDesign": {
+          "palette": "warm",
+          "background": {
+            "type": "solid",
+            "color1": "#1b1815",
+            "color2": "#3b1517",
+            "opacity": 1,
+            "blur": 0,
+            "vignette": 0,
+            "image": ""
+          },
+          "typography": {
+            "fontFamily": "humanist",
+            "titleColor": "#fff8e8",
+            "textColor": "#fff8e8",
+            "priceColor": "#ffd56a",
+            "titleSize": 1.08,
+            "textSize": 1.02,
+            "priceSize": 1,
+            "titleBold": true,
+            "textBold": false,
+            "textAlign": "center"
+          },
+          "banner": {
+            "type": "none",
+            "text": ""
+          },
+          "shape": {
+            "type": "none",
+            "text": "",
+            "position": "right"
+          },
+          "transition": {
+            "type": "fade",
+            "duration": 800
+          },
+          "master": {
+            "useSafeArea": true,
+            "footer": "Köcheclub Werne · Weihnachtsmarkt"
+          }
+        },
+        "layout": {
+          "title": {
+            "x": 66,
+            "y": 37,
+            "w": 56,
+            "h": 15,
+            "scale": 1,
+            "rotation": 0,
+            "opacity": 1,
+            "z": 12
+          },
+          "text": {
+            "x": 66,
+            "y": 58,
+            "w": 56,
+            "h": 28,
+            "scale": 1,
+            "rotation": 0,
+            "opacity": 1,
+            "z": 12
+          },
+          "price": {
+            "x": 50,
+            "y": 69,
+            "w": 42,
+            "h": 13,
+            "scale": 1,
+            "rotation": 0,
+            "opacity": 1,
+            "z": 13
+          },
+          "symbols": {
+            "x": 88,
+            "y": 11,
+            "w": 16,
+            "h": 10,
+            "scale": 0.8,
+            "rotation": 0,
+            "opacity": 1,
+            "color": "#ffd56a",
+            "spacing": 8,
+            "z": 14
+          },
+          "ticker": {
+            "x": 50,
+            "y": 94,
+            "w": 92,
+            "h": 8,
+            "scale": 1,
+            "rotation": 0,
+            "opacity": 1,
+            "z": 16
+          },
+          "weather": {
+            "x": 50,
+            "y": 63,
+            "w": 88,
+            "h": 52,
+            "scale": 1,
+            "rotation": 0,
+            "opacity": 1,
+            "z": 10
+          },
+          "image": {
+            "x": 20,
+            "y": 51,
+            "w": 29,
+            "h": 68,
+            "scale": 1,
+            "rotation": 0,
+            "opacity": 1,
+            "z": 8
+          }
+        },
+        "sourcePresentation": {
+          "name": "Weihnachtsmarkt Werne · bearbeitbare Vorlage",
+          "templateVersion": "1.3.0"
+        },
+        "media": {
+          "name": "Reinhilde Eggenstein · vorläufiges Foto austauschen",
+          "type": "image/webp",
+          "dataUrl": "../avatar-core/assets/chef/chef_female_neutral.webp",
+          "provisional": true
+        },
+        "objectLifecycleVersion": 2
+      },
+      {
+        "id": "wm26-014",
+        "presentationKind": "weihnachtsmarkt-2026",
+        "renderMode": "member-showcase",
+        "type": "member",
+        "title": "Thomas Hess",
+        "text": "Ich unterstütze den Köcheclub gerne, weil Tradition und neue Ideen hier gut zusammenpassen.",
+        "price": "",
+        "duration": 10,
+        "noTime": true,
+        "start": "00:00",
+        "end": "23:59",
+        "ticker": "",
+        "theme": "dark",
+        "decorations": [
+          "⭐"
+        ],
+        "animation": "none",
+        "enabled": true,
+        "backgroundPreset": "market-window-lights",
+        "backgroundDataUrl": "",
+        "backgroundOpacity": 1,
+        "presentationDesign": {
+          "palette": "warm",
+          "background": {
+            "type": "solid",
+            "color1": "#1b1815",
+            "color2": "#3b1517",
+            "opacity": 1,
+            "blur": 0,
+            "vignette": 0,
+            "image": ""
+          },
+          "typography": {
+            "fontFamily": "humanist",
+            "titleColor": "#fff8e8",
+            "textColor": "#fff8e8",
+            "priceColor": "#ffd56a",
+            "titleSize": 1.08,
+            "textSize": 1.02,
+            "priceSize": 1,
+            "titleBold": true,
+            "textBold": false,
+            "textAlign": "center"
+          },
+          "banner": {
+            "type": "none",
+            "text": ""
+          },
+          "shape": {
+            "type": "none",
+            "text": "",
+            "position": "right"
+          },
+          "transition": {
+            "type": "fade",
+            "duration": 800
+          },
+          "master": {
+            "useSafeArea": true,
+            "footer": "Köcheclub Werne · Weihnachtsmarkt"
+          }
+        },
+        "layout": {
+          "title": {
+            "x": 66,
+            "y": 37,
+            "w": 56,
+            "h": 15,
+            "scale": 1,
+            "rotation": 0,
+            "opacity": 1,
+            "z": 12
+          },
+          "text": {
+            "x": 66,
+            "y": 58,
+            "w": 56,
+            "h": 28,
+            "scale": 1,
+            "rotation": 0,
+            "opacity": 1,
+            "z": 12
+          },
+          "price": {
+            "x": 50,
+            "y": 69,
+            "w": 42,
+            "h": 13,
+            "scale": 1,
+            "rotation": 0,
+            "opacity": 1,
+            "z": 13
+          },
+          "symbols": {
+            "x": 88,
+            "y": 11,
+            "w": 16,
+            "h": 10,
+            "scale": 0.8,
+            "rotation": 0,
+            "opacity": 1,
+            "color": "#ffd56a",
+            "spacing": 8,
+            "z": 14
+          },
+          "ticker": {
+            "x": 50,
+            "y": 94,
+            "w": 92,
+            "h": 8,
+            "scale": 1,
+            "rotation": 0,
+            "opacity": 1,
+            "z": 16
+          },
+          "weather": {
+            "x": 50,
+            "y": 63,
+            "w": 88,
+            "h": 52,
+            "scale": 1,
+            "rotation": 0,
+            "opacity": 1,
+            "z": 10
+          },
+          "image": {
+            "x": 20,
+            "y": 51,
+            "w": 29,
+            "h": 68,
+            "scale": 1,
+            "rotation": 0,
+            "opacity": 1,
+            "z": 8
+          }
+        },
+        "sourcePresentation": {
+          "name": "Weihnachtsmarkt Werne · bearbeitbare Vorlage",
+          "templateVersion": "1.3.0"
+        },
+        "media": {
+          "name": "Thomas Hess · vorläufiges Foto austauschen",
+          "type": "image/webp",
+          "dataUrl": "../avatar-core/assets/chef/chef_male_neutral.webp",
+          "provisional": true
+        },
+        "objectLifecycleVersion": 2
+      },
+      {
+        "id": "wm26-015",
+        "presentationKind": "weihnachtsmarkt-2026",
+        "renderMode": "member-showcase",
+        "type": "member",
+        "title": "Christina Scharnetzki",
+        "text": "Gemeinsam planen, anpacken und anschließend zusammen feiern – genau das gefällt mir.",
+        "price": "",
+        "duration": 10,
+        "noTime": true,
+        "start": "00:00",
+        "end": "23:59",
+        "ticker": "",
+        "theme": "dark",
+        "decorations": [
+          "👨‍🍳"
+        ],
+        "animation": "none",
+        "enabled": true,
+        "backgroundPreset": "market-window-lights",
+        "backgroundDataUrl": "",
+        "backgroundOpacity": 1,
+        "presentationDesign": {
+          "palette": "warm",
+          "background": {
+            "type": "solid",
+            "color1": "#1b1815",
+            "color2": "#3b1517",
+            "opacity": 1,
+            "blur": 0,
+            "vignette": 0,
+            "image": ""
+          },
+          "typography": {
+            "fontFamily": "humanist",
+            "titleColor": "#fff8e8",
+            "textColor": "#fff8e8",
+            "priceColor": "#ffd56a",
+            "titleSize": 1.08,
+            "textSize": 1.02,
+            "priceSize": 1,
+            "titleBold": true,
+            "textBold": false,
+            "textAlign": "center"
+          },
+          "banner": {
+            "type": "none",
+            "text": ""
+          },
+          "shape": {
+            "type": "none",
+            "text": "",
+            "position": "right"
+          },
+          "transition": {
+            "type": "fade",
+            "duration": 800
+          },
+          "master": {
+            "useSafeArea": true,
+            "footer": "Köcheclub Werne · Weihnachtsmarkt"
+          }
+        },
+        "layout": {
+          "title": {
+            "x": 66,
+            "y": 37,
+            "w": 56,
+            "h": 15,
+            "scale": 1,
+            "rotation": 0,
+            "opacity": 1,
+            "z": 12
+          },
+          "text": {
+            "x": 66,
+            "y": 58,
+            "w": 56,
+            "h": 28,
+            "scale": 1,
+            "rotation": 0,
+            "opacity": 1,
+            "z": 12
+          },
+          "price": {
+            "x": 50,
+            "y": 69,
+            "w": 42,
+            "h": 13,
+            "scale": 1,
+            "rotation": 0,
+            "opacity": 1,
+            "z": 13
+          },
+          "symbols": {
+            "x": 88,
+            "y": 11,
+            "w": 16,
+            "h": 10,
+            "scale": 0.8,
+            "rotation": 0,
+            "opacity": 1,
+            "color": "#ffd56a",
+            "spacing": 8,
+            "z": 14
+          },
+          "ticker": {
+            "x": 50,
+            "y": 94,
+            "w": 92,
+            "h": 8,
+            "scale": 1,
+            "rotation": 0,
+            "opacity": 1,
+            "z": 16
+          },
+          "weather": {
+            "x": 50,
+            "y": 63,
+            "w": 88,
+            "h": 52,
+            "scale": 1,
+            "rotation": 0,
+            "opacity": 1,
+            "z": 10
+          },
+          "image": {
+            "x": 20,
+            "y": 51,
+            "w": 29,
+            "h": 68,
+            "scale": 1,
+            "rotation": 0,
+            "opacity": 1,
+            "z": 8
+          }
+        },
+        "sourcePresentation": {
+          "name": "Weihnachtsmarkt Werne · bearbeitbare Vorlage",
+          "templateVersion": "1.3.0"
+        },
+        "media": {
+          "name": "Christina Scharnetzki · vorläufiges Foto austauschen",
+          "type": "image/webp",
+          "dataUrl": "../avatar-core/assets/chef/chef_female_neutral.webp",
+          "provisional": true
+        },
+        "objectLifecycleVersion": 2
+      },
+      {
+        "id": "wm26-016",
+        "presentationKind": "weihnachtsmarkt-2026",
+        "renderMode": "member-showcase",
+        "type": "member",
+        "title": "Steven Linley",
+        "text": "Ich komme gerne zu den Treffen, weil es immer interessante Gespräche und viel zu lachen gibt.",
+        "price": "",
+        "duration": 10,
+        "noTime": true,
+        "start": "00:00",
+        "end": "23:59",
+        "ticker": "",
+        "theme": "dark",
+        "decorations": [
+          "👨‍🍳"
+        ],
+        "animation": "none",
+        "enabled": true,
+        "backgroundPreset": "market-window-lights",
+        "backgroundDataUrl": "",
+        "backgroundOpacity": 1,
+        "presentationDesign": {
+          "palette": "warm",
+          "background": {
+            "type": "solid",
+            "color1": "#1b1815",
+            "color2": "#3b1517",
+            "opacity": 1,
+            "blur": 0,
+            "vignette": 0,
+            "image": ""
+          },
+          "typography": {
+            "fontFamily": "humanist",
+            "titleColor": "#fff8e8",
+            "textColor": "#fff8e8",
+            "priceColor": "#ffd56a",
+            "titleSize": 1.08,
+            "textSize": 1.02,
+            "priceSize": 1,
+            "titleBold": true,
+            "textBold": false,
+            "textAlign": "center"
+          },
+          "banner": {
+            "type": "none",
+            "text": ""
+          },
+          "shape": {
+            "type": "none",
+            "text": "",
+            "position": "right"
+          },
+          "transition": {
+            "type": "fade",
+            "duration": 800
+          },
+          "master": {
+            "useSafeArea": true,
+            "footer": "Köcheclub Werne · Weihnachtsmarkt"
+          }
+        },
+        "layout": {
+          "title": {
+            "x": 66,
+            "y": 37,
+            "w": 56,
+            "h": 15,
+            "scale": 1,
+            "rotation": 0,
+            "opacity": 1,
+            "z": 12
+          },
+          "text": {
+            "x": 66,
+            "y": 58,
+            "w": 56,
+            "h": 28,
+            "scale": 1,
+            "rotation": 0,
+            "opacity": 1,
+            "z": 12
+          },
+          "price": {
+            "x": 50,
+            "y": 69,
+            "w": 42,
+            "h": 13,
+            "scale": 1,
+            "rotation": 0,
+            "opacity": 1,
+            "z": 13
+          },
+          "symbols": {
+            "x": 88,
+            "y": 11,
+            "w": 16,
+            "h": 10,
+            "scale": 0.8,
+            "rotation": 0,
+            "opacity": 1,
+            "color": "#ffd56a",
+            "spacing": 8,
+            "z": 14
+          },
+          "ticker": {
+            "x": 50,
+            "y": 94,
+            "w": 92,
+            "h": 8,
+            "scale": 1,
+            "rotation": 0,
+            "opacity": 1,
+            "z": 16
+          },
+          "weather": {
+            "x": 50,
+            "y": 63,
+            "w": 88,
+            "h": 52,
+            "scale": 1,
+            "rotation": 0,
+            "opacity": 1,
+            "z": 10
+          },
+          "image": {
+            "x": 20,
+            "y": 51,
+            "w": 29,
+            "h": 68,
+            "scale": 1,
+            "rotation": 0,
+            "opacity": 1,
+            "z": 8
+          }
+        },
+        "sourcePresentation": {
+          "name": "Weihnachtsmarkt Werne · bearbeitbare Vorlage",
+          "templateVersion": "1.3.0"
+        },
+        "media": {
+          "name": "Steven Linley · vorläufiges Foto austauschen",
+          "type": "image/webp",
+          "dataUrl": "../avatar-core/assets/chef/chef_male_neutral.webp",
+          "provisional": true
+        },
+        "objectLifecycleVersion": 2
+      },
+      {
+        "id": "wm26-017",
+        "presentationKind": "weihnachtsmarkt-2026",
+        "renderMode": "member-showcase",
+        "type": "member",
+        "title": "Peter Wördemann",
+        "text": "Für mich ist der Köcheclub ein Ort, an dem aus Berufskollegen echte Freunde geworden sind.",
+        "price": "",
+        "duration": 10,
+        "noTime": true,
+        "start": "00:00",
+        "end": "23:59",
+        "ticker": "",
+        "theme": "dark",
+        "decorations": [
+          "⭐"
+        ],
+        "animation": "none",
+        "enabled": true,
+        "backgroundPreset": "market-window-lights",
+        "backgroundDataUrl": "",
+        "backgroundOpacity": 1,
+        "presentationDesign": {
+          "palette": "warm",
+          "background": {
+            "type": "solid",
+            "color1": "#1b1815",
+            "color2": "#3b1517",
+            "opacity": 1,
+            "blur": 0,
+            "vignette": 0,
+            "image": ""
+          },
+          "typography": {
+            "fontFamily": "humanist",
+            "titleColor": "#fff8e8",
+            "textColor": "#fff8e8",
+            "priceColor": "#ffd56a",
+            "titleSize": 1.08,
+            "textSize": 1.02,
+            "priceSize": 1,
+            "titleBold": true,
+            "textBold": false,
+            "textAlign": "center"
+          },
+          "banner": {
+            "type": "none",
+            "text": ""
+          },
+          "shape": {
+            "type": "none",
+            "text": "",
+            "position": "right"
+          },
+          "transition": {
+            "type": "fade",
+            "duration": 800
+          },
+          "master": {
+            "useSafeArea": true,
+            "footer": "Köcheclub Werne · Weihnachtsmarkt"
+          }
+        },
+        "layout": {
+          "title": {
+            "x": 66,
+            "y": 37,
+            "w": 56,
+            "h": 15,
+            "scale": 1,
+            "rotation": 0,
+            "opacity": 1,
+            "z": 12
+          },
+          "text": {
+            "x": 66,
+            "y": 58,
+            "w": 56,
+            "h": 28,
+            "scale": 1,
+            "rotation": 0,
+            "opacity": 1,
+            "z": 12
+          },
+          "price": {
+            "x": 50,
+            "y": 69,
+            "w": 42,
+            "h": 13,
+            "scale": 1,
+            "rotation": 0,
+            "opacity": 1,
+            "z": 13
+          },
+          "symbols": {
+            "x": 88,
+            "y": 11,
+            "w": 16,
+            "h": 10,
+            "scale": 0.8,
+            "rotation": 0,
+            "opacity": 1,
+            "color": "#ffd56a",
+            "spacing": 8,
+            "z": 14
+          },
+          "ticker": {
+            "x": 50,
+            "y": 94,
+            "w": 92,
+            "h": 8,
+            "scale": 1,
+            "rotation": 0,
+            "opacity": 1,
+            "z": 16
+          },
+          "weather": {
+            "x": 50,
+            "y": 63,
+            "w": 88,
+            "h": 52,
+            "scale": 1,
+            "rotation": 0,
+            "opacity": 1,
+            "z": 10
+          },
+          "image": {
+            "x": 20,
+            "y": 51,
+            "w": 29,
+            "h": 68,
+            "scale": 1,
+            "rotation": 0,
+            "opacity": 1,
+            "z": 8
+          }
+        },
+        "sourcePresentation": {
+          "name": "Weihnachtsmarkt Werne · bearbeitbare Vorlage",
+          "templateVersion": "1.3.0"
+        },
+        "media": {
+          "name": "Peter Wördemann · vorläufiges Foto austauschen",
+          "type": "image/webp",
+          "dataUrl": "../avatar-core/assets/chef/chef_male_neutral.webp",
+          "provisional": true
+        },
+        "objectLifecycleVersion": 2
+      },
+      {
+        "id": "wm26-018",
+        "presentationKind": "weihnachtsmarkt-2026",
+        "renderMode": "member-showcase",
+        "type": "member",
+        "title": "Ruth Kazik",
+        "text": "Ich engagiere mich gerne, weil unsere Arbeit nicht nur Freude macht, sondern auch einem guten Zweck dient.",
+        "price": "",
+        "duration": 10,
+        "noTime": true,
+        "start": "00:00",
+        "end": "23:59",
+        "ticker": "",
+        "theme": "dark",
+        "decorations": [
+          "👨‍🍳"
+        ],
+        "animation": "none",
+        "enabled": true,
+        "backgroundPreset": "market-window-lights",
+        "backgroundDataUrl": "",
+        "backgroundOpacity": 1,
+        "presentationDesign": {
+          "palette": "warm",
+          "background": {
+            "type": "solid",
+            "color1": "#1b1815",
+            "color2": "#3b1517",
+            "opacity": 1,
+            "blur": 0,
+            "vignette": 0,
+            "image": ""
+          },
+          "typography": {
+            "fontFamily": "humanist",
+            "titleColor": "#fff8e8",
+            "textColor": "#fff8e8",
+            "priceColor": "#ffd56a",
+            "titleSize": 1.08,
+            "textSize": 1.02,
+            "priceSize": 1,
+            "titleBold": true,
+            "textBold": false,
+            "textAlign": "center"
+          },
+          "banner": {
+            "type": "none",
+            "text": ""
+          },
+          "shape": {
+            "type": "none",
+            "text": "",
+            "position": "right"
+          },
+          "transition": {
+            "type": "fade",
+            "duration": 800
+          },
+          "master": {
+            "useSafeArea": true,
+            "footer": "Köcheclub Werne · Weihnachtsmarkt"
+          }
+        },
+        "layout": {
+          "title": {
+            "x": 66,
+            "y": 37,
+            "w": 56,
+            "h": 15,
+            "scale": 1,
+            "rotation": 0,
+            "opacity": 1,
+            "z": 12
+          },
+          "text": {
+            "x": 66,
+            "y": 58,
+            "w": 56,
+            "h": 28,
+            "scale": 1,
+            "rotation": 0,
+            "opacity": 1,
+            "z": 12
+          },
+          "price": {
+            "x": 50,
+            "y": 69,
+            "w": 42,
+            "h": 13,
+            "scale": 1,
+            "rotation": 0,
+            "opacity": 1,
+            "z": 13
+          },
+          "symbols": {
+            "x": 88,
+            "y": 11,
+            "w": 16,
+            "h": 10,
+            "scale": 0.8,
+            "rotation": 0,
+            "opacity": 1,
+            "color": "#ffd56a",
+            "spacing": 8,
+            "z": 14
+          },
+          "ticker": {
+            "x": 50,
+            "y": 94,
+            "w": 92,
+            "h": 8,
+            "scale": 1,
+            "rotation": 0,
+            "opacity": 1,
+            "z": 16
+          },
+          "weather": {
+            "x": 50,
+            "y": 63,
+            "w": 88,
+            "h": 52,
+            "scale": 1,
+            "rotation": 0,
+            "opacity": 1,
+            "z": 10
+          },
+          "image": {
+            "x": 20,
+            "y": 51,
+            "w": 29,
+            "h": 68,
+            "scale": 1,
+            "rotation": 0,
+            "opacity": 1,
+            "z": 8
+          }
+        },
+        "sourcePresentation": {
+          "name": "Weihnachtsmarkt Werne · bearbeitbare Vorlage",
+          "templateVersion": "1.3.0"
+        },
+        "media": {
+          "name": "Ruth Kazik · vorläufiges Foto austauschen",
+          "type": "image/webp",
+          "dataUrl": "../avatar-core/assets/chef/chef_female_neutral.webp",
+          "provisional": true
+        },
+        "objectLifecycleVersion": 2
+      },
+      {
+        "id": "wm26-019",
+        "presentationKind": "weihnachtsmarkt-2026",
+        "renderMode": "member-showcase",
+        "type": "member",
+        "title": "Friedbert Köhling",
+        "text": "Im Köcheclub kann ich meine Erfahrungen weitergeben und gleichzeitig immer wieder Neues lernen.",
+        "price": "",
+        "duration": 10,
+        "noTime": true,
+        "start": "00:00",
+        "end": "23:59",
+        "ticker": "",
+        "theme": "dark",
+        "decorations": [
+          "👨‍🍳"
+        ],
+        "animation": "none",
+        "enabled": true,
+        "backgroundPreset": "market-window-lights",
+        "backgroundDataUrl": "",
+        "backgroundOpacity": 1,
+        "presentationDesign": {
+          "palette": "warm",
+          "background": {
+            "type": "solid",
+            "color1": "#1b1815",
+            "color2": "#3b1517",
+            "opacity": 1,
+            "blur": 0,
+            "vignette": 0,
+            "image": ""
+          },
+          "typography": {
+            "fontFamily": "humanist",
+            "titleColor": "#fff8e8",
+            "textColor": "#fff8e8",
+            "priceColor": "#ffd56a",
+            "titleSize": 1.08,
+            "textSize": 1.02,
+            "priceSize": 1,
+            "titleBold": true,
+            "textBold": false,
+            "textAlign": "center"
+          },
+          "banner": {
+            "type": "none",
+            "text": ""
+          },
+          "shape": {
+            "type": "none",
+            "text": "",
+            "position": "right"
+          },
+          "transition": {
+            "type": "fade",
+            "duration": 800
+          },
+          "master": {
+            "useSafeArea": true,
+            "footer": "Köcheclub Werne · Weihnachtsmarkt"
+          }
+        },
+        "layout": {
+          "title": {
+            "x": 66,
+            "y": 37,
+            "w": 56,
+            "h": 15,
+            "scale": 1,
+            "rotation": 0,
+            "opacity": 1,
+            "z": 12
+          },
+          "text": {
+            "x": 66,
+            "y": 58,
+            "w": 56,
+            "h": 28,
+            "scale": 1,
+            "rotation": 0,
+            "opacity": 1,
+            "z": 12
+          },
+          "price": {
+            "x": 50,
+            "y": 69,
+            "w": 42,
+            "h": 13,
+            "scale": 1,
+            "rotation": 0,
+            "opacity": 1,
+            "z": 13
+          },
+          "symbols": {
+            "x": 88,
+            "y": 11,
+            "w": 16,
+            "h": 10,
+            "scale": 0.8,
+            "rotation": 0,
+            "opacity": 1,
+            "color": "#ffd56a",
+            "spacing": 8,
+            "z": 14
+          },
+          "ticker": {
+            "x": 50,
+            "y": 94,
+            "w": 92,
+            "h": 8,
+            "scale": 1,
+            "rotation": 0,
+            "opacity": 1,
+            "z": 16
+          },
+          "weather": {
+            "x": 50,
+            "y": 63,
+            "w": 88,
+            "h": 52,
+            "scale": 1,
+            "rotation": 0,
+            "opacity": 1,
+            "z": 10
+          },
+          "image": {
+            "x": 20,
+            "y": 51,
+            "w": 29,
+            "h": 68,
+            "scale": 1,
+            "rotation": 0,
+            "opacity": 1,
+            "z": 8
+          }
+        },
+        "sourcePresentation": {
+          "name": "Weihnachtsmarkt Werne · bearbeitbare Vorlage",
+          "templateVersion": "1.3.0"
+        },
+        "media": {
+          "name": "Friedbert Köhling · vorläufiges Foto austauschen",
+          "type": "image/webp",
+          "dataUrl": "../avatar-core/assets/chef/chef_male_neutral.webp",
+          "provisional": true
+        },
+        "objectLifecycleVersion": 2
+      },
+      {
+        "id": "wm26-020",
+        "presentationKind": "weihnachtsmarkt-2026",
+        "renderMode": "member-showcase",
+        "type": "member",
+        "title": "Leon Wördemann",
+        "text": "Ich helfe gerne aus beim Köcheclub Werne, denn helfende Hände werden immer gebraucht.",
+        "price": "",
+        "duration": 10,
+        "noTime": true,
+        "start": "00:00",
+        "end": "23:59",
+        "ticker": "",
+        "theme": "dark",
+        "decorations": [
+          "⭐"
+        ],
+        "animation": "none",
+        "enabled": true,
+        "backgroundPreset": "market-window-lights",
+        "backgroundDataUrl": "",
+        "backgroundOpacity": 1,
+        "presentationDesign": {
+          "palette": "warm",
+          "background": {
+            "type": "solid",
+            "color1": "#1b1815",
+            "color2": "#3b1517",
+            "opacity": 1,
+            "blur": 0,
+            "vignette": 0,
+            "image": ""
+          },
+          "typography": {
+            "fontFamily": "humanist",
+            "titleColor": "#fff8e8",
+            "textColor": "#fff8e8",
+            "priceColor": "#ffd56a",
+            "titleSize": 1.08,
+            "textSize": 1.02,
+            "priceSize": 1,
+            "titleBold": true,
+            "textBold": false,
+            "textAlign": "center"
+          },
+          "banner": {
+            "type": "none",
+            "text": ""
+          },
+          "shape": {
+            "type": "none",
+            "text": "",
+            "position": "right"
+          },
+          "transition": {
+            "type": "fade",
+            "duration": 800
+          },
+          "master": {
+            "useSafeArea": true,
+            "footer": "Köcheclub Werne · Weihnachtsmarkt"
+          }
+        },
+        "layout": {
+          "title": {
+            "x": 66,
+            "y": 37,
+            "w": 56,
+            "h": 15,
+            "scale": 1,
+            "rotation": 0,
+            "opacity": 1,
+            "z": 12
+          },
+          "text": {
+            "x": 66,
+            "y": 58,
+            "w": 56,
+            "h": 28,
+            "scale": 1,
+            "rotation": 0,
+            "opacity": 1,
+            "z": 12
+          },
+          "price": {
+            "x": 50,
+            "y": 69,
+            "w": 42,
+            "h": 13,
+            "scale": 1,
+            "rotation": 0,
+            "opacity": 1,
+            "z": 13
+          },
+          "symbols": {
+            "x": 88,
+            "y": 11,
+            "w": 16,
+            "h": 10,
+            "scale": 0.8,
+            "rotation": 0,
+            "opacity": 1,
+            "color": "#ffd56a",
+            "spacing": 8,
+            "z": 14
+          },
+          "ticker": {
+            "x": 50,
+            "y": 94,
+            "w": 92,
+            "h": 8,
+            "scale": 1,
+            "rotation": 0,
+            "opacity": 1,
+            "z": 16
+          },
+          "weather": {
+            "x": 50,
+            "y": 63,
+            "w": 88,
+            "h": 52,
+            "scale": 1,
+            "rotation": 0,
+            "opacity": 1,
+            "z": 10
+          },
+          "image": {
+            "x": 20,
+            "y": 51,
+            "w": 29,
+            "h": 68,
+            "scale": 1,
+            "rotation": 0,
+            "opacity": 1,
+            "z": 8
+          }
+        },
+        "sourcePresentation": {
+          "name": "Weihnachtsmarkt Werne · bearbeitbare Vorlage",
+          "templateVersion": "1.3.0"
+        },
+        "media": {
+          "name": "Leon Wördemann · vorläufiges Foto austauschen",
+          "type": "image/webp",
+          "dataUrl": "../avatar-core/assets/chef/chef_male_neutral.webp",
+          "provisional": true
+        },
+        "objectLifecycleVersion": 2
+      }
+    ],
+    "memberRotationSlots": [
+      "wm26-member-slot-a",
+      "wm26-member-slot-b"
+    ]
+  },
+  "eventProgramSnapshot": [
+    {
+      "id": "werne25-2025-12-05-0",
+      "year": 2025,
+      "date": "2025-12-05",
+      "time": "15:15",
+      "endTime": "17:15",
+      "title": "Bläsercorps Werne",
+      "description": "Weihnachtliche Blasmusik",
+      "place": "Sparkassenbühne",
+      "children": false,
+      "active": true,
+      "status": "archived",
+      "official": true,
+      "source": "251120-Weihnachtsmarkt-Programm-2025-online.pdf",
+      "sourceLabel": "Original-Programmprospekt Werne 2025"
+    },
+    {
+      "id": "werne25-2025-12-05-1",
+      "year": 2025,
+      "date": "2025-12-05",
+      "time": "16:30",
+      "endTime": "16:45",
+      "title": "Offizielle Weihnachtsmarkteröffnung",
+      "description": "",
+      "place": "Sparkassenbühne",
+      "children": false,
+      "active": true,
+      "status": "archived",
+      "official": true,
+      "source": "251120-Weihnachtsmarkt-Programm-2025-online.pdf",
+      "sourceLabel": "Original-Programmprospekt Werne 2025"
+    },
+    {
+      "id": "werne25-2025-12-05-2",
+      "year": 2025,
+      "date": "2025-12-05",
+      "time": "18:00",
+      "endTime": "18:15",
+      "title": "Theater für Alle",
+      "description": "Frau Holle",
+      "place": "Lichterwald",
+      "children": true,
+      "active": true,
+      "status": "archived",
+      "official": true,
+      "source": "251120-Weihnachtsmarkt-Programm-2025-online.pdf",
+      "sourceLabel": "Original-Programmprospekt Werne 2025"
+    },
+    {
+      "id": "werne25-2025-12-05-3",
+      "year": 2025,
+      "date": "2025-12-05",
+      "time": "19:00",
+      "endTime": "22:30",
+      "title": "Burning Hearts",
+      "description": "Christmas Rock",
+      "place": "Sparkassenbühne",
+      "children": false,
+      "active": true,
+      "status": "archived",
+      "official": true,
+      "source": "251120-Weihnachtsmarkt-Programm-2025-online.pdf",
+      "sourceLabel": "Original-Programmprospekt Werne 2025"
+    },
+    {
+      "id": "werne25-2025-12-06-0",
+      "year": 2025,
+      "date": "2025-12-06",
+      "time": "12:30",
+      "endTime": "13:30",
+      "title": "Trompetenkinder",
+      "description": "Leitung Matthias Beckmann",
+      "place": "Sparkassenbühne",
+      "children": false,
+      "active": true,
+      "status": "archived",
+      "official": true,
+      "source": "251120-Weihnachtsmarkt-Programm-2025-online.pdf",
+      "sourceLabel": "Original-Programmprospekt Werne 2025"
+    },
+    {
+      "id": "werne25-2025-12-06-1",
+      "year": 2025,
+      "date": "2025-12-06",
+      "time": "15:00",
+      "endTime": "16:00",
+      "title": "Maxim Wartenberg und sein Trommelfloh",
+      "description": "Mütze auf, es schneit vielleicht!",
+      "place": "Bühne",
+      "children": true,
+      "active": true,
+      "status": "archived",
+      "official": true,
+      "source": "251120-Weihnachtsmarkt-Programm-2025-online.pdf",
+      "sourceLabel": "Original-Programmprospekt Werne 2025"
+    },
+    {
+      "id": "werne25-2025-12-06-2",
+      "year": 2025,
+      "date": "2025-12-06",
+      "time": "17:00",
+      "endTime": "18:00",
+      "title": "GOLDEN TUCAN",
+      "description": "The Power of Love",
+      "place": "Sparkassenbühne",
+      "children": false,
+      "active": true,
+      "status": "archived",
+      "official": true,
+      "source": "251120-Weihnachtsmarkt-Programm-2025-online.pdf",
+      "sourceLabel": "Original-Programmprospekt Werne 2025"
+    },
+    {
+      "id": "werne25-2025-12-06-3",
+      "year": 2025,
+      "date": "2025-12-06",
+      "time": "18:00",
+      "endTime": "18:15",
+      "title": "Theater für Alle",
+      "description": "Nikolaus mit Knecht Ruprecht",
+      "place": "Lichterwald",
+      "children": true,
+      "active": true,
+      "status": "archived",
+      "official": true,
+      "source": "251120-Weihnachtsmarkt-Programm-2025-online.pdf",
+      "sourceLabel": "Original-Programmprospekt Werne 2025"
+    },
+    {
+      "id": "werne25-2025-12-06-4",
+      "year": 2025,
+      "date": "2025-12-06",
+      "time": "19:00",
+      "endTime": "22:30",
+      "title": "Undercover",
+      "description": "Echt.Gut.Feiern…",
+      "place": "Sparkassenbühne",
+      "children": false,
+      "active": true,
+      "status": "archived",
+      "official": true,
+      "source": "251120-Weihnachtsmarkt-Programm-2025-online.pdf",
+      "sourceLabel": "Original-Programmprospekt Werne 2025"
+    },
+    {
+      "id": "werne25-2025-12-07-0",
+      "year": 2025,
+      "date": "2025-12-07",
+      "time": "12:30",
+      "endTime": "14:00",
+      "title": "GUMMI-Bänd Lünen",
+      "description": "Musik zwischen Marsch und Beat",
+      "place": "Sparkassenbühne",
+      "children": false,
+      "active": true,
+      "status": "archived",
+      "official": true,
+      "source": "251120-Weihnachtsmarkt-Programm-2025-online.pdf",
+      "sourceLabel": "Original-Programmprospekt Werne 2025"
+    },
+    {
+      "id": "werne25-2025-12-07-1",
+      "year": 2025,
+      "date": "2025-12-07",
+      "time": "15:00",
+      "endTime": "16:00",
+      "title": "Das Zappeltier von Frank & seine Freunde",
+      "description": "Zappeltiershow",
+      "place": "Bühne",
+      "children": true,
+      "active": true,
+      "status": "archived",
+      "official": true,
+      "source": "251120-Weihnachtsmarkt-Programm-2025-online.pdf",
+      "sourceLabel": "Original-Programmprospekt Werne 2025"
+    },
+    {
+      "id": "werne25-2025-12-07-2",
+      "year": 2025,
+      "date": "2025-12-07",
+      "time": "17:00",
+      "endTime": "18:00",
+      "title": "Szenische Lesung mit Clemens Schlüter und Gregor A. Zumholz",
+      "description": "Hanns Dieter Hüsch über Gott und die Welt",
+      "place": "Kirche",
+      "children": false,
+      "active": true,
+      "status": "archived",
+      "official": true,
+      "source": "251120-Weihnachtsmarkt-Programm-2025-online.pdf",
+      "sourceLabel": "Original-Programmprospekt Werne 2025"
+    },
+    {
+      "id": "werne25-2025-12-07-3",
+      "year": 2025,
+      "date": "2025-12-07",
+      "time": "18:00",
+      "endTime": "18:15",
+      "title": "Theater für Alle",
+      "description": "Räuber Hotzenplotz",
+      "place": "Lichterwald",
+      "children": true,
+      "active": true,
+      "status": "archived",
+      "official": true,
+      "source": "251120-Weihnachtsmarkt-Programm-2025-online.pdf",
+      "sourceLabel": "Original-Programmprospekt Werne 2025"
+    },
+    {
+      "id": "werne25-2025-12-08-0",
+      "year": 2025,
+      "date": "2025-12-08",
+      "time": "16:00",
+      "endTime": "16:45",
+      "title": "KidsKulturSpass",
+      "description": "Detlefs Weihnachtszauber",
+      "place": "Bühne",
+      "children": true,
+      "active": true,
+      "status": "archived",
+      "official": true,
+      "source": "251120-Weihnachtsmarkt-Programm-2025-online.pdf",
+      "sourceLabel": "Original-Programmprospekt Werne 2025"
+    },
+    {
+      "id": "werne25-2025-12-08-1",
+      "year": 2025,
+      "date": "2025-12-08",
+      "time": "17:30",
+      "endTime": "18:15",
+      "title": "KidsKulturSpass",
+      "description": "Weihnachts-Mitmach-Konzert",
+      "place": "Bühne",
+      "children": true,
+      "active": true,
+      "status": "archived",
+      "official": true,
+      "source": "251120-Weihnachtsmarkt-Programm-2025-online.pdf",
+      "sourceLabel": "Original-Programmprospekt Werne 2025"
+    },
+    {
+      "id": "werne25-2025-12-08-2",
+      "year": 2025,
+      "date": "2025-12-08",
+      "time": "18:00",
+      "endTime": "18:15",
+      "title": "Theater für Alle",
+      "description": "Die zwei Weihnachtsbäume",
+      "place": "Lichterwald",
+      "children": true,
+      "active": true,
+      "status": "archived",
+      "official": true,
+      "source": "251120-Weihnachtsmarkt-Programm-2025-online.pdf",
+      "sourceLabel": "Original-Programmprospekt Werne 2025"
+    },
+    {
+      "id": "werne25-2025-12-08-3",
+      "year": 2025,
+      "date": "2025-12-08",
+      "time": "19:30",
+      "endTime": "21:00",
+      "title": "GoodVibes",
+      "description": "Pop & Rock zur Weihnachtszeit",
+      "place": "Sparkassenbühne",
+      "children": false,
+      "active": true,
+      "status": "archived",
+      "official": true,
+      "source": "251120-Weihnachtsmarkt-Programm-2025-online.pdf",
+      "sourceLabel": "Original-Programmprospekt Werne 2025"
+    },
+    {
+      "id": "werne25-2025-12-09-0",
+      "year": 2025,
+      "date": "2025-12-09",
+      "time": "16:00",
+      "endTime": "",
+      "title": "MS Musik",
+      "description": "1, 2 oder 3",
+      "place": "Bühne",
+      "children": true,
+      "active": true,
+      "status": "archived",
+      "official": true,
+      "source": "251120-Weihnachtsmarkt-Programm-2025-online.pdf",
+      "sourceLabel": "Original-Programmprospekt Werne 2025"
+    },
+    {
+      "id": "werne25-2025-12-09-1",
+      "year": 2025,
+      "date": "2025-12-09",
+      "time": "17:00",
+      "endTime": "",
+      "title": "MS Musik",
+      "description": "1, 2 oder 3",
+      "place": "Bühne",
+      "children": true,
+      "active": true,
+      "status": "archived",
+      "official": true,
+      "source": "251120-Weihnachtsmarkt-Programm-2025-online.pdf",
+      "sourceLabel": "Original-Programmprospekt Werne 2025"
+    },
+    {
+      "id": "werne25-2025-12-09-2",
+      "year": 2025,
+      "date": "2025-12-09",
+      "time": "18:00",
+      "endTime": "18:15",
+      "title": "Theater für Alle",
+      "description": "Die vier Weihnachtskugeln",
+      "place": "Lichterwald",
+      "children": true,
+      "active": true,
+      "status": "archived",
+      "official": true,
+      "source": "251120-Weihnachtsmarkt-Programm-2025-online.pdf",
+      "sourceLabel": "Original-Programmprospekt Werne 2025"
+    },
+    {
+      "id": "werne25-2025-12-09-3",
+      "year": 2025,
+      "date": "2025-12-09",
+      "time": "19:00",
+      "endTime": "21:00",
+      "title": "Mucky Feet",
+      "description": "Weihnachtliches Mitsing-Rock’n’Roll",
+      "place": "Sparkassenbühne",
+      "children": false,
+      "active": true,
+      "status": "archived",
+      "official": true,
+      "source": "251120-Weihnachtsmarkt-Programm-2025-online.pdf",
+      "sourceLabel": "Original-Programmprospekt Werne 2025"
+    },
+    {
+      "id": "werne25-2025-12-10-0",
+      "year": 2025,
+      "date": "2025-12-10",
+      "time": "18:00",
+      "endTime": "18:15",
+      "title": "Theater für Alle",
+      "description": "Der oberste Lebkuchenmann",
+      "place": "Lichterwald",
+      "children": true,
+      "active": true,
+      "status": "archived",
+      "official": true,
+      "source": "251120-Weihnachtsmarkt-Programm-2025-online.pdf",
+      "sourceLabel": "Original-Programmprospekt Werne 2025"
+    },
+    {
+      "id": "werne25-2025-12-10-1",
+      "year": 2025,
+      "date": "2025-12-10",
+      "time": "19:00",
+      "endTime": "21:00",
+      "title": "The Kogs",
+      "description": "Britisch-deutsche Songpoesie mit Herz und Wucht",
+      "place": "Sparkassenbühne",
+      "children": false,
+      "active": true,
+      "status": "archived",
+      "official": true,
+      "source": "251120-Weihnachtsmarkt-Programm-2025-online.pdf",
+      "sourceLabel": "Original-Programmprospekt Werne 2025"
+    },
+    {
+      "id": "werne25-2025-12-11-0",
+      "year": 2025,
+      "date": "2025-12-11",
+      "time": "16:30",
+      "endTime": "18:00",
+      "title": "Smooth Invaders",
+      "description": "Weihnachtszauber",
+      "place": "Sparkassenbühne",
+      "children": false,
+      "active": true,
+      "status": "archived",
+      "official": true,
+      "source": "251120-Weihnachtsmarkt-Programm-2025-online.pdf",
+      "sourceLabel": "Original-Programmprospekt Werne 2025"
+    },
+    {
+      "id": "werne25-2025-12-11-1",
+      "year": 2025,
+      "date": "2025-12-11",
+      "time": "18:00",
+      "endTime": "18:15",
+      "title": "Theater für Alle",
+      "description": "Sterntaler",
+      "place": "Lichterwald",
+      "children": true,
+      "active": true,
+      "status": "archived",
+      "official": true,
+      "source": "251120-Weihnachtsmarkt-Programm-2025-online.pdf",
+      "sourceLabel": "Original-Programmprospekt Werne 2025"
+    },
+    {
+      "id": "werne25-2025-12-11-2",
+      "year": 2025,
+      "date": "2025-12-11",
+      "time": "19:00",
+      "endTime": "21:00",
+      "title": "Fragile Matt",
+      "description": "Irish Smiles",
+      "place": "Sparkassenbühne",
+      "children": false,
+      "active": true,
+      "status": "archived",
+      "official": true,
+      "source": "251120-Weihnachtsmarkt-Programm-2025-online.pdf",
+      "sourceLabel": "Original-Programmprospekt Werne 2025"
+    },
+    {
+      "id": "werne25-2025-12-12-0",
+      "year": 2025,
+      "date": "2025-12-12",
+      "time": "16:30",
+      "endTime": "17:15",
+      "title": "herrH",
+      "description": "WinterMitmachKonzert für die ganze Familie",
+      "place": "Bühne",
+      "children": true,
+      "active": true,
+      "status": "archived",
+      "official": true,
+      "source": "251120-Weihnachtsmarkt-Programm-2025-online.pdf",
+      "sourceLabel": "Original-Programmprospekt Werne 2025"
+    },
+    {
+      "id": "werne25-2025-12-12-1",
+      "year": 2025,
+      "date": "2025-12-12",
+      "time": "18:00",
+      "endTime": "18:15",
+      "title": "Theater für Alle",
+      "description": "Die Weihnachtssterne",
+      "place": "Lichterwald",
+      "children": true,
+      "active": true,
+      "status": "archived",
+      "official": true,
+      "source": "251120-Weihnachtsmarkt-Programm-2025-online.pdf",
+      "sourceLabel": "Original-Programmprospekt Werne 2025"
+    },
+    {
+      "id": "werne25-2025-12-12-2",
+      "year": 2025,
+      "date": "2025-12-12",
+      "time": "19:00",
+      "endTime": "21:00",
+      "title": "Jo Marie Dominiak",
+      "description": "Weihnachten im Revier",
+      "place": "Sparkassenbühne",
+      "children": false,
+      "active": true,
+      "status": "archived",
+      "official": true,
+      "source": "251120-Weihnachtsmarkt-Programm-2025-online.pdf",
+      "sourceLabel": "Original-Programmprospekt Werne 2025"
+    },
+    {
+      "id": "werne25-2025-12-13-0",
+      "year": 2025,
+      "date": "2025-12-13",
+      "time": "13:00",
+      "endTime": "13:45",
+      "title": "Der Minze",
+      "description": "",
+      "place": "Bühne",
+      "children": true,
+      "active": true,
+      "status": "archived",
+      "official": true,
+      "source": "251120-Weihnachtsmarkt-Programm-2025-online.pdf",
+      "sourceLabel": "Original-Programmprospekt Werne 2025"
+    },
+    {
+      "id": "werne25-2025-12-13-1",
+      "year": 2025,
+      "date": "2025-12-13",
+      "time": "15:00",
+      "endTime": "16:30",
+      "title": "Nilsen",
+      "description": "Kinder-Mitmach-Konzert",
+      "place": "Bühne",
+      "children": true,
+      "active": true,
+      "status": "archived",
+      "official": true,
+      "source": "251120-Weihnachtsmarkt-Programm-2025-online.pdf",
+      "sourceLabel": "Original-Programmprospekt Werne 2025"
+    },
+    {
+      "id": "werne25-2025-12-13-2",
+      "year": 2025,
+      "date": "2025-12-13",
+      "time": "17:00",
+      "endTime": "18:00",
+      "title": "Rotstiftpause",
+      "description": "Weihnachtspop",
+      "place": "Sparkassenbühne",
+      "children": false,
+      "active": true,
+      "status": "archived",
+      "official": true,
+      "source": "251120-Weihnachtsmarkt-Programm-2025-online.pdf",
+      "sourceLabel": "Original-Programmprospekt Werne 2025"
+    },
+    {
+      "id": "werne25-2025-12-13-3",
+      "year": 2025,
+      "date": "2025-12-13",
+      "time": "18:00",
+      "endTime": "18:15",
+      "title": "Theater für Alle",
+      "description": "Santa Lucia",
+      "place": "Lichterwald",
+      "children": true,
+      "active": true,
+      "status": "archived",
+      "official": true,
+      "source": "251120-Weihnachtsmarkt-Programm-2025-online.pdf",
+      "sourceLabel": "Original-Programmprospekt Werne 2025"
+    },
+    {
+      "id": "werne25-2025-12-13-4",
+      "year": 2025,
+      "date": "2025-12-13",
+      "time": "19:00",
+      "endTime": "22:30",
+      "title": "Björn van Andel & Svenja Kröger",
+      "description": "",
+      "place": "Sparkassenbühne",
+      "children": false,
+      "active": true,
+      "status": "archived",
+      "official": true,
+      "source": "251120-Weihnachtsmarkt-Programm-2025-online.pdf",
+      "sourceLabel": "Original-Programmprospekt Werne 2025"
+    },
+    {
+      "id": "werne25-2025-12-14-0",
+      "year": 2025,
+      "date": "2025-12-14",
+      "time": "13:00",
+      "endTime": "14:30",
+      "title": "Tim König & Friends",
+      "description": "Weihnachtsklassiker und Pop-Hits",
+      "place": "Sparkassenbühne",
+      "children": false,
+      "active": true,
+      "status": "archived",
+      "official": true,
+      "source": "251120-Weihnachtsmarkt-Programm-2025-online.pdf",
+      "sourceLabel": "Original-Programmprospekt Werne 2025"
+    },
+    {
+      "id": "werne25-2025-12-14-1",
+      "year": 2025,
+      "date": "2025-12-14",
+      "time": "15:00",
+      "endTime": "17:00",
+      "title": "Felice",
+      "description": "Whispers of Winter",
+      "place": "Sparkassenbühne",
+      "children": false,
+      "active": true,
+      "status": "archived",
+      "official": true,
+      "source": "251120-Weihnachtsmarkt-Programm-2025-online.pdf",
+      "sourceLabel": "Original-Programmprospekt Werne 2025"
+    },
+    {
+      "id": "werne25-2025-12-14-2",
+      "year": 2025,
+      "date": "2025-12-14",
+      "time": "17:00",
+      "endTime": "18:30",
+      "title": "Querwind",
+      "description": "Traditionelle Advents- und Weihnachtslieder",
+      "place": "Kirche",
+      "children": false,
+      "active": true,
+      "status": "archived",
+      "official": true,
+      "source": "251120-Weihnachtsmarkt-Programm-2025-online.pdf",
+      "sourceLabel": "Original-Programmprospekt Werne 2025"
+    },
+    {
+      "id": "werne25-2025-12-14-3",
+      "year": 2025,
+      "date": "2025-12-14",
+      "time": "18:00",
+      "endTime": "18:15",
+      "title": "Theater für Alle",
+      "description": "Die kleine Hexe",
+      "place": "Lichterwald",
+      "children": true,
+      "active": true,
+      "status": "archived",
+      "official": true,
+      "source": "251120-Weihnachtsmarkt-Programm-2025-online.pdf",
+      "sourceLabel": "Original-Programmprospekt Werne 2025"
+    },
+    {
+      "id": "werne25-2025-12-14-4",
+      "year": 2025,
+      "date": "2025-12-14",
+      "time": "18:45",
+      "endTime": "19:15",
+      "title": "Förderverein Stadtbücherei Werne e.V.",
+      "description": "Last Quizzer - das Weihnachtsquiz",
+      "place": "Sparkassenbühne",
+      "children": false,
+      "active": true,
+      "status": "archived",
+      "official": true,
+      "source": "251120-Weihnachtsmarkt-Programm-2025-online.pdf",
+      "sourceLabel": "Original-Programmprospekt Werne 2025"
+    },
+    {
+      "id": "werne25-2025-12-14-5",
+      "year": 2025,
+      "date": "2025-12-14",
+      "time": "19:15",
+      "endTime": "19:30",
+      "title": "Das leuchtende Finale",
+      "description": "Wunderkerzen mit Bürgermeister Lars Hübchen",
+      "place": "Sparkassenbühne",
+      "children": false,
+      "active": true,
+      "status": "archived",
+      "official": true,
+      "source": "251120-Weihnachtsmarkt-Programm-2025-online.pdf",
+      "sourceLabel": "Original-Programmprospekt Werne 2025"
+    }
+  ],
+  "audio": {
+    "enabled": true,
+    "type": "music",
+    "src": "media/audio/music/weihnachten-nastelbom.mp3",
+    "volume": 0.35,
+    "loop": true,
+    "autoplay": true
+  }
+}

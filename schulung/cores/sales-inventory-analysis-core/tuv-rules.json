@@ -1,0 +1,13 @@
+{
+  "schema": "KC_TUV_RULESET_V1",
+  "component": "salesInventoryAnalysisCore",
+  "version": "1.0.0",
+  "rules": [
+    {"id":"SI-001","severity":"block","rule":"Kundenanzahl wird aus eindeutigen, nicht als Training markierten Bons gebildet."},
+    {"id":"SI-002","severity":"block","rule":"Bestandsbuchungen dürfen ausschließlich im PC-Manager erfolgen."},
+    {"id":"SI-003","severity":"block","rule":"Kassenabgleiche dürfen Bestände nur anhand bestätigter Verbrauchsregeln vermindern."},
+    {"id":"SI-004","severity":"warning","rule":"Unbekannte Portions- und Gebindewerte müssen als Messung erforderlich erscheinen."},
+    {"id":"SI-005","severity":"block","rule":"Prognosen dürfen Lagerbestände niemals automatisch verändern."},
+    {"id":"SI-006","severity":"manual","rule":"Ampelgrenzen, Verbrauchswerte und Restdauer benötigen vor Gold einen praktischen Veranstaltungsabgleich."}
+  ]
+}

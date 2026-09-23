@@ -1,0 +1,22 @@
+{
+  "schema": "KC_STUDIO_COMPONENT_CATALOG_V1",
+  "id": "table-core",
+  "component": "tableCore",
+  "displayName": "TableCore",
+  "version": "1.1.0",
+  "status": "Candidate",
+  "owner": "Framework Studio",
+  "source": "Framework Studio V1.38.39",
+  "capabilities": [
+    "table.sort",
+    "table.filter",
+    "table.selection",
+    "table.column-order",
+    "table.column-resize",
+    "table.autofit",
+    "table.view-state"
+  ],
+  "consumers": [
+    "KC MarktKasse PC-Manager"
+  ]
+}

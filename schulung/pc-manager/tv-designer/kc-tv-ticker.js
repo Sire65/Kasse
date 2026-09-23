@@ -1,0 +1,5 @@
+(()=>{'use strict';
+let project;try{project=JSON.parse(localStorage.getItem('fs3.kcTvPresentation')||'null')}catch{}project=project||window.KC_DESIGNER_MARKET_PRESENTATION;
+function mount(){const counter=document.getElementById('tvCounter'),number=Number(counter?.textContent.split('/')[0]||1),slide=project?.slides?.[number-1],items=(slide?.items||[]).filter(item=>item.type==='ticker');document.querySelectorAll('.tvItem.ticker').forEach((el,index)=>{if(el.dataset.tvTickerMounted)return;const item=items[index]||{},text=el.textContent,track=document.createElement('span');track.className='tvTickerTrack';track.textContent=text;track.style.fontFamily=item.tickerFontFamily||'Arial, sans-serif';track.style.setProperty('--ticker-duration',Math.max(8,32-Number(item.speed||5)*2.5)+'s');track.dataset.direction=item.tickerDirection||'left';el.textContent='';el.appendChild(track);el.dataset.tvTickerMounted='1';el.title='Laufschrift läuft automatisch'});}
+new MutationObserver(mount).observe(document.getElementById('tvStage'),{childList:true,subtree:true});mount();
+})();

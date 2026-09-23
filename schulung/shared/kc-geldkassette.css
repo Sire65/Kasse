@@ -1,0 +1,29 @@
+/* Geldkassette: Aufteilung auf die beiden Geldladen.
+   Gemeinsames Aussehen für Money Butler und PC-Manager - die Bedienung soll an beiden Stellen
+   gleich sein, deshalb liegt auch die Gestaltung nur einmal hier. */
+.kckass-hinweis{color:#667085;font-size:.86rem;margin:0 0 12px}
+.kckass-aktionen{display:flex;gap:9px;flex-wrap:wrap;margin:0 0 12px}
+.kckass-aktionen button{border:1px solid #c7ced6;border-radius:8px;padding:9px 14px;font-weight:900;background:linear-gradient(#fff,#e8ebee);cursor:pointer}
+/* Hoehere Spezifitaet als noetig, aber mit Absicht: der PC-Manager hat eigene Regeln fuer
+   label-Elemente in seinen Formularbereichen, die eine einfache Klassenregel ueberstimmen
+   wuerden - dann stuenden die Spalten untereinander statt nebeneinander. */
+.kckass-kopf,.kckass-liste .kckass-zeile{display:grid;grid-template-columns:1.2fr .8fr 1fr .8fr;align-items:center;gap:10px}
+.kckass-liste .kckass-zeile>strong,.kckass-liste .kckass-zeile>span{margin:0;text-align:left}
+.kckass-liste .kckass-zeile>.kckass-rest{text-align:right}
+.kckass-kopf{padding:6px 10px;color:#667085;font-size:.75rem;font-weight:900}
+.kckass-liste{display:grid;gap:7px}
+.kckass-liste .kckass-zeile{border:1px solid #d4dae0;border-radius:9px;padding:9px 10px;background:#fafbfc}
+.kckass-liste .kckass-zeile strong{font-size:.9rem}
+.kckass-gesamt,.kckass-rest{font-size:.9rem;font-weight:900;color:#0b315d}
+.kckass-rest{text-align:right}
+.kckass-liste .kckass-eingabe input{width:100%;text-align:center;margin:0}
+.kckass-leer{color:#667085;font-size:.86rem;margin:0}
+.kckass-summe{display:flex;justify-content:space-between;gap:18px;flex-wrap:wrap;margin-top:12px;padding:10px 12px;border-radius:8px;background:#eef3f7}
+.kckass-summe span{font-weight:900;font-size:.84rem}
+.kckass-summe b,.kckass-summe strong{color:#0b315d;font-size:1.15rem;margin-left:6px}
+.kckass-warnung{color:#b91c1c;font-weight:900;font-size:.86rem;margin:8px 0 0}
+.kckass-warnung:empty{display:none}
+@media(max-width:700px){.kckass-kopf{display:none}.kckass-liste .kckass-zeile{grid-template-columns:1fr 1fr}}
+/* Deutlicher Hinweis, dass der Kassettencode an BEIDEN Kassen eingelesen werden muss.
+   Gleiche Gestaltung in Money Butler und PC-Manager. */
+.kckass-doppelhinweis{margin:10px 0 0;padding:11px 14px;border-radius:9px;background:#fff4e5;border-left:5px solid #d98a1f;color:#6b4106;font-size:.9rem;line-height:1.45;text-align:left}

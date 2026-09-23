@@ -1,0 +1,12 @@
+{
+  "schema": "KC_TUV_RULESET_V1",
+  "component": "manager-import-progress",
+  "version": "1.0.0",
+  "rules": [
+    {"id":"IMPORT-PROGRESS-001","level":"error","requirement":"Der Importbutton bleibt während eines laufenden Imports gesperrt."},
+    {"id":"IMPORT-PROGRESS-002","level":"error","requirement":"Jede ausgewählte Datei wird einzeln benannt und verarbeitet."},
+    {"id":"IMPORT-PROGRESS-003","level":"warning","requirement":"Prozent, Laufzeit, Restzeit und aktueller Arbeitsschritt sind sichtbar."},
+    {"id":"IMPORT-PROGRESS-004","level":"error","requirement":"Ein reiner Doppelimport wird ausdrücklich als bereits vorhanden gemeldet."},
+    {"id":"IMPORT-PROGRESS-005","level":"error","requirement":"Der Abschlussdialog darf erst nach Erfolg oder Fehler geschlossen werden."}
+  ]
+}

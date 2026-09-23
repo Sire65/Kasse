@@ -1,0 +1,28 @@
+(function(){
+'use strict';
+/* BEFUND vor der Mitglieder-Präsentation: geprüft wurde AUSSCHLIESSLICH das Projekt des
+   Studios ("fs3.visualDesigner.project"). Auf einem Rechner, auf dem das Studio noch nie
+   geöffnet wurde, ist dieser Schlüssel leer - der TÜV meldete dann "Keine Folien" und
+   stand auf NICHT FREIGABEFÄHIG, obwohl der TV-Bereich des Managers eine vollständige
+   Präsentation enthält. Genau dieser Zustand wäre am Vorführrechner der wahrscheinliche.
+   Jetzt wird zuerst das Studio-Projekt genommen und, wenn dort nichts liegt, die
+   Präsentation des TV-Bereichs. Geprüft wird also immer das, was auch gezeigt wird. */
+function ladeAus(schluessel){try{const roh=localStorage.getItem(schluessel);const p=roh?JSON.parse(roh):null;return (p&&Array.isArray(p.slides)&&p.slides.length)?p:null}catch{return null}}
+function project(){return ladeAus('fs3.visualDesigner.project')||ladeAus('kcm_tv_presentation_v2')||{slides:[]}}
+function run(){const env=KCPresentationTUV.environment();env.releaseReport=window.KCReleaseManifest?.validate?.()||{status:'BLOCKED',issues:[{level:'error',code:'REL-001',title:'Zentrales Release-Manifest fehlt',detail:'Der Versionswächter ist nicht geladen.'}]};const r=KCPresentationTUV.inspect(project(),env);window.__kcPresentationTuvReport=r;const b=document.getElementById('kcTuvButton');if(b){b.dataset.status=r.status;const label=b.querySelector('.kc-tuv-label');if(label)label.textContent=r.status==='PASS'?'TÜV: freigegeben':r.status==='CONDITIONAL'?`TÜV: ${r.counts.warning} Hinweise`:`TÜV: ${r.counts.error} Sperren`}return r}
+function dialog(){let d=document.getElementById('kcTuvDialog');if(d)return d;d=document.createElement('dialog');d.id='kcTuvDialog';d.className='kc-tuv-dialog';d.innerHTML='<div class="kc-tuv-head"><div><strong>Präsentations-TÜV</strong><div>Qualität, Bedienbarkeit und TV-Bereitschaft</div></div><button data-close aria-label="Schließen">✕</button></div><div class="kc-tuv-body"></div><div class="kc-tuv-actions"><button data-autofix>TV-Fläche automatisch korrigieren</button><button data-clear-runtime>Aktuelle Diagnose zurücksetzen</button><button data-rerun>Neu prüfen</button><button data-report>Prüfbericht speichern</button><button data-close>Schließen</button></div>';document.body.appendChild(d);d.querySelectorAll('[data-close]').forEach(x=>x.onclick=()=>d.close());d.querySelector('[data-rerun]').onclick=()=>show();d.querySelector('[data-autofix]').onclick=()=>{const n=window.KCPresentationProfessional?.fixAll?.()||0;window.KCManagerMessages?.show(n?`${n} Layout-Objekte wurden korrigiert.`:'Es war keine Korrektur erforderlich.',n?'success':'info');show()};d.querySelector('[data-clear-runtime]').onclick=()=>{window.KCRuntimeStability?.clear?.();show()};d.querySelector('[data-report]').onclick=()=>KCPresentationTUV.download(run(),`KC_Praesentations_TUV_${new Date().toISOString().slice(0,10)}.json`);return d}
+function show(){let r;try{r=run()}catch(err){console.error('Präsentations-TÜV konnte nicht gestartet werden:',err);window.KCManagerMessages?.show('Der Präsentations-TÜV konnte nicht gestartet werden: '+(err?.message||err),'error');return}const d=dialog(),body=d.querySelector('.kc-tuv-body'),statusText={PASS:'Freigegeben',CONDITIONAL:'Bedingt freigabefähig',BLOCKED:'Nicht freigabefähig'}[r.status];body.innerHTML=`<div class="kc-tuv-summary"><div class="kc-tuv-card"><strong>Status</strong><div>${statusText}</div></div><div class="kc-tuv-card"><strong>Folien</strong><div>${r.activeSlideCount} aktiv / ${r.slideCount}</div></div><div class="kc-tuv-card"><strong>Fehler</strong><div>${r.counts.error}</div></div><div class="kc-tuv-card"><strong>Warnungen</strong><div>${r.counts.warning}</div></div></div><div class="kc-tuv-gates">${Object.entries(r.gates).map(([k,v])=>`<div class="kc-tuv-gate ${v}"><strong>${k}</strong>${v}</div>`).join('')}</div><h3>Prüfergebnisse</h3>${r.issues.length?r.issues.map(x=>`<div class="kc-tuv-issue ${x.level}"><strong>${x.code} · ${x.title}</strong>${x.slideIndex!==null?` <span>– Folie ${x.slideIndex+1}</span>`:''}<small>${x.detail}</small></div>`).join(''):'<div class="kc-tuv-issue"><strong>Keine Beanstandungen</strong><small>Alle automatisierten Prüfpunkte wurden bestanden.</small></div>'}`;if(!d.open)d.showModal()}
+// BEFUND vor der Mitglieder-Präsentation: als letzter Rückfall wurde der Knopf in "main"
+// gehängt - also auf die gerade offene Seite, egal welche. Er klebte dadurch mit rotem Punkt
+// und der Aufschrift "TÜV: 2 Sperren" mitten in der Vorführdaten-Ansicht. Das ist ein
+// Entwicklerwerkzeug und gehört in den TV-Bereich, sonst nirgendwohin.
+function install(){const host=document.querySelector('[data-tv-page="slides"] .tv-manager-toolbar')||document.querySelector('.tv-manager-toolbar');
+ if(!host){window.KCPresentationTUVRun=run;window.KCPresentationTUVShow=show;return}
+ const b=document.createElement('button');b.type='button';b.id='kcTuvButton';b.className='kc-tuv-button';b.innerHTML='<span class="kc-tuv-dot"></span><span class="kc-tuv-label">TÜV prüfen</span>';b.onclick=show;host?.appendChild(b);
+ let timer=0;const schedule=(delay=2200)=>{clearTimeout(timer);timer=setTimeout(()=>{if(!document.hidden)run()},delay)};
+ schedule(800);window.addEventListener('storage',()=>schedule(1200));document.addEventListener('visibilitychange',()=>{if(!document.hidden)schedule(800)});
+ const oldSave=window.saveTvPresentation;if(typeof oldSave==='function')window.saveTvPresentation=function(){const result=oldSave.apply(this,arguments);schedule(2500);return result};
+ window.KCPresentationTUVRun=run;window.KCPresentationTUVShow=show;window.addEventListener('kc-release-manifest-ready',()=>schedule(300));
+}
+window.addEventListener('DOMContentLoaded',install);
+})();

@@ -1,0 +1,1 @@
+{"schema":"framework-studio-catalog-v1","id":"eventSimulationCore","name":"EventSimulationCore","version":"0.1.0","status":"candidate-test-only","contracts":["KC_POS_TRANSACTION_V5","KC_SALES_EXPORT_V4","KC_MANAGER_STOCK_LEDGER_V1"],"runtimeIsolation":"Nur synthetische Testdaten; niemals Produktionsspeicher verwenden."}

@@ -1,0 +1,73 @@
+/* Happy Hour im PC-Manager. Bewusst ruhig gehalten - die Ansicht soll auf einen Blick
+   beantworten: laeuft sie gerade, wann gilt sie, und welche Artikel sind dabei. */
+.hh-jetzt{display:flex;flex-direction:column;gap:3px;padding:12px 16px;border-radius:12px;
+  background:#eef3f8;border:1px solid #d7e0ea;margin-bottom:16px}
+.hh-jetzt b{font-size:1.05rem;color:#173b61}
+.hh-jetzt span{color:#5d6b7d;font-size:.9rem}
+.hh-jetzt-an{background:#fff4d6;border-color:#e6c766}
+.hh-jetzt-an b{color:#7a5200}
+
+.hh-erklaerung{color:#5d6b7d;font-size:.9rem;margin:.2rem 0 .8rem}
+.hh-schalter{display:flex;align-items:center;gap:9px;font-size:1rem}
+.hh-schalter input{width:20px;height:20px}
+
+.hh-fensterliste{display:flex;flex-wrap:wrap;gap:14px}
+.hh-fenster{display:inline-flex;align-items:center;gap:7px;padding:7px 10px;border:1px solid #d9e1eb;
+  border-radius:10px;background:#fff}
+.hh-fenster input[type=time]{min-height:38px;font-size:1rem}
+.hh-fenster span{color:#5d6b7d}
+.hh-verblasst{opacity:.4;pointer-events:none}
+
+.hh-ausnahme{display:flex;flex-wrap:wrap;align-items:center;gap:12px;padding:11px;margin-bottom:9px;
+  border:1px solid #dce4ed;border-radius:11px;background:#f9fbfd}
+.hh-ausnahme input[type=date]{min-height:38px}
+.hh-aus{display:inline-flex;align-items:center;gap:6px;white-space:nowrap}
+
+.hh-meldung{padding:11px 14px;border-radius:10px;margin:12px 0}
+.hh-meldung ul{margin:.4rem 0 0;padding-left:1.1rem}
+.hh-fehler-kasten{background:#fee5e2;color:#8a2118;border:1px solid #f0b4ac}
+.hh-hinweis-kasten{background:#fff4d6;color:#725000;border:1px solid #e6c766}
+
+.hh-tabelle{width:100%;border-collapse:collapse}
+.hh-tabelle th,.hh-tabelle td{padding:8px;border-bottom:1px solid #e2e8f0;text-align:left}
+.hh-preis{color:#0d7a2e}
+.hh-leer{color:#94a3b8}
+
+.hh-fuss{display:flex;align-items:center;gap:14px;margin:18px 0 6px}
+.hh-stand{color:#0d7a2e;font-size:.9rem}
+
+/* Die beiden Felder im Artikelformular */
+.hh-feld .hh-zeile{display:inline-flex;align-items:center;gap:8px}
+.hh-feld .hh-zeile input{width:20px;height:20px}
+.hh-hinweis{display:block;margin-top:4px;font-size:.82rem;color:#5d6b7d;font-weight:500}
+.hh-hinweis.hh-fehler{color:#9b241d}
+.hh-hinweis.hh-gut{color:#166534}
+
+/* Die Artikelliste steht in einer schmalen Spalte neben dem Formular. Sie brauchte schon
+   vor der neuen HH-Spalte mehr Platz als sie hatte (gemessen bei 1500 px Fensterbreite:
+   206 px nötig, 177 vorhanden) - die Zellen quetschten sich dann ineinander und der Text
+   lief übereinander. Mit der neuen Spalte wären es 212 px.
+   Jetzt schiebt sich die Liste waagerecht, statt sich zu verknoten; die Zellen bleiben
+   lesbar und brechen nicht mehr um. */
+.article-table{overflow-x:auto}
+.article-table table{min-width:max-content}
+.article-table th,.article-table td{white-space:nowrap;padding-left:7px;padding-right:7px}
+
+/* NACHGEMESSEN am 31.08.2026 - die Regel oben allein hat NICHT gereicht.
+   Im Bild bei 1920x1080 stand in der Liste "FeuerzangenbowleGetränke" und
+   "Glas + FeuerzangePfRückgabe": die Artikelnamen liefen quer über die Nachbarspalte.
+   Ursache war nicht die Breite, sondern manager-table-core.css. Dieses Modul rüstet
+   Tabellen mit Sortier- und Verschiebeknöpfen nach und setzt dabei `table-layout:fixed`.
+   Bei fester Anordnung wird `min-width:max-content` schlicht ignoriert - die Spalten
+   werden gleich breit verteilt, der Kopftext bekommt neben den zwei 24-px-Knöpfen nur
+   noch 36 px ("Art…", "Gr…"), und weil die Zellen nicht umbrechen dürfen, malen sie
+   ihren Text ungehindert über die Nachbarspalte.
+   Für die Artikelliste wird die feste Anordnung deshalb wieder aufgehoben: die Spalten
+   richten sich nach ihrem Inhalt, und wenn es eng wird, schiebt sich die Liste. */
+.article-table table.kc-tablecore{table-layout:auto}
+.article-table .kc-tablecore-label{overflow:visible;text-overflow:clip}
+
+/* Sicherheitsnetz für ALLE nachgerüsteten Tabellen: falls irgendwo doch der Platz fehlt,
+   wird der Text sauber mit "…" abgeschnitten. Übereinandergemalte Spalten sehen aus wie
+   ein kaputtes Programm - ein gekürzter Text sieht aus wie zu wenig Platz. */
+table.kc-tablecore td{overflow:hidden;text-overflow:ellipsis}

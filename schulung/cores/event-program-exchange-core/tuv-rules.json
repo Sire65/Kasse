@@ -1,0 +1,21 @@
+{
+  "schema": "KC_TUV_RULESET_V1",
+  "ruleSetId": "TUV_EVENT_PROGRAM_EXCHANGE_V1",
+  "component": "EventProgramExchangeCore",
+  "version": "1.0.0",
+  "staticStatus": "PASS",
+  "practicalStatus": "PENDING",
+  "overallStatus": "CONDITIONAL",
+  "rules": [
+    { "id": "EPX-001", "severity": "BLOCK", "check": "schema-exact", "expected": "KC_EVENT_PROGRAM_PACKAGE_V1" },
+    { "id": "EPX-002", "severity": "BLOCK", "check": "checksum-valid" },
+    { "id": "EPX-003", "severity": "BLOCK", "check": "forbidden-pos-domains-absent" },
+    { "id": "EPX-004", "severity": "BLOCK", "check": "program-scope-always-active" },
+    { "id": "EPX-005", "severity": "BLOCK", "check": "rating-enum", "allowed": ["low", "normal", "high", "very-high"] },
+    { "id": "EPX-006", "severity": "BLOCK", "check": "import-verified-before-storage" },
+    { "id": "EPX-007", "severity": "WARN", "check": "pos-indicator-outside-cashier-work-area" },
+    { "id": "EPX-008", "severity": "WARN", "check": "short-and-long-press-on-real-pos-device" },
+    { "id": "EPX-009", "severity": "BLOCK", "check": "staffing-is-hint-not-automatic-decision" }
+  ],
+  "evidence": {"automated": "tests/event-program-exchange.test.cjs", "documentation": "STUDIO_TUV_EVENT_PROGRAM_REGISTRATION_REPAIR_28.md", "realDevice": null}
+}

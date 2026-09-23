@@ -1,0 +1,37 @@
+/* Bargeld-Statistik - dieselbe Darstellung im Money Butler und im PC-Manager. */
+.kcbs-zahlen{display:flex;flex-wrap:wrap;gap:10px;margin:8px 0 14px}
+.kcbs-zahl-karte{flex:1 1 150px;background:#f2f6fb;border:1px solid #d7e0ea;border-radius:10px;padding:9px 12px}
+.kcbs-zahl-karte span{display:block;font-size:.74rem;color:#4a5c70}
+.kcbs-zahl-karte strong{font-size:1.25rem;color:#173765}
+.kcbs-tabelle{width:100%;border-collapse:collapse;margin:4px 0 14px}
+.kcbs-tabelle th,.kcbs-tabelle td{padding:6px 8px;border-bottom:1px solid #e2e8f0;text-align:left;font-size:.86rem}
+/* BEFUND aus dem Foto: im PC-Manager gilt eine allgemeine Regel th{background:#173765;color:#fff}
+   fuer JEDE Tabelle - die Zeilenbeschriftungen (20 € Schein, 2 Rollen ...) standen dadurch
+   dunkelblau auf dunkelblau und waren schlicht unsichtbar. Hintergrund und Farbe deshalb hier
+   ausdruecklich setzen, nicht nur die Schriftfarbe. */
+.kcbs-tabelle th{width:130px;font-weight:700;color:#173765;background:#fff;position:static}
+.kcbs-zahl{white-space:nowrap;text-align:right;width:110px}
+.kcbs-balkenzelle{width:auto}
+.kcbs-balken{display:block;height:14px;border-radius:7px;background:linear-gradient(90deg,#2f6fb5,#173765)}
+.kcbs-leer{color:#5a6b7c;font-size:.86rem;margin:4px 0 14px}
+.kcbs-quelle{font-size:.78rem;color:#4a5c70;background:#edf5ff;border-radius:8px;padding:8px 10px}
+.kcbs-filter{display:flex;flex-wrap:wrap;gap:8px;align-items:flex-end;margin-bottom:6px}
+.kcbs-filter label{display:flex;flex-direction:column;font-size:.74rem;color:#4a5c70;gap:2px}
+.kcbs-filter select,.kcbs-filter input{padding:6px 8px;border:1px solid #c3cede;border-radius:7px;font-size:.86rem}
+
+/* Archiv der Übergabeprotokolle im PC-Manager */
+.kcprot-meldung{margin:8px 0 0;padding:10px 13px;border-radius:8px;font-size:.88rem;font-weight:700;line-height:1.45}
+.kcprot-ok{background:#eaf6ec;border-left:5px solid #2f8a3f;color:#12421d}
+.kcprot-fehler{background:#fff4e5;border-left:5px solid #d98a1f;color:#6b4106}
+.kcprot-beleg{border:1px solid #d4dae0;border-radius:9px;margin:8px 0;background:#fafbfc}
+.kcprot-beleg summary{display:grid;grid-template-columns:auto 1fr auto auto;gap:12px;align-items:center;padding:10px 12px;cursor:pointer;font-size:.88rem}
+.kcprot-nummer{font-family:monospace;font-weight:900;letter-spacing:.05em}
+.kcprot-art{color:#667085}
+.kcprot-datum{color:#667085;font-variant-numeric:tabular-nums}
+.kcprot-betrag{text-align:right;font-weight:900;white-space:nowrap}
+.kcprot-tabelle{width:100%;border-collapse:collapse;margin:0 0 8px}
+.kcprot-tabelle th{text-align:left;font-weight:700;padding:6px 12px;width:9rem;vertical-align:top;color:#667085;font-size:.84rem}
+.kcprot-tabelle td{padding:6px 12px;font-size:.86rem;border-bottom:1px solid #e6eaee}
+.kcprot-tabelle code{font-size:.78rem}
+.kcprot-quelle{margin-top:10px;color:#667085;font-size:.8rem}
+@media(max-width:700px){.kcprot-beleg summary{grid-template-columns:1fr auto}.kcprot-art,.kcprot-datum{grid-column:1/-1}}

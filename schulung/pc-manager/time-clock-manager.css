@@ -1,0 +1,12 @@
+.tc-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}.tc-wide{grid-column:1/-1}
+.tc-actions{display:flex;gap:8px;flex-wrap:wrap;align-items:end}.tc-table{width:100%;border-collapse:collapse}
+.tc-table th,.tc-table td{padding:8px;border-bottom:1px solid #d7e0ea;text-align:left}.tc-status{padding:10px;border-radius:8px;background:#edf5ff}
+.tc-status.ok{background:#e4f7e9;color:#17652d}.tc-status.warn{background:#fff4d6;color:#725000}
+.tc-code{font-family:ui-monospace,monospace;font-size:.85em}.tc-kpi{display:flex;gap:10px;flex-wrap:wrap}
+.tc-kpi span{padding:8px 12px;background:#eef3f8;border-radius:9px}@media(max-width:900px){.tc-grid{grid-template-columns:1fr}}
+.tc-storniert td{text-decoration:line-through;opacity:.6}
+
+/* Unvollständige Buchungen: der Planer muss sie sehen, nicht suchen. */
+.tc-ok{color:#166534;font-weight:800;margin:0}
+.tc-luecke td{background:#fff7ec}
+.tc-luecke td strong{color:#9a4f00}
