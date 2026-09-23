@@ -5,6 +5,10 @@ const path = require('node:path');
 const vm = require('node:vm');
 
 const source = fs.readFileSync(path.join(__dirname, '..', 'pc-manager', 'kc-dienstplan-manager.js'), 'utf8');
+const liveIndex = fs.readFileSync(path.join(__dirname, '..', 'pos', 'index.html'), 'utf8');
+const liveSw = fs.readFileSync(path.join(__dirname, '..', 'pos', 'service-worker.js'), 'utf8');
+const trainingIndex = fs.readFileSync(path.join(__dirname, '..', 'schulung', 'pos', 'index.html'), 'utf8');
+const trainingSw = fs.readFileSync(path.join(__dirname, '..', 'schulung', 'pos', 'service-worker.js'), 'utf8');
 const queries = [];
 let pushed = null;
 const context = {
@@ -43,5 +47,12 @@ vm.runInContext(source, context);
   assert.equal(pushed.schichten[1].area, 'Bereitschaft');
   assert.equal(pushed.eventId, 'KC-WM-2026');
   assert.equal(pushed.sourceUpdatedAt, '2026-09-23T04:15:00Z');
+  for (const [name, html, sw] of [
+    ['Live', liveIndex, liveSw],
+    ['Schulung', trainingIndex, trainingSw],
+  ]) {
+    assert.ok(html.includes('kc-dienstplan-kasse.js?build=0.2.0'), `${name}: Dienstplan 0.2.0 fehlt im HTML`);
+    assert.ok(sw.includes('./kc-dienstplan-kasse.js?build=0.2.0'), `${name}: Dienstplan 0.2.0 fehlt im Offline-Cache`);
+  }
   console.log('dienstplan-pc-manager-v3: OK');
 })().catch((err) => { console.error(err); process.exit(1); });
