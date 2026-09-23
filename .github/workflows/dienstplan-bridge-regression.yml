@@ -6,7 +6,11 @@ on:
     paths:
       - 'pc-manager/kc-dienstplan-manager.js'
       - 'pos/kc-dienstplan-kasse.js'
+      - 'pos/index.html'
+      - 'pos/service-worker.js'
       - 'schulung/pos/kc-dienstplan-kasse.js'
+      - 'schulung/pos/index.html'
+      - 'schulung/pos/service-worker.js'
       - 'markt-kasse-suite/backend-source/device-companion/**'
       - 'markt-kasse-suite/backend-source/manager-companion/**'
       - 'tests/dienstplan-pc-manager-v3.test.cjs'
@@ -15,7 +19,11 @@ on:
     paths:
       - 'pc-manager/kc-dienstplan-manager.js'
       - 'pos/kc-dienstplan-kasse.js'
+      - 'pos/index.html'
+      - 'pos/service-worker.js'
       - 'schulung/pos/kc-dienstplan-kasse.js'
+      - 'schulung/pos/index.html'
+      - 'schulung/pos/service-worker.js'
       - 'markt-kasse-suite/backend-source/device-companion/**'
       - 'markt-kasse-suite/backend-source/manager-companion/**'
       - 'tests/dienstplan-pc-manager-v3.test.cjs'
