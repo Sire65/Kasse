@@ -1,38 +1,61 @@
-// Dienstplan-Ansicht an der Kasse - frei zugaenglich fuer ALLE Kollegen (kein PIN-Bereich),
-// genau der Zweck: schnell nachschauen koennen, wer wann kommt. Blaetterpfeile fuer die
-// naechsten Tage.
-//
-// DATENWEG: wie schon bei der Anwesenheits-Ampel (kc-team-praesenz.js) - die Kasse fragt
-// ihren EIGENEN, lokalen Companion, der die Daten vom PC-Manager holt. Kein Netz/kein
-// Companion (z.B. Schulungsversion, die sich absichtlich nie koppelt) -> die Liste bleibt
-// leer und sagt das auch so, statt einen veralteten Stand vorzutaeuschen.
+// Dienstplan-Ansicht an der Kasse - frei zugaenglich fuer ALLE Kollegen (kein PIN-Bereich).
+// Die Kasse fragt nur ihren lokalen Companion; dieser haelt den letzten erfolgreich synchronisierten
+// Sollplan persistent vor. Auf der Kasse erscheinen ausschliesslich Pseudonyme.
 (function (global) {
   'use strict';
   const POLL_MS = 60000;
+  const PLAN_TIMEZONE = 'Europe/Berlin';
   const URL_DIENSTPLAN = (global.KCSyncConnection?.buildUrl('/kc-sync-dienstplan')) || 'http://127.0.0.1:47391/kc-sync-dienstplan';
 
   let schichten = [];
   let letzterAbruf = null;
+  let planStand = null;
+  let letzteSynchronisierung = null;
+  let planRevision = 0;
   let gewaehltesDatum = heuteIso();
 
+  function datumInZeitzone(date = new Date()) {
+    const teile = new Intl.DateTimeFormat('de-DE', {
+      timeZone: PLAN_TIMEZONE,
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+    }).formatToParts(date);
+    const wert = (typ) => teile.find((p) => p.type === typ)?.value;
+    return `${wert('year')}-${wert('month')}-${wert('day')}`;
+  }
+
   function heuteIso() {
-    return new Date().toISOString().slice(0, 10);
+    return datumInZeitzone();
   }
 
   function verschiebeTag(iso, delta) {
-    const d = new Date(iso + 'T12:00:00');
-    d.setDate(d.getDate() + delta);
+    const d = new Date(iso + 'T12:00:00Z');
+    d.setUTCDate(d.getUTCDate() + delta);
     return d.toISOString().slice(0, 10);
   }
 
   function formatiereDatum(iso) {
-    const d = new Date(iso + 'T12:00:00');
+    const d = new Date(iso + 'T12:00:00Z');
     const heute = heuteIso();
     const morgen = verschiebeTag(heute, 1);
-    const text = d.toLocaleDateString('de-DE', { weekday: 'long', day: '2-digit', month: '2-digit' });
+    const text = d.toLocaleDateString('de-DE', { timeZone: 'UTC', weekday: 'long', day: '2-digit', month: '2-digit' });
     if (iso === heute) return `Heute · ${text}`;
     if (iso === morgen) return `Morgen · ${text}`;
     return text;
+  }
+
+  function formatiereZeitpunkt(iso) {
+    if (!iso) return null;
+    const d = new Date(iso);
+    if (Number.isNaN(d.getTime())) return null;
+    return d.toLocaleString('de-DE', {
+      timeZone: PLAN_TIMEZONE,
+      day: '2-digit',
+      month: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit',
+    }) + ' Uhr';
   }
 
   async function aktualisiere() {
@@ -41,10 +64,13 @@
       if (!res.ok) throw new Error('dienstplan-' + res.status);
       const daten = await res.json();
       schichten = Array.isArray(daten?.schichten) ? daten.schichten : [];
+      planRevision = Number(daten?.revision || 0);
+      planStand = daten?.updatedAt || null;
+      letzteSynchronisierung = daten?.fetchedAt || null;
       letzterAbruf = new Date();
     } catch (e) {
-      // Companion/Manager nicht erreichbar - alten Stand (falls vorhanden) einfach stehen
-      // lassen, kein Absturz. Die Standanzeige unten macht das fuer die Kollegen sichtbar.
+      // Der bereits geladene/persistierte Stand bleibt sichtbar. Nur wenn selbst der lokale
+      // Companion nicht erreichbar ist, kann kein neuer Cache gelesen werden.
     }
     rendere();
   }
@@ -79,9 +105,15 @@
       : `<div class="dienstplan-leer">${schichten.length ? 'Für diesen Tag ist niemand eingeplant.' : 'Noch kein Dienstplan verfügbar.'}</div>`;
 
     if (standEl) {
-      standEl.textContent = letzterAbruf
-        ? `Stand: ${letzterAbruf.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })} Uhr`
-        : 'Noch keine Verbindung zum Dienstplan.';
+      const standText = formatiereZeitpunkt(planStand);
+      const syncText = formatiereZeitpunkt(letzteSynchronisierung);
+      const teile = [];
+      if (standText) teile.push(`Planstand: ${standText}`);
+      if (syncText) teile.push(`Sync: ${syncText}`);
+      if (planRevision > 0) teile.push(`Rev. ${planRevision}`);
+      standEl.textContent = teile.length
+        ? teile.join(' · ')
+        : (letzterAbruf ? 'Noch kein synchronisierter Dienstplan vorhanden.' : 'Noch keine Verbindung zum Dienstplan.');
     }
   }
 
@@ -107,5 +139,5 @@
 
   setInterval(aktualisiere, POLL_MS);
 
-  global.KCDienstplanKasse = { oeffnen: oeffne, aktualisieren: aktualisiere };
+  global.KCDienstplanKasse = { oeffnen, aktualisieren: aktualisiere, heuteIso };
 })(window);
