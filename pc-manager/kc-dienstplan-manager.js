@@ -16,7 +16,7 @@
     if (!global.KCSupabase?.istAngemeldet?.()) return { ok: false, grund: 'nicht_angemeldet' };
     const [plan, aliase] = await Promise.all([
       global.KCSupabase.rufeTabelleAuf(
-        `kc_dp_plan_published?select=person_id,work_date,start_time,end_time,break_minutes,zone,area,event_id,published_at,updated_at&status=eq.published&org_id=eq.${ORG_ID}&event_id=eq.${EVENT_ID}&order=work_date.asc,start_time.asc,person_id.asc`
+        `kc_dp_plan_published?select=person_id,work_date,start_time,end_time,break_minutes,zone,area,event_id,published_at,updated_at&status=eq.published&org_id=eq.${ORG_ID}&event_id=eq.${encodeURIComponent(EVENT_ID)}&order=work_date.asc,start_time.asc,person_id.asc`
       ),
       global.KCSupabase.rufeTabelleAuf(
         `kc_core_pos_aliases?select=person_id,alias_name&org_id=eq.${ORG_ID}&active=is.true`
