@@ -1449,13 +1449,51 @@ class ManagerCompanion {
     const isLoopback = addr === '127.0.0.1' || addr === '::1' || addr === '::ffff:127.0.0.1';
     if (!isLoopback) return this._json(res, 403, { error: 'loopback_only' });
     if (!Array.isArray(body?.schichten)) return this._json(res, 400, { error: 'payload_invalid' });
-    const bisher = this.db.prepare('SELECT revision FROM dienstplan WHERE id = 1').get();
+    const schichtenJson = JSON.stringify(body.schichten);
+    const eventId = body.eventId || null;
+    const sourceUpdatedAt = body.sourceUpdatedAt || null;
+    const bisher = this.db.prepare(
+      'SELECT schichten_json, revision, updated_at, event_id, source_updated_at FROM dienstplan WHERE id = 1'
+    ).get();
+
+    if (
+      bisher &&
+      bisher.schichten_json === schichtenJson &&
+      (bisher.event_id || null) === eventId &&
+      (bisher.source_updated_at || null) === sourceUpdatedAt
+    ) {
+      return this._json(res, 200, {
+        received: true,
+        unchanged: true,
+        revision: bisher.revision,
+        anzahl: body.schichten.length,
+        eventId,
+        sourceUpdatedAt,
+        updatedAt: bisher.updated_at,
+      });
+    }
+
     const neueRevision = (bisher?.revision || 0) + 1;
+    const jetzt = new Date().toISOString();
     this.db.prepare(`
-      INSERT INTO dienstplan (id, schichten_json, revision, updated_at) VALUES (1, ?, ?, ?)
-      ON CONFLICT(id) DO UPDATE SET schichten_json=excluded.schichten_json, revision=excluded.revision, updated_at=excluded.updated_at
-    `).run(JSON.stringify(body.schichten), neueRevision, new Date().toISOString());
-    this._json(res, 200, { received: true, revision: neueRevision, anzahl: body.schichten.length });
+      INSERT INTO dienstplan (id, schichten_json, revision, updated_at, event_id, source_updated_at)
+      VALUES (1, ?, ?, ?, ?, ?)
+      ON CONFLICT(id) DO UPDATE SET
+        schichten_json=excluded.schichten_json,
+        revision=excluded.revision,
+        updated_at=excluded.updated_at,
+        event_id=excluded.event_id,
+        source_updated_at=excluded.source_updated_at
+    `).run(schichtenJson, neueRevision, jetzt, eventId, sourceUpdatedAt);
+    this._json(res, 200, {
+      received: true,
+      unchanged: false,
+      revision: neueRevision,
+      anzahl: body.schichten.length,
+      eventId,
+      sourceUpdatedAt,
+      updatedAt: jetzt,
+    });
   }
 
   // Abruf durch die Kassen (ueber den device-companion, siehe dort) - dieselbe Authentisierung
@@ -1464,12 +1502,14 @@ class ManagerCompanion {
   _dienstplanGet(req, res) {
     const auth = this._authenticate(req);
     if (!auth.ok) return this._json(res, 401, { error: auth.error });
-    const zeile = this.db.prepare('SELECT schichten_json, revision, updated_at FROM dienstplan WHERE id = 1').get();
-    if (!zeile) return this._json(res, 200, { schichten: [], revision: 0, updatedAt: null });
+    const zeile = this.db.prepare('SELECT schichten_json, revision, updated_at, event_id, source_updated_at FROM dienstplan WHERE id = 1').get();
+    if (!zeile) return this._json(res, 200, { schichten: [], revision: 0, updatedAt: null, sourceUpdatedAt: null, eventId: null });
     this._json(res, 200, {
       schichten: (() => { try { return JSON.parse(zeile.schichten_json || '[]'); } catch (e) { return []; } })(),
       revision: zeile.revision,
       updatedAt: zeile.updated_at,
+      sourceUpdatedAt: zeile.source_updated_at,
+      eventId: zeile.event_id,
     });
   }
 

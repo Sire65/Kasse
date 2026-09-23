@@ -13,16 +13,26 @@
 
   let schichten = [];
   let letzterAbruf = null;
+  let quellStand = null;
+  let cacheStand = null;
+  let revision = 0;
   let gewaehltesDatum = heuteIso();
 
+  function lokalesIsoDatum(datum = new Date()) {
+    const y = datum.getFullYear();
+    const m = String(datum.getMonth() + 1).padStart(2, '0');
+    const d = String(datum.getDate()).padStart(2, '0');
+    return `${y}-${m}-${d}`;
+  }
+
   function heuteIso() {
-    return new Date().toISOString().slice(0, 10);
+    return lokalesIsoDatum();
   }
 
   function verschiebeTag(iso, delta) {
     const d = new Date(iso + 'T12:00:00');
     d.setDate(d.getDate() + delta);
-    return d.toISOString().slice(0, 10);
+    return lokalesIsoDatum(d);
   }
 
   function formatiereDatum(iso) {
@@ -62,6 +72,9 @@
       if (!res.ok) throw new Error('dienstplan-' + res.status);
       const daten = await res.json();
       schichten = Array.isArray(daten?.schichten) ? daten.schichten : [];
+      quellStand = daten?.sourceUpdatedAt || daten?.managerUpdatedAt || null;
+      cacheStand = daten?.cachedAt || null;
+      revision = Number(daten?.revision || 0);
       letzterAbruf = new Date();
     } catch (e) {
       // Companion/Manager nicht erreichbar: Vorfuehrdaten einsetzen, aber nur falls noch nie
@@ -102,9 +115,17 @@
       : `<div class="dienstplan-leer">${schichten.length ? 'Für diesen Tag ist niemand eingeplant.' : 'Noch kein Dienstplan verfügbar.'}</div>`;
 
     if (standEl) {
-      standEl.textContent = letzterAbruf
-        ? `Stand: ${letzterAbruf.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })} Uhr`
-        : 'Noch keine Verbindung zum Dienstplan.';
+      const quelle = quellStand ? new Date(quellStand) : null;
+      const cache = cacheStand ? new Date(cacheStand) : null;
+      if (quelle && !Number.isNaN(quelle.getTime())) {
+        standEl.textContent = `Planstand: ${quelle.toLocaleDateString('de-DE')} · ${quelle.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })} Uhr · Rev. ${revision}`;
+      } else if (cache && !Number.isNaN(cache.getTime())) {
+        standEl.textContent = `Zwischengespeicherter Plan · ${cache.toLocaleDateString('de-DE')} · ${cache.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })} Uhr`;
+      } else {
+        standEl.textContent = letzterAbruf
+          ? `Dienstplan abgerufen: ${letzterAbruf.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })} Uhr`
+          : 'Noch keine Verbindung zum Dienstplan.';
+      }
     }
   }
 

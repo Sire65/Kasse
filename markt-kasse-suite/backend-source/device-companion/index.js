@@ -500,7 +500,25 @@ class DeviceCompanion {
     if (!target) return;
     const antwort = await this._request(target, 'GET', '/api/v1/dienstplan', undefined, { 'X-KC-Credential': pinned.credentialId }, pinned.fingerprint);
     if (!antwort || !Array.isArray(antwort.schichten)) return;
-    this._dienstplanSchichten = antwort.schichten;
+    const jetzt = new Date().toISOString();
+    this.db.prepare(`
+      INSERT INTO dienstplan_cache (id, schichten_json, revision, event_id, source_updated_at, manager_updated_at, cached_at)
+      VALUES (1, ?, ?, ?, ?, ?, ?)
+      ON CONFLICT(id) DO UPDATE SET
+        schichten_json=excluded.schichten_json,
+        revision=excluded.revision,
+        event_id=excluded.event_id,
+        source_updated_at=excluded.source_updated_at,
+        manager_updated_at=excluded.manager_updated_at,
+        cached_at=excluded.cached_at
+    `).run(
+      JSON.stringify(antwort.schichten),
+      Number(antwort.revision || 0),
+      antwort.eventId || null,
+      antwort.sourceUpdatedAt || null,
+      antwort.updatedAt || null,
+      jetzt
+    );
   }
 
   // Baustufe 3: liefert den Zustand für die Ampel neben dem Hamburger-Menü. Grün = online und
@@ -637,8 +655,22 @@ class DeviceCompanion {
         return;
       }
       if (req.method === 'GET' && req.url.split('?')[0] === '/kc-sync-dienstplan') {
+        const zeile = this.db.prepare(
+          'SELECT schichten_json, revision, event_id, source_updated_at, manager_updated_at, cached_at FROM dienstplan_cache WHERE id = 1'
+        ).get();
+        let schichten = [];
+        if (zeile) {
+          try { schichten = JSON.parse(zeile.schichten_json || '[]'); } catch (e) { schichten = []; }
+        }
         res.writeHead(200, { 'Content-Type': 'application/json' });
-        res.end(JSON.stringify({ schichten: this._dienstplanSchichten || [] }));
+        res.end(JSON.stringify({
+          schichten,
+          revision: zeile?.revision || 0,
+          eventId: zeile?.event_id || null,
+          sourceUpdatedAt: zeile?.source_updated_at || null,
+          managerUpdatedAt: zeile?.manager_updated_at || null,
+          cachedAt: zeile?.cached_at || null,
+        }));
         return;
       }
       if (req.method === 'POST' && req.url.split('?')[0] === '/kc-sync-sold-out-melden') {

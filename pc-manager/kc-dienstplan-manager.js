@@ -10,12 +10,13 @@
   const ORG_ID = 'KC_WERNE';
   const PUSH_URL = 'http://127.0.0.1:47392/dienstplan/push';
   const AUTO_MINUTEN = 5;
+  const EVENT_ID = 'KC-WM-2026';
 
   async function holeUndVeroeffentliche() {
     if (!global.KCSupabase?.istAngemeldet?.()) return { ok: false, grund: 'nicht_angemeldet' };
     const [plan, aliase] = await Promise.all([
       global.KCSupabase.rufeTabelleAuf(
-        `kc_dp_plan_published?select=person_id,work_date,start_time,end_time,break_minutes,zone,area&status=eq.published&org_id=eq.${ORG_ID}&order=work_date.asc`
+        `kc_dp_plan_published?select=person_id,work_date,start_time,end_time,break_minutes,zone,area,event_id,published_at,updated_at&status=eq.published&org_id=eq.${ORG_ID}&event_id=eq.${encodeURIComponent(EVENT_ID)}&order=work_date.asc,start_time.asc,person_id.asc`
       ),
       global.KCSupabase.rufeTabelleAuf(
         `kc_core_pos_aliases?select=person_id,alias_name&org_id=eq.${ORG_ID}&active=is.true`
@@ -35,10 +36,15 @@
       // Ohne bekanntes Pseudonym (z.B. eine dp2-Aushilfe ohne eigenen Kassen-Zugang) NICHT an
       // die Kasse weitergeben - sonst muesste dort eine leere/anonyme Zeile erscheinen.
       .filter((z) => z.pseudonym);
+    const serverStand = (Array.isArray(plan) ? plan : [])
+      .map((z) => z.updated_at || z.published_at)
+      .filter(Boolean)
+      .sort()
+      .at(-1) || null;
     const antwort = await fetch(PUSH_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ schichten }),
+      body: JSON.stringify({ schichten, eventId: EVENT_ID, sourceUpdatedAt: serverStand }),
     });
     if (!antwort.ok) throw new Error(`Weitergabe an den Manager fehlgeschlagen (${antwort.status})`);
     return { ok: true, anzahl: schichten.length };

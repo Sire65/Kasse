@@ -9,7 +9,7 @@
 'use strict';
 const { DatabaseSync } = require('node:sqlite');
 
-const SCHEMA_VERSION = 26;
+const SCHEMA_VERSION = 27;
 
 function hasColumn(db, table, column) {
   return db.prepare(`PRAGMA table_info(${table})`).all().some((c) => c.name === column);
@@ -600,5 +600,14 @@ MIGRATIONS.push((db) => {
     );
   `);
 });
+
+
+ // Version 27 (23.09.2026): Quellstand und Veranstaltung des Dienstplans mit speichern.
+ // Damit zeigt die Kasse nicht nur ihren letzten Abrufzeitpunkt, sondern den echten Stand
+ // der DP2-/Supabase-Veröffentlichung.
+ MIGRATIONS.push((db) => {
+   if (!hasColumn(db, 'dienstplan', 'event_id')) db.exec("ALTER TABLE dienstplan ADD COLUMN event_id TEXT");
+   if (!hasColumn(db, 'dienstplan', 'source_updated_at')) db.exec("ALTER TABLE dienstplan ADD COLUMN source_updated_at TEXT");
+ });
 
 module.exports = { openManagerDb, SCHEMA_VERSION };
