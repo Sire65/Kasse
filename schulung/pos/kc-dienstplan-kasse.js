@@ -9,24 +9,30 @@
 (function (global) {
   'use strict';
   const POLL_MS = 60000;
+  const PLAN_TIMEZONE = 'Europe/Berlin';
   const URL_DIENSTPLAN = (global.KCSyncConnection?.buildUrl('/kc-sync-dienstplan')) || 'http://127.0.0.1:47391/kc-sync-dienstplan';
 
   let schichten = [];
   let letzterAbruf = null;
+  let istVorfuehrung = false;
   let gewaehltesDatum = heuteIso();
 
   function heuteIso() {
-    return new Date().toISOString().slice(0, 10);
+    const teile = new Intl.DateTimeFormat('de-DE', {
+      timeZone: PLAN_TIMEZONE, year: 'numeric', month: '2-digit', day: '2-digit'
+    }).formatToParts(new Date());
+    const wert = (typ) => teile.find((p) => p.type === typ)?.value;
+    return `${wert('year')}-${wert('month')}-${wert('day')}`;
   }
 
   function verschiebeTag(iso, delta) {
-    const d = new Date(iso + 'T12:00:00');
-    d.setDate(d.getDate() + delta);
+    const d = new Date(iso + 'T12:00:00Z');
+    d.setUTCDate(d.getUTCDate() + delta);
     return d.toISOString().slice(0, 10);
   }
 
   function formatiereDatum(iso) {
-    const d = new Date(iso + 'T12:00:00');
+    const d = new Date(iso + 'T12:00:00Z');
     const heute = heuteIso();
     const morgen = verschiebeTag(heute, 1);
     const text = d.toLocaleDateString('de-DE', { weekday: 'long', day: '2-digit', month: '2-digit' });
@@ -63,11 +69,15 @@
       const daten = await res.json();
       schichten = Array.isArray(daten?.schichten) ? daten.schichten : [];
       letzterAbruf = new Date();
+      istVorfuehrung = false;
     } catch (e) {
       // Companion/Manager nicht erreichbar: Vorfuehrdaten einsetzen, aber nur falls noch nie
       // ein echter Stand geladen wurde - kam vorher schon ein echter Plan an, bleibt der
       // stehen statt durch Beispieldaten ersetzt zu werden.
-      if (!letzterAbruf) schichten = pseudoSchichten();
+      if (!letzterAbruf) {
+        schichten = pseudoSchichten();
+        istVorfuehrung = true;
+      }
     }
     rendere();
   }
@@ -102,9 +112,11 @@
       : `<div class="dienstplan-leer">${schichten.length ? 'Für diesen Tag ist niemand eingeplant.' : 'Noch kein Dienstplan verfügbar.'}</div>`;
 
     if (standEl) {
-      standEl.textContent = letzterAbruf
-        ? `Stand: ${letzterAbruf.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })} Uhr`
-        : 'Noch keine Verbindung zum Dienstplan.';
+      standEl.textContent = istVorfuehrung
+        ? 'Vorfuehrdaten · kein Live-Dienstplan'
+        : (letzterAbruf
+          ? `Live-Dienstplan abgerufen: ${letzterAbruf.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })} Uhr`
+          : 'Noch keine Verbindung zum Dienstplan.');
     }
   }
 
