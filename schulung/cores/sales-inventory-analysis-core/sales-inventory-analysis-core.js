@@ -19,7 +19,7 @@
   const number=value=>Number.isFinite(Number(value))?Number(value):0;
   function localDate(date){return `${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,"0")}-${String(date.getDate()).padStart(2,"0")}`}
   function transactionKey(tx,index){return String(tx.id||`${tx.registerId||"KASSE"}-${tx.bon||tx.bonNumber||tx.time||index}`)}
-  function normalizeTransactions(source=[]){return source.filter(tx=>!tx.training&&tx.type!=="personal").map((tx,index)=>({...tx,_key:transactionKey(tx,index),_date:new Date(tx.time||tx.date||0)})).filter(tx=>!Number.isNaN(tx._date.getTime()))}
+  function normalizeTransactions(source=[]){return source.filter(tx=>!tx.training&&tx.type!=="personal"&&tx.type!=="helfer").map((tx,index)=>({...tx,_key:transactionKey(tx,index),_date:new Date(tx.time||tx.date||0)})).filter(tx=>!Number.isNaN(tx._date.getTime()))}
   function filterTransactions(source,filter={}){
     return normalizeTransactions(source).filter(tx=>{
       const iso=localDate(tx._date),hour=tx._date.getHours(),day=tx._date.getDay();

@@ -6,7 +6,7 @@
   <meta name="theme-color" content="#07111f">
   <title>KC MarktKasse · Kasse</title>
   <link rel="manifest" href="manifest.webmanifest">
-  <link rel="stylesheet" href="styles.css?build=training-ui3">
+  <link rel="stylesheet" href="styles.css?build=training-ui5">
   <link rel="stylesheet" href="../../shared/kc-closing-count-ui.css?build=1.0.0">
   <link rel="stylesheet" href="pos-ui-profile-consumer.css">
   <link rel="stylesheet" href="event-program-display.css">
@@ -14,7 +14,7 @@
   <link rel="stylesheet" href="kc-sync-status-leds.css">
   <link rel="stylesheet" href="kc-team-praesenz.css">
   <link rel="stylesheet" href="kc-dienstplan-kasse.css">
-<link rel="stylesheet" href="kc-oberflaechen-anwenden.css?build=0.9.2">
+<link rel="stylesheet" href="kc-oberflaechen-anwenden.css?build=0.9.4">
 <link rel="stylesheet" href="kc-legacy-fallback.css?build=1.0.0">
   <script defer src="../cores/notification-core/notification-core.js"></script>
   <script defer src="../cores/product-info-core/product-info-core.js"></script>
@@ -77,7 +77,7 @@
     <label class="product-search-wrap">🔎 <input id="productSearchInput" placeholder="Artikel suchen"></label>
     <div class="mode-quick-switches" aria-label="Betriebsmodi">
       <button id="trainingModeTopBtn" class="mode-quick-button" type="button"><span class="mode-led"></span><span>Trainingsmodus</span></button>
-      <button id="rushModeBtn" class="mode-quick-button rush-icon-button" type="button" title="Stoßzeiten" aria-label="Stoßzeiten"><svg class="mode-bomb-icon" viewBox="0 0 32 32" width="20" height="20" aria-hidden="true"><path d="M18 7 Q22 2 27 4" fill="none" stroke="#8a5a2b" stroke-width="2" stroke-linecap="round"/><circle class="mode-bomb-spark" cx="27.5" cy="3.5" r="1.7"/><circle cx="15" cy="20" r="10" fill="#20242b"/><circle cx="12" cy="17" r="2.3" fill="#fff" opacity=".22"/></svg></button>
+      <button id="rushModeBtn" class="mode-quick-button rush-icon-button" type="button" title="Stoßzeiten" aria-label="Stoßzeiten"><svg class="mode-bomb-icon" viewBox="0 0 40 40" width="32" height="32" aria-hidden="true"><circle cx="16" cy="25" r="12" fill="#20242b"/><rect x="18.5" y="9.5" width="7" height="5" rx="1.2" transform="rotate(35 22 12)" fill="#3b4250"/><circle cx="12" cy="20" r="3" fill="#fff" opacity=".22"/><path d="M24 9 Q27 4 31 5" fill="none" stroke="#8a5a2b" stroke-width="2.2" stroke-linecap="round"/><g class="mode-bomb-flamme"><path d="M32 -1 C36 3 37 7 33.5 10 C31 12 27.5 10.5 27.5 7.5 C27.5 5 30 4 29.5 1 C31 2 31.5 3 32 -1 Z" fill="#ff6a00"/><path d="M32 3.5 C34 5.5 34 8 32.2 9 C30.8 9.8 29.3 8.8 29.5 7.2 C29.7 6 31 5.6 32 3.5 Z" fill="#ffd400"/><g class="mode-bomb-funken" stroke="#ffb000" stroke-width="1.4" stroke-linecap="round"><line x1="37" y1="3" x2="39.5" y2="1.5"/><line x1="37.5" y1="8" x2="40" y2="8.5"/><line x1="25.5" y1="2.5" x2="24" y2="0.5"/></g></g></svg></button>
       <button id="happyHourQuickBtn" class="mode-quick-button happy-hour-quick" type="button" hidden><span class="mode-led"></span><span id="happyHourQuickText">Happy Hour</span></button>
     </div>
     <div class="mode-message-center" aria-label="Kassenmeldungen">
@@ -255,6 +255,7 @@
       <button type="button" data-action="reklamation">↩ Reklamation</button>
       <button type="button" data-action="vorfuehrung">🎬 Vorführdaten</button>
       <button type="button" data-action="gutschein">🎁 Gutschein</button>
+      <button type="button" data-action="helfer" id="helferBtn">🤝 Helfer</button>
       <button type="button" id="tokenPayBtn" data-action="wertmarke">🪙 Wertmarke</button>
       <button type="button" data-action="opening">Eröffnung</button>
       <button type="button" data-action="closing">Tagesabschluss</button>
@@ -271,6 +272,19 @@
 </dialog>
 
 
+
+<!-- 23.09.2026 (Betreiber): Helfer (Bauhof, Feuerwehr, Wachpersonal ...) bekommen Essen und
+     Getraenke gratis. Eigene Buchung wie Personalverbrauch - kein Geld, kein Pfand (Glas ist nur
+     geliehen, kommt ohne Pfandrueckgabe zurueck), eigene Zeile im Abschluss je Gruppe. -->
+<dialog id="helferDialog">
+  <form method="dialog" class="dialog-card helfer-card">
+    <button type="button" id="helferDialogCloseX" class="dialog-close-x" aria-label="Helfer-Fenster schließen" title="Schließen">×</button>
+    <h2>🤝 Helfer-Verpflegung</h2>
+    <p class="helfer-betrag">Wert: <strong id="helferBetrag">0,00 €</strong> · kein Geld · kein Pfand</p>
+    <div id="helferGruppen" class="helfer-gruppen"></div>
+    <div class="dialog-actions"><button value="cancel">Abbrechen</button></div>
+  </form>
+</dialog>
 
 <dialog id="currencyDialog">
   <form method="dialog" class="dialog-card currency-card">
@@ -1053,13 +1067,29 @@
       <button type="button" data-tip="10">10,00 €</button>
       <button type="button" data-tip="20">20,00 €</button>
     </div>
-    <label>Freier Betrag<input id="tipCustomAmount" type="number" min="0.01" step="0.01"></label>
+    <label>Freier Betrag<input id="tipCustomAmount" type="text" inputmode="none" readonly placeholder="Antippen – Ziffernblock öffnet sich" class="kc-zahlenfeld-eingabe"></label>
     <label>Bonnummer optional<input id="tipBonNumber" inputmode="numeric"></label>
     <label>Bemerkung optional<input id="tipNote"></label>
     <div class="dialog-actions">
       <button value="cancel">Abbrechen</button>
       <button type="button" id="saveCustomTip" class="primary-action">Trinkgeld speichern</button>
     </div>
+  </form>
+</dialog>
+
+<!-- 23.09.2026 (Betreiber): "Bei freiem Trinkgeld-Betrag soll sich ein Zahlenfeld oeffnen zur
+     Eingabe ueber Ziffern." Allgemeiner Betrags-Ziffernblock (Euro mit Komma, wie beim Rückgeld). -->
+<dialog id="zahlenfeldDialog">
+  <form method="dialog" class="dialog-card zahlenfeld-card">
+    <h2 id="zahlenfeldTitel">Betrag eingeben</h2>
+    <strong id="zahlenfeldAnzeige" class="zahlenfeld-anzeige">0,00 €</strong>
+    <div class="zahlenfeld-tasten">
+      <button type="button" data-zf="7">7</button><button type="button" data-zf="8">8</button><button type="button" data-zf="9">9</button>
+      <button type="button" data-zf="4">4</button><button type="button" data-zf="5">5</button><button type="button" data-zf="6">6</button>
+      <button type="button" data-zf="1">1</button><button type="button" data-zf="2">2</button><button type="button" data-zf="3">3</button>
+      <button type="button" data-zf=",">,</button><button type="button" data-zf="0">0</button><button type="button" data-zf="back">⌫</button>
+    </div>
+    <div class="dialog-actions"><button value="cancel">Abbrechen</button><button type="button" id="zahlenfeldOk" class="primary-action">OK</button></div>
   </form>
 </dialog>
 
@@ -1097,17 +1127,8 @@
       <button value="close" class="icon-close">×</button>
     </div>
     <p class="closing-hinweis closing-hinweis-info">Reiner Zwischenstand zur Kontrolle – schließt die Kasse NICHT ab und setzt nichts zurück. Kann beliebig oft aufgerufen werden.</p>
-    <div class="closing-kpis">
-      <article><span>Anfangsbestand + Nachfüllungen</span><strong id="xBerichtCashIn">0,00 €</strong></article>
-      <article><span>Barverkäufe</span><strong id="xBerichtCashSales">0,00 €</strong></article>
-      <article><span>Bar-Trinkgeld / Aufrundung</span><strong id="xBerichtCashTips">0,00 €</strong></article>
-      <article><span>Entnahmen / Auszahlungen</span><strong id="xBerichtCashOut">0,00 €</strong></article>
-      <article><span>Erwarteter Bargeldbestand</span><strong id="xBerichtExpected">0,00 €</strong></article>
-      <article><span>Personalverbrauch (kein Bargeld)</span><strong id="xBerichtStaffTotal">0,00 €</strong></article>
-      <article><span>Kontoumsatz (kein Bargeld, offen)</span><strong id="xBerichtAccountSales">0,00 €</strong></article>
-      <article><span>Umsatz gesamt (ohne Personalverbrauch)</span><strong id="xBerichtTotalSales">0,00 €</strong></article>
-      <article><span>Bonanzahl im Zeitraum</span><strong id="xBerichtTxCount">0</strong></article>
-    </div>
+    <!-- 23.09.2026: Inhalt wird in Bloecken aus xBerichtAbschnitte() gebaut (Bargeld, ohne Bargeld, Trinkgeld, Pfand, Sonstiges) -->
+    <div id="xBerichtInhalt" class="xbericht-abschnitte"></div>
     <div class="dialog-actions">
       <button value="cancel">Schließen</button>
       <button type="button" id="printXBericht" class="primary-action">🖨 Drucken</button>
@@ -1132,10 +1153,13 @@
       <article><span>Entnahmen / Auszahlungen</span><strong id="closingCashOut">0,00 €</strong></article>
       <article><span>Erwarteter Bargeldbestand</span><strong id="closingExpected">0,00 €</strong></article>
       <article><span>Personalverbrauch (kein Bargeld)</span><strong id="closingStaffTotal">0,00 €</strong></article>
+      <article><span>Helfer-Verpflegung (kein Bargeld)</span><strong id="closingHelperTotal">0,00 €</strong></article>
       <article><span>Einkaufsbelege heute (Soll für die Zählung morgen)</span><strong id="closingReceiptExpected">0 Belege</strong></article>
       <article><span>Kontoumsatz (kein Bargeld, offen)</span><strong id="closingAccountSales">0,00 €</strong></article>
-      <article><span>Umsatz gesamt (ohne Personalverbrauch)</span><strong id="closingTotalSales">0,00 €</strong></article>
+      <article><span>Umsatz gesamt (ohne Personal und Helfer)</span><strong id="closingTotalSales">0,00 €</strong></article>
     </div>
+    <!-- 23.09.2026: dieselben Detail-Bloecke wie im X-Bericht (ohne den Bargeld-Block, der steht oben) -->
+    <div id="closingDetails" class="xbericht-abschnitte"></div>
     <section class="closing-count-section">
       <div class="closing-count-head">
         <div><h3>Ist-Bestand erfassen</h3><p>Optional. Der Soll-Abschluss wird immer unabhängig davon gespeichert.</p></div>
@@ -1526,12 +1550,12 @@
     document.body.appendChild(s);
   }
   window.KCMasterDataSync.bereit.finally(() => {
-    ladeNacheinander(['images-v3.js?build=3-pfand', 'app.js?build=0.31.3.6-r32', '../shared/kc-happyhour.js?build=0.1.0', 'kc-happyhour-pos.js?build=0.1.0', 'kc-meldeweg.js?build=0.1.0', '../shared/kc-security-card.js?build=0.1.0', 'kc-security-card-pos.js?build=0.1.0', 'kc-zahl-zoom.js?build=0.1.0', 'kc-ansicht-umschalter.js?build=0.1.0', 'kc-startup-check.js?build=0.1.0', 'kc-pin-lock.js?build=0.1.1', 'kc-layout-neu.js?build=0.1.0', 'kc-erfassung-getrennt.js?build=0.1.0', 'kc-gutschein.js?build=0.1.0', 'kc-vorfuehrdaten.js?build=0.1.0', '../shared/kc-oberflaechen-format.js?build=0.1.0', 'kc-oberflaechen-pos.js?build=0.1.0', 'kc-oberflaechen-anwenden.js?build=0.9.0', 'kc-kopfzeile.js?build=0.3.0', 'kc-schulung.js?build=0.1.0', 'kc-reklamation.js?build=0.1.2']);
+    ladeNacheinander(['images-v3.js?build=3-pfand', 'app.js?build=0.31.3.6-r34', '../shared/kc-happyhour.js?build=0.1.0', 'kc-happyhour-pos.js?build=0.1.0', 'kc-meldeweg.js?build=0.1.0', '../shared/kc-security-card.js?build=0.1.0', 'kc-security-card-pos.js?build=0.1.0', 'kc-zahl-zoom.js?build=0.1.0', 'kc-ansicht-umschalter.js?build=0.1.0', 'kc-startup-check.js?build=0.1.0', 'kc-pin-lock.js?build=0.1.1', 'kc-layout-neu.js?build=0.1.0', 'kc-erfassung-getrennt.js?build=0.1.0', 'kc-gutschein.js?build=0.1.0', 'kc-vorfuehrdaten.js?build=0.1.0', '../shared/kc-oberflaechen-format.js?build=0.1.0', 'kc-oberflaechen-pos.js?build=0.1.0', 'kc-oberflaechen-anwenden.js?build=0.9.2', 'kc-kopfzeile.js?build=0.3.0', 'kc-schulung.js?build=0.1.0', 'kc-reklamation.js?build=0.1.2']);
   });
 </script>
 <script src="pos-ui-profile-consumer.js?build=0.1.0"></script>
 <script src="event-program-display.js?build=0.2.0"></script>
-<script src="time-clock-pos.js?build=0.1.0"></script>
+<script src="time-clock-pos.js?build=0.1.1"></script>
 <script src="kc-sync-status-leds.js?build=0.2.0"></script>
 <script src="kc-sync-live-event.js?build=0.1.0"></script>
 <script src="kc-team-praesenz.js?build=0.1.0"></script>

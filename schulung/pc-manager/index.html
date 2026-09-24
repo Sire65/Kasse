@@ -4,7 +4,8 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>KC MarktKasse · PC-Manager</title>
-<link rel="stylesheet" href="styles.css"><link rel="stylesheet" href="pos-ui-profile-manager.css"><link rel="stylesheet" href="dev-quick-access.css"><link rel="stylesheet" href="weather-mobile-exchange-integration.css"><link rel="stylesheet" href="../cores/design-core/design-core-presentation.css">
+<link rel="stylesheet" href="styles.css">
+<link rel="stylesheet" href="kc-sonderbuchungen.css?build=1.0.0"><link rel="stylesheet" href="pos-ui-profile-manager.css"><link rel="stylesheet" href="dev-quick-access.css"><link rel="stylesheet" href="weather-mobile-exchange-integration.css"><link rel="stylesheet" href="../cores/design-core/design-core-presentation.css">
 <link rel="stylesheet" href="../shared/kc-bargeld-statistik.css">
 <link rel="stylesheet" href="../shared/kc-geldkassette.css">
 <link rel="stylesheet" href="kc-happyhour-manager.css">
@@ -1105,9 +1106,11 @@
     <label>Datum von<input id="rFrom" type="date"></label><label>Datum bis<input id="rTo" type="date"></label>
     <label>Bediener<input id="rOperator" placeholder="Alle Bediener"></label>
     <label>Zahlungsart<select id="rPayment"><option value="">Alle</option><option value="cash">Bar</option><option value="card">Karte</option></select></label>
-    <label>Datentyp<select id="rDataType"><option value="sales">Umsätze / Rabatte</option><option value="tips">Trinkgeld</option><option value="withdrawals">Entnahmen / Reklamationen</option></select></label>
+    <label>Datentyp<select id="rDataType"><option value="sales">Umsätze / Rabatte</option><option value="tips">Trinkgeld</option><option value="withdrawals">Entnahmen / Reklamationen</option><option value="helfer">Helfer-Buchungen einzeln</option><option value="personal">Personal-Buchungen einzeln</option></select></label>
     <button id="applyReport">Auswertung aktualisieren</button>
   </div>
+  <!-- 23.09.2026: Was ohne Umsatz gebucht wurde - Helfer je Gruppe, Personal je Bediener, Trinkgeld, Spenden, Leihglaeser -->
+  <div id="kcSonderbuchungen" class="kc-sonder"></div>
   <div class="report-actions"><button id="reportCsv">CSV</button><button id="reportExcel">Excel</button><button id="reportPrint">PDF / Drucken</button></div>
   <div class="table-card"><table><thead><tr><th>Kasse</th><th>Datum</th><th>Bon</th><th>Artikel</th><th>Menge</th><th>Umsatz</th></tr></thead><tbody id="reportBody"></tbody></table></div>
 </section>
@@ -1159,12 +1162,13 @@
 <script src="kc-sichtpruefung.js?build=0.1.0"></script>
 <script src="../shared/release-manifest-core.js"></script><script src="manager-message-integration-v010.js"></script>
 <script src="../cores/security-core/crypto-secure-sync.js"></script>
-<script src="../cores/design-core/design-core-presentation.js"></script><script src="../cores/weather-core/weather-core.js"></script><script src="../cores/audio-presentation-core/audio-presentation-core.js"></script><script src="../cores/mobile-presentation-exchange-core/mobile-presentation-exchange-core.js"></script><script src="../cores/pos-ui-profile-core/pos-ui-profile-core.js"></script><script src="../cores/sales-import-core/sales-import-core.js"></script><script src="manager-import-progress-core.js"></script><script src="../shared/pos-catalog-registry-v02946.js"></script><script src="../tv-content/weihnachtsmarkt-2026/presentation.js"></script>
+<script src="../cores/design-core/design-core-presentation.js"></script><script src="../cores/weather-core/weather-core.js"></script><script src="../cores/audio-presentation-core/audio-presentation-core.js"></script><script src="../cores/mobile-presentation-exchange-core/mobile-presentation-exchange-core.js"></script><script src="../cores/pos-ui-profile-core/pos-ui-profile-core.js"></script><script src="../cores/sales-import-core/sales-import-core.js?build=0.3.0"></script><script src="manager-import-progress-core.js"></script><script src="../shared/pos-catalog-registry-v02946.js"></script><script src="../tv-content/weihnachtsmarkt-2026/presentation.js"></script>
 <script src="../shared/kc-geldkassette.js?build=0.1.0"></script>
 <script src="kc-demo-daten.js?build=0.1.0"></script>
 <script src="../shared/kc-artikelnummern-core.js?build=1.0.0"></script>
 <script src="../pos/images-v3.js?build=3-pfand"></script>
-<script src="app.js?build=bilder-v3"></script>
+<script src="app.js?build=bilder-v4"></script>
+<script src="kc-sonderbuchungen.js?build=1.0.0"></script>
 <script src="kc-preisliste.js?build=0.1.0"></script>
 <script src="kc-verbindung-pruefen.js?build=0.1.0"></script>
 <script src="../shared/kc-bargeld-statistik.js?build=0.1.0"></script>

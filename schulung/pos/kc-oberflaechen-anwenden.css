@@ -861,7 +861,8 @@ body.kc-aufbau.kc-bon-leer .kc-pfeilfeld { display: none; }
 }
 .kc-sammel-karte img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: center; opacity: .92; background: #f8fafc; }
 .kc-sammel-karte > span { position: relative; z-index: 1; text-shadow: 0 1px 3px #000; }
-.kc-sammel-karte.ansicht-bild::after { content:""; position:absolute; inset:45% 0 0; background:linear-gradient(transparent,rgba(15,23,42,.86) 55%); pointer-events:none; }
+/* 23.09.2026 (Betreiber: "alle unteren schwarzen Balken aus den Bildern nehmen"): der dunkle
+   Verlauf unten auf den Bildkarten ist entfernt - das Bild ist jetzt komplett sichtbar. */
 .kc-sammel-karte.ansicht-bild .kc-sammel-name,.kc-sammel-karte.ansicht-bild .kc-sammel-preis,.kc-sammel-karte.ansicht-bild .kc-sammel-pfand{z-index:2;color:#fff;}
 .kc-sammel-name { font-weight: 700; font-size: 15px; line-height: 1.2; white-space: normal; overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; }
 .kc-sammel-preis { font-size: 11px; opacity: .85; }
@@ -974,6 +975,11 @@ body.kc-aufbau .kc-bereich.kopf.kompakt > header.app-header > .header-status { w
 .kc-sammel-fuss > .kc-sammel-uebernehmen { flex: 1.3 1 0 !important; height: 56px; font-size: 14px; }
 .kc-sammel-fuss > .kc-sammel-bar, .kc-sammel-fuss > .kc-sammel-rueckgeld { flex: 1.1 1 0; height: 56px; font-size: 12px; }
 .kc-sammel-fuss > .kc-sammel-mehr { flex: 0.8 1 0; height: 56px; font-size: 13px; }
+/* 23.09.2026: Zahlbetrag gross im BAR-Knopf und im Kopf der Sammelbestellung */
+.kc-sammel-fuss > .kc-sammel-bar { flex: 1.6 1 0; display: flex; flex-direction: column; align-items: center; justify-content: center; line-height: 1.05; }
+.kc-sammel-bar-wort { font-size: 12px; }
+.kc-sammel-bar-betrag { font-size: 24px; font-weight: 900; white-space: nowrap; }
+.kc-sammel-summe { margin-left: 12px; font-size: 22px; font-weight: 900; color: #fff; }
 
 /* Trainingsmodus in der GESAMT-Zeile (08.09.): Wort mit Doktorhut, Zeile orange */
 .kc-bereich.bon .grand-total-label { font-size: 0 !important; }
@@ -1040,3 +1046,49 @@ body.kc-aufbau.kc-training #kcZahlenEbene .kc-pos-zeile-zahlen::before { content
   font-style:italic;
   line-height:1!important;
 }
+
+/* 23.09.2026 (Betreiber: "oben in der Zahlecke sind die Zahlen zu klein"): ECHTER FUND - die
+   40px-Regel vom 21.09. hat nie gegriffen, styles.css setzt ".change-card > small" und
+   ".change-card > small b" mit !important auf ca. 16px. Hier deshalb ebenfalls mit !important.
+   "Zu zahlen" und "Gegeben" stehen gross; waehrend getippt wird, zeigt "Gegeben" die
+   getippte Zahl live. */
+#kcZahlenEbene .kc-bereich.berechnung > .change-card[class] > small { font-size: 18px !important; line-height: 1 !important; flex-shrink: 0 !important; align-items: center !important; margin: 0 !important; height: auto !important; min-height: 0 !important; }
+#kcZahlenEbene .kc-bereich.berechnung > .change-card > #changeDisplay { font-size: 38px !important; line-height: 1 !important; margin-bottom: 0 !important; }
+#kcZahlenEbene .kc-bereich.berechnung .change-card-head, #kcZahlenEbene .kc-bereich.berechnung > .change-card > #changePaymentState { flex-shrink: 0 !important; }
+#kcZahlenEbene .kc-bereich.berechnung > .change-card > #changePaymentState { padding: 2px 8px !important; }
+#kcZahlenEbene .kc-bereich.berechnung .kc-pos-zeile-zahlen { flex-shrink: 0 !important; }
+#kcZahlenEbene .kc-bereich.berechnung > .change-card[class] > small > b { font-size: 30px !important; font-weight: 900 !important; line-height: 1 !important; }
+#kcZahlenEbene .kc-bereich.berechnung .change-card-head > span { font-size: 18px !important; line-height: 1 !important; }
+#kcZahlenEbene .kc-bereich.berechnung .change-card-head { line-height: 1 !important; }
+@media (max-height: 700px) {
+  #kcZahlenEbene .kc-bereich.berechnung > .change-card[class] > small { font-size: 15px !important; }
+  #kcZahlenEbene .kc-bereich.berechnung > .change-card[class] > small > b { font-size: 26px !important; }
+  #kcZahlenEbene .kc-bereich.berechnung > .change-card > #changeDisplay { font-size: 26px !important; }
+}
+
+/* 23.09.2026 (Betreiber: "Die Kochmuetze fehlt bzw. ist weiss auf hellem Hintergrund"): ECHTER
+   FUND - im weissen Logo-Kaestchen der Kopfzeile sass das Bild durch das alte margin-right
+   (styles.css .brand-block img) nach links verschoben und wurde vom Kaestchen abgeschnitten.
+   Jetzt die ORIGINAL-Kochmuetze in Schwarz (KC-Logo/kc-kochmuetze-schwarz.webp, nichts neu
+   gezeichnet), mittig, ohne Invert-Filter. Nur wenn kein eigenes Vereinslogo hinterlegt ist. */
+.kc-bereich.kopf.kompakt .brand-block { gap: 0 !important; justify-content: center !important; }
+.kc-bereich.kopf.kompakt .brand-block img { margin: 0 !important; filter: none !important; width: 38px !important; max-width: 38px !important; height: 34px !important; max-height: 34px !important; }
+.kc-bereich.kopf.kompakt .brand-block img[src$="kochmuetze-weiss.png"] { content: url("assets/kc-kochmuetze-schwarz.webp"); }
+/* Die Oberflaechen-Nummer (z. B. KC003) bleibt, aber winzig und dunkel in der Ecke - sie darf
+   die Muetze nicht mehr aus dem Kaestchen schieben. */
+.kc-bereich.kopf.kompakt .brand-block { position: relative !important; }
+.kc-bereich.kopf.kompakt .brand-block #kcAufbauNummerMuetze { position: absolute; right: 1px; bottom: 0; font-size: 7px; line-height: 1; color: #64748b; font-weight: 700; pointer-events: none; }
+
+/* 23.09.2026 (Betreiber): Bombe und Doktorhut groesser, Bombe mit mehr Feuer an der Lunte;
+   Uhr in der Stechuhr gross. Die Flamme brennt immer, bei eingeschalteten Stosszeiten
+   flackert sie und leuchtet. */
+.kc-statuszeile > #trainingModeTopBtn > span:last-child::before { font-size: 30px !important; line-height: 1; }
+#rushModeBtn .mode-bomb-icon { width: 34px !important; height: 34px !important; overflow: visible; }
+#rushModeBtn .mode-bomb-flamme { transform-origin: 31px 9px; }
+#rushModeBtn.active .mode-bomb-flamme, #rushModeBtn[aria-pressed="true"] .mode-bomb-flamme { animation: kcBombeFlamme .35s ease-in-out infinite alternate; filter: drop-shadow(0 0 3px #ff8a00); }
+#rushModeBtn.active .mode-bomb-funken, #rushModeBtn[aria-pressed="true"] .mode-bomb-funken { animation: kcBombeFunken .5s linear infinite; }
+@keyframes kcBombeFlamme { from { transform: scale(.9) rotate(-4deg); } to { transform: scale(1.12) rotate(4deg); } }
+@keyframes kcBombeFunken { 0% { opacity: 1; } 50% { opacity: .2; } 100% { opacity: 1; } }
+#timeClockBtn .kc-stechuhr-symbol { width: 28px !important; height: 28px !important; display: block; margin: auto; }
+body.kc-aufbau .kc-bereich.kopf .header-status #timeClockBtn .kc-stechuhr-symbol { width: 30px !important; height: 30px !important; }
+body .app-header .header-status button#timeClockBtn > svg.kc-stechuhr-symbol, body.kc-aufbau .kc-bereich.kopf .header-status button#timeClockBtn > svg.kc-stechuhr-symbol { width: 30px !important; height: 30px !important; min-width: 30px !important; max-width: none !important; max-height: none !important; }
