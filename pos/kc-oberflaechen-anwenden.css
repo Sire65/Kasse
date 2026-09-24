@@ -1140,3 +1140,30 @@ body.kc-layout-neu #withdrawDialog .withdraw-card > .withdraw-reason-field, #wit
    Unterschied zu Gluehwein nicht"): Getraenkebilder in der Sammelbestellung zeigen den oberen Teil des
    Glases (Zuckerhut, Sahne, Fruechte am Rand) statt der Glasmitte, die bei allen Punschen gleich aussieht. */
 .kc-sammel-karte.ansicht-bild.kat-getraenk > img { object-fit: cover !important; object-position: 50% 0% !important; transform: scale(1.4); transform-origin: 78% 0%; } /* Ausschnitt leicht nach rechts: links oben steckt im Originalbild ein "i"-Zeichen */
+/* 24.09.2026 (Betreiber-Foto: "passt nicht gut - die Buttons mit den Gruenden noch enger nebeneinander
+   und schmaler"): ECHTER FUND - die Gestaltung des Entnahme-Fensters (Ziffernblock, Gruende) hing an
+   body.kc-layout-neu ("Neue Ansicht"). In der normalen Ansicht waren die Zifferntasten winzig in einer
+   Reihe, die Gruende zweispaltig und das Fenster rutschte links aus dem Bild. Jetzt gilt dieselbe
+   kompakte Gestaltung in JEDER Ansicht. */
+#withdrawDialog[open] { width: min(1060px, 96vw) !important; max-width: 96vw !important; min-width: 0 !important; max-height: 96vh !important; margin: auto !important; inset: 0 !important; box-sizing: border-box; }
+#withdrawDialog .withdraw-card { max-height: calc(96vh - 8px); overflow-y: auto; }
+/* Gruende: alle sechs in EINER Reihe, eng und flach */
+#withdrawDialog #withdrawReasonButtons { display: grid !important; grid-template-columns: repeat(6, minmax(0, 1fr)) !important; gap: 4px !important; }
+#withdrawDialog #withdrawReasonButtons > button { min-height: 0 !important; height: 42px !important; padding: 2px 3px !important; font-size: 11px !important; line-height: 1.15 !important; font-weight: 900 !important; white-space: normal; overflow-wrap: normal; word-break: normal; border-radius: 8px !important; }
+#withdrawDialog .withdraw-reason-field { padding: 4px 6px !important; margin: 2px 0 !important; }
+/* Ziffernblock in jeder Ansicht */
+#withdrawDialog #kcBetragBlock.kc-betrag-block { display: grid !important; gap: 5px !important; margin: 4px 0 !important; }
+#withdrawDialog #kcBetragBlock .kc-betrag-schnell { display: grid !important; grid-template-columns: repeat(4, 1fr) !important; gap: 5px !important; }
+#withdrawDialog #kcBetragBlock .kc-betrag-tasten { display: grid !important; grid-template-columns: repeat(3, 1fr) !important; gap: 5px !important; }
+#withdrawDialog #kcBetragBlock button { width: 100% !important; height: 42px !important; min-height: 0 !important; border: 1px solid #cbd5e1 !important; border-radius: 8px !important; background: #fff !important; color: #0f172a !important; font-size: 19px !important; font-weight: 900 !important; }
+#withdrawDialog #kcBetragBlock .kc-betrag-schnell button { background: #f1f5f9 !important; font-size: 15px !important; }
+/* Beleg: Klickfeld und Einscannen nebeneinander, flach */
+#withdrawDialog #withdrawReceiptToggle { min-height: 0 !important; height: 46px !important; font-size: 16px !important; }
+#withdrawDialog #withdrawReceiptActions:not([hidden]) { display: flex !important; align-items: center; gap: 10px; margin-top: 4px; }
+#withdrawDialog #withdrawReceiptActions button { min-height: 0 !important; height: 40px !important; font-size: 14px !important; padding: 0 12px !important; }
+#withdrawDialog #withdrawNote { height: 36px !important; min-height: 0 !important; }
+/* noch etwas flacher, damit "Bon / Quittung einscannen" auch in der richtigen Kasse sichtbar bleibt */
+#withdrawDialog #kcBetragBlock button { height: 38px !important; }
+#withdrawDialog #kcBetragBlock .kc-betrag-schnell button { height: 34px !important; }
+#withdrawDialog > .withdraw-card > label > #withdrawAmount:not([hidden]) { height: 44px !important; min-height: 0 !important; font-size: 24px !important; font-weight: 900; text-align: right; }
+#withdrawDialog .withdraw-card > label, #withdrawDialog .withdraw-card > p { margin-top: 2px !important; margin-bottom: 2px !important; }
