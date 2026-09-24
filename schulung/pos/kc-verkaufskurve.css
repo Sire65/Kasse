@@ -1,0 +1,54 @@
+/* KC Verkaufskurve (24.09.2026) - Fenster am Favoriten-Stern, fuer Tablets ausgelegt
+   (getestet 1280x800 und 1024x600): grosse Zahlen, Achsenschrift 16px, Punkte mit
+   grosser Tippflaeche. */
+#salesTimeDialog.kc-kurve-modus { width: min(1100px, 96vw) !important; max-width: 96vw !important; max-height: 96vh; }
+#salesTimeDialog.kc-kurve-modus .sales-time-card { max-width: none !important; padding: 16px 22px 14px !important; }
+#salesTimeDialog.kc-kurve-modus h2 { font-size: 28px !important; }
+#salesTimeDialog.kc-kurve-modus .sales-time-subtitle { font-size: 16px; margin: 0 0 10px; }
+#salesTimeDialog.kc-kurve-modus .dialog-actions button { min-height: 52px; min-width: 160px; font-size: 18px; }
+.kc-kurve { display: flex; flex-direction: column; gap: 10px; }
+.kc-kurve-kacheln { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+.kc-kurve-kachel { border: 1px solid #e2e8f0; border-radius: 14px; padding: 10px 14px; background: #fff; min-width: 0; }
+.kc-kurve-kachel > span { display: block; font-size: 15px; font-weight: 800; color: #475569; }
+.kc-kurve-kachel .wert { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; }
+.kc-kurve-kachel strong { font-size: 42px; font-weight: 900; color: #0f172a; line-height: 1.1; }
+.kc-kurve-kachel em { font-style: normal; font-size: 16px; color: #475569; font-weight: 700; }
+.kc-kurve-trend { display: flex; align-items: center; gap: 12px; }
+.kc-kurve-trend > div:last-child { display: flex; flex-direction: column; min-width: 0; }
+.kc-kurve-trend strong { font-size: 36px; }
+.kc-kurve-trend strong.hoch { color: #15803d; }
+.kc-kurve-trend strong.runter { color: #b91c1c; }
+.kc-kurve-trend em { font-size: 14px; }
+.kc-kurve-pfeil { flex: 0 0 56px; height: 56px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 34px; font-weight: 900; }
+.kc-kurve-pfeil.hoch { background: #dcfce7; color: #15803d; }
+.kc-kurve-pfeil.runter { background: #fee2e2; color: #b91c1c; }
+.kc-kurve-pfeil.gleich { background: #f1f5f9; color: #475569; }
+.kc-kurve-balken { height: 12px; border-radius: 6px; background: #f1f5f9; margin-top: 6px; overflow: hidden; }
+.kc-kurve-balken i { display: block; height: 100%; background: #b91c1c; border-radius: 6px; }
+.kc-kurve-flaeche { position: relative; width: 100%; }
+.kc-kurve-svg { display: block; }
+.kc-kurve-svg .gitter { stroke: #e2e8f0; stroke-width: 1; }
+.kc-kurve-svg .achse { font-size: 16px; fill: #475569; font-family: inherit; }
+.kc-kurve-svg .vergleich { fill: none; stroke: #94a3b8; stroke-width: 2.5; stroke-dasharray: 7 6; }
+.kc-kurve-svg .flaeche { fill: rgba(185, 28, 28, .10); }
+.kc-kurve-svg .linie { fill: none; stroke: #b91c1c; stroke-width: 3.5; stroke-linejoin: round; stroke-linecap: round; }
+.kc-kurve-svg .punkt { fill: #b91c1c; stroke: #fff; stroke-width: 2.5; }
+.kc-kurve-svg .treffer { fill: transparent; cursor: pointer; }
+.kc-kurve-svg .jetzt { stroke: #0f172a; stroke-width: 1.5; stroke-dasharray: 4 4; }
+.kc-kurve-svg .jetzt-text { font-size: 15px; fill: #0f172a; font-weight: 700; }
+.kc-kurve-tip { position: absolute; z-index: 2; background: #0f172a; color: #fff; font-size: 17px; padding: 8px 12px; border-radius: 10px; white-space: nowrap; pointer-events: none; }
+.kc-kurve-tip b { font-size: 20px; }
+.kc-kurve-legende { display: flex; flex-wrap: wrap; gap: 8px 22px; font-size: 15px; color: #475569; font-weight: 700; }
+.kc-kurve-legende b { display: inline-block; width: 26px; vertical-align: middle; margin-right: 7px; }
+.kc-kurve-legende .l-heute { height: 4px; border-radius: 2px; background: #b91c1c; }
+.kc-kurve-legende .l-vergleich { height: 0; border-top: 3px dashed #94a3b8; }
+.kc-kurve-hilfe { margin-left: auto; color: #94a3b8; font-weight: 600; }
+/* kleine Tablets (z. B. 1024x600): Zahlen etwas kleiner, alles bleibt in einem Bild */
+@media (max-height: 700px) {
+  #salesTimeDialog.kc-kurve-modus h2 { font-size: 22px !important; }
+  .kc-kurve-kachel { padding: 6px 12px; }
+  .kc-kurve-kachel strong { font-size: 32px; }
+  .kc-kurve-trend strong { font-size: 28px; }
+  .kc-kurve-pfeil { flex-basis: 44px; height: 44px; font-size: 26px; }
+  #salesTimeDialog.kc-kurve-modus .dialog-actions button { min-height: 44px; }
+}

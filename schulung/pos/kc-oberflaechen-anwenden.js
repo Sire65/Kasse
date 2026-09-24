@@ -670,8 +670,12 @@
     let st; try { st = state; } catch (e) { return []; }
     const alt = st.activeCategory; st.activeCategory = gruppe;
     let liste = []; try { liste = allProductsForCategory(); } catch (e) { liste = []; }
-    st.activeCategory = alt; return liste;
+    st.activeCategory = alt;
+    /* 24.09.2026 (Betreiber): in der Sammelbestellung die Minus-Variante der Feuerzange raus -
+       die Kachel "Feuerzange Rueckgabe" bleibt nur auf der normalen Kassenseite. */
+    return liste.filter((p) => !SAMMEL_AUSBLENDEN.includes(p.id));
   }
+  const SAMMEL_AUSBLENDEN = ['zangeminus'];
   function sammelSeite(auf) {
     if (!sammelEbene) {
       sammelEbene = document.createElement('div'); sammelEbene.id = 'kcSammelEbene'; sammelEbene.className = 'kc-ebene'; sammelEbene.hidden = true;
@@ -766,20 +770,31 @@
       // 10.09.2026 (Betreiber: "den Info-Button weg, der tut es da nicht"): bestätigt - das "i" hatte
       // NIE einen Klick-Handler (aria-hidden="true" schon von Anfang an), reine Dekoration ohne
       // jede Funktion. Entfernt.
-      const karte = (p, o) => { const k = sammelSchluessel(p, o); const n = sammelWahl[k] || 0;
+      const karte = (p, o, alsHauptartikel) => { const k = sammelSchluessel(p, o); const n = sammelWahl[k] || 0;
         const gruppenButton = $(`#categories button[data-cat="${CSS.escape(g)}"]`);
         const gruppenFarbe = gruppenButton ? (gruppenButton.style.getPropertyValue('--group-color') || '#315d8d') : '#315d8d';
         const farbe = p.color || gruppenFarbe || '#315d8d';
         const textfarbe = sammelAnsicht === 'farbe' ? sammelKontrast(farbe) : '';
-        const bild = sammelAnsicht === 'bild' && p.image ? `<img src="${p.image}" alt="">` : '';
-        const name = o ? (o.label || o.name) : p.name;
+        /* 24.09.2026 (Betreiber: "Bei Kombi muss man auch die Kombinationsartikel sehen"): beide
+           Kombis zeigten nur das Gruenkohl-Bild und sahen gleich aus. Kombi-Kacheln zeigen jetzt die
+           Bilder ALLER enthaltenen Artikel nebeneinander mit "+" dazwischen, darunter hell die Namen. */
+        const teile = p.isPackage ? (p.componentIds || []).map((id) => kPROD().find((x) => x.id === id)).filter(Boolean) : [];
+        const bild = sammelAnsicht === 'bild' && teile.length > 1
+          ? `<span class="kc-sammel-kombi">${teile.map((t) => `<img src="${t.image}" alt="">`).join('<b class="kc-sammel-kombi-plus">+</b>')}</span><span class="kc-sammel-kombi-name">${teile.map((t) => t.name).join(' + ')}</span>`
+          : (sammelAnsicht === 'bild' && p.image ? `<img src="${p.image}" alt="">` : '');
+        const name = o && !alsHauptartikel ? (o.label || o.name) : p.name;
         const preis = Number(p.price || 0) + Number(o?.price || 0);
         const pfand = Array.isArray(p.depositComponents) ? p.depositComponents.reduce((sum, d) => sum + Number(d.price || 0), 0) : 0;
-        return `<div role="button" tabindex="0" data-sammel-key="${k}" class="kc-sammel-karte ansicht-${sammelAnsicht}${n ? ' gewaehlt' : ''}${o ? ' variante' : ''}" style="--tile-color:${farbe};${textfarbe ? `--tile-text:${textfarbe};` : ''}">${bild}<span class="kc-sammel-name">${name}</span><span class="kc-sammel-preis">${geld(preis)}</span>${pfand > 0 ? `<span class="kc-sammel-pfand">+ ${geld(pfand)} Pfand</span>` : ''}${n ? `<b class="kc-sammel-anzahl">${n}×</b><button type="button" class="kc-sammel-minus" data-sammel-minus="${k}" aria-label="Einen weniger">−</button>` : ''}</div>`;
+        return `<div role="button" tabindex="0" data-sammel-key="${k}" class="kc-sammel-karte ansicht-${sammelAnsicht}${n ? ' gewaehlt' : ''}${o && !alsHauptartikel ? ' variante' : ''}" style="--tile-color:${farbe};${textfarbe ? `--tile-text:${textfarbe};` : ''}">${bild}<span class="kc-sammel-name">${name}</span><span class="kc-sammel-preis">${geld(preis)}</span>${pfand > 0 ? `<span class="kc-sammel-pfand">+ ${geld(pfand)} Pfand</span>` : ''}${n ? `<b class="kc-sammel-anzahl">${n}×</b><button type="button" class="kc-sammel-minus" data-sammel-minus="${k}" aria-label="Einen weniger">−</button>` : ''}</div>`;
       };
       const karten = artikel.map((p) => {
         const opt = p.optionGroup && kOPT()[p.optionGroup];
-        if (opt) return `<div class="kc-sammel-gruppe-var"><div class="kc-sammel-var-titel">${p.name}</div>${opt.choices.map((o) => karte(p, o)).join('')}</div>`;
+        /* 24.09.2026 (Betreiber: "Keine Variationen einzeln auflisten - nur Gluehwein rot, und die
+           Artikel Rum und Amaretto"): Artikel mit Zusatzwahl erscheinen nur noch EINMAL und werden
+           mit der ersten Wahl gebucht - bei Schuss "Ohne Schuss", bei Kartoffelcreme "Kartoffeldip"
+           ("nur einmal inkl. Dip"). Rum/Amaretto tippt man als eigene Kacheln "Schuss Rum" /
+           "Schuss Amaretto" dazu (gleicher Preis wie die Zusatzwahl). */
+        if (opt && opt.choices && opt.choices.length) return karte(p, opt.choices[0], true);
         return karte(p, null);
       }).join('') || '<p class="kc-sammel-leer">Keine Artikel</p>';
       const eingeklappt = !!sammelEingeklappt[g];
@@ -798,7 +813,8 @@
     if (gesamtAnz) {
       /* Pfand zaehlt bei "automatisch" UND "inklusive" - nur bei "manuell" nicht (wie addConfiguredProduct) */
       const pfandExtra = (() => { try { return state.master.depositRule !== 'manual'; } catch (e) { return true; } })();
-      let betrag = (() => { try { return Number(total()) || 0; } catch (e) { return 0; } })();
+      const imBon = (() => { try { return Number(total()) || 0; } catch (e) { return 0; } })();
+      let betrag = imBon;
       Object.entries(sammelWahl).forEach(([k, anz]) => {
         const [pid, oid] = k.split('|');
         /* Kombi-Artikel stehen nicht in PRODUCTS - dieselbe Suche wie beim Uebernehmen */
@@ -813,6 +829,9 @@
       $('.kc-sammel-stand', sammelEbene).innerHTML = `${gesamtAnz} Artikel markiert<b class="kc-sammel-summe">Zu zahlen: ${betragText}</b>`;
       const barBtn = $('.kc-sammel-bar', sammelEbene);
       if (barBtn) barBtn.innerHTML = `<span class="kc-sammel-bar-wort">💶 BAR</span><span class="kc-sammel-bar-betrag">${betragText}</span>`;
+      // 24.09.2026 (Betreiber: "bei Uebernehmen auch den Betrag in die Taste schreiben"): Wert der
+      // markierten Artikel, also genau das, was durch Uebernehmen in den Bon kommt.
+      if (uebernehmenBtn) uebernehmenBtn.innerHTML = `<span class="kc-sammel-bar-wort">✓ ${gesamtAnz} ÜBERNEHMEN</span><span class="kc-sammel-bar-betrag">${geld(Math.round((betrag - imBon) * 100) / 100)}</span>`;
     } else {
       const barBtn = $('.kc-sammel-bar', sammelEbene);
       if (barBtn) barBtn.textContent = '💶 BAR';

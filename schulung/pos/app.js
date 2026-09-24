@@ -983,11 +983,14 @@ function produktVerkaufszeiten(productId,datumIso=localBusinessDate()){
     .map(([stunde,menge])=>({label:`${String(stunde).padStart(2,"0")}:00–${String((stunde+1)%24).padStart(2,"0")}:00`,menge}));
 }
 function openSalesTimeBreakdown(productId){
+  // 24.09.2026: Kurve mit Nachfrage-Pfeil und Tagesanteil (kc-verkaufskurve.js); die Textliste unten bleibt als Rueckfall
+  if(window.KCVerkaufskurve?.oeffnen?.(productId))return;
   const p=PRODUCTS.find(x=>x.id===productId);
   const zeilen=produktVerkaufszeiten(productId);
   el("salesTimeTitle").textContent=p?p.name:"Artikel";
   const gesamt=zeilen.reduce((sum,z)=>sum+z.menge,0);
   el("salesTimeSubtitle").textContent=zeilen.length?`Heute insgesamt ${gesamt}× verkauft`:"Heute noch keine Verkäufe";
+  el("salesTimeDialog").classList.remove("kc-kurve-modus");el("salesTimeList").className="sales-time-list";
   el("salesTimeList").innerHTML=zeilen.length
     ? zeilen.map(z=>`<div class="sales-time-row"><span>${z.label}</span><b>${z.menge}×</b></div>`).join("")
     : `<p class="sales-time-empty">Für ${escapeHtml(p?.name||"diesen Artikel")} liegen heute noch keine Verkäufe vor.</p>`;

@@ -1100,3 +1100,18 @@ body.kc-aufbau.kc-training #kcZahlenEbene .kc-pos-zeile-zahlen::before { content
 #timeClockBtn .kc-stechuhr-symbol { width: 28px !important; height: 28px !important; display: block; margin: auto; }
 body.kc-aufbau .kc-bereich.kopf .header-status #timeClockBtn .kc-stechuhr-symbol { width: 30px !important; height: 30px !important; }
 body .app-header .header-status button#timeClockBtn > svg.kc-stechuhr-symbol, body.kc-aufbau .kc-bereich.kopf .header-status button#timeClockBtn > svg.kc-stechuhr-symbol { width: 30px !important; height: 30px !important; min-width: 30px !important; max-width: none !important; max-height: none !important; }
+
+/* 24.09.2026 (Betreiber: "Keine dunklen Raender im Bild, nur klares Bild"): die Bildkarten
+   lagen auf dunklem Grund (#1f2937) und das Bild war zu 92 % deckend - dadurch wirkte es
+   abgedunkelt mit dunklen Kanten. Jetzt voll deckend auf hellem Grund, duenner heller Rahmen. */
+.kc-sammel-karte.ansicht-bild { background: #fff !important; border-color: #e2e8f0 !important; }
+.kc-sammel-karte.ansicht-bild img { opacity: 1 !important; background: #fff !important; filter: none !important; }
+.kc-sammel-karte.ansicht-bild::after, .kc-sammel-karte.ansicht-bild::before { content: none !important; }
+.kc-sammel-karte.ansicht-bild.gewaehlt { border-color: #22c55e !important; }
+/* 24.09.2026: Kombi-Kachel - Bilder aller enthaltenen Artikel nebeneinander, "+" dazwischen, Namen hell darunter */
+.kc-sammel-karte.ansicht-bild > .kc-sammel-kombi { position: absolute !important; left: 0; right: 0; top: 0; bottom: 18px; z-index: 0; display: flex; align-items: center; justify-content: center; gap: 2px; text-shadow: none !important; background: #fff; }
+.kc-sammel-karte.ansicht-bild > .kc-sammel-kombi img { position: static !important; inset: auto !important; flex: 1 1 0; min-width: 0; width: auto !important; height: 100% !important; object-fit: contain !important; opacity: 1 !important; background: #fff !important; }
+.kc-sammel-karte.ansicht-bild .kc-sammel-kombi-plus { flex: 0 0 auto; width: 20px; height: 20px; border-radius: 50%; background: #16a34a; color: #fff; font-size: 15px; font-weight: 900; line-height: 20px; text-align: center; }
+.kc-sammel-karte.ansicht-bild > .kc-sammel-kombi-name { position: absolute !important; left: 0; right: 0; bottom: 0; height: 18px; z-index: 1; display: block !important; padding: 0 4px; background: #f1f5f9; color: #0f172a !important; text-shadow: none !important; font-size: 11px; font-weight: 800; line-height: 18px; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+/* 24.09.2026: Betrag auch in der UEBERNEHMEN-Taste (zweizeilig wie BAR) */
+.kc-sammel-fuss > .kc-sammel-uebernehmen { display: flex; flex-direction: column; align-items: center; justify-content: center; line-height: 1.05; }
