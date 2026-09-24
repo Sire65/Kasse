@@ -807,7 +807,7 @@ function filteredSales(){
   const payment=el("rPayment")?.value||"";
   let rows=[];
   sales.filter(t=>
-    !t.training&&t.type!=="personal"&&
+    !t.training&&t.type!=="personal"&&t.type!=="helfer"&&
     (!rid||t.registerId===rid)&&
     (!from||String(t.time).slice(0,10)>=from)&&
     (!to||String(t.time).slice(0,10)<=to)&&
@@ -820,6 +820,9 @@ function filteredSales(){
   return rows
 }
 function renderReport(){
+  // 23.09.2026: Uebersicht "Ohne Umsatz" (Helfer, Personal, Trinkgeld, Spenden ...) folgt denselben Filtern
+  try{window.KCSonderbuchungen?.zeichnen?.()}catch(e){console.warn("Sonderbuchungen",e)}
+  if(window.KCSonderbuchungen?.tabelle?.(el("rDataType").value,el("reportBody")))return;
   if(el("rDataType").value==="withdrawals"){
     const rid=el("rRegister").value,from=el("rFrom").value,to=el("rTo").value,operator=(el("rOperator").value||"").trim().toLowerCase();
     const rows=cashWithdrawals.filter(item=>!item.training&&(!rid||item.registerId===rid)&&(!from||String(item.time).slice(0,10)>=from)&&(!to||String(item.time).slice(0,10)<=to)&&(!operator||String(item.operator||"").toLowerCase().includes(operator)));

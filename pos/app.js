@@ -47,11 +47,11 @@ const KC_BEDIENERSTAMM=[
   {id:"kc-0017",name:"Sandmann",memberNo:"KC-0017"},
   {id:"kc-0018",name:"Simba",memberNo:"KC-0018"}
 ].map(p=>({...p,code:`KCOPE1:${p.id}`}));
-// Auf KUNDENBELEGEN steht nie ein Pseudonym, sondern immer "Team" - das Pseudonym ist eine
-// rein interne Kennung und darf den Stand nicht verlassen. Intern (Transaktion, Manager,
-// Auswertung) laeuft der echte Bediener unveraendert weiter.
-const BELEG_BEDIENER="Team";
-window.KCBelegBediener=BELEG_BEDIENER; // fuer die anderen Module (Gutscheinbon) erreichbar machen
+// 23.09.2026 (Betreiber: "Zeige auf den Bons den Bediener mit an - Pseudonym"): bisher stand auf
+// Kundenbelegen immer nur "Team". Jetzt steht dort das Pseudonym, mit dem gebucht wurde (nie ein
+// Klarname - an der Kasse gibt es nur Pseudonyme). Ohne angemeldeten Bediener bleibt es "Team".
+function belegBediener(t){return String((t&&t.operator)||state.master.operatorName||"Team").trim()||"Team"}
+Object.defineProperty(window,"KCBelegBediener",{get:()=>belegBediener(null),configurable:true}); // fuer den Gutscheinbon
 const DEFAULTS = {workspaceButtons:null,clubName:"Köcheclub Werne",clubLogo:"",eventName:"Weihnachtsmarkt 2026",registerName:"Kasse 1",operatorName:"Team",operators:KC_BEDIENERSTAMM.map(p=>p.name),operatorProfiles:KC_BEDIENERSTAMM.map(p=>({...p})),requireOperatorConfirmation:false,pinLockEnabled:true,nextBon:123,depositRule:"automatic",showProductInfo:true,highlightAllergens:true,notificationProfile:"standard",buttonSize:"standard",buttonMode:"image",showPrice:true,registerId:"KASSE-01",showStaff:true,showTip:true,showDeposit:true,showPrint:true,showMore:true,showChange:true,showCard:true,showAccount:true,showDiscount:true,showHappyHour:true,showRushMode:true,allowTraining:true,requireChangeFlow:false,rushMode:false,trainingMode:false,autoFavorites:true,groupColorMode:true,fiscalMode:"off",tseProvider:"",tseSerial:"",superAdminAccess:null,healthMonitor:{enabled:true,level:"normal",autoRushProtection:true},receipt:{header:true,head1:"Köcheclub Werne",head2:"Weihnachtsmarkt",vat:"summary",foot1:"Vielen Dank!",autoPrint:true}};
 DEFAULTS.categoryOrder=null;
 const OPTIONS={
@@ -969,6 +969,13 @@ function selectProduct(id){if(!operatorReadyForArticle())return;const p=products
 // normale Artikelkachel angetippt wurde - anders als der RÜCKGELD-Knopf, der das selbst macht.
 // Ohne das oeffnete sich rein gar nichts sichtbares.
 function openFreieZahlung(){if(!operatorReadyForArticle())return;setKeypadMode("freibetrag");window.KCAufbau?.zahlenSeite?.(true)}
+// 23.09.2026 (Betreiber: "nur wenn der Ziffernblock ueber den Artikel Sonderverkauf gestartet
+// wurde, ist es ein Sonderverkauf mit frei definiertem Betrag"): echter Fund - wer die Freie
+// Zahlung startete und ohne OK zurueckging, liess den Zahlenblock im Modus "freibetrag" stehen.
+// Beim naechsten RUECKGELD landete der getippte Betrag dann als "Divers" im Bon statt als
+// "Gegeben". Jeder andere Weg auf die Zahlen-Seite setzt jetzt ausdruecklich auf Bargeld zurueck.
+function keypadAufBargeld(){if(state.keypadMode!=="cash")setKeypadMode("cash")}
+window.KCKeypadAufBargeld=keypadAufBargeld;
 function addDiversItem(betrag){
   const cents=toCents(betrag),key=`divers:${cents}`,found=state.cart.find(x=>x.key===key);
   const item={key,id:"divers",name:"Divers",price:fromCents(cents),normalPrice:fromCents(cents),halfAllowed:false,halfPrice:0,portionFactor:1,originalPrice:fromCents(cents),offerId:null,offerName:"",offerType:"",category:"Sonstiges",image:"assets/divers.svg",manualDeposit:false,qty:1,option:null,deposits:[]};
@@ -1564,7 +1571,7 @@ function playCompletedSaleSound(){
 }
 
 function canonicalTransaction(row){const copy=cloneData(row);delete copy.recordHash;return JSON.stringify(copy)}
-async function completeSale(method,{type="sale",silent=false,changeTarget=null,directSettlement=false,payoutHandledWithoutCash=false}={}){
+async function completeSale(method,{type="sale",silent=false,changeTarget=null,directSettlement=false,payoutHandledWithoutCash=false,helperGroup=null}={}){
   if(!state.cart.length)return keinBonMeldung();
   if(state.saleInProgress)return;
   state.saleInProgress=true;
@@ -1573,12 +1580,12 @@ async function completeSale(method,{type="sale",silent=false,changeTarget=null,d
     const training=!!state.master.trainingMode,endTime=new Date().toISOString();
     const trainingCounter=Number(localStorage.getItem("kc_training_next_bon_v018")||1);
     const current=training?`T-${String(trainingCounter).padStart(6,"0")}`:bonText();
-    const grossDue=+grossTotal().toFixed(2),globalDiscountValue=+globalDiscountAmount().toFixed(2),positionDiscountValue=+totalPositionDiscountAmount().toFixed(2),discountValue=+(globalDiscountValue+positionDiscountValue).toFixed(2),due=+total().toFixed(2),given=type==="personal"?0:+state.given.toFixed(2),settlementTarget=changeTarget!==null&&Number.isFinite(Number(changeTarget))?Number(changeTarget):due,isPayout=toCents(due)<0,payout=isPayout&&!payoutHandledWithoutCash?+Math.abs(due).toFixed(2):0,change=type==="personal"||payoutHandledWithoutCash?0:(isPayout?payout:+Math.max(0,given-settlementTarget).toFixed(2));
+    const grossDue=+grossTotal().toFixed(2),globalDiscountValue=+globalDiscountAmount().toFixed(2),positionDiscountValue=+totalPositionDiscountAmount().toFixed(2),discountValue=+(globalDiscountValue+positionDiscountValue).toFixed(2),due=+total().toFixed(2),given=(type==="personal"||type==="helfer")?0:+state.given.toFixed(2),settlementTarget=changeTarget!==null&&Number.isFinite(Number(changeTarget))?Number(changeTarget):due,isPayout=toCents(due)<0,payout=isPayout&&!payoutHandledWithoutCash?+Math.abs(due).toFixed(2):0,change=type==="personal"||type==="helfer"||payoutHandledWithoutCash?0:(isPayout?payout:+Math.max(0,given-settlementTarget).toFixed(2));
     const rows=training?readTrainingTransactions():readTransactions(),previousHash=rows[rows.length-1]?.recordHash||null;
     const items=state.cart.map(item=>({...cloneData(item),unitTotal:+(lineUnit(item)+(state.master.depositRule==="automatic"?item.deposits.reduce((sum,d)=>sum+Number(d.price||0),0):0)).toFixed(2),lineTotal:+((lineUnit(item)+(state.master.depositRule==="automatic"?item.deposits.reduce((sum,d)=>sum+Number(d.price||0),0):0))*item.qty).toFixed(2)}));
     if(globalDiscountValue>0)items.push({id:"DISCOUNT",name:`Rabatt ${Number(state.discount.percent).toLocaleString("de-DE")} %${state.discount.reason?` · ${state.discount.reason}`:""}`,category:"Rabatt",price:-globalDiscountValue,qty:1,unitTotal:-globalDiscountValue,lineTotal:-globalDiscountValue,discountLine:true});
     state.cart.filter(item=>item.positionDiscount?.percent).forEach(item=>{const value=+positionDiscountAmount(item).toFixed(2);if(value>0)items.push({id:`POSITION-DISCOUNT-${item.id}`,name:`Positionsrabatt ${Number(item.positionDiscount.percent).toLocaleString("de-DE")} % · ${item.name}`,category:"Positionsrabatt",price:-value,qty:1,unitTotal:-value,lineTotal:-value,discountLine:true,sourceItemKey:item.key,reason:item.positionDiscount.reason||null,note:item.positionDiscount.note||null})});
-    const rec={transactionId:crypto.randomUUID(),formatVersion:6,bon:current,bonNumber:current,startTime:state.cartStartedAt||endTime,time:endTime,endTime,registerId:state.master.registerId,registerName:state.master.registerName,operator:state.master.operatorName,type,training,method,payment:method,grossDue,grossDueCents:toCents(grossDue),discount:{percent:Number(state.discount.percent||0),amount:discountValue,amountCents:toCents(discountValue),globalAmount:globalDiscountValue,positionAmount:positionDiscountValue,base:discountBase(),reason:state.discount.reason||null,note:state.discount.note||null,keys:Array.isArray(state.discount.keys)?state.discount.keys:[],positions:state.cart.filter(item=>item.positionDiscount?.percent).map(item=>({key:item.key,id:item.id,name:item.name,percent:Number(item.positionDiscount.percent),amount:positionDiscountAmount(item),reason:item.positionDiscount.reason||null}))},due,total:due,dueCents:toCents(due),given,givenCents:toCents(given),settlementTarget:+settlementTarget.toFixed(2),isPayout,payout,payoutCents:toCents(payout),change,changeCents:toCents(change),depositRule:state.master.depositRule,items,previousHash};
+    const rec={transactionId:crypto.randomUUID(),formatVersion:6,bon:current,bonNumber:current,startTime:state.cartStartedAt||endTime,time:endTime,endTime,registerId:state.master.registerId,registerName:state.master.registerName,operator:state.master.operatorName,type,training,method,payment:method,...(helperGroup?{helperGroup}:{}),grossDue,grossDueCents:toCents(grossDue),discount:{percent:Number(state.discount.percent||0),amount:discountValue,amountCents:toCents(discountValue),globalAmount:globalDiscountValue,positionAmount:positionDiscountValue,base:discountBase(),reason:state.discount.reason||null,note:state.discount.note||null,keys:Array.isArray(state.discount.keys)?state.discount.keys:[],positions:state.cart.filter(item=>item.positionDiscount?.percent).map(item=>({key:item.key,id:item.id,name:item.name,percent:Number(item.positionDiscount.percent),amount:positionDiscountAmount(item),reason:item.positionDiscount.reason||null}))},due,total:due,dueCents:toCents(due),given,givenCents:toCents(given),settlementTarget:+settlementTarget.toFixed(2),isPayout,payout,payoutCents:toCents(payout),change,changeCents:toCents(change),depositRule:state.master.depositRule,items,previousHash};
     rec.recordHash=await sha256Hex(canonicalTransaction(rec));rows.push(rec);saveTransactions(rows,training);
     // KC Sync Live-Monitor: rein zur Anzeige im PC Manager, kein Archiv, keine Auswirkung auf
     // die Buchung selbst (siehe kc-sync-live-event.js für die Begründung). NICHT awaited.
@@ -1599,6 +1606,7 @@ async function completeSale(method,{type="sale",silent=false,changeTarget=null,d
     notify("success","Einkaufswagen abgerechnet","sale-complete",7000);
     if(silent)setSystemHint(`${training?"Training":"Verkauf"} abgeschlossen · bereit für den nächsten Verkauf`);
     else if(type==="personal")showMessage("Personalverbrauch",money(due),`${training?"Trainingsvorgang":"Vorgang"} ${current} wurde protokolliert.`);
+    else if(type==="helfer")showMessage("Helfer-Verpflegung",money(due),`${training?"Trainingsvorgang":"Vorgang"} ${current} für ${helperGroup||"Helfer"} wurde protokolliert.`);
     else if(isPayout)showMessage(training?"Training abgeschlossen":"Auszahlung",money(payout),`${training?"Trainingsbon":"Bon"} ${current} gespeichert. Betrag an den Kunden auszahlen.`);
     else if(state.master.requireChangeFlow===true)showMessage(training?"Training abgeschlossen":"Rückgeld",money(change),`${training?"Trainingsbon":"Bon"} ${current} gespeichert.`);
     else showMessage(training?"Training abgeschlossen":"Verkauf abgeschlossen","✓",`${training?"Trainingsbon":"Bon"} ${current} gespeichert.`);
@@ -2129,9 +2137,10 @@ function getGroupExportRows(){
     rows:items.map(g=>[g.id,g.name,g.shortName||"",g.sortOrder,g.color,isActiveRecord(g)?"Ja":"Nein",g.notes||""])
   };
 }
+function helferZeile(s){const kopf=`${money(s.helperTotal)} (${s.helperCount} ${s.helperCount===1?"Vorgang":"Vorgänge"})`;return s.helperBreakdown.length?`${kopf}<small class="helfer-aufteilung">${s.helperBreakdown.map(g=>`${g.name}: ${money(g.amount)}`).join(" · ")}</small>`:kopf}
 function dateOnly(iso){return String(iso||"").slice(0,10)}
 function filterTransactions(){
-  let tx=readTransactions().filter(t=>t.type!=="personal");
+  let tx=readTransactions().filter(t=>t.type!=="personal"&&t.type!=="helfer");
   const mode=el("salesDateMode").value;
   if(mode==="day"){
     const d=el("salesDateSingle").value; if(d)tx=tx.filter(t=>dateOnly(t.time)===d);
@@ -2715,7 +2724,7 @@ function renderRecentBons(){
 // einfach den internen technischen Code in Grossbuchstaben (z.B. "COMPLAINT-REFUND",
 // "CASH-BUTTON-DIRECT", "ACCOUNT-CHARGE") - nie fuer Kunden gedacht. Feste deutsche
 // Bezeichnungen dafuer; unbekannte/neue Codes fallen auf "BAR" zurueck statt roh durchzureichen.
-const ZAHLART_LABELS={"complaint-refund":"ERSTATTUNG","ersatz-reklamation":"ERSATZ (REKLAMATION)","account-charge":"KONTO","pfand-trinkgeld":"TRINKGELD","pfand-spende":"SPENDE","internal-personal":"PERSONAL"};
+const ZAHLART_LABELS={"complaint-refund":"ERSTATTUNG","ersatz-reklamation":"ERSATZ (REKLAMATION)","account-charge":"KONTO","pfand-trinkgeld":"TRINKGELD","pfand-spende":"SPENDE","internal-personal":"PERSONAL","internal-helfer":"HELFER"};
 function zahlartLabel(method){
   const m=String(method||"").toLowerCase();
   if(ZAHLART_LABELS[m])return ZAHLART_LABELS[m];
@@ -2780,7 +2789,7 @@ function bonSeite(t,autoPrint){
     <section class="meta">
       <div>${esc(state.master.registerName)} · Bon ${esc(t.bon||t.bonNumber)}</div>
       <div>${date.toLocaleDateString("de-DE")} · ${date.toLocaleTimeString("de-DE",{hour:"2-digit",minute:"2-digit"})}</div>
-      <div>Bediener: ${esc(BELEG_BEDIENER)}</div>
+      <div>Bediener: ${esc(belegBediener(t))}</div>
     </section>
     <div class="rule"></div>
     <table><tbody>${normalRows}${discountRows}</tbody></table>
@@ -3134,8 +3143,11 @@ function closingSnapshot(){
   // eigenes Konto ausgewiesen - vorher tauchte er in keiner einzigen Auswertung auf.
   const staffTx=tx.filter(t=>t.type==="personal");
   const staffTotal=staffTx.reduce((sum,t)=>sum+Number(t.due??t.total??0),0);
+  const helperTx=tx.filter(t=>t.type==="helfer");
+  const helperTotal=helperTx.reduce((sum,t)=>sum+Number(t.due??t.total??0),0);
+  const helperBreakdown=(()=>{const je={};helperTx.forEach(t=>{const k=t.helperGroup||"Helfer";je[k]=(je[k]||0)+Number(t.due??t.total??0)});return Object.entries(je).map(([name,amount])=>({name,amount:+amount.toFixed(2)}))})();
   const cashIn=movements.reduce((sum,m)=>sum+Number(m.total||0),0);
-  const cashSales=tx.filter(t=>t.type!=="personal"&&String(t.method||t.payment).startsWith("cash")).reduce((sum,t)=>sum+Number(t.due??t.total??0),0);
+  const cashSales=tx.filter(t=>t.type!=="personal"&&t.type!=="helfer"&&String(t.method||t.payment).startsWith("cash")).reduce((sum,t)=>sum+Number(t.due??t.total??0),0);
   const cashTips=tips.reduce((sum,t)=>sum+Number(t.amount||0),0);
   // Pfandrückgabe als Trinkgeld bewegt kein Bargeld: die geschuldete Auszahlung wird nur
   // in Trinkgeld umgewidmet. Sie darf den erwarteten Kassenbestand daher nicht erhöhen.
@@ -3143,12 +3155,12 @@ function closingSnapshot(){
   const cashOut=withdrawals.reduce((sum,m)=>sum+Number(m.amount||0),0);
   // Kontobuchungen sind Umsatz, aber kein Bargeld. Trainingsdaten und andere Kassen
   // bleiben aus dieser lokalen Abschlussperiode heraus.
-  const accountTx=tx.filter(t=>t.type!=="personal"&&String(t.method||t.payment)==="account-charge");
+  const accountTx=tx.filter(t=>t.type!=="personal"&&t.type!=="helfer"&&String(t.method||t.payment)==="account-charge");
   const accountSales=accountTx.reduce((sum,t)=>sum+Number(t.due??t.total??0),0);
   const accountBreakdown=(()=>{const je={};kcEvents().filter(e=>e.status!=="void"&&!e.training&&(!e.registerId||e.registerId===state.master.registerId)&&(!startAt||e.date>=startAt)).forEach(e=>{const k=e.accountName||e.accountId;je[k]=(je[k]||0)+Number(e.amount||0)});return Object.entries(je).map(([name,amount])=>({name,amount:+amount.toFixed(2)}))})();
-  const totalSales=tx.filter(t=>t.type!=="personal").reduce((sum,t)=>sum+Number(t.due??t.total??0),0);
+  const totalSales=tx.filter(t=>t.type!=="personal"&&t.type!=="helfer").reduce((sum,t)=>sum+Number(t.due??t.total??0),0);
   const receiptExpected=withdrawals.filter(w=>w.receiptAvailable===true).length;
-  return {startAt,tx,movements,withdrawals,tips,staffCount:staffTx.length,staffTotal:+staffTotal.toFixed(2),cashIn:+cashIn.toFixed(2),cashSales:+cashSales.toFixed(2),accountSales:+accountSales.toFixed(2),accountBreakdown,totalSales:+totalSales.toFixed(2),cashTips:+cashTipsDrawer.toFixed(2),tipTotal:+cashTips.toFixed(2),cashOut:+cashOut.toFixed(2),expectedCash:+(cashIn+cashSales+cashTipsDrawer-cashOut).toFixed(2),receiptExpected};
+  return {startAt,tx,movements,withdrawals,tips,staffCount:staffTx.length,staffTotal:+staffTotal.toFixed(2),helperCount:helperTx.length,helperTotal:+helperTotal.toFixed(2),helperBreakdown,cashIn:+cashIn.toFixed(2),cashSales:+cashSales.toFixed(2),accountSales:+accountSales.toFixed(2),accountBreakdown,totalSales:+totalSales.toFixed(2),cashTips:+cashTipsDrawer.toFixed(2),tipTotal:+cashTips.toFixed(2),cashOut:+cashOut.toFixed(2),expectedCash:+(cashIn+cashSales+cashTipsDrawer-cashOut).toFixed(2),receiptExpected};
 }
 // Ruhiger Hinweis im Abschluss, wenn fuer heute kein Anfangsbestand eingelesen wurde. Der
 // Uebergabecode gilt den ganzen Tag - er kann an dieser Stelle also noch nachgeholt werden,
@@ -3177,17 +3189,69 @@ function pflegeAnfangsbestandHinweis(){
 // nichts wird hier gespeichert oder zurueckgesetzt), nur zum Nachschauen und Ausdrucken.
 // Bewusst OHNE Abschlusscode/QR/Notiz - das bleibt dem echten Tagesabschluss vorbehalten,
 // damit ein X-Bericht nie mit einem fertigen Abschluss verwechselt werden kann.
+// 23.09.2026 (Betreiber: "Im X-Bericht fehlen Trinkgeld, Helferkosten, auf Konto gebucht usw."):
+// Vieles wurde schon gerechnet, aber nicht gezeigt. Der Bericht besteht jetzt aus Bloecken, die
+// Anzeige, Druck und Tagesabschluss gemeinsam benutzen - so koennen die drei nie auseinanderlaufen.
+function xBerichtAbschnitte(s){
+  const anz=n=>`${n} ${n===1?"Vorgang":"Vorgänge"}`;
+  const verkauf=s.tx.filter(t=>t.type!=="personal"&&t.type!=="helfer");
+  // Trinkgeld nach Herkunft
+  const tipSumme=f=>s.tips.filter(f).reduce((sum,t)=>sum+Number(t.amount||0),0);
+  const tipAusPfand=tipSumme(t=>String(t.source||"").startsWith("pfand-behalten"));
+  const tipBar=tipSumme(t=>!String(t.source||"").startsWith("pfand-behalten"));
+  const spenden=(()=>{try{return donationRecords().filter(d=>d.registerId===state.master.registerId&&!d.training&&(!s.startAt||String(d.time||"")>=s.startAt))}catch(e){return []}})();
+  const spendenSumme=spenden.reduce((sum,d)=>sum+Number(d.amount||0),0);
+  // Pfand: ausgegeben = Pfand an Artikeln + eigene Pfand-Artikel mit Plus-Preis;
+  // zurueck = Pfand-Artikel mit Minus-Preis; Leihglaeser = bei Personal/Helfer weggelassenes Pfand
+  let pfandAusStk=0,pfandAusBetrag=0,pfandZurueckStk=0,pfandZurueckBetrag=0,leihglaeser=0;
+  s.tx.forEach(t=>(t.items||[]).forEach(i=>{
+    const qty=Number(i.qty||0);
+    if(Array.isArray(i.deposits)&&i.deposits.length&&!i.refund){pfandAusStk+=qty*i.deposits.length;pfandAusBetrag+=qty*i.deposits.reduce((a,d)=>a+Number(d.price||0),0)}
+    if(Array.isArray(i.leihPfand))leihglaeser+=qty*i.leihPfand.length;
+    if(i.category==="Pfand"&&Number(i.price)>0){pfandAusStk+=qty;pfandAusBetrag+=Number(i.price)*qty}
+    if(i.category==="Pfand"&&Number(i.price)<0){pfandZurueckStk+=Math.abs(qty);pfandZurueckBetrag+=Math.abs(Number(i.price)*qty)}
+  }));
+  const rabatt=verkauf.reduce((sum,t)=>sum+Number(t.discount?.amount||0),0);
+  const reklamation=s.tx.filter(t=>t.method==="complaint-refund"||t.method==="ersatz-reklamation");
+  const reklamationSumme=reklamation.reduce((sum,t)=>sum+Math.abs(Number(t.due??t.total??0)),0);
+  return [
+    {titel:"💶 Bargeld",zeilen:[
+      ["Anfangsbestand + Nachfüllungen",money(s.cashIn)],
+      ["Barverkäufe",money(s.cashSales)],
+      ["Bar-Trinkgeld / Aufrundung",money(s.cashTips)],
+      ["Entnahmen / Auszahlungen",money(s.cashOut)],
+      ["Erwarteter Bargeldbestand",money(s.expectedCash),"summe"]]},
+    {titel:"🧾 Ohne Bargeld",zeilen:[
+      ["Auf Konto gebucht",money(s.accountSales)],
+      ...s.accountBreakdown.map(k=>["· "+k.name,money(k.amount),"klein"]),
+      ["Personalverbrauch",`${money(s.staffTotal)} (${anz(s.staffCount)})`],
+      ["Helfer-Verpflegung",`${money(s.helperTotal)} (${anz(s.helperCount)})`],
+      ...s.helperBreakdown.map(g=>["· "+g.name,money(g.amount),"klein"])]},
+    {titel:"💝 Trinkgeld & Spenden",zeilen:[
+      ["Trinkgeld gesamt",money(tipBar+tipAusPfand),"summe"],
+      ["· bar / Aufrundung / stimmt so",money(tipBar),"klein"],
+      ["· aus Pfand behalten",money(tipAusPfand),"klein"],
+      ["Spenden (Pfand als Spende)",`${money(spendenSumme)} (${anz(spenden.length)})`]]},
+    {titel:"♻ Pfand",zeilen:[
+      ["Pfand ausgegeben",`${money(pfandAusBetrag)} (${pfandAusStk} Stk.)`],
+      ["Pfand zurückgenommen",`${money(pfandZurueckBetrag)} (${pfandZurueckStk} Stk.)`],
+      ["Leihgläser Personal/Helfer (ohne Pfand)",`${leihglaeser} Stk.`]]},
+    {titel:"📊 Sonstiges",zeilen:[
+      ["Umsatz gesamt (ohne Personal und Helfer)",money(s.totalSales),"summe"],
+      ["Rabatte gewährt",money(rabatt)],
+      ["Reklamationen",`${money(reklamationSumme)} (${anz(reklamation.length)})`],
+      ["Bonanzahl im Zeitraum",String(s.tx.length)]]}
+  ];
+}
+function xBerichtHtml(abschnitte){
+  return abschnitte.map(a=>`<section class="xbericht-block"><h3>${a.titel}</h3>${a.zeilen.map(([text,wert,art])=>`<div class="xbericht-zeile${art?" "+art:""}"><span>${escapeHtml(text)}</span><b>${escapeHtml(wert)}</b></div>`).join("")}</section>`).join("");
+}
+function xBerichtDruckHtml(abschnitte){
+  return abschnitte.map(a=>`<div class="rule"></div><div class="block-titel">${escapeHtml(a.titel.replace(/^[^A-Za-zÄÖÜäöü]+/,""))}</div>${a.zeilen.map(([t,w,art])=>`<div class="line${art==="summe"?" total":""}"><span>${escapeHtml(t)}</span><b>${escapeHtml(w)}</b></div>`).join("")}`).join("");
+}
 function openXBerichtDialog(){
   const s=closingSnapshot();
-  el("xBerichtCashIn").textContent=money(s.cashIn);
-  el("xBerichtCashSales").textContent=money(s.cashSales);
-  el("xBerichtCashTips").textContent=money(s.cashTips);
-  el("xBerichtCashOut").textContent=money(s.cashOut);
-  el("xBerichtExpected").textContent=money(s.expectedCash);
-  el("xBerichtStaffTotal").textContent=`${money(s.staffTotal)} (${s.staffCount} ${s.staffCount===1?"Vorgang":"Vorgänge"})`;
-  el("xBerichtAccountSales").innerHTML=`${money(s.accountSales)}${s.accountBreakdown.length?`<small class="closing-konten">${s.accountBreakdown.map(k=>`${escapeHtml(k.name)}: ${money(k.amount)}`).join(" · ")}</small>`:""}`;
-  el("xBerichtTotalSales").textContent=money(s.totalSales);
-  el("xBerichtTxCount").textContent=String(s.tx.length);
+  el("xBerichtInhalt").innerHTML=xBerichtHtml(xBerichtAbschnitte(s));
   el("xBerichtDialog").showModal();
 }
 // Druck im selben 72mm-Bonformat wie ein normaler Kassenbon (siehe printBonByNumber) - passt
@@ -3207,21 +3271,12 @@ el("printXBericht").onclick=()=>{
     .rule{border-top:1px dashed #000;margin:2mm 0}
     .line{display:flex;justify-content:space-between;gap:3mm;margin:.9mm 0}
     .total{font-weight:bold;font-size:11pt}
+    .block-titel{font-weight:bold;text-transform:uppercase;margin:1mm 0}
     footer{text-align:center;margin-top:4mm;font-size:8.5pt}
     @media print{html,body{width:72mm!important;max-width:72mm!important;margin:0!important;padding:0!important}}
   </style></head><body>
     <header><h1>X-Bericht</h1><h2>${escapeHtml(state.master.registerName||state.master.registerId)}</h2><h2>${jetzt.toLocaleString("de-DE")}</h2></header>
-    <div class="rule"></div>
-    <div class="line"><span>Anfangsbestand + Nachfüllungen</span><b>${money(s.cashIn)}</b></div>
-    <div class="line"><span>Barverkäufe</span><b>${money(s.cashSales)}</b></div>
-    <div class="line"><span>Bar-Trinkgeld / Aufrundung</span><b>${money(s.cashTips)}</b></div>
-    <div class="line"><span>Entnahmen</span><b>${money(s.cashOut)}</b></div>
-    <div class="rule"></div>
-    <div class="line total"><span>Erwarteter Bestand</span><b>${money(s.expectedCash)}</b></div>
-    <div class="rule"></div>
-    <div class="line"><span>Kontoumsatz</span><b>${money(s.accountSales)}</b></div>
-    <div class="line"><span>Umsatz gesamt</span><b>${money(s.totalSales)}</b></div>
-    <div class="line"><span>Bonanzahl</span><b>${s.tx.length}</b></div>
+    ${xBerichtDruckHtml(xBerichtAbschnitte(s))}
     <footer>Zwischenstand - kein Tagesabschluss</footer>
     <script>window.onload=()=>window.print()<\/script>
   </body></html>`);
@@ -3229,8 +3284,9 @@ el("printXBericht").onclick=()=>{
 };
 function openClosingDialog(){
   pflegeAnfangsbestandHinweis();
+  try{if(el("closingDetails"))el("closingDetails").innerHTML=xBerichtHtml(xBerichtAbschnitte(closingSnapshot()).slice(1))}catch(e){/* Details sind Zusatz - der Abschluss darf daran nie scheitern */}
   window.KCClosingCountUI?.setMode?.("defer");
-  const s=closingSnapshot();el("closingCashIn").textContent=money(s.cashIn);el("closingCashSales").textContent=money(s.cashSales);el("closingCashTips").textContent=money(s.cashTips);el("closingCashOut").textContent=money(s.cashOut);el("closingExpected").textContent=money(s.expectedCash);if(el("closingAccountSales"))el("closingAccountSales").innerHTML=`${money(s.accountSales)}${s.accountBreakdown.length?`<small class="closing-konten">${s.accountBreakdown.map(k=>`${escapeHtml(k.name)}: ${money(k.amount)}`).join(" · ")}</small>`:""}`;if(el("closingTotalSales"))el("closingTotalSales").textContent=money(s.totalSales);if(el("closingStaffTotal"))el("closingStaffTotal").textContent=`${money(s.staffTotal)} (${s.staffCount} ${s.staffCount===1?"Vorgang":"Vorgänge"})`;if(el("closingReceiptExpected"))el("closingReceiptExpected").textContent=`${s.receiptExpected} ${s.receiptExpected===1?"Beleg":"Belege"}`;el("closingPayload").value="";el("closingQrCanvas").classList.remove("ready");el("closingDialog").showModal();
+  const s=closingSnapshot();el("closingCashIn").textContent=money(s.cashIn);el("closingCashSales").textContent=money(s.cashSales);el("closingCashTips").textContent=money(s.cashTips);el("closingCashOut").textContent=money(s.cashOut);el("closingExpected").textContent=money(s.expectedCash);if(el("closingAccountSales"))el("closingAccountSales").innerHTML=`${money(s.accountSales)}${s.accountBreakdown.length?`<small class="closing-konten">${s.accountBreakdown.map(k=>`${escapeHtml(k.name)}: ${money(k.amount)}`).join(" · ")}</small>`:""}`;if(el("closingTotalSales"))el("closingTotalSales").textContent=money(s.totalSales);if(el("closingStaffTotal"))el("closingStaffTotal").textContent=`${money(s.staffTotal)} (${s.staffCount} ${s.staffCount===1?"Vorgang":"Vorgänge"})`;if(el("closingHelperTotal"))el("closingHelperTotal").innerHTML=helferZeile(s);if(el("closingReceiptExpected"))el("closingReceiptExpected").textContent=`${s.receiptExpected} ${s.receiptExpected===1?"Beleg":"Belege"}`;el("closingPayload").value="";el("closingQrCanvas").classList.remove("ready");el("closingDialog").showModal();
 }
 function createClosing(){
   const s=closingSnapshot(),createdAt=new Date().toISOString(),businessDate=localBusinessDate(),closingId=crypto.randomUUID();
@@ -3238,7 +3294,7 @@ function createClosing(){
   try{cashCount=window.KCClosingCountUI?.buildPayload?.({registerId:state.master.registerId,businessDate,closingId})||null}
   catch(err){setSystemHint(err.message||String(err),"warn");return null}
   if(cashCount)cashCount.checksum=checksumObject(cashCount);
-  const payload={format:"KC_CASH_CLOSING",version:4,closingId,registerId:state.master.registerId,registerName:state.master.registerName,operator:state.master.operatorName,businessDate,createdAt,periodStart:s.startAt,periodEnd:createdAt,cashIn:s.cashIn,cashSales:s.cashSales,cashTips:s.cashTips,cashOut:s.cashOut,expectedCash:s.expectedCash,staffTotal:s.staffTotal,staffCount:s.staffCount,accountSales:s.accountSales,accountBreakdown:s.accountBreakdown,totalSales:s.totalSales,transactionCount:s.tx.length,receiptExpected:s.receiptExpected,firstTransactionId:s.tx[0]?.transactionId||null,lastTransactionId:s.tx[s.tx.length-1]?.transactionId||null,note:el("closingNote").value.trim(),cashCount};
+  const payload={format:"KC_CASH_CLOSING",version:4,closingId,registerId:state.master.registerId,registerName:state.master.registerName,operator:state.master.operatorName,businessDate,createdAt,periodStart:s.startAt,periodEnd:createdAt,cashIn:s.cashIn,cashSales:s.cashSales,cashTips:s.cashTips,cashOut:s.cashOut,expectedCash:s.expectedCash,staffTotal:s.staffTotal,staffCount:s.staffCount,helperTotal:s.helperTotal,helperCount:s.helperCount,helperBreakdown:s.helperBreakdown,accountSales:s.accountSales,accountBreakdown:s.accountBreakdown,totalSales:s.totalSales,transactionCount:s.tx.length,receiptExpected:s.receiptExpected,firstTransactionId:s.tx[0]?.transactionId||null,lastTransactionId:s.tx[s.tx.length-1]?.transactionId||null,note:el("closingNote").value.trim(),cashCount};
   payload.checksum=checksumObject(payload);const code=encodePayload("KCLOSE1:",payload);
   const closings=safeArray(CLOSING_KEY);closings.push(payload);localStorage.setItem(CLOSING_KEY,JSON.stringify(closings));el("closingPayload").value=code;
   try{drawRealQr(el("closingQrCanvas"),code);el("closingQrCanvas").classList.add("ready")}catch(err){setSystemHint(`Abschluss gespeichert, QR nicht darstellbar: ${err.message}`,"warn")}
@@ -3930,7 +3986,7 @@ el("tipBtn").onclick=()=>{
   // Bei offenem Bon darf ein bereits erfasster Zahlbetrag nicht versehentlich komplett als
   // Trinkgeld vorbelegt werden. Ein Mehrbetrag wurde oben bereits eindeutig behandelt.
   const staged=!state.cart.length&&state.given>0?state.given:0;
-  el("tipCustomAmount").value=staged?staged.toFixed(2):"";
+  el("tipCustomAmount").value=staged?staged.toFixed(2).replace(".",","):"";
   el("tipBonNumber").value=state.cart.length?bonText():"";
   el("tipNote").value="";
   el("tipStagedAmount").hidden=!staged;
@@ -3938,7 +3994,32 @@ el("tipBtn").onclick=()=>{
   el("tipDialog").showModal();
 };
 document.querySelectorAll("[data-tip]").forEach(b=>b.onclick=()=>saveManualTip(b.dataset.tip));
-el("saveCustomTip").onclick=()=>saveManualTip(el("tipCustomAmount").value);
+el("saveCustomTip").onclick=()=>saveManualTip(String(el("tipCustomAmount").value).replace(",","."));
+// 23.09.2026 (Betreiber: "Bei freiem Trinkgeld-Betrag sollte sich ein Zahlenfeld oeffnen zur
+// Eingabe ueber Ziffern"): Betrags-Ziffernblock als eigenes Fenster - Euro mit Komma, genau wie
+// beim Rueckgeld ("5" = 5,00 EUR, "2,5" = 2,50 EUR), hoechstens 4 Stellen vor und 2 nach dem Komma.
+let zahlenfeldPuffer="",zahlenfeldFertig=null;
+function zahlenfeldZeigen(){el("zahlenfeldAnzeige").textContent=zahlenfeldPuffer?`${zahlenfeldPuffer} €`:"0,00 €"}
+function openZahlenfeld(titel,startwert,fertig){
+  zahlenfeldPuffer=startwert?String(startwert).replace(".",",").replace(/,00$/,""):"";zahlenfeldFertig=fertig;
+  el("zahlenfeldTitel").textContent=titel;zahlenfeldZeigen();el("zahlenfeldDialog").showModal();
+}
+document.querySelectorAll("#zahlenfeldDialog [data-zf]").forEach(b=>b.onclick=()=>{
+  const k=b.dataset.zf,[v,n]=zahlenfeldPuffer.split(",");
+  if(k==="back")zahlenfeldPuffer=zahlenfeldPuffer.slice(0,-1);
+  else if(k===","){if(n===undefined)zahlenfeldPuffer=(v||"0")+","}
+  else if(n!==undefined){if(n.length<2)zahlenfeldPuffer+=k}
+  else if(v.replace(/^0+/,"").length<4)zahlenfeldPuffer=(v+k).replace(/^0+(?=\d)/,"");
+  zahlenfeldZeigen();
+});
+el("zahlenfeldOk").onclick=()=>{
+  const wert=Number(String(zahlenfeldPuffer||"0").replace(",","."));
+  el("zahlenfeldDialog").close();
+  if(zahlenfeldFertig)zahlenfeldFertig(wert);
+};
+el("tipCustomAmount").addEventListener("click",()=>openZahlenfeld("Trinkgeld – freier Betrag",el("tipCustomAmount").value,wert=>{
+  el("tipCustomAmount").value=wert>0?wert.toFixed(2).replace(".",","):"";
+}));
 
 
 // Der Aufrunden-Dialog ist vorbereitet, der sichtbare Button aber optional.
@@ -4043,7 +4124,7 @@ function setKeypadMode(mode){
   document.querySelectorAll("[data-keypad-mode]").forEach(button=>button.classList.toggle("active",button.dataset.keypadMode===mode));
   el("keypadModeLabel").textContent=KEYPAD_MODES[mode].label;
   el("keypadHelp").textContent=KEYPAD_MODES[mode].help;
-  document.querySelector(".keypad")?.classList.toggle("keypad-no-decimal",keypadIstCentEingabe(mode));
+  document.querySelector(".keypad")?.classList.toggle("keypad-no-decimal",["quantity","article","bon"].includes(mode));document.querySelector(".keypad")?.classList.toggle("keypad-euro",keypadIstGeldEingabe(mode));
   renderKeypadDisplay();
   // Betreiber: "bei Freier Zahlung im Ziffernblock gelandet, aber dann steht nichts im Bon,
   // kann nichts kassieren" - #keypadModeLabel/#keypadHelp (oben gesetzt) stecken in
@@ -4058,16 +4139,20 @@ function setKeypadMode(mode){
 // der getippte Text woertlich als Zahl gelesen ("5","0" ergab 50,00 EUR statt 0,50 EUR) - schon
 // zwei Tastendruecke reichten fuer versehentlich sehr hohe Betraege. Menge/Rabatt/Artikel/Bon
 // sind keine Centbetraege und bleiben bei der woertlichen Eingabe.
-function keypadIstCentEingabe(mode){return mode==="cash"||mode==="price"||mode==="freibetrag"}
+// 23.09.2026 (Betreiber: "Ziffern nehmen die Betraege nicht gut an" -> "Ziffern in Euro mit
+// Komma"): die Cent-Eingabe ("20" = 0,20 EUR, Komma wurde ignoriert) passte nicht zum Denken an
+// der Kasse ("der Kunde gibt 20"). Jetzt: Ziffern sind Euro, Komma leitet die Cent ein
+// ("20" = 20,00 EUR, "12,5" = 12,50 EUR). Gegen Fehlgriffe: hoechstens 4 Stellen vor dem Komma
+// (bis 9.999,99 EUR), 2 danach - und die getippte Zahl steht gross oben in der Zahlecke.
+function keypadIstGeldEingabe(mode){return mode==="cash"||mode==="price"||mode==="freibetrag"}
 function keypadNumber(){
-  const mode=state.keypadMode||"cash";
-  if(keypadIstCentEingabe(mode))return (Number(state.keypadBuffer||"0")||0)/100;
   return Number(String(state.keypadBuffer||"0").replace(",","."));
 }
 function renderKeypadDisplay(){
   const value=keypadNumber(),display=el("keypadDisplay");
   if(display){
-    if(state.keypadMode==="cash"||state.keypadMode==="price")display.textContent=money(Number.isFinite(value)?value:0);
+    // 23.09.2026: Euro-Eingabe - genau das Getippte zeigen (z. B. "12,5 €")
+    if(state.keypadMode==="cash"||state.keypadMode==="price")display.textContent=state.keypadBuffer?`${state.keypadBuffer} €`:money(0);
     else if(state.keypadMode==="discount")display.textContent=`${Number.isFinite(value)?value:0} %`;
     else display.textContent=state.keypadBuffer||"0";
   }
@@ -4128,14 +4213,14 @@ function handleKeypad(key){
   if(key==="back"){state.keypadBuffer=state.keypadBuffer.slice(0,-1);renderKeypadDisplay();return}
   if(key==="ok"){applyKeypadValue();return}
   if(!/^\d$|^00$|^[,.]$/.test(key))return;
-  if(keypadIstCentEingabe(state.keypadMode||"cash")){
-    if(key===","||key===".")return;// Cent-Eingabe: die letzten zwei Stellen sind immer die Cent, kein Komma noetig
-    // Betreiber: bei "Freie Zahlung" ohne sichtbare Rueckmeldung (siehe renderKeypadDisplay)
-    // wurde einmal versehentlich bis 3.002.874,12 EUR weitergetippt - 9 Stellen liessen das
-    // rechnerisch zu. Fuer einen Marktstand reichen 6 Stellen (bis 9.999,99 EUR) bei weitem
-    // und begrenzen einen Fehlgriff auf einen sofort erkennbaren, nicht mehr absurden Betrag.
-    if(state.keypadBuffer.length>=6)return;
-    state.keypadBuffer=(state.keypadBuffer+key).replace(/^0+(?=\d)/,"");
+  if(keypadIstGeldEingabe(state.keypadMode||"cash")){
+    const [vorKomma,nachKomma]=state.keypadBuffer.split(",");
+    if(key===","||key==="."){if(nachKomma===undefined)state.keypadBuffer=(vorKomma||"0")+",";renderKeypadDisplay();return}
+    for(const ziffer of key){
+      const [v,n]=state.keypadBuffer.split(",");
+      if(n!==undefined){if(n.length>=2)break;state.keypadBuffer+=ziffer}
+      else{if(v.replace(/^0+/,"").length>=4)break;state.keypadBuffer=(v+ziffer).replace(/^0+(?=\d)/,"")}
+    }
     renderKeypadDisplay();return;
   }
   const part=(key==="."||key===",")?",":key;
@@ -4277,8 +4362,37 @@ el("cardBtn").onclick=()=>setSystemHint("EC-Kartenzahlung ist noch nicht verfüg
 el("staffBtn").onclick=()=>{
   if(!state.cart.length)return keinBonMeldung();
   if(toCents(total())<0)return pfandAlsSpendeVerbuchen();
-  const gesperrt=staffBlockedCartItems();if(gesperrt.length)return showMessage("Personalverbrauch nicht möglich",money(total()),`Nicht auf Personal buchbar: ${gesperrt.join(", ")}. Bitte diese Position${gesperrt.length>1?"en":""} entfernen oder normal abrechnen.`);askConfirm("Personalverbrauch speichern",`${money(total())} als Personalverbrauch protokollieren?`,()=>completeSale("internal-personal",{type:"personal"}))
+  const gesperrt=staffBlockedCartItems();if(gesperrt.length)return showMessage("Personalverbrauch nicht möglich",money(total()),`Nicht auf Personal buchbar: ${gesperrt.join(", ")}. Bitte diese Position${gesperrt.length>1?"en":""} entfernen oder normal abrechnen.`);const betragOhnePfand=internOhnePfand(()=>total());askConfirm("Personalverbrauch speichern",`${money(betragOhnePfand)} als Personalverbrauch protokollieren? (Pfand wird nicht berechnet - das Glas ist nur geliehen.)`,()=>{internPfandEntfernen();completeSale("internal-personal",{type:"personal"})})
 };
+// 23.09.2026 (Betreiber): "Personal bucht evtl. einen Gluehwein am Stand trinken, dann wird Pfand
+// verbucht, aber es findet kein Ruecklauf statt." Bei Personal und Helfern ist das Glas nur
+// geliehen - Pfand wird deshalb gar nicht erst berechnet (sonst steht ausgegebenes Pfand in der
+// Auswertung, dem nie eine Rueckgabe gegenuebersteht). Nur wer im Artikel ausdruecklich
+// "Pfand bei Personalverbrauch" angehakt hat, behaelt das Pfand. Das weggelassene Pfand bleibt
+// als leihPfand an der Bonzeile stehen - nachvollziehbar, aber ohne Betrag.
+function internPfandBleibt(item){const p=PRODUCTS.find(x=>x.id===item.id);return !!(p&&p.staffDeposit===true)}
+function internOhnePfand(fn){const alt=state.cart.map(i=>i.deposits);state.cart.forEach(i=>{if(!internPfandBleibt(i)&&Array.isArray(i.deposits)&&i.deposits.length)i.deposits=[]});try{return fn()}finally{state.cart.forEach((i,k)=>{i.deposits=alt[k]})}}
+function internPfandEntfernen(){state.cart.forEach(i=>{if(!internPfandBleibt(i)&&Array.isArray(i.deposits)&&i.deposits.length){i.leihPfand=i.deposits;i.deposits=[]}})}
+// 23.09.2026 (Betreiber): Helfer bekommen Essen und Getraenke gratis. Erst den Warenkorb buchen,
+// dann MEHR -> HELFER -> Gruppe antippen. Eigene Buchungsart "helfer" (kein Geld in der Kasse,
+// nicht im Umsatz), eigene Zeile im X-Bericht und im Tagesabschluss, je Gruppe aufgeteilt.
+const HELFER_GRUPPEN_STANDARD=["Bauhof","Stadtmarketing","Feuerwehr","Wachpersonal","Bühnenpersonal","Künstler","Artisten"];
+function helferGruppen(){const eigene=state.master.helperGroups;return Array.isArray(eigene)&&eigene.length?eigene:HELFER_GRUPPEN_STANDARD}
+function openHelfer(){
+  if(!state.cart.length)return keinBonMeldung();
+  if(toCents(total())<0)return showMessage("Helfer nicht möglich",money(total()),"Im Bon steht eine Auszahlung (z. B. Pfandrückgabe). Bitte zuerst normal abrechnen.");
+  const gesperrt=staffBlockedCartItems();if(gesperrt.length)return showMessage("Helfer-Buchung nicht möglich",money(total()),`Nicht gratis buchbar: ${gesperrt.join(", ")}. Bitte diese Position${gesperrt.length>1?"en":""} entfernen oder normal abrechnen.`);
+  el("helferBetrag").textContent=money(internOhnePfand(()=>total()));
+  el("helferGruppen").innerHTML=helferGruppen().map(g=>`<button type="button" data-helfer-gruppe="${String(g).replace(/"/g,"&quot;")}">${g}</button>`).join("");
+  el("helferDialog").showModal();
+}
+el("helferGruppen")?.addEventListener("click",ev=>{
+  const b=ev.target.closest("button[data-helfer-gruppe]");if(!b)return;
+  el("helferDialog").close();
+  internPfandEntfernen();
+  completeSale("internal-helfer",{type:"helfer",helperGroup:b.dataset.helferGruppe});
+});
+el("helferDialogCloseX")?.addEventListener("click",()=>el("helferDialog")?.close());
 el("depositBtn").onclick=()=>{state.activeCategory="Pfand";renderCategories();renderProducts()};
 el("complaintBtn").onclick=()=>{window.KCReklamation?window.KCReklamation.oeffnen():openWithdrawal()};   /* schneller 3-Schritt-Reklamationsweg, Rückfall auf alten Dialog falls Modul fehlt */
 el("moreBtn").onclick=()=>el("moreDialog").showModal();el("menuBtn").onclick=()=>el("moreDialog").showModal();
@@ -4303,6 +4417,7 @@ document.querySelectorAll('.more-grid button[data-action]').forEach(button=>butt
   if(action==="staff")return leaveMore(()=>el("staffBtn").click());
   if(action==="tip")return leaveMore(()=>el("tipBtn").click());
   if(action==="deposit")return leaveMore(()=>el("depositBtn").click());
+  if(action==="helfer")return leaveMore(openHelfer);
   if(action==="lastbon")return leaveMore(()=>el("printBonBtn").click());
   if(action==="operator")return leaveMore(()=>el("operatorBtn").click());
   if(action==="rush")return leaveMore(()=>el("rushModeBtn").click());

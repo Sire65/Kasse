@@ -214,7 +214,9 @@
     if (!header || el('timeClockBtn')) return;
     const button = document.createElement('button');
     button.id = 'timeClockBtn'; button.type = 'button'; button.className = 'header-tool-button time-clock-button';
-    button.title = 'Kommen oder Gehen erfassen'; button.setAttribute('aria-label', button.title); button.textContent = '\u25F7';
+    button.title = 'Kommen oder Gehen erfassen'; button.setAttribute('aria-label', button.title); button.innerHTML = '<svg class="kc-stechuhr-symbol" viewBox="0 0 24 24" width="28" height="28" aria-hidden="true"><circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" stroke-width="2.4"/><path d="M12 6.5V12l3.8 2.4" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+    // 23.09.2026 (Betreiber: "Uhrsymbol in der Stechuhr vergroessern, erkennt man kaum im Button"):
+    // statt des kleinen Schriftzeichens eine klare Uhr, die den Knopf ausfuellt.
     header.insertBefore(button, el('menuBtn'));
 
     const dialog = document.createElement('dialog');

@@ -796,13 +796,17 @@
     // im Bon steht + die markierten Artikel (inkl. Pfand, wenn Pfand extra berechnet wird).
     // Steht gross im BAR-Knopf und oben im Kopf - ohne Zwischenfenster, kein Extra-Tipp.
     if (gesamtAnz) {
-      const pfandExtra = (() => { try { return state.master.depositRule === 'automatic'; } catch (e) { return true; } })();
+      /* Pfand zaehlt bei "automatisch" UND "inklusive" - nur bei "manuell" nicht (wie addConfiguredProduct) */
+      const pfandExtra = (() => { try { return state.master.depositRule !== 'manual'; } catch (e) { return true; } })();
       let betrag = (() => { try { return Number(total()) || 0; } catch (e) { return 0; } })();
       Object.entries(sammelWahl).forEach(([k, anz]) => {
         const [pid, oid] = k.split('|');
-        const p = kPROD().find((x) => x.id === pid); if (!p) return;
+        /* Kombi-Artikel stehen nicht in PRODUCTS - dieselbe Suche wie beim Uebernehmen */
+        const p = (() => { try { return productsForSale().find((x) => x.id === pid); } catch (e) { return null; } })() || kPROD().find((x) => x.id === pid); if (!p) return;
         const o = oid && p.optionGroup && kOPT()[p.optionGroup] ? kOPT()[p.optionGroup].choices.find((x) => x.id === oid) : null;
-        const pfand = pfandExtra && Array.isArray(p.depositComponents) ? p.depositComponents.reduce((s, d) => s + Number(d.price || 0), 0) : 0;
+        /* Kombis: das Pfand haengt an den Einzelteilen (componentIds) */
+        const teile = p.isPackage ? (p.componentIds || []).map((id) => kPROD().find((x) => x.id === id)).filter(Boolean) : [p];
+        const pfand = pfandExtra ? teile.reduce((s, t) => s + (Array.isArray(t.depositComponents) ? t.depositComponents.reduce((a, d) => a + Number(d.price || 0), 0) : 0), 0) : 0;
         betrag += (Number(p.price || 0) + Number(o?.price || 0) + pfand) * anz;
       });
       const betragText = geld(Math.round(betrag * 100) / 100);

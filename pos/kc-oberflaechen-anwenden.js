@@ -223,11 +223,13 @@
     const t = `${name.trim()} · ${zustand.trim()}`;
     if (b.dataset.kcText !== t) b.dataset.kcText = t;
   }
+  function keypadAufBargeld() { try { if (global.KCKeypadAufBargeld) global.KCKeypadAufBargeld(); } catch (e) { /* app.js noch nicht bereit */ } }
   function zahlenTasteBauen() {
     const k = document.createElement('button');
     k.type = 'button'; k.id = 'kcZahlenTaste'; k.className = 'kc-zahlen-taste';
     k.innerHTML = '<strong>💶 RÜCKGELD</strong><small>Zahlen-Seite öffnen</small>';
-    k.addEventListener('click', () => zahlenSeite(true));
+    /* 23.09.2026: RÜCKGELD ist immer Bargeld - nie ein haengengebliebener Sonderverkauf */
+    k.addEventListener('click', () => { keypadAufBargeld(); zahlenSeite(true); });
     return k;
   }
 
@@ -248,6 +250,8 @@
     } else {
       zahlenEbene.hidden = true;
       document.body.classList.remove('kc-zahlenseite-offen');
+      /* 23.09.2026: Sonderverkauf ohne OK verlassen -> Zahlenblock zurueck auf Bargeld */
+      keypadAufBargeld();
       verteile(seiteFinden(aktiv, 'kasse') || { bausteine: [] }, hauptRaster, aktiv);
       nachbauen();
     }
@@ -345,7 +349,8 @@
       k.type = 'button'; k.id = 'kcZahlenTasteSchwebend'; k.className = 'kc-zahlen-taste-schwebend';
       k.innerHTML = '<strong>💶 RÜCKGELD</strong>';
       k.title = 'Zahlen-Seite öffnen';
-      k.addEventListener('click', () => zahlenSeite(true));
+      /* 23.09.2026: RÜCKGELD ist immer Bargeld - nie ein haengengebliebener Sonderverkauf */
+    k.addEventListener('click', () => { keypadAufBargeld(); zahlenSeite(true); });
       document.body.appendChild(k);
     }
     k.hidden = false;
@@ -690,7 +695,7 @@
         else if (f.dataset.sammel === 'uebernehmen') { sammelUebernehmen(); sammelSeite(false); }
         /* 08.09. (Betreiber): direkt aus der Sammelbestellung kassieren bzw. abschließen */
         else if (f.dataset.sammel === 'bar') { sammelUebernehmen(); sammelSeite(false); setTimeout(() => { const b = $('#payBtn'); if (b) b.click(); }, 150); }
-        else if (f.dataset.sammel === 'rueckgeld') { sammelUebernehmen(); sammelSeite(false); setTimeout(() => zahlenSeite(true), 150); }
+        else if (f.dataset.sammel === 'rueckgeld') { sammelUebernehmen(); sammelSeite(false); setTimeout(() => { keypadAufBargeld(); zahlenSeite(true); }, 150); }
         // 10.09.2026: MEHR oeffnet/schliesst das kleine Einblendfeld mit Bild/Farbe/Text.
         else if (f.dataset.sammel === 'mehr') { sammelMehrUmschalten(f); }
       });
@@ -787,6 +792,31 @@
     // 10.09.2026 (Betreiber: "im Button 'Alles uebernehmen' die Anzahl X uebernehmen eintragen"):
     const uebernehmenBtn = $('.kc-sammel-uebernehmen', sammelEbene);
     if (uebernehmenBtn) uebernehmenBtn.textContent = gesamtAnz ? `✓ ${gesamtAnz} ÜBERNEHMEN` : '✓ ÜBERNEHMEN';
+    // 23.09.2026 (Betreiber: "ich sehe nicht, was der Kunde zahlen muss"): Zahlbetrag = was schon
+    // im Bon steht + die markierten Artikel (inkl. Pfand, wenn Pfand extra berechnet wird).
+    // Steht gross im BAR-Knopf und oben im Kopf - ohne Zwischenfenster, kein Extra-Tipp.
+    if (gesamtAnz) {
+      /* Pfand zaehlt bei "automatisch" UND "inklusive" - nur bei "manuell" nicht (wie addConfiguredProduct) */
+      const pfandExtra = (() => { try { return state.master.depositRule !== 'manual'; } catch (e) { return true; } })();
+      let betrag = (() => { try { return Number(total()) || 0; } catch (e) { return 0; } })();
+      Object.entries(sammelWahl).forEach(([k, anz]) => {
+        const [pid, oid] = k.split('|');
+        /* Kombi-Artikel stehen nicht in PRODUCTS - dieselbe Suche wie beim Uebernehmen */
+        const p = (() => { try { return productsForSale().find((x) => x.id === pid); } catch (e) { return null; } })() || kPROD().find((x) => x.id === pid); if (!p) return;
+        const o = oid && p.optionGroup && kOPT()[p.optionGroup] ? kOPT()[p.optionGroup].choices.find((x) => x.id === oid) : null;
+        /* Kombis: das Pfand haengt an den Einzelteilen (componentIds) */
+        const teile = p.isPackage ? (p.componentIds || []).map((id) => kPROD().find((x) => x.id === id)).filter(Boolean) : [p];
+        const pfand = pfandExtra ? teile.reduce((s, t) => s + (Array.isArray(t.depositComponents) ? t.depositComponents.reduce((a, d) => a + Number(d.price || 0), 0) : 0), 0) : 0;
+        betrag += (Number(p.price || 0) + Number(o?.price || 0) + pfand) * anz;
+      });
+      const betragText = geld(Math.round(betrag * 100) / 100);
+      $('.kc-sammel-stand', sammelEbene).innerHTML = `${gesamtAnz} Artikel markiert<b class="kc-sammel-summe">Zu zahlen: ${betragText}</b>`;
+      const barBtn = $('.kc-sammel-bar', sammelEbene);
+      if (barBtn) barBtn.innerHTML = `<span class="kc-sammel-bar-wort">💶 BAR</span><span class="kc-sammel-bar-betrag">${betragText}</span>`;
+    } else {
+      const barBtn = $('.kc-sammel-bar', sammelEbene);
+      if (barBtn) barBtn.textContent = '💶 BAR';
+    }
     ['.kc-sammel-uebernehmen', '.kc-sammel-bar', '.kc-sammel-rueckgeld'].forEach((sel) => { const b = $(sel, sammelEbene); if (b) b.disabled = !gesamtAnz; });
     // 10.09.2026: Bild/Farbe/Text sitzen jetzt im MEHR-Einblendfeld, nicht mehr in einer eigenen Zeile.
     $$('#kcSammelMehrPopup > button', sammelEbene).forEach((b) => b.classList.toggle('aktiv', b.dataset.sammelAnsicht === sammelAnsicht));
@@ -977,6 +1007,8 @@
     const m = st.master || {}, rc = m.receipt || {}, geld = (v) => { try { return money(v); } catch (e) { return String(v); } };
     const z = [];
     (rc.head || m.clubName || 'Köcheclub').split('\n').filter(Boolean).forEach((t) => z.push(mitte(t)));
+    /* 23.09.2026 (Betreiber): Bediener (Pseudonym) auch auf dem Bon */
+    z.push(mitte('Bediener: ' + (global.KCBelegBediener || 'Team')));
     z.push('-'.repeat(BREITE));
     (st.cart || []).forEach((x) => {
       const einzel = (Number(x.price) || 0) + (x.option && Number(x.option.price) || 0);
