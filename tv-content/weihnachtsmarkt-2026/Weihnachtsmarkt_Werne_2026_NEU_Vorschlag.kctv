@@ -4786,7 +4786,7 @@
         "presentationKind": "weihnachtsmarkt-2026",
         "renderMode": "member-showcase",
         "type": "member",
-        "title": "Christina Scharnetzki",
+        "title": "Christina Brösel",
         "text": "Gemeinsam planen, anpacken und anschließend zusammen feiern – genau das gefällt mir.",
         "price": "",
         "duration": 10,
@@ -4923,7 +4923,7 @@
           "templateVersion": "1.3.0"
         },
         "media": {
-          "name": "Christina Scharnetzki · vorläufiges Foto austauschen",
+          "name": "Christina Brösel · vorläufiges Foto austauschen",
           "type": "image/webp",
           "dataUrl": "../avatar-core/assets/chef/chef_female_neutral.webp",
           "provisional": true

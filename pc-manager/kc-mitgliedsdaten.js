@@ -24,7 +24,7 @@ window.KCMitgliedsdaten = {
   'KC-0013': {name: 'Steven Linley', strasse: 'Unnaer Straße 5', plz: '59069', ort: 'Hamm', telefon: '+49 163 8740643', funktion: 'Mitglied', status: 'Aktiv'},
   // Bei diesen fünf ist in der Verwaltung keine Anschrift hinterlegt - die Felder bleiben
   // auf dem Ausweis leer, statt etwas zu erfinden.
-  'KC-0014': {name: 'Christina Scharnetzki', funktion: 'Mitglied', status: 'Aktiv'},
+  'KC-0014': {name: 'Christina Brösel', funktion: 'Mitglied', status: 'Aktiv'},
   'KC-0015': {name: 'Karla Kazik', funktion: 'Mitglied', status: 'Aktiv'},
   'KC-0016': {name: 'Ruth Kazik', funktion: 'Mitglied', status: 'Aktiv'},
   'KC-0017': {name: 'Peter Wördemann', funktion: 'Mitglied', status: 'Aktiv'},

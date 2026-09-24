@@ -43,7 +43,7 @@
     { name: "Frank Brösel", photo: MEMBER_ASSET_BASE + "mitglied-10.jpg", mediaType: "image/jpeg", provisional: true },
     { name: "Reinhilde Eggenstein", photo: FEMALE, mediaType: "image/webp", provisional: true },
     { name: "Thomas Hess", photo: MALE, mediaType: "image/webp", provisional: true },
-    { name: "Christina Scharnetzki", photo: FEMALE, mediaType: "image/webp", provisional: true },
+    { name: "Christina Brösel", photo: FEMALE, mediaType: "image/webp", provisional: true },
     { name: "Steven Linley", photo: MALE, mediaType: "image/webp", provisional: true },
     { name: "Peter Wördemann", photo: MALE, mediaType: "image/webp", provisional: true },
     { name: "Ruth Kazik", photo: FEMALE, mediaType: "image/webp", provisional: true },

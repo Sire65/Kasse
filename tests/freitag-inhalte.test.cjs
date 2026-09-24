@@ -70,9 +70,9 @@ if (GEGENPROBE) {
 {
   const ALT = ['Katzig', 'Kazig', 'Fridbert', 'Fred Köhling', 'Nachname ergänzen', 'Name Mitglied 1',
     'Steven Linkey',
-    // Nachgereicht vom Betreiber am 03.09.2026: Sie heisst Scharnetzki, nicht Brösel.
-    'Christina Brösel',
-    // Aus den beiden Reserve-Folien sind Christina Scharnetzki und Leon Wördemann geworden.
+    // Korrigiert vom Betreiber am 24.09.2026: Sie heisst Brösel (vorher Scharnetzki).
+    'Christina Scharnetzki', 'Frau Scharnetzki',
+    // Aus den beiden Reserve-Folien sind Christina Brösel und Leon Wördemann geworden.
     'Reserve 1', 'Reserve 2'];
   const dateien = [];
   (function sammle(dir) {
@@ -91,7 +91,7 @@ if (GEGENPROBE) {
   });
 
   pruefe('Mitgliedsdaten führen 18 Personen', MITGLIEDER.length === 18, MITGLIEDER.length + ' gefunden');
-  ['Ruth Kazik', 'Karla Kazik', 'Friedbert Köhling', 'Christina Scharnetzki', 'Leon Wördemann'].forEach((n) => {
+  ['Ruth Kazik', 'Karla Kazik', 'Friedbert Köhling', 'Christina Brösel', 'Leon Wördemann'].forEach((n) => {
     pruefe('„' + n + '“ steht in den Mitgliedsdaten', MITGLIEDER.includes(n));
   });
 
