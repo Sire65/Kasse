@@ -1107,3 +1107,21 @@ body .app-header .header-status button#timeClockBtn > svg.kc-stechuhr-symbol, bo
 .kc-sammel-karte.ansicht-bild > .kc-sammel-kombi-name { position: absolute !important; left: 0; right: 0; bottom: 0; height: 18px; z-index: 1; display: block !important; padding: 0 4px; background: #f1f5f9; color: #0f172a !important; text-shadow: none !important; font-size: 11px; font-weight: 800; line-height: 18px; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 /* 24.09.2026: Betrag auch in der UEBERNEHMEN-Taste (zweizeilig wie BAR) */
 .kc-sammel-fuss > .kc-sammel-uebernehmen { display: flex; flex-direction: column; align-items: center; justify-content: center; line-height: 1.05; }
+
+/* 24.09.2026 (Betreiber: "Baue die Entnahme wieder ein unter MEHR"): Entnahme ist im MEHR-Fenster
+   wieder fuer alle sichtbar - die uebrigen Kassenfunktionen bleiben hinter Geheimweg + PIN. */
+body.kc-aufbau #moreDialog .more-grid > button[data-action="withdraw"] { display: inline-block !important; }
+#withdrawReasonButtons > button[hidden] { display: none !important; }
+#withdrawReceiptToggle { min-height: 56px; font-size: 18px !important; font-weight: 900; }
+#withdrawReceiptToggle.active { background: #dcfce7 !important; border-color: #16a34a !important; color: #14532d !important; }
+/* 24.09.2026: Entnahme-Fenster aufgeraeumt
+   - Richtige Kasse: der Grund-Kasten wurde im Fenster auf 30px zusammengedrueckt, die Tasten
+     ragten ueber "Zusatz / Notiz" -> Kasten darf nicht schrumpfen.
+   - Schulung: mit dem grossen Ziffernblock gab es zwei Betragsauswahlen, und der getippte Betrag
+     war nirgends zu sehen (Feld versteckt) -> kleine Betragsknoepfe weg, Betrag gross sichtbar. */
+body.kc-layout-neu #withdrawDialog .withdraw-card > .withdraw-reason-field, #withdrawDialog .withdraw-card > .withdraw-reason-field { flex: 0 0 auto !important; overflow: visible !important; }
+#withdrawDialog:has(#kcBetragBlock) #withdrawAmountQuick { display: none !important; }
+#withdrawDialog:has(#kcBetragBlock) #withdrawAmount[hidden] { display: block !important; width: 100%; box-sizing: border-box; height: 56px; padding: 0 14px; border: 2px solid #173765; border-radius: 10px; font-size: 30px; font-weight: 900; text-align: right; color: #0f172a; background: #f8fafc; }
+/* Entnahme passt auf 1280x800 ohne Scrollen: Zifferntasten etwas flacher, Notizfeld einzeilig */
+#withdrawDialog #kcBetragBlock .kc-betrag-tasten button, #withdrawDialog #kcBetragBlock .kc-betrag-schnell button { min-height: 0 !important; height: 44px !important; }
+#withdrawDialog #withdrawNote { height: 38px !important; min-height: 0 !important; }

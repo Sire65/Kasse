@@ -14,7 +14,7 @@
   <link rel="stylesheet" href="kc-sync-status-leds.css">
   <link rel="stylesheet" href="kc-team-praesenz.css">
   <link rel="stylesheet" href="kc-dienstplan-kasse.css">
-<link rel="stylesheet" href="kc-oberflaechen-anwenden.css?build=0.9.7">
+<link rel="stylesheet" href="kc-oberflaechen-anwenden.css?build=0.9.11">
 <link rel="stylesheet" href="kc-verkaufskurve.css?build=1.0.0">
 <link rel="stylesheet" href="kc-legacy-fallback.css?build=1.0.0">
   <script defer src="../cores/notification-core/notification-core.js"></script>
@@ -1239,13 +1239,14 @@
     <fieldset class="withdraw-reason-field">
       <legend>1. Grund auswählen</legend>
       <div id="withdrawReasonButtons" class="withdraw-reason-grid">
+        <!-- 24.09.2026 (Betreiber): Gruende fest nach Vorgabe - Einkauf Lebensmittel, Einkauf Reinigungsmittel,
+             Essen Personal, Getraenke Personal, WC-Geld, Sonstiges. Reklamation hat einen eigenen Weg
+             (Taste REKLAMATION); die Schaltflaeche bleibt nur unsichtbar fuer den alten Reklamationsablauf. -->
         <button type="button" data-withdraw-reason="Einkauf Lebensmittel">🛒 EINKAUF<br>LEBENSMITTEL</button>
         <button type="button" data-withdraw-reason="Einkauf Reinigungsmittel">🧴 EINKAUF<br>REINIGUNGSMITTEL</button>
-        <button type="button" data-withdraw-reason="Einkauf Baumarkt">🔧 EINKAUF<br>BAUMARKT</button>
         <button type="button" data-withdraw-reason="Essen Personal">🍽 ESSEN<br>PERSONAL</button>
         <button type="button" data-withdraw-reason="Getränke Personal">🥤 GETRÄNKE<br>PERSONAL</button>
-        <button type="button" data-withdraw-reason="Geld zur Hauptkasse">🏦 GELD ZUR<br>HAUPTKASSE</button>
-        <!-- Reklamation 09.09.2026: eigener Ablauf über #complaintBtn -> kc-reklamation.js -->
+        <button type="button" data-withdraw-reason="WC-Geld">🚻 WC-GELD</button>
         <button type="button" data-withdraw-reason="Sonstiges">⋯ SONSTIGES</button>
       </div>
     </fieldset>

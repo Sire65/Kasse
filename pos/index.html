@@ -15,7 +15,7 @@
   <link rel="stylesheet" href="kc-team-praesenz.css">
   <link rel="stylesheet" href="kc-dienstplan-kasse.css">
   <link rel="stylesheet" href="kc-legacy-fallback.css?build=1.0.0">
-  <link rel="stylesheet" href="kc-oberflaechen-anwenden.css?build=0.9.7">
+  <link rel="stylesheet" href="kc-oberflaechen-anwenden.css?build=0.9.11">
 <link rel="stylesheet" href="kc-verkaufskurve.css?build=1.0.0">
   <script defer src="../cores/notification-core/notification-core.js"></script>
   <script defer src="../cores/product-info-core/product-info-core.js"></script>
@@ -1237,12 +1237,16 @@
     <fieldset class="withdraw-reason-field">
       <legend>Grund auswählen</legend>
       <div id="withdrawReasonButtons" class="withdraw-reason-grid">
-        <button type="button" data-withdraw-reason="Einkauf">EINKAUF</button>
-        <button type="button" data-withdraw-reason="Essen Personal">ESSEN PERSONAL</button>
-        <button type="button" data-withdraw-reason="Getränke Personal">GETRÄNKE PERSONAL</button>
-        <button type="button" data-withdraw-reason="Geld zur Hauptkasse">HAUPTKASSE</button>
-        <button type="button" data-withdraw-reason="Reklamation">REKLAMATION</button>
-        <button type="button" data-withdraw-reason="Sonstiges">SONSTIGES</button>
+        <!-- 24.09.2026 (Betreiber): Gruende fest nach Vorgabe - Einkauf Lebensmittel, Einkauf Reinigungsmittel,
+             Essen Personal, Getraenke Personal, WC-Geld, Sonstiges. Reklamation hat einen eigenen Weg
+             (Taste REKLAMATION); die Schaltflaeche bleibt nur unsichtbar fuer den alten Reklamationsablauf. -->
+        <button type="button" data-withdraw-reason="Einkauf Lebensmittel">🛒 EINKAUF<br>LEBENSMITTEL</button>
+        <button type="button" data-withdraw-reason="Einkauf Reinigungsmittel">🧴 EINKAUF<br>REINIGUNGSMITTEL</button>
+        <button type="button" data-withdraw-reason="Essen Personal">🍽 ESSEN<br>PERSONAL</button>
+        <button type="button" data-withdraw-reason="Getränke Personal">🥤 GETRÄNKE<br>PERSONAL</button>
+        <button type="button" data-withdraw-reason="WC-Geld">🚻 WC-GELD</button>
+        <button type="button" data-withdraw-reason="Sonstiges">⋯ SONSTIGES</button>
+        <button type="button" data-withdraw-reason="Reklamation" hidden>REKLAMATION</button>
       </div>
     </fieldset>
     <section id="complaintPanel" class="complaint-panel" hidden>
