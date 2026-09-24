@@ -59,6 +59,10 @@
 
   function zifferblockAnpassen() {
     if (el('kcBetragBlock')) return;
+    // 24.09.2026: Das Entnahmefenster hat jetzt eigene Schnellbetraege und oeffnet fuer einen
+    // freien Betrag das gemeinsame Zahlenfeld. Der eingebaute Block wuerde dann doppelt
+    // erscheinen und das Fenster wieder ueberladen - er entfaellt dort.
+    if (el('withdrawAmountQuick')) return;
     const feld = el('withdrawAmount');
     if (!feld) return;
     const block = document.createElement('div');

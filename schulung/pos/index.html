@@ -6,7 +6,7 @@
   <meta name="theme-color" content="#07111f">
   <title>KC MarktKasse · Kasse</title>
   <link rel="manifest" href="manifest.webmanifest">
-  <link rel="stylesheet" href="styles.css?build=training-ui5">
+  <link rel="stylesheet" href="styles.css?build=training-ui6">
   <link rel="stylesheet" href="../../shared/kc-closing-count-ui.css?build=1.0.0">
   <link rel="stylesheet" href="pos-ui-profile-consumer.css">
   <link rel="stylesheet" href="event-program-display.css">
@@ -1230,38 +1230,45 @@
   </form>
 </dialog>
 
-<dialog id="withdrawDialog">
+<dialog id="withdrawDialog" class="kc-entnahme-kompakt">
   <form method="dialog" class="dialog-card withdraw-card">
     <button type="button" id="withdrawDialogCloseX" class="dialog-close-x" aria-label="Reklamations- und Entnahmefenster schließen" title="Schließen">×</button>
+    <!-- 24.09.2026 (Betreiber): "Entnahme zu unuebersichtlich - Tasten enger, bei freiem Betrag fest
+         ein Ziffernfenster, muss aufs Tablet passen, nicht so ueberladen." Ein Bildschirm, drei
+         Schritte: 1. Wofuer? 2. Wie viel? 3. optional Beleg/Notiz. Buchung und Protokoll bleiben
+         unveraendert (saveWithdrawal); nur die Bedienung ist neu geordnet. -->
     <h2>Bargeldentnahme</h2>
     <p id="withdrawKassenstand" class="withdraw-kassenstand"></p>
     <div class="withdraw-scroll">
     <fieldset class="withdraw-reason-field">
-      <legend>1. Grund auswählen</legend>
+      <legend>1. Wofür?</legend>
       <div id="withdrawReasonButtons" class="withdraw-reason-grid">
         <!-- 24.09.2026 (Betreiber): Gruende fest nach Vorgabe - Einkauf Lebensmittel, Einkauf Reinigungsmittel,
              Essen Personal, Getraenke Personal, WC-Geld, Sonstiges. Reklamation hat einen eigenen Weg
              (Taste REKLAMATION); die Schaltflaeche bleibt nur unsichtbar fuer den alten Reklamationsablauf. -->
-        <button type="button" data-withdraw-reason="Einkauf Lebensmittel">🛒 EINKAUF<br>LEBENSMITTEL</button>
-        <button type="button" data-withdraw-reason="Einkauf Reinigungsmittel">🧴 EINKAUF<br>REINIGUNGSMITTEL</button>
-        <button type="button" data-withdraw-reason="Essen Personal">🍽 ESSEN<br>PERSONAL</button>
-        <button type="button" data-withdraw-reason="Getränke Personal">🥤 GETRÄNKE<br>PERSONAL</button>
-        <button type="button" data-withdraw-reason="WC-Geld">🚻 WC-GELD</button>
-        <button type="button" data-withdraw-reason="Sonstiges">⋯ SONSTIGES</button>
+        <button type="button" data-withdraw-reason="Einkauf Lebensmittel">🛒 Einkauf Lebensmittel</button>
+        <button type="button" data-withdraw-reason="Einkauf Reinigungsmittel">🧴 Einkauf Reinigung</button>
+        <button type="button" data-withdraw-reason="Essen Personal">🍽 Essen Personal</button>
+        <button type="button" data-withdraw-reason="Getränke Personal">🥤 Getränke Personal</button>
+        <button type="button" data-withdraw-reason="WC-Geld">🚻 WC-Geld</button>
+        <button type="button" data-withdraw-reason="Sonstiges">⋯ Sonstiges</button>
+        <button type="button" data-withdraw-reason="Reklamation" hidden>REKLAMATION</button>
       </div>
     </fieldset>
     <fieldset class="withdraw-amount-field">
-      <legend>2. Betrag</legend>
+      <legend>2. Wie viel?</legend>
+      <!-- 0,50 € auf Wunsch des Betreibers fuer das WC-Geld. "Freier Betrag" oeffnet IMMER das
+           gemeinsame Zahlenfeld (Euro mit Komma, wie beim Trinkgeld). -->
       <div id="withdrawAmountQuick" class="withdraw-amount-grid">
+        <button type="button" data-withdraw-amount="0.5">0,50 €</button>
         <button type="button" data-withdraw-amount="5">5 €</button>
         <button type="button" data-withdraw-amount="10">10 €</button>
         <button type="button" data-withdraw-amount="20">20 €</button>
         <button type="button" data-withdraw-amount="50">50 €</button>
         <button type="button" data-withdraw-amount="100">100 €</button>
-        <button type="button" id="withdrawAmountAnders">ANDERER<br>BETRAG</button>
+        <button type="button" id="withdrawAmountAnders" class="withdraw-amount-frei">🔢 Freier Betrag</button>
       </div>
       <input id="withdrawAmount" type="number" min="0.01" step="0.01" inputmode="decimal" hidden>
-      <p id="withdrawAmountAnzeige" class="withdraw-amount-anzeige" hidden></p>
     </fieldset>
     <section id="complaintPanel" class="complaint-panel" hidden>
       <div class="complaint-head"><div><span class="info-kicker">RÜCKGABE</span><h3>Reklamationsauszahlung</h3></div><strong id="complaintArticleTotal">0,00 €</strong></div>
@@ -1295,15 +1302,18 @@
       </details>
       <p class="complaint-help">Der Artikelwert wird als Auszahlungsbetrag vorgeschlagen. Der Betrag kann bei einer Teilkulanz angepasst werden; die Abweichung wird protokolliert.</p>
     </section>
-    <label>Zusatz / Notiz<textarea id="withdrawNote" rows="2" placeholder="optional ergänzen"></textarea></label>
-    <button type="button" id="withdrawReceiptToggle" class="withdraw-receipt-toggle" aria-pressed="false">☐ BON / QUITTUNG VORHANDEN</button>
+    <div class="withdraw-extras">
+      <button type="button" id="withdrawReceiptToggle" class="withdraw-receipt-toggle" aria-pressed="false">☐ Beleg vorhanden</button>
+      <button type="button" id="withdrawNoteToggle" class="withdraw-note-toggle" aria-expanded="false">✎ Notiz</button>
+    </div>
     <div id="withdrawReceiptActions" class="withdraw-receipt-actions" hidden>
       <input id="withdrawReceiptFile" type="file" accept="image/*,application/pdf" capture="environment" hidden>
-      <button type="button" id="scanWithdrawalReceipt">📷 BON / QUITTUNG EINSCANNEN</button>
+      <button type="button" id="scanWithdrawalReceipt">📷 Beleg fotografieren</button>
       <span id="withdrawReceiptStatus">Noch kein Beleg erfasst.</span>
     </div>
+    <label id="withdrawNoteField" class="withdraw-note-field" hidden>Notiz<textarea id="withdrawNote" rows="2" placeholder="z. B. wofür genau"></textarea></label>
     </div>
-    <div class="dialog-actions"><button value="cancel">Abbrechen</button><button type="button" id="saveWithdrawal" class="primary-action">Entnahme speichern</button></div>
+    <div class="dialog-actions"><button value="cancel">Abbrechen</button><button type="button" id="saveWithdrawal" class="primary-action" disabled>Erst Grund wählen</button></div>
   </form>
 </dialog>
 
@@ -1415,19 +1425,6 @@
 
 
 
-<dialog id="withdrawKeypadDialog" class="withdraw-keypad-dialog">
-  <form method="dialog" class="dialog-card withdraw-keypad-card">
-    <h2>Anderer Betrag</h2>
-    <p id="withdrawKeypadAnzeige" class="withdraw-keypad-anzeige">0,00 €</p>
-    <div class="withdraw-keypad-tasten">
-      <button type="button" data-kp="7">7</button><button type="button" data-kp="8">8</button><button type="button" data-kp="9">9</button>
-      <button type="button" data-kp="4">4</button><button type="button" data-kp="5">5</button><button type="button" data-kp="6">6</button>
-      <button type="button" data-kp="1">1</button><button type="button" data-kp="2">2</button><button type="button" data-kp="3">3</button>
-      <button type="button" data-kp="loeschen">⌫</button><button type="button" data-kp="0">0</button><button type="button" data-kp="00">00</button>
-    </div>
-    <div class="dialog-actions"><button value="cancel">Abbrechen</button><button type="button" id="withdrawKeypadOk" class="primary-action">Übernehmen</button></div>
-  </form>
-</dialog>
 <dialog id="adminHomeDialog">
   <form method="dialog" class="dialog-card admin-home-card">
     <div class="admin-home-head">
@@ -1552,7 +1549,7 @@
     document.body.appendChild(s);
   }
   window.KCMasterDataSync.bereit.finally(() => {
-    ladeNacheinander(['images-v3.js?build=3-pfand', 'app.js?build=0.31.3.6-r35', '../shared/kc-happyhour.js?build=0.1.0', 'kc-happyhour-pos.js?build=0.1.0', 'kc-meldeweg.js?build=0.1.0', '../shared/kc-security-card.js?build=0.1.0', 'kc-security-card-pos.js?build=0.1.0', 'kc-zahl-zoom.js?build=0.1.0', 'kc-ansicht-umschalter.js?build=0.1.0', 'kc-startup-check.js?build=0.1.0', 'kc-pin-lock.js?build=0.1.1', 'kc-layout-neu.js?build=0.1.0', 'kc-erfassung-getrennt.js?build=0.1.0', 'kc-gutschein.js?build=0.1.0', 'kc-vorfuehrdaten.js?build=0.1.0', '../shared/kc-oberflaechen-format.js?build=0.1.0', 'kc-oberflaechen-pos.js?build=0.1.0', 'kc-oberflaechen-anwenden.js?build=0.9.7', 'kc-kopfzeile.js?build=0.3.0', 'kc-schulung.js?build=0.1.0', 'kc-reklamation.js?build=0.1.2']);
+    ladeNacheinander(['images-v3.js?build=3-pfand', 'app.js?build=0.31.3.6-r36', '../shared/kc-happyhour.js?build=0.1.0', 'kc-happyhour-pos.js?build=0.1.0', 'kc-meldeweg.js?build=0.1.0', '../shared/kc-security-card.js?build=0.1.0', 'kc-security-card-pos.js?build=0.1.0', 'kc-zahl-zoom.js?build=0.1.0', 'kc-ansicht-umschalter.js?build=0.1.0', 'kc-startup-check.js?build=0.1.0', 'kc-pin-lock.js?build=0.1.1', 'kc-layout-neu.js?build=0.1.0', 'kc-erfassung-getrennt.js?build=0.2.0', 'kc-gutschein.js?build=0.1.0', 'kc-vorfuehrdaten.js?build=0.1.0', '../shared/kc-oberflaechen-format.js?build=0.1.0', 'kc-oberflaechen-pos.js?build=0.1.0', 'kc-oberflaechen-anwenden.js?build=0.9.7', 'kc-kopfzeile.js?build=0.3.0', 'kc-schulung.js?build=0.1.0', 'kc-reklamation.js?build=0.1.2']);
   });
 </script>
 <script src="pos-ui-profile-consumer.js?build=0.1.0"></script>

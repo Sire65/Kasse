@@ -3555,71 +3555,75 @@ function changeComplaintQuantity(id,delta){const next=Math.max(0,Math.min(99,(co
 // Beschriftung an den tatsaechlichen Vorgang anpassen. Dasselbe Fenster dient zwei Zwecken -
 // Bargeldentnahme und Reklamation -, und bisher stand immer "Entnahme speichern" darauf.
 function beschrifteWithdrawKnopf(){
-  const knopf=el("saveWithdrawal");if(!knopf)return;
-  const reklamation=withdrawalReason==="Reklamation";
-  knopf.textContent=reklamation?"Reklamation auszahlen":"Entnahme speichern";
   const titel=el("withdrawDialog")?.querySelector("h2");
-  if(titel)titel.textContent=reklamation?"Reklamation":"Bargeldentnahme";
+  if(titel)titel.textContent=withdrawalReason==="Reklamation"?"Reklamation":"Bargeldentnahme";
+  aktualisiereWithdrawBuchenKnopf();
 }
 function resetComplaint(){complaintReason="";complaintArticles=new Map();complaintCategory="Alle";el("complaintPanel").hidden=true;el("complaintBonReference").value="";if(el("complaintArticleSearch"))el("complaintArticleSearch").value="";el("complaintArticleTotal").textContent=money(0);document.querySelectorAll("[data-complaint-reason]").forEach(button=>button.classList.remove("active"));renderComplaintArticles()}
-function resetWithdrawalReceipt(){withdrawReceiptVomBedienerGesetzt=false;withdrawalReceiptAvailable=false;withdrawalReceiptAttachment=null;el("withdrawReceiptToggle").classList.remove("active");el("withdrawReceiptToggle").setAttribute("aria-pressed","false");el("withdrawReceiptToggle").textContent="☐ BON / QUITTUNG VORHANDEN";el("withdrawReceiptActions").hidden=true;el("withdrawReceiptFile").value="";el("withdrawReceiptStatus").textContent="Noch kein Beleg erfasst."}
-// 09.09.2026 (Betreiber): Entnahme "einfach, schnell, bedienerfreundlich" - Gruende jetzt mit
-// eigenen Einkaufsarten (Lebensmittel/Reinigungsmittel/Baumarkt), Betrag ueber Schnelltasten
-// oder einen eigenen Ziffernblock statt eines kleinen Zahlenfelds, Bon-Schalter je nach Grund
-// sinnvoll vorbelegt (Einkauf: an - da liegt so gut wie immer ein Beleg vor; Personal-Konsum an
-// fremden Staenden: aus - dort gibt es meist keinen Beleg), und oben zur Orientierung der
-// ungefaehre Kassenbestand VOR der Entnahme (rein informativ, keine Eingabe).
+function resetWithdrawalReceipt(){withdrawReceiptVomBedienerGesetzt=false;withdrawReceiptZustandSetzen(false)}
+// 24.09.2026 (Betreiber): Entnahme "nicht so ueberladen, Tasten enger, bei freiem Betrag fest
+// ein Ziffernfenster, muss aufs Tablet passen". Ablauf auf EINEM Bildschirm: 1. Wofuer?
+// 2. Wie viel? (Schnellbetraege inkl. 0,50 € fuer das WC-Geld; "Freier Betrag" oeffnet immer
+// das gemeinsame Zahlenfeld wie beim Trinkgeld) 3. optional Beleg/Notiz. Die Speichertaste
+// nennt Betrag und Grund und ist erst aktiv, wenn beides gewaehlt ist. Die Buchung selbst
+// (saveWithdrawal) ist unveraendert. Seit 09.09.2026 (Schulung): Bon-Schalter je nach Grund
+// vorbelegt (Einkauf: an), oben der ungefaehre Kassenbestand VOR der Entnahme (nur Info).
+let withdrawReceiptVomBedienerGesetzt=false,withdrawalAmountValue=0;
 function openWithdrawal(){
   el("withdrawAmount").value="";withdrawalAmountValue=0;el("withdrawNote").value="";withdrawalReason="";
   document.querySelectorAll("[data-withdraw-reason]").forEach(button=>button.classList.remove("active"));
-  document.querySelectorAll("[data-withdraw-amount]").forEach(button=>button.classList.remove("active"));
-  el("withdrawAmountAnzeige").hidden=true;el("withdrawAmountAnzeige").textContent="";
+  withdrawBetragAnzeigen();withdrawNotizZeigen(false);
   resetComplaint();resetWithdrawalReceipt();
   try{el("withdrawKassenstand").textContent=`Kasse jetzt ungefähr: ${money(closingSnapshot().expectedCash)}`}catch(e){el("withdrawKassenstand").textContent=""}
-  aktualisiereWithdrawBuchenKnopf();
+  beschrifteWithdrawKnopf();
   el("withdrawDialog").showModal();
 }
+function withdrawGrundKurz(grund){return String(grund||"").replace(/^Einkauf /,"")}
 function aktualisiereWithdrawBuchenKnopf(){
+  const knopf=el("saveWithdrawal");if(!knopf)return;
+  if(withdrawalReason==="Reklamation"){knopf.disabled=false;knopf.textContent="Reklamation auszahlen";return}
   const bereit=!!withdrawalReason&&withdrawalAmountValue>0;
-  const knopf=el("saveWithdrawal");if(knopf)knopf.disabled=!bereit;
+  knopf.disabled=!bereit;
+  knopf.textContent=bereit?`${money(withdrawalAmountValue)} entnehmen · ${withdrawGrundKurz(withdrawalReason)}`:(withdrawalReason?"Betrag wählen":"Erst Grund wählen");
 }
 // Grund -> sinnvolle Vorbelegung des Bon-Schalters (nur wenn der Bediener ihn nicht schon
 // selbst angefasst hat, sonst wuerde ein Tipp auf den Grund die eigene Wahl ueberschreiben).
-let withdrawReceiptVomBedienerGesetzt=false,withdrawalAmountValue=0;
 function withdrawBonVorschlag(grund){
   return /^Einkauf/.test(grund);
 }
 function bargeldentnahmeGrundSetzen(button){
-  document.querySelectorAll("[data-withdraw-reason]").forEach(b=>b.classList.remove("active"));
-  button.classList.add("active");withdrawalReason=button.dataset.withdrawReason;
-  if(!withdrawReceiptVomBedienerGesetzt){
-    withdrawReceiptZustandSetzen(withdrawBonVorschlag(withdrawalReason));
-  }
+  document.querySelectorAll("[data-withdraw-reason]").forEach(b=>b.classList.toggle("active",b===button));
+  withdrawalReason=button.dataset.withdrawReason;
+  if(!withdrawReceiptVomBedienerGesetzt)withdrawReceiptZustandSetzen(withdrawBonVorschlag(withdrawalReason));
+  // Bei "Sonstiges" gleich das Notizfeld zeigen - dort weiss man sonst spaeter nicht, wofuer.
+  if(withdrawalReason==="Sonstiges")withdrawNotizZeigen(true);
   aktualisiereWithdrawBuchenKnopf();
+}
+// Gewaehlten Betrag markieren. Ein freier Betrag steht direkt auf seiner Taste - keine
+// zusaetzliche Anzeigezeile.
+function withdrawBetragAnzeigen(){
+  const schnell=[...document.querySelectorAll("[data-withdraw-amount]")];
+  const treffer=withdrawalAmountValue>0?schnell.find(b=>toCents(Number(b.dataset.withdrawAmount))===toCents(withdrawalAmountValue)):null;
+  schnell.forEach(b=>b.classList.toggle("active",b===treffer));
+  const frei=el("withdrawAmountAnders"),freiAktiv=withdrawalAmountValue>0&&!treffer;
+  frei.classList.toggle("active",freiAktiv);
+  frei.textContent=freiAktiv?`🔢 ${money(withdrawalAmountValue)}`:"🔢 Freier Betrag";
 }
 function bargeldentnahmeBetragSetzen(cent){
-  withdrawalAmountValue=+(cent/100).toFixed(2);el("withdrawAmount").value=withdrawalAmountValue;
-  document.querySelectorAll("[data-withdraw-amount]").forEach(b=>b.classList.toggle("active",Number(b.dataset.withdrawAmount)===withdrawalAmountValue));
-  el("withdrawAmountAnzeige").hidden=true;el("withdrawAmountAnzeige").textContent="";
-  aktualisiereWithdrawBuchenKnopf();
+  withdrawalAmountValue=+(cent/100).toFixed(2);el("withdrawAmount").value=withdrawalAmountValue>0?withdrawalAmountValue:"";
+  withdrawBetragAnzeigen();aktualisiereWithdrawBuchenKnopf();
 }
 document.querySelectorAll("[data-withdraw-amount]").forEach(b=>b.onclick=()=>bargeldentnahmeBetragSetzen(Math.round(Number(b.dataset.withdrawAmount)*100)));
-let withdrawKeypadPuffer="";
-function withdrawKeypadZeichnen(){el("withdrawKeypadAnzeige").textContent=money((Number(withdrawKeypadPuffer||"0"))/100)}
-el("withdrawAmountAnders").onclick=()=>{withdrawKeypadPuffer="";withdrawKeypadZeichnen();el("withdrawKeypadDialog").showModal()};
-document.querySelectorAll("#withdrawKeypadDialog [data-kp]").forEach(b=>b.onclick=()=>{
-  const k=b.dataset.kp;
-  if(k==="loeschen")withdrawKeypadPuffer=withdrawKeypadPuffer.slice(0,-1);
-  else if(withdrawKeypadPuffer.length<7)withdrawKeypadPuffer+=k;
-  withdrawKeypadZeichnen();
+// Startet immer leer: wer "Freier Betrag" drueckt, will einen neuen Betrag tippen.
+el("withdrawAmountAnders").onclick=()=>openZahlenfeld("Entnahme – freier Betrag","",wert=>{
+  if(wert>0)bargeldentnahmeBetragSetzen(Math.round(wert*100));
 });
-el("withdrawKeypadOk").onclick=()=>{
-  const cent=Number(withdrawKeypadPuffer||"0");
-  el("withdrawKeypadDialog").close();
-  if(cent<=0)return;
-  bargeldentnahmeBetragSetzen(cent);
-  el("withdrawAmountAnzeige").hidden=false;el("withdrawAmountAnzeige").textContent=`Eingegeben: ${money(cent/100)}`;
-};
+function withdrawNotizZeigen(an,fokus){
+  el("withdrawNoteField").hidden=!an;
+  el("withdrawNoteToggle").classList.toggle("active",an);el("withdrawNoteToggle").setAttribute("aria-expanded",String(an));
+  if(an&&fokus)setTimeout(()=>el("withdrawNote").focus(),30);
+}
+el("withdrawNoteToggle").onclick=()=>withdrawNotizZeigen(el("withdrawNoteField").hidden,true);
 
 document.querySelectorAll("[data-withdraw-reason]").forEach(button=>button.onclick=()=>{bargeldentnahmeGrundSetzen(button);beschrifteWithdrawKnopf()});   /* 09.09.2026: Reklamation laeuft nicht mehr hierueber */
 document.querySelectorAll("[data-complaint-reason]").forEach(button=>button.onclick=()=>{complaintReason=complaintReason===button.dataset.complaintReason?"":button.dataset.complaintReason;document.querySelectorAll("[data-complaint-reason]").forEach(item=>item.classList.toggle("active",item.dataset.complaintReason===complaintReason))});
@@ -3636,7 +3640,7 @@ el("complaintClearSelection").onclick=()=>{
 function withdrawReceiptZustandSetzen(an){
   withdrawalReceiptAvailable=an;
   el("withdrawReceiptToggle").classList.toggle("active",an);el("withdrawReceiptToggle").setAttribute("aria-pressed",String(an));
-  el("withdrawReceiptToggle").textContent=an?"☑ BON / QUITTUNG VORHANDEN":"☐ BON / QUITTUNG VORHANDEN";el("withdrawReceiptActions").hidden=!an;
+  el("withdrawReceiptToggle").textContent=an?"☑ Beleg vorhanden":"☐ Beleg vorhanden";el("withdrawReceiptActions").hidden=!an;
   if(!an){withdrawalReceiptAttachment=null;el("withdrawReceiptFile").value="";el("withdrawReceiptStatus").textContent="Noch kein Beleg erfasst."}
 }
 el("withdrawReceiptToggle").onclick=()=>{withdrawReceiptVomBedienerGesetzt=true;withdrawReceiptZustandSetzen(!withdrawalReceiptAvailable)};
@@ -3773,7 +3777,7 @@ el("saveWithdrawal").onclick=async()=>{
     setSystemHint(err?.message||"Entnahme konnte nicht gespeichert werden","error");
   }finally{
     saveButton.disabled=false;
-    saveButton.textContent="ENTNAHME SPEICHERN";
+    aktualisiereWithdrawBuchenKnopf();
   }
 };
 
