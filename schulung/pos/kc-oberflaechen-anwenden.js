@@ -780,12 +780,12 @@
            Bilder ALLER enthaltenen Artikel nebeneinander mit "+" dazwischen, darunter hell die Namen. */
         const teile = p.isPackage ? (p.componentIds || []).map((id) => kPROD().find((x) => x.id === id)).filter(Boolean) : [];
         const bild = sammelAnsicht === 'bild' && teile.length > 1
-          ? `<span class="kc-sammel-kombi">${teile.map((t) => `<img src="${t.image}" alt="">`).join('<b class="kc-sammel-kombi-plus">+</b>')}</span><span class="kc-sammel-kombi-name">${teile.map((t) => t.name).join(' + ')}</span>`
+          ? `<span class="kc-sammel-kombi">${teile.map((t) => `<img src="${t.image}" alt="">`).join('<b class="kc-sammel-kombi-plus">+</b>')}</span><span class="kc-sammel-kombi-name">${p.name}</span>`
           : (sammelAnsicht === 'bild' && p.image ? `<img src="${p.image}" alt="">` : '');
         const name = o && !alsHauptartikel ? (o.label || o.name) : p.name;
         const preis = Number(p.price || 0) + Number(o?.price || 0);
         const pfand = Array.isArray(p.depositComponents) ? p.depositComponents.reduce((sum, d) => sum + Number(d.price || 0), 0) : 0;
-        return `<div role="button" tabindex="0" data-sammel-key="${k}" class="kc-sammel-karte ansicht-${sammelAnsicht}${n ? ' gewaehlt' : ''}${o && !alsHauptartikel ? ' variante' : ''}" style="--tile-color:${farbe};${textfarbe ? `--tile-text:${textfarbe};` : ''}">${bild}<span class="kc-sammel-name">${name}</span><span class="kc-sammel-preis">${geld(preis)}</span>${pfand > 0 ? `<span class="kc-sammel-pfand">+ ${geld(pfand)} Pfand</span>` : ''}${n ? `<b class="kc-sammel-anzahl">${n}×</b><button type="button" class="kc-sammel-minus" data-sammel-minus="${k}" aria-label="Einen weniger">−</button>` : ''}</div>`;
+        return `<div role="button" tabindex="0" data-sammel-key="${k}" class="kc-sammel-karte ansicht-${sammelAnsicht}${p.category === 'Getränke' && !p.isPackage && !/^schuss/.test(p.id) ? ' kat-getraenk' : ''}${n ? ' gewaehlt' : ''}${o && !alsHauptartikel ? ' variante' : ''}" style="--tile-color:${farbe};${textfarbe ? `--tile-text:${textfarbe};` : ''}">${bild}<span class="kc-sammel-name">${name}</span><span class="kc-sammel-preis">${geld(preis)}</span>${pfand > 0 ? `<span class="kc-sammel-pfand">+ ${geld(pfand)} Pfand</span>` : ''}${n ? `<b class="kc-sammel-anzahl">${n}×</b><button type="button" class="kc-sammel-minus" data-sammel-minus="${k}" aria-label="Einen weniger">−</button>` : ''}</div>`;
       };
       const karten = artikel.map((p) => {
         const opt = p.optionGroup && kOPT()[p.optionGroup];

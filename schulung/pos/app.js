@@ -265,6 +265,25 @@ const DEFAULT_PACKAGES=[
  {id:"PKG-GK-EI",name:"Grünkohl + Eierlikörpunsch",componentIds:["gruenkohl","eier"],price:12.00,category:"Kombi",active:true,autoManaged:false,source:"manual",note:"Startpackage"}
 ];
 let PACKAGES=JSON.parse(localStorage.getItem(PACKAGE_STORAGE_KEY)||"null")||DEFAULT_PACKAGES;
+// 24.09.2026 (Betreiber): zwei weitere Kombis mit Gruenkohl-Wurst. Jedes Geraet bekommt sie EINMAL
+// ergaenzt - auch wenn es schon eine gespeicherte Kombi-Liste hat. Preis wie bei den bestehenden
+// Kombis = Summe der Einzelpreise (Pfand kommt ueber die Einzelteile extra dazu). Wer eine davon
+// spaeter in der Verwaltung loescht, bekommt sie nicht wieder aufgedraengt (Marke unten).
+{const MARKE="kc_kombi_gkm_ergaenzt_v1";
+ if(!localStorage.getItem(MARKE)){
+  const NEUE_KOMBIS=[
+   {id:"PKG-GKM-GR",name:"Grünkohl-Wurst + Glühwein rot",componentIds:["gruenkohlmett","grot"]},
+   {id:"PKG-GKM-EI",name:"Grünkohl-Wurst + Eierlikörpunsch",componentIds:["gruenkohlmett","eier"]}
+  ];
+  const summe=ids=>ids.reduce((s,id)=>s+Number((PRODUCTS.find(p=>p.id===id)||{}).price||0),0);
+  let neu=0;
+  NEUE_KOMBIS.forEach(k=>{
+   if(PACKAGES.some(p=>p.id===k.id)||!k.componentIds.every(id=>PRODUCTS.some(p=>p.id===id)))return;
+   PACKAGES.push({...k,price:+summe(k.componentIds).toFixed(2),category:"Kombi",active:true,autoManaged:false,source:"manual",note:"Kombi 24.09.2026"});neu++;
+  });
+  if(neu)localStorage.setItem(PACKAGE_STORAGE_KEY,JSON.stringify(PACKAGES));
+  localStorage.setItem(MARKE,"1");
+ }}
 let PACKAGE_SUGGESTIONS=[];
 // Die Warengruppe hiess "Packages". Am Stand sagt niemand "Package" - es sind Kombinationen
 // aus Essen und Getraenk. Der Name steht auf dem Warengruppenknopf, im Bon, in der

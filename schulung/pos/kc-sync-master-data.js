@@ -23,7 +23,10 @@
       if (!daten.vorhanden) return; // Manager hat noch nie Stammdaten gesendet - bisheriger Stand bleibt
       if (Array.isArray(daten.groups) && daten.groups.length) localStorage.setItem('kc_groups_v050', JSON.stringify(daten.groups));
       if (Array.isArray(daten.articles) && daten.articles.length) localStorage.setItem('kc_products_v050', JSON.stringify(daten.articles));
-      if (Array.isArray(daten.packages)) localStorage.setItem('kc_packages_v100', JSON.stringify(daten.packages));
+      // 24.09.2026: ECHTER FUND - der PC-Manager sendet beim Stammdaten-Abgleich packages: [] mit;
+      // das loeschte auf jeder Kasse ALLE Kombis. Wie bei Warengruppen/Artikeln nur eine gefuellte
+      // Liste uebernehmen.
+      if (Array.isArray(daten.packages) && daten.packages.length) localStorage.setItem('kc_packages_v100', JSON.stringify(daten.packages));
       if (Array.isArray(daten.accounts) && daten.accounts.length) {
         const konten = JSON.stringify(daten.accounts);
         // kc_account_master_v029 ist der von der Kontofunktion tatsächlich gelesene Schlüssel.

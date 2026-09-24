@@ -1133,3 +1133,10 @@ body.kc-layout-neu #withdrawDialog .withdraw-card > .withdraw-reason-field, #wit
 /* Entnahme passt auf 1280x800 ohne Scrollen: Zifferntasten etwas flacher, Notizfeld einzeilig */
 #withdrawDialog #kcBetragBlock .kc-betrag-tasten button, #withdrawDialog #kcBetragBlock .kc-betrag-schnell button { min-height: 0 !important; height: 44px !important; }
 #withdrawDialog #withdrawNote { height: 38px !important; min-height: 0 !important; }
+/* 24.09.2026: Kombi-Namen duerfen zweizeilig sein (laengere Kombis wie "Gruenkohl-Wurst + Eierlikoerpunsch") */
+.kc-sammel-karte.ansicht-bild > .kc-sammel-kombi { bottom: 28px !important; }
+.kc-sammel-karte.ansicht-bild > .kc-sammel-kombi-name { height: 28px !important; line-height: 13px !important; padding-top: 1px !important; white-space: normal !important; display: -webkit-box !important; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+/* 24.09.2026 (Betreiber: "nur das obere Drittel zeigen, z. B. bei Feuerzangenbowle, sonst sieht man den
+   Unterschied zu Gluehwein nicht"): Getraenkebilder in der Sammelbestellung zeigen den oberen Teil des
+   Glases (Zuckerhut, Sahne, Fruechte am Rand) statt der Glasmitte, die bei allen Punschen gleich aussieht. */
+.kc-sammel-karte.ansicht-bild.kat-getraenk > img { object-fit: cover !important; object-position: 50% 0% !important; transform: scale(1.4); transform-origin: 78% 0%; } /* Ausschnitt leicht nach rechts: links oben steckt im Originalbild ein "i"-Zeichen */

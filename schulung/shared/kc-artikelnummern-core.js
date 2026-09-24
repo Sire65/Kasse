@@ -70,6 +70,8 @@
     // ---- 05 Kombi (Essen + Getraenk zusammen) ----
     'PKG-GK-GR':          '05001',
     'PKG-GK-EI':          '05002',
+    'PKG-GKM-GR':         '05003',
+    'PKG-GKM-EI':         '05004',
     // ---- 09 Happy Hour ----
     'hh-grot':            '09001',
     'hh-gweiss':          '09002'

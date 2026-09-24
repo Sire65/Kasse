@@ -17,9 +17,16 @@
   let ausverkauftIds = new Set();
   try { ausverkauftIds = new Set(JSON.parse(localStorage.getItem(SPEICHER_SCHLUESSEL) || '[]')); } catch (e) { /* leer starten */ }
 
+  // 24.09.2026 (Betreiber: "Bei Sperre Gluehwein muss noch Feuerzangenbowle hin, da die auch aus
+  // Gluehwein besteht"): Artikel, die aus einem anderen Artikel gemacht werden. Ist die Grundlage
+  // ausverkauft, ist der Artikel automatisch mit gesperrt - und wieder frei, wenn die Grundlage
+  // wieder verfuegbar ist. Kombis laufen weiter ueber ihre componentIds (unten).
+  const BESTEHT_AUS = { feuer: ['grot'] };
+
   function istAusverkauft(p) {
     if (!p) return false;
     if (ausverkauftIds.has(p.id)) return true;
+    if ((BESTEHT_AUS[p.id] || []).some((id) => ausverkauftIds.has(id))) return true;
     // Pakete: ausverkauft, wenn IRGENDEINE Zutat ausverkauft ist - man kann das Paket sonst
     // nicht mehr vollständig zusammenstellen.
     if (Array.isArray(p.componentIds)) return p.componentIds.some((id) => ausverkauftIds.has(id));
