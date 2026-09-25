@@ -20,7 +20,7 @@ WICHTIG:
 - Das Startfenster während des Betriebs nicht schließen.
 - Beenden mit Strg+C oder durch Schließen des Fensters.
 
-Geprüfter GitHub-Ausgangspunkt vor dieser Startreparatur:
+Diese Startreparatur wird zusätzlich als Windows-Komplettpaket mit portablem Node gebaut.\n\nGeprüfter GitHub-Ausgangspunkt vor dieser Startreparatur:
 main / 5ff2b788abb291d6ec7235afa8a149ea5153fe47
 Transfer-Regression: SUCCESS
 Tagesabschluss-TÜV: SUCCESS
