@@ -1,3 +1,4 @@
+// KC Windows-Komplettpaket Build-Marke 2026-09-25
 const global=window;
 
 const DENOMS=[200,100,50,20,10,5,2,1,.5,.2,.1,.05,.02,.01];
