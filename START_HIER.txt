@@ -1,26 +1,34 @@
-KC MARKTKASSE – STARTANLEITUNG (Stand 25.09.2026)
+KC MARKTKASSE – START HIER
+Stand: 25.09.2026
 
+NORMALER START
 1. ZIP vollständig entpacken.
-2. Im Hauptordner KC_Manager_Start.cmd doppelklicken.
-3. Das schwarze Startfenster geöffnet lassen.
-4. Der PC-Manager öffnet sich automatisch im Standardbrowser.
+2. KC_Manager_Start.cmd doppelklicken.
+3. Beim allerersten Start Internetverbindung zulassen.
+4. Das schwarze Startfenster während des Betriebs geöffnet lassen.
+5. Der PC-Manager öffnet sich automatisch im Standardbrowser.
 
-Der Start umfasst gleichzeitig:
-- lokalen Manager-/Kassen-Dienst (HTTPS 8543)
-- lokalen Webserver (ab Port 8090; bei Belegung wird der nächste freie Port gewählt)
-- PC-Manager im Browser
+ERSTER START
+Falls die portable Laufzeit noch nicht im Ordner liegt, startet automatisch KC_Einrichtung.ps1.
+Die Einrichtung:
+- lädt Node.js 22.22.3 als portable Windows-Laufzeit,
+- prüft die offizielle SHA-256-Prüfsumme von nodejs.org,
+- installiert die benötigten Module ws, bonjour-service und selfsigned,
+- speichert alles innerhalb dieses KC-Ordners.
 
-Im Startfenster werden zusätzlich die Adressen für Kasse und Money Butler angezeigt.
-Für Tablets im selben WLAN die dort angezeigte WLAN-Adresse verwenden.
+Nach erfolgreichem ersten Start kann diese Installation im selben entpackten Ordner weiterverwendet werden. Für den lokalen Start ist dann keine erneute Installation erforderlich.
 
-WICHTIG:
-- Die Komplettversion enthält eine portable Node.js-Laufzeit im Ordner runtime.
-- Die benötigten Node-Module sind bereits enthalten.
-- Normalerweise ist weder Node-Installation noch npm install erforderlich.
-- Das Startfenster während des Betriebs nicht schließen.
-- Beenden mit Strg+C oder durch Schließen des Fensters.
+GESTARTET WERDEN
+- Manager-/Kassen-Dienst auf HTTPS-Port 8543,
+- lokaler Webserver ab Port 8090,
+- PC-Manager im Browser.
 
-Diese Startreparatur wird zusätzlich als Windows-Komplettpaket mit portablem Node gebaut.\n\nGeprüfter GitHub-Ausgangspunkt vor dieser Startreparatur:
-main / 5ff2b788abb291d6ec7235afa8a149ea5153fe47
-Transfer-Regression: SUCCESS
-Tagesabschluss-TÜV: SUCCESS
+Im Startfenster werden die aktuellen Adressen für PC-Manager, Kasse und Money Butler angezeigt. Für Tablets im gleichen WLAN die dort angezeigte WLAN-IP verwenden.
+
+WICHTIG
+- Nicht direkt pc-manager\index.html per Doppelklick öffnen.
+- Nicht das schwarze Startfenster schließen, solange PC-Manager/Kassen arbeiten.
+- Bei belegtem Port 8090 wird automatisch der nächste freie Port verwendet.
+- Browserdateien werden mit No-Cache ausgeliefert, damit keine alte JS-Version hängen bleibt.
+
+Beenden: Strg+C im schwarzen Startfenster.
