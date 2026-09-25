@@ -1,3 +1,4 @@
+/* PRODUKTIVER SOURCE-OF-TRUTH: money-butler/ – Auth- und Rollenlogik nicht aus Schulungs-/Suite-Kopien zurückkopieren. */
 (function(global){
   'use strict';
 
