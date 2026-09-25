@@ -169,9 +169,8 @@ function settingsImagePath(item,type){
   return "";
 }
 async function cashMeasureCloudClient(){
-  const token=window.KCMoneyButlerCommunicator?.tokenLesen?.()||"";
-  if(!token||typeof KCCommunicationClient!=="function")return null;
-  return new KCCommunicationClient({sourceProgram:"kc-money-butler",getAccessToken:async()=>token,defaultTestOnly:false});
+  if(typeof KCCommunicationClient!=="function"||!window.KCMoneyButlerAuth?.getAccessToken)return null;
+  return new KCCommunicationClient({sourceProgram:"kc-money-butler",getAccessToken:()=>window.KCMoneyButlerAuth.getAccessToken(),defaultTestOnly:false});
 }
 async function pullCashMeasureSettings(){
   try{
@@ -184,7 +183,7 @@ async function pullCashMeasureSettings(){
 }
 async function pushCashMeasureSettings(settingsToSave){
   const client=await cashMeasureCloudClient();
-  if(!client)throw new Error("Kein KC-Communicator-Zugriffstoken gespeichert.");
+  if(!client)throw new Error("Keine aktive Money-Butler-Anmeldung.");
   const data=await client._request("kc-finance-bridge",{action:"cash_measure_settings_upsert",sourceProgram:"kc-money-butler",settings:settingsToSave});
   return data;
 }
@@ -404,10 +403,6 @@ function openHandoverStart(method){
       :"Optional: Der Transfer enthält dann die Anforderung, den Eingang des Geldes zu bestätigen.";
   const auth=el("handoverCommunicatorAuth");
   auth.hidden=method!=="communicator";
-  if(method==="communicator"){
-    const token=window.KCMoneyButlerCommunicator?.tokenLesen?.()||"";
-    el("handoverCommToken").value=token;
-  }
   el("handoverStartDialog").showModal();
 }
 document.querySelectorAll("[data-handover-method]").forEach(button=>button.addEventListener("click",()=>openHandoverStart(button.dataset.handoverMethod)));
@@ -439,10 +434,8 @@ el("handoverStartButton")?.addEventListener("click",async()=>{
       return;
     }
     if(selectedHandoverMethod==="communicator"){
-      const token=String(el("handoverCommToken").value||"").trim();
-      if(!token)throw new Error("Bitte den KC-Communicator Zugriffstoken eintragen.");
-      el("commToken").value=token;
-      localStorage.setItem("kc_money_butler_communication_token_v1",token);
+      const token=await window.KCMoneyButlerAuth?.getAccessToken?.();
+      if(!token)throw new Error("Bitte zuerst im Money Butler anmelden.");
       const result=await window.KCMoneyButlerCommunicator?.senden?.();
       if(!result)throw new Error(el("commSendStatus")?.textContent||"KC Communicator hat die Übergabe nicht bestätigt.");
       status.textContent=wantConfirmation
@@ -661,4 +654,4 @@ window.addEventListener("DOMContentLoaded",()=>{let tab=1;document.querySelector
     ?.addEventListener('click',()=>setTimeout(zeichneStatistik,120));
 })();
 
-setTimeout(()=>pullCashMeasureSettings(),1800);
+window.KCMoneyButlerAuth?.ready?.then(access=>{if(access)setTimeout(()=>pullCashMeasureSettings(),250)});
