@@ -8,7 +8,27 @@
 <link rel="stylesheet" href="../shared/kc-bargeld-statistik.css">
 <link rel="stylesheet" href="../shared/kc-geldkassette.css">
 </head>
-<body>
+<body class="mb-auth-pending">
+<div id="mbAuthGate" class="mb-auth-gate" hidden>
+  <form id="mbAuthForm" class="mb-auth-card">
+    <div class="mb-auth-logo">KC</div>
+    <h2>KC Money Butler</h2>
+    <p id="mbAuthMessage">Bitte mit dem persönlichen KC-Zugang anmelden.</p>
+    <label>E-Mail
+      <input id="mbAuthEmail" type="email" autocomplete="username" required>
+    </label>
+    <label>Passwort
+      <input id="mbAuthPassword" type="password" autocomplete="current-password" required>
+    </label>
+    <label class="mb-auth-remember">
+      <input id="mbAuthRemember" type="checkbox" checked>
+      <span>Auf diesem Gerät angemeldet bleiben</span>
+    </label>
+    <button id="mbAuthSubmit" type="submit" class="primary">Anmelden</button>
+    <button id="mbAuthRetry" type="button">Zugang erneut prüfen</button>
+    <small>Freigegeben sind Admin, Kassenwart und aktivierte Vertretung.</small>
+  </form>
+</div>
 <div class="app">
   <header>
     <div class="logo">KC</div>
@@ -16,7 +36,7 @@
       <h1>KC Money Butler</h1>
       <p>Wechselgeld vorbereiten – einfach und sicher</p>
     </div>
-    <div class="header-tools"><span>V0.25.0</span><button type="button" id="settingsBtn" class="settings-gear" title="Voreinstellungen und Testcenter" aria-label="Voreinstellungen öffnen">⚙</button></div>
+    <div class="header-tools"><span>V0.26.0</span><span id="mbAuthUserStatus" class="mb-auth-user-status">Nicht angemeldet</span><button type="button" id="mbAuthLogout" class="mb-auth-logout" hidden>Abmelden</button><button type="button" id="settingsBtn" class="settings-gear" title="Voreinstellungen und Testcenter" aria-label="Voreinstellungen öffnen">⚙</button></div>
   </header>
 
   <main>
@@ -158,10 +178,7 @@
         <button id="save" hidden>Datei speichern</button>
         <button id="commSend" hidden>Über KC Communicator senden</button>
         <div class="communicator-send-box" id="communicatorSettings" hidden>
-          <label>KC-Communicator Zugriffstoken
-            <input id="commToken" type="password" autocomplete="off" placeholder="Zugriffstoken des Kassenwarts">
-          </label>
-          <button id="commTokenSave" type="button">Zugang auf diesem PC speichern</button>
+          <p class="hint"><strong>KC-Anmeldung aktiv.</strong> Für den Versand wird automatisch die persönliche Money-Butler-Sitzung verwendet.</p>
           <p id="commSendStatus" class="hint">Der PC-Manager ist die zentrale Annahmestelle und gibt die Übergabe anschließend an die Kassen weiter.</p>
         </div>
         <button id="protokoll" hidden>Übergabeprotokoll</button>
@@ -184,9 +201,7 @@
         </label>
         <p id="handoverConfirmationHint" class="hint"></p>
         <div id="handoverCommunicatorAuth" hidden>
-          <label>KC-Communicator Zugriffstoken
-            <input id="handoverCommToken" type="password" autocomplete="off" placeholder="Zugriffstoken des Kassenwarts">
-          </label>
+          <p class="hint">Es wird automatisch der aktuell angemeldete KC-Zugang verwendet.</p>
         </div>
         <div class="dialog-actions">
           <button type="button" id="handoverStartCancel">Abbrechen</button>
@@ -275,6 +290,7 @@
 <script src="../shared/kc-cash-measure-settings.js?build=1.0.0"></script>
 <script src="../shared/kc-uebergabeprotokoll.js"></script>
 <script src="../pc-manager/kc-communication-client.js"></script>
+<script src="kc-auth.js?build=0.26.0"></script>
 <script src="app.js"></script>
 <script src="kc-communicator-bridge.js"></script>
 </body>
