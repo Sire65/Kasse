@@ -3,9 +3,9 @@ setlocal EnableExtensions
 title KC MarktKasse - PC Manager
 cd /d "%~dp0"
 
-set "KC_ROOT=%~dp0"
-set "KC_BACKEND=%KC_ROOT%markt-kasse-suite\backend-source"
-set "KC_NODE=%KC_ROOT%runtime\node.exe"
+for %%I in ("%~dp0.") do set "KC_ROOT=%%~fI"
+set "KC_BACKEND=%KC_ROOT%\markt-kasse-suite\backend-source"
+set "KC_NODE=%KC_ROOT%\runtime\node.exe"
 
 if not exist "%KC_BACKEND%\run-manager-service.js" (
   echo.
@@ -29,7 +29,7 @@ echo Die KC-Laufzeit wird beim ersten Start einmalig eingerichtet.
 echo Dafuer wird jetzt eine Internetverbindung benoetigt.
 echo Danach bleibt alles im entpackten KC-Ordner gespeichert.
 echo.
-powershell.exe -NoProfile -ExecutionPolicy Bypass -File "%KC_ROOT%KC_Einrichtung.ps1" -Root "%KC_ROOT%"
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File "%KC_ROOT%\KC_Einrichtung.ps1"
 if errorlevel 1 (
   echo.
   echo Die Einrichtung war nicht erfolgreich.
