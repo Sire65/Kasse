@@ -20,23 +20,33 @@ const MIME_TYPES = {
   '.ico': 'image/x-icon', '.mp3': 'audio/mpeg', '.wav': 'audio/wav', '.map': 'application/json',
 };
 
+function liegtUnterRoot(datei) {
+  const rel = path.relative(root, datei);
+  return rel === '' || (!rel.startsWith('..' + path.sep) && rel !== '..' && !path.isAbsolute(rel));
+}
+
 const server = http.createServer((req, res) => {
   try {
     const urlPath = decodeURIComponent(req.url.split('?')[0]);
     const requestedPath = path.normalize(path.join(root, urlPath));
-    if (!requestedPath.startsWith(root)) { res.writeHead(403); res.end('Verboten'); return; }
+    if (!liegtUnterRoot(requestedPath)) { res.writeHead(403); res.end('Verboten'); return; }
 
     let filePath = requestedPath;
     if (fs.existsSync(filePath) && fs.statSync(filePath).isDirectory()) {
       filePath = path.join(filePath, 'index.html');
     }
-    if (!fs.existsSync(filePath)) { res.writeHead(404); res.end('Nicht gefunden: ' + urlPath); return; }
+    if (!fs.existsSync(filePath)) { res.writeHead(404, { 'Cache-Control': 'no-store' }); res.end('Nicht gefunden: ' + urlPath); return; }
 
     const ext = path.extname(filePath).toLowerCase();
-    res.writeHead(200, { 'Content-Type': MIME_TYPES[ext] || 'application/octet-stream' });
+    res.writeHead(200, {
+      'Content-Type': MIME_TYPES[ext] || 'application/octet-stream',
+      'Cache-Control': 'no-store, no-cache, must-revalidate, max-age=0',
+      'Pragma': 'no-cache',
+      'Expires': '0'
+    });
     fs.createReadStream(filePath).pipe(res);
   } catch (err) {
-    res.writeHead(500); res.end('Serverfehler: ' + err.message);
+    res.writeHead(500, { 'Cache-Control': 'no-store' }); res.end('Serverfehler: ' + err.message);
   }
 });
 
@@ -56,9 +66,14 @@ server.listen(port, '0.0.0.0', () => {
     .filter((i) => i && i.family === 'IPv4' && !i.internal)
     .map((i) => i.address);
   console.log(`KC Sync Webserver läuft auf Port ${port} (Wurzelordner: ${root})`);
-  console.log(`Auf diesem Rechner:  http://127.0.0.1:${port}/pos/index.html`);
+  console.log(`PC-Manager lokal:  http://127.0.0.1:${port}/pc-manager/index.html`);
+  console.log(`Kasse lokal:       http://127.0.0.1:${port}/pos/index.html`);
+  console.log(`Money Butler lokal:http://127.0.0.1:${port}/money-butler/index.html`);
   if (lanAddresses.length) {
-    lanAddresses.forEach((addr) => console.log(`Für andere Geräte im selben WLAN: http://${addr}:${port}/pos/index.html`));
+    lanAddresses.forEach((addr) => {
+      console.log(`WLAN Kasse:        http://${addr}:${port}/pos/index.html`);
+      console.log(`WLAN Money Butler: http://${addr}:${port}/money-butler/index.html`);
+    });
   } else {
     console.log('Keine WLAN-Adresse gefunden - nur auf diesem Rechner erreichbar.');
   }
