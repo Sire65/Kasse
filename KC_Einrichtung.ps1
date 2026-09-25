@@ -4,6 +4,7 @@ param(
 
 $ErrorActionPreference = 'Stop'
 $ProgressPreference = 'SilentlyContinue'
+[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
 
 $NodeVersion = 'v22.22.3'
 $Backend = Join-Path $Root 'markt-kasse-suite\backend-source'
