@@ -167,3 +167,40 @@ body.entry-mode-weigh [data-money-section="loose"],body.entry-mode-weigh [data-m
 .settings-actions{display:flex;justify-content:flex-end;gap:8px;flex-wrap:wrap;margin-top:18px;padding-top:14px;border-top:1px solid #dbe3ec}.settings-actions button,.testcenter-actions button{padding:10px 14px;border:1px solid #c7ced6;border-radius:8px;background:#fff;font-weight:800}.settings-actions .primary{background:#173765;color:#fff}
 .testcenter-results{display:grid;gap:8px;margin-top:12px}.test-result{display:grid;grid-template-columns:18px 1fr auto;gap:8px;align-items:center;padding:10px;border:1px solid #d9e0e7;border-radius:9px}.test-result.ok{background:#edf9f0}.test-result.warn{background:#fff8e7}.test-result.fail{background:#fff0f0}.test-result small{color:#667085}
 @media(max-width:700px){.entry-mode-card{align-items:stretch;flex-direction:column}.entry-mode-switch{width:100%}.entry-mode-switch button{min-width:0}.settings-tabs{grid-template-columns:1fr 1fr}.settings-money-row{grid-template-columns:54px 1fr}.settings-money-row input{grid-column:2}.settings-money-row .settings-extra{grid-column:2}}
+
+
+/* V0.26.0 – persönliche Money-Butler-Anmeldung */
+.mb-auth-pending .app,.mb-auth-locked .app{visibility:hidden}
+.mb-auth-gate{
+  position:fixed;inset:0;z-index:10000;display:grid;place-items:center;
+  padding:24px;background:linear-gradient(145deg,#f3f4f6,#e5e7eb);
+}
+.mb-auth-gate[hidden]{display:none}
+.mb-auth-card{
+  width:min(440px,100%);background:#fff;border-radius:22px;padding:28px;
+  box-shadow:0 24px 70px rgba(15,23,42,.22);display:grid;gap:16px
+}
+.mb-auth-logo{
+  width:64px;height:64px;border-radius:18px;display:grid;place-items:center;
+  font-weight:900;font-size:24px;background:#111827;color:#fff
+}
+.mb-auth-card h2{margin:0;font-size:26px}
+.mb-auth-card p{margin:0;color:#475569}
+.mb-auth-card label{display:grid;gap:7px;font-weight:700}
+.mb-auth-card input[type="email"],.mb-auth-card input[type="password"]{
+  width:100%;box-sizing:border-box;border:1px solid #cbd5e1;border-radius:12px;
+  padding:12px 14px;font:inherit;background:#fff;color:#111827
+}
+.mb-auth-card .mb-auth-remember{display:flex;align-items:center;gap:10px;font-weight:600}
+.mb-auth-card .mb-auth-remember input{width:20px;height:20px}
+.mb-auth-card button{min-height:44px}
+.mb-auth-card small{color:#64748b;line-height:1.4}
+.mb-auth-user-status{
+  max-width:260px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  font-size:13px;font-weight:700;padding:7px 10px;border-radius:999px;background:#eef2ff;color:#3730a3
+}
+.mb-auth-logout{font-size:13px;padding:7px 10px}
+@media(max-width:760px){
+  .mb-auth-user-status{max-width:145px}
+  .mb-auth-card{padding:22px}
+}
