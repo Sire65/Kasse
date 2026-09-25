@@ -246,8 +246,8 @@ function testResult(name,state,detail){
 }
 async function runConnectionTests(){
   const out=el("testcenterResults");out.innerHTML=testResult("Prüfung","warn","läuft …");
-  const token=window.KCMoneyButlerCommunicator?.tokenLesen?.()||"";
-  if(!token){out.innerHTML=testResult("KC Communicator","warn","Kein Zugriffstoken gespeichert.")+testResult("Datenbank","warn","Ohne Anmeldung nicht prüfbar.")+testResult("PC Manager","warn","Cloudweg ohne Anmeldung nicht prüfbar.")+testResult("KC Verwaltung","warn","Finanzweg ohne Anmeldung nicht prüfbar.");return;}
+  const token=await window.KCMoneyButlerAuth?.getAccessToken?.()||"";
+  if(!token){out.innerHTML=testResult("KC Communicator","warn","Nicht angemeldet.")+testResult("Datenbank","warn","Ohne Anmeldung nicht prüfbar.")+testResult("PC Manager","warn","Cloudweg ohne Anmeldung nicht prüfbar.")+testResult("KC Verwaltung","warn","Finanzweg ohne Anmeldung nicht prüfbar.");return;}
   const client=new KCCommunicationClient({sourceProgram:"kc-money-butler",getAccessToken:async()=>token,defaultTestOnly:false});
   const rows=[];
   try{await client.health();rows.push(testResult("Datenbank / KC Cloud","ok","erreichbar"));}catch(e){rows.push(testResult("Datenbank / KC Cloud","fail",e?.message||String(e)))}
