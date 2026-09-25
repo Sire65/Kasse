@@ -1,8 +1,6 @@
-param(
-  [string]$Root = (Split-Path -Parent $MyInvocation.MyCommand.Path)
-)
-
 $ErrorActionPreference = 'Stop'
+$Root = Split-Path -LiteralPath $MyInvocation.MyCommand.Path -Parent
+$Root = [System.IO.Path]::GetFullPath($Root)
 $ProgressPreference = 'SilentlyContinue'
 [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
 
@@ -22,11 +20,11 @@ Write-Host '==============================================================' -For
 Write-Host ' KC MARKTKASSE - EINMALIGE EINRICHTUNG' -ForegroundColor Cyan
 Write-Host '==============================================================' -ForegroundColor Cyan
 
-if (-not (Test-Path $Backend)) {
+if (-not (Test-Path -LiteralPath $Backend)) {
   Fail "Backend-Ordner fehlt: $Backend"
 }
 
-if (-not (Test-Path $NodeExe)) {
+if (-not (Test-Path -LiteralPath $NodeExe)) {
   $arch = if ($env:PROCESSOR_ARCHITECTURE -match 'ARM64') { 'win-arm64' } else { 'win-x64' }
   $archiveName = "node-$NodeVersion-$arch.zip"
   $baseUrl = "https://nodejs.org/dist/$NodeVersion"
@@ -51,7 +49,7 @@ if (-not (Test-Path $NodeExe)) {
     $source = Get-ChildItem -Path $extract -Directory | Select-Object -First 1
     if (-not $source) { Fail 'Entpackte Node-Laufzeit wurde nicht gefunden.' }
 
-    if (Test-Path $Runtime) { Remove-Item -Recurse -Force $Runtime }
+    if (Test-Path -LiteralPath $Runtime) { Remove-Item -Recurse -Force $Runtime }
     New-Item -ItemType Directory -Force -Path $Runtime | Out-Null
     Copy-Item -Path (Join-Path $source.FullName '*') -Destination $Runtime -Recurse -Force
     Write-Host 'Portable Node.js wurde eingerichtet.' -ForegroundColor Green
@@ -61,10 +59,10 @@ if (-not (Test-Path $NodeExe)) {
   }
 }
 
-if (-not (Test-Path $NodeExe)) {
+if (-not (Test-Path -LiteralPath $NodeExe)) {
   Fail 'Portable node.exe fehlt nach der Einrichtung.'
 }
-if (-not (Test-Path $NpmCmd)) {
+if (-not (Test-Path -LiteralPath $NpmCmd)) {
   Fail 'Portable npm.cmd fehlt nach der Einrichtung.'
 }
 
