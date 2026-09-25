@@ -84,40 +84,45 @@
     if(!response.ok)throw new Error(data?.message||('Berechtigungsprüfung fehlgeschlagen (HTTP '+response.status+')'));
     return Array.isArray(data)?data:[];
   }
+  async function bootstrapAccess(token){
+    const response=await fetch(BASE_URL+'/functions/v1/kc-money-butler-account-bootstrap',{
+      method:'POST',
+      headers:{...authHeaders(token),'Content-Type':'application/json'},
+      body:'{}'
+    });
+    const data=await safeJson(response);
+    if(!response.ok){
+      const map={
+        NO_ELIGIBLE_KC_PERSON:'Diese E-Mail ist keinem freigegebenen KC-Mitglied zugeordnet.',
+        MONEY_BUTLER_NOT_ENABLED:'Für dieses Mitglied ist Money Butler nicht freigeschaltet.',
+        PERSON_ALREADY_LINKED:'Dieses KC-Mitglied ist bereits mit einem anderen Benutzerkonto verknüpft.',
+        AMBIGUOUS_EMAIL_MATCH:'Die E-Mail ist im Mitgliederbestand nicht eindeutig.'
+      };
+      const err=new Error(map[data?.error]||data?.error||('Zugangsprüfung fehlgeschlagen (HTTP '+response.status+')'));
+      err.code=data?.error||'BOOTSTRAP_FAILED';
+      throw err;
+    }
+    return data;
+  }
   async function checkAccess(){
     const token=await accessToken();
     if(!token)return null;
     const user=await getUser(token);
-    const links=await rows('kc_core_user_links',{
-      select:'org_id,person_id,core_role,active',
-      user_id:'eq.'+user.id,
-      org_id:'eq.'+ORG_ID,
-      active:'eq.true',
-      limit:'1'
-    },token);
-    const link=links[0];
-    if(!link)throw new Error('Dieses Benutzerkonto ist dem Köcheclub Werne nicht zugeordnet.');
-    const accessRows=await rows('kc_core_app_access',{
-      select:'org_id,person_id,app_id,access_role,active',
-      org_id:'eq.'+ORG_ID,
-      person_id:'eq.'+link.person_id,
-      app_id:'eq.'+APP_ID,
-      limit:'1'
-    },token);
-    const access=accessRows[0]||null;
-    const coreAdmin=['admin','superadmin'].includes(String(link.core_role||''));
-    const resolvedRole=coreAdmin?'admin':String(access?.access_role||'');
-    if(!coreAdmin&&(!access||access.active!==true||!ALLOWED_ROLES.has(resolvedRole))){
+    const result=await bootstrapAccess(token);
+    const resolvedRole=['admin','superadmin'].includes(String(result?.coreRole||''))?'admin':String(result?.accessRole||'');
+    if(!ALLOWED_ROLES.has(resolvedRole)){
       const err=new Error('Der Money-Butler-Zugang ist derzeit nicht freigeschaltet.');
       err.code='ACCESS_DISABLED';
       throw err;
     }
-    let displayName=user.email||'KC Benutzer';
-    try{
-      const people=await rows('kc_core_people',{select:'display_name',person_id:'eq.'+link.person_id,limit:'1'},token);
-      if(people[0]?.display_name)displayName=people[0].display_name;
-    }catch{}
-    current={user,link,access,displayName,role:resolvedRole,roleLabel:ROLE_LABELS[resolvedRole]||resolvedRole};
+    current={
+      user,
+      link:{org_id:result.orgId,person_id:result.personId,core_role:result.coreRole,active:true},
+      access:{app_id:result.appId,access_role:result.accessRole,active:true},
+      displayName:result.displayName||user.email||'KC Benutzer',
+      role:resolvedRole,
+      roleLabel:ROLE_LABELS[resolvedRole]||resolvedRole
+    };
     return current;
   }
   function showGate(message='',keepEmail=true){
@@ -153,6 +158,21 @@
       throw err;
     }
   }
+  async function signUp(email,password,remember=true){
+    const mail=String(email||'').trim();
+    const pwd=String(password||'');
+    if(!mail)throw new Error('Bitte die E-Mail-Adresse eintragen.');
+    if(pwd.length<8)throw new Error('Das Passwort muss mindestens 8 Zeichen haben.');
+    const data=await authRequest('/auth/v1/signup',{email:mail,password:pwd});
+    if(data?.access_token&&data?.refresh_token){
+      const session=normalizeSession(data,remember);
+      clearStored();store(session);
+      const access=await checkAccess();
+      showApp();
+      return {confirmationRequired:false,access};
+    }
+    return {confirmationRequired:true,user:data?.user||null};
+  }
   async function signOut(){
     const token=await accessToken();
     if(token){
@@ -179,6 +199,33 @@
         showGate(message.textContent,true);
       }finally{button.disabled=false;button.textContent='Anmelden'}
     });
+    el('mbAuthActivateToggle')?.addEventListener('click',()=>{
+      const box=el('mbAuthActivateBox');
+      if(!box)return;
+      box.hidden=!box.hidden;
+      if(!box.hidden)el('mbAuthNewPassword')?.focus();
+    });
+    el('mbAuthActivate')?.addEventListener('click',async()=>{
+      const message=el('mbAuthMessage'),button=el('mbAuthActivate');
+      const email=el('mbAuthEmail')?.value||'';
+      const p1=String(el('mbAuthNewPassword')?.value||'');
+      const p2=String(el('mbAuthNewPassword2')?.value||'');
+      if(p1!==p2){message.textContent='Die beiden Passwörter stimmen nicht überein.';return;}
+      button.disabled=true;button.textContent='Zugang wird eingerichtet …';
+      try{
+        const result=await signUp(email,p1,el('mbAuthRemember')?.checked!==false);
+        if(result.confirmationRequired){
+          message.textContent='Bestätigungs-E-Mail wurde gesendet. Bitte den Link öffnen und danach hier mit dem neuen Passwort anmelden.';
+          el('mbAuthActivateBox').hidden=true;
+          el('mbAuthPassword').value='';
+        }else{
+          message.textContent='Zugang ist eingerichtet und angemeldet.';
+          el('mbAuthActivateBox').hidden=true;
+        }
+      }catch(err){
+        message.textContent=err?.message||String(err);
+      }finally{button.disabled=false;button.textContent='Erstzugang einrichten'}
+    });
     el('mbAuthRetry')?.addEventListener('click',async()=>{
       const message=el('mbAuthMessage');message.textContent='Zugang wird erneut geprüft …';
       try{await checkAccess();showApp()}catch(err){showGate(err?.message||String(err),true)}
@@ -202,6 +249,7 @@
     getCurrent:()=>current,
     checkAccess,
     signIn,
+    signUp,
     signOut
   };
 
