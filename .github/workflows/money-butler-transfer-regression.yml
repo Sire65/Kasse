@@ -49,6 +49,7 @@ jobs:
       - name: Money Butler syntax
         run: |
           node --check money-butler/app.js
+          node --check money-butler/kc-auth.js
           node --check money-butler/kc-communicator-bridge.js
           node --check shared/kc-cash-measure-settings.js
           node --check shared/kc-closing-count-ui.js
