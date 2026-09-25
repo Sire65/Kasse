@@ -1,0 +1,26 @@
+KC MARKTKASSE – STARTANLEITUNG (Stand 25.09.2026)
+
+1. ZIP vollständig entpacken.
+2. Im Hauptordner KC_Manager_Start.cmd doppelklicken.
+3. Das schwarze Startfenster geöffnet lassen.
+4. Der PC-Manager öffnet sich automatisch im Standardbrowser.
+
+Der Start umfasst gleichzeitig:
+- lokalen Manager-/Kassen-Dienst (HTTPS 8543)
+- lokalen Webserver (ab Port 8090; bei Belegung wird der nächste freie Port gewählt)
+- PC-Manager im Browser
+
+Im Startfenster werden zusätzlich die Adressen für Kasse und Money Butler angezeigt.
+Für Tablets im selben WLAN die dort angezeigte WLAN-Adresse verwenden.
+
+WICHTIG:
+- Die Komplettversion enthält eine portable Node.js-Laufzeit im Ordner runtime.
+- Die benötigten Node-Module sind bereits enthalten.
+- Normalerweise ist weder Node-Installation noch npm install erforderlich.
+- Das Startfenster während des Betriebs nicht schließen.
+- Beenden mit Strg+C oder durch Schließen des Fensters.
+
+Geprüfter GitHub-Ausgangspunkt vor dieser Startreparatur:
+main / 5ff2b788abb291d6ec7235afa8a149ea5153fe47
+Transfer-Regression: SUCCESS
+Tagesabschluss-TÜV: SUCCESS
