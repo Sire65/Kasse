@@ -5,23 +5,7 @@ cd /d "%~dp0"
 
 set "KC_ROOT=%~dp0"
 set "KC_BACKEND=%KC_ROOT%markt-kasse-suite\backend-source"
-set "KC_NODE="
-
-if exist "%KC_ROOT%runtime\node.exe" set "KC_NODE=%KC_ROOT%runtime\node.exe"
-if not defined KC_NODE (
-  where node >nul 2>nul
-  if not errorlevel 1 set "KC_NODE=node"
-)
-
-if not defined KC_NODE (
-  echo.
-  echo FEHLER: Node.js wurde nicht gefunden.
-  echo Diese Komplettversion sollte runtime\node.exe enthalten.
-  echo Falls der Ordner runtime fehlt, bitte die ZIP erneut vollstaendig entpacken.
-  echo.
-  pause
-  exit /b 1
-)
+set "KC_NODE=%KC_ROOT%runtime\node.exe"
 
 if not exist "%KC_BACKEND%\run-manager-service.js" (
   echo.
@@ -33,27 +17,30 @@ if not exist "%KC_BACKEND%\run-manager-service.js" (
   exit /b 1
 )
 
-cd /d "%KC_BACKEND%"
+if not exist "%KC_NODE%" goto EINRICHTEN
+if not exist "%KC_BACKEND%\node_modules\ws" goto EINRICHTEN
+if not exist "%KC_BACKEND%\node_modules\bonjour-service" goto EINRICHTEN
+if not exist "%KC_BACKEND%\node_modules\selfsigned" goto EINRICHTEN
+goto STARTEN
 
-if not exist "node_modules\ws" (
+:EINRICHTEN
+echo.
+echo Die KC-Laufzeit wird beim ersten Start einmalig eingerichtet.
+echo Dafuer wird jetzt eine Internetverbindung benoetigt.
+echo Danach bleibt alles im entpackten KC-Ordner gespeichert.
+echo.
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File "%KC_ROOT%KC_Einrichtung.ps1" -Root "%KC_ROOT%"
+if errorlevel 1 (
   echo.
-  echo Laufzeitmodule fehlen. Versuche einmalige Installation ...
-  where npm >nul 2>nul
-  if errorlevel 1 (
-    echo FEHLER: node_modules fehlen und npm ist nicht verfuegbar.
-    echo Bitte die vollstaendige KC-Komplett-ZIP verwenden.
-    pause
-    exit /b 1
-  )
-  call npm install --omit=dev --no-audit --no-fund
-  if errorlevel 1 (
-    echo.
-    echo FEHLER: Laufzeitmodule konnten nicht installiert werden.
-    echo Bitte die vollstaendige KC-Komplett-ZIP verwenden.
-    pause
-    exit /b 1
-  )
+  echo Die Einrichtung war nicht erfolgreich.
+  echo Bitte Internetverbindung pruefen und KC_Manager_Start.cmd erneut starten.
+  echo.
+  pause
+  exit /b 1
 )
+
+:STARTEN
+cd /d "%KC_BACKEND%"
 
 echo.
 echo ==============================================================
