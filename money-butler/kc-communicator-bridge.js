@@ -1,18 +1,11 @@
 (function(global){
   'use strict';
 
-  const TOKEN_KEY='kc_money_butler_communication_token_v1';
   const SOURCE='kc-money-butler';
   const el=(id)=>document.getElementById(id);
 
-  function tokenLesen(){
-    return String(global.KC_COMMUNICATION_ACCESS_TOKEN||localStorage.getItem(TOKEN_KEY)||'').trim();
-  }
-  function tokenSpeichern(){
-    const token=String(el('commToken')?.value||'').trim();
-    if(!token){localStorage.removeItem(TOKEN_KEY);el('commSendStatus').textContent='Gespeicherter KC-Communicator Zugang wurde entfernt.';return;}
-    localStorage.setItem(TOKEN_KEY,token);
-    el('commSendStatus').textContent='KC-Communicator Zugang wurde nur auf diesem PC gespeichert.';
+  async function tokenLesen(){
+    return String(await global.KCMoneyButlerAuth?.getAccessToken?.()||'').trim();
   }
   function payloadLesen(){
     const text=String(document.getElementById('payload')?.value||'').trim();
@@ -41,8 +34,8 @@
   async function senden(){
     const status=el('commSendStatus');
     try{
-      const token=tokenLesen();
-      if(!token)throw new Error('Bitte zuerst den KC-Communicator Zugriffstoken des Kassenwarts eintragen.');
+      const token=await tokenLesen();
+      if(!token)throw new Error('Bitte zuerst im Money Butler anmelden.');
       if(typeof global.KCCommunicationClient!=='function')throw new Error('KC Communication Client konnte nicht geladen werden.');
       const {text,payload,kind}=payloadLesen();
       status.textContent=kind==='count'
@@ -107,9 +100,6 @@
   }
 
   function init(){
-    const feld=el('commToken');
-    if(feld&&!feld.value)feld.value=localStorage.getItem(TOKEN_KEY)||'';
-    el('commTokenSave')?.addEventListener('click',tokenSpeichern);
     el('commSend')?.addEventListener('click',senden);
   }
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);
