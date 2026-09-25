@@ -105,7 +105,9 @@
       limit:'1'
     },token);
     const access=accessRows[0]||null;
-    if(!access||access.active!==true||!ALLOWED_ROLES.has(String(access.access_role))){
+    const coreAdmin=['admin','superadmin'].includes(String(link.core_role||''));
+    const resolvedRole=coreAdmin?'admin':String(access?.access_role||'');
+    if(!coreAdmin&&(!access||access.active!==true||!ALLOWED_ROLES.has(resolvedRole))){
       const err=new Error('Der Money-Butler-Zugang ist derzeit nicht freigeschaltet.');
       err.code='ACCESS_DISABLED';
       throw err;
@@ -115,7 +117,7 @@
       const people=await rows('kc_core_people',{select:'display_name',person_id:'eq.'+link.person_id,limit:'1'},token);
       if(people[0]?.display_name)displayName=people[0].display_name;
     }catch{}
-    current={user,link,access,displayName,role:String(access.access_role),roleLabel:ROLE_LABELS[String(access.access_role)]||String(access.access_role)};
+    current={user,link,access,displayName,role:resolvedRole,roleLabel:ROLE_LABELS[resolvedRole]||resolvedRole};
     return current;
   }
   function showGate(message='',keepEmail=true){
