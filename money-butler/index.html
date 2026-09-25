@@ -25,8 +25,19 @@
       <span>Auf diesem Gerät angemeldet bleiben</span>
     </label>
     <button id="mbAuthSubmit" type="submit" class="primary">Anmelden</button>
+    <button id="mbAuthActivateToggle" type="button">Erstzugang / Passwort festlegen</button>
+    <div id="mbAuthActivateBox" class="mb-auth-activate" hidden>
+      <p><strong>Erstzugang:</strong> Die oben eingetragene E-Mail muss bereits einem freigegebenen KC-Mitglied gehören.</p>
+      <label>Neues Passwort
+        <input id="mbAuthNewPassword" type="password" autocomplete="new-password" minlength="8">
+      </label>
+      <label>Passwort wiederholen
+        <input id="mbAuthNewPassword2" type="password" autocomplete="new-password" minlength="8">
+      </label>
+      <button id="mbAuthActivate" type="button">Erstzugang einrichten</button>
+    </div>
     <button id="mbAuthRetry" type="button">Zugang erneut prüfen</button>
-    <small>Freigegeben sind Admin, Kassenwart und aktivierte Vertretung.</small>
+    <small>Freigegeben sind Admin, Kassenwart und aktivierte Vertretung. Die Zuordnung erfolgt automatisch über die KC-Mitgliedsdaten.</small>
   </form>
 </div>
 <div class="app">
@@ -36,7 +47,7 @@
       <h1>KC Money Butler</h1>
       <p>Wechselgeld vorbereiten – einfach und sicher</p>
     </div>
-    <div class="header-tools"><span>V0.26.0</span><span id="mbAuthUserStatus" class="mb-auth-user-status">Nicht angemeldet</span><button type="button" id="mbAuthLogout" class="mb-auth-logout" hidden>Abmelden</button><button type="button" id="settingsBtn" class="settings-gear" title="Voreinstellungen und Testcenter" aria-label="Voreinstellungen öffnen">⚙</button></div>
+    <div class="header-tools"><span>V0.27.0</span><span id="mbAuthUserStatus" class="mb-auth-user-status">Nicht angemeldet</span><button type="button" id="mbAuthLogout" class="mb-auth-logout" hidden>Abmelden</button><button type="button" id="settingsBtn" class="settings-gear" title="Voreinstellungen und Testcenter" aria-label="Voreinstellungen öffnen">⚙</button></div>
   </header>
 
   <main>
@@ -290,7 +301,7 @@
 <script src="../shared/kc-cash-measure-settings.js?build=1.0.0"></script>
 <script src="../shared/kc-uebergabeprotokoll.js"></script>
 <script src="../pc-manager/kc-communication-client.js"></script>
-<script src="kc-auth.js?build=0.26.0"></script>
+<script src="kc-auth.js?build=0.27.0"></script>
 <script src="app.js"></script>
 <script src="kc-communicator-bridge.js"></script>
 </body>
