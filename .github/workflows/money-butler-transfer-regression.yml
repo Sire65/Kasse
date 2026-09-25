@@ -30,6 +30,8 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
+      - name: Money Butler Konsolidierung
+        run: node tests/money-butler-consolidation.test.cjs
       - name: Money Butler Communicator route
         run: node tests/money-butler-communicator-route.test.cjs
       - name: Money Butler complete transfer paths
