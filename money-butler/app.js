@@ -655,3 +655,4 @@ window.addEventListener("DOMContentLoaded",()=>{let tab=1;document.querySelector
 })();
 
 window.KCMoneyButlerAuth?.ready?.then(access=>{if(access)setTimeout(()=>pullCashMeasureSettings(),250)});
+window.addEventListener('kc-money-butler-auth-changed',()=>setTimeout(()=>pullCashMeasureSettings(),250));
