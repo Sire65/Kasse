@@ -38,8 +38,13 @@ jobs:
         working-directory: Kasse
         run: node tests/tagesabschluss-system.test.cjs
 
+      - name: Money Butler Konsolidierung
+        working-directory: Kasse
+        run: node tests/money-butler-consolidation.test.cjs
+
       - name: JavaScript Syntaxprüfung
         run: |
+          node --check Kasse/money-butler/kc-auth.js
           node --check Kasse/pc-manager/kc-tagesabschluss-zentrale.js
           node --check Kasse/pc-manager/kc-abschluesse-manager.js
           node --check Kasse/pc-manager/kc-finance-bridge.js
