@@ -117,13 +117,54 @@
     return JSON.parse(new TextDecoder().decode(plaintext));
   }
 
+  // 28.09.2026 (Befund Pruefkette): IndexedDB liefert getAll() SORTIERT NACH SCHLUESSEL - hier
+  // die transactionId, also eine Zufalls-UUID. Die Buchungsreihenfolge ging damit bei jedem
+  // Neustart verloren: inspectLedger meldete "Pruefkette ist unterbrochen", und schlimmer, der
+  // naechste Verkauf haengte sich per previousHash an einen ZUFAELLIGEN Bon (das "letzte"
+  // Element der durcheinandergewuerfelten Liste) - die Kette bekam echte Abzweigungen.
+  // Jetzt wird die Reihenfolge beim Laden wiederhergestellt:
+  //   - Kette intakt (ein Anfang, jeder Bon hoechstens einen Nachfolger): exakt in
+  //     Kettenreihenfolge ueber previousHash -> recordHash.
+  //   - Kette bereits beschaedigt (Altbestand von Geraeten, die mit dem Fehler gelaufen sind):
+  //     nach Buchungszeit. Die Beschaedigung selbst bleibt fuer die Pruefung sichtbar - hier
+  //     wird nichts umgeschrieben oder neu berechnet.
+  //   - Alt-Datensaetze ohne Pruefsumme (vor Einfuehrung der Kette) stehen vorne, nach Zeit.
+  function buchungsZeit(row) { return String(row?.endTime || row?.time || ''); }
+  function nachZeit(a, b) { const x = buchungsZeit(a), y = buchungsZeit(b); return x < y ? -1 : x > y ? 1 : 0; }
+  function inBuchungsreihenfolge(rows) {
+    if (!Array.isArray(rows) || rows.length < 2) return rows;
+    const ohneKette = rows.filter((r) => !r?.recordHash).sort(nachZeit);
+    const mitKette = rows.filter((r) => r?.recordHash);
+    const bekannt = new Set(mitKette.map((r) => r.recordHash));
+    const nachfolger = new Map();
+    let anfaenge = 0, verzweigt = false;
+    for (const r of mitKette) {
+      const vorgaenger = r.previousHash && bekannt.has(r.previousHash) ? r.previousHash : null;
+      if (vorgaenger === null) { anfaenge++; continue; }
+      if (nachfolger.has(vorgaenger)) verzweigt = true;
+      nachfolger.set(vorgaenger, r);
+    }
+    if (anfaenge !== 1 || verzweigt) return ohneKette.concat(mitKette.slice().sort(nachZeit));
+    const kette = [];
+    let aktuell = mitKette.find((r) => !r.previousHash || !bekannt.has(r.previousHash));
+    const gesehen = new Set();
+    while (aktuell && !gesehen.has(aktuell.recordHash)) {
+      gesehen.add(aktuell.recordHash);
+      kette.push(aktuell);
+      aktuell = nachfolger.get(aktuell.recordHash);
+    }
+    // Sicherheitsnetz (z. B. doppelte recordHash): nichts darf verlorengehen.
+    if (kette.length !== mitKette.length) return ohneKette.concat(mitKette.slice().sort(nachZeit));
+    return ohneKette.concat(kette);
+  }
+
   function getAll(storeName) {
     return openDb().then((db) => new Promise((resolve, reject) => {
       const tx = db.transaction(storeName, 'readonly');
       const req = tx.objectStore(storeName).getAll();
       req.onsuccess = () => resolve(req.result || []);
       req.onerror = () => reject(req.error);
-    })).then((rows) => Promise.all(rows.map(entschluesseleZeile)));
+    })).then((rows) => Promise.all(rows.map(entschluesseleZeile))).then(inBuchungsreihenfolge);
   }
 
   // Ersetzt den GESAMTEN Inhalt eines Speichers - entspricht exakt dem bisherigen Verhalten von
@@ -181,7 +222,7 @@
   // zurück, ob dabei tatsächlich etwas wiederhergestellt wurde (für einen sichtbaren Hinweis).
   async function reconcile(storeName, localRows) {
     const databaseRows = await getAll(storeName);
-    const merged = mergeRows(databaseRows, localRows);
+    const merged = inBuchungsreihenfolge(mergeRows(databaseRows, localRows));
     await replaceAll(storeName, merged);
     const localCount = Array.isArray(localRows) ? localRows.length : 0;
     return { rows: merged, databaseCount: databaseRows.length, localCount, recovered: merged.length > localCount };
@@ -206,5 +247,5 @@
     return status;
   }
 
-  global.KCTransactionStore = { openDb, getAll, replaceAll, mergeRows, reconcile, requestPersistence, STORE_SALES, STORE_TRAINING };
+  global.KCTransactionStore = { openDb, getAll, replaceAll, mergeRows, reconcile, requestPersistence, inBuchungsreihenfolge, STORE_SALES, STORE_TRAINING };
 })(window);

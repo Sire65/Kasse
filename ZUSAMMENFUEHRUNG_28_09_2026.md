@@ -51,3 +51,24 @@ Funktionen sind erhalten, `tests/aenderungen-26-09.test.cjs` prüft das.
 * Komplette Test-Suite (74 Tests) vorher/nachher: keine Abweichung bei Exit-Codes und Fehlerbildern.
   Die schon vorher roten Tests sind unverändert rot.
 * Neu: `tests/tse-relay.test.cjs` (39 Prüfpunkte) und `tests/aenderungen-26-09.test.cjs` (Live + Schulung).
+
+## Nachtrag: Prüfkette nach Neustart behoben (28.09.2026)
+**Befund:** IndexedDB liefert `getAll()` sortiert nach Schlüssel, hier der zufälligen `transactionId`.
+Bei jedem Neustart der Kasse waren die Bons deshalb durcheinander. Das hatte zwei Folgen:
+
+* Die Ledger-Prüfung meldete „Prüfkette ist unterbrochen“.
+* Der nächste Verkauf hängte sich per `previousHash` an einen zufälligen Bon, die Kette bekam echte
+  Abzweigungen.
+
+Im alten Stand passierte das in 6 von 6 Versuchen.
+
+**Behebung** in `pos/kc-transaction-store.js` (gleich in `schulung/pos/`, Build 0.1.1): Beim Laden wird die
+Buchungsreihenfolge wiederhergestellt. Ist die Kette intakt, wird exakt entlang der Kette sortiert. Ist
+sie schon beschädigt, wird nach Buchungszeit sortiert. Datensätze werden dabei nicht verändert.
+
+**Altbestand:** Tablets, die mit dem Fehler neu gestartet und danach weiter kassiert haben, tragen
+bereits Abzweigungen in ihren gespeicherten Bons. Die Prüfung meldet das weiterhin ehrlich, denn diese
+Bons wurden tatsächlich falsch verkettet. Ab dem nächsten Marktstart-Reset ist die Kette sauber.
+
+**Test:** `tests/pruefkette-neustart.test.cjs`, Live und Schulung, je 3 Durchläufe mit zwei Neustarts.
+Die Gegenprobe mit dem alten Code wird rot.
