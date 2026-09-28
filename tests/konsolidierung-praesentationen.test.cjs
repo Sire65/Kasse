@@ -87,10 +87,22 @@ function auszugNeu() {
   return JSON.parse(fs.readFileSync(ziel, 'utf8'));
 }
 
+/* 28.09.2026: HTML-Fassung und Bauplatz (kc-hg) liegen außerhalb des Kassenpakets und waren
+   nie im Repository. Fehlen beide an den Standardorten, fehlt auf diesem Rechner der ganze
+   Präsentations-Bauplatz - dann wird ehrlich übersprungen statt rot gemeldet. Fehlt nur der
+   Bauplatz, entfällt Teil 1 (Auszug); die HTML-Fassung wird trotzdem geprüft. Wer KC_HTML oder
+   KC_HG ausdrücklich setzt, bekommt fehlende Dateien weiterhin als Abweichung gemeldet. */
+const OHNE_BAUPLATZ = !process.env.KC_HG && !(fs.existsSync(AUSZUG) && fs.existsSync(HOLER));
+if (OHNE_BAUPLATZ && !process.env.KC_HTML && !fs.existsSync(HTML)) {
+  console.log('  ueberspringen: HTML-Fassung und Bauplatz kc-hg nicht vorhanden unter ' + HTML + ' bzw. ' + HG
+    + ' (KC_HTML auf die HTML-Fassung und KC_HG auf den kc-hg-Ordner setzen)');
+  process.exit(0);
+}
+
 const V4 = original();
 const STAMM = stammdaten();
 const MITGLIEDER = mitgliedsnamen();
-const AUSZUG_GESPEICHERT = JSON.parse(fs.readFileSync(AUSZUG, 'utf8'));
+const AUSZUG_GESPEICHERT = OHNE_BAUPLATZ ? null : JSON.parse(fs.readFileSync(AUSZUG, 'utf8'));
 
 /* Aus dem Original die Vergleichswerte je Folie ziehen - dieselbe Sicht, die auch der
    Auszug erzeugt, aber hier unabhängig davon aus der Originaldatei. */
@@ -150,7 +162,10 @@ const NACH_NR = new Map(ORIGINAL.map((f) => [f.nr, f]));
 /* ================================================================== Lauf */
 (async () => {
   /* ---------------------------------------------- 1. Der Zwischenstand ist kein eigener Stand */
-  {
+  if (OHNE_BAUPLATZ) {
+    console.log('  ueberspringen: Teil 1 (Auszug), Bauplatz kc-hg nicht vorhanden unter ' + HG
+      + ' (KC_HG auf den kc-hg-Ordner setzen)');
+  } else {
     const neu = auszugNeu();
     pruefe('Der Auszug hat so viele Folien wie das Original',
       neu.folien.length === V4.slides.length, neu.folien.length + ' vs ' + V4.slides.length);

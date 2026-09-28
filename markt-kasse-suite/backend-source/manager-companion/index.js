@@ -568,6 +568,32 @@ class ManagerCompanion {
         res.writeHead(204); res.end();
         return;
       }
+      // 28.09.2026 (Befund Geldweg Money Butler -> PC-Manager -> Kasse): der PC-Manager laeuft im
+      // normalen Browser und schickte die Geld-Uebergaben an den HTTPS-Kanal 8543. Dort scheiterten
+      // sie immer - ohne apiVersion mit 400, und ein normaler Browser vertraut dem selbstsignierten
+      // Zertifikat ohnehin nicht. "An Kasse freigeben" zielte schon auf 47392, dort fehlte aber die
+      // Route (404). Beide Ablagen laufen jetzt - wie Stammdaten, Dienstplan und Fernbefehle - ueber
+      // diesen nur lokal erreichbaren Kanal. Die Handler pruefen die Loopback-Herkunft selbst.
+      if (url.pathname === '/api/v1/cash-transfer/queue' || url.pathname === '/api/v1/finance-transfer/queue') {
+        if (req.headers.origin) res.setHeader('Access-Control-Allow-Origin', req.headers.origin);
+        if (req.method === 'OPTIONS') {
+          res.setHeader('Access-Control-Allow-Methods', 'POST');
+          res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+          res.writeHead(204); res.end();
+          return;
+        }
+        if (req.method === 'POST') {
+          let koerper = '';
+          req.on('data', (c) => { koerper += c; if (koerper.length > 16384) req.destroy(); });
+          req.on('end', () => {
+            let daten;
+            try { daten = JSON.parse(koerper || '{}'); } catch (e) { return this._json(res, 400, { error: 'payload_invalid' }); }
+            if (url.pathname === '/api/v1/cash-transfer/queue') return this._cashTransferQueue(req, res, daten);
+            return this._financeTransferQueue(req, res, daten);
+          });
+          return;
+        }
+      }
       if (req.method === 'POST' && url.pathname === '/remote-command/queue') {
         const addr = req.socket.remoteAddress || '';
         const isLoopback = addr === '127.0.0.1' || addr === '::1' || addr === '::ffff:127.0.0.1';

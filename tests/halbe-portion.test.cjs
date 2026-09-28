@@ -79,6 +79,9 @@ const p = (name, gut, zusatz = '') => { gut ? ok++ : rot++; console.log(`${gut ?
   kasse.on('pageerror', e => fehler.push('Kasse: ' + e.message));
   kasse.on('dialog', d => d.accept().catch(() => {}));
   // Die Kasse übernimmt die Stammdaten so, wie sie der Manager sendet.
+  // 28.09.2026 (a12231d + Betreiber-Entscheid 28.09.): frische Geraete starten im KC-Aufbau,
+  // dort bleibt der ½-Knopf bewusst klein. Die Groessen-Anforderung gilt fuer die Standardansicht.
+  await kasse.addInitScript(() => { try { localStorage.setItem('kc.kassenoberflaeche.standard.v1', '1'); } catch (e) {} });
   await kasse.addInitScript(() => {
     try {
       const roh = JSON.parse(localStorage.getItem('kc_products_v050') || 'null');
@@ -288,7 +291,9 @@ const p = (name, gut, zusatz = '') => { gut ? ok++ : rot++; console.log(`${gut ?
   const bon = await kasse.evaluate(() => { state.cart.length = 0; state.selectedCartKey = null; renderCart(); return true; });
   await kasse.evaluate(() => { const g = [...document.querySelectorAll('#categories button')].find(x => /Speisen/i.test(x.innerText)); g?.click(); });
   await kasse.waitForTimeout(500);
-  await kasse.evaluate(() => { const t = [...document.querySelectorAll('.product-tile')].find(x => /Grünkohl/i.test(x.innerText) && !/Mettwurst/i.test(x.innerText)); t?.click(); });
+  // 28.09.2026 (949592f, Bilderversion 3): der Name ist ins Bild eingebrannt, der Text per CSS
+  // ausgeblendet - innerText ist leer. Kachel deshalb ueber data-id waehlen.
+  await kasse.evaluate(() => { document.querySelector('.product-tile[data-id="gruenkohl"]')?.click(); });
   await kasse.waitForTimeout(700);
   await kasse.evaluate(() => { document.querySelector('.cart-row')?.click(); });
   await kasse.waitForTimeout(300);

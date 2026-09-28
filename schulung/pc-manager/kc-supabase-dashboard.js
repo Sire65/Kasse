@@ -10,7 +10,7 @@ const managerVersion=()=>String(global.KCManagerAppVersion||'unbekannt');
 function versionParts(v){return String(v||'').replace(/^V/i,'').split('.').map(x=>Number(x)||0)}
 function versionGte(a,b){const aa=versionParts(a),bb=versionParts(b),n=Math.max(aa.length,bb.length);for(let i=0;i<n;i++){if((aa[i]||0)>(bb[i]||0))return true;if((aa[i]||0)<(bb[i]||0))return false}return true}
 function zeitAgo(iso){if(!iso)return'nie';const d=Math.round((Date.now()-new Date(iso).getTime())/60000);if(d<1)return'gerade eben';if(d<60)return`vor ${d} Min.`;if(d<1440)return`vor ${Math.round(d/60)} Std.`;return`vor ${Math.round(d/1440)} Tagen`}
-function klartext(n){const r=String(n||'');if(r==='nicht_angemeldet')return'Bitte oben rechts bei Supabase anmelden.';if(/permission denied|not authorized|insufficient_privilege/i.test(r))return'Die Datenbank hat den Zugriff verweigert. Bitte Supabase-Anmeldung und Manager-Berechtigung prüfen.';return r}
+function klartext(n){const r=String(n||'');if(r==='nicht_angemeldet')return'Bitte oben rechts bei Supabase anmelden.';if(/permission denied|not authorized|insufficient_privilege/i.test(r))return'Die Datenbank hat den Zugriff verweigert. Bitte Supabase-Anmeldung und Manager-Berechtigung prüfen. (Diese Seite ist nur eine Übersicht – Kassieren und Abschlüsse laufen ohne sie.)';return r}
 async function rpc(name,args={}){if(!global.KCSupabase?.istAngemeldet())throw new Error('nicht_angemeldet');return global.KCSupabase.rufeFunktionAuf(name,args)}
 async function ladeDaten(){return rpc('kc_core_dashboard_data',{})}
 async function ladeSystemstand(){return rpc('kc_manager_system_version',{})}

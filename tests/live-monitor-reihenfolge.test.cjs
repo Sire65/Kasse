@@ -14,7 +14,19 @@ const { chromium } = require('playwright');
 const http = require('http'), fs = require('fs'), path = require('path');
 // ws liegt beim Backend (dort wird der Live-Kanal betrieben) - von dort geholt, statt eine
 // zweite Kopie in diesen Ordner zu legen.
-const { WebSocketServer } = require(require.resolve('ws', { paths: [path.resolve(__dirname, '..', '..', 'kc-sync-installation-und-backend')] }));
+// 28.09.2026: Das Backend liegt im Repository unter markt-kasse-suite/backend-source; der
+// Nachbarordner ../kc-sync-installation-und-backend stammt aus dem alten ZIP-Aufbau und bleibt
+// nur als Rueckfall. Ist ws nirgends installiert, wird ehrlich uebersprungen.
+let wsPfad;
+try {
+  wsPfad = require.resolve('ws', { paths: [
+    path.resolve(__dirname, '..', 'markt-kasse-suite', 'backend-source'),
+    path.resolve(__dirname, '..', '..', 'kc-sync-installation-und-backend')] });
+} catch (e) {
+  console.log('  ueberspringen: Paket ws nicht installiert (npm install in markt-kasse-suite/backend-source)');
+  process.exit(0);
+}
+const { WebSocketServer } = require(wsPfad);
 const WURZEL = path.resolve(__dirname, '..');
 const T = { '.html': 'text/html', '.js': 'text/javascript', '.css': 'text/css', '.json': 'application/json', '.png': 'image/png', '.jpg': 'image/jpeg', '.webp': 'image/webp', '.svg': 'image/svg+xml', '.mp3': 'audio/mpeg', '.webmanifest': 'application/manifest+json' };
 let ok = 0, rot = 0;

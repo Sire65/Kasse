@@ -67,7 +67,13 @@ pruefe('Die Aufgabe des früheren Textobjekt-Editors steckt jetzt im Objekt-Stud
 // Genau hier entstand der Schaden: geloeschte Dateien blieben eingebunden.
 const tot = [];
 let geprueft = 0;
+// 28.09.2026: markt-kasse-suite/money-butler/ ist Teil des Paketimports vom 24.08.2026
+// (siehe markt-kasse-suite/README.md) - ein Archivstand, der nicht ausgeliefert wird; sein
+// Verweis ../pc-manager/vendor/... stammt aus dem alten ZIP-Aufbau. Nur dieser Archivordner
+// ist von Punkt 4 ausgenommen, Punkt 2 prueft ihn weiter, backend-source bleibt geprueft.
+const ARCHIV_OHNE_VERWEISPRUEFUNG = [path.join('markt-kasse-suite', 'money-butler') + path.sep];
 for (const datei of htmlDateien) {
+  if (ARCHIV_OHNE_VERWEISPRUEFUNG.some((a) => path.relative(WURZEL, datei).startsWith(a))) continue;
   const txt = fs.readFileSync(datei, 'utf8');
   const basis = path.dirname(datei);
   for (const m of txt.matchAll(/(?:src|href)\s*=\s*["']([^"'#?]+)["']/g)) {

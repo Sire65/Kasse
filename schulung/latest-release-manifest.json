@@ -110,7 +110,7 @@
       "label": "PC-Manager Analyse- und Bestandsdashboard mit Legende und Listenaktionen"
     },
     "salesImportCore": {
-      "requiredVersion": "0.2.0",
+      "requiredVersion": "0.3.0",
       "label": "Quota-sicherer kompakter Umsatzimport"
     },
     "eventSimulationCore": {

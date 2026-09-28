@@ -925,6 +925,11 @@ function syncImageV3RowSpans(){
   grid.style.removeProperty("grid-auto-rows");
   grid.style.removeProperty("row-gap");
   wraps.forEach(w=>{w.style.removeProperty("grid-row");w.style.removeProperty("height")});
+  // 28.09.2026: im neuen Kassenlayout bestimmt das feste Raster (--kc-spalten/--kc-zeilen) die
+  // Kachelgroesse, damit ALLE Artikel der Gruppe sichtbar sind. Die Feinzeilen von hier haben dort
+  // die quadratischen Bildkacheln ueber das Raster hinaus verlaengert: die zweite Reihe lag
+  // unsichtbar unter der Flaeche, obwohl "Seite 1/1" angezeigt wurde.
+  if(document.body.classList.contains("kc-layout-neu")&&!document.body.classList.contains("kc-aufbau"))return;
   const gap=parseFloat(getComputedStyle(grid).rowGap)||6;
   const heights=wraps.map(w=>w.getBoundingClientRect().height);
   const FEINEINHEIT=2;

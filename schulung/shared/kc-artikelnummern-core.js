@@ -26,7 +26,7 @@
  */
 (function (g) {
   'use strict';
-  var VERSION = '1.0.0';
+  var VERSION = '1.0.1';
 
   var WARENGRUPPEN = [
     { code: '01', gruppenId: 'WG01',  name: 'Getränke' },
@@ -48,6 +48,8 @@
     apfel:                '01004',
     roterfeger:           '01005',
     eier:                 '01006',
+    schussrum:            '01007',   // 28.09.2026 nachgetragen (seit 19.09. verkaufbar, Nummer fehlte)
+    schussamaretto:       '01008',   // 28.09.2026 nachgetragen
     // ---- 02 Speisen ----
     sauerkraut:           '02001',
     sauerkrautmett:       '02002',
@@ -67,6 +69,7 @@
     // ---- 04 Sonstiges ----
     wertmarke:            '04001',
     becher:               '04002',
+    'freie-zahlung':      '04003',   // 28.09.2026 (Betreiber): Scan oeffnet die Betragseingabe, bucht nichts selbst
     // ---- 05 Kombi (Essen + Getraenk zusammen) ----
     'PKG-GK-GR':          '05001',
     'PKG-GK-EI':          '05002',

@@ -14,7 +14,15 @@ let ok = 0, rot = 0;
 const p = (name, gut, zusatz = '') => { gut ? ok++ : rot++; console.log(`${gut ? '  OK  ' : 'FEHLER'}  ${name}${zusatz ? '   [' + zusatz + ']' : ''}`); };
 
 const WURZEL = path.resolve(__dirname, '..');
-const KONVERTER = path.resolve(WURZEL, '..', 'kc-sync-installation-und-backend', 'convert-kng-members.js');
+// 28.09.2026: Der Konverter lag nur im alten ZIP-Aufbau neben dem Kassenpaket
+// (../kc-sync-installation-und-backend) und war nie im Repository. Gesucht wird deshalb der
+// Reihe nach: KC_SYNC_DIR, der Manager-Dienst im Repository, der alte Nachbarordner.
+const KONVERTER_ORTE = [
+  process.env.KC_SYNC_DIR,
+  path.join(WURZEL, 'markt-kasse-suite', 'backend-source'),
+  path.resolve(WURZEL, '..', 'kc-sync-installation-und-backend'),
+].filter(Boolean).map((d) => path.resolve(d, 'convert-kng-members.js'));
+const KONVERTER = KONVERTER_ORTE.find((f) => fs.existsSync(f)) || KONVERTER_ORTE[0];
 
 // ------------------------------------------------------------------ 1. Der Konverter
 const mitglieder = [
@@ -33,7 +41,13 @@ const stateDatei = path.join(tmp, 'state.js');
 const ausgabe = path.join(tmp, 'paket.json');
 fs.writeFileSync(stateDatei, 'module.exports = ' + JSON.stringify({members: mitglieder}) + ';');
 
-if (!fs.existsSync(KONVERTER)) {
+if (!fs.existsSync(KONVERTER) && !process.env.KC_SYNC_DIR) {
+  // 28.09.2026: Datei liegt ausserhalb des Repositorys - Teil 1 ehrlich ueberspringen,
+  // Teile 2 und 3 pruefen den Quelltext im Repository und laufen weiter.
+  console.log('  ueberspringen: Teil 1, convert-kng-members.js nicht gefunden in '
+    + KONVERTER_ORTE.map((f) => path.dirname(f)).join(', ')
+    + ' (KC_SYNC_DIR auf den Ordner kc-sync-installation-und-backend setzen)');
+} else if (!fs.existsSync(KONVERTER)) {
   p('Konverter convert-kng-members.js gefunden', false, KONVERTER);
 } else {
   const ausgabeText = execFileSync('node', [KONVERTER, stateDatei, ausgabe], {encoding: 'utf8'});

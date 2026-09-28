@@ -78,6 +78,15 @@ const WETTERANTWORT = {
 };
 
 (async () => {
+  /* 28.09.2026: Die HTML-Fassung liegt außerhalb des Kassenpakets und war nie im Repository.
+     Fehlt sie am Standardort, ist das ein Prüfrechner ohne Präsentations-Bauplatz - dann wird
+     ehrlich übersprungen statt rot gemeldet. Wer KC_HTML ausdrücklich setzt, bekommt bei einer
+     fehlenden Datei weiterhin die Abweichung. */
+  if (!fs.existsSync(HTML) && !process.env.KC_HTML) {
+    console.log('  ueberspringen: HTML-Fassung nicht vorhanden unter ' + HTML
+      + ' (KC_HTML auf die KC_Weihnachtsmarkt_2026_Praesentation.html setzen)');
+    process.exit(0);
+  }
   if (!fs.existsSync(HTML)) { rot.push('Die HTML-Fassung liegt nicht unter ' + HTML); return fertig(); }
   const browser = await chromium.launch();
 

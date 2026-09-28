@@ -75,17 +75,35 @@ const p = (n, b, z = '') => { b ? ok++ : rot++; console.log(`${b ? '  OK  ' : 'F
   p('und dasselbe UI-Schema',
     jsonQuelle.uiSchemaVersion === (jsQuelle.match(/uiSchemaVersion:\s*'([^']+)'/) || [])[1],
     jsonQuelle.uiSchemaVersion);
+  // 28.09.2026: bbd34a9 (18.09., einheitliche read-only Updatepruefung) hat den Hinweis bewusst neu
+  // formuliert: "Automatisch mit latest-release-manifest.js abzugleichen ...". Aussage bleibt dieselbe -
+  // die .js ist die Quelle, die .json wird abgeglichen. Beide Formulierungen gelten.
   p('in der .json steht, dass sie erzeugt ist und nicht von Hand geaendert wird',
-    /NICHT VON HAND/i.test(jsonQuelle.hinweis || ''), (jsonQuelle.hinweis || '').slice(0, 60));
+    /NICHT VON HAND/i.test(jsonQuelle.hinweis || '') || /Automatisch mit latest-release-manifest\.js abzugleichen/i.test(jsonQuelle.hinweis || ''),
+    (jsonQuelle.hinweis || '').slice(0, 60));
 
   // ---------------------------------------------------------------- Inhalt gegen die Kasse
   console.log('\n== Inhalt gegen die heutige Kasse ==');
   const app = fs.readFileSync(path.join(WURZEL, 'training-video', 'app.js'), 'utf-8');
   const css = fs.readFileSync(path.join(WURZEL, 'pos', 'styles.css'), 'utf-8');
   const infoLinks = /\.product-info-button\{[^}]*left:\s*7px/.test(css.replace(/\s+/g, ' ').replace(/\.product-info-button\s*\{/, '.product-info-button{'));
-  const sternLinksDarunter = /\.auto-favorite-star\{[^}]*left:\s*7px/.test(css);
+  // 28.09.2026: Die Grundregel in pos/styles.css (.auto-favorite-star{left:7px;top:39px}) hat 8f2a82a
+  // (21.09., Regression zurueckgenommen) bewusst wieder auf right:7px;top:7px gesetzt. Sichtbar gilt fuer
+  // die Artikelkacheln (Bilderversion 3, 949592f vom 19.09., Abstand 5c0b5d5 vom 22.09.) pos/images-v3.css: Stern mittig UNTER dem
+  // Info-Button. Geprueft wird deshalb diese Regel gegen die Info-Button-Regel derselben Datei:
+  // Sternmitte (translateX(-50%)) innerhalb der Info-Button-Breite, right:auto, top unterhalb seiner Unterkante.
+  const v3 = fs.readFileSync(path.join(WURZEL, 'pos', 'images-v3.css'), 'utf-8');
+  const regel = (sel) => (v3.match(new RegExp(sel.replace(/[.>]/g, '\\$&') + '\\{([^}]*)\\}')) || [])[1] || '';
+  const prozent = (r, eig) => { const m = new RegExp('(?:^|;)\\s*' + eig + ':\\s*([\\d.]+)%').exec(r); return m ? Number(m[1]) : NaN; };
+  const infoV3 = regel('.product-grid .image-v3>.product-info-button'), sternV3 = regel('.product-grid .image-v3>.auto-favorite-star');
+  const info = { links: prozent(infoV3, 'left'), oben: prozent(infoV3, 'top'), breite: prozent(infoV3, 'width'), hoehe: prozent(infoV3, 'height') };
+  const stern = { links: prozent(sternV3, 'left'), oben: prozent(sternV3, 'top') };
+  const sternLinksDarunter = /right:\s*auto/.test(sternV3) && /translateX\(-50%\)/.test(sternV3)
+    && stern.links >= info.links && stern.links <= info.links + info.breite
+    && stern.oben > info.oben + info.hoehe;
   p('in der Kasse sitzt die Infotaste wirklich oben LINKS', infoLinks);
-  p('und der Favoritenstern LINKS DARUNTER (21.09.2026: nicht mehr oben rechts, der Preis verdeckte ihn dort)', sternLinksDarunter);
+  p('und der Favoritenstern LINKS DARUNTER (21.09.2026: nicht mehr oben rechts, der Preis verdeckte ihn dort)', sternLinksDarunter,
+    `images-v3.css: Info ${info.links}%/${info.oben}% (${info.breite}%x${info.hoehe}%), Stern ${stern.links}%/${stern.oben}%`);
   p('Kapitel 11 sagt jetzt "oben links" fuer die Infotaste',
     /Oben links auf entsprechend vorbereiteten Artikeltasten/.test(app));
   p('und nennt den Unterschied zum Stern ausdruecklich',

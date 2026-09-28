@@ -37,7 +37,7 @@
       managerMessageCore: Object.freeze({ requiredVersion: '0.2.0', label: 'Zentrales sichtbares Manager-Meldungswesen' }),
       salesInventoryAnalysisCore: Object.freeze({ requiredVersion: '0.1.1', label: 'Studio Umsatz-, Kunden- und BestandsanalyseCore mit deutschen Folientypen' }),
       managerSalesInventoryDashboard: Object.freeze({ requiredVersion: '0.1.1', label: 'PC-Manager Analyse- und Bestandsdashboard mit Legende und Listenaktionen' }),
-      salesImportCore: Object.freeze({ requiredVersion: '0.2.0', label: 'Quota-sicherer kompakter Umsatzimport' }),
+      salesImportCore: Object.freeze({ requiredVersion: '0.3.0', label: 'Quota-sicherer kompakter Umsatzimport' }),
       eventSimulationCore: Object.freeze({ requiredVersion: '0.1.0', label: 'TÜV-Echtbetriebssimulation', runtimeRequired: false }),
       managerEventSimulation: Object.freeze({ requiredVersion: '0.1.0', label: 'Isolierter PC-Manager-Testadapter', runtimeRequired: false }),
       managerImportProgress: Object.freeze({ requiredVersion: '0.1.0', label: 'Sichtbarer Umsatzimport-FortschrittsCore' })

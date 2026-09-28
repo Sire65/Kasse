@@ -31,7 +31,9 @@ ok(managerHtml.includes('Money-Butler Eingang')&&managerHtml.includes('KC-Commun
 ok(managerHtml.includes('communicatorCashFile'),'PC Manager communicator file input missing');
 ok(managerApp.includes('decodeCommunicatorCashFile'),'PC Manager communicator cash validation missing');
 ok(managerApp.includes('queueCashTransferPayload'),'PC Manager cash forward helper missing');
-ok(managerApp.includes('127.0.0.1:8543/api/v1/cash-transfer/queue'),'PC Manager must forward through existing local cash queue');
+// 28.09.2026: der Weg ueber 8543 (HTTPS) scheiterte in echt immer (400 ohne apiVersion, Zertifikat im
+// Browser). Die Ablage laeuft jetzt ueber den lokalen Klartext-Kanal 47392 wie Stammdaten/Dienstplan.
+ok(managerApp.includes('127.0.0.1:47392/api/v1/cash-transfer/queue'),'PC Manager must forward through existing local cash queue');
 ok(managerApp.includes('Datei / KC Communicator übernommen')&&managerApp.includes('uebernehmeIncomingCashPayload(payload'),'PC Manager communicator acceptance path missing');
 
 console.log('Money Butler Communicator route: 20/20 checks passed');

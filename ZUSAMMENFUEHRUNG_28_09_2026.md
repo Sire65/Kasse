@@ -84,3 +84,52 @@ den Offline-Speicher erneuern.
 
 **Test:** `tests/einstellungen-bereiche.test.cjs` prüft Live und Schulung, jeden Tab einzeln, als
 Service-Admin und als normale Kasse. Die Gegenprobe mit dem alten Stand ergibt 18 Fehler.
+
+## Nachtrag: rote Tests abgearbeitet (28.09.2026)
+Alle 20 zuvor roten Tests wurden einzeln untersucht und nach ihrer Ursache eingeordnet.
+Danach laufen alle 79 Tests grün.
+
+**Echte Fehler im Code – behoben (Live und Schulung):**
+1. **Artikelnummern:** Schuss Rum (01007) und Schuss Amaretto (01008) waren seit 19.09. verkaufbar,
+   hatten aber keine Nummer und waren damit nicht scannbar. Freie Zahlung bekommt 04003 (Betreiber-Entscheid):
+   Der Scan öffnet die Betragseingabe und bucht nichts selbst. `kc-artikelnummern-core.js` 1.0.1, Build 1.0.2.
+2. **Freigabe-Manifest:** Es verlangte für den Verkaufs-Import noch 0.2.0, der Core ist seit 24.09. 0.3.0.
+   Der Manager-Release-Gate stand dadurch auf BLOCKED.
+3. **Supabase-Übersicht im Manager:** Der Satz „Kassieren und Abschlüsse laufen ohne sie“ war am 11.09.
+   beim Umbau verloren gegangen.
+4. **Warengruppen-Farbrand:** Er ist wieder auf den Bildkacheln (Betreiber-Entscheid, `images-v3.css` Build 6).
+5. **Neues Kassenlayout:** Die zweite Reihe der Bildkacheln lag unsichtbar unter der Artikelfläche, obwohl
+   „Seite 1/1“ angezeigt wurde. Die Kacheln passen sich jetzt dem Raster an, alle Artikel sind sichtbar,
+   Info-, Stern- und „+“-Knöpfe sitzen weiter auf dem Bild.
+6. **Geldweg Money Butler → PC-Manager → Kasse:** Keiner der Wege funktionierte.
+   * Die Übergaben gingen an den HTTPS-Kanal 8543 und wurden dort immer abgelehnt: ohne `apiVersion` mit 400,
+     und im normalen Browser ohnehin wegen des selbstsignierten Zertifikats.
+   * „An Kasse freigeben“ traf auf 47392 eine fehlende Route (404).
+   * Behebung: Beide Ablagen laufen jetzt über den nur lokal erreichbaren Kanal 47392, wie Stammdaten,
+     Dienstplan und Fernbefehle. Dazu kommt die Route im Manager-Dienst (`markt-kasse-suite/backend-source`).
+   * **Der Manager-Dienst auf dem PC muss dafür einmal neu gestartet werden** (KC_Manager_Start.cmd).
+   * Test: `tests/geldweg-manager-kasse.test.cjs` nutzt den echten Dienst, die echte Manager-Seite und eine
+     echt gekoppelte Kasse. Die Gegenprobe mit dem alten Code ergibt 5 Fehler.
+
+**Bewusst NICHT geändert:** Der Uhrknopf ist ab Werk sichtbar. Seit 21.09. sind die 18 Stammpersonen
+vorbelegt, damit Ausweise an der Stechuhr auch ohne PC-Manager erkannt werden, und gestempelt wird nur über
+diesen Knopf. Der Test prüft jetzt dieses Soll. Der ½-Knopf im KC-Aufbau bleibt klein (Betreiber-Entscheid).
+
+**Veraltete Tests an bewusste Änderungen angepasst.** Jede Anpassung trägt im Test einen Kommentar mit Commit.
+Keine Prüfung wurde gestrichen.
+* KC-Aufbau als Start auf frischen Geräten (19.09.)
+* Bilderversion 3
+* Stoßzeiten-Bombe
+* Import-Format 0.3.0
+* Datenbank-Schema 25–27
+* Money-Butler-Anmeldung: Der Test meldet sich über das echte Formular an, Supabase wird im Test simuliert.
+* Schulung als eigenständige Kopie
+* Import-Archiv `markt-kasse-suite/money-butler`
+
+**Umgebung:** Folgende Tests melden jetzt ehrlich „übersprungen“ mit Hinweis statt FEHLER:
+* Tests, die Dateien vom Rechner einer früheren Sitzung brauchen (`/home/claude/...`)
+* Tests mit externem Konverter
+* TV-Musik: Die beiden Weihnachts-MP3 sind wegen der Größe nicht im Repo. Sie gehören nach
+  `media/audio/music/`, bis dahin läuft die TV-Vorführung stumm.
+
+Der Live-Monitor-Test läuft jetzt echt. Er braucht dafür einmal `npm install` in `markt-kasse-suite/backend-source`.

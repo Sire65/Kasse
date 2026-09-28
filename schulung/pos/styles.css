@@ -3915,6 +3915,12 @@ body.kc-layout-neu:not(.kc-aufbau) .sales-area>.product-grid>.product-tile-wrap{
 body.kc-layout-neu:not(.kc-aufbau) .sales-area>.product-grid>.product-tile-wrap>.product-tile{
   width:100%!important;height:100%!important;min-height:0!important;max-height:235px!important;
 }
+/* 28.09.2026: Bildkacheln (Bilderversion 3) sind sonst quadratisch und spannen zwei Rasterzeilen -
+   im neuen Layout bleiben sie quadratisch, aber so hoch wie die Rasterzelle und mittig darin - so passen
+   eingebrannte Info-/Stern-Stellen weiter genau auf die unsichtbaren Knoepfe darueber. */
+body.kc-layout-neu:not(.kc-aufbau) .sales-area>.product-grid>.product-tile-wrap.image-v3{grid-row:auto!important;aspect-ratio:1!important;height:100%!important;width:auto!important;max-width:100%!important;justify-self:center!important;align-self:stretch!important}
+body.kc-layout-neu:not(.kc-aufbau) .sales-area>.product-grid>.product-tile-wrap.image-v3>.product-tile{aspect-ratio:1!important;height:100%!important;width:100%!important}
+body.kc-layout-neu:not(.kc-aufbau) .sales-area>.product-grid>.product-tile-wrap.image-v3>.product-variant-button{width:30%!important;height:30%!important;min-width:0!important;min-height:0!important;top:40%!important;font-size:clamp(12px,1.6vw,22px)!important;line-height:1!important;padding:0!important}
 
 /* Zahlungsfluss-Pfeile: auf Standard, KC003/KC004 und Schulung identisch.
    ◀ = Geld kommt zur Kasse, ▶ = Geld geht zum Kunden (Rückgeld/Auszahlung/Pfandrückgabe). */

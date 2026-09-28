@@ -36,7 +36,12 @@ const aufnehmen = (seite) => seite.evaluate(() => {
     emoji: /[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}]/u.test(n.textContent || ''),
   }));
   const kacheln = [...document.querySelectorAll('.product-tile')];
+  // 28.09.2026: die zuletzt angetippte Kachel (.last-selected, scale 1.08) ist gewollt groesser
+  // und zaehlte als Ueberlappung. Wie bei "ragt heraus" die Vergroesserung zum Messen abschalten.
+  const vorherUe = kacheln.map((t) => [t.style.transform, t.style.transition]);
+  kacheln.forEach((t) => { t.style.transition = 'none'; t.style.transform = 'none'; });
   const rechtecke = kacheln.map((t) => t.getBoundingClientRect());
+  kacheln.forEach((t, i) => { t.style.transform = vorherUe[i][0]; t.style.transition = vorherUe[i][1]; });
   let ueberlappungen = 0;
   for (let i = 0; i < rechtecke.length; i++) for (let j = i + 1; j < rechtecke.length; j++) {
     const a = rechtecke[i], b = rechtecke[j];
@@ -48,6 +53,11 @@ const aufnehmen = (seite) => seite.evaluate(() => {
     gruppen,
     gruppenLeisteHoehe: Math.round((document.getElementById('categories') || {getBoundingClientRect: () => ({height: 0})}).getBoundingClientRect().height),
     kachelZahl: kacheln.length,
+    // 28.09.2026: Standard blaettert (6 je Seite), kc-layout-neu zeigt seit 19.09. alle Artikel
+    // der Gruppe (productsPerPage in pos/app.js). Verglichen wird deshalb die Artikelzahl der
+    // Warengruppe, nicht die Kacheln einer Seite.
+    artikelGesamt: typeof allProductsForCategory === 'function' ? allProductsForCategory().length : -1,
+    seiten: typeof allProductsForCategory === 'function' ? Math.max(1, Math.ceil(allProductsForCategory().length / productsPerPage())) : -1,
     ueberlappungen,
     kachelRand: ersteKachel ? parseFloat(getComputedStyle(ersteKachel).borderTopWidth) : 0,
     kachelRandFarbe: ersteKachel ? getComputedStyle(ersteKachel).getPropertyValue('--gruppen-rand').trim() : '',
@@ -85,6 +95,9 @@ const aufnehmen = (seite) => seite.evaluate(() => {
       localStorage.setItem('kc_master_v040', JSON.stringify({registerId: 'KASSE-01', pinLockEnabled: false}));
       // Aktionen aus: sonst haengt das Ergebnis an der Uhrzeit (Happy Hour 17-18 Uhr).
       localStorage.setItem('kc_offers_v100', '[]');
+      // 28.09.2026 (a12231d): frische Geraete starten im KC-Aufbau; verglichen werden hier
+      // Standardansicht und kc-layout-neu - deshalb den Standard-Marker setzen.
+      localStorage.setItem('kc.kassenoberflaeche.standard.v1', '1');
     });
     await p.goto('http://127.0.0.1:8479/pos/index.html');
     await p.waitForTimeout(1600);
@@ -123,7 +136,14 @@ const aufnehmen = (seite) => seite.evaluate(() => {
   // Der eigentliche Punkt: die beiden Ansichten dürfen in diesen Eigenschaften nicht auseinanderlaufen.
   const s = messwerte.standard, n = messwerte.neu;
   pruefe('Beide Ansichten zeigen gleich viele Warengruppen', s.gruppen.length === n.gruppen.length, `${s.gruppen.length} / ${n.gruppen.length}`);
-  pruefe('Beide Ansichten zeigen gleich viele Artikel', s.kachelZahl === n.kachelZahl, `${s.kachelZahl} / ${n.kachelZahl}`);
+  pruefe('Beide Ansichten zeigen gleich viele Artikel', s.artikelGesamt > 0 && s.artikelGesamt === n.artikelGesamt,
+    `${s.artikelGesamt} / ${n.artikelGesamt} (Kacheln je Seite ${s.kachelZahl} / ${n.kachelZahl})`);
+  // Und kein Artikel geht unter: entweder alle Kacheln da oder weitere Seiten zum Blaettern.
+  for (const [name, m] of [['standard', s], ['neu', n]]) {
+    pruefe(`${name}: jeder Artikel der Gruppe ist erreichbar (Kacheln oder Seiten)`,
+      m.kachelZahl === m.artikelGesamt || (m.seiten > 1 && m.kachelZahl * m.seiten >= m.artikelGesamt),
+      `${m.kachelZahl} Kacheln, ${m.seiten} Seite(n), ${m.artikelGesamt} Artikel`);
+  }
   pruefe('Beide Ansichten haben den Kachel-Farbrand',
     (s.kachelRand >= 3) === (n.kachelRand >= 3), `${s.kachelRand} / ${n.kachelRand}`);
   pruefe('Beide Ansichten sind frei von Überlappungen', s.ueberlappungen === 0 && n.ueberlappungen === 0);

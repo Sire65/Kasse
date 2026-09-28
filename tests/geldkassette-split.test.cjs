@@ -31,7 +31,29 @@ function pruefe(name,bedingung,zusatz=''){
 
   // --- 1. Money Butler: Kassetteninhalt erfassen und aufteilen ---------------------------
   const mb=await browser.newPage({viewport:{width:1280,height:1400}});
+  // 28.09.2026: Seit 306f00f/7911a20/d4e5dc3 (25.09.) hat Money Butler eine Pflichtanmeldung
+  // (money-butler/kc-auth.js, Supabase); ohne Anmeldung bleibt .app per .mb-auth-locked unsichtbar.
+  // Die Sperre wird NICHT umgangen: der Test meldet sich ueber das echte Anmeldeformular an, die
+  // Supabase-Antworten kommen von hier (Test-Sitzung, Rolle "manager" = Kassenwart). Kein echter
+  // Netzwerkzugriff - alles ausser dem lokalen Testserver wird abgebrochen.
+  await mb.route(u=>!/^http:\/\/127\.0\.0\.1:8471\//.test(u.href),async route=>{
+    const url=new URL(route.request().url());
+    const antwort=(daten,status=200)=>route.fulfill({status,contentType:'application/json',body:JSON.stringify(daten)});
+    if(!/\.supabase\.co$/.test(url.hostname))return route.abort();
+    const jetzt=Math.floor(Date.now()/1000);
+    if(url.pathname==='/auth/v1/token')return antwort({access_token:'test-zugang',refresh_token:'test-erneuern',token_type:'bearer',expires_in:3600,expires_at:jetzt+3600,user:{id:'test-user',email:'kassenwart@test.invalid'}});
+    if(url.pathname==='/auth/v1/user')return antwort({id:'test-user',email:'kassenwart@test.invalid'});
+    if(url.pathname==='/functions/v1/kc-money-butler-account-bootstrap')return antwort({orgId:'KC_WERNE',personId:'test-person',appId:'KC_MONEY_BUTLER',coreRole:'member',accessRole:'manager',displayName:'Test Kassenwart'});
+    return antwort({error:'im Test nicht vorgesehen'},404);
+  });
   await mb.goto('http://127.0.0.1:8471/money-butler/index.html');
+  await mb.waitForSelector('#mbAuthForm',{state:'visible'});
+  pruefe('Money Butler zeigt ohne Anmeldung die Anmeldesperre',await mb.evaluate(()=>document.body.classList.contains('mb-auth-locked')));
+  await mb.fill('#mbAuthEmail','kassenwart@test.invalid');
+  await mb.fill('#mbAuthPassword','test-passwort');
+  await mb.click('#mbAuthSubmit');
+  await mb.waitForFunction(()=>!document.body.classList.contains('mb-auth-locked')&&!document.body.classList.contains('mb-auth-pending'),null,{timeout:10000});
+  pruefe('Anmeldung ueber das Formular gibt die Oberflaeche frei',(await mb.textContent('#mbAuthUserStatus')).includes('Kassenwart'),await mb.textContent('#mbAuthUserStatus'));
   await mb.selectOption('#register','KASSETTE');
   await mb.fill('#effectiveDate',heute());
   // 2x 50, 4x 20, 6x 10, 5x 2 EUR lose + 2 Rollen 1 EUR + 3 Rollen 20 ct

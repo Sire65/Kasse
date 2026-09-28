@@ -17,6 +17,9 @@ await p.addInitScript(()=>localStorage.setItem('kc_master_v040',JSON.stringify({
 // zusaetzliche Warengruppe und die Preise sind 10 % niedriger - der Test wurde rot,
 // obwohl das Programm richtig arbeitete. Aktionen werden deshalb ausgeschaltet.
 await p.addInitScript(()=>localStorage.setItem('kc_offers_v100','[]'));
+// 28.09.2026 (a12231d, Betreiber-Freigabe): frische Geraete starten im KC-Aufbau.
+// Dieser Test prueft ausdruecklich die Standardansicht - deshalb den Standard-Marker setzen.
+await p.addInitScript(()=>localStorage.setItem('kc.kassenoberflaeche.standard.v1','1'));
 await p.goto('http://127.0.0.1:8475/pos/index.html');await p.waitForTimeout(1400);
 await p.evaluate(()=>{const k=[...document.querySelectorAll('button')].find(x=>/KASSE STARTEN/i.test(x.textContent));if(k)k.click()});
 await p.waitForTimeout(1500);
@@ -92,7 +95,8 @@ for (const modul of [true,false]) {
   await p.evaluate(()=>{const k=[...document.querySelectorAll('button')].find(x=>/KASSE STARTEN/i.test(x.textContent));if(k)k.click()});
   await p.waitForTimeout(800);
   if(!modul)await p.evaluate(()=>document.body.classList.remove('kc-layout-neu'));
-  await p.evaluate(()=>{const k=[...document.querySelectorAll('button')].find(x=>/Stoßzeiten/i.test(x.textContent));if(k)k.click()});
+  // 28.09.2026 (fd41dac): der Knopf zeigt jetzt eine Bombe (SVG) statt Text - per ID suchen.
+  await p.evaluate(()=>{const k=document.getElementById('rushModeBtn');if(k)k.click()});
   await p.waitForTimeout(800);
   const m=await p.evaluate(()=>{
     const tabs=document.getElementById('categories'),grid=document.getElementById('productGrid');

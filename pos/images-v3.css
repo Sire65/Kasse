@@ -1,6 +1,8 @@
 /* V3 assets contain a name band and info icon. A real button sits on that icon. */
 .product-grid .product-tile-wrap.image-v3{position:relative!important;aspect-ratio:1;align-self:start!important;min-height:0!important;max-height:none!important;grid-row:span 2!important}
-.product-grid .image-v3>.product-tile{position:relative!important;width:100%!important;height:auto!important;aspect-ratio:1!important;min-height:0!important;max-height:none!important;padding:0!important;border:0!important;background:#eee!important}
+.product-grid .image-v3>.product-tile{position:relative!important;width:100%!important;height:auto!important;aspect-ratio:1!important;min-height:0!important;max-height:none!important;padding:0!important;border:4px solid var(--gruppen-rand,#315d8d)!important;box-sizing:border-box!important;background:#eee!important}
+/* 28.09.2026 (Betreiber): der Warengruppen-Farbrand ("Vorschlag A vom Stand", siehe styles.css) gilt
+   auch fuer die Bildkacheln - Bilderversion 3 hatte ihn mit border:0 abgeschaltet. */
 .product-grid .image-v3>.product-tile>img{position:absolute!important;inset:0!important;width:100%!important;height:100%!important;max-height:none!important;object-fit:contain!important}
 .product-grid .image-v3>.product-tile:after{display:none!important}
 .product-grid .image-v3 .product-label{position:absolute!important;inset:2% 2% auto auto!important;z-index:5!important;text-shadow:none!important;pointer-events:none}

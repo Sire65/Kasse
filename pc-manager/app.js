@@ -1217,9 +1217,11 @@ async function queueCashTransferPayload(payload){
     ?payload.registerIds.map(kasse=>({kasse,queueId:`${payload.transferId}#${kasse}`}))
     :[{kasse:payload.registerId,queueId:payload.transferId}];
   for(const ziel of ziele){
+    // 28.09.2026: ueber den lokalen Klartext-Kanal 47392 wie Stammdaten/Dienstplan - der HTTPS-Kanal
+    // 8543 lehnte diese Aufrufe immer ab (fehlende apiVersion, selbstsigniertes Zertifikat im Browser).
     const endpoint=payload.confirmationRequested===true
-      ?"https://127.0.0.1:8543/api/v1/finance-transfer/queue"
-      :"https://127.0.0.1:8543/api/v1/cash-transfer/queue";
+      ?"http://127.0.0.1:47392/api/v1/finance-transfer/queue"
+      :"http://127.0.0.1:47392/api/v1/cash-transfer/queue";
     const antwort=await fetch(endpoint,{
       method:"POST",headers:{"Content-Type":"application/json"},
       body:JSON.stringify({transferId:ziel.queueId,registerLabel:ziel.kasse,payload})

@@ -19,12 +19,16 @@ for(const [name,code] of [['POS',posSync],['Schulung',trainingSync]]){
 assert(pos.includes('const KC_ACCOUNT_KEY="kc_account_master_v029"'),'Kontofunktion liest unerwarteten Schlüssel');
 assert(pos.includes('allowedGroups:["Speisen","Getränke"]'),'Stadtmarketing-Fallback erlaubt Speisen/Getränke nicht');
 
-assert(managerDb.includes('SCHEMA_VERSION = 24'),'Manager-DB Schema 24 fehlt');
+// 28.09.2026: Die Schemata wurden bewusst weiterentwickelt (Manager d84dde7 -> 25, 8efec99 -> 26,
+// c446534 -> 27; Device 5d0d61f -> 11). Geprueft wird deshalb die Mindestversion, ab der accounts_json
+// existiert (Manager >= 24, Device >= 10) - accounts_json selbst wird unten weiterhin verlangt.
+const schema=(code)=>{const m=/const\s+SCHEMA_VERSION\s*=\s*(\d+)\s*;/.exec(code);return m?Number(m[1]):0;};
+assert(schema(managerDb)>=24,'Manager-DB Schema >= 24 fehlt (gefunden: '+schema(managerDb)+')');
 assert(managerDb.includes('accounts_json'),'Manager-DB accounts_json fehlt');
 assert(managerCompanion.includes('const accounts = Array.isArray(body?.accounts) ? body.accounts : []'),'Manager-Companion nimmt accounts nicht an');
 assert(managerCompanion.includes('accounts_json'),'Manager-Companion persistiert/liefert accounts nicht');
 
-assert(deviceDb.includes('SCHEMA_VERSION = 10'),'Device-DB Schema 10 fehlt');
+assert(schema(deviceDb)>=10,'Device-DB Schema >= 10 fehlt (gefunden: '+schema(deviceDb)+')');
 assert(deviceDb.includes('accounts_json'),'Device-Cache accounts_json fehlt');
 assert(deviceCompanion.includes('JSON.stringify(antwort.accounts || [])'),'Device-Companion cached accounts nicht');
 assert(deviceCompanion.includes("accounts: (() => { try { return JSON.parse(zeile.accounts_json || '[]'); } catch (e) { return []; } })()"),'Device-Loopback liefert accounts nicht');

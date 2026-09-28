@@ -7,6 +7,8 @@ const WURZEL=path.resolve(__dirname,'..');
 const T={'.html':'text/html','.js':'text/javascript','.css':'text/css','.json':'application/json','.png':'image/png','.jpg':'image/jpeg','.webp':'image/webp','.svg':'image/svg+xml','.mp3':'audio/mpeg','.txt':'text/plain','.webmanifest':'application/manifest+json'};
 let ok=0,rot=0; const p=(n,b,z='')=>{b?ok++:rot++;console.log(`${b?'  OK  ':'FEHLER'}  ${n}${z?'   ['+z+']':''}`)};
 
+// 28.09.2026 (a12231d): frische Geraete starten im KC-Aufbau. Dort zeigt der Kopf den Bediener
+// ueber data-kc-text (::after), nicht als innerText - deshalb je nach Ansicht lesen.
 const frei=async pg=>pg.evaluate(()=>{["fullscreenGate","kcStartupSummary","kcPinLockOverlay"].forEach(id=>{const e=document.getElementById(id);if(e)e.style.display="none"});document.querySelectorAll("[data-kc-sperrend]").forEach(e=>e.style.display="none")});
 // Ein Scanner tippt wie eine Tastatur und schickt Enter hinterher.
 async function scanne(pg,code){ await pg.evaluate(()=>document.activeElement&&document.activeElement.blur());
@@ -24,12 +26,12 @@ async function scanne(pg,code){ await pg.evaluate(()=>document.activeElement&&do
  // =============================================================== WEG 1: Bedienerausweis
  console.log('\n== Weg 1: Mitarbeiterausweis scannen ==');
  const start=await pg.evaluate(()=>({bediener:state.master.operatorName,
-   kopf:document.getElementById("operatorBtn")?.innerText.replace(/\s+/g,' ').trim()}));
+   kopf:(()=>{const k=document.getElementById("operatorBtn");if(!k)return undefined;return document.body.classList.contains("kc-aufbau")?(k.dataset.kcText||""):k.innerText.replace(/\s+/g,' ').trim()})()}));
  p('vor dem Scan steht "Team" im Kopf', /Team/.test(start.kopf||'')||start.bediener==='Team', `${start.bediener} / ${start.kopf}`);
 
  await scanne(pg,'KCOPE1:kc-0003');            // Bedienerausweis aus dem PC-Manager
  const nach1=await pg.evaluate(()=>({bediener:state.master.operatorName,
-   kopf:document.getElementById("operatorBtn")?.innerText.replace(/\s+/g,' ').trim()}));
+   kopf:(()=>{const k=document.getElementById("operatorBtn");if(!k)return undefined;return document.body.classList.contains("kc-aufbau")?(k.dataset.kcText||""):k.innerText.replace(/\s+/g,' ').trim()})()}));
  p('nach dem Scan ist der Bediener umgesprungen', nach1.bediener==='Puhbär', nach1.bediener);
  p('der neue Bediener steht oben links im Kopf', /Puhbär/.test(nach1.kopf||''), nach1.kopf);
 
@@ -44,7 +46,7 @@ async function scanne(pg,code){ await pg.evaluate(()=>document.activeElement&&do
  await pg.keyboard.type('KCOPE1:kc-0001',{delay:8}); await pg.keyboard.press('Enter'); await pg.waitForTimeout(700);
  const beiOffenerListe=await pg.evaluate(()=>({bediener:state.master.operatorName,
    nochOffen:document.getElementById("operatorDialog")?.open===true,
-   kopf:document.getElementById("operatorBtn")?.innerText.replace(/\s+/g,' ').trim()}));
+   kopf:(()=>{const k=document.getElementById("operatorBtn");if(!k)return undefined;return document.body.classList.contains("kc-aufbau")?(k.dataset.kcText||""):k.innerText.replace(/\s+/g,' ').trim()})()}));
  p('der Scan wirkt auch bei geoeffneter Bedienerliste', beiOffenerListe.bediener==='Maja', beiOffenerListe.bediener);
  p('und die Liste schliesst sich danach von selbst', beiOffenerListe.nochOffen===false,
    beiOffenerListe.nochOffen?'Liste blieb offen und zeigte den alten Namen':'geschlossen');
@@ -144,8 +146,19 @@ async function scanne(pg,code){ await pg.evaluate(()=>document.activeElement&&do
  await pg.evaluate(()=>document.querySelectorAll("dialog[open]").forEach(d=>{try{d.close()}catch{}}));
  const uhrAbWerk=await pg.evaluate(()=>{const b=document.getElementById("timeClockBtn");
    return {da:!!b, sichtbar:!!b&&!b.hidden&&b.getBoundingClientRect().width>0}});
- p('ohne freigegebene Zeiterfassung ist der Uhrknopf bewusst ausgeblendet',
-   uhrAbWerk.da===true&&uhrAbWerk.sichtbar===false, JSON.stringify(uhrAbWerk));
+ // 28.09.2026 (d53df16, Betreiber-Entscheid 28.09.): die Stechuhr ist ab Werk mit den 18
+ // Stammpersonen (KC-0001..KC-0018) vorbelegt, damit Mitgliedsausweise auch ohne PC-Manager
+ // erkannt werden. Der Uhrknopf ist deshalb bewusst sichtbar (Stempeln geht nur ueber ihn).
+ const abWerk=await pg.evaluate(()=>{const b=document.getElementById("timeClockBtn");
+   const pers=window.KCTimeClockPOS?.personen?.()||[];
+   return {da:!!b, sichtbar:!!b&&!b.hidden&&b.getBoundingClientRect().width>0,
+     personen:pers.length, nummern:pers.map(x=>x.credential).join(','),
+     gespeichert:localStorage.getItem('kc_time_clock_people_v1')!==null}});
+ p('ab Werk ist die Personenliste mit den 18 Stammpersonen vorbelegt',
+   abWerk.personen===18&&/KC-0001/.test(abWerk.nummern)&&/KC-0018/.test(abWerk.nummern)&&abWerk.gespeichert===false,
+   `${abWerk.personen} Personen, gespeichert: ${abWerk.gespeichert}`);
+ p('ab Werk ist der Uhrknopf deshalb bewusst sichtbar',
+   uhrAbWerk.da===true&&uhrAbWerk.sichtbar===true, JSON.stringify(uhrAbWerk));
 
  // Jetzt so, wie es Freitag sein muss: der PC-Manager hat Personen an die Kasse gesendet.
  await pg.evaluate(()=>{
@@ -181,7 +194,7 @@ async function scanne(pg,code){ await pg.evaluate(()=>document.activeElement&&do
  console.log('\n== Nach einem Neustart der Kasse ==');
  await pg.reload(); await pg.waitForTimeout(6500); await frei(pg);
  const nachNeustart=await pg.evaluate(()=>({bediener:state.master.operatorName,
-   kopf:document.getElementById("operatorBtn")?.innerText.replace(/\s+/g,' ').trim()}));
+   kopf:(()=>{const k=document.getElementById("operatorBtn");if(!k)return undefined;return document.body.classList.contains("kc-aufbau")?(k.dataset.kcText||""):k.innerText.replace(/\s+/g,' ').trim()})()}));
  p('nach einem Neustart steht wieder "Team" da', nachNeustart.bediener==='Team',
    `${nachNeustart.bediener} / ${nachNeustart.kopf}`);
 

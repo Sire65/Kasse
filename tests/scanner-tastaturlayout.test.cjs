@@ -38,7 +38,13 @@ const lage = (pg) => pg.evaluate(() => {
   const d = document.getElementById('messageDialog');
   return {
     meldung: d && d.open ? d.innerText.replace(/\s+/g, ' ').trim() : '',
-    bediener: (document.getElementById('operatorBtn') || {}).innerText || '',
+    // 28.09.2026: Seit a12231d (19.09., KC-Aufbau startet auf frischen Geraeten automatisch)
+    // blendet kc-oberflaechen-anwenden.css die Kinder von #operatorBtn aus und zeigt den Namen
+    // per ::after aus data-kc-text - innerText ist dann leer. Gelesen wird deshalb der Name,
+    // den die Kasse setzt (#operatorBtnName), dazu der angezeigte data-kc-text.
+    bediener: [(document.getElementById('operatorBtnName') || {}).textContent || '',
+      ((document.getElementById('operatorBtn') || {}).dataset || {}).kcText || '',
+      (document.getElementById('operatorBtn') || {}).innerText || ''].map((s) => s.trim()).filter(Boolean).join(' | '),
     korb: [...document.querySelectorAll('#cartList .cart-row, #cartList li, #cartList > *')].map((e) => e.innerText.replace(/\s+/g, ' ').trim()).join(' | '),
     hinweis: [...document.querySelectorAll('#notificationBar, .kc-message, .kc-message-text, [data-kc-message]')]
       .map((e) => e.innerText).join(' ') || (document.body.innerText.match(/Scanner steht auf amerikanischer[^\n]*/) || [''])[0],

@@ -38,6 +38,16 @@ const SCHUSS = process.env.KC_BILDER || path.join(__dirname, 'tuev', 'vorfuehrun
      KC_SEITE=/home/claude/KC_Original_Praesentation_EINE_DATEI.html node tests/... */
 const EINZELSEITE = process.env.KC_SEITE || '';
 
+/* 28.09.2026: Die beiden Weihnachtsstücke liegen wegen der Dateigröße bewusst NICHT im Paket
+   (LIESMICH_KASSENDESIGNER.txt, "NICHT ENTHALTEN"). Fehlt eine davon, werden NUR die
+   Musikprüfung und die 404-Meldung für genau diese Musikdatei übersprungen - alle anderen
+   Dateien bleiben in der 404-Prüfung. Bei KC_SEITE ist die Musik eingebettet: nichts wird
+   übersprungen. */
+const MUSIKDATEIEN = ['weihnachten-nastelbom.mp3', 'weihnachten-sound-gallery.mp3'];
+const MUSIK_FEHLT = EINZELSEITE ? [] : MUSIKDATEIEN.filter((d) => !fs.existsSync(path.join(WURZEL, 'media', 'audio', 'music', d)));
+const MUSIK_HINWEIS = 'Musikdatei nicht im Paket – aus dem Freitagspaket nach media/audio/music/ kopieren';
+MUSIK_FEHLT.forEach((d) => console.log('  ueberspringen: 404-Prüfung für ' + d + ' (' + MUSIK_HINWEIS + ')'));
+
 let gruen = 0; const rot = [];
 const p = (name, ok, zusatz) => { if (ok) gruen++; else rot.push(name + (zusatz ? '   [' + zusatz + ']' : '')); };
 
@@ -64,7 +74,12 @@ const TYPEN = { '.html': 'text/html', '.js': 'text/javascript', '.css': 'text/cs
   const fehler = [];
   seite.on('pageerror', (e) => fehler.push(String(e).slice(0, 160)));
   const fehlendeBilder = [];
-  seite.on('response', (r) => { if (r.status() >= 400 && /\.(png|jpe?g|webp|bin|mp3)/i.test(r.url())) fehlendeBilder.push(r.url().split('/').pop() + ' → ' + r.status()); });
+  seite.on('response', (r) => {
+    if (r.status() < 400 || !/\.(png|jpe?g|webp|bin|mp3)/i.test(r.url())) return;
+    const name = decodeURIComponent(r.url().split('?')[0].split('#')[0].split('/').pop());
+    if (MUSIK_FEHLT.includes(name)) return;   // siehe MUSIK_FEHLT oben (28.09.2026)
+    fehlendeBilder.push(r.url().split('/').pop() + ' → ' + r.status());
+  });
 
   await seite.goto(EINZELSEITE ? `http://127.0.0.1:${PORT}/einzeldatei.html`
     : `http://127.0.0.1:${PORT}/pc-manager/tv-designer/KC_TV_START.html`);
@@ -232,7 +247,11 @@ const TYPEN = { '.html': 'text/html', '.js': 'text/javascript', '.css': 'text/cs
   await seite.waitForTimeout(1600);
   const ton = await seite.evaluate(() => { const a = window.KCTVMusik && window.KCTVMusik.spieler;
     return a ? { da: true, laeuft: !a.paused, zeit: a.currentTime, laut: a.volume } : { da: false }; });
-  p('Die Musik läuft', ton.da && ton.laeuft && ton.zeit > 0.2, JSON.stringify(ton));
+  if (MUSIK_FEHLT.includes('weihnachten-nastelbom.mp3')) {
+    console.log('  ueberspringen: Die Musik läuft (' + MUSIK_HINWEIS + ')');
+  } else {
+    p('Die Musik läuft', ton.da && ton.laeuft && ton.zeit > 0.2, JSON.stringify(ton));
+  }
 
   p('Keine Skriptfehler in der ganzen Vorführung', fehler.length === 0, fehler.slice(0, 3).join(' | '));
 

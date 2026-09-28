@@ -84,7 +84,14 @@ const pruefe=(name,bedingung,zusatz='')=>{console.log(`${bedingung?'  OK  ':'FEH
   });
   pruefe('Kacheln haben einen sichtbaren Rand',kacheln.every(k=>k.randBreite>=3),`schmalster ${Math.min(...kacheln.map(k=>k.randBreite))}px`);
   pruefe('Der Rand trägt die Warengruppenfarbe',kacheln.every(k=>k.randFarbe&&k.randFarbe===k.gruppenFarbe),`${kacheln[0].randFarbe} / Gruppe ${kacheln[0].gruppenFarbe}`);
-  pruefe('Der dunkle Balken bedeckt weniger als die Hälfte der Kachel',kacheln.every(k=>k.anteilVerdeckt<50),`größter Anteil ${Math.max(...kacheln.map(k=>k.anteilVerdeckt))}%`);
+  // 28.09.2026 (949592f, Bilderversion 3): auf Bildkacheln (image-v3) gibt es den ::after-Balken
+  // nicht mehr, das Namensband ist ins Bild eingebrannt. Gemessen werden nur Kacheln MIT Balken.
+  const balken=await p.evaluate(()=>[...document.querySelectorAll('.product-tile')]
+    .filter(n=>getComputedStyle(n,'::after').display!=='none')
+    .map(n=>{const r=n.getBoundingClientRect(),oben=parseFloat(getComputedStyle(n,'::after').top)||0;
+      return {id:n.dataset.id,anteilVerdeckt:Math.round((1-oben/r.height)*100)}}));
+  if(!balken.length)console.log('HINWEIS  Balkenprüfung: keine Kachel mit ::after-Balken sichtbar (alle Bildkacheln) - nichts zu messen');
+  else pruefe('Der dunkle Balken bedeckt weniger als die Hälfte der Kachel',balken.every(k=>k.anteilVerdeckt<50),`${balken.length} Kachel(n), größter Anteil ${Math.max(...balken.map(k=>k.anteilVerdeckt))}%`);
 
   await browser.close();
   server.close();

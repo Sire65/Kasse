@@ -136,9 +136,16 @@ p('Keine Bonnummer ist doppelt vergeben', doppelteIds === 0, `${doppelteIds} Dop
 
 // ---------------------------------------------------------------- 4. Tote Verweise
 console.log('\n== Verweise in allen Seiten ==');
+// 28.09.2026: markt-kasse-suite/money-butler/ ist Teil des Paketimports vom 24.08.2026
+// (siehe markt-kasse-suite/README.md und PACKAGE_INVENTORY.md) - ein unveränderter Archivstand,
+// der nicht ausgeliefert wird. Sein Verweis ../pc-manager/vendor/... stammt aus dem alten
+// ZIP-Aufbau und kann im Repository nicht aufgehen. Ausgenommen wird NUR dieser Archivordner;
+// markt-kasse-suite/backend-source (der echte Manager-Dienst) wird weiter geprüft.
+const ARCHIV_OHNE_VERWEISPRUEFUNG = [path.join('markt-kasse-suite', 'money-butler') + path.sep];
 const tot = [];
 let verweise = 0;
 for (const f of htmlDateien) {
+  if (ARCHIV_OHNE_VERWEISPRUEFUNG.some((a) => rel(f).startsWith(a))) continue;
   const s = fs.readFileSync(f, 'utf8');
   for (const m of s.matchAll(/(?:src|href)="([^"#?][^"]*)"/g)) {
     const u = m.group?.(1) ?? m[1];
@@ -155,7 +162,11 @@ p('Kein Verweis zeigt auf eine Datei, die es nicht gibt', tot.length === 0,
 console.log('\n== Gleiche Datei an mehreren Orten ==');
 const crypto = require('crypto');
 const nachInhalt = new Map();
+// 28.09.2026: schulung/ ist bewusst eine eigenständige Offline-Kopie der Kasse (seit 13.09.,
+// am 23.09. wurden schulung/cores und schulung/shared durch volle Kopien ersetzt). Dort sind
+// gleiche Dateien also gewollt. Ausgenommen wird NUR schulung/ und NUR in dieser Prüfung.
 for (const f of jsDateien) {
+  if (rel(f).startsWith('schulung' + path.sep)) continue;
   const roh = fs.readFileSync(f);
   if (roh.length < 400) continue;
   const h = crypto.createHash('sha256').update(roh).digest('hex');
@@ -164,7 +175,7 @@ for (const f of jsDateien) {
 const doppelt = [...nachInhalt.values()].filter((v) => v.length > 1);
 p('Keine JavaScript-Datei liegt inhaltsgleich mehrfach im Paket', doppelt.length === 0,
   doppelt.length ? doppelt.slice(0, 2).map((v) => v.join(' = ')).join(' | ')
-                 : `${jsDateien.length} Dateien verglichen`);
+                 : `${jsDateien.filter((f) => !rel(f).startsWith('schulung' + path.sep)).length} Dateien verglichen, schulung/ ausgenommen`);
 
 // ---------------------------------------------------------------- 6. Versionsangaben
 console.log('\n== Versionsangabe der Suite ==');
