@@ -52,7 +52,7 @@ const KC_BEDIENERSTAMM=[
 // Klarname - an der Kasse gibt es nur Pseudonyme). Ohne angemeldeten Bediener bleibt es "Team".
 function belegBediener(t){return String((t&&t.operator)||state.master.operatorName||"Team").trim()||"Team"}
 Object.defineProperty(window,"KCBelegBediener",{get:()=>belegBediener(null),configurable:true}); // fuer den Gutscheinbon
-const DEFAULTS = {workspaceButtons:null,clubName:"Köcheclub Werne",clubLogo:"",eventName:"Weihnachtsmarkt 2026",registerName:"Kasse 1",operatorName:"Team",operators:KC_BEDIENERSTAMM.map(p=>p.name),operatorProfiles:KC_BEDIENERSTAMM.map(p=>({...p})),requireOperatorConfirmation:false,pinLockEnabled:true,nextBon:123,depositRule:"automatic",showProductInfo:true,highlightAllergens:true,notificationProfile:"standard",buttonSize:"standard",buttonMode:"image",showPrice:true,registerId:"KASSE-01",showStaff:true,showTip:true,showDeposit:true,showPrint:true,showMore:true,showChange:true,showCard:true,showAccount:true,showDiscount:true,showHappyHour:true,showRushMode:true,allowTraining:true,requireChangeFlow:false,rushMode:false,trainingMode:false,autoFavorites:true,groupColorMode:true,fiscalMode:"off",tseProvider:"",tseSerial:"",superAdminAccess:null,healthMonitor:{enabled:true,level:"normal",autoRushProtection:true},receipt:{header:true,head1:"Köcheclub Werne",head2:"Weihnachtsmarkt",vat:"summary",foot1:"Vielen Dank!",autoPrint:true}};
+const DEFAULTS = {workspaceButtons:null,clubName:"Köcheclub Werne",clubLogo:"",eventName:"Weihnachtsmarkt 2026",registerName:"Kasse 1",operatorName:"Team",operators:KC_BEDIENERSTAMM.map(p=>p.name),operatorProfiles:KC_BEDIENERSTAMM.map(p=>({...p})),requireOperatorConfirmation:false,pinLockEnabled:true,nextBon:123,depositRule:"automatic",showProductInfo:true,highlightAllergens:true,notificationProfile:"standard",buttonSize:"standard",buttonMode:"image",showPrice:true,registerId:"KASSE-01",showStaff:true,showTip:true,showDeposit:true,showPrint:true,showMore:true,digitalBonEnabled:false,showChange:true,showCard:true,showAccount:true,showDiscount:true,showHappyHour:true,showRushMode:true,allowTraining:true,requireChangeFlow:false,rushMode:false,trainingMode:false,autoFavorites:true,groupColorMode:true,fiscalMode:"off",tseProvider:"",tseSerial:"",tseEntwicklungAktiv:false,tseRelayAdresse:"",superAdminAccess:null,healthMonitor:{enabled:true,level:"normal",autoRushProtection:true},receipt:{header:true,head1:"Köcheclub Werne",head2:"Weihnachtsmarkt",vat:"summary",foot1:"Vielen Dank!",autoPrint:true}};
 DEFAULTS.categoryOrder=null;
 const OPTIONS={
   shot:{title:"Schuss wählen",choices:[
@@ -89,10 +89,10 @@ const DEFAULT_PRODUCTS=[
  // Zahlungsknopf unter MEHR, der noch nicht freigeschaltet ist.
  {id:"wertmarke",name:"Wertmarke",price:5.00,category:"Sonstiges",image:"assets/wertmarke.svg",color:"#7c3aed",info:{important:"Vorab verkaufte Wertmarke. Das Einl\u00f6sen erfolgt sp\u00e4ter \u00fcber die Bezahlfunktion Wertmarke."}},
  {id:"glasplus",name:"Glaspfand",price:2.00,category:"Pfand",image:"assets/pfand_aufschlag_version_3.png",manualDeposit:true},
- {id:"zangeplus",name:"Feuerzangenpfand",price:2.00,category:"Pfand",image:"assets/feuerzange_version_3.webp",manualDeposit:true},
+ {id:"zangeplus",name:"Feuerzangenpfand",price:2.00,category:"Pfand",image:"assets/feuerzangenpfand_version_3.webp",manualDeposit:true},
  {id:"glasminus",name:"Glasrückgabe",price:-2.00,category:"Pfand",image:"assets/pfandrueckgabe_version_3.png"},
- {id:"zangeminus",name:"Feuerzange Rückgabe",price:-2.00,category:"Pfand",image:"assets/feuerzange_version_3.webp"},
- {id:"glaszangebundleminus",name:"Glas + Feuerzange Rückgabe",price:-4.00,category:"Pfand",image:"assets/pfand_glas_feuerzange_version_3.webp",color:"#9f1239",info:{shortDescription:"Komplettrückgabe von Pfandglas und Feuerzange"}},
+ {id:"zangeminus",name:"Feuerzange Rückgabe",price:-2.00,category:"Pfand",image:"assets/feuerzangerueckgabe_version_3.webp"},
+ {id:"glaszangebundleminus",name:"Glas + Feuerzange Rückgabe",price:-4.00,category:"Pfand",image:"assets/glas_feuerzangerueckgabe_version_3.webp",color:"#9f1239",info:{shortDescription:"Komplettrückgabe von Pfandglas und Feuerzange"}},
  {id:"becher",name:"Außer-Haus-Becher",price:1.00,category:"Sonstiges",image:"assets/becher_auth.jpg"}
 ];
 let PRODUCTS=JSON.parse(localStorage.getItem("kc_products_v050")||"null")||DEFAULT_PRODUCTS;
@@ -140,8 +140,8 @@ if(!PRODUCTS.find(p=>p.id==="freie-zahlung")){
 }
 const REQUIRED_DEPOSIT_RETURNS=[
  {id:"glasminus",name:"Glasrückgabe",price:-2.00,category:"Pfand",image:"assets/pfandrueckgabe_version_3.png",color:"#9f1239"},
- {id:"zangeminus",name:"Feuerzange Rückgabe",price:-2.00,category:"Pfand",image:"assets/feuerzange_version_3.webp",color:"#9f1239",info:{shortDescription:"Einzelrückgabe Feuerzange"}},
- {id:"glaszangebundleminus",name:"Glas + Feuerzange Rückgabe",price:-4.00,category:"Pfand",image:"assets/pfand_glas_feuerzange_version_3.webp",color:"#9f1239",info:{shortDescription:"Komplettrückgabe von Pfandglas und Feuerzange"}}
+ {id:"zangeminus",name:"Feuerzange Rückgabe",price:-2.00,category:"Pfand",image:"assets/feuerzangerueckgabe_version_3.webp",color:"#9f1239",info:{shortDescription:"Einzelrückgabe Feuerzange"}},
+ {id:"glaszangebundleminus",name:"Glas + Feuerzange Rückgabe",price:-4.00,category:"Pfand",image:"assets/glas_feuerzangerueckgabe_version_3.webp",color:"#9f1239",info:{shortDescription:"Komplettrückgabe von Pfandglas und Feuerzange"}}
 ];
 let depositReturnMigration=false;
 for(const required of REQUIRED_DEPOSIT_RETURNS){const existing=PRODUCTS.find(p=>p.id===required.id);if(!existing){PRODUCTS.push(required);depositReturnMigration=true}else if(required.id!=="glasminus"&&String(existing.image||"").includes("amaretto_auth")){existing.image=required.image;existing.info=required.info;depositReturnMigration=true}}
@@ -151,7 +151,7 @@ if(depositReturnMigration)localStorage.setItem("kc_products_v050",JSON.stringify
 // Ohne das behielte eine Kasse, die den Artikel schon im Speicher hat, das alte
 // Ersatzbild und den alten Preis - der Neustand waere nur auf einem frischen Geraet zu
 // sehen. Es werden ausschliesslich diese Felder gesetzt, sonst nichts.
-{const patches={zangeplus:{image:"assets/feuerzange_version_3.webp"},zangeminus:{image:"assets/feuerzange_version_3.webp"},glaszangebundleminus:{image:"assets/pfand_glas_feuerzange_version_3.webp"},mettwurst:{image:"assets/mettwurst_auth.webp"},hering:{image:"assets/hering_kartoffeln_auth.webp",price:4.50},knirpsecreme:{image:"assets/kartoffelcreme_auth.webp",price:3.50},
+{const patches={zangeplus:{image:"assets/feuerzangenpfand_version_3.webp"},zangeminus:{image:"assets/feuerzangerueckgabe_version_3.webp"},glaszangebundleminus:{image:"assets/glas_feuerzangerueckgabe_version_3.webp"},mettwurst:{image:"assets/mettwurst_auth.webp"},hering:{image:"assets/hering_kartoffeln_auth.webp",price:4.50},knirpsecreme:{image:"assets/kartoffelcreme_auth.webp",price:3.50},
 // 03.09.2026, vom Betreiber bestaetigt: Bei diesen vier Getraenken stand der Preis MIT Pfand
 // als Artikelpreis. Weil die Kasse das Pfand automatisch draufrechnet, wurde es zweimal
 // berechnet - der Gast zahlte 2,00 EUR zu viel je Glas. Hier stehen jetzt die Getraenkepreise
@@ -971,6 +971,12 @@ function openProductInfo(id){
   if(r.status!=='approved')sections.push(infoSection('Datenstatus','Produktinformation nicht vollständig geprüft – bitte Marktleitung fragen.','important'));
   el('productInfoContent').innerHTML=sections.join('')||'<p class="info-empty">Keine freigegebenen Schnellinformationen hinterlegt.</p>';
   el('productInfoDetailsBtn').hidden=false;el('productInfoDialog').showModal();notify('info',`${p.name}: Information geöffnet`,'product-info');
+  // 25.09.2026 (Betreiber: "Jeder Artikel Button hat einen Info Button. Einige haben
+  // Favoriten Sterne, der eine Verkaufsauswertung oeffnet. Baue ueberall im Info-Bereich einen
+  // Knopf ein, der dieselbe Info aufruft wie der Stern"): ruft dieselbe Funktion auf wie der
+  // Favoriten-Stern (openSalesTimeBreakdown) - jetzt bei JEDEM Artikel erreichbar, nicht nur
+  // bei den automatisch erkannten Renner-Artikeln mit Stern.
+  el('productInfoSalesBtn').onclick=()=>openSalesTimeBreakdown(p.id);
 }
 function infoSection(title,text,cls){return `<section class="info-section ${cls}"><h3>${escapeHtml(title)}</h3><p>${escapeHtml(text)}</p></section>`}
 function escapeHtml(value){return String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
@@ -1027,10 +1033,13 @@ function addConfiguredProduct(p,option){
 function signedMoney(value){const amount=Number(value||0);return amount<0?`− ${money(Math.abs(amount))}`:money(amount)}
 function lineUnit(x){return x.price+(x.option?.price||0)+(state.master.depositRule==="included"?x.deposits.reduce((s,d)=>s+d.price,0):0)}
 function grossTotal(){return fromCents(state.cart.reduce((sum,item)=>sum+toCents(lineUnit(item)*item.qty)+(state.master.depositRule==="automatic"?toCents(item.deposits.reduce((value,deposit)=>value+Number(deposit.price||0),0)*item.qty):0),0))}
-function positionDiscountAmount(item){const percent=Math.max(0,Math.min(100,Number(item?.positionDiscount?.percent||0))),unit=Number(item?.price||0)+Number(item?.option?.price||0);if(!item||item.category==="Pfand"||item.manualDeposit||unit<=0||percent<=0)return 0;const base=toCents(unit*Number(item.qty||0));return fromCents(Math.min(base,Math.round(base*percent/100)))}
+// 26.09.2026 (Betreiber: "der Endpreis soll immer auf 20 Cent aufgerundet werden, zugunsten
+// der Kasse, egal wie der Prozentsatz zustande kam"): siehe rabattBetragGerundet (weiter
+// unten definiert, wird hier bereits verwendet, da Funktionsdeklarationen gehoisted werden).
+function positionDiscountAmount(item){const percent=Math.max(0,Math.min(100,Number(item?.positionDiscount?.percent||0))),unit=Number(item?.price||0)+Number(item?.option?.price||0);if(!item||item.category==="Pfand"||item.manualDeposit||unit<=0||percent<=0)return 0;const basis=fromCents(toCents(unit*Number(item.qty||0)));return rabattBetragGerundet(basis,percent)}
 function totalPositionDiscountAmount(){return fromCents(state.cart.reduce((sum,item)=>sum+toCents(positionDiscountAmount(item)),0))}
 function discountBase(keysOverride=null){const selected=Array.isArray(keysOverride)?keysOverride:(Array.isArray(state.discount?.keys)?state.discount.keys:[]),restrict=selected.length>0;return fromCents(state.cart.reduce((sum,item)=>{const unit=Number(item.price||0)+Number(item.option?.price||0),eligible=item.category!=="Pfand"&&!item.manualDeposit&&unit>0&&!Number(item.positionDiscount?.percent||0);if(!eligible)return sum;if(restrict&&!selected.includes(item.key))return sum;return sum+toCents(unit*Number(item.qty||0))},0))}
-function globalDiscountAmount(){const percent=Math.max(0,Math.min(100,Number(state.discount?.percent||0))),base=toCents(discountBase());return fromCents(Math.min(base,Math.round(base*percent/100)))}
+function globalDiscountAmount(){const percent=Math.max(0,Math.min(100,Number(state.discount?.percent||0)));if(percent<=0)return 0;return rabattBetragGerundet(discountBase(),percent)}
 function discountAmount(){return fromCents(toCents(globalDiscountAmount())+toCents(totalPositionDiscountAmount()))}
 function total(){return fromCents(toCents(grossTotal())-toCents(discountAmount()))}
 function resetDiscount(){state.discount={percent:0,reason:"",note:"",keys:[]}}
@@ -1340,37 +1349,41 @@ function eligibleDiscountItems(){
     return eligible&&(!positionDiscountTargetKey||item.key===positionDiscountTargetKey);
   })
 }
-function renderDiscountArticlePicker(){
-  const search=(el("discountArticleSearch")?.value||"").trim().toLowerCase();
-  const items=eligibleDiscountItems();
-  const categories=["Alle",...new Set(items.map(item=>item.category))];
-  el("discountCategoryFilters").innerHTML=categories.map(category=>`<button type="button" data-discount-category="${escapeHtml(category)}" class="${category===discountDraftCategory?"active":""}">${escapeHtml(category)}</button>`).join("");
-  el("discountCategoryFilters").querySelectorAll("button").forEach(button=>button.onclick=()=>{
-    discountDraftCategory=button.dataset.discountCategory;
-    renderDiscountArticlePicker();
-  });
-  const visible=items.filter(item=>(discountDraftCategory==="Alle"||item.category===discountDraftCategory)&&(!search||item.name.toLowerCase().includes(search)));
-  el("discountArticleList").innerHTML=visible.map(item=>`<label class="discount-article-row ${discountDraftKeys.includes(item.key)?"selected":""}">
-    <input type="checkbox" data-discount-key="${item.key}" ${discountDraftKeys.includes(item.key)?"checked":""}>
-    <img src="${item.image}" alt="">
-    <span><strong>${escapeHtml(item.name)}</strong><small>${escapeHtml(item.category)} · Menge ${item.qty}</small></span>
-    <b>${money((Number(item.price||0)+Number(item.option?.price||0))*item.qty)}</b>
-  </label>`).join("")||'<p class="discount-no-results">Keine passenden Artikel gefunden.</p>';
-  el("discountArticleList").querySelectorAll("[data-discount-key]").forEach(input=>input.onchange=()=>{
-    if(input.checked&&!discountDraftKeys.includes(input.dataset.discountKey))discountDraftKeys.push(input.dataset.discountKey);
-    if(!input.checked)discountDraftKeys=discountDraftKeys.filter(key=>key!==input.dataset.discountKey);
-    renderDiscountArticlePicker();
-    renderDiscountDraft();
-  });
+// 26.09.2026 (Betreiber: "der Endpreis nach Abzug soll immer auf 20 Cent aufgerundet werden,
+// zugunsten der Kasse, egal wie der Prozentsatz zustande kam"): der natuerliche Rabattbetrag
+// (Basis x Prozent) wird so weit VERKLEINERT, dass der sich ergebende Endbetrag exakt auf dem
+// naechsten 20-Cent-Schritt landet - nie zugunsten des Kunden, nur zugunsten der Kasse.
+function rabattBetragGerundet(basisEuro,percent){
+  const basisCents=toCents(basisEuro);
+  const natuerlicherRabattCents=Math.round(basisCents*Math.max(0,Math.min(100,Number(percent||0)))/100);
+  const endeVorRundung=basisCents-natuerlicherRabattCents;
+  const endeGerundet=Math.ceil(endeVorRundung/20)*20;
+  const rabattGerundetCents=Math.max(0,basisCents-endeGerundet);
+  return fromCents(rabattGerundetCents);
 }
 function renderDiscountDraft(){
   const percent=Math.max(0,Math.min(100,Number(discountDraftPercent||0)));
   const targetItem=positionDiscountTargetKey?state.cart.find(item=>item.key===positionDiscountTargetKey):null;
-  const previewBase=targetItem?fromCents(toCents((Number(targetItem.price||0)+Number(targetItem.option?.price||0))*targetItem.qty)):discountBase(discountDraftKeys);
-  const amount=fromCents(Math.round(toCents(previewBase)*percent/100));
-  el("discountPreview").textContent=`− ${money(amount)}`;
+  // 26.09.2026 (Betreiber: "zeige oben zuerst an: Anzahl Position im Warenkorb, Zahlbetrag
+  // aller Artikel, Endbetrag nach Rabattwahl"): "Zahlbetrag aller Artikel" ist die volle Summe
+  // INKLUSIVE Pfand (das der Kunde ja trotzdem zahlt). ECHTER FUND beim eigenen Testen: der
+  // "Endbetrag" zeigte vorher nur den rabattierbaren Teil ohne Pfand - das waere leicht
+  // misszuverstehen als "das zahlt der Kunde insgesamt". Jetzt korrekt: voller Zahlbetrag
+  // minus dem (gerundeten) Rabatt, also das, was tatsaechlich insgesamt zu zahlen ist.
+  const zahlbetragVoll=targetItem?fromCents(toCents((Number(targetItem.price||0)+Number(targetItem.option?.price||0)+(state.master.depositRule==="automatic"?targetItem.deposits.reduce((s,d)=>s+Number(d.price||0),0):0))*targetItem.qty)):grossTotal();
+  const rabattfaehigeBasis=targetItem?fromCents(toCents((Number(targetItem.price||0)+Number(targetItem.option?.price||0))*targetItem.qty)):discountBase(discountDraftKeys);
+  const amount=percent>0?rabattBetragGerundet(rabattfaehigeBasis,percent):0;
+  const endbetrag=fromCents(toCents(zahlbetragVoll)-toCents(amount));
+  el("discountPreview").textContent=money(endbetrag);
+  el("discountSummaryCount").textContent=targetItem?"1":String(state.cart.length);
+  el("discountSummaryTotal").textContent=money(zahlbetragVoll);
   document.querySelectorAll("[data-discount-percent]").forEach(button=>button.classList.toggle("active",Number(button.dataset.discountPercent)===percent));
   document.querySelectorAll("[data-discount-reason]").forEach(button=>button.classList.toggle("active",button.dataset.discountReason===discountDraftReason));
+  // Schritt 2 (Prozent) erst freischalten, sobald ein Empfaenger gewaehlt wurde - vorher
+  // ausgegraut, wie vom Betreiber gefordert ("Buttons erst aktivieren wenn es Sinn macht").
+  el("discountStepPercent").disabled=!discountDraftReason;
+  // "Rabatt uebernehmen" erst aktiv, wenn zusaetzlich ein gueltiger Prozentsatz feststeht.
+  el("applyDiscountBtn").disabled=!discountDraftReason||!(percent>0&&percent<=100);
 }
 function prepareDiscountDialog(){
   const card=el("discountDialog").querySelector(".discount-card");
@@ -1382,16 +1395,16 @@ function prepareDiscountDialog(){
 function openDiscountDialog(){
   positionDiscountTargetKey=null;
   if(!state.cart.length||eligibleDiscountItems().length===0)return setSystemHint("Für diesen Einkaufswagen ist kein Rabatt möglich","warn");
+  // 26.09.2026: keine Artikel-Auswahl mehr - der ganze Warenkorb wird rabattiert, immer alle
+  // rabattfaehigen Positionen (Pfand/Rueckgabe bleiben wie bisher automatisch aussen vor). Ein
+  // bereits gesetzter Rabatt wird beim erneuten Oeffnen wieder angezeigt (editierbar), nicht
+  // zurueckgesetzt.
+  discountDraftKeys=eligibleDiscountItems().map(item=>item.key);
   discountDraftPercent=Number(state.discount.percent||0);
   discountDraftReason=state.discount.reason||"";
-  const eligibleKeys=eligibleDiscountItems().map(item=>item.key);
-  discountDraftKeys=Array.isArray(state.discount.keys)&&state.discount.keys.length?state.discount.keys.filter(key=>eligibleKeys.includes(key)):[...eligibleKeys];
-  discountDraftCategory="Alle";
   el("discountCustomPercent").value=discountDraftPercent||"";
   el("discountReasonNote").value=state.discount.note||"";
-  el("discountArticleSearch").value="";
   prepareDiscountDialog();
-  renderDiscountArticlePicker();
   renderDiscountDraft();
   el("discountDialog").showModal();
 }
@@ -1400,15 +1413,12 @@ function openPositionDiscount(index){
   const unit=Number(item?.price||0)+Number(item?.option?.price||0);
   if(!item||item.category==="Pfand"||item.manualDeposit||unit<=0)return setSystemHint("Für diese Position ist kein Rabatt möglich","warn");
   positionDiscountTargetKey=item.key;
+  discountDraftKeys=[item.key];
   discountDraftPercent=Number(item.positionDiscount?.percent||0);
   discountDraftReason=item.positionDiscount?.reason||"";
-  discountDraftKeys=[item.key];
-  discountDraftCategory=item.category;
   el("discountCustomPercent").value=discountDraftPercent||"";
   el("discountReasonNote").value=item.positionDiscount?.note||"";
-  el("discountArticleSearch").value=item.name;
   prepareDiscountDialog();
-  renderDiscountArticlePicker();
   renderDiscountDraft();
   el("discountDialog").showModal();
 }
@@ -1416,16 +1426,40 @@ function recordDiscountAudit(operation){const entry={discountId:crypto.randomUUI
   if(window.KCHashChain){const rows=safeArray("kc_discount_audit_v020");window.KCHashChain.appendChained(rows,entry).then(()=>localStorage.setItem("kc_discount_audit_v020",JSON.stringify(rows.slice(-2000))))}else{const rows=safeArray("kc_discount_audit_v020");rows.push(entry);localStorage.setItem("kc_discount_audit_v020",JSON.stringify(rows.slice(-2000)))}}
 el("discountBtn").onclick=()=>{positionDiscountTargetKey=null;openDiscountDialog()};
 el("discountDialog").addEventListener("close",()=>{positionDiscountTargetKey=null;el("discountDialog").querySelector(".discount-card")?.classList.remove("position-discount-mode")});
-el("discountArticleSearch").oninput=renderDiscountArticlePicker;
-el("discountSelectAllBtn").onclick=()=>{
-  const all=eligibleDiscountItems().map(item=>item.key);
-  discountDraftKeys=discountDraftKeys.length===all.length?[]:[...all];
-  renderDiscountArticlePicker();
+document.querySelectorAll("[data-discount-percent]").forEach(button=>button.onclick=()=>{discountDraftPercent=Number(button.dataset.discountPercent);el("discountCustomPercent").value=String(discountDraftPercent).replace(".",",");renderDiscountDraft()});
+// 26.09.2026 (Betreiber: "voreingestellte Werte, die aber geändert werden können"): Empfänger
+// waehlen setzt automatisch den vereinbarten Prozentsatz (BEKANNTER 100/MARKTBESCHICKER 20/
+// STAMMGAST 10/REKLAMATION 10/KULANZ 10, SONSTIGES ohne Vorgabe) - bleibt danach ganz normal
+// über die Prozent-Knöpfe oder das Ziffernfeld änderbar, wird dadurch nicht gesperrt.
+document.querySelectorAll("[data-discount-reason]").forEach(button=>button.onclick=()=>{
+  discountDraftReason=discountDraftReason===button.dataset.discountReason?"":button.dataset.discountReason;
+  const voreingestellt=button.dataset.discountPreset;
+  if(discountDraftReason&&voreingestellt){discountDraftPercent=Number(voreingestellt);el("discountCustomPercent").value=String(discountDraftPercent).replace(".",",")}
+  renderDiscountDraft();
+});
+// Kleines Ziffernfeld-Popup statt der Systemtastatur (Betreiber: "Wenn ich in Zeile klicke
+// muss sich ein kleines Ziffernfeld mit Ziffern an aufploppen").
+let discountKeypadEingabe="";
+function oeffneDiscountKeypad(){
+  discountKeypadEingabe=discountDraftPercent?String(discountDraftPercent).replace(".",","):"";
+  el("discountMiniKeypad").hidden=false;
+}
+function schliesseDiscountKeypad(){el("discountMiniKeypad").hidden=true}
+el("discountCustomPercent").addEventListener("click",oeffneDiscountKeypad);
+el("discountCustomPercent").addEventListener("focus",oeffneDiscountKeypad);
+el("discountMiniKeypad").querySelectorAll("[data-key]").forEach(taste=>taste.onclick=()=>{
+  const wert=taste.dataset.key;
+  if(wert==="back")discountKeypadEingabe=discountKeypadEingabe.slice(0,-1);
+  else if(wert===","){if(!discountKeypadEingabe.includes(","))discountKeypadEingabe+=","}
+  else if(discountKeypadEingabe.length<5)discountKeypadEingabe+=wert;
+  el("discountCustomPercent").value=discountKeypadEingabe;
+});
+el("discountMiniKeypadOk").onclick=()=>{
+  discountDraftPercent=Math.max(0,Math.min(100,Number(discountKeypadEingabe.replace(",","."))||0));
+  el("discountCustomPercent").value=discountDraftPercent?String(discountDraftPercent).replace(".",","):"";
+  schliesseDiscountKeypad();
   renderDiscountDraft();
 };
-document.querySelectorAll("[data-discount-percent]").forEach(button=>button.onclick=()=>{discountDraftPercent=Number(button.dataset.discountPercent);el("discountCustomPercent").value=discountDraftPercent;renderDiscountDraft()});
-el("discountCustomPercent").oninput=()=>{discountDraftPercent=Number(String(el("discountCustomPercent").value).replace(",","."))||0;renderDiscountDraft()};
-document.querySelectorAll("[data-discount-reason]").forEach(button=>button.onclick=()=>{discountDraftReason=discountDraftReason===button.dataset.discountReason?"":button.dataset.discountReason;renderDiscountDraft()});
 el("applyDiscountBtn").onclick=()=>{const percent=Number(discountDraftPercent);if(!Number.isFinite(percent)||percent<=0||percent>100)return setSystemHint("Rabatt muss größer als 0 und höchstens 100 Prozent sein","warn");if(positionDiscountTargetKey){const item=state.cart.find(row=>row.key===positionDiscountTargetKey);if(!item)return setSystemHint("Die gewählte Position ist nicht mehr vorhanden","warn");item.positionDiscount={percent:+percent.toFixed(1),reason:safeText(discountDraftReason,80),note:safeText(el("discountReasonNote").value,160)};const name=item.name,value=positionDiscountAmount(item);positionDiscountTargetKey=null;el("discountDialog").close();renderCart();setSystemHint(`${percent.toLocaleString("de-DE")} % Positionsrabatt für ${name} · − ${money(value)}`,"ok");return}if(!discountDraftKeys.length)return setSystemHint("Mindestens einen Artikel für den Rabatt auswählen","warn");state.discount={percent:+percent.toFixed(1),reason:safeText(discountDraftReason,80),note:safeText(el("discountReasonNote").value,160),keys:[...discountDraftKeys]};recordDiscountAudit("apply");el("discountDialog").close();renderCart();setSystemHint(`${state.discount.percent.toLocaleString("de-DE")} % Rabatt · − ${money(globalDiscountAmount())}`,"ok")};
 el("clearDiscountBtn").onclick=()=>{if(positionDiscountTargetKey){const item=state.cart.find(row=>row.key===positionDiscountTargetKey);if(item)delete item.positionDiscount;positionDiscountTargetKey=null;el("discountDialog").close();renderCart();setSystemHint("Positionsrabatt entfernt","ok");return}const hadDiscount=globalDiscountAmount()>0;if(hadDiscount)recordDiscountAudit("remove");resetDiscount();el("discountDialog").close();renderCart();setSystemHint("Rabatt entfernt","ok")};
 el("exitDiscountModeBtn")?.addEventListener("click",()=>{const hadDiscount=discountAmount()>0;if(hadDiscount)recordDiscountAudit("remove");resetDiscount();renderCart();setSystemHint("Rabattmodus beendet")});
@@ -1638,6 +1672,13 @@ async function completeSale(method,{type="sale",silent=false,changeTarget=null,d
     // Jetzt drei klare Möglichkeiten (immer / nach jedem Bon fragen / nie). Trainingsbons
     // werden nie gedruckt - sonst landet Papier im Korb, das keinen Vorgang belegt.
     if(!silent&&!training)kcBonDruckAnbieten(current);
+    // TSE-Relay (Entwicklung/experimentell, kc-tse-relay.js): erst NACH dem vollständigen
+    // Abschluss, nicht awaited, nur bei eingeschaltetem Schalter - sonst passiert hier nichts.
+    // Die Signatur landet in einer eigenen Liste, NICHT am Bon (recordHash bleibt gültig).
+    if(!training&&state.master.tseEntwicklungAktiv===true){try{window.KCTseRelay?.signiereVorgang(rec)}catch(err){console.warn("TSE-Relay",err)}}
+    // Digitaler Bon (26.09.2026, Standard AUS). Abgesichert: ein Fehler beim QR-Code darf den
+    // bereits gespeicherten Verkauf nicht nachtraeglich als fehlgeschlagen melden.
+    if(!training&&state.master.digitalBonEnabled===true){try{zeigeDigitalenBon(rec)}catch(err){console.warn("Digitaler Bon",err)}}
     return rec;
   }finally{state.saleInProgress=false}
 }
@@ -1665,6 +1706,32 @@ function kcBonDruckAnbieten(bonNummer){
   box.querySelector("[data-ja]").onclick=()=>{weg();printBonByNumber(bonNummer)};
   box.querySelector("[data-nein]").onclick=weg;
   const uhr=setTimeout(weg,12000);
+}
+// 26.09.2026 (Betreiber: "wäre schon mal hilfreich wenn wir es könnten, und die Funktion sich
+// abschalten lässt" - Vorbereitung auf die ab 2028 geplante Pflicht zum digitalen Bon, aber
+// ausdrücklich OHNE den Verkaufsablauf zu verlangsamen: kein Pflicht-Scan, kein Warten, rein
+// abschaltbares Angebot). Klartext-Inhalt des Bons für den QR-Code - eigenständig, nicht die
+// HTML-Druckvorlage, weil ein QR-Code mit möglichst wenig Zeichen auskommen soll.
+function digitalBonText(rec){
+  const zeilen=[rec.registerName||state.master.clubName||"",`Bon ${rec.bon}`,new Date(rec.time).toLocaleString("de-DE")];
+  rec.items.filter(i=>!i.discountLine).forEach(i=>zeilen.push(`${i.qty}x ${i.name} ${money(i.lineTotal)}`));
+  if(rec.discount&&rec.discount.amount>0)zeilen.push(`Rabatt -${money(rec.discount.amount)}`);
+  zeilen.push(`SUMME ${money(rec.due)}`);
+  return zeilen.join("\n");
+}
+// Nicht-blockierende Anzeige, genau wie kcBonDruckAnbieten: erscheint zusätzlich, haelt
+// niemanden auf, verschwindet von selbst. Die Kasse ist sofort wieder fuer den naechsten
+// Verkauf bedienbar, auch waehrend der QR-Code noch zu sehen ist.
+function zeigeDigitalenBon(rec){
+  const alt=document.getElementById("kcDigitalerBon");if(alt)alt.remove();
+  const box=document.createElement("div");
+  box.id="kcDigitalerBon";box.className="kc-digitaler-bon";
+  box.innerHTML=`<strong>Digitaler Bon ${rec.bon}</strong><canvas class="kc-digitaler-bon-qr" width="150" height="150" aria-label="QR-Code des Bons"></canvas><button type="button" data-schliessen>Schließen</button>`;
+  document.body.appendChild(box);
+  if(window.KCQrCode)window.KCQrCode.zeichne(box.querySelector("canvas"),digitalBonText(rec),150);
+  const weg=()=>{clearTimeout(uhr);box.remove()};
+  box.querySelector("[data-schliessen]").onclick=weg;
+  const uhr=setTimeout(weg,20000);
 }
 function showMessage(t,v,txt){el("messageTitle").textContent=t;el("messageValue").textContent=v;el("messageText").textContent=txt;el("messageDialog").showModal()}
 // Betreiber: bei "Freie Zahlung" mitten in der Eingabe (Betrag getippt, aber OK noch nicht
@@ -1760,6 +1827,7 @@ function openSettings(){
     if(el("neuesLayoutToggle"))el("neuesLayoutToggle").checked=state.master.neuesLayout===true;
     el("showTipToggle").checked=state.master.showTip!==false;
     el("showDepositToggle").checked=state.master.showDeposit!==false;
+    el("digitalBonToggle").checked=state.master.digitalBonEnabled===true;
     el("showPrintToggle").checked=state.master.showPrint!==false;
   if(el("bonDruckModus"))el("bonDruckModus").value=kcBonDruckModus();
     el("buttonSizeSelect").value=state.master.buttonSize;
@@ -1768,6 +1836,10 @@ function openSettings(){
     el("fiscalModeSelect").value=state.master.fiscalMode||"off";
     el("tseProviderSetting").value=state.master.tseProvider||"";
     el("tseSerialSetting").value=state.master.tseSerial||"";
+    // TSE-Relay (Entwicklung/experimentell) - siehe kc-tse-relay.js.
+    if(el("tseEntwicklungAktivToggle"))el("tseEntwicklungAktivToggle").checked=state.master.tseEntwicklungAktiv===true;
+    if(el("tseRelayAdresseSetting"))el("tseRelayAdresseSetting").value=state.master.tseRelayAdresse||"";
+    if(el("tseRelayTokenSetting"))el("tseRelayTokenSetting").value="";
     // Dialog zuerst öffnen. Umfangreiche Tabellen werden danach nur bei Bedarf geladen.
     el("settingsDialog").showModal();
     initializeSettingsPanel("general");
@@ -2066,6 +2138,7 @@ el("saveTestSettings").onclick=e=>{
     receipt:{...(state.master.receipt||{}),printMode:el("bonDruckModus")?el("bonDruckModus").value:kcBonDruckModus()}===true,
     showTip:el("showTipToggle").checked,
     showDeposit:el("showDepositToggle").checked,
+    digitalBonEnabled:el("digitalBonToggle").checked,
     showPrint:el("showPrintToggle").checked,
     buttonSize:el("buttonSizeSelect").value,
     buttonMode:el("buttonModeSelect").value,
@@ -2073,11 +2146,15 @@ el("saveTestSettings").onclick=e=>{
     fiscalMode:el("fiscalModeSelect").value,
     tseProvider:el("tseProviderSetting").value.trim(),
     tseSerial:el("tseSerialSetting").value.trim(),
+    tseEntwicklungAktiv:el("tseEntwicklungAktivToggle")?el("tseEntwicklungAktivToggle").checked:state.master.tseEntwicklungAktiv===true,
+    tseRelayAdresse:el("tseRelayAdresseSetting")?el("tseRelayAdresseSetting").value.trim():(state.master.tseRelayAdresse||""),
     healthMonitor:{enabled:el("healthEnabledSetting")?.checked!==false,level:el("healthLevelSetting")?.value||"normal",autoRushProtection:el("healthRushProtectionSetting")?.checked!==false},
     workspaceButtons:cloneData(workspaceDraft||workspaceConfig())
   });
   state.operatorConfirmedForSale=state.master.requireOperatorConfirmation!==true;
   saveMaster();window.KCHealthCore?.saveSettings?.(state.master.healthMonitor||{});renderHeader();renderCategories();renderProducts();renderCart();
+  // TSE-Relay (Entwicklung): Passwort nur bei Neueingabe ersetzen (Feld bleibt leer = unverändert), Takt an/aus.
+  try{const t=el("tseRelayTokenSetting")?.value.trim();if(t)window.KCTseRelay?.setzeToken(t);window.KCTseRelay?.einstellungenGeaendert()}catch(err){console.warn("TSE-Relay-Einstellung",err)}
   if(JSON.stringify(before)!==JSON.stringify(state.master))recordAdminChange("settings","update","pos-settings",before,state.master);
   el("settingsDialog").close();
 };
@@ -4654,7 +4731,37 @@ el("currencyRefresh")?.addEventListener("click",refreshEcbRates);el("currencyHis
 loadCurrencyCache();
 
 
-function syncViewportHeight(){const profile=window.AdaptiveLayoutCore?.recalculate?.();if(!window.AdaptiveLayoutCore){const height=window.visualViewport?.height||window.innerHeight;document.documentElement.style.setProperty("--app-height",`${Math.round(height)}px`)}}
+// 25.09.2026 (Betreiber: "altes Samsung-Tablet, alter Browser, Größe passt sich nicht
+// automatisch an"): zwei echte Ursachen gefunden und behoben.
+// 1) AdaptiveLayoutCore.init() wurde nirgends aufgerufen - dadurch wurden dessen eigene
+//    resize/orientationchange-Listener nie angehängt, die Kachel-Anpassung reagierte nur auf
+//    Zufall (wenn app.js selbst zufällig ein resize feuerte).
+// 2) Die urspruengliche Absicherung setzte bei fehlendem AdaptiveLayoutCore direkt auf
+//    optional chaining (?.) und verliess sich in der CSS auf die "dvh"-Einheit als
+//    Rueckfallwert (styles.css: var(--app-height,100dvh)) - beides ist auf sehr alten
+//    Browsern (aelterer Samsung-Internet-Stand) nicht sicher unterstuetzt. Jetzt IMMER,
+//    unabhaengig von AdaptiveLayoutCore, zusaetzlich eine einfache, maximal kompatible
+//    Berechnung mit reinem window.innerHeight (kein optional chaining, keine dvh-Abhaengigkeit)
+//    als letzte Absicherung - die kann auch ein sehr altes Geraet nicht falsch verstehen.
+// 25.09.2026, dritter Anlauf: die beiden vorherigen Versuche haben die bestehende Regression
+// gezeigt, aber falsch behoben (einmal zu viel geaendert, einmal die urspruengliche Logik
+// komplett ersetzt). Jetzt bewusst additiv: die urspruengliche Zeile bleibt UNVERAENDERT
+// (AdaptiveLayoutCore.recalculate() wie zuvor, inkl. seiner Klassen-Umschaltung - das war nie
+// das gemeldete Problem und aendert es jetzt auch nicht). Zusaetzlich, unabhaengig vom
+// Ergebnis, wird --app-height/--app-width IMMER auch mit einer einfachen, maximal
+// kompatiblen Berechnung gesetzt (kein optional chaining im kritischen Pfad, kein dvh) - das
+// ist die eigentliche Reparatur fuer alte Browser, die vorher nur unter der Bedingung
+// "AdaptiveLayoutCore fehlt komplett" griff, obwohl AdaptiveLayoutCore ja geladen war, nur
+// seine eigenen fortlaufenden Listener nie angehaengt wurden.
+function syncViewportHeight(){
+  if(window.AdaptiveLayoutCore&&window.AdaptiveLayoutCore.recalculate){window.AdaptiveLayoutCore.recalculate()}
+  var height=window.innerHeight;
+  if(window.visualViewport&&window.visualViewport.height){height=window.visualViewport.height}
+  var width=window.innerWidth;
+  if(window.visualViewport&&window.visualViewport.width){width=window.visualViewport.width}
+  document.documentElement.style.setProperty("--app-height",Math.round(height)+"px");
+  document.documentElement.style.setProperty("--app-width",Math.round(width)+"px");
+}
 let kioskFullscreenActive=false;
 function runsAsInstalledApp(){return window.matchMedia?.("(display-mode: standalone)")?.matches||window.navigator.standalone===true}
 function syncFullscreenGate(){const gate=el("fullscreenGate"),ended=document.body.classList.contains("application-ended");if(gate)gate.hidden=KC_EMBEDDED_TRAINING||ended||runsAsInstalledApp()||kioskFullscreenActive||!!document.fullscreenElement}
@@ -4677,8 +4784,15 @@ function confirmHeaderExit(){
     el("endedScreen")?.removeAttribute("hidden");
   });
 }
+// 28.09.2026 (Zusammenführung): init() wird seit 05.09.2026 hier aufgerufen und bleibt erhalten -
+// die Fassung vom 26.09. hatte diese Zeile entfernt, obwohl der Kommentar unten das Gegenteil annahm.
 window.AdaptiveLayoutCore?.init?.();
 window.addEventListener("resize",syncViewportHeight);window.visualViewport?.addEventListener("resize",syncViewportHeight);document.addEventListener("fullscreenchange",()=>{kioskFullscreenActive=!!document.fullscreenElement;document.body.classList.toggle("fullscreen-active",kioskFullscreenActive);syncViewportHeight();syncFullscreenGate()});
+// 25.09.2026: orientationchange loeste bisher gar keine Neuberechnung aus (weder hier noch in
+// AdaptiveLayoutCore, dessen eigener orientationchange-Listener nur via init() angehaengt
+// wird - init() wird oben aufgerufen). Rein additiv ergaenzt, aendert an der Zeile darueber
+// nichts.
+window.addEventListener("orientationchange",syncViewportHeight);
 el("headerExitBtn")?.addEventListener("click",confirmHeaderExit);
 el("fullscreenGateBtn")?.addEventListener("click",enterKioskFullscreen);
 el("exitButton")?.addEventListener("click",openExitMenu);el("enterFullscreenBtn")?.addEventListener("click",()=>{el("exitDialog")?.close();enterKioskFullscreen()});el("leaveFullscreenBtn")?.addEventListener("click",()=>{el("exitDialog")?.close();leaveKioskFullscreen()});el("goStartBtn")?.addEventListener("click",()=>{if(state.cart.length)return askConfirm("Zur Startseite","Der offene Bon bleibt gespeichert, wird aber nicht abgerechnet. Zur Startseite wechseln?",()=>location.href="../index.html");location.href="../index.html"});el("finishAppBtn")?.addEventListener("click",finishApplicationSession);el("resumeAppBtn")?.addEventListener("click",()=>{document.body.classList.remove("application-ended");el("endedScreen")?.setAttribute("hidden","");enterKioskFullscreen()});

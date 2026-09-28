@@ -177,6 +177,13 @@
 
   const STOPPWOERTER = new Set(['mit', 'und', 'ohne', 'der', 'die', 'das', 'ein', 'eine', 'vom', 'von', 'zum', 'aus', 'auf', 'fuer', 'für']);
 
+  // 25.09.2026 (Betreiber: "Feuerzangenbowle wird nur aus rotem Glühwein hergestellt - wenn
+  // roter Glühwein ausverkauft, dann auch Feuerzangenbowle sperren bzw. fragen oder anklicken"):
+  // gezielte, feste Verknüpfung zusätzlich zur normalen Namens-Wortsuche - "Feuerzangenbowle"
+  // enthält weder "Glühwein" noch "rot" im Namen und würde sonst nie vorgeschlagen. Bewusst nur
+  // diese eine Verknüpfung (Betreiber: "nur Feuerzangenbowle dazu"), nicht allgemein gehalten.
+  const ZUSATZ_VERKNUEPFUNGEN = { grot: ['feuer'] };
+
   function verkaufsartikel() {
     // Pakete bleiben aussen vor: sie sperren sich automatisch ueber ihre Bestandteile.
     return (global.productsForSale ? global.productsForSale() : []).filter((p) => p && !Array.isArray(p.componentIds));
@@ -256,6 +263,13 @@
       const gefunden = treffer(gewaehltesWort, freigeben);
       // Der ausloesende Artikel ist immer dabei, auch wenn die Namenssuche ihn nicht faende.
       if (!gefunden.some((p) => p.id === artikel.id)) gefunden.unshift(artikel);
+      // Feste Zusatz-Verknuepfung (siehe ZUSATZ_VERKNUEPFUNGEN oben) - unabhaengig von der
+      // Namenssuche, genau wie beim ausloesenden Artikel selbst.
+      (ZUSATZ_VERKNUEPFUNGEN[artikel.id] || []).forEach((verknuepfteId) => {
+        if (gefunden.some((p) => p.id === verknuepfteId)) return;
+        const p = verkaufsartikel().find((x) => x.id === verknuepfteId);
+        if (p) gefunden.push(p);
+      });
       angehakt = new Set(gefunden.map((p) => p.id));
       liste.innerHTML = gefunden.map((p) => `
         <label class="kc-sammel-zeile">

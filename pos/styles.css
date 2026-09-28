@@ -538,7 +538,30 @@ body.training-mode .app-header{background:linear-gradient(180deg,#4a3510,#2f2209
 .tip-quick-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;margin:15px 0}
 .tip-quick-grid button{min-height:58px;border:0;border-radius:8px;background:#8c2d5d;color:#fff;font-size:1.15rem;font-weight:900}
 .tip-card input{width:100%;padding:10px;border:1px solid #c7ced6;border-radius:7px}
-.discount-card{max-width:760px}.discount-card>label{display:grid;gap:5px;margin-top:9px;font-weight:850;font-size:.88rem}.discount-card input{width:100%;padding:8px;border:1px solid #c7ced6;border-radius:7px}.discount-quick-grid{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:6px;margin:11px 0}.discount-quick-grid button,.discount-reason-grid button{min-height:36px;padding:4px 6px;font-size:.76rem;border:1px solid #c7ced6;border-radius:7px;background:linear-gradient(#fff,#e7ebef);font-weight:800}.discount-quick-grid button.active,.discount-reason-grid button.active{background:#173765;color:#fff;border-color:#173765}.discount-reason-field{margin:11px 0 7px;border:1px solid #d2d8df;border-radius:8px;padding:8px}.discount-reason-field legend{font-weight:900;padding:0 5px;font-size:.82rem}.discount-reason-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}.discount-preview{display:flex;align-items:center;justify-content:space-between;margin-top:11px;padding:8px 12px;border-radius:8px;background:#eef5fb;border:1px solid #bfd3e3}.discount-preview strong{font-size:1.15rem;color:#173765}
+.discount-card{max-width:760px}.discount-card>label{display:grid;gap:5px;margin-top:9px;font-weight:850;font-size:.88rem}.discount-card input{width:100%;padding:8px;border:1px solid #c7ced6;border-radius:7px}.discount-quick-grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:6px;margin:0}.discount-quick-grid button,.discount-reason-grid button{min-height:40px;padding:4px 4px;font-size:.74rem;border:1px solid #c7ced6;border-radius:7px;background:linear-gradient(#fff,#e7ebef);font-weight:800}.discount-quick-grid button.active,.discount-reason-grid button.active{background:#173765;color:#fff;border-color:#173765}.discount-reason-field{margin:0 0 7px;border:1px solid #d2d8df;border-radius:8px;padding:8px}.discount-reason-field legend{font-weight:900;padding:0 5px;font-size:.82rem}.discount-reason-grid{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:6px}.discount-preview{display:flex;align-items:center;justify-content:space-between;margin-top:11px;padding:8px 12px;border-radius:8px;background:#eef5fb;border:1px solid #bfd3e3}.discount-preview strong{font-size:1.15rem;color:#173765}
+/* 26.09.2026 (Betreiber: "übersichtlich, logisch, bedienerfreundlich, Schritt für Schritt.
+   Buttons erst aktivieren wenn es Sinn macht. Vorher ausgrauen"): neue Rabatt-Struktur. */
+.discount-card-v2{width:min(640px,calc(100vw - 32px))}
+.discount-step{margin:12px 0 0}
+.discount-step legend{font-weight:900;padding:0 5px;font-size:.85rem;color:#173765}
+.discount-step:disabled,fieldset.discount-step:disabled *{opacity:.4;pointer-events:none}
+.discount-percent-row{display:flex;gap:10px;align-items:stretch}
+.discount-percent-row .discount-quick-grid{flex:1 1 auto}
+.discount-custom-percent-label{display:flex;flex-direction:column;gap:4px;font-weight:850;font-size:.76rem;width:84px;flex:0 0 auto}
+.discount-custom-percent-label input{width:100%;height:40px;padding:0 6px;border:1px solid #c7ced6;border-radius:7px;text-align:center;font-weight:900;font-size:1rem;background:#fff;cursor:pointer}
+.discount-note-label{display:grid;gap:5px;margin-top:11px;font-weight:850;font-size:.82rem}
+.discount-note-label input{width:100%;padding:8px;border:1px solid #c7ced6;border-radius:7px}
+#applyDiscountBtn:disabled,#discountStepPercent:disabled ~ * #applyDiscountBtn{opacity:.5}
+.discount-mini-keypad{display:grid;grid-template-columns:repeat(3,56px);grid-auto-rows:44px;gap:6px;justify-content:center;margin:10px 0;padding:10px;background:#f4f6f8;border:1px solid #d2d8df;border-radius:10px}
+.discount-mini-keypad[hidden]{display:none}
+.discount-mini-keypad button{border:1px solid #c7ced6;border-radius:7px;background:#fff;font-weight:900;font-size:1.05rem}
+.discount-mini-keypad-ok{grid-column:1 / span 3;background:#167447;color:#fff;border-color:#167447}
+.discount-summary{display:flex;gap:8px;margin:0 0 14px;flex-wrap:wrap}
+.discount-summary>div{flex:1 1 0;min-width:140px;padding:8px 12px;border-radius:8px;background:#f4f6f8;border:1px solid #d2d8df;display:flex;flex-direction:column;gap:2px}
+.discount-summary span{font-size:.7rem;font-weight:800;color:#667085;text-transform:uppercase;letter-spacing:.02em}
+.discount-summary strong{font-size:1.05rem;color:#173765}
+.discount-summary-end{background:#eef5fb!important;border-color:#bfd3e3!important}
+.discount-summary-end strong{color:#167447;font-size:1.2rem}
 .withdraw-reason-field{margin:14px 0;border:1px solid #d2d8df;border-radius:9px;padding:11px}.withdraw-reason-field legend{font-weight:900;padding:0 6px}.withdraw-reason-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.withdraw-reason-grid button,.withdraw-receipt-toggle,.withdraw-receipt-actions button{min-height:50px;border:1px solid #c7ced6;border-radius:8px;background:linear-gradient(#fff,#e7ebef);font-weight:900}.withdraw-reason-grid button.active{background:#173765;color:#fff;border-color:#173765}.withdraw-receipt-toggle{width:100%;margin-top:10px}.withdraw-receipt-toggle.active{background:#176329;color:#fff}.withdraw-receipt-actions{display:grid;grid-template-columns:auto 1fr;align-items:center;gap:10px;margin-top:9px}.withdraw-receipt-actions[hidden]{display:none}.withdraw-receipt-actions span{font-size:.82rem;color:#667085}
 #withdrawDialog{width:min(900px,calc(100vw - 32px))}.withdraw-card{width:100%;max-width:none;max-height:90vh;overflow:auto}.withdraw-card>label,.complaint-panel>label{display:grid;gap:6px;margin-top:10px;font-weight:850}.withdraw-card input,.withdraw-card textarea,.complaint-panel input{width:100%;padding:10px;border:1px solid #c7ced6;border-radius:8px}.complaint-panel{margin:14px 0;padding:13px;border:2px solid #ba6915;border-radius:10px;background:#fffaf0}.complaint-panel[hidden]{display:none}.complaint-head{display:flex;align-items:center;justify-content:space-between;gap:15px}.complaint-head h3{margin:3px 0}.complaint-head>strong{font-size:1.5rem;color:#9a4f00}.complaint-field{margin:12px 0;border:1px solid #d7c19a;border-radius:9px;padding:10px}.complaint-field legend{font-weight:900;padding:0 6px}.complaint-article-list{display:grid;gap:7px;max-height:250px;overflow:auto}.complaint-article-row{display:grid;grid-template-columns:1fr auto;align-items:center;gap:10px;border:1px solid #d4d9df;border-radius:8px;padding:7px 9px;background:#fff}.complaint-article-row.selected{border-color:#176bb0;background:#eef6fd}.complaint-article-row span{display:grid;gap:2px}.complaint-article-row small{color:#667085}.complaint-qty{display:grid;grid-template-columns:44px 38px 44px;align-items:center;text-align:center}.complaint-qty button{min-height:44px;border:1px solid #bdc6d0;background:#f2f4f6;font-size:1.25rem;font-weight:900}.complaint-qty button:first-child{border-radius:7px 0 0 7px}.complaint-qty button:last-child{border-radius:0 7px 7px 0}.complaint-qty b{height:44px;display:grid;place-items:center;border-top:1px solid #bdc6d0;border-bottom:1px solid #bdc6d0}.complaint-reason-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.complaint-reason-grid button{min-height:50px;border:1px solid #c7ced6;border-radius:8px;background:linear-gradient(#fff,#e7ebef);font-weight:900}.complaint-reason-grid button.active{background:#9a4f00;color:#fff;border-color:#9a4f00}.complaint-help{font-size:.83rem;color:#6f4d1d;margin:8px 0 0}
 @media(max-width:600px){.withdraw-reason-grid,.withdraw-receipt-actions,.complaint-reason-grid{grid-template-columns:1fr}.discount-reason-grid{grid-template-columns:repeat(2,1fr)}.discount-quick-grid{grid-template-columns:repeat(3,1fr)}.complaint-article-row{grid-template-columns:1fr}.complaint-qty{justify-content:start}}
@@ -1407,10 +1430,16 @@ body.rush-mode .screen-lock-button{
 .main-actions #tipBtn{grid-column:2!important;grid-row:2!important}
 .main-actions #moreBtn{grid-column:3!important;grid-row:2 / span 2!important}
 
-/* Breiter Rabattdialog und Artikel zweispaltig. */
+/* 26.09.2026 (Betreiber: "die gesamte Rabattseite ist zu voll und zu unübersichtlich"): diese
+   Regel stammte aus der Zeit, als hier noch eine zweispaltige Artikel-Auswahl stand ("Breiter
+   Rabattdialog und Artikel zweispaltig") - die Artikel-Auswahl ist inzwischen komplett
+   entfernt (der ganze Warenkorb wird rabattiert), diese Breite war seitdem unnötig und
+   verursachte einen echten Bildschirm-Überlauf (Knöpfe/Ziffernfeld teilweise außerhalb des
+   sichtbaren Bereichs, bestätigt bis zu 150px auf einem 1280px-Bildschirm). Auf die neue,
+   schmalere Struktur zurückgesetzt. */
 .discount-card{
-  width:min(1120px,96vw)!important;
-  max-width:1120px!important;
+  width:min(640px,96vw)!important;
+  max-width:640px!important;
   max-height:92vh;
   overflow:auto;
 }
@@ -3241,6 +3270,13 @@ body.kc-layout-neu:not(.kc-aufbau) .sales-area>.product-grid>.product-tile-wrap>
 .kc-bon-frage button{min-height:42px;padding:0 16px;border:0;border-radius:8px;font-weight:900;cursor:pointer}
 .kc-bon-frage [data-ja]{background:#16a34a;color:#fff}
 .kc-bon-frage [data-nein]{background:#e2e8f0;color:#0f172a}
+/* 26.09.2026: eigene Ecke (links statt rechts), damit sie sich mit der Bon-Druck-Rueckfrage
+   (rechts) nicht ueberlappt, falls beide gleichzeitig erscheinen. */
+.kc-digitaler-bon{position:fixed;left:18px;bottom:18px;z-index:99997;display:grid;gap:8px;justify-items:center;
+  padding:12px 14px;border-radius:12px;background:#0f172a;color:#fff;
+  box-shadow:0 8px 22px rgba(0,0,0,.4);font-size:.92rem}
+.kc-digitaler-bon-qr{background:#fff;border-radius:6px;padding:4px}
+.kc-digitaler-bon button{min-height:38px;padding:0 16px;border:0;border-radius:8px;font-weight:900;cursor:pointer;background:#e2e8f0;color:#0f172a}
 
 /* ===== Vergrößerte Warenkorb-Ansicht (User-Wunsch) - rein additiv, keine Basis-Regel verändert =====
 
@@ -3765,3 +3801,9 @@ body.kc-layout-neu:not(.kc-aufbau) .sales-area>.product-grid>.product-tile-wrap>
 .xbericht-zeile.summe span{font-weight:800;color:#0f172a}
 .xbericht-zeile.klein{padding-left:12px;font-size:12px;border-top:0}
 .xbericht-zeile.klein b{font-size:13px;font-weight:700}
+
+/* TSE-Relay (Entwicklung, kc-tse-relay.js): kleiner Hinweis auf noch nicht signierte Vorgaenge.
+   Fest positioniert (fixed), damit sich an der Anordnung der Kopfzeile nichts verschiebt. Nur
+   vorhanden, wenn der Schalter an ist UND etwas offen ist. */
+.kc-tse-hinweis{position:fixed;left:8px;top:3px;z-index:60;pointer-events:auto;font-size:.66rem;font-weight:700;line-height:1;padding:2px 6px;border-radius:8px;background:#2b2200;color:#ffd35c;border:1px solid #e0a100;white-space:nowrap}
+.tse-entwicklung-warnung{border-left:4px solid #e0a100;background:#fff7df;color:#5a4200;padding:8px 10px;border-radius:6px}

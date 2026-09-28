@@ -356,7 +356,7 @@
     </div>
     <img id="productInfoImage" class="product-info-image" alt="">
     <div id="productInfoContent" class="product-info-content"></div>
-    <div class="dialog-actions product-info-actions"><button type="button" id="productInfoAusverkauftBtn" class="secondary-action">🚫 Als ausverkauft markieren</button><button type="button" id="productInfoDetailsBtn" class="primary-action">Vollständige Produktinformationen</button><button value="close" class="dialog-close">Schließen</button></div>
+    <div class="dialog-actions product-info-actions"><button type="button" id="productInfoAusverkauftBtn" class="secondary-action">🚫 Als ausverkauft markieren</button><button type="button" id="productInfoSalesBtn" class="secondary-action" title="Verkaufszeiten heute - wie beim Favoriten-Stern">📊 Verkaufszeiten heute</button><button type="button" id="productInfoDetailsBtn" class="primary-action">Vollständige Produktinformationen</button><button value="close" class="dialog-close">Schließen</button></div>
   </form>
 </dialog>
 
@@ -388,6 +388,7 @@
       <button type="button" data-settings-tab="packages">📦 Kombi</button>
       <button type="button" data-settings-tab="offers">🏷 Angebote & Happy Hour</button>
       <button type="button" data-settings-tab="system" class="superadmin-only">System</button>
+      <button type="button" data-settings-tab="tse-entwicklung" class="superadmin-only">🧪 TSE (Entwicklung)</button>
       <button type="button" data-settings-tab="transfer" class="superadmin-only">Import / Export</button>
     </div>
 
@@ -423,6 +424,12 @@
           <option value="fragen">Nach jedem Verkauf fragen</option>
           <option value="nie">Nie drucken</option>
         </select></label>
+      <!-- 26.09.2026 (Betreiber: "wäre schon mal hilfreich wenn wir es könnten, und die Funktion
+           sich abschalten lässt" - Vorbereitung auf die ab 2028 geplante Pflicht zum digitalen
+           Bon): rein optional, Standard AUS. Zeigt nach dem Verkauf zusätzlich einen QR-Code
+           mit dem Bon-Inhalt, ohne den Ablauf zu blockieren oder zu verzögern - kein
+           Pflicht-Scan, kein Warten. -->
+      <label class="toggle-setting"><span><strong>Digitalen Bon anbieten (QR-Code)</strong><small>Vorbereitung auf die ab 2028 geplante Pflicht. Zeigt zusätzlich einen QR-Code mit dem Bon-Inhalt - niemand muss darauf warten oder ihn scannen, es ist nur ein Angebot.</small></span><input id="digitalBonToggle" type="checkbox"></label>
       <p class="setting-help">
         Pro Artikel können Zutaten, Allergene, Inhaltsstoffe, Herkunft, Zubereitungshinweise
         und frei definierte wichtige Hinweise gespeichert werden.
@@ -806,6 +813,17 @@
       </div>
     </section>
 
+    <section class="settings-panel tse-entwicklung-panel" data-settings-panel="tse-entwicklung">
+      <h3>🧪 TSE-Relay · Entwicklung / experimentell</h3>
+      <p class="setting-help tse-entwicklung-warnung"><strong>Experimentell - nicht für den Echtbetrieb freigegeben.</strong> Nach jedem abgeschlossenen Verkauf wird der Vorgang im Hintergrund an den TSE-Dienst auf dem Mini-PC geschickt. Der Verkauf selbst wartet nie darauf. Ausgeschaltet verhält sich die Kasse exakt wie bisher. Trainingsbons werden nie signiert.</p>
+      <label class="toggle-setting"><span><strong>TSE-Relay (Entwicklung) aktiv</strong><small>Standard: aus.</small></span><input id="tseEntwicklungAktivToggle" type="checkbox"></label>
+      <label class="setting-line"><span>Adresse des Mini-PC-Dienstes</span><input id="tseRelayAdresseSetting" inputmode="url" autocomplete="off" spellcheck="false" placeholder="z. B. http://192.168.1.50:8765"></label>
+      <label class="setting-line"><span>Passwort Mini-PC (Token)</span><input id="tseRelayTokenSetting" type="password" autocomplete="new-password" placeholder="leer lassen = unverändert"></label>
+      <p class="setting-help">Das Passwort wird nur auf diesem Gerät gespeichert und nicht mit exportiert oder synchronisiert.</p>
+      <div class="health-admin-actions"><button type="button" id="tseRelayTestBtn">Verbindung testen</button><button type="button" id="tseRelayNachtragenBtn">Offene jetzt nachtragen</button></div>
+      <p id="tseRelayStatus" class="setting-help" aria-live="polite"></p>
+    </section>
+
     <section class="settings-panel transfer-panel" data-settings-panel="transfer">
       <div class="masterdata-head">
         <div>
@@ -1187,46 +1205,61 @@
   </form>
 </dialog>
 
+<!-- 26.09.2026 (Betreiber: "die gesamte Rabattseite ist zu voll und zu unübersichtlich ... wenn
+     ich unten im Warenkorb Rabatt wähle brauche ich keine Artikel mehr suchen, denn der ganze WK
+     soll rabattiert werden"): komplett neu aufgebaut, Schritt für Schritt statt alles auf
+     einmal. Artikel-Suche entfernt (verursachte nebenbei auch den Bildschirm-Überlauf - siehe
+     STAND.txt). Reihenfolge: 1) Empfänger (setzt automatisch einen Vorschlagswert, änderbar),
+     2) Prozent (ausgegraut bis ein Empfänger gewählt ist), 3) Vorschau, 4) Übernehmen (ausgegraut
+     bis ein gültiger Prozentsatz feststeht). -->
 <dialog id="discountDialog">
-  <form method="dialog" class="dialog-card discount-card">
+  <form method="dialog" class="dialog-card discount-card discount-card-v2">
     <div class="admin-home-head">
       <div><span id="discountDialogKicker" class="info-kicker">WARENKORB</span><h2 id="discountDialogTitle">Rabatt festlegen</h2></div>
       <button value="close" class="icon-close" aria-label="Schließen">×</button>
     </div>
-    <p>Wähle die Artikel aus, für die der Rabatt gelten soll. Pfand und Rückgabeartikel werden nicht rabattiert.</p>
-    <section class="discount-article-picker">
-      <div class="discount-article-toolbar">
-        <label class="discount-search-label">Artikel suchen
-          <input id="discountArticleSearch" type="search" placeholder="Artikelname eingeben">
-        </label>
-        <button type="button" id="discountSelectAllBtn">Alle rabattfähigen</button>
-      </div>
-      <div id="discountCategoryFilters" class="discount-category-filters" aria-label="Warengruppen"></div>
-      <div id="discountArticleList" class="discount-article-list" aria-label="Artikel für Rabatt"></div>
-    </section>
-    <div id="discountQuickButtons" class="discount-quick-grid" aria-label="Gängige Rabattwerte">
-      <button type="button" data-discount-percent="2">2 %</button>
-      <button type="button" data-discount-percent="3">3 %</button>
-      <button type="button" data-discount-percent="5">5 %</button>
-      <button type="button" data-discount-percent="10">10 %</button>
-      <button type="button" data-discount-percent="20">20 %</button>
-      <button type="button" data-discount-percent="50">50 %</button>
+    <div class="discount-summary" id="discountSummary">
+      <div><span>Positionen im Warenkorb</span><strong id="discountSummaryCount">0</strong></div>
+      <div><span>Zahlbetrag aller Artikel</span><strong id="discountSummaryTotal">0,00 €</strong></div>
+      <div class="discount-summary-end"><span>Endbetrag nach Rabatt</span><strong id="discountPreview">0,00 €</strong></div>
     </div>
-    <label>Freie Eingabe in Prozent<input id="discountCustomPercent" type="number" min="0" max="100" step="0.1" inputmode="decimal" placeholder="z. B. 7,5"></label>
-    <fieldset class="discount-reason-field">
-      <legend>Grund optional</legend>
+    <fieldset class="discount-reason-field discount-step" id="discountStepReason">
+      <legend>1 · Für wen?</legend>
       <div id="discountReasonButtons" class="discount-reason-grid">
-        <button type="button" data-discount-reason="Bekannter">BEKANNTER</button>
-        <button type="button" data-discount-reason="Marktbeschicker">MARKTBESCHICKER</button>
-        <button type="button" data-discount-reason="Stammgast">STAMMGAST</button>
-        <button type="button" data-discount-reason="Reklamation">REKLAMATION</button>
-        <button type="button" data-discount-reason="Kulanz">KULANZ</button>
+        <button type="button" data-discount-reason="Bekannter" data-discount-preset="100">BEKANNTER</button>
+        <button type="button" data-discount-reason="Marktbeschicker" data-discount-preset="20">MARKTBESCHICKER</button>
+        <button type="button" data-discount-reason="Stammgast" data-discount-preset="10">STAMMGAST</button>
+        <button type="button" data-discount-reason="Reklamation" data-discount-preset="10">REKLAMATION</button>
+        <button type="button" data-discount-reason="Kulanz" data-discount-preset="10">KULANZ</button>
         <button type="button" data-discount-reason="Sonstiges">SONSTIGES</button>
       </div>
     </fieldset>
-    <label>Ergänzung zum Grund<input id="discountReasonNote" maxlength="160" placeholder="optional"></label>
-    <div class="discount-preview"><span>Abzug im Einkaufswagen</span><strong id="discountPreview">0,00 €</strong></div>
-    <div class="dialog-actions"><button type="button" id="clearDiscountBtn">Rabatt entfernen</button><button value="cancel">Abbrechen</button><button type="button" id="applyDiscountBtn" class="primary-action">Rabatt übernehmen</button></div>
+    <fieldset class="discount-step" id="discountStepPercent" disabled>
+      <legend>2 · Wie viel Prozent?</legend>
+      <div class="discount-percent-row">
+        <div id="discountQuickButtons" class="discount-quick-grid" aria-label="Gängige Rabattwerte">
+          <button type="button" data-discount-percent="2">2 %</button>
+          <button type="button" data-discount-percent="3">3 %</button>
+          <button type="button" data-discount-percent="5">5 %</button>
+          <button type="button" data-discount-percent="10">10 %</button>
+          <button type="button" data-discount-percent="20">20 %</button>
+          <button type="button" data-discount-percent="50">50 %</button>
+          <button type="button" data-discount-percent="100">100 %</button>
+        </div>
+        <label class="discount-custom-percent-label">Frei
+          <input id="discountCustomPercent" type="text" inputmode="none" readonly placeholder="–">
+        </label>
+      </div>
+    </fieldset>
+    <div id="discountMiniKeypad" class="discount-mini-keypad" hidden>
+      <button type="button" data-key="7">7</button><button type="button" data-key="8">8</button><button type="button" data-key="9">9</button>
+      <button type="button" data-key="4">4</button><button type="button" data-key="5">5</button><button type="button" data-key="6">6</button>
+      <button type="button" data-key="1">1</button><button type="button" data-key="2">2</button><button type="button" data-key="3">3</button>
+      <button type="button" data-key=",">,</button><button type="button" data-key="0">0</button><button type="button" data-key="back">⌫</button>
+      <button type="button" id="discountMiniKeypadOk" class="primary-action discount-mini-keypad-ok">OK</button>
+    </div>
+    <label class="discount-note-label">Ergänzung zum Grund<input id="discountReasonNote" maxlength="160" placeholder="optional"></label>
+    <div class="dialog-actions"><button type="button" id="clearDiscountBtn">Rabatt entfernen</button><button value="cancel">Abbrechen</button><button type="button" id="applyDiscountBtn" class="primary-action" disabled>Rabatt übernehmen</button></div>
   </form>
 </dialog>
 
@@ -1532,7 +1565,7 @@
 <script src="kc-sync-master-data.js?build=1.1.1"></script>
 <script src="kc-sync-remote-command.js?build=1.0.0"></script>
 <script src="kc-spiegel-modus.js?build=1.0.0"></script>
-<script src="kc-ausverkauft.js?build=1.0.1"></script>
+<script src="kc-ausverkauft.js?build=1.0.2"></script>
 <script src="kc-sync-cash-transfer.js?build=1.0.0"></script>
 <script src="kc-finance-transfer-kasse.js?build=1.0.1"></script>
 <script src="kc-transaction-store.js?build=0.1.0"></script>
@@ -1552,7 +1585,7 @@
     document.body.appendChild(s);
   }
   window.KCMasterDataSync.bereit.finally(() => {
-    ladeNacheinander(['images-v3.js?build=3-pfand', 'app.js?build=0.31.3.6-r36', '../shared/kc-happyhour.js?build=0.1.0', 'kc-happyhour-pos.js?build=0.1.0', 'kc-meldeweg.js?build=0.1.0', '../shared/kc-security-card.js?build=0.1.0', 'kc-security-card-pos.js?build=0.1.0', 'kc-zahl-zoom.js?build=0.1.0', 'kc-ansicht-umschalter.js?build=0.1.0', 'kc-startup-check.js?build=0.1.0', 'kc-pin-lock.js?build=0.1.1', 'kc-layout-neu.js?build=0.1.0', 'kc-erfassung-getrennt.js?build=0.1.0', 'kc-gutschein.js?build=0.1.0', 'kc-vorfuehrdaten.js?build=0.1.0', '../shared/kc-oberflaechen-format.js?build=0.1.0', 'kc-oberflaechen-pos.js?build=0.1.0', 'kc-oberflaechen-anwenden.js?build=0.9.9', 'kc-kopfzeile.js?build=0.3.0', 'kc-schulung.js?build=0.1.0', 'kc-reklamation.js?build=0.1.2']);
+    ladeNacheinander(['images-v3.js?build=3-pfand', 'app.js?build=0.31.3.6-r37', '../shared/kc-happyhour.js?build=0.1.0', 'kc-happyhour-pos.js?build=0.1.0', 'kc-meldeweg.js?build=0.1.0', '../shared/kc-security-card.js?build=0.1.0', 'kc-security-card-pos.js?build=0.1.0', 'kc-zahl-zoom.js?build=0.1.0', 'kc-ansicht-umschalter.js?build=0.1.0', 'kc-startup-check.js?build=0.1.0', 'kc-pin-lock.js?build=0.1.1', 'kc-layout-neu.js?build=0.1.0', 'kc-erfassung-getrennt.js?build=0.1.0', 'kc-gutschein.js?build=0.1.0', 'kc-vorfuehrdaten.js?build=0.1.0', '../shared/kc-oberflaechen-format.js?build=0.1.0', 'kc-oberflaechen-pos.js?build=0.1.0', 'kc-oberflaechen-anwenden.js?build=0.9.9', 'kc-kopfzeile.js?build=0.3.0', 'kc-schulung.js?build=0.1.0', 'kc-reklamation.js?build=0.1.2', 'kc-tse-relay.js?build=0.1.0']);
   });
 </script>
 <script src="pos-ui-profile-consumer.js?build=0.1.0"></script>

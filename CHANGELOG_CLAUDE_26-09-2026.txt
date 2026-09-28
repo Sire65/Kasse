@@ -1,0 +1,45 @@
+KC MarktKasse - Änderungen 26.09.2026 (Claude)
+================================================
+
+pos/cores/adaptive-layout-core/adaptive-layout-core.js
+- ES5-sicher wiederhergestellt (Samsung SM-T535, Android 5.0.2)
+
+pos/app.js
+- --app-height/--app-width zuverlässig per JavaScript gesetzt (zusätzlich zur
+  bestehenden Logik, nicht ersetzend), orientationchange-Listener ergänzt
+- Neuer Knopf "Verkaufszeiten heute" im Info-Dialog jedes Artikels (ruft dieselbe
+  Auswertung wie der Favoriten-Stern auf)
+- Rabatt-Dialog komplett neu: Empfänger zuerst (mit Voreinstellung je nach
+  Empfänger), dann Prozent, Endbetrag immer auf 20 Cent aufgerundet (zugunsten
+  der Kasse), Übersicht oben (Positionen/Zahlbetrag/Endbetrag), Buttons
+  ausgegraut bis sinnvoll aktivierbar
+- Feuerzangenpfand/Feuerzange Rückgabe/Glas+Feuerzange Rückgabe: neue Bilder mit
+  Pfeilen (grün links = Plus, rot rechts = Minus), Patches-Stelle mit aktualisiert
+- Digitaler Bon (QR-Code): neuer Schalter, Standard AUS, nicht-blockierend
+
+pos/index.html
+- Rabatt-Dialog-Struktur neu, Info-Dialog-Knopf ergänzt, Schalter "Digitalen Bon
+  anbieten" ergänzt
+
+pos/styles.css
+- CSS für alle obigen Punkte; veraltete "Breiter Rabattdialog"-Regel entfernt
+  (verursachte Bildschirm-Überlauf)
+
+pos/kc-ausverkauft.js
+- Feste Verknüpfung: Glühwein rot ausverkauft → Feuerzangenbowle wird im
+  Sammel-Fenster mit vorgeschlagen
+
+pos/assets/ (neu)
+- feuerzangenpfand_version_3.webp, feuerzangerueckgabe_version_3.webp,
+  glas_feuerzangerueckgabe_version_3.webp
+
+pc-manager/app.js + pc-manager/assets/ (neu)
+- Dieselben drei Pfand-Bilder mit Pfeilen, als PNG für den Manager
+
+pos/service-worker.js
+- Automatisch aktualisiert (Prüfsummen-basierte Cache-Version, kein manueller
+  Eingriff nötig)
+
+Alle Punkte einzeln getestet (Playwright + echte Screenshots), Regressionstests
+liefen nach jeder Änderung - nur die bereits vorher bestehenden 5 Altfehler
+(kasse-bedienung: Spiegeln-Knopf-Position, LED-Anordnung), keine neuen.
