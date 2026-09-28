@@ -133,3 +133,14 @@ Keine Prüfung wurde gestrichen.
   `media/audio/music/`, bis dahin läuft die TV-Vorführung stumm.
 
 Der Live-Monitor-Test läuft jetzt echt. Er braucht dafür einmal `npm install` in `markt-kasse-suite/backend-source`.
+
+## Nachtrag: Digitaler Bon und Rabatt-Knöpfe (28.09.2026)
+* **Digitaler Bon (QR):**
+  * Das Fenster lag links unten und verdeckte bis zu 20 s den RÜCKGELD-Knopf. Es steht jetzt mittig über
+    dem nach dem Verkauf leeren Warenkorb.
+  * Es geht von selbst zu, sobald der nächste Artikel gebucht wird.
+  * Der Test prüft, dass kein Bedienknopf der Zahlfläche verdeckt ist.
+* **Rabatt-Dialog:** „MARKTBESCHICKER“ und „REKLAMATION“ waren abgeschnitten. Sie brechen jetzt an einer
+  festen Stelle auf zwei Zeilen um (MARKT-BESCHICKER, REKLA-MATION). Der gespeicherte Grund bleibt
+  unverändert. Der Test prüft, dass kein Grund-Knopf abgeschnitten ist.
+* Build: `app.js` r40 (Live und Schulung).

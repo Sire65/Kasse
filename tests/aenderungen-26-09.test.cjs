@@ -30,6 +30,9 @@ pruefe('Rabatt-Dialog: offen, Schritt 2 + Übernehmen ausgegraut',d1.offen&&d1.s
 await p.evaluate(()=>document.querySelector('[data-discount-reason="Stammgast"]').click());await p.waitForTimeout(200);
 const d2=await p.evaluate(()=>({prozent:document.getElementById('discountCustomPercent').value,schritt2:document.getElementById('discountStepPercent').disabled,uebernehmen:document.getElementById('applyDiscountBtn').disabled,ende:document.getElementById('discountPreview').textContent}));
 pruefe('Stammgast setzt 10 % vor und schaltet frei',d2.prozent==='10'&&!d2.schritt2&&!d2.uebernehmen,JSON.stringify(d2));
+// 28.09.2026: "MARKTBESCHICKER" war abgeschnitten - kein Grund-Knopf darf seinen Text abschneiden.
+const gruende=await p.evaluate(()=>[...document.querySelectorAll('[data-discount-reason]')].map(b=>({t:b.textContent.replace(/\u00ad/g,''),ab:b.scrollWidth>b.clientWidth+1||b.scrollHeight>b.clientHeight+1})));
+pruefe('Kein Rabatt-Grund ist abgeschnitten (auch MARKTBESCHICKER)',gruende.length>=5&&gruende.every(g=>!g.ab),JSON.stringify(gruende.filter(g=>g.ab)));
 if(BILDER)await p.screenshot({path:path.join(BILDER,'zip-rabatt'+(PFAD.includes('schulung')?'-schulung':'')+'.png')});
 await p.evaluate(()=>document.querySelector('[data-discount-percent="3"]').click());await p.waitForTimeout(150);
 await p.evaluate(()=>document.getElementById('applyDiscountBtn').click());await p.waitForTimeout(300);
@@ -46,8 +49,17 @@ await p.evaluate(()=>{addConfiguredProduct(productsForSale().find(x=>x.id==='gro
 const t0=Date.now();await p.evaluate(()=>document.getElementById('payBtn').click());await p.waitForTimeout(500);
 const bonAn=await p.evaluate(()=>{const b=document.getElementById('kcDigitalerBon');const c=b?.querySelector('canvas');let dunkel=0;if(c){const d=c.getContext('2d').getImageData(0,0,c.width,c.height).data;for(let i=0;i<d.length;i+=4)if(d[i]<100)dunkel++}return {da:!!b,dunkel,leer:state.cart.length===0,klickbar:(()=>{const t=document.querySelector('.product-tile').getBoundingClientRect();const o=document.elementFromPoint(t.left+t.width/2,t.top+t.height/2);return !!o?.closest('.product-tile')})()}});
 pruefe('Digitaler Bon AN: QR erscheint (gezeichnet), Kasse sofort weiter bedienbar',bonAn.da&&bonAn.dunkel>500&&bonAn.leer&&bonAn.klickbar,JSON.stringify(bonAn));
+// 28.09.2026: das Fenster lag links unten ueber dem RUECKGELD-Knopf. Es darf keinen sichtbaren
+// Bedienknopf der Zahlflaeche verdecken und muss beim naechsten Artikel von selbst zugehen.
+const verdeckt=await p.evaluate(()=>{const b=document.getElementById('kcDigitalerBon').getBoundingClientRect();const ids=['cashChangeBtn','payBtn','staffBtn','tipBtn','depositBtn','accountBtn','moreBtn','discountBtn'];
+  const knoepfe=[...document.querySelectorAll('.bottom-layout button,.main-actions button,.kc-bereich button,#payBtn,#cashChangeBtn')].filter(x=>{const r=x.getBoundingClientRect();return r.width>0&&r.height>0&&getComputedStyle(x).visibility!=='hidden'});
+  return knoepfe.filter(x=>{const r=x.getBoundingClientRect();return !(r.right<=b.left||r.left>=b.right||r.bottom<=b.top||r.top>=b.bottom)}).map(x=>x.id||x.textContent.trim().slice(0,20))});
+pruefe('QR-Fenster verdeckt keinen Bedienknopf der Zahlfläche',verdeckt.length===0,verdeckt.join(', '));
+await p.evaluate(()=>{addConfiguredProduct(productsForSale().find(x=>x.id==='grot'),null)});await p.waitForTimeout(300);
+pruefe('QR-Fenster geht beim nächsten Artikel von selbst zu',await p.evaluate(()=>!document.getElementById('kcDigitalerBon')));
+await p.evaluate(()=>{state.cart=[];renderCart()});
 if(BILDER)await p.screenshot({path:path.join(BILDER,'zip-digitalbon'+(PFAD.includes('schulung')?'-schulung':'')+'.png')});
-await p.evaluate(()=>document.querySelector('#kcDigitalerBon [data-schliessen]').click());
+await p.evaluate(()=>document.querySelector('#kcDigitalerBon [data-schliessen]')?.click());
 // Info-Dialog: Verkaufszeiten-Knopf
 await p.evaluate(()=>openProductInfo?openProductInfo('grot'):null).catch(()=>{});
 let info=await p.evaluate(()=>({offen:document.getElementById('productInfoDialog')?.open,knopf:!!document.getElementById('productInfoSalesBtn')}));

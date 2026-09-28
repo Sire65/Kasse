@@ -1873,7 +1873,21 @@ function zeigeDigitalenBon(rec){
   box.innerHTML=`<strong>Digitaler Bon ${rec.bon}</strong><canvas class="kc-digitaler-bon-qr" width="150" height="150" aria-label="QR-Code des Bons"></canvas><button type="button" data-schliessen>Schließen</button>`;
   document.body.appendChild(box);
   if(window.KCQrCode)window.KCQrCode.zeichne(box.querySelector("canvas"),digitalBonText(rec),150);
-  const weg=()=>{clearTimeout(uhr);box.remove()};
+  // 28.09.2026: vorher links unten fest - dort verdeckte das Fenster 20 s lang den RUECKGELD-Knopf.
+  // Jetzt mittig ueber dem (nach dem Verkauf ohnehin leeren) Warenkorb. Liegt der Warenkorb nicht
+  // sichtbar auf dem Schirm, bleibt die Ecke aus styles.css als Rueckfall.
+  const korb=el("cartList"),r=korb&&korb.getBoundingClientRect();
+  if(r&&r.width>=180&&r.height>=120){
+    const b=box.getBoundingClientRect();
+    box.style.left=Math.round(r.left+Math.max(0,(r.width-b.width)/2))+"px";
+    box.style.top=Math.round(r.top+Math.max(0,Math.min(r.height-b.height,(r.height-b.height)/2)))+"px";
+    box.style.bottom="auto";
+  }
+  // Sobald der naechste Artikel im Warenkorb landet, geht das Fenster von selbst zu - niemand muss
+  // es wegtippen, und der neue Bon ist sofort sichtbar.
+  const beobachter=korb&&window.MutationObserver?new MutationObserver(()=>{if(state.cart.length)weg()}):null;
+  if(beobachter)beobachter.observe(korb,{childList:true,subtree:true});
+  const weg=()=>{clearTimeout(uhr);if(beobachter)beobachter.disconnect();box.remove()};
   box.querySelector("[data-schliessen]").onclick=weg;
   const uhr=setTimeout(weg,20000);
 }
