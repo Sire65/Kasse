@@ -72,3 +72,15 @@ Bons wurden tatsächlich falsch verkettet. Ab dem nächsten Marktstart-Reset ist
 
 **Test:** `tests/pruefkette-neustart.test.cjs`, Live und Schulung, je 3 Durchläufe mit zwei Neustarts.
 Die Gegenprobe mit dem alten Code wird rot.
+
+## Nachtrag: Einstellungen – System-Bereich nur noch im eigenen Tab (28.09.2026)
+**Befund:** Die Regel `body.role-superadmin .superadmin-only{display:inline-block}` ist für kleine
+Admin-Knöpfe gedacht. Sie traf aber auch ganze Einstellungsbereiche und hebelte `.settings-panel{display:none}`
+aus. Für Service-Admins stand „System“ deshalb unter jedem Tab.
+
+**Behebung** in `pos/styles.css` und `schulung/pos/styles.css`: Einstellungsbereiche mit `superadmin-only`
+folgen wieder nur ihrem Tab. Die Build-Kennung von `app.js` ist auf r38 hochgezählt, damit die Tablets
+den Offline-Speicher erneuern.
+
+**Test:** `tests/einstellungen-bereiche.test.cjs` prüft Live und Schulung, jeden Tab einzeln, als
+Service-Admin und als normale Kasse. Die Gegenprobe mit dem alten Stand ergibt 18 Fehler.

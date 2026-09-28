@@ -343,6 +343,11 @@ body.hide-product-prices .product-price-tag{display:none}
 /* V0.6.0 Import-/Exportzentrum */
 .superadmin-only{display:none}
 body.role-admin .superadmin-only,body.role-superadmin .superadmin-only{display:inline-block}
+/* 28.09.2026: die Regel darueber ist fuer kleine Admin-Knoepfe gedacht, traf aber auch ganze
+   Einstellungsbereiche (z. B. "System") und hebelte deren .settings-panel{display:none} aus - der
+   Bereich stand dann fuer Service-Admins unter JEDEM Tab. Bereiche folgen jetzt wieder nur ihrem Tab. */
+body.role-admin .settings-panel.superadmin-only:not(.active),body.role-superadmin .settings-panel.superadmin-only:not(.active){display:none}
+body.role-admin .settings-panel.superadmin-only.active,body.role-superadmin .settings-panel.superadmin-only.active{display:block}
 .transfer-tabs{display:flex;gap:6px;flex-wrap:wrap;margin:14px 0;border-bottom:1px solid #d6dbe1;padding-bottom:8px}
 .transfer-tabs button{border:1px solid #cbd1d8;background:#eef1f4;border-radius:7px;padding:9px 13px;font-weight:800}
 .transfer-tabs button.active{background:#173765;color:#fff}
