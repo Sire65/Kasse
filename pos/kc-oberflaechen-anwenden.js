@@ -788,7 +788,7 @@
       const artikel = sammelArtikel(g);
       const anz = Object.keys(sammelWahl).filter((k) => {
         const p = kPROD().find((x) => x.id === k.split('|')[0]);
-        return p && (p.category === g || (Array.isArray(p.displayCategories) && p.displayCategories.includes(g)));
+        return p && (typeof productInCategory === 'function' ? productInCategory(p, g) : (p.category === g || (Array.isArray(p.displayCategories) && p.displayCategories.includes(g))));
       }).reduce((n, k) => n + sammelWahl[k], 0);
       // 10.09.2026 (Betreiber: "den Info-Button weg, der tut es da nicht"): bestätigt - das "i" hatte
       // NIE einen Klick-Handler (aria-hidden="true" schon von Anfang an), reine Dekoration ohne

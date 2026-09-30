@@ -261,3 +261,18 @@ Toilettengeld auch wählbar sein.“
 * Builds: `kc-erfassung-getrennt.js` 0.1.1, `kc-oberflaechen-anwenden.css` 0.9.17.
 * Test: `tests/entnahme-ziffernfeld.test.cjs` (Kasse und Schulung, 1280×800 und 1024×768, echte
   WC-Geld-Entnahme über 0,50 €).
+
+## Nachtrag: Pfand-Plus-Kacheln unter „Sonstiges“ (30.09.2026)
+
+Betreiber: „Pack die beiden Plus-Positionen in der Pfandgruppe unter Sonstiges, sonst vertut man sich zu schnell.“
+
+* Glaspfand (+2 €) und Feuerzangenpfand (+2 €) stehen nicht mehr neben den Rückgaben (−2 €), sondern unter
+  „Sonstiges“. Die Pfand-Gruppe zeigt nur noch Glas-Rückgabe, Feuerzange-Rückgabe und Glas + Feuerzange Rückgabe.
+* **Nur die Anzeige ist verschoben.** Die Warengruppe bleibt „Pfand“: Pfandzählung im Kassenabschluss,
+  „kein Rabatt auf Pfand“, Auswertung und Artikelnummern laufen wie bisher. Die „+“-Taste an den Getränken
+  bucht das Pfand weiter automatisch.
+* Umsetzung über Artikeldaten statt fester Programmierung: neues Artikelfeld `hideInOwnCategory` zusammen mit
+  dem vorhandenen `displayCategories` (wie beim Außer-Haus-Becher). Laufende Geräte werden einmalig umgestellt
+  (Merker `kc_pfand_plus_unter_sonstiges_v1`), eine spätere eigene Einstellung wird nicht überschrieben.
+* Builds: `app.js` r45, `kc-oberflaechen-anwenden.js` 0.9.11.
+* Test: `tests/pfand-plus-unter-sonstiges.test.cjs` (Kasse und Schulung, frisches und bestehendes Gerät).

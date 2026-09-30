@@ -102,8 +102,8 @@ const DEFAULT_PRODUCTS=[
  // Kasse und ist zaehlbar. Das Einloesen ist etwas anderes - dafuer gibt es den
  // Zahlungsknopf unter MEHR, der noch nicht freigeschaltet ist.
  {id:"wertmarke",name:"Wertmarke",price:5.00,category:"Sonstiges",image:"assets/wertmarke.svg",color:"#7c3aed",info:{important:"Vorab verkaufte Wertmarke. Das Einl\u00f6sen erfolgt sp\u00e4ter \u00fcber die Bezahlfunktion Wertmarke."}},
- {id:"glasplus",name:"Glaspfand",price:2.00,category:"Pfand",image:"assets/pfand_aufschlag_version_3.png",manualDeposit:true},
- {id:"zangeplus",name:"Feuerzangenpfand",price:2.00,category:"Pfand",image:"assets/feuerzangenpfand_version_3.webp",manualDeposit:true},
+ {id:"glasplus",name:"Glaspfand",price:2.00,category:"Pfand",image:"assets/pfand_aufschlag_version_3.png",manualDeposit:true,displayCategories:["Sonstiges"],hideInOwnCategory:true},
+ {id:"zangeplus",name:"Feuerzangenpfand",price:2.00,category:"Pfand",image:"assets/feuerzangenpfand_version_3.webp",manualDeposit:true,displayCategories:["Sonstiges"],hideInOwnCategory:true},
  {id:"glasminus",name:"Glasrückgabe",price:-2.00,category:"Pfand",image:"assets/pfandrueckgabe_version_3.png"},
  {id:"zangeminus",name:"Feuerzange Rückgabe",price:-2.00,category:"Pfand",image:"assets/feuerzangerueckgabe_version_3.webp"},
  {id:"glaszangebundleminus",name:"Glas + Feuerzange Rückgabe",price:-4.00,category:"Pfand",image:"assets/glas_feuerzangerueckgabe_version_3.webp",color:"#9f1239",info:{shortDescription:"Komplettrückgabe von Pfandglas und Feuerzange"}},
@@ -126,6 +126,25 @@ let PRODUCTS=JSON.parse(localStorage.getItem("kc_products_v050")||"null")||DEFAU
     if(geaendert)localStorage.setItem("kc_products_v050",JSON.stringify(PRODUCTS));
   }
 }
+// 30.09.2026 (Betreiber: "Pack die beiden Plus-Positionen in der Pfandgruppe unter Sonstiges, sonst
+// vertut man sich zu schnell"): Glaspfand und Feuerzangenpfand (+2 EUR) stehen nicht mehr neben den
+// Rueckgaben (-2 EUR), sondern unter "Sonstiges". NUR die Anzeige - Warengruppe bleibt "Pfand", damit
+// Pfandzaehlung im Abschluss, Rabattsperre und Auswertung genau wie bisher laufen. Die "+"-Taste an den
+// Getraenken bucht das Pfand weiter automatisch. Einmalig umgestellt (Merker), damit eine spaetere
+// eigene Einstellung im Artikelstamm nicht bei jedem Start wieder ueberschrieben wird.
+try{
+  if(!localStorage.getItem("kc_pfand_plus_unter_sonstiges_v1")){
+    let geaendert=false;
+    for(const id of ["glasplus","zangeplus"]){
+      const p=PRODUCTS.find(x=>x.id===id);
+      if(!p||p.category!=="Pfand")continue;
+      const extra=Array.isArray(p.displayCategories)?p.displayCategories:[];
+      p.displayCategories=[...new Set([...extra,"Sonstiges"])];p.hideInOwnCategory=true;geaendert=true;
+    }
+    if(geaendert)localStorage.setItem("kc_products_v050",JSON.stringify(PRODUCTS));
+    localStorage.setItem("kc_pfand_plus_unter_sonstiges_v1","1");
+  }
+}catch(e){}
 // 22.09.2026 (Betreiber-Wunsch): "Freie Zahlung" fuer Artikel ohne eigene Kassentaste (z.B.
 // eine einzelne Feuerzange, eine Tuete Plaetzchen) - Betrag am Zahlenblock eingeben statt fuer
 // jeden Einzelfall einen eigenen Knopf anzulegen. Bereits gespeicherte Artikellisten kennen
@@ -825,7 +844,9 @@ function gruppenFarben(farbe){
   return {kraeftig:alsHex(rgb),flaeche:alsHex(hell),vordergrund:vorder,
           aktivVorder:farbHelligkeit(rgb)>150?"#10233f":"#ffffff"};
 }
-function productInCategory(p,category){return p?.category===category||(Array.isArray(p?.displayCategories)&&p.displayCategories.includes(category))}
+// 30.09.2026: hideInOwnCategory = Kachel erscheint NUR unter displayCategories, nicht in der eigenen
+// Warengruppe. Die Warengruppe selbst (Buchung, Abschluss, Rabattsperre) bleibt unveraendert.
+function productInCategory(p,category){return (p?.category===category&&p?.hideInOwnCategory!==true)||(Array.isArray(p?.displayCategories)&&p.displayCategories.includes(category))}
 function renderCategories(){
   ensureActiveCategory();
   el("categories").innerHTML=categories().map(c=>{
