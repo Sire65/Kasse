@@ -355,6 +355,26 @@
     }
     k.hidden = false;
   }
+  /* 30.09.2026 (Betreiber, echter Fund am Schulungs-iPad): "Habe eine Kassen-Oberfläche
+     eingestellt und kann sie nicht ändern, weil nirgendwo ein Button ist." KC015 (für den
+     PC-Manager gedacht) legt weder MENÜ noch MEHR ins Raster - damit war die Oberflächen-Wahl
+     im Mehr-Fenster unerreichbar. Regel: Liegt nach dem Umbau kein sichtbarer MENÜ-/MEHR-Knopf
+     im Raster, erscheint ein kleiner schwebender ☰-Knopf, der das Mehr-Fenster öffnet.
+     Oberflächen mit eigenem Menü-Knopf bleiben unverändert. */
+  function sorgeFuerMenueZugang() {
+    let k = document.getElementById('kcMenueSchwebend');
+    const sichtbar = (n) => !!(n && hauptRaster && hauptRaster.contains(n) && !n.hidden && n.getClientRects().length);
+    const vorhanden = aktiv && (sichtbar(document.getElementById('menuBtn')) || sichtbar(document.getElementById('moreBtn')));
+    if (!aktiv || vorhanden) { if (k) k.hidden = true; return; }
+    if (!k) {
+      k = document.createElement('button');
+      k.type = 'button'; k.id = 'kcMenueSchwebend'; k.className = 'kc-menue-schwebend';
+      k.textContent = '☰'; k.title = 'Menü (Oberfläche wechseln)'; k.setAttribute('aria-label', 'Menü öffnen');
+      k.addEventListener('click', () => { const d = document.getElementById('moreDialog'); if (d && !d.open) d.showModal(); });
+      document.body.appendChild(k);
+    }
+    k.hidden = false;
+  }
   function anwenden(id) {
     const P = global.KCOberflaechen;
     if (!P) return { ok: false, grund: 'kc-oberflaechen-pos.js fehlt' };
@@ -389,6 +409,8 @@
     const b = verteile(seiteFinden(o, 'kasse') || { bausteine: [] }, hauptRaster, o);
     hauptRaster.dataset.oberflaeche = o.id;
     sorgeFuerRueckgeldZugang(o);
+    /* Sichtbarkeit erst nach dem Zeichnen messbar */
+    requestAnimationFrame(sorgeFuerMenueZugang);
     // 10.09.2026 (Betreiber: "unauffällig einen Code einbauen der die Nummer der Oberfläche
     // zeigt, damit man nicht immer fragen muss, welche es ist"): kleine Kennung unten in der
     // Fußzeile - die einzige Stelle, die bei JEDER der (aktuell 19) Vorlagen unverändert
@@ -406,6 +428,7 @@
   function zuruecksetzen() {
     if (zahlenEbene) { zahlenEbene.hidden = true; document.body.classList.remove('kc-zahlenseite-offen'); }
     const schweber = document.getElementById('kcZahlenTasteSchwebend'); if (schweber) schweber.hidden = true;
+    const menue = document.getElementById('kcMenueSchwebend'); if (menue) menue.hidden = true;
     allesHeim();
     if (hauptRaster) hauptRaster.innerHTML = '';
     aktiv = null;
@@ -932,6 +955,9 @@
     kreuzeEinbauen();
     eingebauteVorlagenLaden().then(() => {
       wahlEinbauen();
+      // Notausgang per Adresse: ...?oberflaeche=standard setzt auf die Standardansicht zurück.
+      let perAdresse = ''; try { perAdresse = new URLSearchParams(location.search).get('oberflaeche') || ''; } catch (e) { /* egal */ }
+      if (perAdresse === 'standard') { zuruecksetzen(); return; }
       if (P && P.gewaehlte()) { anwenden(); return; }
       // Eine bewusst gewaehlte Standardansicht bleibt auch nach Neustart Standard.
       // Nur ein wirklich frisches Geraet ohne Auswahl UND ohne Standard-Marker nutzt Auto-KC003/004.

@@ -174,6 +174,13 @@ body.kc-aufbau .app-shell > .status-footer { display: none !important; }
   background: linear-gradient(180deg, #1e6848, #14532d); color: #fff; font-weight: 800; font-size: 15px;
 }
 body.kc-zahlenseite-offen .kc-zahlen-taste-schwebend { display: none; }
+/* 30.09.2026: Notausgang zum Mehr-Fenster, nur wenn die Oberfläche keinen MENÜ-/MEHR-Knopf hat */
+.kc-menue-schwebend {
+  position: fixed; left: 8px; top: 8px; z-index: 501; width: 44px; height: 44px; border: 0; border-radius: 12px;
+  cursor: pointer; background: #1f2937; color: #fff; font-size: 24px; line-height: 1; box-shadow: 0 4px 12px rgba(0,0,0,.35);
+}
+.kc-menue-schwebend[hidden] { display: none; }
+body.kc-zahlenseite-offen .kc-menue-schwebend { display: none; }
 .kc-bereich.zahlen.block > .keypad-shell { height: 100%; display: flex; flex-direction: column; }
 .kc-bereich.zahlen.block .keypad { flex: 1; }
 

@@ -225,3 +225,20 @@ der Drucker in der Drucktaste, Mülleimer usw.“
 **Tests:** `tests/altbrowser-regeln.test.cjs` erweitert: jede große Artikelgrafik hat eine kleine, offline
 gespeicherte Kopie unter 150 KB; Tausch nur in `<img>`; Rückfall bei fehlender Kopie ohne Endlosschleife;
 aktueller Browser unverändert; Ersatzschrift vorhanden und offline gespeichert.
+
+## 30.09.2026 – Oberfläche ohne Menü-Knopf sperrt das Tablet nicht mehr ein
+
+**Fund (Betreiber, Schulungs-iPad):** „Habe eine Kassen-Oberfläche eingestellt und kann sie nicht ändern, weil
+nirgendwo ein Button ist.“ Gewählt war KC015 „Kassierer-Ansicht mit Bontabelle“ (für den PC-Manager gedacht).
+Sie legt weder MENÜ noch MEHR ins Raster – die Oberflächen-Wahl im Mehr-Fenster war damit unerreichbar.
+
+* `kc-oberflaechen-anwenden.js` 0.9.10: Liegt nach dem Umbau kein sichtbarer MENÜ-/MEHR-Knopf im Raster,
+  erscheint oben links ein kleiner schwebender ☰-Knopf, der das Mehr-Fenster (mit „Oberfläche“) öffnet.
+  Oberflächen mit eigenem Menü-Knopf und die Standardansicht bleiben unverändert.
+* Notausgang per Adresse: `…/pos/index.html?oberflaeche=standard` setzt auf die Standardansicht zurück.
+* CSS 0.9.16. Live und Schulung gleich.
+
+**Tests:** `tests/oberflaeche-notausgang.test.cjs` (neu). Browserprüfung: KC015 → ☰ sichtbar → Mehr-Fenster
+mit Oberflächen-Wahl öffnet → Standard blendet ☰ aus; Köcheclub-Aufbau mit eigenem Menü zeigt kein ☰;
+`?oberflaeche=standard` setzt zurück. kassenbaukasten, schulung-versionsabgleich, pin-sperre-tablet,
+halbe-portion, kombi-warengruppe grün.
