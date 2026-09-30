@@ -198,3 +198,30 @@ Die Ergebnisse entsprachen 1:1 den Fotos.
 
 Nachweis im Chromium 83, alter gegen neuen Stand (Startfenster, Bilder, „mehr“, Parken-Fenster):
 alt 3 von 4 kaputt, neu 4 von 4 ok. Komplette Suite 82/82 grün.
+
+## Nachtrag: altes Tablet – Bilder schneller, Symbole wieder da (30.09.2026)
+
+Betreiber: „läuft jetzt, aber sehr sehr langsam bauen sich die Bilder … einige Icons sind weg: der Warenkorb,
+der Drucker in der Drucktaste, Mülleimer usw.“
+
+**Ursachen**
+* Die Artikelbilder `assets/*_version_3.png` sind je 1,4–2 MB groß (zusammen ca. 30 MB). Ein Tablet von 2014
+  braucht zum Entpacken so großer Bilder sehr lange.
+* Die Symbole sind Emoji-Zeichen (🛒 🖨 🗑 🧾 …). Android 5 kennt nur ältere Emoji und zeigt neuere gar nicht an.
+
+**Behebung** (Live und Schulung, nur auf alten Browsern – erkannt wie bisher am fehlenden `aspect-ratio`)
+* 17 kleine Kopien der Artikelbilder in `assets/klein/` (640 px, webp, zusammen ca. 0,7 MB statt 30 MB).
+  `kc-altbrowser.js` tauscht jedes große Bild schon im HTML-Text gegen die kleine Kopie, bevor der Browser es
+  anfordert (nur `<img src>`, nie gespeicherte Daten oder Eingabefelder). Fehlt eine kleine Kopie, kommt das
+  große Bild automatisch zurück. Nachweis im Chromium 83: vorher 14 Abrufe großer PNGs, jetzt 0.
+* Ersatzschrift `assets/kc-emoji-ersatz.woff2` (Ausschnitt aus Noto Emoji, 23 Zeichen, 17,5 KB, freie Lizenz
+  SIL OFL, Lizenztext liegt daneben). Wird nur auf alten Browsern als letzte Schrift eingehängt, und der
+  Browser lädt sie nur, wenn eines dieser Zeichen tatsächlich fehlt.
+* Startfenster: verschwindet auf alten Browsern jetzt sofort beim Tippen auf „KASSE STARTEN“ (vorher erst,
+  wenn der Browser den Vollbildwunsch beantwortet hatte – das bleibt auf manchen Geräten ganz aus).
+* iPad / neuer Chrome: keine Änderung (im Test geprüft).
+* Builds: `app.js` r44, `kc-altbrowser.js` 1.0.1, `kc-legacy-fallback.css` 1.0.1.
+
+**Tests:** `tests/altbrowser-regeln.test.cjs` erweitert: jede große Artikelgrafik hat eine kleine, offline
+gespeicherte Kopie unter 150 KB; Tausch nur in `<img>`; Rückfall bei fehlender Kopie ohne Endlosschleife;
+aktueller Browser unverändert; Ersatzschrift vorhanden und offline gespeichert.

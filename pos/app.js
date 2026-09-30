@@ -4788,7 +4788,7 @@ function runsAsInstalledApp(){return window.matchMedia?.("(display-mode: standal
 let kcAltbrowserStartfensterWeg=false;
 function syncFullscreenGate(){const gate=el("fullscreenGate"),ended=document.body.classList.contains("application-ended");if(gate)gate.hidden=KC_EMBEDDED_TRAINING||ended||runsAsInstalledApp()||kioskFullscreenActive||kcAltbrowserStartfensterWeg||!!document.fullscreenElement}
 async function enterKioskFullscreen(){
-  if(document.documentElement.classList.contains("kc-ohne-seitenverhaeltnis"))kcAltbrowserStartfensterWeg=true;
+  if(document.documentElement.classList.contains("kc-ohne-seitenverhaeltnis")){kcAltbrowserStartfensterWeg=true;syncFullscreenGate()}
   if(KC_EMBEDDED_TRAINING){
     if(document.fullscreenElement&&document.exitFullscreen)await document.exitFullscreen().catch(()=>{});
     kioskFullscreenActive=false;syncViewportHeight();syncFullscreenGate();return;

@@ -58,6 +58,71 @@
       }
     });
   }
+  // Kleine Artikelbilder (Betreiber 30.09.2026: "sehr sehr langsam bauen sich die Bilder"):
+  // Die Artikelbilder assets/*_version_3.png sind je 1,4-2 MB gross. Ein altes Tablet braucht zum
+  // Laden und Entpacken so grosser Bilder sehr lange. Auf alten Browsern (erkennbar wie in
+  // images-v3.js am fehlenden aspect-ratio) wird jedes solche Bild gegen die kleine Kopie in
+  // assets/klein/ (640 px, webp) getauscht - schon im HTML-Text, bevor der Browser es anfordert.
+  // Nur <img src>, nie gespeicherte Daten oder Eingabefelder. Fehlt eine kleine Kopie, kommt
+  // automatisch das grosse Bild zurueck. Aktuelle Geraete (iPad, neuer Chrome): keine Aenderung.
+  var html = typeof document !== 'undefined' && document.documentElement;
+  var ohneSeitenverhaeltnis = false;
+  try { ohneSeitenverhaeltnis = !(window.CSS && CSS.supports && CSS.supports('aspect-ratio', '1 / 1')); } catch (e) { ohneSeitenverhaeltnis = true; }
+  var GROSS = /(^|\/)assets\/([\w-]+_version_3)\.png(?=$|\?)/;
+  var KLEIN = /(^|\/)assets\/klein\/([\w-]+_version_3)\.webp(?=$|\?)/;
+  var IMG_IM_TEXT = /(<img\b[^>]*?\ssrc\s*=\s*["'])([^"']*)/gi;
+  var ohneKlein = {};
+  function kleinerPfad(src) {
+    var m = typeof src === 'string' && src.match(GROSS);
+    return m && !ohneKlein[m[2]] ? src.replace(GROSS, '$1assets/klein/$2.webp') : src;
+  }
+  function kleinerText(text) {
+    return typeof text === 'string' && text.indexOf('_version_3.png') >= 0
+      ? text.replace(IMG_IM_TEXT, function (x, anfang, src) { return anfang + kleinerPfad(src); }) : text;
+  }
+  function kleinesBild(img) {
+    var src = img.getAttribute && img.getAttribute('src');
+    var klein = kleinerPfad(src);
+    if (klein !== src) img.setAttribute('src', klein);
+  }
+  function durchsuche(knoten) {
+    if (!knoten || knoten.nodeType !== 1) return;
+    if (knoten.tagName === 'IMG') kleinesBild(knoten);
+    else if (knoten.getElementsByTagName) { var bilder = knoten.getElementsByTagName('img'); for (var i = 0; i < bilder.length; i++) kleinesBild(bilder[i]); }
+  }
+  function umhuelle(proto, name, tausch) {
+    var d = proto && Object.getOwnPropertyDescriptor(proto, name);
+    if (!d || !d.set || !d.configurable) return;
+    Object.defineProperty(proto, name, { configurable: true, enumerable: d.enumerable, get: d.get,
+      set: function (wert) { d.set.call(this, tausch.call(this, wert)); } });
+  }
+  if (html && ohneSeitenverhaeltnis && typeof MutationObserver === 'function') {
+    nachgeruestet.push('kleineBilder');
+    try {
+      umhuelle(Element.prototype, 'innerHTML', kleinerText);
+      umhuelle(HTMLImageElement.prototype, 'src', kleinerPfad);
+      var einfuegen = Element.prototype.insertAdjacentHTML;
+      if (einfuegen) Element.prototype.insertAdjacentHTML = function (wo, text) { return einfuegen.call(this, wo, kleinerText(text)); };
+    } catch (e) { /* dann greift nur die Beobachtung unten */ }
+    // Sicherheitsnetz fuer alles andere (setAttribute, Seiten-HTML): beim Einfuegen tauschen.
+    new MutationObserver(function (aenderungen) {
+      for (var i = 0; i < aenderungen.length; i++) {
+        var a = aenderungen[i];
+        if (a.type === 'attributes') kleinesBild(a.target);
+        else for (var j = 0; j < a.addedNodes.length; j++) durchsuche(a.addedNodes[j]);
+      }
+    }).observe(html, { childList: true, subtree: true, attributes: true, attributeFilter: ['src'] });
+    durchsuche(html);
+    // Kleine Kopie fehlt -> grosses Bild zurueck (und fuer dieses Bild nicht mehr tauschen).
+    document.addEventListener('error', function (ev) {
+      var img = ev.target, src = img && img.tagName === 'IMG' && img.getAttribute('src');
+      var m = src && src.match(KLEIN);
+      if (!m) return;
+      ohneKlein[m[2]] = true;
+      img.setAttribute('src', src.replace(KLEIN, '$1assets/$2.png'));
+    }, true);
+  }
+
   // Fuer die Diagnose: was musste nachgeruestet werden? (leer = aktueller Browser)
   window.KC_ALTBROWSER_NACHGERUESTET = nachgeruestet;
 })();

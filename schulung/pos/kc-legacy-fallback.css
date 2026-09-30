@@ -132,3 +132,16 @@
 @media (max-width:1366px){
   .category-tabs button,.product-tile,.main-actions button,.cash-finish-row button{min-height:44px}
 }
+
+/* ===== Emoji-Ersatzschrift fuer alte Geraete (30.09.2026) ====================
+   Betreiber (Samsung SM-T535, Android 5): "einige Icons sind weg - Warenkorb, Drucker,
+   Muelleimer usw." Die Kasse zeichnet viele Icons als Emoji. Android 5 kennt nur Emoji bis
+   Unicode 6 (2014); juengere (🛒 🖨 🗑 🧾 🏷 🤝 🥤 🧪 ...) bleiben dort leer.
+   Ersatz: kleine Schrift "Noto Emoji" (Google, SIL Open Font License, kostenlos - Lizenz liegt
+   daneben in assets/kc-emoji-ersatz-LIZENZ-OFL.txt), NUR mit genau diesen 23 Zeichen (18 KB).
+   Aktiv NUR auf alten Browsern (html.kc-ohne-seitenverhaeltnis, gesetzt von images-v3.js) -
+   aktuelle Geraete zeigen weiter ihre bunten System-Emoji. Auf dem alten Geraet erscheinen
+   diese Icons einfarbig, aber sie sind da. */
+@font-face{font-family:"KC Emoji Ersatz";src:url("assets/kc-emoji-ersatz.woff2") format("woff2");font-display:swap;unicode-range:U+2696,U+2699,U+1F32D,U+1F37D,U+1F3F7,U+1F465,U+1F4B6,U+1F504,U+1F507,U+1F5A8,U+1F5D1,U+1F5DD,U+1F6D2,U+1F6F0,U+1F7E1,U+1F91D,U+1F922,U+1F964,U+1F976,U+1F9EA,U+1F9F4,U+1F9FE,U+1FA99}
+html.kc-ohne-seitenverhaeltnis body{font-family:Arial,Helvetica,sans-serif,"KC Emoji Ersatz"}
+

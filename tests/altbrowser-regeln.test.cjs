@@ -38,4 +38,51 @@ const quelle=fs.readFileSync(path.join(W,'pos/kc-altbrowser.js'),'utf8');
  const at=Anackt.prototype.at;pruefe('Nachgerüstetes .at(-1) liefert das letzte Element',at.call([1,2,3],-1)===3&&at.call([1,2,3],5)===undefined);
  const ra=Snackt.prototype.replaceAll;pruefe('Nachgerüstetes replaceAll ersetzt alle Vorkommen',ra.call('a-b-c','-','+')==='a+b+c');
  const sig=ctx.AbortSignal.timeout(10);pruefe('Nachgerüstetes AbortSignal.timeout liefert ein Signal',sig&&typeof sig.aborted==='boolean');}
+// 4. Kleine Artikelbilder fuer alte Tablets (30.09.2026: "sehr sehr langsam bauen sich die Bilder")
+for(const base of ['pos','schulung/pos']){
+  const quellen=['app.js','images-v3.js'].map(f=>fs.readFileSync(path.join(W,base,f),'utf8')).join('\n');
+  const namen=[...new Set([...quellen.matchAll(/assets\/([\w-]+_version_3)\.png/g)].map(m=>m[1]))];
+  const sw=fs.readFileSync(path.join(W,base,'service-worker.js'),'utf8');
+  const fehlt=namen.filter(n=>!fs.existsSync(path.join(W,base,'assets/klein',n+'.webp')));
+  const nichtOffline=namen.filter(n=>!sw.includes(`"./assets/klein/${n}.webp"`));
+  pruefe(`${base}: jedes grosse Artikelbild (${namen.length}) hat eine kleine Kopie`,namen.length>10&&!fehlt.length,fehlt.join(', '));
+  pruefe(`${base}: kleine Kopien sind offline gespeichert`,!nichtOffline.length,nichtOffline.join(', '));
+  const zuGross=namen.filter(n=>fs.existsSync(path.join(W,base,'assets/klein',n+'.webp'))&&fs.statSync(path.join(W,base,'assets/klein',n+'.webp')).size>150000);
+  pruefe(`${base}: kleine Kopien sind wirklich klein (unter 150 KB)`,!zuGross.length,zuGross.join(', '));
+  pruefe(`${base}: Ersatzschrift fuer fehlende Symbole ist da und offline gespeichert`,fs.existsSync(path.join(W,base,'assets/kc-emoji-ersatz.woff2'))&&sw.includes('"./assets/kc-emoji-ersatz.woff2"')&&/html\.kc-ohne-seitenverhaeltnis body\{[^}]*KC Emoji Ersatz/.test(fs.readFileSync(path.join(W,base,'kc-legacy-fallback.css'),'utf8')));
+}
+function baueDom(mitSeitenverhaeltnis){
+  const log=[];
+  function El(tag){this.tagName=tag;this.nodeType=1;this.attr={}}
+  El.prototype.getAttribute=function(n){return n in this.attr?this.attr[n]:null};
+  El.prototype.setAttribute=function(n,v){this.attr[n]=String(v)};
+  El.prototype.getElementsByTagName=function(){return []};
+  El.prototype.insertAdjacentHTML=function(wo,t){this.html=t};
+  Object.defineProperty(El.prototype,'innerHTML',{configurable:true,get(){return this.html||''},set(t){this.html=t}});
+  function Img(){El.call(this,'IMG')}Img.prototype=Object.create(El.prototype);
+  Object.defineProperty(Img.prototype,'src',{configurable:true,get(){return this.getAttribute('src')},set(v){this.setAttribute('src',v)}});
+  const root=new El('HTML');let fehlerHoerer=null;
+  const win={CSS:{supports:()=>mitSeitenverhaeltnis}};
+  const ctx={window:win,CSS:win.CSS,Array,String,Object,Math,JSON,AbortSignal,AbortController,setTimeout,Element:El,HTMLImageElement:Img,
+    MutationObserver:function(){this.observe=()=>log.push('beobachtet')},
+    document:{documentElement:root,addEventListener:(t,f)=>{if(t==='error')fehlerHoerer=f},createTextNode:t=>t}};
+  vm.runInNewContext(quelle,ctx);
+  return {win,El,Img,log,fehler:img=>fehlerHoerer&&fehlerHoerer({target:img})};
+}
+{const d=baueDom(false);
+ const div=new d.El('DIV');
+ div.innerHTML='<img class="x" src="assets/gluehwein_version_3.png" alt=""><input value="assets/gluehwein_version_3.png"><img src="assets/logo.png">';
+ pruefe('Alter Browser: Kachel-HTML bekommt das kleine Bild',div.html.includes('src="assets/klein/gluehwein_version_3.webp"'),div.html);
+ pruefe('Alter Browser: Eingabefelder/Daten bleiben unveraendert',div.html.includes('value="assets/gluehwein_version_3.png"')&&div.html.includes('src="assets/logo.png"'));
+ const img=new d.Img();img.src='assets/rum_version_3.png';
+ pruefe('Alter Browser: img.src = grosses Bild -> kleines Bild',img.getAttribute('src')==='assets/klein/rum_version_3.webp',img.getAttribute('src'));
+ d.fehler(img);
+ pruefe('Kleine Kopie fehlt -> grosses Bild kommt zurueck',img.getAttribute('src')==='assets/rum_version_3.png',img.getAttribute('src'));
+ img.src='assets/rum_version_3.png';
+ pruefe('Danach wird dieses Bild nicht mehr getauscht (keine Endlosschleife)',img.getAttribute('src')==='assets/rum_version_3.png');
+ pruefe('Alter Browser: kleineBilder in der Diagnose',d.win.KC_ALTBROWSER_NACHGERUESTET.includes('kleineBilder'));}
+{const d=baueDom(true);
+ const div=new d.El('DIV');const html='<img src="assets/gluehwein_version_3.png">';div.innerHTML=html;
+ const img=new d.Img();img.src='assets/rum_version_3.png';
+ pruefe('Aktueller Browser: Bilder bleiben unveraendert gross',div.html===html&&img.getAttribute('src')==='assets/rum_version_3.png'&&!d.win.KC_ALTBROWSER_NACHGERUESTET.includes('kleineBilder'));}
 console.log(fehler?`\n${fehler} FEHLER`:'\nAlles OK');process.exit(fehler?1:0);
