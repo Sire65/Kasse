@@ -46,7 +46,7 @@
     // Bildschirmtastatur aufging, lag sie ueber dem Eingabefeld - man tippte blind. iOS
     // verkleinert bei position:fixed die Flaeche NICHT, das Feld rutscht also nicht von selbst
     // nach oben. Deshalb sitzt das Fenster jetzt OBEN, mit etwas Abstand.
-    overlay.style.cssText = 'position:fixed;inset:0;background:#07111f;z-index:99997;display:flex;'
+    overlay.style.cssText = 'position:fixed;top:0;right:0;bottom:0;left:0;inset:0;background:#07111f;z-index:99997;display:flex;'
       + 'align-items:flex-start;justify-content:center;padding:4vh 12px 12px;overflow:auto;font-family:inherit;';
     const bereitsEingerichtet = !!localStorage.getItem(PIN_HASH_KEY);
     const box = document.createElement('div');

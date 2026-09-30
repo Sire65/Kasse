@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>KC MarktKasse · Programm aktualisieren</title>
+<!--
+  30.09.2026 (Betreiber: "Das alte Tablet laedt nicht die neueste Version, habe schon 3x versucht").
+  Die Kasse haelt fuer den Offline-Betrieb eine komplette Programmkopie im Browser (Service Worker +
+  Programm-Cache). Haengt ein Geraet an einer alten Kopie fest, hilft Neuladen nicht - die alte Kopie
+  liefert sich selbst immer wieder aus.
+  Diese Seite liegt bewusst AUSSERHALB von pos/ und schulung/pos/ und wird deshalb immer frisch vom
+  Server geladen. Sie entfernt NUR die gespeicherte Programmkopie von Kasse und Schulung.
+  Verkaeufe, Bons, Einstellungen, Kopplung (localStorage/IndexedDB) werden NICHT angefasst.
+  Bewusst altes, einfaches JavaScript (var/function), damit sie auch auf sehr alten Browsern laeuft.
+-->
+<style>
+  :root{--grund:#f4f6f8;--karte:#fff;--text:#101828;--leise:#5b6574;--ok:#167447;--warn:#9a3412;--blau:#173765}
+  body{margin:0;background:var(--grund);color:var(--text);font-family:system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif}
+  main{max-width:720px;margin:0 auto;padding:16px}
+  .karte{background:var(--karte);border:1px solid #d6dbe1;border-radius:12px;padding:18px;margin:0 0 14px}
+  h1{font-size:1.35rem;margin:0 0 6px;color:var(--blau)}
+  p{line-height:1.45;margin:6px 0}
+  .leise{color:var(--leise);font-size:.92rem}
+  button,a.knopf{display:block;width:100%;box-sizing:border-box;min-height:56px;margin:10px 0 0;border:0;border-radius:10px;font-size:1.1rem;font-weight:800;cursor:pointer;text-align:center;text-decoration:none;line-height:56px}
+  #los{background:var(--blau);color:#fff}
+  #los[disabled]{opacity:.5;cursor:default}
+  a.knopf{background:var(--ok);color:#fff}
+  a.knopf.zweit{background:#e7ebef;color:var(--text)}
+  #protokoll{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:.85rem;white-space:pre-wrap;background:#0f172a;color:#e2e8f0;border-radius:8px;padding:10px;min-height:3em;margin:10px 0 0}
+  .ok{color:var(--ok);font-weight:800}.warn{color:var(--warn);font-weight:800}
+  #fertig{display:none}
+</style>
+</head>
+<body>
+<main>
+  <section class="karte">
+    <h1>Programm aktualisieren</h1>
+    <p>Für Geräte, die trotz Neuladen die alte Version der Kasse zeigen.</p>
+    <p class="leise">Es wird nur die im Browser gespeicherte Programmkopie (Kasse, Schulung, Startseite) entfernt. <strong>Verkäufe, Bons, Einstellungen und die Kopplung bleiben erhalten.</strong></p>
+    <p id="version" class="leise">Aktuelle Version auf dem Server: wird geprüft …</p>
+    <button type="button" id="los">Jetzt aktualisieren</button>
+    <div id="protokoll" aria-live="polite"></div>
+  </section>
+  <section class="karte" id="fertig">
+    <p class="ok">Fertig. Jetzt die Kasse neu öffnen:</p>
+    <a class="knopf" id="zurKasse" href="pos/index.html">Kasse öffnen</a>
+    <a class="knopf zweit" id="zurSchulung" href="schulung/pos/index.html">Schulung öffnen</a>
+  </section>
+</main>
+<script>
+(function(){
+  'use strict';
+  var protokoll=document.getElementById('protokoll');
+  function zeile(text,art){var z=document.createElement('div');if(art)z.className=art;z.textContent=text;protokoll.appendChild(z)}
+  // Nur die Programmkopien von Kasse und Schulung - alles andere bleibt, wie es ist.
+  // kc-bildrechner- = Kasse, kc-schulung- = Schulung, kc-marktkasse- = alte Startseite im Hauptordner.
+  // Letztere fragt nie nach Updates; ohne sie zu entfernen koennte sie nach dem Aufraeumen einspringen
+  // und eine noch aeltere Kasse ausliefern.
+  function istKassenCache(name){return name.indexOf('kc-bildrechner-')===0||name.indexOf('kc-schulung-')===0||name.indexOf('kc-marktkasse-')===0}
+  // Alle Programmsteuerungen unterhalb des Ordners, in dem diese Seite liegt (Kasse, Schulung, Startseite).
+  var basis=location.href.replace(/[^\/]*([?#].*)?$/,'');
+  function istKassenBereich(scope){return scope.indexOf(basis)===0}
+
+  // Welche Version liegt auf dem Server? (am Zwischenspeicher vorbei)
+  try{
+    fetch('pos/index.html?stand='+Date.now(),{cache:'no-store'}).then(function(r){return r.text()}).then(function(t){
+      var m=t.match(/app\.js\?build=([^'"]+)/);document.getElementById('version').textContent='Aktuelle Version auf dem Server: '+(m?m[1]:'unbekannt');
+    })['catch'](function(){document.getElementById('version').textContent='Server gerade nicht erreichbar - bitte WLAN prüfen.'});
+  }catch(e){}
+
+  document.getElementById('los').onclick=function(){
+    var knopf=this;knopf.disabled=true;protokoll.textContent='';
+    var schritte=[];
+    if('serviceWorker' in navigator&&navigator.serviceWorker.getRegistrations){
+      schritte.push(navigator.serviceWorker.getRegistrations().then(function(regs){
+        var weg=regs.filter(function(r){return istKassenBereich(r.scope)});
+        if(!weg.length)zeile('Keine gespeicherte Programmsteuerung gefunden.');
+        return Promise.all(weg.map(function(r){return r.unregister().then(function(ok){zeile((ok?'Entfernt: ':'Nicht entfernt: ')+r.scope,ok?'':'warn')})}));
+      }));
+    }else zeile('Dieser Browser hat keine Programmsteuerung (Service Worker) - nichts zu tun.');
+    if(window.caches&&caches.keys){
+      schritte.push(caches.keys().then(function(namen){
+        var weg=namen.filter(istKassenCache);
+        if(!weg.length)zeile('Keine gespeicherte Programmkopie gefunden.');
+        return Promise.all(weg.map(function(n){return caches['delete'](n).then(function(ok){zeile((ok?'Gelöscht: ':'Nicht gelöscht: ')+n,ok?'':'warn')})}));
+      }));
+    }
+    Promise.all(schritte).then(function(){
+      zeile('Verkäufe, Bons und Einstellungen wurden nicht verändert.','ok');
+      var t='?neu='+Date.now();
+      document.getElementById('zurKasse').href='pos/index.html'+t;
+      document.getElementById('zurSchulung').href='schulung/pos/index.html'+t;
+      document.getElementById('fertig').style.display='block';
+    })['catch'](function(e){zeile('Fehler: '+(e&&e.message||e),'warn');knopf.disabled=false});
+  };
+})();
+</script>
+</body>
+</html>

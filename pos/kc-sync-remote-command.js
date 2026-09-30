@@ -14,7 +14,7 @@
     if (document.getElementById('kcGeraetGesperrtOverlay')) return;
     const overlay = document.createElement('div');
     overlay.id = 'kcGeraetGesperrtOverlay';
-    overlay.style.cssText = 'position:fixed;inset:0;background:#7f1d1d;color:#fff;z-index:999999;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:40px;font-family:system-ui,sans-serif;';
+    overlay.style.cssText = 'position:fixed;top:0;right:0;bottom:0;left:0;inset:0;background:#7f1d1d;color:#fff;z-index:999999;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:40px;font-family:system-ui,sans-serif;';
     overlay.innerHTML = `
       <div style="font-size:4rem;">🔒</div>
       <h1 style="font-size:1.8rem;margin:16px 0 8px;">Dieses Gerät wurde gesperrt</h1>

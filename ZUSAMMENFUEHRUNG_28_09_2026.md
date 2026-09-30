@@ -161,3 +161,40 @@ allein aus `aspect-ratio:1`, und das kennt der alte Browser nicht. Übrig blieb 
 **Test:** `tests/alter-browser-kacheln.test.cjs` simuliert den alten Browser in Live und Schulung
 (KC-Aufbau und neues Layout). Die Gegenprobe mit dem alten Code ergibt 8 Fehler (206×8 px, Bild 0 px),
 genau wie auf dem Foto. Komplette Suite: 80/80 grün.
+
+## Nachtrag: altes Samsung-Tablet vollständig lauffähig (30.09.2026)
+**Befund** (Betreiber-Fotos SM-T535, Samsung-Browser): Nach dem aspect-ratio-Fix hatten die Kacheln die
+richtige Größe, aber kein Bild. „Seite 2“ und das Parken-Fenster gingen nicht, und in Chrome ging gar nichts.
+Das habe ich mit einem **echten Chromium 83** nachgestellt, dem Stand des Samsung-Browsers auf Android 5.
+Die Ergebnisse entsprachen 1:1 den Fotos.
+
+**Ursachen**
+* **CSS `inset`** (erst ab Chrome 87): Alle Ebenen, die damit ihre Größe bekommen, blieben im alten Browser
+  ohne Größe. Betroffen waren:
+  * das Bild in der Kachel (lag 210 px unterhalb, also außerhalb der Kachel)
+  * das Parken-Fenster (unsichtbar)
+  * das Startfenster „Kasse im Vollbild starten“ (lag außerhalb des Bildschirms)
+  * die Ebenen von PIN-Sperre, Security Card, Startprüfung, Geldübergabe und Fernbefehl
+* **JavaScript:** `.at()` (Chrome 92), `replaceAll` (85), `AbortSignal.timeout` (103), `Object.hasOwn`,
+  `structuredClone`, `replaceChildren`.
+
+**Behebung** (Live und Schulung)
+* Vor jeder `inset:`-Angabe steht jetzt die ausgeschriebene Form `top/right/bottom/left`, maschinell,
+  70 Stellen in CSS und in JS-Styles. Neue Browser: identisches Ergebnis.
+* `pos/kc-altbrowser.js` wird als erstes Skript geladen und ergänzt die fehlenden JS-Funktionen **nur**, wenn
+  sie fehlen. Auf aktuellen Geräten tut die Datei nichts.
+* Startfenster: Auf alten Browsern verschwindet es nach „KASSE STARTEN“ auch dann, wenn der Vollbildmodus
+  nicht startet, damit es die Kasse nie blockieren kann. Andere Geräte: unverändert.
+* Neue Seite `kasse-aktualisieren.html` im Hauptordner: entfernt die im Browser gespeicherte Programmkopie
+  von Kasse, Schulung und alter Startseite. Verkäufe, Bons und Einstellungen bleiben erhalten.
+  Für Geräte, die an einer alten Version hängen.
+* Die Kasse fragt bei jedem Start ausdrücklich am Server nach Updates (`updateViaCache:"none"` + `update()`).
+* Build: `app.js` r43.
+
+**Tests:**
+* `tests/altbrowser-regeln.test.cjs`: inset-Regel, Ladereihenfolge, Nachrüstung. Die Gegenprobe mit dem
+  alten Stand schlägt an.
+* `tests/kasse-aktualisieren.test.cjs`: Update-Seite mit aktivem Offline-Speicher und echtem Bon.
+
+Nachweis im Chromium 83, alter gegen neuen Stand (Startfenster, Bilder, „mehr“, Parken-Fenster):
+alt 3 von 4 kaputt, neu 4 von 4 ok. Komplette Suite 82/82 grün.

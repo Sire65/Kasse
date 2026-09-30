@@ -5105,8 +5105,12 @@ function syncViewportHeight(){
 }
 let kioskFullscreenActive=false;
 function runsAsInstalledApp(){return window.matchMedia?.("(display-mode: standalone)")?.matches||window.navigator.standalone===true}
-function syncFullscreenGate(){const gate=el("fullscreenGate"),ended=document.body.classList.contains("application-ended");if(gate)gate.hidden=KC_EMBEDDED_TRAINING||ended||runsAsInstalledApp()||kioskFullscreenActive||!!document.fullscreenElement}
+// 30.09.2026: auf alten Browsern (html.kc-ohne-seitenverhaeltnis, z.B. Samsung-Tablet) darf das
+// Startfenster die Kasse nie blockieren - auch wenn der Vollbildmodus dort nicht startet. Andere Geraete: wie bisher.
+let kcAltbrowserStartfensterWeg=false;
+function syncFullscreenGate(){const gate=el("fullscreenGate"),ended=document.body.classList.contains("application-ended");if(gate)gate.hidden=KC_EMBEDDED_TRAINING||ended||runsAsInstalledApp()||kioskFullscreenActive||kcAltbrowserStartfensterWeg||!!document.fullscreenElement}
 async function enterKioskFullscreen(){
+  if(document.documentElement.classList.contains("kc-ohne-seitenverhaeltnis"))kcAltbrowserStartfensterWeg=true;
   if(KC_EMBEDDED_TRAINING){
     if(document.fullscreenElement&&document.exitFullscreen)await document.exitFullscreen().catch(()=>{});
     kioskFullscreenActive=false;syncViewportHeight();syncFullscreenGate();return;
@@ -5161,7 +5165,11 @@ window.KCHealthCore?.start?.({probes:{
   checkCore:async()=>({status:(PRODUCTS.length&&GROUPS.length)?"pass":"fail",message:`${PRODUCTS.length} Artikel · ${GROUPS.length} Gruppen geladen`})
 }});
 if("serviceWorker" in navigator&&location.protocol!=="file:"){
-  window.addEventListener("load",()=>navigator.serviceWorker.register("service-worker.js").catch(()=>{}));
+  // 30.09.2026 (Betreiber: altes Tablet holte die neue Version nicht): bei jedem Start ausdruecklich
+  // am Server nachfragen, ob es eine neue Programmversion gibt - am Browser-Zwischenspeicher vorbei
+  // (updateViaCache:"none"; aeltere Browser ignorieren die Angabe, update() fragt trotzdem nach).
+  // Haengt ein Geraet trotzdem fest: ../kasse-aktualisieren.html (bzw. ../../ in der Schulung).
+  window.addEventListener("load",()=>navigator.serviceWorker.register("service-worker.js",{updateViaCache:"none"}).then(reg=>{try{reg.update()}catch(e){}}).catch(()=>{}));
   // Betreiber: wiederholt Verwirrung nach einem Update ("alter Stand trotz Neuladen") - ein
   // neuer Service-Worker uebernimmt zwar sofort (skipWaiting/clients.claim), die bereits
   // GELADENE Seite fragt ihre Skripte/Styles deshalb aber trotzdem erst beim NAECHSTEN

@@ -22,7 +22,7 @@
 .kc-rotate-overlay{display:none}
 @media (orientation:portrait) and (pointer:coarse) and (max-width:1366px){
   .kc-rotate-overlay{
-    display:flex!important;position:fixed;inset:0;z-index:99999;
+    display:flex!important;position:fixed;top:0;right:0;bottom:0;left:0;inset:0;z-index:99999;
     background:#07111f;color:#fff;flex-direction:column;align-items:center;justify-content:center;
     text-align:center;padding:32px;box-sizing:border-box;
   }

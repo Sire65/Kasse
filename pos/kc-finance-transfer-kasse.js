@@ -74,7 +74,7 @@
 
     const overlay = document.createElement('div');
     overlay.id = 'kcFinanceTransferOverlay';
-    overlay.style.cssText = 'position:fixed;inset:0;background:rgba(15,23,42,.75);z-index:999998;display:flex;align-items:center;justify-content:center;padding:20px;font-family:system-ui,sans-serif;';
+    overlay.style.cssText = 'position:fixed;top:0;right:0;bottom:0;left:0;inset:0;background:rgba(15,23,42,.75);z-index:999998;display:flex;align-items:center;justify-content:center;padding:20px;font-family:system-ui,sans-serif;';
     overlay.innerHTML = `
       <div style="background:#fff;border-radius:14px;padding:28px;max-width:400px;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,.3);">
         <div style="font-size:2.6rem;">💶</div>

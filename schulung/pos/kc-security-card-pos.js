@@ -110,7 +110,7 @@
     if (overlay || istBereit()) return;
     overlay = document.createElement('div');
     overlay.id = 'kcStartkarteOverlay';
-    overlay.style.cssText = 'position:fixed;inset:0;background:rgba(9,18,32,.93);z-index:99998;'
+    overlay.style.cssText = 'position:fixed;top:0;right:0;bottom:0;left:0;inset:0;background:rgba(9,18,32,.93);z-index:99998;'
       + 'display:flex;align-items:center;justify-content:center;font-family:system-ui,sans-serif';
     overlay.innerHTML = `
       <div style="background:#fff;border-radius:16px;padding:28px 30px;max-width:430px;text-align:center">

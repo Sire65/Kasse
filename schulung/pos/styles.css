@@ -94,7 +94,7 @@ body.kc-spiegel-modus .main-layout>.cart-area{direction:ltr}
 .product-grid{display:grid;grid-template-columns:repeat(5,1fr);grid-template-rows:repeat(3,1fr);gap:9px;height:535px}
 .product-tile{position:relative;border:0;border-radius:9px;overflow:hidden;box-shadow:0 2px 5px rgba(0,0,0,.22);background:#222;color:white;padding:0}
 .product-tile img{width:100%;height:100%;object-fit:cover;display:block}
-.product-tile:after{content:"";position:absolute;inset:44% 0 0;background:linear-gradient(transparent,rgba(0,0,0,.92))}
+.product-tile:after{content:"";position:absolute;top:44%;right:0;bottom:0;left:0;inset:44% 0 0;background:linear-gradient(transparent,rgba(0,0,0,.92))}
 .product-label{position:absolute;left:8px;right:8px;bottom:10px;z-index:2;text-align:center;text-shadow:0 2px 3px #000}
 .product-label strong{display:block;font-size:1rem}
 .product-label span{display:block;font-size:1.05rem;font-weight:900;margin-top:4px}
@@ -243,14 +243,14 @@ dialog::backdrop{background:rgba(0,0,0,.72)}
 .product-tile.mode-color{background:var(--tile-color,#315d8d)}
 .product-tile.mode-text{background:linear-gradient(#fff,#e7ebef);color:#101828;border:1px solid #c9d0d8}
 .product-tile.mode-text .product-label,.product-tile.mode-color .product-label{
-  position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  position:absolute;top:0;right:0;bottom:0;left:0;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;
   text-shadow:none;padding:10px
 }
 .product-tile.mode-color .product-label{color:#fff}
 .product-tile.mode-text .product-label{color:#101828}
 .product-tile.mode-mixed{background:var(--tile-color,#315d8d)}
 .product-tile.mode-mixed img{height:68%;object-fit:cover}
-.product-tile.mode-mixed:after{inset:56% 0 0;background:linear-gradient(transparent,var(--tile-color,#315d8d) 38%)}
+.product-tile.mode-mixed:after{top:56%;right:0;bottom:0;left:0;inset:56% 0 0;background:linear-gradient(transparent,var(--tile-color,#315d8d) 38%)}
 .product-grid.size-compact .product-label strong{font-size:.86rem}
 .product-grid.size-compact .product-label span{font-size:.92rem}
 .product-grid.size-large .product-label strong{font-size:1.12rem}
@@ -286,7 +286,7 @@ body.hide-product-prices .product-price-tag{display:none}
 .layout-preview{margin-top:20px;border-top:1px solid #dde1e5;padding-top:15px}
 .layout-preview>span{display:block;font-weight:900;margin-bottom:10px}
 .preview-tile{position:relative;width:210px;height:130px;border-radius:9px;overflow:hidden;background:#315d8d;color:white;display:flex;flex-direction:column;justify-content:flex-end;padding:12px;box-shadow:0 2px 7px rgba(0,0,0,.2)}
-.preview-image{position:absolute;inset:0;background:linear-gradient(135deg,#80351e,#e5a23d);opacity:.78}
+.preview-image{position:absolute;top:0;right:0;bottom:0;left:0;inset:0;background:linear-gradient(135deg,#80351e,#e5a23d);opacity:.78}
 .preview-tile strong,.preview-tile b{position:relative;z-index:2}
 .preview-tile i{position:absolute;top:8px;left:8px;z-index:3;background:#22a521;border-radius:50%;width:25px;height:25px;display:flex;align-items:center;justify-content:center;font-style:normal;font-weight:900}
 .preview-tile.mode-color .preview-image,.preview-tile.mode-text .preview-image{display:none}
@@ -814,7 +814,7 @@ dialog>.dialog-card{
 @media (prefers-reduced-motion:reduce){.notification-bar,.product-tile{transition:none}.product-tile-wrap.last-selected .product-tile{transform:none}}
 
 /* V0.21.3 KassenCoachCore */
-.coach-overlay{position:fixed;inset:0;z-index:9999;pointer-events:none}.coach-overlay[hidden]{display:none}.coach-card{pointer-events:auto;position:absolute;right:18px;bottom:18px;width:min(430px,calc(100vw - 36px));background:#fff;border:3px solid #075fbd;border-radius:16px;padding:18px;box-shadow:0 14px 50px rgba(0,0,0,.35)}.coach-progress{display:flex;justify-content:space-between;align-items:center;color:#075fbd;font-weight:900}.coach-progress button{border:0;background:transparent;font-size:28px}.coach-card h2{margin:8px 0}.coach-actions{display:flex;justify-content:space-between;gap:10px}.coach-highlight{outline:6px solid #ffd24a!important;outline-offset:4px;position:relative;z-index:9998}.coach-card button{min-height:46px;padding:8px 16px}@media(max-width:650px){.coach-card{left:10px;right:10px;bottom:10px;width:auto}}
+.coach-overlay{position:fixed;top:0;right:0;bottom:0;left:0;inset:0;z-index:9999;pointer-events:none}.coach-overlay[hidden]{display:none}.coach-card{pointer-events:auto;position:absolute;right:18px;bottom:18px;width:min(430px,calc(100vw - 36px));background:#fff;border:3px solid #075fbd;border-radius:16px;padding:18px;box-shadow:0 14px 50px rgba(0,0,0,.35)}.coach-progress{display:flex;justify-content:space-between;align-items:center;color:#075fbd;font-weight:900}.coach-progress button{border:0;background:transparent;font-size:28px}.coach-card h2{margin:8px 0}.coach-actions{display:flex;justify-content:space-between;gap:10px}.coach-highlight{outline:6px solid #ffd24a!important;outline-offset:4px;position:relative;z-index:9998}.coach-card button{min-height:46px;padding:8px 16px}@media(max-width:650px){.coach-card{left:10px;right:10px;bottom:10px;width:auto}}
 
 /* V0.21.3 – getrennte Direktwahl und Variantenauswahl */
 .product-variant-button{position:absolute;right:8px;top:8px;z-index:8;width:50px!important;height:50px!important;min-width:50px!important;min-height:50px!important;border-radius:14px!important;border:3px solid #fff!important;background:#1769aa!important;color:#fff!important;font-size:34px!important;font-weight:950!important;line-height:1!important;display:grid!important;place-items:center!important;box-shadow:0 5px 14px #0009;padding:0!important;touch-action:manipulation}
@@ -906,7 +906,7 @@ html,body{width:100%;max-width:100%;overflow-x:hidden}
 /* Keine Systemmeldung mehr oberhalb der eigentlichen Kopfzeile. */
 .notification-bar{
   position:static!important;
-  inset:auto!important;
+  top:auto!important;right:auto!important;bottom:auto!important;left:auto!important;inset:auto!important;
   transform:none!important;
   opacity:1!important;
   pointer-events:auto!important;
@@ -1228,7 +1228,7 @@ html,body{width:100%;max-width:100%;overflow-x:hidden}
 /* Vollflächiger dunkler Sperrbildschirm. */
 .screen-saver{
   position:fixed;
-  inset:0;
+  top:0;right:0;bottom:0;left:0;inset:0;
   z-index:100000;
   display:grid;
   place-items:center;
@@ -2213,7 +2213,7 @@ body.rush-mode #rushModeBtn{display:inline-flex!important}
 .exit-button{border:0;border-radius:7px;background:#374151;color:#fff;padding:10px 15px;font-weight:1000;letter-spacing:.03em}
 .exit-dialog-card{max-width:520px}.exit-open-bon{padding:10px 12px;border:1px solid #d98d19;border-radius:8px;background:#fff5d9;color:#6c4300;font-weight:800}
 .exit-action-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:18px 0}.exit-action-grid button{min-height:58px;border:1px solid #cbd0d6;border-radius:8px;background:#eef1f4;font-weight:900}.exit-action-grid .danger-action{background:#b91c1c;color:#fff;border-color:#8d1111}
-.ended-screen{position:fixed;inset:0;z-index:100000;background:linear-gradient(145deg,#07111f,#12243d);color:#fff;display:grid;place-items:center;padding:24px}.ended-screen[hidden]{display:none}.ended-screen>div{max-width:620px;text-align:center}.ended-screen span{font-size:5rem}.ended-screen h1{font-size:2rem}.ended-screen p{line-height:1.6;color:#dbe5f2}.ended-screen button{border:0;border-radius:9px;padding:14px 24px;background:#20a53a;color:#fff;font-size:1.05rem;font-weight:1000}
+.ended-screen{position:fixed;top:0;right:0;bottom:0;left:0;inset:0;z-index:100000;background:linear-gradient(145deg,#07111f,#12243d);color:#fff;display:grid;place-items:center;padding:24px}.ended-screen[hidden]{display:none}.ended-screen>div{max-width:620px;text-align:center}.ended-screen span{font-size:5rem}.ended-screen h1{font-size:2rem}.ended-screen p{line-height:1.6;color:#dbe5f2}.ended-screen button{border:0;border-radius:9px;padding:14px 24px;background:#20a53a;color:#fff;font-size:1.05rem;font-weight:1000}
 @media (min-width:901px){
   body.tablet-compact-height .app-header{height:78px}.tablet-compact-height .brand-block img{width:84px;height:56px}.tablet-compact-height .brand-text strong{font-size:1.45rem}.tablet-compact-height .brand-text small{font-size:.9rem;margin-top:4px}.tablet-compact-height .info-cell{padding:8px 12px}.tablet-compact-height .info-cell strong{font-size:1.15rem}.tablet-compact-height .mode-strip{min-height:42px!important;padding:4px 8px!important}.tablet-compact-height .main-layout{padding:6px 9px 4px;gap:7px}.tablet-compact-height .category-tabs{margin-bottom:5px}.tablet-compact-height .category-tabs button{height:42px;font-size:.86rem}.tablet-compact-height .pager{height:36px;margin-top:2px}.tablet-compact-height .cart-title{min-height:58px}.tablet-compact-height .cart-row{min-height:52px}.tablet-compact-height .summary-meta{min-height:40px}.tablet-compact-height .grand-total{height:58px}.tablet-compact-height .grand-total strong{font-size:2rem}.tablet-compact-height .bottom-layout{padding:6px 9px;gap:7px;height:190px}.tablet-compact-height .banknote-button{height:66px}.tablet-compact-height .banknote-visual{height:38px}.tablet-compact-height .coin{width:21px;height:21px;flex-basis:21px}.tablet-compact-height .status-footer{height:40px;padding:0 14px}
   body.tablet-very-compact .app-header{height:66px}.tablet-very-compact .brand-block img{width:70px;height:46px}.tablet-very-compact .header-info .info-cell:nth-child(2){display:none}.tablet-very-compact .bottom-layout{height:164px}.tablet-very-compact .scanner-card{display:none}.tablet-very-compact .bottom-layout{grid-template-columns:minmax(360px,2fr) minmax(190px,1fr) minmax(110px,.55fr) minmax(190px,1fr) minmax(300px,1.5fr);grid-template-areas:"cash change card keypad actions"}.tablet-very-compact .banknote-button{height:55px}.tablet-very-compact .cash-card h3{display:none}.tablet-very-compact .cash-finish-row{margin-top:3px}.tablet-very-compact .grand-total{height:52px}.tablet-very-compact .summary-meta{min-height:34px}
@@ -2302,7 +2302,7 @@ body.public-beta.admin-open #sharedCashControlDialog[open]{display:block!importa
 .bottom-layout .keypad-shell{grid-template-areas:"keypad"!important;grid-template-rows:minmax(0,1fr)!important}
 
 /* Repair 7 – verbindlicher Vollbildstart und dynamische Warenkorbdichte */
-.fullscreen-gate{position:fixed;inset:0;z-index:99999;display:grid;place-items:center;padding:24px;background:linear-gradient(145deg,#07111f,#15314f);color:#fff}
+.fullscreen-gate{position:fixed;top:0;right:0;bottom:0;left:0;inset:0;z-index:99999;display:grid;place-items:center;padding:24px;background:linear-gradient(145deg,#07111f,#15314f);color:#fff}
 .fullscreen-gate[hidden]{display:none!important}
 .fullscreen-gate>div{width:min(620px,92vw);display:grid;justify-items:center;gap:13px;text-align:center;padding:34px;border:2px solid #5f7f9c;border-radius:18px;background:#0c1c2ddd;box-shadow:0 20px 60px #0008}
 .fullscreen-gate span{font-size:4.5rem;line-height:1}.fullscreen-gate h1{margin:0;font-size:2rem}.fullscreen-gate p{margin:0;color:#dce8f2;font-size:1.08rem}.fullscreen-gate small{color:#aec2d3;line-height:1.4}
@@ -2463,7 +2463,7 @@ body[data-layout-profile="tablet-landscape"] .cart-list{overflow-y:auto!importan
 /* Repair 10 · MessageCore: zentrale Meldungszeile neben Betriebsmodi */
 .mode-strip{grid-template-columns:auto minmax(140px,280px) auto minmax(140px,1fr) auto!important}
 .mode-message-center{min-width:0;display:grid;grid-template-columns:minmax(0,1fr) 40px;gap:5px;align-items:center}
-.mode-message-center .notification-bar{position:static!important;inset:auto!important;transform:none!important;min-width:0!important;max-width:none!important;width:100%;height:36px;box-sizing:border-box;padding:7px 11px;border-radius:8px;box-shadow:none;opacity:1;pointer-events:auto;transition:none;text-align:left;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:.86rem}
+.mode-message-center .notification-bar{position:static!important;top:auto!important;right:auto!important;bottom:auto!important;left:auto!important;inset:auto!important;transform:none!important;min-width:0!important;max-width:none!important;width:100%;height:36px;box-sizing:border-box;padding:7px 11px;border-radius:8px;box-shadow:none;opacity:1;pointer-events:auto;transition:none;text-align:left;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:.86rem}
 .mode-message-center .notification-bar:not(.visible){display:block;opacity:1;background:#eef2f5;color:#314355;border:1px solid #cbd5df}
 .mode-message-center .notification-bar.history-view{outline:2px solid #718096;outline-offset:-2px}
 .mode-strip .message-history-button{width:40px!important;min-width:40px!important;height:36px!important;min-height:36px!important;padding:0!important;font-size:1.35rem!important;line-height:1!important;border-radius:8px!important}
@@ -2495,7 +2495,7 @@ body.tablet-fit .mode-strip .message-history-button{height:34px!important;min-he
 /* Ausverkauft-Markierung: rotes Kreuz ueber die GANZE Kachel (vorher nur ein schmaler roter
    Balken oben). Die beiden Balken werden ueber die volle Flaeche gedreht, dadurch passt sich
    das Kreuz automatisch jeder Knopfgroesse und jedem Bildschirmmodus an. */
-.kc-ausverkauft-kreuz{position:absolute;inset:0;z-index:5;pointer-events:none;display:flex;align-items:flex-end;justify-content:center;overflow:hidden;border-radius:inherit;font-size:0}
+.kc-ausverkauft-kreuz{position:absolute;top:0;right:0;bottom:0;left:0;inset:0;z-index:5;pointer-events:none;display:flex;align-items:flex-end;justify-content:center;overflow:hidden;border-radius:inherit;font-size:0}
 .kc-ausverkauft-kreuz::before,.kc-ausverkauft-kreuz::after{content:"";position:absolute;top:50%;left:-12%;width:124%;height:9px;background:#dc2626;border-radius:5px;box-shadow:0 0 0 2px rgba(255,255,255,.72);transform-origin:center}
 .kc-ausverkauft-kreuz::before{transform:translateY(-50%) rotate(32deg)}
 .kc-ausverkauft-kreuz::after{transform:translateY(-50%) rotate(-32deg)}
@@ -3301,7 +3301,7 @@ body.kc-layout-neu:not(.kc-aufbau) .sales-area>.product-grid>.product-tile-wrap>
    Die Kopfzeile bleibt frei: alle Blöcke beginnen bei max(8vh,58px). Auf flachen
    Bildschirmen greift der Pixelwert, auf hohen der Prozentwert - eine feste vh-Zahl
    allein würde die Kopfzeile auf kleinen Tablets überdecken. */
-#kcCartExpandOverlay{display:none;position:fixed;inset:0;background:rgba(7,17,31,.72);z-index:9000}
+#kcCartExpandOverlay{display:none;position:fixed;top:0;right:0;bottom:0;left:0;inset:0;background:rgba(7,17,31,.72);z-index:9000}
 body.kc-cart-expanded #kcCartExpandOverlay{display:block}
 
 /* ---- Spalte 1 links: Warengruppen oben, Artikeltasten darunter nach unten ---- */
@@ -3560,11 +3560,11 @@ body:not(.group-color-mode) .category-tabs button.active{background:linear-gradi
    unteren Haelfte (ab 44 %, bis 92 % Schwarz) - das Foto sackte genau dort ab, wo bei vielen
    Bildern das Motiv sitzt. Jetzt liegt er nur noch unter Name und Preis. */
 .product-tile{border:4px solid var(--gruppen-rand,#315d8d)!important}
-.product-tile:after{inset:60% 0 0!important;background:linear-gradient(transparent,rgba(0,0,0,.42) 38%,rgba(0,0,0,.86))!important}
+.product-tile:after{top:60%!important;right:0!important;bottom:0!important;left:0!important;inset:60% 0 0!important;background:linear-gradient(transparent,rgba(0,0,0,.42) 38%,rgba(0,0,0,.86))!important}
 /* Bei den reinen Farbkacheln (ohne Foto) bleibt es wie bisher - dort gibt es kein Bild, das
    verdeckt werden koennte. */
-.product-tile.mode-color:after{inset:0!important;background:none!important}
-.product-tile.mode-mixed:after{inset:56% 0 0!important;background:linear-gradient(transparent,var(--tile-color,#315d8d) 38%)!important}
+.product-tile.mode-color:after{top:0!important;right:0!important;bottom:0!important;left:0!important;inset:0!important;background:none!important}
+.product-tile.mode-mixed:after{top:56%!important;right:0!important;bottom:0!important;left:0!important;inset:56% 0 0!important;background:linear-gradient(transparent,var(--tile-color,#315d8d) 38%)!important}
 
 /* Modusanzeige in der Kopfzeile (TÜV-Befund: sie zeigte immer "Normalbetrieb").
    Der Trainingsmodus muss auf einen Blick erkennbar sein - dort zählt kein echter Umsatz. */
@@ -3667,7 +3667,7 @@ body:not(.group-color-mode) .category-tabs button.active{background:linear-gradi
 @media (max-height:700px){
   .product-tile img{height:52%!important}
   .product-tile{font-size:.82rem}
-  .product-tile:after{inset:52% 0 0!important}
+  .product-tile:after{top:52%!important;right:0!important;bottom:0!important;left:0!important;inset:52% 0 0!important}
 }
 /* Hochkant (Breite unter 900 px) setzte eine eigene Regel grid-auto-rows:160px, waehrend die
    Zeilenvorlage 90 px vorgab - dort ueberlappten sich die Kacheln weiterhin. Auch hier gilt:
@@ -3695,10 +3695,10 @@ body:not(.group-color-mode) .category-tabs button.active{background:linear-gradi
    Kachelgroesse gleich dick bleibt und genau auf der Diagonalen sitzt (ein CSS-Verlauf
    trifft die Diagonale bei nicht-quadratischen Kacheln nicht). */
 .product-tile .kombi-bild{position:relative;display:block;width:100%;height:100%;overflow:hidden}
-.product-tile .kombi-bild img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block}
+.product-tile .kombi-bild img{position:absolute;top:0;right:0;bottom:0;left:0;inset:0;width:100%;height:100%;object-fit:cover;display:block}
 .product-tile .kombi-bild .kombi-oben{clip-path:polygon(0 0,100% 0,0 100%);object-position:32% 28%}
 .product-tile .kombi-bild .kombi-unten{clip-path:polygon(100% 0,100% 100%,0 100%);object-position:68% 72%}
-.product-tile .kombi-bild .kombi-linie{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
+.product-tile .kombi-bild .kombi-linie{position:absolute;top:0;right:0;bottom:0;left:0;inset:0;width:100%;height:100%;pointer-events:none}
 .product-tile .kombi-bild .kombi-linie line{stroke:#fff;stroke-width:3}
 .product-tile-wrap.package-tile .product-label strong:before{content:"";font-size:1em}
 
@@ -3724,7 +3724,7 @@ body:not(.group-color-mode) .category-tabs button.active{background:linear-gradi
 .product-tile:after{display:none!important}
 .product-tile>img{
   position:absolute!important;
-  inset:0 0 26% 0!important;
+  top:0!important;right:0!important;bottom:26%!important;left:0!important;inset:0 0 26% 0!important;
   width:100%!important;
   height:74%!important;
   object-fit:cover!important;
@@ -3733,7 +3733,7 @@ body:not(.group-color-mode) .category-tabs button.active{background:linear-gradi
 }
 .product-tile .kombi-bild{
   position:absolute!important;
-  inset:0 0 26% 0!important;
+  top:0!important;right:0!important;bottom:26%!important;left:0!important;inset:0 0 26% 0!important;
   width:100%!important;
   height:74%!important;
   overflow:hidden!important;
@@ -3944,7 +3944,7 @@ body.kc-layout-neu:not(.kc-aufbau) .sales-area>.product-grid>.product-tile-wrap.
    ein ganz normaler Block am Dokumentenende und stand damit weit unterhalb des sichtbaren
    Bildschirms. Der Tipp loeste also durchaus die Reklamation aus (kein Fehler in der Konsole),
    nur zu sehen war davon nichts. */
-.kc-reklamation-ebene{position:fixed;inset:0;z-index:150;background:#e8e8e8;display:flex;flex-direction:column}
+.kc-reklamation-ebene{position:fixed;top:0;right:0;bottom:0;left:0;inset:0;z-index:150;background:#e8e8e8;display:flex;flex-direction:column}
 .kc-reklamation-ebene[hidden]{display:none!important}
 .kc-rek-kopf{display:flex;align-items:center;gap:10px;padding:12px 14px;background:#0c1726;color:#fff}
 .kc-rek-titel{flex:1;font-size:17px;font-weight:800}

@@ -68,7 +68,7 @@
     // im Weg sein. Wird nur gerufen, wenn wirklich etwas das Kassieren verhindert.
     const zuSperrfensterMachen = () => {
       overlay.dataset.kcSperrend = '1';
-      overlay.style.cssText = 'position:fixed;inset:0;background:rgba(7,17,31,.85);z-index:99999;display:flex;align-items:center;justify-content:center;font-family:inherit;';
+      overlay.style.cssText = 'position:fixed;top:0;right:0;bottom:0;left:0;inset:0;background:rgba(7,17,31,.85);z-index:99999;display:flex;align-items:center;justify-content:center;font-family:inherit;';
       box.style.padding = '24px 28px';
     };
     box.innerHTML = `
