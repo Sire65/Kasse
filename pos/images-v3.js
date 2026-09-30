@@ -1,5 +1,11 @@
 /* Freigegebene Bilderversion 3: nur Bildfelder bekannter Standardartikel migrieren. */
 (function(g){'use strict';
+// 30.09.2026 (Betreiber-Foto vom Samsung-Tablet SM-T535, Samsung-Browser): die Bildkacheln
+// fielen dort zu duennen Strichen zusammen. Ihre Hoehe entsteht allein aus "aspect-ratio:1" - das
+// kennt dieser alte Browser nicht, uebrig blieb nur der Rand. Kann der Browser es nicht, bekommt
+// <html> diese Kennzeichnung und images-v3.css haelt die Kacheln ueber padding-top quadratisch.
+// Moderne Browser sind davon nicht betroffen.
+(function(){const h=g.document&&g.document.documentElement;if(!h)return;let kann=false;try{kann=!!(g.CSS&&g.CSS.supports&&g.CSS.supports('aspect-ratio','1 / 1'))}catch(e){}if(!kann)h.classList.add('kc-ohne-seitenverhaeltnis')})();
 const entries={"glasplus":{"image":"assets/pfand_aufschlag_version_3.png","legacy":["pfandglas_auth.webp","pfandglas_bv2.webp","pfandglas_geben_bv2.webp","pfandglas_geben_12-09.webp"]},"glasminus":{"image":"assets/pfandrueckgabe_version_3.png","legacy":["pfandglas_auth.webp","pfandglas_bv2.webp","pfandglas_rueckgabe_bv2.webp","pfandglas_rueckgabe_12-09.webp"]},"zangeplus":{"image":"assets/feuerzange_version_3.webp","legacy":["feuerzange_placeholder.svg","amaretto_auth.webp","feuerzange_version_3.png"]},"zangeminus":{"image":"assets/feuerzange_version_3.webp","legacy":["feuerzange_placeholder.svg","amaretto_auth.webp","feuerzange_version_3.png"]},"glaszangebundleminus":{"image":"assets/pfand_glas_feuerzange_version_3.webp","legacy":["pfand_bundle_placeholder.svg","pfand_glas_feuerzange_version_3.png"]},
   "eier": {
     "image": "assets/eierpunsch_version_3.png",

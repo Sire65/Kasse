@@ -40,3 +40,12 @@ body .product-grid>.product-tile-wrap:not(.image-v3){width:100%!important;min-wi
 body .product-grid>.product-tile-wrap:not(.image-v3)>.product-tile{width:100%!important;min-width:0!important;height:100%!important;max-height:none!important}
 .product-grid .image-v3>.product-info-button{clip-path:none!important}
 .product-grid .image-v3>.product-info-button::before,.product-grid .image-v3>.product-info-button::after{display:none!important}
+
+/* 30.09.2026: Rueckfall fuer Browser ohne aspect-ratio (altes Samsung-Tablet, Samsung-Browser) -
+   gesetzt von images-v3.js. Quadrat ueber padding-top:100% (bezogen auf die Breite), das Bild liegt
+   ohnehin absolut darin (inset:0). Nur wenn die Kennzeichnung gesetzt ist, sonst wirkungslos. */
+html.kc-ohne-seitenverhaeltnis .product-grid .product-tile-wrap.image-v3{height:auto!important}
+html.kc-ohne-seitenverhaeltnis .product-grid .product-tile-wrap.image-v3>.product-tile{height:0!important;padding:100% 0 0 0!important;box-sizing:border-box!important}
+/* Neues Kassenlayout (ohne KC-Aufbau): dort gibt das Raster die Hoehe vor - Kachel fuellt die Zelle. */
+html.kc-ohne-seitenverhaeltnis body.kc-layout-neu:not(.kc-aufbau) .sales-area>.product-grid>.product-tile-wrap.image-v3{width:100%!important;height:100%!important}
+html.kc-ohne-seitenverhaeltnis body.kc-layout-neu:not(.kc-aufbau) .sales-area>.product-grid>.product-tile-wrap.image-v3>.product-tile{height:100%!important;padding:0!important}

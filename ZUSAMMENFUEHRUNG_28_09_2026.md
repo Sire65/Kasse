@@ -144,3 +144,20 @@ Der Live-Monitor-Test läuft jetzt echt. Er braucht dafür einmal `npm install` 
   festen Stelle auf zwei Zeilen um (MARKT-BESCHICKER, REKLA-MATION). Der gespeicherte Grund bleibt
   unverändert. Der Test prüft, dass kein Grund-Knopf abgeschnitten ist.
 * Build: `app.js` r40 (Live und Schulung).
+
+## Nachtrag: Bildkacheln auf alten Browsern (30.09.2026)
+**Befund** (Betreiber-Foto, Samsung-Tablet SM-T535 mit Samsung-Browser): Die Bildkacheln der Bilderversion 3
+fielen zu dünnen farbigen Strichen zusammen, nur die Kachel ohne Bild war normal. Ursache: Ihre Höhe entsteht
+allein aus `aspect-ratio:1`, und das kennt der alte Browser nicht. Übrig blieb nur der Rand (8 px hoch, Bild 0 px).
+
+**Behebung** in `images-v3.js` und `images-v3.css` (Live und Schulung):
+* Beim Start prüft die Kasse einmal per `CSS.supports`, ob der Browser `aspect-ratio` kann.
+* Kann er es nicht, wird `<html class="kc-ohne-seitenverhaeltnis">` gesetzt, und die Kacheln werden über
+  `padding-top:100%` quadratisch gehalten.
+* Im neuen Kassenlayout füllen sie stattdessen die Rasterzelle.
+* Moderne Browser bekommen die Kennzeichnung nicht, dort ändert sich nichts.
+* Builds: `images-v3.js` 4-alt, `images-v3.css` 7, `app.js` r41.
+
+**Test:** `tests/alter-browser-kacheln.test.cjs` simuliert den alten Browser in Live und Schulung
+(KC-Aufbau und neues Layout). Die Gegenprobe mit dem alten Code ergibt 8 Fehler (206×8 px, Bild 0 px),
+genau wie auf dem Foto. Komplette Suite: 80/80 grün.
