@@ -1166,3 +1166,19 @@ body.kc-layout-neu #withdrawDialog .withdraw-card > .withdraw-reason-field, #wit
 #withdrawDialog #kcBetragBlock .kc-betrag-schnell button { height: 34px !important; }
 #withdrawDialog > .withdraw-card > label > #withdrawAmount:not([hidden]) { height: 44px !important; min-height: 0 !important; font-size: 24px !important; font-weight: 900; text-align: right; }
 #withdrawDialog .withdraw-card > label, #withdrawDialog .withdraw-card > p { margin-top: 2px !important; margin-bottom: 2px !important; }
+/* 30.09.2026 (Betreiber: "zu unuebersichtlich mit den vielen Zahlen - Ziffernfeld erst beim Tippen ins
+   Betragsfeld oeffnen, recht klein; Betraege besser anordnen; 0,50 fuer Toilettengeld"):
+   Schnellbetraege in EINER Reihe (0,50 bis 100 EUR), der Ziffernblock ist ein kleines Klappfeld
+   rechts unter dem Betragsfeld und liegt ueber dem Rest, statt ihn nach unten zu schieben. */
+#withdrawDialog #kcBetragBlock.kc-betrag-block { position: relative !important; }
+#withdrawDialog #kcBetragBlock .kc-betrag-schnell { grid-template-columns: repeat(8, minmax(0, 1fr)) !important; gap: 6px !important; }
+#withdrawDialog #kcBetragBlock .kc-betrag-schnell button { height: 44px !important; font-size: 16px !important; background: #eef4fb !important; border-color: #b9c8d9 !important; color: #173765 !important; }
+#withdrawDialog #kcBetragBlock .kc-betrag-schnell button:active { background: #d7e5f5 !important; }
+#withdrawDialog #kcBetragBlock .kc-ziffern-feld[hidden] { display: none !important; }
+#withdrawDialog #kcBetragBlock .kc-ziffern-feld { position: fixed; z-index: 30; width: 240px; box-sizing: border-box; padding: 8px; display: grid !important; gap: 6px; background: #fff; border: 2px solid #173765; border-radius: 12px; box-shadow: 0 12px 30px rgba(15, 23, 42, .28); }
+#withdrawDialog #kcBetragBlock .kc-ziffern-feld .kc-betrag-tasten { grid-template-columns: repeat(3, 1fr) !important; gap: 6px !important; }
+#withdrawDialog #kcBetragBlock .kc-ziffern-feld .kc-betrag-tasten button { height: 46px !important; font-size: 20px !important; }
+#withdrawDialog #kcBetragBlock .kc-ziffern-feld .kc-betrag-loeschen { background: #fee2e2 !important; border-color: #fca5a5 !important; color: #7f1d1d !important; }
+#withdrawDialog #kcBetragBlock .kc-ziffern-feld .kc-ziffern-ok { height: 44px !important; background: #16a34a !important; border-color: #15803d !important; color: #fff !important; font-size: 17px !important; }
+#withdrawDialog.kc-modus-entnahme #withdrawAmount { cursor: pointer; }
+#withdrawDialog #withdrawAmount::-webkit-inner-spin-button, #withdrawDialog #withdrawAmount::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }

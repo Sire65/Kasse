@@ -242,3 +242,22 @@ Sie legt weder MENÜ noch MEHR ins Raster – die Oberflächen-Wahl im Mehr-Fens
 mit Oberflächen-Wahl öffnet → Standard blendet ☰ aus; Köcheclub-Aufbau mit eigenem Menü zeigt kein ☰;
 `?oberflaeche=standard` setzt zurück. kassenbaukasten, schulung-versionsabgleich, pin-sperre-tablet,
 halbe-portion, kombi-warengruppe grün.
+
+## Nachtrag: Entnahme übersichtlicher, 0,50 € wählbar (30.09.2026)
+
+Betreiber: „Die Entnahme ist zu unübersichtlich mit den vielen Zahlen. Wenn in das Feld Betrag geklickt wird,
+muss sich ein Ziffernfeld öffnen, recht klein. Die vorgefertigten Beträge besser anordnen. 0,50 muss bei
+Toilettengeld auch wählbar sein.“
+
+* Der große Ziffernblock ist nicht mehr dauernd offen. Tippen ins Betragsfeld öffnet ein kleines Ziffernfeld
+  (240 px) rechts unter dem Feld, am Bildschirm ausgerichtet, damit es nie abgeschnitten wird. OK, ein
+  Schnellbetrag oder Tippen daneben schließt es. Die Tablet-Tastatur klappt nicht zusätzlich auf; am PC kann
+  weiter direkt ins Feld getippt werden.
+* Schnellbeträge in einer Reihe, von klein nach groß: 0,50 · 1 · 2 · 5 · 10 · 20 · 50 · 100 €.
+* Gefundener Altfehler in der Schulung: Der Betrag aus dem Ziffernblock kam dort nicht bei der Buchung an,
+  „Entnahme speichern“ blieb gesperrt, eine Entnahme war in der Schulung nicht möglich. Behoben in
+  `kc-erfassung-getrennt.js` (meldet den Betrag an die vorhandene Schulungsfunktion). Kasse: unverändert.
+* Buchung, Gründe, Beleg, Abschluss und Auswertung: unverändert.
+* Builds: `kc-erfassung-getrennt.js` 0.1.1, `kc-oberflaechen-anwenden.css` 0.9.17.
+* Test: `tests/entnahme-ziffernfeld.test.cjs` (Kasse und Schulung, 1280×800 und 1024×768, echte
+  WC-Geld-Entnahme über 0,50 €).
