@@ -304,3 +304,12 @@ als Bild abgestimmt.)
 * Test: `tests/entnahme-ziffernfeld.test.cjs` neu (Kasse und Schulung, 1280×800 und 1024×768: Bilder geladen,
   eine Reihe, Zähler, Zurück/Leeren, Ziffernfeld, Sperre bis Betrag + Grund, Farben, Tastatur, Bon-Größe,
   echte Buchung 6,00 € WC-Geld mit Bon und Notiz, neu geöffnet wieder leer).
+
+## Nachtrag: Helfer-Gruppe „Küche DO“ (02.10.2026)
+
+Betreiber: „Nimm in Helferseite noch einen Button Küche DO auf als Helfer.“
+
+* Neue Standard-Helfergruppe „Küche DO“ (achter Knopf im Helfer-Fenster, Kasse und Schulung).
+* Buchung wie alle Helfergruppen: Typ „helfer“, kein Bargeld, kein Pfand, `helperGroup: "Küche DO"`; erscheint
+  im Kassenabschluss unter „Helfer-Verpflegung“ mit eigener Zeile.
+* Build: `app.js` r46 (Kasse und Schulung, Service-Worker-Liste nachgezogen).

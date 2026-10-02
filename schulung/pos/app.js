@@ -4813,7 +4813,7 @@ function internPfandEntfernen(){state.cart.forEach(i=>{if(!internPfandBleibt(i)&
 // 23.09.2026 (Betreiber): Helfer bekommen Essen und Getraenke gratis. Erst den Warenkorb buchen,
 // dann MEHR -> HELFER -> Gruppe antippen. Eigene Buchungsart "helfer" (kein Geld in der Kasse,
 // nicht im Umsatz), eigene Zeile im X-Bericht und im Tagesabschluss, je Gruppe aufgeteilt.
-const HELFER_GRUPPEN_STANDARD=["Bauhof","Stadtmarketing","Feuerwehr","Wachpersonal","Bühnenpersonal","Künstler","Artisten"];
+const HELFER_GRUPPEN_STANDARD=["Bauhof","Stadtmarketing","Feuerwehr","Wachpersonal","Bühnenpersonal","Künstler","Artisten","Küche DO"];
 function helferGruppen(){const eigene=state.master.helperGroups;return Array.isArray(eigene)&&eigene.length?eigene:HELFER_GRUPPEN_STANDARD}
 function openHelfer(){
   if(!state.cart.length)return keinBonMeldung();
