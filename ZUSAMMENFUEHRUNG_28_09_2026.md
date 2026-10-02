@@ -369,3 +369,13 @@ Buchungen laufen über die vorhandenen, unveränderten Funktionen.
   Schulung, mit echten Buchungen: Rabatt Stammgast, Gutschein 35 €, Anfangsbestand 150 € per Code,
   Nachfüllung 600 € per Kurzcode. Neuer Test `tests/bedienung-farbig.test.cjs`; Bedienung-, Entnahme-,
   Update-, WLAN-, Notausgang-, Ansichten- und Altbrowser-Tests grün.
+
+## Nachtrag: Gutschein-Fenster mit weißem Hintergrund, Kurzanleitung Version 4 (02.10.2026)
+
+* Beim Erstellen der Kurzanleitung Version 4 fiel auf: Das Gutschein-Fenster hatte keinen eigenen Hintergrund,
+  die Kasse schimmerte durch (schon vor dem 02.10. so, auch im Bild der Version 3). `kc-bedienung-farbig.js`
+  0.1.1 gibt dem Fenster einen weißen Hintergrund (Kasse und Schulung, Ladeplan und Service-Worker-Liste
+  nachgezogen). Nur Aussehen, keine Änderung an Ausstellen/Einlösen.
+* Kurzanleitung Bilderrechner Version 4 (28 Seiten) liegt in der Club-App unter `dokumente/`: neue Seiten zu
+  Rabatt, Weitere Funktionen, Bargeldentnahme, Gutschein, Helfer und „Bargeld vom Kassenwart übernehmen“;
+  Knöpfe einzeln ausgeschnitten. Der Geheimweg zu den Kassenfunktionen wird darin bewusst nicht beschrieben.

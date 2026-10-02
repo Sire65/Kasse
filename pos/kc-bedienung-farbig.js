@@ -8,6 +8,7 @@
 // Behaeltern, ersetzt keine Klick-Funktionen und schreibt nichts in den Speicher.
 // Die Gestaltung bringt die Datei selbst mit (<style id="kcFarbStil">) – Lehre aus dem iPad-Befund:
 // Programm und Aussehen sollen nie aus verschiedenen Dateistaenden kommen.
+// 0.1.1: Gutschein-Fenster mit weissem Hintergrund (vorher durchsichtig, die Kasse schimmerte durch).
 (function (global) {
   'use strict';
   const el = id => document.getElementById(id);
@@ -59,6 +60,7 @@
 #discountDialog .kc-rb-hinweis { margin: 8px 0 4px; padding: 8px 12px; border-radius: 10px; background: #f1f5f9; color: #475569; font: 700 14px/1.3 Arial, sans-serif; text-align: center; }
 #discountDialog .kc-rb-hinweis.kc-bereit { background: #dcfce7; color: #14532d; }
 /* ---- Gutschein ---- */
+#gutscheinDialog { background: #fff !important; color: #111827; }
 #gutscheinDialog .kc-gs-reiter { display: grid !important; grid-template-columns: repeat(3, 1fr); gap: 0 !important; border: 2px solid #6a1b9a; border-radius: 12px; overflow: hidden; margin: 10px 0 6px; }
 #gutscheinDialog .kc-gs-reiter > button { min-height: 52px !important; border: 0 !important; border-radius: 0 !important; background: #fff !important; color: #6a1b9a !important; font-size: 17px !important; font-weight: 900 !important; }
 #gutscheinDialog .kc-gs-reiter > button.aktiv { background: #6a1b9a !important; color: #fff !important; }
