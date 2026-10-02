@@ -333,3 +333,13 @@ Betreiber: „Auf einem größeren iPad war heute die neue Seite Entnahme falsch
   Chrome; Mischstand (neues Programm + alte Stildatei) zeigt jetzt ebenfalls eine Reihe. Echte Buchungen
   (7,20 € Einkauf Lebensmittel; 6,00 € WC-Geld mit Bon) korrekt. Update-, WLAN- und Offline-Tests grün.
 * Test `tests/entnahme-ziffernfeld.test.cjs` um die Mischstand-Prüfung ergänzt.
+
+## Nachtrag: Helfer-Knöpfe bunt (02.10.2026)
+
+Betreiber: „Mache die Buttons in Helfer auch bunt zur besseren Unterscheidung.“
+
+* Jede Helfergruppe hat eine eigene Farbe: Bauhof orange, Stadtmarketing lila, Feuerwehr rot, Wachpersonal
+  dunkelgrau, Bühnenpersonal türkis, Künstler pink, Artisten grün, Küche DO braun. Eigene Gruppen aus dem
+  Manager bekommen der Reihe nach eine Farbe aus derselben Palette.
+* Nur Aussehen, Buchung unverändert. `kc-oberflaechen-anwenden.css` 0.9.20 (Kasse und Schulung,
+  Service-Worker-Liste nachgezogen). Geprüft in Chrome und WebKit (iPad), Helfer-Buchung „Küche DO“ korrekt.
