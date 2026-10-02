@@ -2920,10 +2920,15 @@ function bonSeite(t,autoPrint){
     .line{display:flex;justify-content:space-between;gap:3mm;margin:.7mm 0}
     .total strong{font-size:13pt}
     footer{text-align:center;margin-top:4mm;font-size:9pt}
-    @media screen{body{margin:8px auto;border:1px solid #ccc;padding:4mm;box-shadow:0 2px 12px #0002}}
-    @media print{html,body{width:72mm!important;max-width:72mm!important;margin:0!important;padding:0!important;border:0!important;box-shadow:none!important}.bon{width:72mm!important}.kc-bon-druckknopf{display:none!important}}
+    @media screen{body{margin:64px auto 8px;border:1px solid #ccc;padding:4mm;box-shadow:0 2px 12px #0002}}
+    @media print{html,body{width:72mm!important;max-width:72mm!important;margin:0!important;padding:0!important;border:0!important;box-shadow:none!important}.bon{width:72mm!important}.kc-bon-druckknopf,.kc-bon-zurueck,.kc-bon-hinweis{display:none!important}}
+    /* Betreiber (02.10.2026): "oben rechts ist ein Druckbutton, aber dort muss es auch einen Zurueck-Button
+       geben, sonst komme ich aus dem Bild nicht mehr raus" - auf dem Tablet (Vollbild) hat das Bon-Fenster
+       keine Browserleiste. Zurueck schliesst das Fenster; klappt das nicht, Hinweis statt Sackgasse. */
+    .kc-bon-zurueck{position:fixed;top:8px;left:8px;padding:10px 16px;font-size:14px;font-weight:800;border:2px solid #334155;border-radius:8px;background:#fff;color:#111;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,.3);font-family:Arial,sans-serif}
+    .kc-bon-hinweis{position:fixed;top:58px;left:8px;right:8px;padding:8px 12px;border-radius:8px;background:#fef3c7;color:#78350f;font:700 13px Arial,sans-serif}
     .kc-bon-druckknopf{position:fixed;top:8px;right:8px;padding:10px 16px;font-size:14px;font-weight:800;border:0;border-radius:8px;background:#166534;color:#fff;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,.3)}
-  </style></head><body>${autoPrint?"":'<button type="button" class="kc-bon-druckknopf" onclick="window.print()">🖨 Drucken</button>'}<main class="bon">
+  </style></head><body><button type="button" class="kc-bon-zurueck" onclick="kcBonZurueck()">← Zurück zur Kasse</button><div class="kc-bon-hinweis" id="kcBonHinweis" hidden>Bitte dieses Fenster schließen (oben ✕), dann ist die Kasse wieder da.</div><script>function kcBonZurueck(){try{if(window.opener&&!window.opener.closed)window.opener.focus()}catch(e){}try{window.close()}catch(e){}setTimeout(function(){if(!window.closed){if(history.length>1)history.back();else document.getElementById("kcBonHinweis").hidden=false}},300)}<\/script>${autoPrint?"":'<button type="button" class="kc-bon-druckknopf" onclick="window.print()">🖨 Drucken</button>'}<main class="bon">
     <header>${r.header!==false?`<h1>${esc(r.head1||state.master.clubName)}</h1><h2>${esc(r.head2||state.master.eventName)}</h2>`:""}</header>
     <section class="meta">
       <div>${esc(state.master.registerName)} · Bon ${esc(t.bon||t.bonNumber)}</div>

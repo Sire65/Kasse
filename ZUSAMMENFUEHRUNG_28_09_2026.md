@@ -379,3 +379,15 @@ Buchungen laufen über die vorhandenen, unveränderten Funktionen.
 * Kurzanleitung Bilderrechner Version 4 (28 Seiten) liegt in der Club-App unter `dokumente/`: neue Seiten zu
   Rabatt, Weitere Funktionen, Bargeldentnahme, Gutschein, Helfer und „Bargeld vom Kassenwart übernehmen“;
   Knöpfe einzeln ausgeschnitten. Der Geheimweg zu den Kassenfunktionen wird darin bewusst nicht beschrieben.
+
+## Nachtrag: Bon ansehen – Knopf „Zurück zur Kasse“ (02.10.2026)
+
+Betreiber: „Wenn ich bei Bondruck einen Bon ansehe, öffnet der sich. Oben rechts ist ein Druckbutton, aber dort
+muss es auch einen Zurück-Button geben, sonst komme ich aus dem Bild nicht mehr raus.“
+
+* Das Bon-Fenster (Ansehen und Drucken) hat oben links den Knopf **„← Zurück zur Kasse“**. Er schließt das
+  Fenster, die Kasse ist wieder da. Klappt das Schließen auf einem Gerät nicht, erscheint der Hinweis „Bitte dieses
+  Fenster schließen (oben ✕)“ statt einer Sackgasse. Beim Ausdruck ist der Knopf unsichtbar; der Bon rückt am
+  Bildschirm etwas nach unten, damit die Knöpfe nichts verdecken. Bon-Inhalt und Druck unverändert.
+* `app.js` r47 (Kasse und Schulung, Ladeplan und Service-Worker-Liste nachgezogen). Neuer Test
+  `tests/bon-ansehen-zurueck.test.cjs`, geprüft in Chrome und WebKit (iPad); übrige Kassentests grün.
