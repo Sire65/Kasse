@@ -343,3 +343,29 @@ Betreiber: „Mache die Buttons in Helfer auch bunt zur besseren Unterscheidung.
   Manager bekommen der Reihe nach eine Farbe aus derselben Palette.
 * Nur Aussehen, Buchung unverändert. `kc-oberflaechen-anwenden.css` 0.9.20 (Kasse und Schulung,
   Service-Worker-Liste nachgezogen). Geprüft in Chrome und WebKit (iPad), Helfer-Buchung „Küche DO“ korrekt.
+
+## Nachtrag: Weitere Funktionen, Rabatt, Gutschein, Bargeldeinzahlung bedienerfreundlich (02.10.2026)
+
+Betreiber: „Sind damit alle Übersichten bedienerfreundlich aufgebaut?“ → Entwürfe → „Ja, alles so bauen.“
+
+Neues Modul `kc-bedienung-farbig.js` 0.1.0 (Kasse und Schulung, im Ladeplan nach `kc-gutschein.js`,
+Service-Worker-Liste nachgezogen). Es bringt seine Gestaltung selbst mit (`<style id="kcFarbStil">`), damit
+kein Mischstand mit einer alten Stildatei entstehen kann. Es ändert nur Aussehen und Führung – alle
+Buchungen laufen über die vorhandenen, unveränderten Funktionen.
+
+* **Weitere Funktionen**: Knöpfe in Gruppen mit Überschrift (💶 Geld · ↩ Rückgabe · 🗄 Kasse ·
+  🧾 Bon und Übersicht), jede Funktion mit eigener Farbe. Leere Gruppen werden ausgeblendet; „Ansicht“
+  steht unten im Raster neben Umschalter und Schließen.
+* **Rabatt**: Gründe farbig mit Symbol und „Vorschlag x %“; nach der Wahl werden die anderen Gründe
+  blass, darunter steht z. B. „✓ STAMMGAST · 10 % · −0,30 €“. „Übernehmen“ bleibt grau bis ein Grund
+  gewählt ist (vorhandene Logik).
+* **Gutschein**: Beträge als echte Scheinbilder, große Betragsanzeige, „Anderer Betrag“ öffnet erst
+  dann das Ziffernfeld. „Drucken“ grau ohne Betrag oder über 500 €; „gültig bis“ wird angezeigt.
+* **Bargeldeinzahlung**: Titel „Bargeld vom Kassenwart übernehmen“, großes Scanfeld, Vorschau vor dem
+  Übernehmen (Art, Betrag, Kasse, Datum, Kassenwart); „Übernehmen“ grau, bis der Code gültig ist.
+  Kurzcode in vier Kästchen mit Prüfziffer-Kontrolle (gleiches Verfahren wie die Kasse); bei falscher
+  Prüfziffer gesperrt mit Hinweis.
+* Geprüft in Chrome (1280×800, 1024×768) und WebKit/Safari (iPad 1180×820, 1366×1024), Kasse und
+  Schulung, mit echten Buchungen: Rabatt Stammgast, Gutschein 35 €, Anfangsbestand 150 € per Code,
+  Nachfüllung 600 € per Kurzcode. Neuer Test `tests/bedienung-farbig.test.cjs`; Bedienung-, Entnahme-,
+  Update-, WLAN-, Notausgang-, Ansichten- und Altbrowser-Tests grün.
