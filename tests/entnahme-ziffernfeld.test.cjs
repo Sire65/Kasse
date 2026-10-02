@@ -1,4 +1,4 @@
-/* Entnahme wie Money Butler (02.10.2026, ersetzt den Stand vom 30.09.2026)
+/* Entnahme wie Money Butler (02.10.2026, ersetzt den Stand vom 30.09.2026; iPad-Mischstand-Pruefung 02.10.2026)
    Betreiber: "wie Money Butler die Muenzen und Scheine anzeigen ordentlich aufgereiht ... die Gruende als
    Buttons farbig ... Button ausgegraut bis Sachen gewaehlt wurden ... Bon/Quittung etwas groesser ...
    wenn ins Schreibfeld geklickt wird Tastatur einblenden ... 0,50 reicht, echte Bilder der Muenzen und Scheine".
@@ -29,6 +29,11 @@ try{
   pruefe(`${n}: echte Bilder 0,50 1 2 5 10 20 50 100 € geladen`,geld.map(g=>g.w).join('|')==='0.5|1|2|5|10|20|50|100'&&geld.every(g=>g.ok&&/^assets\/(muenze|schein)_/.test(g.src)),geld.map(g=>g.w+(g.ok?'':'!')).join(' '));
   const dlg=await p.evaluate(()=>{const r=document.querySelector('#withdrawDialog .withdraw-card').getBoundingClientRect();return {l:r.left,r:r.right}});
   pruefe(`${n}: alles in einer Reihe und im Fenster`,Math.max(...geld.map(g=>g.y))-Math.min(...geld.map(g=>g.y))<20&&geld.every(g=>g.links>=dlg.l&&g.rechts<=dlg.r));
+  // 02.10.2026 iPad-Befund: neues Programm + ALTE Stildatei (alle Knoepfe im Betragsbereich 100 % breit)
+  // stellte die Muenzen untereinander. Die Gestaltung kommt jetzt aus dem Programm selbst (#kcGeldStil).
+  const misch=await p.evaluate(()=>{const st=document.createElement('style');st.id='altStil';st.textContent='#withdrawDialog #kcBetragBlock button { width: 100% !important; height: 42px !important; }';document.head.insertBefore(st,document.head.firstChild);
+    const y=[...document.querySelectorAll('#kcBetragBlock [data-geld]')].map(x=>{const r=x.getBoundingClientRect();return r.top+r.height/2});st.remove();return {stil:!!document.getElementById('kcGeldStil'),spanne:Math.max(...y)-Math.min(...y)}});
+  pruefe(`${n}: auch mit alter Stildatei in einer Reihe (Gestaltung im Programm)`,misch.stil&&misch.spanne<25,Math.round(misch.spanne)+' px');
   for(const w of ['5','5','0.5'])await p.tap(`[data-geld="${w}"]`);
   pruefe(`${n}: 2× 5 € + 0,50 € = 10,50 € mit Zaehler`,await wert()==='10.50'&&/2× 5 €/.test(await p.textContent('#kcGeldSumme'))&&(await p.textContent('[data-geld="5"] .kc-geld-zahl'))==='2×',await wert());
   pruefe(`${n}: Speichern noch grau ohne Grund (mit Hinweis)`,await gesperrt()&&/Grund/.test(await p.textContent('#kcSpeichernHinweis')));

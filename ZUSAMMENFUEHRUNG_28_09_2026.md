@@ -313,3 +313,23 @@ Betreiber: „Nimm in Helferseite noch einen Button Küche DO auf als Helfer.“
 * Buchung wie alle Helfergruppen: Typ „helfer“, kein Bargeld, kein Pfand, `helperGroup: "Küche DO"`; erscheint
   im Kassenabschluss unter „Helfer-Verpflegung“ mit eigener Zeile.
 * Build: `app.js` r46 (Kasse und Schulung, Service-Worker-Liste nachgezogen).
+
+## Nachtrag: Entnahme auf dem iPad – Münzen untereinander (02.10.2026)
+
+Betreiber: „Auf einem größeren iPad war heute die neue Seite Entnahme falsch, die Münzen waren untereinander.“
+
+* Ursache gefunden und nachgestellt (Safari-Engine WebKit, iPad-Größen): Das iPad hatte das neue Programm
+  (`kc-erfassung-getrennt.js` 0.2.0), aber noch die **alte Stildatei** (0.9.17). Dort sind alle Knöpfe im
+  Betragsbereich 100 % breit – Münzen und Scheine standen untereinander. Möglich war dieser Mischstand,
+  weil der Offline-Speicher (Service Worker) bei fehlender neuer Fassung stillschweigend die alte Fassung
+  derselben Datei auslieferte (Rückfall „ignoreSearch“), auch wenn Netz da war.
+* Behoben an zwei Stellen:
+  1. `kc-erfassung-getrennt.js` 0.2.1 bringt die Gestaltung der Entnahme selbst mit (`<style id="kcGeldStil">`);
+     die Regeln stehen nicht mehr in `kc-oberflaechen-anwenden.css` (0.9.19). Programm und Aussehen können
+     nicht mehr auseinanderlaufen.
+  2. Service Worker (Kasse und Schulung): Die alte Fassung einer Datei wird nur noch genommen, wenn das
+     Laden aus dem Netz scheitert (offline). Mit Netz wird die richtige neue Fassung geladen.
+* Geprüft in WebKit (Safari) auf iPad (5./6./7./11. Gen., Mini, Pro 11, Pro 12,9 – hoch und quer) und in
+  Chrome; Mischstand (neues Programm + alte Stildatei) zeigt jetzt ebenfalls eine Reihe. Echte Buchungen
+  (7,20 € Einkauf Lebensmittel; 6,00 € WC-Geld mit Bon) korrekt. Update-, WLAN- und Offline-Tests grün.
+* Test `tests/entnahme-ziffernfeld.test.cjs` um die Mischstand-Prüfung ergänzt.
