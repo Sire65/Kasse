@@ -276,3 +276,31 @@ Betreiber: „Pack die beiden Plus-Positionen in der Pfandgruppe unter Sonstiges
   (Merker `kc_pfand_plus_unter_sonstiges_v1`), eine spätere eigene Einstellung wird nicht überschrieben.
 * Builds: `app.js` r45, `kc-oberflaechen-anwenden.js` 0.9.11.
 * Test: `tests/pfand-plus-unter-sonstiges.test.cjs` (Kasse und Schulung, frisches und bestehendes Gerät).
+
+## Nachtrag: Entnahme wie Money Butler (02.10.2026)
+
+Betreiber: „Wie z. B. Money Butler die Münzen und Scheine anzeigen, ordentlich aufgereiht, dann einen gewissen
+Abstand und die Gründe als Buttons farbig zur schnelleren Unterscheidung. Den Button ausgegraut, bis Sachen
+gewählt wurden, und Bon/Quittung vorhanden etwas größer. Wenn ins Schreibfeld geklickt wird, Tastatur
+einblenden.“ – „0,50 reicht, aber die echten Bilder der Münzen und Scheine wie in Money Butler.“ (Entwurf vorab
+als Bild abgestimmt.)
+
+* Betrag: echte Bilder aus `assets/` (dieselben wie im Money Butler) – Münzen 0,50 €, 1 €, 2 €, Scheine 5–100 €
+  in einer Reihe. Jedes Antippen zählt dazu, ein Zähler zeigt „2×“. Große Summenanzeige mit Aufstellung
+  („2× 5 € · 1× 0,50 €“), „↶ Letzte zurück“, „🗑 Leeren“; krumme Beträge über „⌨ Anderer Betrag“ (das
+  bisherige kleine Ziffernfeld, die erste Ziffer ersetzt den Betrag). Die Schnellbetrags-Reihe vom 30.09. ist
+  dadurch ersetzt.
+* Gründe als große farbige Knöpfe (Lebensmittel grün, Reinigungsmittel türkis, Essen orange, Getränke lila,
+  WC-Geld blau, Sonstiges grau); der gewählte Grund mit Rahmen und ✓, die anderen blass.
+* „Entnahme speichern“ ist grau, bis Betrag **und** Grund gewählt sind; darüber ein Hinweis („Bitte zuerst
+  Betrag und Grund wählen“ bzw. „✓ 6,00 € · WC-Geld · mit Bon – bereit zum Speichern“).
+* „Bon / Quittung vorhanden“ als großer Knopf (62 px), grün mit Haken, wenn gewählt.
+* Notiz: Bildschirmtastatur (inputmode text), das Feld rutscht beim Tippen in die Bildmitte.
+* **Buchung unverändert:** gebucht wird wie bisher über das (jetzt versteckt geführte) Betragsfeld und
+  `app.js` – Betrag, Cent, Grund, Notiz, Bon, Protokoll, Abschluss und Auswertung wie bisher. Reklamation
+  unverändert (keine Münzen, Speichern nicht gesperrt). Schulung behält ihre Reihenfolge (Grund vor Betrag).
+* Builds: `kc-erfassung-getrennt.js` 0.2.0, `kc-oberflaechen-anwenden.css` 0.9.18 (Kasse und Schulung,
+  Service-Worker-Liste nachgezogen; Bilder waren dort schon enthalten).
+* Test: `tests/entnahme-ziffernfeld.test.cjs` neu (Kasse und Schulung, 1280×800 und 1024×768: Bilder geladen,
+  eine Reihe, Zähler, Zurück/Leeren, Ziffernfeld, Sperre bis Betrag + Grund, Farben, Tastatur, Bon-Größe,
+  echte Buchung 6,00 € WC-Geld mit Bon und Notiz, neu geöffnet wieder leer).
