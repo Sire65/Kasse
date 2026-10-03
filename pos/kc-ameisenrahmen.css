@@ -1,4 +1,4 @@
-/* KC MarktKasse - Ameisenrahmen (03.10.2026, Betreiber-Wunsch)
+/* KC MarktKasse - Ameisenrahmen (03.10.2026, Betreiber-Wunsch; 1.1.1 duenner Rahmen der aktiven Warenkorbzeile bleibt)
    Laufender, gestrichelter Rahmen ("marching ants") fuer die drei aktiven Elemente:
      1. aktive Warengruppe      -> auffallendes Gruen
      2. aktiver Artikel         -> bisherige Rahmenfarbe Hellblau #38bdf8
@@ -72,7 +72,9 @@ body .product-grid .product-tile-wrap.last-selected.kc-ur-ru>.product-tile,body 
 }
 
 /* ---------- 3. markierte Warenkorbzeile: Blau ---------- */
-body .cart-row.selected{position:relative!important;outline:none!important}
+/* 1.1.1 (Betreiber): der bisherige duenne Rahmen der aktiven Zeile bleibt sichtbar - als
+   durchgehende 2-px-Linie direkt innen am Laufrahmen (styles.css: 2px solid #176bb0). */
+body .cart-row.selected{position:relative!important;outline:2px solid #176bb0!important;outline-offset:-5px!important}
 body .cart-row.selected::after{
   content:""!important;display:block!important;
   position:absolute!important;top:0!important;right:0!important;bottom:0!important;left:0!important;
