@@ -172,7 +172,7 @@
           <button type="button" id="kcGeldSumme" class="kc-geld-summe" aria-live="polite"><b>0,00 €</b><small>noch kein Betrag</small></button>
           <button type="button" data-geld-zurueck="1" class="kc-geld-knopf">↶ Letzte zurück</button>
           <button type="button" data-geld-anders="1" class="kc-geld-knopf">⌨ Anderer Betrag</button>
-          <button type="button" data-geld-leeren="1" class="kc-geld-knopf">🗑 Leeren</button>
+          <button type="button" data-geld-leeren="1" class="kc-geld-knopf"><span class="kc-muell">🗑</span> Leeren</button>
         </div>
         <div class="kc-geld-schale" role="group" aria-label="Münzen und Scheine antippen">
           ${GELD.map(g => `<button type="button" class="kc-geld kc-geld-${g.art}" data-geld="${g.wert}" aria-label="${g.name} dazuzählen"><img src="${g.bild}" alt="${g.name}" draggable="false"><span class="kc-geld-zahl" hidden></span></button>`).join('')}

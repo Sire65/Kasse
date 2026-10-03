@@ -391,3 +391,16 @@ muss es auch einen Zurück-Button geben, sonst komme ich aus dem Bild nicht mehr
   Bildschirm etwas nach unten, damit die Knöpfe nichts verdecken. Bon-Inhalt und Druck unverändert.
 * `app.js` r47 (Kasse und Schulung, Ladeplan und Service-Worker-Liste nachgezogen). Neuer Test
   `tests/bon-ansehen-zurueck.test.cjs`, geprüft in Chrome und WebKit (iPad); übrige Kassentests grün.
+
+## Nachtrag: Alle Mülleimer rot (03.10.2026)
+
+Betreiber: „Mache alle Mülleimer im Programm rot, besonders im Warenkorb.“
+
+* Das Mülleimer-Zeichen 🗑 ist auf dem iPad ein graues Farb-Emoji und ignoriert die Textfarbe. Es wird jetzt über
+  `color: transparent` + `text-shadow` eingefärbt (wirkt auch in Safari): rot im Warenkorb (Artikel stornieren),
+  bei geparkten Bons (verwerfen), bei „Leeren“ in der Entnahme und bei „Löschen“ (Pakete/Angebote); auf dem roten
+  BON-verwerfen-Knopf weiß, damit er sichtbar bleibt. Nur Aussehen, keine Funktion geändert.
+* `kc-bedienung-farbig.js` 0.1.2, `kc-erfassung-getrennt.js` 0.2.2 (Kasse und Schulung, Ladeplan und
+  Service-Worker-Liste nachgezogen). Geprüft in Chrome und WebKit; Kassentests grün.
+* Nebenbefund (unverändert, schon vorher so): Bei Bildschirmbreiten über 1050 px ist der gelbe %-Knopf in der
+  Warenkorbzeile leer (`font-size:0` ohne das „%“-Zeichen, das nur bis 1050 px gesetzt wird).

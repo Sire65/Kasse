@@ -9,6 +9,9 @@
 // Die Gestaltung bringt die Datei selbst mit (<style id="kcFarbStil">) – Lehre aus dem iPad-Befund:
 // Programm und Aussehen sollen nie aus verschiedenen Dateistaenden kommen.
 // 0.1.1: Gutschein-Fenster mit weissem Hintergrund (vorher durchsichtig, die Kasse schimmerte durch).
+// 0.1.2: Alle Muelleimer rot (Betreiber: "Mache alle Muelleimer im Programm rot, besonders im Warenkorb").
+//        Das Zeichen ist auf dem iPad ein graues Farb-Emoji, das CSS-Farbe ignoriert - deshalb eingefaerbt
+//        ueber color:transparent + text-shadow (wirkt auch in Safari). Auf dem roten BON-Knopf weiss.
 (function (global) {
   'use strict';
   const el = id => document.getElementById(id);
@@ -61,6 +64,8 @@
 #discountDialog .kc-rb-hinweis.kc-bereit { background: #dcfce7; color: #14532d; }
 /* ---- Gutschein ---- */
 #gutscheinDialog { background: #fff !important; color: #111827; }
+.delete-row, .kc-park-weg, .kc-muell { color: transparent !important; text-shadow: 0 0 0 #dc2626 !important; }
+.void-bon { color: transparent !important; text-shadow: 0 0 0 #fff !important; }
 #gutscheinDialog .kc-gs-reiter { display: grid !important; grid-template-columns: repeat(3, 1fr); gap: 0 !important; border: 2px solid #6a1b9a; border-radius: 12px; overflow: hidden; margin: 10px 0 6px; }
 #gutscheinDialog .kc-gs-reiter > button { min-height: 52px !important; border: 0 !important; border-radius: 0 !important; background: #fff !important; color: #6a1b9a !important; font-size: 17px !important; font-weight: 900 !important; }
 #gutscheinDialog .kc-gs-reiter > button.aktiv { background: #6a1b9a !important; color: #fff !important; }
