@@ -1,0 +1,89 @@
+/* KC MarktKasse - Ameisenrahmen (03.10.2026, Betreiber-Wunsch)
+   Laufender, gestrichelter Rahmen ("marching ants") fuer die drei aktiven Elemente:
+     1. aktive Warengruppe      -> auffallendes Gruen
+     2. aktiver Artikel         -> bisherige Rahmenfarbe Hellblau #38bdf8
+     3. markierte Warenkorbzeile -> bisherige Rahmenfarbe Blau #176bb0
+   Eigene Datei, zuletzt geladen. Keine CSS-Variablen (alte Tablet-Browser). */
+
+@keyframes kcAmeisenLauf{
+  from{background-position:0 0,0 100%,0 0,100% 0}
+  to{background-position:16px 0,-16px 100%,0 -16px,100% 16px}
+}
+
+/* ---------- 1. aktive Warengruppe: Gruen ---------- */
+body .category-tabs button.active{
+  border-color:#053d1b!important;
+  box-shadow:0 2px 8px rgba(0,0,0,.28)!important;
+}
+/* styles.css schaltet ::after der aktiven Gruppe ab (display:none!important) - deshalb "body" davor. */
+body .category-tabs button.active::after{
+  content:""!important;display:block!important;
+  position:absolute!important;top:0!important;right:0!important;bottom:0!important;left:0!important;
+  width:auto!important;height:auto!important;margin:0!important;padding:0!important;
+  border:0!important;border-radius:5px!important;box-shadow:none!important;
+  background-color:transparent!important;
+  background-image:
+    linear-gradient(90deg,#39ff14 50%,#053d1b 50%),
+    linear-gradient(90deg,#39ff14 50%,#053d1b 50%),
+    linear-gradient(0deg,#39ff14 50%,#053d1b 50%),
+    linear-gradient(0deg,#39ff14 50%,#053d1b 50%)!important;
+  background-repeat:repeat-x,repeat-x,repeat-y,repeat-y!important;
+  background-size:16px 5px,16px 5px,5px 16px,5px 16px!important;
+  pointer-events:none!important;z-index:3!important;
+  animation:kcAmeisenLauf .8s linear infinite!important;
+}
+
+/* ---------- 2. aktiver Artikel: Hellblau, 5 % groesser, Rahmen waechst mit ---------- */
+/* Rahmen = Pseudo-Element der HUELLE (die Kachel selbst hat overflow:hidden). */
+body .product-grid .product-tile-wrap.last-selected{position:relative;z-index:4}
+body .product-grid .product-tile-wrap.last-selected>.product-tile{
+  outline:none!important;transform:scale(1.05)!important;z-index:4!important;
+}
+body .product-grid .product-tile-wrap.last-selected::after{
+  content:""!important;display:block!important;
+  position:absolute!important;top:0!important;right:0!important;bottom:0!important;left:0!important;
+  border-radius:9px!important;
+  transform:scale(1.05)!important;
+  background-image:
+    linear-gradient(90deg,#38bdf8 50%,#ffffff 50%),
+    linear-gradient(90deg,#38bdf8 50%,#ffffff 50%),
+    linear-gradient(0deg,#38bdf8 50%,#ffffff 50%),
+    linear-gradient(0deg,#38bdf8 50%,#ffffff 50%)!important;
+  background-repeat:repeat-x,repeat-x,repeat-y,repeat-y!important;
+  background-size:16px 4px,16px 4px,4px 16px,4px 16px!important;
+  pointer-events:none!important;z-index:6!important;
+  animation:kcAmeisenLauf .8s linear infinite!important;
+}
+/* Wachstumsrichtung: kc-ameisenrahmen.js setzt kc-ur-<x><y> (x=l/m/r, y=o/m/u).
+   Bewusst KEINE Innenluft an der Flaeche. */
+body .product-grid .product-tile-wrap.last-selected.kc-ur-lo>.product-tile,body .product-grid .product-tile-wrap.last-selected.kc-ur-lo::after{transform-origin:left top!important}
+body .product-grid .product-tile-wrap.last-selected.kc-ur-lm>.product-tile,body .product-grid .product-tile-wrap.last-selected.kc-ur-lm::after{transform-origin:left center!important}
+body .product-grid .product-tile-wrap.last-selected.kc-ur-lu>.product-tile,body .product-grid .product-tile-wrap.last-selected.kc-ur-lu::after{transform-origin:left bottom!important}
+body .product-grid .product-tile-wrap.last-selected.kc-ur-mo>.product-tile,body .product-grid .product-tile-wrap.last-selected.kc-ur-mo::after{transform-origin:center top!important}
+body .product-grid .product-tile-wrap.last-selected.kc-ur-mm>.product-tile,body .product-grid .product-tile-wrap.last-selected.kc-ur-mm::after{transform-origin:center center!important}
+body .product-grid .product-tile-wrap.last-selected.kc-ur-mu>.product-tile,body .product-grid .product-tile-wrap.last-selected.kc-ur-mu::after{transform-origin:center bottom!important}
+body .product-grid .product-tile-wrap.last-selected.kc-ur-ro>.product-tile,body .product-grid .product-tile-wrap.last-selected.kc-ur-ro::after{transform-origin:right top!important}
+body .product-grid .product-tile-wrap.last-selected.kc-ur-rm>.product-tile,body .product-grid .product-tile-wrap.last-selected.kc-ur-rm::after{transform-origin:right center!important}
+body .product-grid .product-tile-wrap.last-selected.kc-ur-ru>.product-tile,body .product-grid .product-tile-wrap.last-selected.kc-ur-ru::after{transform-origin:right bottom!important}
+
+@media (prefers-reduced-motion:reduce){
+  body .product-grid .product-tile-wrap.last-selected>.product-tile,
+  body .product-grid .product-tile-wrap.last-selected::after{transform:none!important}
+}
+
+/* ---------- 3. markierte Warenkorbzeile: Blau ---------- */
+body .cart-row.selected{position:relative!important;outline:none!important}
+body .cart-row.selected::after{
+  content:""!important;display:block!important;
+  position:absolute!important;top:0!important;right:0!important;bottom:0!important;left:0!important;
+  border-radius:7px!important;
+  background-image:
+    linear-gradient(90deg,#176bb0 50%,#ffffff 50%),
+    linear-gradient(90deg,#176bb0 50%,#ffffff 50%),
+    linear-gradient(0deg,#176bb0 50%,#ffffff 50%),
+    linear-gradient(0deg,#176bb0 50%,#ffffff 50%)!important;
+  background-repeat:repeat-x,repeat-x,repeat-y,repeat-y!important;
+  background-size:16px 3px,16px 3px,3px 16px,3px 16px!important;
+  pointer-events:none!important;z-index:2!important;
+  animation:kcAmeisenLauf .8s linear infinite!important;
+}
