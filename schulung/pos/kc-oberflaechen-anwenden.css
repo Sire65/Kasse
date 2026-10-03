@@ -139,8 +139,9 @@ body.kc-aufbau .app-shell > .status-footer { display: none !important; }
 .kc-bereich.bon.tabelle .half-portion-cell, .kc-bereich.bon.kompakt .half-portion-cell { grid-column: 2 !important; margin: 0 !important; }
 .kc-bereich.bon.tabelle .half-portion-button, .kc-bereich.bon.kompakt .half-portion-button { width: 32px; height: 32px; padding: 0; }
 .kc-bereich.bon.tabelle .position-discount-button, .kc-bereich.bon.kompakt .position-discount-button { grid-column: 3 !important; font-size: 0 !important; width: 40px !important; min-width: 0 !important; max-width: 40px; height: 32px; padding: 0 !important; }
-/* Der Knopf bringt sein %-Zeichen schon selbst mit (::before) - nur die Schrift wird versteckt. */
-.kc-bereich.bon.tabelle .position-discount-button::before, .kc-bereich.bon.kompakt .position-discount-button::before { font-size: 15px; font-weight: 800; }
+/* Die Schrift wird versteckt, das %-Zeichen kommt aus ::before. 0.9.21 (03.10.2026): das Zeichen hier selbst
+   setzen - styles.css setzt es nur bis 1200 px Breite, darueber war der Knopf leer. */
+.kc-bereich.bon.tabelle .position-discount-button::before, .kc-bereich.bon.kompakt .position-discount-button::before { content: "%"; font-size: 15px; font-weight: 800; }
 .kc-bereich.bon.tabelle .qty-box, .kc-bereich.bon.kompakt .qty-box { grid-column: 4 !important; grid-template-columns: 22px 26px 22px !important; }
 .kc-bereich.bon.tabelle .row-total, .kc-bereich.bon.kompakt .row-total { grid-column: 5 !important; font-size: 15px; }
 .kc-bereich.bon.tabelle .delete-row, .kc-bereich.bon.kompakt .delete-row { grid-column: 6 !important; width: 26px; padding: 0; }

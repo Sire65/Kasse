@@ -404,3 +404,12 @@ Betreiber: „Mache alle Mülleimer im Programm rot, besonders im Warenkorb.“
   Service-Worker-Liste nachgezogen). Geprüft in Chrome und WebKit; Kassentests grün.
 * Nebenbefund (unverändert, schon vorher so): Bei Bildschirmbreiten über 1050 px ist der gelbe %-Knopf in der
   Warenkorbzeile leer (`font-size:0` ohne das „%“-Zeichen, das nur bis 1050 px gesetzt wird).
+
+## Nachtrag: %-Knopf im Warenkorb wieder mit Zeichen (03.10.2026)
+
+* Ursache: `kc-oberflaechen-anwenden.css` versteckt in der Tabellen-/Kompaktansicht (KC003 u. a.) die Schrift des
+  Positionsrabatt-Knopfes und verließ sich darauf, dass das „%“ aus `styles.css` kommt – das gibt es dort aber nur bis
+  1200 px Breite. Darüber war der gelbe Knopf leer. Jetzt setzt die Regel das „%“ selbst (0.9.21, Kasse und Schulung,
+  Ladeplan und Service-Worker-Liste nachgezogen). Geprüft 800–1920 px in Chrome und WebKit.
+* Unverändert (schon vorher so): In „Standard (wie bisher)“ bei 1024 bzw. 800 px Breite steht im 44 px schmalen Knopf
+  „%“ und zusätzlich „POS. RABATT“, der Text läuft über.
