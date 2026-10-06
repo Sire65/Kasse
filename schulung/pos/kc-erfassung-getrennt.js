@@ -39,6 +39,7 @@
       // Frisch geoeffnet (app.js leert das Betragsfeld): auch Muenzen/Scheine zuruecksetzen.
       if (!(Number(el('withdrawAmount')?.value) > 0)) geldZuruecksetzen(); else geldAnzeigen();
     }
+    grundNachOben(modus === 'entnahme');
     const betrag = el('withdrawAmount');
     if (betrag) betrag.setAttribute('inputmode', modus === 'entnahme' ? 'none' : 'decimal');
     if (modus !== 'entnahme' && el('kcZiffernFeld')) el('kcZiffernFeld').hidden = true;
@@ -141,6 +142,10 @@
 #withdrawDialog.kc-modus-entnahme .withdraw-reason-field { margin-top: 6px !important; padding: 8px 8px 10px !important; }
 /* Bon / Quittung als grosser Knopf */
 #withdrawDialog.kc-modus-entnahme #withdrawReceiptToggle { height: 62px !important; font-size: 20px !important; font-weight: 900 !important; border: 3px solid #94a3b8 !important; border-radius: 12px !important; background: #f8fafc !important; color: #1f2937 !important; }
+/* 0.2.3 (Betreiber 06.10.2026): Klickkaestchen ☐/☑ deutlich groesser */
+#withdrawDialog.kc-modus-entnahme #withdrawReceiptToggle { height: 72px !important; }
+#withdrawDialog.kc-modus-entnahme #withdrawReceiptToggle::first-letter { font-size: 40px; line-height: 0; color: #0f172a; }
+#withdrawDialog.kc-modus-entnahme #withdrawReceiptToggle.active::first-letter { color: #15803d; }
 #withdrawDialog.kc-modus-entnahme #withdrawReceiptToggle.active { background: #dcfce7 !important; border-color: #16a34a !important; color: #14532d !important; }
 #withdrawDialog.kc-modus-entnahme #withdrawNote { height: 46px !important; font-size: 17px !important; border-radius: 10px !important; }
 /* Speichern grau, bis Betrag und Grund gewaehlt sind */
@@ -305,6 +310,20 @@
     geldAnzeigen();
   }
 
+  // 0.2.3 (Betreiber 06.10.2026): "Zuerst oben den Grund waehlen, dann den Betrag" - in der Kasse
+  // stand der Betrag oben, in der Schulung schon der Grund. Bei der Entnahme steht der Grund jetzt
+  // ueberall oben; in jedem anderen Modus die bisherige Reihenfolge (Betrag, dann Grund).
+  // Steht der Grund im HTML schon vor dem Betrag (Schulung), wird nichts verschoben.
+  function grundNachOben(oben) {
+    const grund = document.querySelector('#withdrawDialog .withdraw-reason-field');
+    const label = el('withdrawAmount')?.closest('label');
+    if (!grund || !label || label.parentElement !== grund.parentElement) return;
+    const block = el('kcBetragBlock');
+    const betragZuerst = !!(label.compareDocumentPosition(grund) & Node.DOCUMENT_POSITION_FOLLOWING);
+    if (oben && betragZuerst) label.insertAdjacentElement('beforebegin', grund);
+    else if (!oben && !betragZuerst) ((block && block.parentElement === label.parentElement) ? block : label).insertAdjacentElement('afterend', grund);
+  }
+
   // ---- "Entnahme speichern" erst, wenn Betrag UND Grund gewaehlt sind ------------------------
   // Nur die Bedienung: app.js prueft beim Speichern weiterhin selbst. Im Reklamationsmodus bleibt
   // alles wie bisher.
@@ -322,7 +341,7 @@
       dlg.querySelector('.dialog-actions')?.insertAdjacentElement('beforebegin', hinweis);
     }
     const betrag = Number(el('withdrawAmount')?.value) || 0;
-    const fehlt = [betrag > 0 ? '' : 'Betrag', grund ? '' : 'Grund'].filter(Boolean);
+    const fehlt = [grund ? '' : 'Grund', betrag > 0 ? '' : 'Betrag'].filter(Boolean);
     if (knopf.textContent !== 'WIRD GESPEICHERT …') knopf.disabled = fehlt.length > 0;
     hinweis.hidden = false;
     hinweis.classList.toggle('kc-bereit', !fehlt.length);
@@ -361,6 +380,16 @@
     // Grund / Bon gewaehlt -> Speichern-Knopf und Hinweis nachziehen (nach dem Klick in app.js).
     document.querySelectorAll('[data-withdraw-reason]').forEach(b => b.addEventListener('click', () => setTimeout(speichernPruefen, 80)));
     el('withdrawReceiptToggle')?.addEventListener('click', () => setTimeout(speichernPruefen, 0));
+    // 0.2.3 (Betreiber 06.10.2026: "heute wurde der gruene Knopf nicht aktiv"): nach JEDEM Tipp im
+    // Entnahmefenster und bei jeder Betragsaenderung neu pruefen - egal ueber welchen Weg der Betrag
+    // kam (Muenzen, Ziffernfeld, Schnelltasten). Nur Bedienung; app.js prueft beim Speichern selbst.
+    const wd = el('withdrawDialog');
+    if (wd && !wd.dataset.kcPruefen) {
+      wd.dataset.kcPruefen = '1';
+      wd.addEventListener('click', () => setTimeout(speichernPruefen, 120));
+      el('withdrawAmount')?.addEventListener('input', () => setTimeout(speichernPruefen, 0));
+      el('withdrawAmount')?.addEventListener('change', () => setTimeout(speichernPruefen, 0));
+    }
     // Notiz: Bildschirmtastatur erlaubt; das Feld rutscht in die Mitte, damit es sichtbar bleibt.
     const notiz = el('withdrawNote');
     if (notiz && !notiz.dataset.kcTastatur) {

@@ -413,3 +413,31 @@ Betreiber: „Mache alle Mülleimer im Programm rot, besonders im Warenkorb.“
   Ladeplan und Service-Worker-Liste nachgezogen). Geprüft 800–1920 px in Chrome und WebKit.
 * Unverändert (schon vorher so): In „Standard (wie bisher)“ bei 1024 bzw. 800 px Breite steht im 44 px schmalen Knopf
   „%“ und zusätzlich „POS. RABATT“, der Text läuft über.
+
+## Nachtrag: Schulung zeigt immer die aktuellen V3-Bilder (06.10.2026)
+
+* Anlass: Auf dem Notebook zeigte die Schulung alte Echtfotos. Ursache: Die Artikel im Gerätespeicher stammen aus
+  einem Konfig-Import „mit Bildern“ und tragen ein `embeddedImage`; `images-v3.js` übersprang solche Artikel und
+  `sanitizeProduct` bevorzugt `embeddedImage` vor `image`.
+* Betreiber-Entscheidung „Weg 2“ – die Schulung ist reine Vorführung: In `schulung/pos/` zeigen die 20 bekannten
+  Standardartikel jetzt immer das V3-Bild (`images-v3.js` build 5-schulung, `app.js` build 0.31.3.6-r48 (Kasse und Schulung gleiche Buildkennung laut Vertragstest; in `pos/app.js` keine Codeänderung), Ladeplan
+  und Service-Worker-Liste nachgezogen). `embeddedImage` bleibt im Speicher erhalten (kein Datenverlust), eigene
+  Artikel mit eigenem Foto bleiben unverändert.
+* Echte Kasse `pos/` unverändert: Dort gewinnt weiterhin das eingebettete Foto, auch wenn auf demselben Gerät die
+  Schulung lief. `tests/product-images-v3.test.cjs` prüft beides getrennt.
+
+## Nachtrag: Entnahme – Grund oben, großes Bon-Kästchen, grüner Knopf prüft sich nach jedem Tipp (06.10.2026)
+
+* Betreiber: „Zuerst oben den Grund wählen, dann den Betrag … dann Bon vorhanden, das Klickkästchen etwas größer,
+  dann den grünen Knopf – der muss vorher inaktiv sein … heute wurde der grüne Button nicht aktiv.“
+* `kc-erfassung-getrennt.js` 0.2.3 (Kasse und Schulung identisch, Ladeplan und Service-Worker-Liste nachgezogen):
+  * Entnahme: Grund steht jetzt auch in der Kasse oben, darunter der Betrag (Schulung hatte das schon). Im
+    Reklamationsmodus bleibt die bisherige Reihenfolge. Hinweis lautet „Bitte zuerst Grund und Betrag wählen“.
+  * Bon-Knopf 72 px hoch, das Kästchen ☐/☑ 40 px groß (angehakt grün).
+  * „Entnahme speichern“ wird nach jedem Tipp im Fenster und bei jeder Betragsänderung neu geprüft – egal über
+    welchen Weg der Betrag kam. Grau, solange Grund oder Betrag fehlt; „Bon vorhanden“ ist freiwillig und ändert
+    an der Freigabe nichts. Buchungslogik in `app.js` unverändert.
+* Den Fehler „grün wurde nicht aktiv“ konnte ich mit dem aktuellen Stand nicht nachstellen. Geprüft in Chrome:
+  Kasse und Schulung, KC003 und Standard, 1280×800 und 800×1280, Münzen, Ziffernfeld, Betrag zuerst, mit Bon und
+  Bon-Foto, zweite Entnahme direkt nach dem Speichern – immer grün. Mögliche Ursache war ein älterer
+  zwischengespeicherter Stand auf dem Gerät. Safari/WebKit war in dieser Prüfumgebung nicht verfügbar.
