@@ -117,7 +117,11 @@ const entries={"glasplus":{"image":"assets/pfand_aufschlag_version_3.png","legac
     ]
   }
 };
-function migrate(p){if(!p)return p;(p.depositComponents||[]).forEach(d=>{if(d.id==='glass'&&(!d.image||entries.glasplus.legacy.includes(String(d.image).split('/').pop())))d.image=entries.glasplus.image});if(p.embeddedImage)return p;const e=entries[p.id];if(!e)return p;const current=String(p.image||'');const file=current.split('/').pop();if(!current||e.legacy.includes(file)||current===e.image)p.image=e.image;return p}
+// 06.10.2026 NUR SCHULUNG (Betreiber, Weg 2): Notebook zeigte alte Echtfotos, weil die Artikel aus einem
+// Konfig-Import "mit Bildern" ein embeddedImage tragen und migrate() solche Artikel uebersprang. Die Schulung
+// ist reine Vorfuehrung: bekannte Standardartikel zeigen hier IMMER das aktuelle V3-Bild. embeddedImage bleibt
+// unangetastet (kein Datenverlust). Die echte Kasse (pos/images-v3.js) ist unveraendert.
+function migrate(p){if(!p)return p;(p.depositComponents||[]).forEach(d=>{if(d.id==='glass'&&(!d.image||entries.glasplus.legacy.includes(String(d.image).split('/').pop())))d.image=entries.glasplus.image});const e=entries[p.id];if(p.embeddedImage){if(e)p.image=e.image;return p}if(!e)return p;const current=String(p.image||'');const file=current.split('/').pop();if(!current||e.legacy.includes(file)||current===e.image)p.image=e.image;return p}
 function apply(items){(items||[]).forEach(migrate);return items}
 // Betreiber (22.09.2026): Glaspfand/Zangenpfand kamen als .webp statt .png (gleiche V3-Optik,
 // eingebrannter Info-Kreis + Namensband) - isV3() erkannte nur ".png" und diese Artikel waeren
