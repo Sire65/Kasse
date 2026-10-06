@@ -20,6 +20,12 @@
   font-size: 1.3rem;
   font-weight: 900;
 }
+/* 0.2.1 (Betreiber 06.10.2026: "das Schliesskreuz verdeckt den Weiter-blaettern-Knopf"): das Kreuz
+   oben rechts (kc-oberflaechen-anwenden.js, .kc-dialog-x) sitzt genau ueber dem Pfeil. Ist es da,
+   bekommt die Kopfzeile rechts Platz dafuer - der Pfeil rueckt links neben das Kreuz. */
+.dienstplan-card > .kc-dialog-x ~ .dienstplan-head {
+  padding-right: 50px;
+}
 .dienstplan-datum {
   display: flex;
   flex-direction: column;

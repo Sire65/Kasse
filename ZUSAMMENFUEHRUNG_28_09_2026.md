@@ -441,3 +441,11 @@ Betreiber: „Mache alle Mülleimer im Programm rot, besonders im Warenkorb.“
   Kasse und Schulung, KC003 und Standard, 1280×800 und 800×1280, Münzen, Ziffernfeld, Betrag zuerst, mit Bon und
   Bon-Foto, zweite Entnahme direkt nach dem Speichern – immer grün. Mögliche Ursache war ein älterer
   zwischengespeicherter Stand auf dem Gerät. Safari/WebKit war in dieser Prüfumgebung nicht verfügbar.
+
+## Nachtrag: Dienstplan – Schließkreuz verdeckt nicht mehr den Weiter-Pfeil (06.10.2026)
+
+* Betreiber: „Dort verdeckt das Schließkreuz den Weiter-blättern-Button.“ Ursache: Das automatisch eingebaute
+  Kreuz oben rechts (`kc-oberflaechen-anwenden.js`, `.kc-dialog-x`) lag genau über dem Pfeil ›.
+* `kc-dienstplan-kasse.css` 0.2.1 (Kasse und Schulung, Ladeplan und Service-Worker-Liste nachgezogen): Ist das
+  Kreuz da, bekommt die Kopfzeile rechts 50 px Platz, der Pfeil sitzt links daneben. Ohne Kreuz unverändert.
+  Geprüft 1280×800, 1024×768, 800×1280 – keine Überlappung mehr.
