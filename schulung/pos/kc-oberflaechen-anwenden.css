@@ -535,6 +535,19 @@ body.kc-aufbau.kc-kassenfunktionen-offen #moreDialog .more-grid > button[data-ac
 .kc-park-anhaengen[hidden] { display: none !important; }
 .kc-park-weg { background: #e5e7eb; color: #7f1d1d; font-size: 20px; }
 .kc-park-leer, .kc-park-hinweis { color: #6b7280; padding: 10px 4px; font-size: 14px; }
+/* 07.10.2026: geparkte Bons markieren / verbinden / lösen */
+.kc-park-karte { cursor: pointer; }
+.kc-park-karte.markiert { border: 2px solid #1d4ed8; background: #eff6ff; }
+.kc-park-haken { font-size: 26px; line-height: 1; color: #1d4ed8; flex: 0 0 auto; }
+.kc-park-gruppe { border: 3px solid #b45309; border-radius: 12px; background: #fffbeb; padding: 8px; display: flex; flex-direction: column; gap: 8px; }
+.kc-park-gkopf { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; font-size: 16px; color: #78350f; }
+.kc-park-leiste { position: sticky; bottom: 0; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; padding: 10px 12px; background: #0c1726; color: #fff; border-radius: 10px; font-size: 15px; }
+.kc-park-leiste > span { flex: 1; min-width: 140px; }
+.kc-park-leiste > button { height: 52px; padding: 0 18px; border: 0; border-radius: 8px; font-weight: 800; font-size: 15px; cursor: pointer; }
+.kc-park-verbinden { background: #b45309; color: #fff; }
+.kc-park-loesen { background: #e5e7eb; color: #1f2937; }
+.kc-park-ab { background: #374151; color: #fff; }
+.kc-park-leiste > button:disabled { opacity: .4; cursor: default; }
 
 /* ===================================================================================
    KOPFZEILE (08.09.2026, Sitzungsende): Reihenfolge von rechts: Tür · Menü · Ansicht · Uhr ·

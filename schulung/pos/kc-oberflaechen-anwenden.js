@@ -484,12 +484,76 @@
     st.cart = anhaengen ? st.cart.concat(e.cart) : e.cart;
     if (!anhaengen && e.discount) st.discount = e.discount;
     if (!st.cart.length) { /* nichts */ } else if (!st.cartStartedAt) st.cartStartedAt = e.zeit;
-    liste.splice(i, 1); geparkteSchreiben(liste);
+    liste.splice(i, 1); geparkteSchreiben(gruppenBereinigen(liste)); parkMarkiert.delete(id);
     neuZeichnen(); parkSeite(false);
     try { notify && notify('success', 'Geparkter Bon zurückgeholt'); } catch (e2) { /* egal */ }
     return true;
   }
-  function verwerfen(id) { geparkteSchreiben(geparkte().filter((x) => x.id !== id)); parkSeiteZeichnen(); }
+  function verwerfen(id) { geparkteSchreiben(gruppenBereinigen(geparkte().filter((x) => x.id !== id))); parkSeiteZeichnen(); }
+
+  /* ------------------------------------------- Geparkte Bons verbinden / lösen   07.10.2026
+     Betreiber: "Eine Gruppe trinkt, holt die nächste Runde, zum Schluss wird alles zusammen
+     gezählt. Geparkte Warenkörbe markieren, unten Verbinden und Lösen. Wenn verbunden, holen
+     gemeinsam über einen Knopf und alles ist zusammengefasst im Warenkorb."
+     Verbunden = gleiche Kennung e.gruppe an den geparkten Einträgen (bleibt im localStorage,
+     überlebt Neuladen). Beim gemeinsamen Holen werden gleiche Positionen (gleicher Artikel,
+     gleiche Option, gleicher Preis, gleiche halbe Portion, kein eigener Rabatt) zu EINER Zeile
+     mit addierter Menge zusammengelegt; alles andere bleibt als eigene Zeile stehen. */
+  const parkMarkiert = new Set();
+  function gruppenBereinigen(liste) {
+    /* eine "Gruppe" mit nur noch einem Bon ist keine mehr */
+    const n = {}; liste.forEach((x) => { if (x.gruppe) n[x.gruppe] = (n[x.gruppe] || 0) + 1; });
+    return liste.map((x) => (x.gruppe && n[x.gruppe] < 2 ? Object.assign({}, x, { gruppe: undefined }) : x));
+  }
+  function verbinden() {
+    const liste = geparkte(); const ids = [...parkMarkiert].filter((id) => liste.some((x) => x.id === id));
+    if (ids.length < 2) return false;
+    /* schon verbundene Gruppen der markierten Bons kommen mit in die neue Gruppe */
+    const alteGruppen = new Set(liste.filter((x) => ids.includes(x.id) && x.gruppe).map((x) => x.gruppe));
+    const gid = 'g' + Date.now().toString(36);
+    liste.forEach((x) => { if (ids.includes(x.id) || (x.gruppe && alteGruppen.has(x.gruppe))) x.gruppe = gid; });
+    geparkteSchreiben(liste); parkMarkiert.clear(); parkSeiteZeichnen();
+    try { notify && notify('success', `${liste.filter((x) => x.gruppe === gid).length} Bons verbunden`); } catch (e) { /* egal */ }
+    return true;
+  }
+  function loesen() {
+    const liste = geparkte(); const gr = new Set(liste.filter((x) => parkMarkiert.has(x.id) && x.gruppe).map((x) => x.gruppe));
+    if (!gr.size) return false;
+    liste.forEach((x) => { if (x.gruppe && gr.has(x.gruppe)) delete x.gruppe; });
+    geparkteSchreiben(liste); parkMarkiert.clear(); parkSeiteZeichnen();
+    try { notify && notify('success', 'Verbindung gelöst'); } catch (e) { /* egal */ }
+    return true;
+  }
+  function zeilenZusammen(zeilen) {
+    const aus = [];
+    const gleich = (a, b) => a.key === b.key && Number(a.price) === Number(b.price) && Number(a.portionFactor || 1) === Number(b.portionFactor || 1)
+      && !a.positionDiscount && !b.positionDiscount && JSON.stringify(a.option || null) === JSON.stringify(b.option || null);
+    zeilen.forEach((z0) => {
+      const z = JSON.parse(JSON.stringify(z0));
+      const da = aus.find((x) => gleich(x, z));
+      if (da) { da.qty = Number(da.qty) + Number(z.qty); return; }
+      /* gleiche Kennung, aber anders (z. B. halbe Portion oder eigener Rabatt): eigene Zeile mit eindeutiger Kennung */
+      if (aus.some((x) => x.key === z.key)) { let i = 2; while (aus.some((x) => x.key === `${z.key}~${i}`)) i++; z.key = `${z.key}~${i}`; }
+      aus.push(z);
+    });
+    return aus;
+  }
+  function gruppeHolen(gid, anhaengen) {
+    const st = kasseState(); if (!st) return false;
+    const liste = geparkte(); const teil = liste.filter((x) => x.gruppe === gid); if (!teil.length) return false;
+    if (st.cart.length && !anhaengen) return 'voll';
+    const zeilen = teil.reduce((a, e) => a.concat(e.cart), []);
+    st.cart = zeilenZusammen(anhaengen ? st.cart.concat(zeilen) : zeilen);
+    /* Bon-Rabatt nur übernehmen, wenn alle verbundenen Bons denselben hatten */
+    const rab = teil.map((e) => JSON.stringify(e.discount || {}));
+    let rabattHinweis = false;
+    if (!anhaengen) { if (rab.every((r) => r === rab[0])) { if (teil[0].discount) st.discount = teil[0].discount; } else { try { resetDiscount(); } catch (e) { /* egal */ } rabattHinweis = true; } }
+    if (st.cart.length && !st.cartStartedAt) st.cartStartedAt = teil.map((e) => e.zeit).sort()[0];
+    geparkteSchreiben(liste.filter((x) => x.gruppe !== gid)); parkMarkiert.clear();
+    neuZeichnen(); parkSeite(false);
+    try { notify && notify(rabattHinweis ? 'warn' : 'success', `${teil.length} verbundene Bons zusammen im Warenkorb${rabattHinweis ? ' – die Bons hatten verschiedene Rabatte, bitte Rabatt neu setzen' : ''}`); } catch (e) { /* egal */ }
+    return true;
+  }
   let parkEbene = null;
   function parkSeite(auf) {
     if (!parkEbene) {
@@ -498,6 +562,13 @@
       document.body.appendChild(parkEbene);
       $('#kcParkZu', parkEbene).addEventListener('click', () => parkSeite(false));
       parkEbene.addEventListener('click', (ev) => {
+        /* 07.10.2026: markieren (Tipp auf die Karte), verbinden, lösen, Gruppe holen */
+        const g = ev.target.closest('button[data-gruppe]');
+        if (g) { const erg = gruppeHolen(g.dataset.gruppe, g.dataset.was === 'anhaengen'); if (erg === 'voll') { const h = $('.kc-park-hinweis', parkEbene); if (h) h.textContent = 'Der Warenkorb ist nicht leer - „Alle anhängen" fügt die Positionen dazu.'; } return; }
+        const a = ev.target.closest('button[data-aktion]');
+        if (a) { const was = a.dataset.aktion; if (was === 'verbinden') verbinden(); else if (was === 'loesen') loesen(); else { parkMarkiert.clear(); parkSeiteZeichnen(); } return; }
+        const m = ev.target.closest('[data-markieren]');
+        if (m && !ev.target.closest('button')) { const id = m.dataset.markieren; if (parkMarkiert.has(id)) parkMarkiert.delete(id); else parkMarkiert.add(id); parkSeiteZeichnen(); return; }
         const b = ev.target.closest('button[data-park]'); if (!b) return;
         const id = b.dataset.park, was = b.dataset.was;
         if (was === 'verwerfen') {
@@ -517,13 +588,29 @@
     if (!parkEbene) return;
     const geld = (v) => { try { return money(v); } catch (e) { return v + ' €'; } };
     const l = geparkte();
+    [...parkMarkiert].forEach((id) => { if (!l.some((x) => x.id === id)) parkMarkiert.delete(id); });
     const st = kasseState(); const voll = !!(st && st.cart && st.cart.length);
-    $('.kc-park-liste', parkEbene).innerHTML = (l.length ? l.map((e) => {
+    const html = (t) => String(t == null ? '' : t).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+    const karte = (e, inGruppe) => {
       const z = new Date(e.zeit); const uhr = z.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' });
-      const pos = e.cart.map((x) => `${x.qty}× ${x.name}`).join(' · ');
-      return `<div class="kc-park-karte"><div class="kc-park-info"><b>${uhr} Uhr</b> · ${e.cart.length} Pos. · <b>${geld(e.summe)}</b>${e.bediener ? ' · ' + e.bediener : ''}<div class="kc-park-pos">${pos}</div></div>
-        <div class="kc-park-tasten"><button type="button" class="kc-park-holen" data-park="${e.id}" data-was="holen">⬇ HOLEN</button><button type="button" class="kc-park-anhaengen" data-park="${e.id}" data-was="anhaengen" ${voll ? '' : 'hidden'}>＋ ANHÄNGEN</button><button type="button" class="kc-park-weg" data-park="${e.id}" data-was="verwerfen">🗑</button></div></div>`;
-    }).join('') : '<div class="kc-park-leer">Keine geparkten Bons.</div>') + `<div class="kc-park-hinweis">${voll ? 'Der Warenkorb ist nicht leer - „Anhängen" fügt die Positionen dazu, „Holen" geht nur bei leerem Warenkorb.' : ''}</div>`;
+      const pos = e.cart.map((x) => `${x.qty}× ${html(x.name)}`).join(' · '); const an = parkMarkiert.has(e.id);
+      return `<div class="kc-park-karte${an ? ' markiert' : ''}" data-markieren="${e.id}"><span class="kc-park-haken" aria-hidden="true">${an ? '☑' : '☐'}</span><div class="kc-park-info"><b>${uhr} Uhr</b> · ${e.cart.length} Pos. · <b>${geld(e.summe)}</b>${e.bediener ? ' · ' + html(e.bediener) : ''}<div class="kc-park-pos">${pos}</div></div>
+        <div class="kc-park-tasten">${inGruppe ? '' : `<button type="button" class="kc-park-holen" data-park="${e.id}" data-was="holen">⬇ HOLEN</button><button type="button" class="kc-park-anhaengen" data-park="${e.id}" data-was="anhaengen" ${voll ? '' : 'hidden'}>＋ ANHÄNGEN</button>`}<button type="button" class="kc-park-weg" data-park="${e.id}" data-was="verwerfen">🗑</button></div></div>`;
+    };
+    /* Reihenfolge wie geparkt; eine Gruppe erscheint dort, wo ihr erster Bon steht */
+    const gezeigt = new Set(); let nr = 0; const teile = [];
+    l.forEach((e) => {
+      if (!e.gruppe) { teile.push(karte(e, false)); return; }
+      if (gezeigt.has(e.gruppe)) return; gezeigt.add(e.gruppe); nr++;
+      const mit = l.filter((x) => x.gruppe === e.gruppe); const summe = mit.reduce((s, x) => s + Number(x.summe || 0), 0);
+      teile.push(`<div class="kc-park-gruppe"><div class="kc-park-gkopf"><span>🔗 <b>Verbunden ${nr}</b> · ${mit.length} Bons · zusammen <b>${geld(summe)}</b></span>
+        <span class="kc-park-tasten"><button type="button" class="kc-park-holen" data-gruppe="${e.gruppe}" data-was="holen">⬇ ALLE HOLEN</button><button type="button" class="kc-park-anhaengen" data-gruppe="${e.gruppe}" data-was="anhaengen" ${voll ? '' : 'hidden'}>＋ ALLE ANHÄNGEN</button></span></div>${mit.map((x) => karte(x, true)).join('')}</div>`);
+    });
+    const mk = l.filter((x) => parkMarkiert.has(x.id)); const loesbar = mk.some((x) => x.gruppe);
+    const leiste = l.length > 1 ? `<div class="kc-park-leiste"><span>${mk.length ? `<b>${mk.length}</b> markiert` : 'Bons antippen zum Markieren'}</span>
+      <button type="button" class="kc-park-verbinden" data-aktion="verbinden" ${mk.length >= 2 ? '' : 'disabled'}>🔗 VERBINDEN</button>
+      <button type="button" class="kc-park-loesen" data-aktion="loesen" ${loesbar ? '' : 'disabled'}>✂ LÖSEN</button>${mk.length ? '<button type="button" class="kc-park-ab" data-aktion="ab">✕</button>' : ''}</div>` : '';
+    $('.kc-park-liste', parkEbene).innerHTML = (l.length ? teile.join('') : '<div class="kc-park-leer">Keine geparkten Bons.</div>') + `<div class="kc-park-hinweis">${voll ? 'Der Warenkorb ist nicht leer - „Anhängen" fügt die Positionen dazu, „Holen" geht nur bei leerem Warenkorb.' : ''}</div>` + leiste;
   }
   function parkKnopfEinbauen() {
     const kopf = $('.cart-title .cart-heading'); if (!kopf || $('#kcParkBtn', kopf)) return;

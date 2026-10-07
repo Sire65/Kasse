@@ -548,3 +548,21 @@ Betreiber: „Mache alle Mülleimer im Programm rot, besonders im Warenkorb.“
   angeordnet), Anleitungsseite mit Stapel-Methode und Druckhinweisen. Erzeugt mit `werkzeuge/uebungsliste/karten.cjs`.
 * Quelle: `werkzeuge/uebungsliste/daten.js` (Aufgaben) und `bauen.cjs` (erzeugt Webseite und PDF). Nach Änderungen an
   der Bedienung die betroffenen Schritte erneut durchspielen.
+
+## Nachtrag 07.10.2026 – geparkte Bons verbinden (Kasse und Schulung)
+
+Wunsch Betreiber: eine Gruppe trinkt, holt die nächste Runde, zum Schluss wird alles zusammen
+gezählt. In der Liste „Geparkte Bons" (blaues/rotes P) jetzt:
+
+- Bons **antippen = markieren** (☑). Unten eine Leiste mit **🔗 VERBINDEN** (ab 2 markierten)
+  und **✂ LÖSEN** (wenn ein markierter Bon verbunden ist).
+- Verbundene Bons stehen in einem braunen Rahmen „🔗 Verbunden 1 · 3 Bons · zusammen 12,50 €".
+  **⬇ ALLE HOLEN** legt alles in EINEN Warenkorb (bei vollem Korb **＋ ALLE ANHÄNGEN**).
+- Gleiche Positionen werden zusammengezählt (2× Rum + 1× Rum = 3× Rum). Halbe Portionen und
+  Positionen mit eigenem Rabatt bleiben eigene Zeilen. Hatten die Bons verschiedene Bon-Rabatte,
+  wird kein Rabatt übernommen und die Kasse meldet „bitte Rabatt neu setzen".
+- Verbindung überlebt Neuladen (gleicher Speicher wie das Parken). Einzelnen Bon löschen oder
+  einzeln holen: der Rest bleibt verbunden; bleibt nur einer übrig, ist es keine Gruppe mehr.
+
+Dateien: `kc-oberflaechen-anwenden.js` 0.9.12, `kc-oberflaechen-anwenden.css` 0.9.22 (pos und
+schulung/pos), Buildnummern in index.html und service-worker.js. Test: `tests/park-verbinden.test.cjs`.
