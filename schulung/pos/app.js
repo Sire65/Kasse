@@ -563,7 +563,27 @@ function ensureBedienerstamm(){
 }
 function sanitizeGroup(group,index){return {...group,id:safeId(group?.id,`WG-${index+1}`),name:safeText(group?.name||`Warengruppe ${index+1}`,80),shortName:safeText(group?.shortName||group?.name,40),notes:safeText(group?.notes,500),color:/^#[0-9a-f]{6}$/i.test(group?.color||"")?group.color:"#173765",sortOrder:Number(group?.sortOrder||((index+1)*10)),active:group?.active!==false}}
 /* 06.10.2026 NUR SCHULUNG (Weg 2): bekannte Standardartikel zeigen das V3-Bild, auch wenn ein eingebettetes Importfoto da ist. */
-function sanitizeProduct(product,index){product=window.KCImagesV3.migrate({...product});const info=product?.info||{};return {...product,id:safeId(product?.id,`ART-${index+1}`),name:safeText(product?.name||`Artikel ${index+1}`,100),shortName:safeText(product?.shortName,60),receiptText:safeText(product?.receiptText||product?.name,100),category:safeText(product?.category,80),image:safeImage((window.KCImagesV3.entries[product?.id]?"":product?.embeddedImage)||product?.image),barcode:safeText(product?.barcode,80),price:Number(product?.price||0),purchasePrice:Number(product?.purchasePrice||0),active:product?.active!==false,info:{ingredients:safeText(info.ingredients,1500),allergens:safeText(info.allergens,1500),contents:safeText(info.contents,1500),important:safeText(info.important,1500),notes:safeText(info.notes,1500)}}}
+// 07.10.2026 (beim Durchspielen fuer die Uebungsliste gefunden: "Kunde fragt, ob im Gluehwein Allergene sind"):
+// sanitizeProduct machte aus den strukturierten Artikelinformationen Text - das Allergen-Objekt
+// (z. B. {sulphites:"contained"}) wurde zu "[object Object]", Freigabestatus, Kurzbeschreibung und
+// Naehrwerte gingen verloren. Das Info-Fenster zeigte deshalb bei JEDEM Artikel "Allergene [object Object]"
+// und "nicht vollstaendig geprueft". Jetzt bleiben die Angaben erhalten (nur Text bereinigt, Zahlen geprueft).
+// Bereits verdorbene Angaben ("[object Object]") werden aus den eingebauten Standardangaben wiederhergestellt;
+// der naechste Stammdaten-Abgleich vom PC-Manager liefert sie ohnehin vollstaendig.
+function sanitizeProductInfo(info,id){
+  info=info&&typeof info==="object"?info:{};
+  if(info.allergens==="[object Object]"){const std=(typeof DEFAULT_PRODUCTS!=="undefined"?DEFAULT_PRODUCTS:[]).find(x=>x.id===id);info=std&&std.info&&typeof std.info==="object"?{...std.info}:{...info,allergens:""}}
+  const t=(v,n=1500)=>safeText(v,n);
+  if(typeof info.allergens!=="object"||info.allergens===null)return {ingredients:t(info.ingredients),allergens:t(info.allergens),contents:t(info.contents),important:t(info.important),notes:t(info.notes)};
+  const STATUS=new Set(["contained","traces","free","unknown","not_checked"]);
+  const allergens=Object.fromEntries(Object.entries(info.allergens).filter(([k,v])=>/^[a-z_]{2,20}$/.test(k)&&typeof v==="string").map(([k,v])=>[k,STATUS.has(v)?v:t(v,40)]));
+  const nutrition=Object.fromEntries(Object.entries(info.nutrition&&typeof info.nutrition==="object"?info.nutrition:{}).filter(([k,v])=>/^[A-Za-z]{2,20}$/.test(k)&&v!==""&&v!==null&&Number.isFinite(Number(v))).map(([k,v])=>[k,Number(v)]));
+  const out={status:info.status==="approved"?"approved":t(info.status||"incomplete",30),version:t(info.version,20),shortDescription:t(info.shortDescription),ingredients:t(info.ingredients),additives:t(info.additives),contents:t(info.contents),important:t(info.important),notes:t(info.notes),allergens,nutrition,
+    manufacturer:t(info.manufacturer,120),supplier:t(info.supplier,120),source:t(info.source,200),validAt:t(info.validAt,40),approvedAt:t(info.approvedAt,40),approvedBy:t(info.approvedBy,80)};
+  if(info.legacyAllergens)out.legacyAllergens=t(info.legacyAllergens);
+  return out;
+}
+function sanitizeProduct(product,index){product=window.KCImagesV3.migrate({...product});const info=product?.info||{};return {...product,id:safeId(product?.id,`ART-${index+1}`),name:safeText(product?.name||`Artikel ${index+1}`,100),shortName:safeText(product?.shortName,60),receiptText:safeText(product?.receiptText||product?.name,100),category:safeText(product?.category,80),image:safeImage((window.KCImagesV3.entries[product?.id]?"":product?.embeddedImage)||product?.image),barcode:safeText(product?.barcode,80),price:Number(product?.price||0),purchasePrice:Number(product?.purchasePrice||0),active:product?.active!==false,info:sanitizeProductInfo(info,product?.id)}}
 function transactionIdentity(t,index=0){return t.transactionId||`${t.registerId||"legacy"}:${t.bon||t.bonNumber||"?"}:${t.time||index}`}
 // IndexedDB-Umstellung: siehe kc-transaction-store.js für die ausführliche Architektur-
 // Begründung. _txCache/_trainingTxCache sind der synchrone Zwischenspeicher, den ALLE

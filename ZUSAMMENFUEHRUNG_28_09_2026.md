@@ -516,3 +516,18 @@ Betreiber: „Mache alle Mülleimer im Programm rot, besonders im Warenkorb.“
 * Offen: Kombis werden weiterhin in der Kasse gepflegt; der PC-Manager sendet keine Kombis mit (leere Liste wird
   von der Kasse ignoriert). Eine Kombi-Verwaltung im PC-Manager wäre ein eigener Ausbauschritt.
 * Test: `tests/warengruppen-reihenfolge-dreier-kombi.test.cjs`.
+
+## Nachtrag: Allergene im Info-Fenster wieder lesbar (07.10.2026)
+
+* Gefunden beim Durchspielen der Übungsliste („Ein Kunde fragt, ob im Glühwein Allergene drin sind“): Im
+  Info-Fenster stand bei jedem Artikel „Allergene [object Object]“ und „Produktinformation nicht vollständig
+  geprüft“. Ursache: `sanitizeProduct` machte aus den strukturierten Artikelinformationen Text – das Allergen-Objekt
+  (z. B. `{sulphites:"contained"}`) wurde zu „[object Object]“, Freigabestatus, Kurzbeschreibung und Nährwerte gingen
+  verloren und wurden so gespeichert.
+* `app.js` (Kasse und Schulung, Build 0.31.3.6-r51): neue `sanitizeProductInfo` behält die Angaben (Text bereinigt,
+  Zahlen geprüft); Artikel mit Allergenen als Text bleiben wie bisher. Bereits verdorbene Angaben werden aus den
+  eingebauten Standardangaben wiederhergestellt; der nächste Stammdaten-Abgleich vom PC-Manager liefert sie
+  ohnehin vollständig. Glühwein rot zeigt jetzt „Schwefeldioxid / Sulfite: Enthalten“.
+* Offen (Daten, nicht Programm): Beim Eierlikörpunsch und weiteren Artikeln sind im Artikelstamm keine Allergene
+  hinterlegt – bitte im PC-Manager eintragen.
+* Test: `tests/artikelinfo-allergene.test.cjs` (ohne Reparatur 8 Fehler).
