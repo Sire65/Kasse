@@ -449,3 +449,17 @@ Betreiber: „Mache alle Mülleimer im Programm rot, besonders im Warenkorb.“
 * `kc-dienstplan-kasse.css` 0.2.1 (Kasse und Schulung, Ladeplan und Service-Worker-Liste nachgezogen): Ist das
   Kreuz da, bekommt die Kopfzeile rechts 50 px Platz, der Pfeil sitzt links daneben. Ohne Kreuz unverändert.
   Geprüft 1280×800, 1024×768, 800×1280 – keine Überlappung mehr.
+
+## Nachtrag: Pfand-Rückgaben auch unter Getränke, Apfelpunsch mit „+“ (07.10.2026)
+
+* Betreiber: „Baue mir noch die 3 Pfandartikel Glas, Zange, beides kombiniert in die Gruppe Getränke unten drunter.
+  Den Rest so lassen, und bei Apfelpunsch muss noch ein Pluszeichen wegen Amaretto und Rum dazu.“
+* `app.js` (Kasse und Schulung, Build 0.31.3.6-r49, Ladeplan und Service-Worker-Liste nachgezogen):
+  * Glasrückgabe, Feuerzange Rückgabe und Glas + Feuerzange Rückgabe erscheinen zusätzlich unter „Getränke“, ganz
+    unten nach Schuss Rum/Amaretto (`displayCategories`, Reihenfolge 9100–9102). In „Pfand“ bleiben sie unverändert,
+    Warengruppe bleibt „Pfand“ (Pfandzählung, Rabattsperre, Auswertung wie bisher). Einmalig per Merker
+    `kc_pfand_rueckgabe_unter_getraenke_v1`, spätere eigene Einstellungen im Artikelstamm werden nicht überschrieben.
+  * Apfelpunsch bekommt die Schuss-Auswahl (`optionGroup:"shot"`: ohne / Rum / Amaretto je 1,00 €) wie Glühwein und
+    Roter Feger.
+* Geprüft in Chrome: Kasse und Schulung, KC003 und Standard, frisches Gerät und Gerät mit gespeichertem Altbestand.
+  In KC003 liegen die drei Rückgaben in der vierten Reihe der Getränke (über „▼ mehr“ erreichbar).

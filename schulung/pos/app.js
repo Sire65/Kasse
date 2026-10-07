@@ -145,6 +145,25 @@ try{
     localStorage.setItem("kc_pfand_plus_unter_sonstiges_v1","1");
   }
 }catch(e){}
+// 07.10.2026 (Betreiber: "Baue mir noch die 3 Pfandartikel Glas, Zange, beides kombiniert in die Gruppe
+// Getraenke unten drunter, den Rest so lassen"): die drei Rueckgaben erscheinen ZUSAETZLICH unter
+// "Getraenke", ganz unten (nach Schuss Rum/Amaretto). In "Pfand" bleiben sie unveraendert; Warengruppe
+// bleibt "Pfand" (Pfandzaehlung, Rabattsperre, Auswertung wie bisher). Einmalig per Merker, damit eine
+// spaetere eigene Einstellung im Artikelstamm nicht bei jedem Start ueberschrieben wird.
+try{
+  if(!localStorage.getItem("kc_pfand_rueckgabe_unter_getraenke_v1")){
+    let geaendert=false;
+    [["glasminus",9100],["zangeminus",9101],["glaszangebundleminus",9102]].forEach(([id,reihe])=>{
+      const p=PRODUCTS.find(x=>x.id===id);
+      if(!p||p.category!=="Pfand")return;
+      const extra=Array.isArray(p.displayCategories)?p.displayCategories:[];
+      if(!extra.includes("Getränke")){p.displayCategories=[...new Set([...extra,"Getränke"])];geaendert=true}
+      if(!(p.sortOrder>0)){p.sortOrder=reihe;geaendert=true}
+    });
+    if(geaendert)localStorage.setItem("kc_products_v050",JSON.stringify(PRODUCTS));
+    localStorage.setItem("kc_pfand_rueckgabe_unter_getraenke_v1","1");
+  }
+}catch(e){}
 // 22.09.2026 (Betreiber-Wunsch): "Freie Zahlung" fuer Artikel ohne eigene Kassentaste (z.B.
 // eine einzelne Feuerzange, eine Tuete Plaetzchen) - Betrag am Zahlenblock eingeben statt fuer
 // jeden Einzelfall einen eigenen Knopf anzulegen. Bereits gespeicherte Artikellisten kennen
@@ -227,7 +246,10 @@ if(depositReturnMigration)localStorage.setItem("kc_products_v050",JSON.stringify
 grot:{price:3.50},gweiss:{price:3.50},eier:{price:4.50},apfel:{price:2.50},
 // Der Rote Feger wird ebenfalls mit Schuss verkauft (Rum oder Amaretto, je 1,00 EUR).
 // Die Auswahl ist gebaut; sie hing nur noch nicht an diesem Artikel.
-roterfeger:{optionGroup:"shot"}};let changed=false;for(const product of PRODUCTS){const patch=patches[product.id];if(!patch)continue;for(const [key,value] of Object.entries(patch)){if(product[key]!==value){product[key]=value;changed=true}}}
+roterfeger:{optionGroup:"shot"},
+// 07.10.2026 (Betreiber): "bei Apfelpunsch muss noch ein Pluszeichen wegen Amaretto und Rum dazu" -
+// dieselbe Schuss-Auswahl wie bei Gluehwein und Rotem Feger.
+apfel:{optionGroup:"shot"}};let changed=false;for(const product of PRODUCTS){const patch=patches[product.id];if(!patch)continue;for(const [key,value] of Object.entries(patch)){if(product[key]!==value){product[key]=value;changed=true}}}
 // Aus dem Sortiment genommen (Betreiber 03.09.2026). Eine Kasse, die sie schon gespeichert
 // hat, behielte sie sonst - der Artikel waere nur auf einem frischen Geraet verschwunden.
 for(const weg of ["knirpse","knirpseher"]){const n=PRODUCTS.findIndex(p=>p.id===weg);if(n>=0){PRODUCTS.splice(n,1);changed=true}}
