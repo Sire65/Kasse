@@ -539,5 +539,8 @@ Betreiber: „Mache alle Mülleimer im Programm rot, besonders im Warenkorb.“
 * `schulung/uebungsliste/index.html` (Webseite zum Ankreuzen am Handy/Tablet, Stand bleibt im Gerät gespeichert,
   „Neu beginnen“, druckt wie das PDF) und `schulung/uebungsliste/Kassen-Training_Uebungsliste.pdf` (A4, 7 Seiten).
   46 Aufgaben in 8 Stufen, jede am 07.10.2026 in der Kasse (Oberfläche KC003) durchgespielt, Beträge nachgerechnet.
+* Gestaltung wie die Unterlagen in der Club-App (Kurzanleitung Bilderrechner, Club-App-Anleitung): Titelblatt mit
+  Kochmütze, Kopfzeile „Köcheclub Werne“ mit Logo, Inhalt, grüne Überschriften und Nummernfelder, grüne Hinweiskästen,
+  „Seite X von Y“, Schrift Carlito; PDF 9 Seiten.
 * Quelle: `werkzeuge/uebungsliste/daten.js` (Aufgaben) und `bauen.cjs` (erzeugt Webseite und PDF). Nach Änderungen an
   der Bedienung die betroffenen Schritte erneut durchspielen.
