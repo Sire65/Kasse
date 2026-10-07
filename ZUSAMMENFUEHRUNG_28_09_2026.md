@@ -463,3 +463,56 @@ Betreiber: „Mache alle Mülleimer im Programm rot, besonders im Warenkorb.“
     Roter Feger.
 * Geprüft in Chrome: Kasse und Schulung, KC003 und Standard, frisches Gerät und Gerät mit gespeichertem Altbestand.
   In KC003 liegen die drei Rückgaben in der vierten Reihe der Getränke (über „▼ mehr“ erreichbar).
+
+## Nachtrag: PC-Manager pflegt Pfand-Anzeige und Apfelpunsch-Schuss, Warengruppen-Reihenfolge, Dreier-Kombi (07.10.2026)
+
+* Betreiber: „Das Ganze muss auch in den PC-Manager, weil der maßgeblich die Kassen steuert. Die Reihenfolge der
+  Warengruppen muss sein: Getränke, Essen, Pfand, Favoriten, Kombinationen, Sonstiges. Stelle noch eine Kombi her
+  aus Eierpunsch / Grünkohl / Wurst, die Wurst besser in den Vordergrund.“ (Rückfrage: Dreier-Kombi.)
+* **Befund:** „Stammdaten senden“ im PC-Manager ersetzt auf jeder Kasse die komplette Artikelliste. Was der Manager
+  nicht kannte (Glas-/Zangenpfand nur unter Sonstiges, Rückgaben auch unter Getränke), wäre nach dem nächsten Senden
+  weg gewesen. Außerdem baute „Artikel speichern“ im Manager das Artikelobjekt aus dem Formular neu – diese Angaben
+  gingen dabei verloren.
+* **PC-Manager** (`pc-manager/` und `schulung/pc-manager/` identisch, Build `bilder-v7`):
+  * Einmalig (`kcm_artikel_anzeige_v1`): Rückgaben zusätzlich unter Getränke (Reihenfolge 9100–9102),
+    Glas-/Zangenpfand nur unter Sonstiges, Apfelpunsch Schuss-Auswahl. Warengruppe bleibt „Pfand“.
+  * Neues Feld am Artikel „Zusätzlich an der Kasse anzeigen in Warengruppe“ (Auswahl je Gruppe, eigene Gruppe
+    gesperrt) und „Nur dort zeigen, nicht in der eigenen Warengruppe“. Speichern behält die Einstellung.
+  * Standard-Reihenfolge Getränke, Speisen, Pfand, Favoriten, Kombi, Sonstiges, danach alle weiteren; einmalig
+    übernommen (`kcm_warengruppen_reihenfolge_v1`), danach im Manager frei änderbar und wird mitgesendet.
+* **Kasse und Schulung** (`app.js` 0.31.3.6-r50):
+  * Reihenfolge der Warengruppen wie oben, wenn keine eigene gesendet wurde; eine bisher gespeicherte Reihenfolge
+    wird einmalig verworfen (`kc_warengruppen_reihenfolge_v1`). Fehlt in der gesendeten Reihenfolge eine
+    Standardgruppe (der Manager kennt „Kombi“ nicht), steht sie hinter ihrem Vorgänger statt am Ende.
+    Angebote/Happy Hour wie bisher.
+  * Neue Kombi „Eierlikörpunsch + Grünkohl + Mettwurst“ (11,50 € = Summe der Teile, Pfand extra über den Punsch),
+    einmalig ergänzt (`kc_kombi_ei_gk_mw_ergaenzt_v1`). Kachel: Punsch oben, Grünkohl unten, Mettwurst als runder
+    Ausschnitt groß in der Mitte vorne (`vorneProductId`). Die vier bisherigen Kombis bleiben.
+  * Kombi-Formular der Kasse (nur zwei Felder): bei einer Dreier-Kombi bleibt das dritte Teil erhalten, solange die
+    ersten beiden unverändert sind.
+* **Nachtrag gleicher Tag** (Betreiber: „Dann mache noch Kombis mit Glühwein und Grünkohl mit Wurst, ohne Wurst. Und bau
+  das so, dass wenn die Kasse was schickt, nicht automatisch der PC-Manager überschrieben wird oder umgekehrt.
+  Normalerweise bestückt nur der Manager die Kassen.“):
+  * Kombi „Glühwein rot + Grünkohl + Mettwurst“ (10,50 €, Wurst vorne). „Grünkohl + Glühwein rot“ (ohne Wurst) gab es
+    schon; damit hat Glühwein rot dieselben Kombis wie Eierlikörpunsch.
+  * **Kasse → Manager:** Laufen beide im selben Browser, las der Manager beim Start die Kassenartikel ein, und deren
+    Werte gewannen (ein im Manager geänderter Preis kam beim nächsten Start zurück). Jetzt gewinnt der Manager; aus
+    Kasse/Katalog kommen nur Artikel und Gruppen dazu, die er noch nicht kennt. Nur beim allerersten Start (noch
+    nichts im Manager gespeichert) wird der Kassenstand wie bisher übernommen.
+  * **Manager → Kasse:** Kombis schickt der Manager nicht (leere Liste wird ignoriert) – die in der Kasse
+    eingetragenen Kombis bleiben. Ein vor dem 07.10. gesendeter Manager-Stand kennt die Anzeige-Angabe noch nicht;
+    fehlt sie am Artikel ganz, setzt die Kasse ihre Vorgabe (Plus-Pfand unter Sonstiges, Rückgaben auch unter
+    Getränke). Eine bewusste Einstellung aus dem neuen Manager – auch „keine Zusatzgruppe“ – bleibt unangetastet.
+  * **Befund aus dem Kettentest (Manager → Kasse), behoben:** Die Kasse setzte bei JEDEM Start die Preise von
+    Glühwein rot/weiß, Eierlikörpunsch, Apfelpunsch, Hering und Kartoffelcreme fest (Korrektur vom 03.09.). Ein im
+    PC-Manager geänderter Preis dieser Artikel kam dadurch nie an der Kasse an (gemessen: Manager 3,70 €, Kasse
+    3,50 €). Jetzt wird nur noch der alte falsche Preis mit eingerechnetem Glaspfand korrigiert (5,50/6,50/4,50 €);
+    Hering/Kartoffelcreme einmalig je Gerät (`kc_preis_hering_creme_v1`). Die Schuss-Auswahl an Rotem Feger und
+    Apfelpunsch setzt die Kasse nur, wenn die Angabe ganz fehlt – „Keine“ aus dem Manager bleibt.
+  * Neuer Test `tests/manager-an-kasse-kette.test.cjs`: echtes Paket aus „Stammdaten senden“ im PC-Manager → Kasse
+    startet mit genau diesem Abgleich (Reihenfolge, Pfand-Anzeige, Apfelpunsch „+“, 6 Kombis, Preisänderung), dazu
+    ein alter Manager-Stand (falscher Preis mit Pfand, „keine Schuss-Auswahl“). Die beiden Dienste reichen die
+    Stammdaten unverändert als JSON durch (`articles_json`), `categoryOrder` ist nicht gesperrt.
+* Offen: Kombis werden weiterhin in der Kasse gepflegt; der PC-Manager sendet keine Kombis mit (leere Liste wird
+  von der Kasse ignoriert). Eine Kombi-Verwaltung im PC-Manager wäre ein eigener Ausbauschritt.
+* Test: `tests/warengruppen-reihenfolge-dreier-kombi.test.cjs`.

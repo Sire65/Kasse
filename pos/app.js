@@ -118,12 +118,17 @@ let PRODUCTS=JSON.parse(localStorage.getItem("kc_products_v050")||"null")||DEFAU
 // Pfandzaehlung im Abschluss, Rabattsperre und Auswertung genau wie bisher laufen. Die "+"-Taste an den
 // Getraenken bucht das Pfand weiter automatisch. Einmalig umgestellt (Merker), damit eine spaetere
 // eigene Einstellung im Artikelstamm nicht bei jedem Start wieder ueberschrieben wird.
+// 07.10.2026: Der Merker allein reichte nicht - der PC-Manager sendet die ganze Artikelliste, und ein vor dem
+// 07.10. gesendeter Stand kennt "displayCategories" noch nicht; damit standen die Plus-Positionen nach dem
+// naechsten Abgleich wieder in "Pfand". Deshalb zusaetzlich: Fehlt die Angabe am Artikel GANZ (alter Stand),
+// gilt diese Vorgabe. Eine bewusste Einstellung aus dem Manager (auch eine leere Liste) bleibt unangetastet.
 try{
-  if(!localStorage.getItem("kc_pfand_plus_unter_sonstiges_v1")){
+  if(!localStorage.getItem("kc_pfand_plus_unter_sonstiges_v1")||["glasplus","zangeplus"].some(id=>{const p=PRODUCTS.find(x=>x.id===id);return p&&p.category==="Pfand"&&!Array.isArray(p.displayCategories)})){
     let geaendert=false;
     for(const id of ["glasplus","zangeplus"]){
       const p=PRODUCTS.find(x=>x.id===id);
       if(!p||p.category!=="Pfand")continue;
+      if(localStorage.getItem("kc_pfand_plus_unter_sonstiges_v1")&&Array.isArray(p.displayCategories))continue;
       const extra=Array.isArray(p.displayCategories)?p.displayCategories:[];
       p.displayCategories=[...new Set([...extra,"Sonstiges"])];p.hideInOwnCategory=true;geaendert=true;
     }
@@ -137,11 +142,15 @@ try{
 // bleibt "Pfand" (Pfandzaehlung, Rabattsperre, Auswertung wie bisher). Einmalig per Merker, damit eine
 // spaetere eigene Einstellung im Artikelstamm nicht bei jedem Start ueberschrieben wird.
 try{
-  if(!localStorage.getItem("kc_pfand_rueckgabe_unter_getraenke_v1")){
+  // Wie oben: auch nach einem Abgleich mit einem alten Manager-Stand (Angabe fehlt ganz) wieder setzen.
+  const RUECKGABEN=[["glasminus",9100],["zangeminus",9101],["glaszangebundleminus",9102]];
+  const merker=!!localStorage.getItem("kc_pfand_rueckgabe_unter_getraenke_v1");
+  if(!merker||RUECKGABEN.some(([id])=>{const p=PRODUCTS.find(x=>x.id===id);return p&&p.category==="Pfand"&&!Array.isArray(p.displayCategories)})){
     let geaendert=false;
-    [["glasminus",9100],["zangeminus",9101],["glaszangebundleminus",9102]].forEach(([id,reihe])=>{
+    RUECKGABEN.forEach(([id,reihe])=>{
       const p=PRODUCTS.find(x=>x.id===id);
       if(!p||p.category!=="Pfand")return;
+      if(merker&&Array.isArray(p.displayCategories))return;
       const extra=Array.isArray(p.displayCategories)?p.displayCategories:[];
       if(!extra.includes("Getränke")){p.displayCategories=[...new Set([...extra,"Getränke"])];geaendert=true}
       if(!(p.sortOrder>0)){p.sortOrder=reihe;geaendert=true}
@@ -189,18 +198,25 @@ if(depositReturnMigration)localStorage.setItem("kc_products_v050",JSON.stringify
 // Ohne das behielte eine Kasse, die den Artikel schon im Speicher hat, das alte
 // Ersatzbild und den alten Preis - der Neustand waere nur auf einem frischen Geraet zu
 // sehen. Es werden ausschliesslich diese Felder gesetzt, sonst nichts.
-{const patches={zangeplus:{image:"assets/feuerzangenpfand_version_3.webp"},zangeminus:{image:"assets/feuerzangerueckgabe_version_3.webp"},glaszangebundleminus:{image:"assets/glas_feuerzangerueckgabe_version_3.webp"},mettwurst:{image:"assets/mettwurst_auth.webp"},hering:{image:"assets/hering_kartoffeln_auth.webp",price:4.50},knirpsecreme:{image:"assets/kartoffelcreme_auth.webp",price:3.50},
-// 03.09.2026, vom Betreiber bestaetigt: Bei diesen vier Getraenken stand der Preis MIT Pfand
-// als Artikelpreis. Weil die Kasse das Pfand automatisch draufrechnet, wurde es zweimal
-// berechnet - der Gast zahlte 2,00 EUR zu viel je Glas. Hier stehen jetzt die Getraenkepreise
-// OHNE Pfand; das Pfand kommt weiterhin aus depositComponents.
-grot:{price:3.50},gweiss:{price:3.50},eier:{price:4.50},apfel:{price:2.50},
+{const patches={zangeplus:{image:"assets/feuerzangenpfand_version_3.webp"},zangeminus:{image:"assets/feuerzangerueckgabe_version_3.webp"},glaszangebundleminus:{image:"assets/glas_feuerzangerueckgabe_version_3.webp"},mettwurst:{image:"assets/mettwurst_auth.webp"},hering:{image:"assets/hering_kartoffeln_auth.webp"},knirpsecreme:{image:"assets/kartoffelcreme_auth.webp"},
+};
+// 03.09.2026, vom Betreiber bestaetigt: Bei Gluehwein rot/weiss, Eierlikoerpunsch und Apfelpunsch stand der
+// Preis MIT Pfand als Artikelpreis. Weil die Kasse das Pfand automatisch draufrechnet, wurde es zweimal
+// berechnet - der Gast zahlte 2,00 EUR zu viel je Glas. Das Pfand kommt aus depositComponents.
 // Der Rote Feger wird ebenfalls mit Schuss verkauft (Rum oder Amaretto, je 1,00 EUR).
-// Die Auswahl ist gebaut; sie hing nur noch nicht an diesem Artikel.
-roterfeger:{optionGroup:"shot"},
-// 07.10.2026 (Betreiber): "bei Apfelpunsch muss noch ein Pluszeichen wegen Amaretto und Rum dazu" -
-// dieselbe Schuss-Auswahl wie bei Gluehwein und Rotem Feger.
-apfel:{optionGroup:"shot"}};let changed=false;for(const product of PRODUCTS){const patch=patches[product.id];if(!patch)continue;for(const [key,value] of Object.entries(patch)){if(product[key]!==value){product[key]=value;changed=true}}}
+let changed=false;for(const product of PRODUCTS){const patch=patches[product.id];if(!patch)continue;for(const [key,value] of Object.entries(patch)){if(product[key]!==value){product[key]=value;changed=true}}}
+// 07.10.2026 (Betreiber: "normalerweise bestueckt nur der Manager die Kassen ... nicht automatisch
+// ueberschreiben"): Die Preise oben wurden bisher bei JEDEM Start fest gesetzt - ein im PC-Manager
+// geaenderter Preis fuer diese Artikel kam dadurch nie an der Kasse an. Jetzt wird nur noch der alte
+// FALSCHE Preis mit eingerechnetem Glaspfand (+2,00 EUR) korrigiert; jeder andere Preis vom Manager gilt.
+{const FALSCH_MIT_PFAND={grot:[5.50,3.50],gweiss:[5.50,3.50],eier:[6.50,4.50],apfel:[4.50,2.50]};
+ for(const product of PRODUCTS){const k=FALSCH_MIT_PFAND[product.id];if(k&&Math.abs(Number(product.price)-k[0])<0.001){product.price=k[1];changed=true}}
+ // Hering/Kartoffelcreme: Preiskorrektur vom 03.09. nur noch EINMAL je Geraet, danach gilt der Manager.
+ if(!localStorage.getItem("kc_preis_hering_creme_v1")){for(const [id,preis] of [["hering",4.50],["knirpsecreme",3.50]]){const p=PRODUCTS.find(x=>x.id===id);if(p&&p.price!==preis){p.price=preis;changed=true}}localStorage.setItem("kc_preis_hering_creme_v1","1")}
+ // Schuss-Auswahl (Rum/Amaretto) am Roten Feger (03.09.) und am Apfelpunsch (07.10., Betreiber: "bei Apfelpunsch
+ // muss noch ein Pluszeichen wegen Amaretto und Rum dazu") nur setzen, wenn die Angabe GANZ fehlt (alter
+ // Stand). "Keine" aus dem PC-Manager (leerer Wert) bleibt bestehen.
+ for(const id of ["roterfeger","apfel"]){const p=PRODUCTS.find(x=>x.id===id);if(p&&p.optionGroup===undefined){p.optionGroup="shot";changed=true}}}
 // Aus dem Sortiment genommen (Betreiber 03.09.2026). Eine Kasse, die sie schon gespeichert
 // hat, behielte sie sonst - der Artikel waere nur auf einem frischen Geraet verschwunden.
 for(const weg of ["knirpse","knirpseher"]){const n=PRODUCTS.findIndex(p=>p.id===weg);if(n>=0){PRODUCTS.splice(n,1);changed=true}}
@@ -250,6 +266,24 @@ let PACKAGES=JSON.parse(localStorage.getItem(PACKAGE_STORAGE_KEY)||"null")||DEFA
   if(neu)localStorage.setItem(PACKAGE_STORAGE_KEY,JSON.stringify(PACKAGES));
   localStorage.setItem(MARKE,"1");
  }}
+// 07.10.2026 (Betreiber): Dreier-Kombis Eierlikoerpunsch bzw. Gluehwein rot + Gruenkohl + Mettwurst, die Wurst im Bild
+// vorne. Einmalig ergaenzt wie die Kombis vom 24.09.; wer sie loescht, bekommt sie nicht wieder.
+// Preis = Summe der Einzelpreise, Pfand kommt ueber den Punsch extra dazu.
+{const MARKE="kc_kombi_ei_gk_mw_ergaenzt_v1";
+ if(!localStorage.getItem(MARKE)){
+  // Dazu (Betreiber, gleicher Tag): dieselbe Dreier-Kombi mit Gluehwein rot. Die Kombi ohne Wurst
+  // ("Gruenkohl + Gluehwein rot") gibt es schon seit Werk.
+  const NEUE=[{id:"PKG-EI-GK-MW",name:"Eierlikörpunsch + Grünkohl + Mettwurst",componentIds:["eier","gruenkohl","mettwurst"],vorneProductId:"mettwurst"},
+   {id:"PKG-GR-GK-MW",name:"Glühwein rot + Grünkohl + Mettwurst",componentIds:["grot","gruenkohl","mettwurst"],vorneProductId:"mettwurst"}];
+  let neu=0;
+  NEUE.forEach(k=>{
+   if(PACKAGES.some(p=>p.id===k.id)||!k.componentIds.every(id=>PRODUCTS.some(p=>p.id===id)))return;
+   const summe=k.componentIds.reduce((n,id)=>n+Number((PRODUCTS.find(p=>p.id===id)||{}).price||0),0);
+   PACKAGES.push({...k,price:+summe.toFixed(2),category:"Kombi",active:true,autoManaged:false,source:"manual",note:"Kombi 07.10.2026"});neu++;
+  });
+  if(neu)localStorage.setItem(PACKAGE_STORAGE_KEY,JSON.stringify(PACKAGES));
+  localStorage.setItem(MARKE,"1");
+ }}
 let PACKAGE_SUGGESTIONS=[];
 // Die Warengruppe hiess "Packages". Am Stand sagt niemand "Package" - es sind Kombinationen
 // aus Essen und Getraenk. Der Name steht auf dem Warengruppenknopf, im Bon, in der
@@ -261,6 +295,14 @@ const KOMBI_GRUPPE="Kombi";
  if(!GROUPS.some(g=>g.name===KOMBI_GRUPPE)){GROUPS.push({id:"WG05",name:KOMBI_GRUPPE,shortName:KOMBI_GRUPPE,sortOrder:5,color:"#6d28d9",active:true,notes:"Freigegebene Kombinationen aus Essen und Getr\u00e4nk"});geaendert=true}
  if(geaendert)localStorage.setItem("kc_groups_v050",JSON.stringify(GROUPS));}
 function savePackages(){localStorage.setItem(PACKAGE_STORAGE_KEY,JSON.stringify(PACKAGES))}
+// 07.10.2026: runder Vordergrund-Ausschnitt fuer das dritte Teil einer Kombi (Mettwurst). Der Stil kommt
+// mit app.js selbst, damit Kachel und Aussehen immer aus derselben Version stammen. Das V3-Bild hat unten
+// ein Namensband und oben links ein "i" - der Ausschnitt zeigt nur die Bildmitte mit der Wurst.
+(function(){if(document.getElementById("kcKombiVorneStil"))return;const st=document.createElement("style");st.id="kcKombiVorneStil";
+ st.textContent="#productGrid .product-tile .kombi-bild .kombi-vorne{position:absolute;left:50%;top:42%;width:58%;aspect-ratio:1/1;transform:translate(-50%,-50%);border-radius:50%;overflow:hidden;border:3px solid #fff;box-shadow:0 3px 10px rgba(0,0,0,.45);z-index:2;background:#fff}"
+ +".kc-ohne-seitenverhaeltnis #productGrid .product-tile .kombi-bild .kombi-vorne{height:0;padding-top:58%}"
+ +"#productGrid .product-tile .kombi-bild .kombi-vorne img{position:absolute!important;top:-30%!important;left:-25%!important;right:auto!important;bottom:auto!important;width:150%!important;height:150%!important;max-height:none!important;max-width:none!important;object-fit:cover!important;object-position:50% 50%!important;clip-path:none!important}";
+ (document.head||document.documentElement).appendChild(st)})();
 function packageProductView(pkg,index=0){
   const components=(pkg.componentIds||[]).map(id=>PRODUCTS.find(p=>p.id===id)).filter(Boolean);
   const lead=components.find(p=>p.id===pkg.imageProductId)||components[0];
@@ -272,9 +314,15 @@ function packageProductView(pkg,index=0){
   const mitBild=components.filter(c=>c.image);
   const getraenk=mitBild.find(c=>c.category==="Getränke");
   const speise=mitBild.find(c=>c!==getraenk);
+  // 07.10.2026: Bei drei Teilen (z. B. Punsch + Gruenkohl + Mettwurst) steht das dritte als runder
+  // Ausschnitt VORNE in der Mitte - vom Betreiber so gewuenscht ("die Wurst besser in den Vordergrund").
+  // Welches Teil vorne steht, legt vorneProductId fest; sonst das dritte Teil mit Bild.
+  const vorneTeil=mitBild.length>=3?(mitBild.find(c=>c.id===pkg.vorneProductId)||mitBild.find(c=>c!==getraenk&&c!==speise)):null;
+  const speiseHinten=vorneTeil&&speise===vorneTeil?mitBild.find(c=>c!==getraenk&&c!==vorneTeil):speise;
   const kombiBilder=mitBild.length>=2
     ? {oben:(getraenk||mitBild[0]).image, obenName:(getraenk||mitBild[0]).name,
-       unten:(speise||mitBild[1]).image, untenName:(speise||mitBild[1]).name}
+       unten:(speiseHinten||mitBild[1]).image, untenName:(speiseHinten||mitBild[1]).name,
+       vorne:vorneTeil?.image||"", vorneName:vorneTeil?.name||""}
     : null;
   return {...pkg,isPackage:true,category:KOMBI_GRUPPE,image:lead?.image||"assets/logo.webp",color:"#6d28d9",kombiBilder,
     barcode:pkg.barcode||window.KCArtikelnummern?.fuerArtikel(pkg.id)
@@ -379,6 +427,9 @@ function productsForSale(){return [...promotedBaseProducts(),...activePackagePro
 
 const el=id=>document.getElementById(id);let notifier=null;let currentInfoProduct=null;const money=n=>new Intl.NumberFormat("de-DE",{style:"currency",currency:"EUR"}).format(n);const bonText=()=>String(state.master.nextBon).padStart(6,"0");
 function saveMaster(){localStorage.setItem("kc_master_v040",JSON.stringify(state.master))}
+// 07.10.2026: neue Standard-Reihenfolge der Warengruppen (siehe categories()). Eine bisher gespeicherte
+// Reihenfolge wird EINMALIG verworfen; der PC-Manager sendet ab jetzt dieselbe neue Reihenfolge mit.
+try{if(!localStorage.getItem("kc_warengruppen_reihenfolge_v1")){if(Array.isArray(state.master.categoryOrder)&&state.master.categoryOrder.length){state.master.categoryOrder=null;saveMaster()}localStorage.setItem("kc_warengruppen_reihenfolge_v1","1")}}catch(e){}
 function saveGroups(){localStorage.setItem("kc_groups_v050",JSON.stringify(GROUPS))}
 function saveProducts(){localStorage.setItem("kc_products_v050",JSON.stringify(PRODUCTS))}
 
@@ -723,10 +774,24 @@ function tick(){const d=new Date();el("dateText").textContent=d.toLocaleDateStri
 function categories(){
   const groups=visibleGroups(),names=groups.map(g=>g.name),base=[...offerCategoryNames(),...names,...(names.length?["Favoriten"]:[])];
   const configured=Array.isArray(state.master.categoryOrder)?state.master.categoryOrder:[];
-  if(!configured.length)return base;
+  // 07.10.2026 (Betreiber): "die Reihenfolge der Warengruppen muss sein: Getraenke, Essen, Pfand, Favoriten,
+  // Kombinationen, Sonstiges". Gilt, solange im PC-Manager keine eigene Reihenfolge gesendet wurde.
+  // Zeitlich begrenzte Aktionen (Angebote, Happy Hour) bleiben wie bisher vorne, alles Unbekannte hinten.
+  if(!configured.length){
+    const STANDARD=["Getränke","Speisen","Pfand","Favoriten",KOMBI_GRUPPE,"Sonstiges"],aktionen=offerCategoryNames();
+    const rang=(name,index)=>aktionen.includes(name)?-1:STANDARD.includes(name)?STANDARD.indexOf(name):STANDARD.length+index;
+    return base.map((name,index)=>({name,r:rang(name,index),index})).sort((x,y)=>x.r-y.r||x.index-y.index).map(x=>x.name);
+  }
   const keyFor=name=>name==="Favoriten"?"Favoriten":(groups.find(g=>g.name===name)?.id||name);
   const rank=new Map(configured.map((key,index)=>[String(key),index]));
-  return base.map((name,index)=>({name,index,rank:rank.has(keyFor(name))?rank.get(keyFor(name)):configured.length+index})).sort((a,b)=>a.rank-b.rank||a.index-b.index).map(x=>x.name);
+  // 07.10.2026: Fehlt eine der Standardgruppen in der gesendeten Reihenfolge (der PC-Manager kennt z. B.
+  // die Gruppe "Kombi" nicht - die legt die Kasse selbst an), steht sie direkt hinter ihrem Vorgaenger aus
+  // der Standard-Reihenfolge statt ganz am Ende. Alles andere wie bisher.
+  const STANDARD=["Getränke","Speisen","Pfand","Favoriten",KOMBI_GRUPPE,"Sonstiges"];
+  const fehlendRang=(name,index)=>{const k=STANDARD.indexOf(name);if(k<0)return configured.length+index;
+    for(let j=k-1;j>=0;j--){const v=base.includes(STANDARD[j])&&rank.get(keyFor(STANDARD[j]));if(typeof v==="number")return v+0.5}
+    return -0.5};
+  return base.map((name,index)=>({name,index,rank:rank.has(keyFor(name))?rank.get(keyFor(name)):fehlendRang(name,index)})).sort((a,b)=>a.rank-b.rank||a.index-b.index).map(x=>x.name);
 }
 function ensureActiveCategory(){
   const available=categories();
@@ -889,10 +954,10 @@ function renderProducts(){
     const autoFav=state.master.autoFavorites&&autoFavoriteIds().includes(p.id);
     return `<div class="product-tile-wrap ${imageV3?"image-v3":""} ${p.isPackage?"package-tile":""} ${p.isOffer?(p.isHappyHour?"happyhour-tile":"offer-tile"):""} ${infoVisible?"":"no-info"} ${state.lastSelectedProduct===p.id?"last-selected":""}">
       <button class="product-tile mode-${mode}" data-id="${p.id}" style="--tile-color:${p.color||"#315d8d"};--gruppen-rand:${(GROUPS.find(x=>x.name===p.category)||{}).color||p.color||"#315d8d"}" aria-label="${p.name} direkt verkaufen">
-        ${p.kombiBilder?`<span class="kombi-bild" role="img" aria-label="${escapeHtml(p.kombiBilder.obenName)} und ${escapeHtml(p.kombiBilder.untenName)}">
+        ${p.kombiBilder?`<span class="kombi-bild" role="img" aria-label="${escapeHtml(p.kombiBilder.obenName)} und ${escapeHtml(p.kombiBilder.untenName)}${p.kombiBilder.vorneName?` und ${escapeHtml(p.kombiBilder.vorneName)}`:""}">
           <img class="kombi-oben" src="${p.kombiBilder.oben}" alt="">
           <img class="kombi-unten" src="${p.kombiBilder.unten}" alt="">
-          <svg class="kombi-linie" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"><line x1="0" y1="100" x2="100" y2="0" vector-effect="non-scaling-stroke"/></svg>
+          <svg class="kombi-linie" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"><line x1="0" y1="100" x2="100" y2="0" vector-effect="non-scaling-stroke"/></svg>${p.kombiBilder.vorne?`<span class="kombi-vorne"><img src="${p.kombiBilder.vorne}" alt=""></span>`:""}
         </span>`:`<img src="${p.image}" alt="">`}
         <span class="product-price-tag ${p.isOffer?"offer-price-line":""}">${p.isOffer?`<small class="offer-old-price">${money(p.originalPrice)}</small>`:""}${p.isFreieZahlung?"frei":money(displayPrice(p)).replace(/\s?€/,"")}</span>
         <span class="product-label"><strong>${p.name}</strong>${p.isOffer?`<small class="offer-badge" title="${escapeHtml(p.offerName)}">${p.isHappyHour?"HH":"ANGEBOT"}</small>`:""}${p.isPackage?'<small class="package-tag">beides zusammen</small>':""}${p.optionGroup?'<small class="option-tag" title="Auf den Artikel tippen verkauft die Standardausführung. Das + daneben öffnet die Varianten.">+ = Varianten</small>':""}${p.depositComponents?`<small class="deposit-tag" title="${depositHint(p)}">${depositKurz(p)}</small>`:""}</span>
@@ -2484,6 +2549,8 @@ function sanitizePackage(raw,index=0){
     // Package das einzige, was sich am Zahlenblock nicht aufrufen laesst.
     barcode:safeText(raw?.barcode||window.KCArtikelnummern?.fuerArtikel(raw?.id)
       ||window.KCArtikelnummern?.tagespackageNummer(index+1)||"",20),
+    // 07.10.2026: welches Teil einer Dreier-Kombi rund vorne im Bild steht (siehe packageProductView).
+    vorneProductId:safeId(raw?.vorneProductId||"",""),
     note:safeText(raw?.note||"",220),updatedAt:raw?.updatedAt||new Date().toISOString()};
 }
 function packageOptions(selected=""){
@@ -2524,7 +2591,10 @@ function savePackageFromForm(){
   if(price<=0)return showMessage("Preis fehlt","!","Beide Bestandteile müssen einen Preis haben - der Kombipreis wird daraus gerechnet.");
   const id=el("packageId").value||`PKG-${Date.now()}`,existing=PACKAGES.findIndex(p=>p.id===id);
   const before=existing>=0?cloneData(PACKAGES[existing]):null;
-  const pkg=sanitizePackage({id,name,componentIds:ids,price,active:el("packageActive").checked,autoManaged:el("packageAutoManaged").checked,
+  // 07.10.2026: Das Formular hat nur zwei Felder. Bei einer Dreier-Kombi (z. B. Punsch + Gruenkohl + Mettwurst)
+  // bleiben die weiteren Teile erhalten, solange die ersten beiden unveraendert sind.
+  const weitere=before&&Array.isArray(before.componentIds)&&before.componentIds.length>2&&before.componentIds[0]===ids[0]&&before.componentIds[1]===ids[1]?before.componentIds.slice(2):[];
+  const pkg=sanitizePackage({id,name,componentIds:[...ids,...weitere],vorneProductId:weitere.length?before.vorneProductId:"",price,active:el("packageActive").checked,autoManaged:el("packageAutoManaged").checked,
     source:before?.source||"manual",imageProductId:el("packageImageProduct").value||ids[0],note:el("packageNote").value,updatedAt:new Date().toISOString()});
   if(existing>=0)PACKAGES[existing]=pkg;else PACKAGES.push(pkg);
   savePackages();renderPackageTable();renderCategories();renderProducts();loadPackage(pkg.id);recordAdminChange("package",before?"update":"create",pkg.id,before,pkg);setSystemHint("Kombination gespeichert");

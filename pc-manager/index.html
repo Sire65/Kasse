@@ -197,6 +197,10 @@
           <label class="check">Aktiv<input id="aActive" type="checkbox" checked></label>
           <label class="check">Favorit<input id="aFavorite" type="checkbox"></label>
           <label class="check" title="Nur markierte Artikel erscheinen in den Preislisten der TV-Präsentation.">PL · Preisliste<input id="aPriceListVisible" type="checkbox" checked></label>
+          <fieldset class="a-auch-in" style="grid-column:1/-1;border:1px solid #cbd5e1;border-radius:8px;padding:6px 10px"><legend>Zusätzlich an der Kasse anzeigen in Warengruppe</legend>
+            <div id="aAlsoIn" style="display:flex;flex-wrap:wrap;gap:4px 16px"></div>
+            <label class="check" title="Der Artikel erscheint dann nur in den oben angehakten Gruppen. Er zählt weiter zu seiner eigenen Warengruppe (Auswertung, Pfand, Rabatt).">Nur dort zeigen, nicht in der eigenen Warengruppe<input id="aHideOwn" type="checkbox"></label>
+          </fieldset>
         </div>
       </div>
       <div class="atab" data-apanel="sale">
@@ -1167,7 +1171,7 @@
 <script src="kc-demo-daten.js?build=0.1.0"></script>
 <script src="../shared/kc-artikelnummern-core.js?build=1.0.2"></script>
 <script src="../pos/images-v3.js?build=3-pfand"></script>
-<script src="app.js?build=bilder-v6"></script>
+<script src="app.js?build=bilder-v7"></script>
 <script src="kc-sonderbuchungen.js?build=1.0.0"></script>
 <script src="kc-preisliste.js?build=0.1.0"></script>
 <script src="kc-verbindung-pruefen.js?build=0.1.0"></script>
