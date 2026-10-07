@@ -1,0 +1,461 @@
+<!doctype html><html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Kassen-Training · Übungsliste</title><style>
+@page{size:A4;margin:11mm 11mm 13mm}
+*{box-sizing:border-box}body{font-family:Carlito,'Liberation Sans',sans-serif;color:#111827;font-size:10.6pt;margin:0;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+.kopf{display:flex;justify-content:space-between;align-items:flex-end;border-bottom:3px solid #173765;padding-bottom:6px;margin-bottom:8px}
+.kopf h1{font-size:21pt;margin:0;color:#173765}.kopf .u{font-size:10pt;color:#475569}
+.kopf .r{text-align:right;font-size:9.5pt;color:#475569;line-height:1.35}
+.einleitung{display:grid;grid-template-columns:1.25fr 1fr;gap:8px;margin-bottom:8px}
+.kasten{border:1.5px solid #cbd5e1;border-radius:8px;padding:7px 10px;background:#f8fafc;font-size:9.8pt;line-height:1.35}
+.kasten h3{margin:0 0 3px;font-size:10.8pt;color:#173765}.kasten ol,.kasten ul{margin:2px 0 0 16px;padding:0}.kasten li{margin:1px 0}
+.namen{display:grid;grid-template-columns:1fr 1fr 0.7fr;gap:10px;margin:2px 0 8px;font-size:9.8pt}.namen div{border-bottom:1px solid #94a3b8;padding:12px 0 1px;color:#475569}
+.stufe h2{font-size:12.5pt;margin:10px 0 5px;color:#fff;background:var(--f);padding:4px 10px;border-radius:6px;display:flex;align-items:center;gap:10px;break-after:avoid}
+.balken{display:inline-flex;gap:2px}.balken i{width:7px;height:12px;border-radius:2px;background:rgba(255,255,255,.35)}.balken i.an{background:#fff}
+.aufgabe{display:grid;grid-template-columns:30px 1fr 74px;gap:8px;border:1.3px solid #d1d5db;border-left:5px solid var(--f);border-radius:7px;padding:6px 8px;margin-bottom:5px;break-inside:avoid;background:#fff}
+.nr{width:26px;height:26px;border-radius:50%;background:var(--f);color:#fff;font-weight:700;display:flex;align-items:center;justify-content:center;font-size:11pt}
+.kunde{font-size:11.2pt;font-weight:700;margin-bottom:3px;line-height:1.25}.kunde .was{display:inline-block;font-size:7.6pt;font-weight:700;text-transform:uppercase;letter-spacing:.04em;color:#fff;background:#173765;border-radius:3px;padding:1px 5px;margin-right:6px;vertical-align:2px}
+.kunde.lage{font-style:italic;font-weight:700;color:#334155}.kunde.lage .was{background:#64748b}
+.neu{font-size:7.4pt;font-weight:700;color:#7c2d12;background:#ffedd5;border:1px solid #fdba74;border-radius:3px;padding:0 4px;margin-left:6px;vertical-align:2px;font-style:normal}
+ol{margin:0 0 3px 16px;padding:0}ol li{margin:0.5px 0;line-height:1.28}ol b,.kontrolle b{color:#0b3a75}
+.kontrolle{font-size:9.6pt;background:#ecfdf5;border-radius:4px;padding:2px 6px;color:#14532d;line-height:1.28}.kontrolle span{font-weight:700}
+.gewusst{border-left:1.5px dashed #cbd5e1;padding-left:7px;display:flex;flex-direction:column;justify-content:center;gap:5px}
+.gewusst .t{font-size:8.6pt;font-weight:700;color:#475569}.gewusst label{display:flex;align-items:center;gap:6px;font-weight:700;font-size:10.5pt}
+.box{width:17px;height:17px;border:2px solid #111827;border-radius:3px;display:inline-block;background:#fff}
+.auswertung{break-inside:avoid;margin-top:10px;border:2px solid #173765;border-radius:8px;padding:9px 12px}
+.leiste{position:sticky;top:0;z-index:5;display:flex;flex-wrap:wrap;gap:8px;align-items:center;background:#173765;color:#fff;padding:8px 12px;border-radius:0 0 10px 10px;margin:0 -2px 10px;font-size:11pt}
+.leiste a,.leiste button{font:inherit;font-weight:700;color:#173765;background:#fff;border:0;border-radius:6px;padding:6px 12px;text-decoration:none;cursor:pointer}
+.leiste .stand{margin-right:auto}
+.gewusst label{cursor:pointer;user-select:none;-webkit-user-select:none;padding:3px 0}
+.gewusst label.an[data-w="ja"] .box{background:#16a34a;border-color:#16a34a;box-shadow:inset 0 0 0 3px #fff}
+.gewusst label.an[data-w="nein"] .box{background:#dc2626;border-color:#dc2626;box-shadow:inset 0 0 0 3px #fff}
+.aufgabe.ok{background:#f0fdf4}.aufgabe.nok{background:#fef2f2}
+@media screen{body{max-width:900px;margin:0 auto;padding:0 10px 30px;background:#eef2f7}.aufgabe,.kasten{background:#fff}}
+@media screen and (max-width:640px){.einleitung{grid-template-columns:1fr}.aufgabe{grid-template-columns:26px 1fr;}.gewusst{grid-column:1/-1;border-left:0;border-top:1.5px dashed #cbd5e1;padding:6px 0 0;flex-direction:row;align-items:center;gap:18px}.kopf{flex-direction:column;align-items:flex-start;gap:4px}.kopf .r{text-align:left}.namen{grid-template-columns:1fr}}
+@media print{.leiste{display:none}}
+.auswertung h3{margin:0 0 6px;color:#173765}.zeile{display:flex;gap:18px;font-size:11pt;margin-bottom:8px}.linie{border-bottom:1px solid #94a3b8;height:20px;margin-bottom:4px}
+</style></head><body><div class="leiste"><span class="stand">Gewusst: <b class="zJa">0</b> Ja · <b class="zNein">0</b> Nein · <span class="zOffen">46</span> offen</span><a href="Kassen-Training_Uebungsliste.pdf" download>PDF herunterladen</a><button type="button" id="neu">Neu beginnen</button></div>
+<div class="kopf"><div><h1>Kassen-Training – Übungsliste</h1><div class="u">Köcheclub Werne · Weihnachtsmarkt 2026 · zu zweit üben: eine Person kassiert, eine ist der Kunde</div></div>
+<div class="r">Bilderrechner V0.31.3.6 · Oberfläche KC003<br>Stand 07.10.2026 · 46 Aufgaben<br>jede Aufgabe in der Kasse durchgespielt</div></div>
+<div class="einleitung">
+ <div class="kasten"><h3>So wird geübt</h3><ol>
+  <li><b>Kunde</b> hält diese Liste und liest „Kunde sagt“ vor – <b>nicht</b> die Lösung.</li>
+  <li><b>Bedienung</b> erledigt den Vorgang an der Kasse.</li>
+  <li>Der Kunde vergleicht mit den Schritten und der <b>Kontrolle</b> und kreuzt an: <b>Gewusst? Ja / Nein</b>.</li>
+  <li>Bei „Nein“: gemeinsam die Schritte durchgehen und die Aufgabe wiederholen.</li>
+  <li>Danach Rollen tauschen. Die Aufgaben werden von oben nach unten schwerer.</li></ol>
+  <p style="margin:4px 0 0"><b>Geübt wird in der Schulungs-Kasse</b> (Schulungs-Link bzw. QR-Code): dort zählt nichts zum Umsatz.</p></div>
+ <div class="kasten"><h3>Gut zu wissen</h3><ul>
+  <li>Glaspfand (2,00 €) kommt bei Getränken <b>von selbst</b> dazu.</li>
+  <li>Bei der halben Portion wird das Pfand <b>nie</b> halbiert.</li>
+  <li>Auf Pfand gibt es <b>nie</b> Rabatt.</li>
+  <li>Mengenknöpfe erst <b>nach</b> dem Artikel antippen.</li>
+  <li>Nach Helfer, Personal und Auszahlung erscheint ein Fenster – mit <b>Fertig</b> schließen.</li>
+  <li>„Lage“ = kein Kundensatz, sondern eine Situation am Stand.</li></ul></div>
+</div>
+<div class="namen"><div>Bedienung:</div><div>Kunde:</div><div>Datum:</div></div>
+<section class="stufe" style="--f:#15803d">
+ <h2><span class="balken"><i class="an"></i><i></i><i></i><i></i><i></i></span>Stufe 1 · Erste Verkäufe</h2>
+ <article class="aufgabe">
+  <div class="nr">1</div>
+  <div class="inhalt">
+   <div class="kunde "><span class="was">Kunde sagt</span>„Hallo, ich möchte einen Eierpunsch, bitte.“</div>
+   <ol><li>Oben die Warengruppe <b>Getränke</b> antippen.</li><li><b>Eierlikörpunsch</b> antippen.</li><li>Unten <b>BAR</b> antippen – Verkauf beendet.</li></ol>
+   <div class="kontrolle"><span>✓ Kontrolle:</span> 6,50 € = 4,50 € Punsch + 2,00 € Glaspfand. Das Pfand kommt von selbst dazu.</div>
+  </div>
+  <div class="gewusst"><div class="t">Gewusst?</div><label data-nr="1" data-w="ja"><span class="box"></span>Ja</label><label data-nr="1" data-w="nein"><span class="box"></span>Nein</label></div>
+ </article><article class="aufgabe">
+  <div class="nr">2</div>
+  <div class="inhalt">
+   <div class="kunde "><span class="was">Kunde sagt</span>„Einen weißen Glühwein, bitte.“</div>
+   <ol><li><b>Getränke</b> → <b>Glühwein weiß</b> antippen.</li><li><b>BAR</b> antippen.</li></ol>
+   <div class="kontrolle"><span>✓ Kontrolle:</span> 5,50 € (mit Glaspfand).</div>
+  </div>
+  <div class="gewusst"><div class="t">Gewusst?</div><label data-nr="2" data-w="ja"><span class="box"></span>Ja</label><label data-nr="2" data-w="nein"><span class="box"></span>Nein</label></div>
+ </article><article class="aufgabe">
+  <div class="nr">3</div>
+  <div class="inhalt">
+   <div class="kunde "><span class="was">Kunde sagt</span>„Zwei rote Glühwein, bitte.“<span class="neu">zusätzlich</span></div>
+   <ol><li><b>Glühwein rot</b> antippen.</li><li>Oben im Warenkorb die Menge <b>2</b> antippen.</li><li><b>BAR</b> antippen.</li></ol>
+   <div class="kontrolle"><span>✓ Kontrolle:</span> 11,00 €. Die Mengenknöpfe sind grau, bis ein Artikel im Warenkorb liegt – also erst den Artikel, dann die Menge.</div>
+  </div>
+  <div class="gewusst"><div class="t">Gewusst?</div><label data-nr="3" data-w="ja"><span class="box"></span>Ja</label><label data-nr="3" data-w="nein"><span class="box"></span>Nein</label></div>
+ </article>
+</section><section class="stufe" style="--f:#0369a1">
+ <h2><span class="balken"><i class="an"></i><i class="an"></i><i></i><i></i><i></i></span>Stufe 2 · Mit Pluszeichen und Kombis</h2>
+ <article class="aufgabe">
+  <div class="nr">4</div>
+  <div class="inhalt">
+   <div class="kunde "><span class="was">Kunde sagt</span>„Einen roten Glühwein mit Schuss Rum.“</div>
+   <ol><li>Auf der Kachel <b>Glühwein rot</b> das blaue <b>+</b> antippen.</li><li><b>Schuss Rum</b> antippen.</li><li><b>BAR</b> antippen.</li></ol>
+   <div class="kontrolle"><span>✓ Kontrolle:</span> 6,50 € = 3,50 € + 1,00 € Schuss + 2,00 € Pfand. Im Warenkorb steht „+ Schuss Rum“.</div>
+  </div>
+  <div class="gewusst"><div class="t">Gewusst?</div><label data-nr="4" data-w="ja"><span class="box"></span>Ja</label><label data-nr="4" data-w="nein"><span class="box"></span>Nein</label></div>
+ </article><article class="aufgabe">
+  <div class="nr">5</div>
+  <div class="inhalt">
+   <div class="kunde "><span class="was">Kunde sagt</span>„Einen Apfelpunsch mit Amaretto, bitte.“</div>
+   <ol><li>Auf <b>Apfelpunsch</b> das blaue <b>+</b> antippen.</li><li><b>Schuss Amaretto</b> antippen.</li><li><b>BAR</b> antippen.</li></ol>
+   <div class="kontrolle"><span>✓ Kontrolle:</span> 5,50 € = 2,50 € + 1,00 € + 2,00 € Pfand.</div>
+  </div>
+  <div class="gewusst"><div class="t">Gewusst?</div><label data-nr="5" data-w="ja"><span class="box"></span>Ja</label><label data-nr="5" data-w="nein"><span class="box"></span>Nein</label></div>
+ </article><article class="aufgabe">
+  <div class="nr">6</div>
+  <div class="inhalt">
+   <div class="kunde "><span class="was">Kunde sagt</span>„Einmal Grünkohl und einen roten Glühwein.“<span class="neu">zusätzlich</span></div>
+   <ol><li>Warengruppe <b>Kombi</b> antippen.</li><li><b>Grünkohl + Glühwein rot</b> antippen.</li><li><b>BAR</b> antippen.</li></ol>
+   <div class="kontrolle"><span>✓ Kontrolle:</span> 11,00 € mit Pfand. Einzeln über Getränke und Speisen kostet es dasselbe.</div>
+  </div>
+  <div class="gewusst"><div class="t">Gewusst?</div><label data-nr="6" data-w="ja"><span class="box"></span>Ja</label><label data-nr="6" data-w="nein"><span class="box"></span>Nein</label></div>
+ </article><article class="aufgabe">
+  <div class="nr">7</div>
+  <div class="inhalt">
+   <div class="kunde "><span class="was">Kunde sagt</span>„Einen Eierpunsch, einen Grünkohl und eine Mettwurst.“<span class="neu">zusätzlich</span></div>
+   <ol><li>Warengruppe <b>Kombi</b> antippen.</li><li><b>Eierlikörpunsch + Grünkohl + Mettwurst</b> antippen (die Kachel mit der Wurst vorne).</li><li><b>BAR</b> antippen.</li></ol>
+   <div class="kontrolle"><span>✓ Kontrolle:</span> 13,50 € mit Pfand.</div>
+  </div>
+  <div class="gewusst"><div class="t">Gewusst?</div><label data-nr="7" data-w="ja"><span class="box"></span>Ja</label><label data-nr="7" data-w="nein"><span class="box"></span>Nein</label></div>
+ </article>
+</section><section class="stufe" style="--f:#7c3aed">
+ <h2><span class="balken"><i class="an"></i><i class="an"></i><i class="an"></i><i></i><i></i></span>Stufe 3 · Mehrere Warengruppen, ändern und löschen</h2>
+ <article class="aufgabe">
+  <div class="nr">8</div>
+  <div class="inhalt">
+   <div class="kunde "><span class="was">Kunde sagt</span>„Einen roten Glühwein und einen Grünkohl.“</div>
+   <ol><li><b>Getränke</b> → <b>Glühwein rot</b>.</li><li><b>Speisen</b> → <b>Grünkohl</b>.</li><li><b>BAR</b> antippen.</li></ol>
+   <div class="kontrolle"><span>✓ Kontrolle:</span> 11,00 €. Beide Artikel stehen untereinander im Warenkorb.</div>
+  </div>
+  <div class="gewusst"><div class="t">Gewusst?</div><label data-nr="8" data-w="ja"><span class="box"></span>Ja</label><label data-nr="8" data-w="nein"><span class="box"></span>Nein</label></div>
+ </article><article class="aufgabe">
+  <div class="nr">9</div>
+  <div class="inhalt">
+   <div class="kunde "><span class="was">Kunde sagt</span>„Einen weißen Glühwein und eine Feuerzangenbowle … ach nein, doch keine Feuerzangenbowle.“</div>
+   <ol><li><b>Glühwein weiß</b> und <b>Feuerzangenbowle</b> antippen.</li><li>In der Zeile Feuerzangenbowle den roten <b>Papierkorb</b> antippen.</li><li>Rückfrage „Artikel stornieren“ mit <b>Bestätigen</b> beantworten.</li><li><b>BAR</b> antippen.</li></ol>
+   <div class="kontrolle"><span>✓ Kontrolle:</span> 5,50 € – nur der Glühwein weiß.</div>
+  </div>
+  <div class="gewusst"><div class="t">Gewusst?</div><label data-nr="9" data-w="ja"><span class="box"></span>Ja</label><label data-nr="9" data-w="nein"><span class="box"></span>Nein</label></div>
+ </article><article class="aufgabe">
+  <div class="nr">10</div>
+  <div class="inhalt">
+   <div class="kunde "><span class="was">Kunde sagt</span>„Einen Glühwein und einen Eierpunsch … ach, ich hab’s mir anders überlegt, ich will doch nichts.“<span class="neu">zusätzlich</span></div>
+   <ol><li>Beide Artikel antippen.</li><li>Oben am Bon den roten <b>Papierkorb</b> (Bon verwerfen) antippen.</li><li><b>Bestätigen</b>.</li></ol>
+   <div class="kontrolle"><span>✓ Kontrolle:</span> Der Warenkorb ist leer, nichts wurde gebucht.</div>
+  </div>
+  <div class="gewusst"><div class="t">Gewusst?</div><label data-nr="10" data-w="ja"><span class="box"></span>Ja</label><label data-nr="10" data-w="nein"><span class="box"></span>Nein</label></div>
+ </article><article class="aufgabe">
+  <div class="nr">11</div>
+  <div class="inhalt">
+   <div class="kunde "><span class="was">Kunde sagt</span>„Einen ganzen und einen halben roten Glühwein.“</div>
+   <ol><li><b>Glühwein rot</b> zweimal antippen (Zeile „×2“).</li><li>In der Zeile auf <b>½</b> tippen: eine Zeile wandert als „½ Glühwein rot“ darunter.</li><li><b>BAR</b> antippen.</li></ol>
+   <div class="kontrolle"><span>✓ Kontrolle:</span> 9,25 € = 5,50 € + 3,75 €. Das Pfand wird nie halbiert.</div>
+  </div>
+  <div class="gewusst"><div class="t">Gewusst?</div><label data-nr="11" data-w="ja"><span class="box"></span>Ja</label><label data-nr="11" data-w="nein"><span class="box"></span>Nein</label></div>
+ </article><article class="aufgabe">
+  <div class="nr">12</div>
+  <div class="inhalt">
+   <div class="kunde "><span class="was">Kunde sagt</span>„Wir sind drei: einen ganzen und zwei halbe Glühwein.“<span class="neu">zusätzlich</span></div>
+   <ol><li><b>Glühwein rot</b> dreimal antippen.</li><li>In der Zeile auf <b>½</b> tippen.</li><li>In der OBEREN Zeile (dort steht noch ×2) nochmal <b>½</b> tippen.</li><li><b>BAR</b> antippen.</li></ol>
+   <div class="kontrolle"><span>✓ Kontrolle:</span> 13,00 € = 5,50 € + 3,75 € + 3,75 €. Nicht ½ in einer halben Zeile tippen – das macht sie wieder ganz.</div>
+  </div>
+  <div class="gewusst"><div class="t">Gewusst?</div><label data-nr="12" data-w="ja"><span class="box"></span>Ja</label><label data-nr="12" data-w="nein"><span class="box"></span>Nein</label></div>
+ </article><article class="aufgabe">
+  <div class="nr">13</div>
+  <div class="inhalt">
+   <div class="kunde "><span class="was">Kunde sagt</span>„Eine halbe Portion Grünkohl ohne Wurst.“</div>
+   <ol><li><b>Speisen</b> → <b>Grünkohl</b> (die Kachel ohne Wurst).</li><li>In der Zeile <b>½</b> antippen.</li><li><b>BAR</b> antippen.</li></ol>
+   <div class="kontrolle"><span>✓ Kontrolle:</span> 2,75 €.</div>
+  </div>
+  <div class="gewusst"><div class="t">Gewusst?</div><label data-nr="13" data-w="ja"><span class="box"></span>Ja</label><label data-nr="13" data-w="nein"><span class="box"></span>Nein</label></div>
+ </article><article class="aufgabe">
+  <div class="nr">14</div>
+  <div class="inhalt">
+   <div class="kunde "><span class="was">Kunde sagt</span>„Eine Portion Grünkohl mit einer halben Wurst.“</div>
+   <ol><li><b>Speisen</b> → <b>Grünkohl</b> antippen.</li><li><b>Mettwurst</b> antippen.</li><li>In der Zeile Mettwurst <b>½</b> antippen.</li><li><b>BAR</b> antippen.</li></ol>
+   <div class="kontrolle"><span>✓ Kontrolle:</span> 6,25 € = 5,50 € + 0,75 €.</div>
+  </div>
+  <div class="gewusst"><div class="t">Gewusst?</div><label data-nr="14" data-w="ja"><span class="box"></span>Ja</label><label data-nr="14" data-w="nein"><span class="box"></span>Nein</label></div>
+ </article>
+</section><section class="stufe" style="--f:#b45309">
+ <h2><span class="balken"><i class="an"></i><i class="an"></i><i class="an"></i><i class="an"></i><i></i></span>Stufe 4 · Bezahlen und Rückgeld</h2>
+ <article class="aufgabe">
+  <div class="nr">15</div>
+  <div class="inhalt">
+   <div class="kunde "><span class="was">Kunde sagt</span>„Einen roten Glühwein und einen halben Grünkohl. Hier sind 20 Euro.“</div>
+   <ol><li>Artikel erfassen (Grünkohl mit <b>½</b>).</li><li><b>💶 RÜCKGELD</b> antippen – die Zahlen-Seite öffnet sich.</li><li>Den <b>20-€-Schein</b> antippen.</li><li>Rückgeld ablesen, dann <b>BAR</b> antippen.</li></ol>
+   <div class="kontrolle"><span>✓ Kontrolle:</span> Zu zahlen 8,25 €, Rückgeld 11,75 €.</div>
+  </div>
+  <div class="gewusst"><div class="t">Gewusst?</div><label data-nr="15" data-w="ja"><span class="box"></span>Ja</label><label data-nr="15" data-w="nein"><span class="box"></span>Nein</label></div>
+ </article><article class="aufgabe">
+  <div class="nr">16</div>
+  <div class="inhalt">
+   <div class="kunde "><span class="was">Kunde sagt</span>„Eierpunsch, roter Glühwein, Apfelpunsch und eine Mettwurst. Mach 20 draus.“</div>
+   <ol><li>Alles erfassen – macht 18,00 €.</li><li><b>💶 RÜCKGELD</b> → <b>AUFRUNDEN</b> antippen.</li><li><b>20,00 €</b> antippen.</li></ol>
+   <div class="kontrolle"><span>✓ Kontrolle:</span> Bon ist abgeschlossen, 2,00 € werden als Trinkgeld gebucht.</div>
+  </div>
+  <div class="gewusst"><div class="t">Gewusst?</div><label data-nr="16" data-w="ja"><span class="box"></span>Ja</label><label data-nr="16" data-w="nein"><span class="box"></span>Nein</label></div>
+ </article><article class="aufgabe">
+  <div class="nr">17</div>
+  <div class="inhalt">
+   <div class="kunde "><span class="was">Kunde sagt</span>„Eine Feuerzangenbowle. Hier sind 100 Euro … ach warte, ich hab’s passender: 2 × 50 Euro.“</div>
+   <ol><li><b>Feuerzangenbowle</b> antippen.</li><li><b>💶 RÜCKGELD</b> → <b>100-€-Schein</b> antippen.</li><li><b>↶ ZURÜCK · letzte Eingabe</b> antippen (100 € sind wieder weg).</li><li>Zweimal den <b>50-€-Schein</b> antippen, dann <b>BAR</b>.</li></ol>
+   <div class="kontrolle"><span>✓ Kontrolle:</span> Zu zahlen 9,00 €, Rückgeld 91,00 €.</div>
+  </div>
+  <div class="gewusst"><div class="t">Gewusst?</div><label data-nr="17" data-w="ja"><span class="box"></span>Ja</label><label data-nr="17" data-w="nein"><span class="box"></span>Nein</label></div>
+ </article><article class="aufgabe">
+  <div class="nr">18</div>
+  <div class="inhalt">
+   <div class="kunde "><span class="was">Kunde sagt</span>„Eine Feuerzangenbowle – hier sind 10 Euro, stimmt so.“<span class="neu">zusätzlich</span></div>
+   <ol><li><b>Feuerzangenbowle</b> antippen.</li><li><b>💶 RÜCKGELD</b> → <b>10-€-Schein</b>.</li><li><b>STIMMT SO</b> antippen.</li></ol>
+   <div class="kontrolle"><span>✓ Kontrolle:</span> Bon abgeschlossen, 1,00 € Trinkgeld, kein Rückgeld.</div>
+  </div>
+  <div class="gewusst"><div class="t">Gewusst?</div><label data-nr="18" data-w="ja"><span class="box"></span>Ja</label><label data-nr="18" data-w="nein"><span class="box"></span>Nein</label></div>
+ </article><article class="aufgabe">
+  <div class="nr">19</div>
+  <div class="inhalt">
+   <div class="kunde "><span class="was">Kunde sagt</span>„Hier sind 2 Euro – Trinkgeld für euch.“<span class="neu">zusätzlich</span></div>
+   <ol><li>Nichts im Warenkorb nötig.</li><li><b>TRINKGELD</b> antippen.</li><li><b>2,00 €</b> antippen, dann <b>Trinkgeld speichern</b>.</li></ol>
+   <div class="kontrolle"><span>✓ Kontrolle:</span> 2,00 € als Trinkgeld gebucht.</div>
+  </div>
+  <div class="gewusst"><div class="t">Gewusst?</div><label data-nr="19" data-w="ja"><span class="box"></span>Ja</label><label data-nr="19" data-w="nein"><span class="box"></span>Nein</label></div>
+ </article><article class="aufgabe">
+  <div class="nr">20</div>
+  <div class="inhalt">
+   <div class="kunde "><span class="was">Kunde sagt</span>„Kann ich mit Karte zahlen?“<span class="neu">zusätzlich</span></div>
+   <ol><li>Auf der Zahlen-Seite ist <b>EC-KARTE</b> grau.</li><li>Freundlich sagen: „Bei uns leider nur bar.“</li></ol>
+   <div class="kontrolle"><span>✓ Kontrolle:</span> Kartenzahlung ist noch nicht freigeschaltet.</div>
+  </div>
+  <div class="gewusst"><div class="t">Gewusst?</div><label data-nr="20" data-w="ja"><span class="box"></span>Ja</label><label data-nr="20" data-w="nein"><span class="box"></span>Nein</label></div>
+ </article><article class="aufgabe">
+  <div class="nr">21</div>
+  <div class="inhalt">
+   <div class="kunde "><span class="was">Kunde sagt</span>„Eine Tüte Plätzchen für 3,50 Euro.“<span class="neu">zusätzlich</span></div>
+   <ol><li>Warengruppe <b>Sonstiges</b> → <b>Freie Zahlung</b> antippen.</li><li>Auf dem Ziffernblock <b>3 , 5 0</b> und <b>OK</b> tippen.</li><li><b>BAR</b> antippen.</li></ol>
+   <div class="kontrolle"><span>✓ Kontrolle:</span> Im Warenkorb steht „Divers 3,50 €“. Für alles, was keine eigene Taste hat.</div>
+  </div>
+  <div class="gewusst"><div class="t">Gewusst?</div><label data-nr="21" data-w="ja"><span class="box"></span>Ja</label><label data-nr="21" data-w="nein"><span class="box"></span>Nein</label></div>
+ </article>
+</section><section class="stufe" style="--f:#0f766e">
+ <h2><span class="balken"><i class="an"></i><i class="an"></i><i class="an"></i><i class="an"></i><i></i></span>Stufe 5 · Pfand</h2>
+ <article class="aufgabe">
+  <div class="nr">22</div>
+  <div class="inhalt">
+   <div class="kunde "><span class="was">Kunde sagt</span>„Ich möchte ein Glas kaufen.“</div>
+   <ol><li>Warengruppe <b>Sonstiges</b> → <b>Glaspfand</b> antippen.</li><li><b>BAR</b> antippen.</li></ol>
+   <div class="kontrolle"><span>✓ Kontrolle:</span> 2,00 €. Der Kunde behält das Glas.</div>
+  </div>
+  <div class="gewusst"><div class="t">Gewusst?</div><label data-nr="22" data-w="ja"><span class="box"></span>Ja</label><label data-nr="22" data-w="nein"><span class="box"></span>Nein</label></div>
+ </article><article class="aufgabe">
+  <div class="nr">23</div>
+  <div class="inhalt">
+   <div class="kunde "><span class="was">Kunde sagt</span>„Ich möchte eine Feuerzange kaufen.“</div>
+   <ol><li><b>Sonstiges</b> → <b>Feuerzangenpfand</b> antippen.</li><li><b>BAR</b> antippen.</li></ol>
+   <div class="kontrolle"><span>✓ Kontrolle:</span> 2,00 €. Soll die Zange mehr kosten: <b>Freie Zahlung</b> mit dem Preis.</div>
+  </div>
+  <div class="gewusst"><div class="t">Gewusst?</div><label data-nr="23" data-w="ja"><span class="box"></span>Ja</label><label data-nr="23" data-w="nein"><span class="box"></span>Nein</label></div>
+ </article><article class="aufgabe">
+  <div class="nr">24</div>
+  <div class="inhalt">
+   <div class="kunde "><span class="was">Kunde sagt</span>„Ich bringe 6 Gläser zurück.“</div>
+   <ol><li><b>PFAND</b> (oder unten in Getränke) → <b>Glasrückgabe</b> antippen.</li><li>Oben die Menge <b>6</b> antippen.</li><li><b>BAR</b> antippen.</li><li>Fenster „Auszahlung 12,00 €“: Geld auszahlen, <b>Fertig</b>.</li></ol>
+   <div class="kontrolle"><span>✓ Kontrolle:</span> −12,00 € werden ausgezahlt.</div>
+  </div>
+  <div class="gewusst"><div class="t">Gewusst?</div><label data-nr="24" data-w="ja"><span class="box"></span>Ja</label><label data-nr="24" data-w="nein"><span class="box"></span>Nein</label></div>
+ </article><article class="aufgabe">
+  <div class="nr">25</div>
+  <div class="inhalt">
+   <div class="kunde "><span class="was">Kunde sagt</span>„Hier sind Glas und Feuerzange zurück.“<span class="neu">zusätzlich</span></div>
+   <ol><li><b>Glas + Feuerzange Rückgabe</b> antippen.</li><li><b>BAR</b> → 4,00 € auszahlen → <b>Fertig</b>.</li></ol>
+   <div class="kontrolle"><span>✓ Kontrolle:</span> −4,00 €.</div>
+  </div>
+  <div class="gewusst"><div class="t">Gewusst?</div><label data-nr="25" data-w="ja"><span class="box"></span>Ja</label><label data-nr="25" data-w="nein"><span class="box"></span>Nein</label></div>
+ </article><article class="aufgabe">
+  <div class="nr">26</div>
+  <div class="inhalt">
+   <div class="kunde "><span class="was">Kunde sagt</span>„Ich bringe ein Glas zurück – das Geld ist eine Spende für den Klub.“</div>
+   <ol><li><b>Glasrückgabe</b> antippen.</li><li><b>PERSONAL</b> antippen. Achtung: Bei einer Pfand-Rückgabe bucht dieser Knopf eine <b>Spende</b>.</li></ol>
+   <div class="kontrolle"><span>✓ Kontrolle:</span> 2,00 € als Spende gebucht. Kein Geld auszahlen.</div>
+  </div>
+  <div class="gewusst"><div class="t">Gewusst?</div><label data-nr="26" data-w="ja"><span class="box"></span>Ja</label><label data-nr="26" data-w="nein"><span class="box"></span>Nein</label></div>
+ </article><article class="aufgabe">
+  <div class="nr">27</div>
+  <div class="inhalt">
+   <div class="kunde "><span class="was">Kunde sagt</span>„Das Glas zurück – behaltet das Pfand als Trinkgeld.“<span class="neu">zusätzlich</span></div>
+   <ol><li><b>Glasrückgabe</b> antippen.</li><li><b>TRINKGELD</b> antippen (oder <b>🎁 BEHALTEN als Trinkgeld</b>).</li></ol>
+   <div class="kontrolle"><span>✓ Kontrolle:</span> 2,00 € als Trinkgeld gebucht. Kein Geld auszahlen.</div>
+  </div>
+  <div class="gewusst"><div class="t">Gewusst?</div><label data-nr="27" data-w="ja"><span class="box"></span>Ja</label><label data-nr="27" data-w="nein"><span class="box"></span>Nein</label></div>
+ </article>
+</section><section class="stufe" style="--f:#be123c">
+ <h2><span class="balken"><i class="an"></i><i class="an"></i><i class="an"></i><i class="an"></i><i class="an"></i></span>Stufe 6 · Rabatt, Gäste, Personal und Konto</h2>
+ <article class="aufgabe">
+  <div class="nr">28</div>
+  <div class="inhalt">
+   <div class="kunde "><span class="was">Kunde sagt</span>„Ich bin vom Stand nebenan und hab immer Rabatt bekommen: einen Glühwein und einen Grünkohl.“</div>
+   <ol><li>Beide Artikel erfassen.</li><li><b>🏷 RABATT</b> antippen.</li><li><b>MARKTBESCHICKER</b> (20 %) antippen.</li><li><b>Rabatt übernehmen</b> → <b>BAR</b>.</li></ol>
+   <div class="kontrolle"><span>✓ Kontrolle:</span> 9,20 € statt 11,00 €. Auf Pfand gibt es nie Rabatt.</div>
+  </div>
+  <div class="gewusst"><div class="t">Gewusst?</div><label data-nr="28" data-w="ja"><span class="box"></span>Ja</label><label data-nr="28" data-w="nein"><span class="box"></span>Nein</label></div>
+ </article><article class="aufgabe">
+  <div class="nr">29</div>
+  <div class="inhalt">
+   <div class="kunde lage"><span class="was">Lage</span>Ein Bekannter kommt – du möchtest ihm einen Glühwein spendieren.</div>
+   <ol><li><b>Glühwein rot</b> antippen.</li><li><b>🏷 RABATT</b> → <b>BEKANNTER</b> (100 %).</li><li><b>Rabatt übernehmen</b> → <b>BAR</b>.</li></ol>
+   <div class="kontrolle"><span>✓ Kontrolle:</span> 2,00 € – nur das Glaspfand bleibt stehen.</div>
+  </div>
+  <div class="gewusst"><div class="t">Gewusst?</div><label data-nr="29" data-w="ja"><span class="box"></span>Ja</label><label data-nr="29" data-w="nein"><span class="box"></span>Nein</label></div>
+ </article><article class="aufgabe">
+  <div class="nr">30</div>
+  <div class="inhalt">
+   <div class="kunde "><span class="was">Kunde sagt</span>„Einen Eierpunsch und einen Glühwein – ich bin Stammgast, aber nur auf den Eierpunsch.“<span class="neu">zusätzlich</span></div>
+   <ol><li>Beide Artikel erfassen.</li><li>In der Zeile Eierlikörpunsch das gelbe <b>%</b> antippen.</li><li><b>STAMMGAST</b> → <b>Rabatt übernehmen</b> → <b>BAR</b>.</li></ol>
+   <div class="kontrolle"><span>✓ Kontrolle:</span> 11,70 €. Der Rabatt gilt nur für diese Zeile.</div>
+  </div>
+  <div class="gewusst"><div class="t">Gewusst?</div><label data-nr="30" data-w="ja"><span class="box"></span>Ja</label><label data-nr="30" data-w="nein"><span class="box"></span>Nein</label></div>
+ </article><article class="aufgabe">
+  <div class="nr">31</div>
+  <div class="inhalt">
+   <div class="kunde lage"><span class="was">Lage</span>Die Band auf der Bühne soll 2 Eierpunsch gratis bekommen.</div>
+   <ol><li><b>Eierlikörpunsch</b> antippen, Menge <b>2</b>.</li><li><b>MEHR</b> → <b>🤝 Helfer</b> antippen.</li><li>Gruppe <b>Künstler</b> antippen.</li><li>Fenster mit <b>Fertig</b> schließen.</li></ol>
+   <div class="kontrolle"><span>✓ Kontrolle:</span> Wert 9,00 € gebucht. Kein Geld, kein Pfand.</div>
+  </div>
+  <div class="gewusst"><div class="t">Gewusst?</div><label data-nr="31" data-w="ja"><span class="box"></span>Ja</label><label data-nr="31" data-w="nein"><span class="box"></span>Nein</label></div>
+ </article><article class="aufgabe">
+  <div class="nr">32</div>
+  <div class="inhalt">
+   <div class="kunde "><span class="was">Kunde sagt</span>„Wir sind vom Bauhof, 8 Leute – Essen und Trinken, wir sind eure Gäste.“</div>
+   <ol><li><b>Glühwein rot</b> antippen, dann oben <b>…</b> → Feld „Andere Menge“: <b>8</b> → <b>Übernehmen</b>.</li><li><b>Speisen</b> → <b>Grünkohl + Mettwurst</b>, wieder <b>…</b> → <b>8</b> → <b>Übernehmen</b>.</li><li><b>MEHR</b> → <b>🤝 Helfer</b> → <b>Bauhof</b> → <b>Fertig</b>.</li></ol>
+   <div class="kontrolle"><span>✓ Kontrolle:</span> 84,00 € als Helfer-Verpflegung. Kein Pfand.</div>
+  </div>
+  <div class="gewusst"><div class="t">Gewusst?</div><label data-nr="32" data-w="ja"><span class="box"></span>Ja</label><label data-nr="32" data-w="nein"><span class="box"></span>Nein</label></div>
+ </article><article class="aufgabe">
+  <div class="nr">33</div>
+  <div class="inhalt">
+   <div class="kunde "><span class="was">Kunde sagt</span>„Stadtmarketing – bitte auf unser Konto: ein Grünkohl und ein Glühwein.“</div>
+   <ol><li>Beide Artikel erfassen.</li><li><b>KONTO</b> antippen, „Stadt“ ins Suchfeld tippen.</li><li><b>Stadtmarketing Werne</b> antippen.</li><li><b>AUF KONTO BUCHEN</b> → <b>Fertig</b>.</li></ol>
+   <div class="kontrolle"><span>✓ Kontrolle:</span> 11,00 € auf das Konto Stadtmarketing.</div>
+  </div>
+  <div class="gewusst"><div class="t">Gewusst?</div><label data-nr="33" data-w="ja"><span class="box"></span>Ja</label><label data-nr="33" data-w="nein"><span class="box"></span>Nein</label></div>
+ </article><article class="aufgabe">
+  <div class="nr">34</div>
+  <div class="inhalt">
+   <div class="kunde "><span class="was">Kunde sagt</span>„Stadtmarketing bringt ein Pfandglas zurück.“</div>
+   <ol><li><b>Glasrückgabe</b> antippen.</li><li><b>KONTO</b> → <b>Stadtmarketing Werne</b> → <b>AUF KONTO BUCHEN</b> → <b>Fertig</b>.</li></ol>
+   <div class="kontrolle"><span>✓ Kontrolle:</span> −2,00 € werden dem Konto gutgeschrieben. Kein Bargeld auszahlen.</div>
+  </div>
+  <div class="gewusst"><div class="t">Gewusst?</div><label data-nr="34" data-w="ja"><span class="box"></span>Ja</label><label data-nr="34" data-w="nein"><span class="box"></span>Nein</label></div>
+ </article><article class="aufgabe">
+  <div class="nr">35</div>
+  <div class="inhalt">
+   <div class="kunde lage"><span class="was">Lage</span>Du hast Feierabend: 2 Portionen Grünkohl zum Mitnehmen, eine davon mit 2 Würsten, beide im Außer-Haus-Becher.</div>
+   <ol><li><b>Speisen</b>: <b>Grünkohl</b> 2×, <b>Mettwurst</b> 2×, <b>Außer-Haus-Becher</b> 2× antippen.</li><li><b>PERSONAL</b> antippen → <b>Bestätigen</b> → <b>Fertig</b>.</li></ol>
+   <div class="kontrolle"><span>✓ Kontrolle:</span> 16,00 € als Personalverbrauch. Kein Geld, kein Pfand.</div>
+  </div>
+  <div class="gewusst"><div class="t">Gewusst?</div><label data-nr="35" data-w="ja"><span class="box"></span>Ja</label><label data-nr="35" data-w="nein"><span class="box"></span>Nein</label></div>
+ </article>
+</section><section class="stufe" style="--f:#9a3412">
+ <h2><span class="balken"><i class="an"></i><i class="an"></i><i class="an"></i><i class="an"></i><i class="an"></i></span>Stufe 7 · Fragen, ausverkauft, Reklamation</h2>
+ <article class="aufgabe">
+  <div class="nr">36</div>
+  <div class="inhalt">
+   <div class="kunde "><span class="was">Kunde sagt</span>„Sind im Glühwein Allergene drin?“</div>
+   <ol><li>Auf der Kachel <b>Glühwein rot</b> das <b>i</b> (oben links) antippen.</li><li>Unter „Allergene“ vorlesen.</li><li>Mehr: <b>Vollständige Produktinformationen</b>, dann <b>Schließen</b>.</li></ol>
+   <div class="kontrolle"><span>✓ Kontrolle:</span> „Schwefeldioxid / Sulfite: Enthalten“.</div>
+  </div>
+  <div class="gewusst"><div class="t">Gewusst?</div><label data-nr="36" data-w="ja"><span class="box"></span>Ja</label><label data-nr="36" data-w="nein"><span class="box"></span>Nein</label></div>
+ </article><article class="aufgabe">
+  <div class="nr">37</div>
+  <div class="inhalt">
+   <div class="kunde lage"><span class="was">Lage</span>Es ist 19 Uhr – der Heringsstipp ist ausverkauft.</div>
+   <ol><li><b>Speisen</b> → auf <b>Kartoffel mit Hering</b> das <b>i</b> antippen.</li><li><b>🚫 Als ausverkauft markieren</b> → <b>Alle sperren (1)</b>.</li></ol>
+   <div class="kontrolle"><span>✓ Kontrolle:</span> Die Kachel ist gesperrt. Zurücknehmen: <b>i</b> → <b>✅ Wieder verfügbar machen</b>.</div>
+  </div>
+  <div class="gewusst"><div class="t">Gewusst?</div><label data-nr="37" data-w="ja"><span class="box"></span>Ja</label><label data-nr="37" data-w="nein"><span class="box"></span>Nein</label></div>
+ </article><article class="aufgabe">
+  <div class="nr">38</div>
+  <div class="inhalt">
+   <div class="kunde "><span class="was">Kunde sagt</span>„Der Grünkohl war verbrannt – ich möchte mein Geld zurück.“</div>
+   <ol><li><b>↩ REKLAMATION</b> antippen.</li><li><b>Speisen</b> → <b>Grünkohl</b> → <b>🔥 Verbrannt</b>.</li><li><b>💶 AUSZAHLUNG</b> antippen.</li><li>Im Warenkorb steht „Reklamation · Grünkohl −5,50 €“: <b>BAR</b> → 5,50 € auszahlen → <b>Fertig</b>.</li></ol>
+   <div class="kontrolle"><span>✓ Kontrolle:</span> 5,50 € zurück. Erst mit BAR wird ausgezahlt!</div>
+  </div>
+  <div class="gewusst"><div class="t">Gewusst?</div><label data-nr="38" data-w="ja"><span class="box"></span>Ja</label><label data-nr="38" data-w="nein"><span class="box"></span>Nein</label></div>
+ </article><article class="aufgabe">
+  <div class="nr">39</div>
+  <div class="inhalt">
+   <div class="kunde "><span class="was">Kunde sagt</span>„Mein Glühwein ist kalt.“<span class="neu">zusätzlich</span></div>
+   <ol><li><b>↩ REKLAMATION</b> → <b>Getränke</b> → <b>Glühwein rot</b>.</li><li><b>🥶 Kalt ausgegeben</b> → <b>🔄 ERSATZ</b>.</li><li>Neuen Glühwein ausgeben.</li></ol>
+   <div class="kontrolle"><span>✓ Kontrolle:</span> Als kostenloser Ersatz gebucht (0,00 €).</div>
+  </div>
+  <div class="gewusst"><div class="t">Gewusst?</div><label data-nr="39" data-w="ja"><span class="box"></span>Ja</label><label data-nr="39" data-w="nein"><span class="box"></span>Nein</label></div>
+ </article>
+</section><section class="stufe" style="--f:#334155">
+ <h2><span class="balken"><i class="an"></i><i class="an"></i><i class="an"></i><i class="an"></i><i class="an"></i></span>Stufe 8 · Kasse und Geld</h2>
+ <article class="aufgabe">
+  <div class="nr">40</div>
+  <div class="inhalt">
+   <div class="kunde "><span class="was">Kunde sagt</span>„Einen Glühwein und einen Eierpunsch … oh, mein Geld liegt im Auto. Ich komme gleich wieder.“</div>
+   <ol><li>Beide Artikel erfassen.</li><li>Oben im Warenkorb <b>P</b> antippen – der Bon ist geparkt, am P steht eine 1.</li><li>Nächste Kunden ganz normal bedienen.</li><li>Kunde ist zurück: bei leerem Warenkorb <b>P</b> → <b>⬇ HOLEN</b> → <b>BAR</b>.</li></ol>
+   <div class="kontrolle"><span>✓ Kontrolle:</span> 12,00 €. Geparkte Bons nicht vergessen – die Zahl am P zeigt sie.</div>
+  </div>
+  <div class="gewusst"><div class="t">Gewusst?</div><label data-nr="40" data-w="ja"><span class="box"></span>Ja</label><label data-nr="40" data-w="nein"><span class="box"></span>Nein</label></div>
+ </article><article class="aufgabe">
+  <div class="nr">41</div>
+  <div class="inhalt">
+   <div class="kunde lage"><span class="was">Lage</span>Ein Kollege holt Bier aus der Kneipe nebenan – 20 Euro, Bon bringt er mit.</div>
+   <ol><li><b>MEHR</b> → <b>💶 Entnahme</b>.</li><li>Grund <b>GETRÄNKE PERSONAL</b> antippen.</li><li>Den <b>20-€-Schein</b> antippen.</li><li>Notiz „Bier Kneipe“, <b>BON / QUITTUNG VORHANDEN</b> antippen.</li><li><b>Entnahme speichern</b> (wird grün, sobald Grund und Betrag gewählt sind).</li></ol>
+   <div class="kontrolle"><span>✓ Kontrolle:</span> 20,00 € Entnahme mit Beleg.</div>
+  </div>
+  <div class="gewusst"><div class="t">Gewusst?</div><label data-nr="41" data-w="ja"><span class="box"></span>Ja</label><label data-nr="41" data-w="nein"><span class="box"></span>Nein</label></div>
+ </article><article class="aufgabe">
+  <div class="nr">42</div>
+  <div class="inhalt">
+   <div class="kunde lage"><span class="was">Lage</span>Getränke fürs Personal bei Aldi gekauft – 12,80 Euro, Bon ist weg.</div>
+   <ol><li><b>MEHR</b> → <b>💶 Entnahme</b> → <b>GETRÄNKE PERSONAL</b>.</li><li><b>⌨ Anderer Betrag</b> → <b>1 2 , 8 0</b> → <b>OK</b>.</li><li>Notiz „Aldi“. „Bon / Quittung vorhanden“ NICHT antippen.</li><li><b>Entnahme speichern</b>.</li></ol>
+   <div class="kontrolle"><span>✓ Kontrolle:</span> 12,80 € Entnahme ohne Beleg.</div>
+  </div>
+  <div class="gewusst"><div class="t">Gewusst?</div><label data-nr="42" data-w="ja"><span class="box"></span>Ja</label><label data-nr="42" data-w="nein"><span class="box"></span>Nein</label></div>
+ </article><article class="aufgabe">
+  <div class="nr">43</div>
+  <div class="inhalt">
+   <div class="kunde "><span class="was">Kunde sagt</span>„Kann ich noch einen Bon bekommen?“<span class="neu">zusätzlich</span></div>
+   <ol><li><b>🧾 BONDRUCK</b> antippen.</li><li>Den Bon unter „Letzte fünf Bons“ wählen und drucken.</li></ol>
+   <div class="kontrolle"><span>✓ Kontrolle:</span> Bon wird erneut gedruckt.</div>
+  </div>
+  <div class="gewusst"><div class="t">Gewusst?</div><label data-nr="43" data-w="ja"><span class="box"></span>Ja</label><label data-nr="43" data-w="nein"><span class="box"></span>Nein</label></div>
+ </article><article class="aufgabe">
+  <div class="nr">44</div>
+  <div class="inhalt">
+   <div class="kunde lage"><span class="was">Lage</span>Schichtwechsel – du übernimmst die Kasse.<span class="neu">zusätzlich</span></div>
+   <ol><li>Unten <b>Team · aktiv</b> (Bedienerknopf) antippen.</li><li>Deinen Namen antippen.</li></ol>
+   <div class="kontrolle"><span>✓ Kontrolle:</span> Ab jetzt laufen die Buchungen unter deinem Namen.</div>
+  </div>
+  <div class="gewusst"><div class="t">Gewusst?</div><label data-nr="44" data-w="ja"><span class="box"></span>Ja</label><label data-nr="44" data-w="nein"><span class="box"></span>Nein</label></div>
+ </article><article class="aufgabe">
+  <div class="nr">45</div>
+  <div class="inhalt">
+   <div class="kunde lage"><span class="was">Lage</span>Die Kasse ist abgestürzt und muss neu gestartet werden.</div>
+   <ol><li>Die Kasse neu öffnen (App bzw. Seite neu laden).</li><li><b>KASSE STARTEN</b> → Startprüfung mit <b>OK</b> bestätigen.</li><li>„Kasse entsperren“: die <b>4-stellige PIN</b> auf dem Ziffernblock tippen → <b>Entsperren</b>.</li></ol>
+   <div class="kontrolle"><span>✓ Kontrolle:</span> Nach 5 Minuten ohne Bedienung sperrt sich die Kasse auch von selbst – dann ebenfalls die PIN eingeben. Falsche PIN: „Falsche PIN.“</div>
+  </div>
+  <div class="gewusst"><div class="t">Gewusst?</div><label data-nr="45" data-w="ja"><span class="box"></span>Ja</label><label data-nr="45" data-w="nein"><span class="box"></span>Nein</label></div>
+ </article><article class="aufgabe">
+  <div class="nr">46</div>
+  <div class="inhalt">
+   <div class="kunde lage"><span class="was">Lage</span>Der Kassenwart fragt nach dem Zwischenstand.<span class="neu">zusätzlich</span></div>
+   <ol><li><b>MEHR</b> → <b>📊 X-Bericht</b>.</li><li>Ablesen, dann <b>Schließen</b>.</li></ol>
+   <div class="kontrolle"><span>✓ Kontrolle:</span> Reiner Zwischenstand – schließt die Kasse NICHT ab.</div>
+  </div>
+  <div class="gewusst"><div class="t">Gewusst?</div><label data-nr="46" data-w="ja"><span class="box"></span>Ja</label><label data-nr="46" data-w="nein"><span class="box"></span>Nein</label></div>
+ </article>
+</section>
+<div class="auswertung"><h3>Auswertung</h3>
+ <div class="zeile"><span>Gewusst <b>Ja</b>: <b class="zJa">______</b> von 46</span><span>Gewusst <b>Nein</b>: <b class="zNein">______</b></span><span>Wiederholt am: ____________</span></div>
+ <div style="font-weight:700;margin-bottom:2px">Was war schwierig? Was fehlt in der Liste?</div><div class="linie"></div><div class="linie"></div><div class="linie"></div></div>
+<script>
+(function(){var K='kc.uebungsliste.v1',st={};try{st=JSON.parse(localStorage.getItem(K)||'{}')||{}}catch(e){st={}}
+function speichern(){try{localStorage.setItem(K,JSON.stringify(st))}catch(e){}}
+function zeigen(){var ja=0,nein=0;document.querySelectorAll('.gewusst label').forEach(function(l){var an=st[l.dataset.nr]===l.dataset.w;l.classList.toggle('an',an)});
+ document.querySelectorAll('.aufgabe').forEach(function(a){var l=a.querySelector('.gewusst label');var w=l&&st[l.dataset.nr];a.classList.toggle('ok',w==='ja');a.classList.toggle('nok',w==='nein')});
+ Object.keys(st).forEach(function(k){if(st[k]==='ja')ja++;else if(st[k]==='nein')nein++});
+ document.querySelectorAll('.zJa').forEach(function(e){e.textContent=ja});document.querySelectorAll('.zNein').forEach(function(e){e.textContent=nein});document.querySelectorAll('.zOffen').forEach(function(e){e.textContent=46-ja-nein})}
+document.addEventListener('click',function(ev){var l=ev.target.closest&&ev.target.closest('.gewusst label');if(l){ev.preventDefault();st[l.dataset.nr]=st[l.dataset.nr]===l.dataset.w?undefined:l.dataset.w;if(!st[l.dataset.nr])delete st[l.dataset.nr];speichern();zeigen()}
+ if(ev.target.id==='neu'&&confirm('Alle Kreuze löschen und neu beginnen?')){st={};speichern();zeigen();window.scrollTo(0,0)}});
+zeigen()})();
+</script></body></html>

@@ -531,3 +531,13 @@ Betreiber: „Mache alle Mülleimer im Programm rot, besonders im Warenkorb.“
 * Offen (Daten, nicht Programm): Beim Eierlikörpunsch und weiteren Artikeln sind im Artikelstamm keine Allergene
   hinterlegt – bitte im PC-Manager eintragen.
 * Test: `tests/artikelinfo-allergene.test.cjs` (ohne Reparatur 8 Fehler).
+
+## Nachtrag: Übungsliste Kassen-Training (07.10.2026)
+
+* Betreiber: Liste zum Üben zu zweit – einer bedient, einer ist Kunde mit der Liste („Kunde sagt“, Lösungsschritte,
+  Ankreuzen „Gewusst ja/nein“), Schwierigkeit langsam steigend.
+* `schulung/uebungsliste/index.html` (Webseite zum Ankreuzen am Handy/Tablet, Stand bleibt im Gerät gespeichert,
+  „Neu beginnen“, druckt wie das PDF) und `schulung/uebungsliste/Kassen-Training_Uebungsliste.pdf` (A4, 7 Seiten).
+  46 Aufgaben in 8 Stufen, jede am 07.10.2026 in der Kasse (Oberfläche KC003) durchgespielt, Beträge nachgerechnet.
+* Quelle: `werkzeuge/uebungsliste/daten.js` (Aufgaben) und `bauen.cjs` (erzeugt Webseite und PDF). Nach Änderungen an
+  der Bedienung die betroffenen Schritte erneut durchspielen.
