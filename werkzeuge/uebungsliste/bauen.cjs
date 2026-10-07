@@ -52,6 +52,7 @@ const titel=`<div class="titelblatt"><img src="${HUT}" style="width:62pt" alt=""
  <li>Die <b>Bedienung</b> erledigt den Vorgang an der Kasse.</li>
  <li>Der Kunde vergleicht mit den Schritten und der <b>Kontrolle</b> und kreuzt an: <b>Gewusst? Ja / Nein</b>.</li>
  <li>Bei „Nein“ die Schritte gemeinsam durchgehen und wiederholen. Danach Rollen tauschen.</li></ol>
+ <p><b>Alleine üben:</b> Dieselben Aufgaben gibt es als <b>Karteikarten</b> – vorne die Aufgabe, hinten die Lösung. Gewusste Karten auf den Stapel <b>„Kann ich“</b>, nicht gewusste auf den Stapel <b>„Üben“</b>, dann mit dem Stapel „Üben“ weitermachen, bis er leer ist.</p>
  <p><b>Geübt wird in der Schulungs-Kasse</b> (Schulungs-Link bzw. QR-Code) – dort zählt nichts zum Umsatz. „<b>Lage</b>“ = kein Kundensatz, sondern eine Situation am Stand. <span class="ge">ZUSÄTZLICH</span> = weitere Fälle, die am Stand vorkommen können.</p></div>
 <div class="kasten"><p><b>Gut zu wissen:</b></p><ul>
  <li>Glaspfand (2,00 €) kommt bei Getränken <b>von selbst</b> dazu. Bei der halben Portion wird das Pfand <b>nie</b> halbiert, auf Pfand gibt es <b>nie</b> Rabatt.</li>
@@ -75,7 +76,7 @@ const WEB=`.leiste{position:sticky;top:0;z-index:5;display:flex;flex-wrap:wrap;g
 body{max-width:860px;margin:0 auto;padding:0 14px 40px;background:#fff}
 @media (max-width:640px){.aufgabe{grid-template-columns:24pt 1fr}.gewusst{grid-column:2;border-left:0;border-top:.8pt dashed #c9ced6;padding:5px 0 0;flex-direction:row;align-items:center;gap:18px}.namen{grid-template-columns:1fr}h2 .schwer{float:none;display:block;margin-top:0}.leiste .stand{width:100%;order:3;margin-left:0}}
 @media print{.leiste{display:none}body{max-width:none;padding:0}}`;
-const leiste=`<div class="leiste"><img src="logo.png" alt=""><span class="name">Köcheclub Werne</span><span class="stand">Gewusst: <b class="zJa">0</b> Ja · <b class="zNein">0</b> Nein · <span class="zOffen">${gesamt}</span> offen</span><a href="Kassen-Training_Uebungsliste.pdf" download>PDF</a><button type="button" id="neu">Neu beginnen</button></div>`;
+const leiste=`<div class="leiste"><img src="logo.png" alt=""><span class="name">Köcheclub Werne</span><span class="stand">Gewusst: <b class="zJa">0</b> Ja · <b class="zNein">0</b> Nein · <span class="zOffen">${gesamt}</span> offen</span><a href="Kassen-Training_Uebungsliste.pdf" download>PDF</a><a href="Kassen-Training_Karteikarten.pdf" download>Karteikarten</a><button type="button" id="neu">Neu beginnen</button></div>`;
 const skript=`<script>
 (function(){var K='kc.uebungsliste.v1',st={};try{st=JSON.parse(localStorage.getItem(K)||'{}')||{}}catch(e){st={}}
 function speichern(){try{localStorage.setItem(K,JSON.stringify(st))}catch(e){}}

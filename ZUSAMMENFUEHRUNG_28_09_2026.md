@@ -542,5 +542,9 @@ Betreiber: „Mache alle Mülleimer im Programm rot, besonders im Warenkorb.“
 * Gestaltung wie die Unterlagen in der Club-App (Kurzanleitung Bilderrechner, Club-App-Anleitung): Titelblatt mit
   Kochmütze, Kopfzeile „Köcheclub Werne“ mit Logo, Inhalt, grüne Überschriften und Nummernfelder, grüne Hinweiskästen,
   „Seite X von Y“, Schrift Carlito; PDF 9 Seiten.
+* Zweite Fassung zum Alleine-Üben (Betreiber: „Fragen auf die Vorderseite, Antworten auf die Rückseite … gewusste auf
+  einen Stapel, nicht gewusste auf einen anderen“): `schulung/uebungsliste/Kassen-Training_Karteikarten.pdf` – 46 Karten
+  95 × 130 mm, 4 je A4-Blatt mit Schnittmarken, beidseitig „an der langen Kante wenden“ (Rückseiten gespiegelt
+  angeordnet), Anleitungsseite mit Stapel-Methode und Druckhinweisen. Erzeugt mit `werkzeuge/uebungsliste/karten.cjs`.
 * Quelle: `werkzeuge/uebungsliste/daten.js` (Aufgaben) und `bauen.cjs` (erzeugt Webseite und PDF). Nach Änderungen an
   der Bedienung die betroffenen Schritte erneut durchspielen.
