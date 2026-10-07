@@ -538,6 +538,20 @@
     });
     return aus;
   }
+  /* 07.10.2026 (Betreiber): Gesamtzeile unten - Positionen, Stück, Pfand, Gesamtsumme der
+     markierten Bons (ohne Markierung: der verbundenen Bons). Pfand = automatisches/enthaltenes
+     Pfand je Artikel plus Pfand-Artikel (Warengruppe "Pfand", Rückgaben zählen negativ). */
+  function parkZusammenfassung(bons) {
+    let regel = 'automatic'; try { regel = state.master.depositRule || 'automatic'; } catch (e) { /* Standard */ }
+    const zeilen = zeilenZusammen(bons.reduce((a, e) => a.concat(e.cart || []), []));
+    let stueck = 0, pfand = 0;
+    zeilen.forEach((x) => {
+      const q = Number(x.qty || 0); stueck += q;
+      if (x.category === 'Pfand') pfand += Number(x.price || 0) * q;
+      else if (regel !== 'manual') pfand += (x.deposits || []).reduce((t, d) => t + Number(d.price || 0), 0) * q;
+    });
+    return { bons: bons.length, pos: zeilen.length, stueck, pfand: Math.round(pfand * 100) / 100, summe: Math.round(bons.reduce((t, e) => t + Number(e.summe || 0), 0) * 100) / 100 };
+  }
   function gruppeHolen(gid, anhaengen) {
     const st = kasseState(); if (!st) return false;
     const liste = geparkte(); const teil = liste.filter((x) => x.gruppe === gid); if (!teil.length) return false;
@@ -607,7 +621,12 @@
         <span class="kc-park-tasten"><button type="button" class="kc-park-holen" data-gruppe="${e.gruppe}" data-was="holen">⬇ ALLE HOLEN</button><button type="button" class="kc-park-anhaengen" data-gruppe="${e.gruppe}" data-was="anhaengen" ${voll ? '' : 'hidden'}>＋ ALLE ANHÄNGEN</button></span></div>${mit.map((x) => karte(x, true)).join('')}</div>`);
     });
     const mk = l.filter((x) => parkMarkiert.has(x.id)); const loesbar = mk.some((x) => x.gruppe);
-    const leiste = l.length > 1 ? `<div class="kc-park-leiste"><span>${mk.length ? `<b>${mk.length}</b> markiert` : 'Bons antippen zum Markieren'}</span>
+    const basis = mk.length ? mk : l.filter((x) => x.gruppe);
+    const zf = basis.length ? parkZusammenfassung(basis) : null;
+    const zeile = zf ? `<div class="kc-park-summe"><span class="kc-park-was">${mk.length ? 'Markiert' : 'Verbunden'}</span>
+      <span><small>Bons</small><b>${zf.bons}</b></span><span><small>Positionen</small><b>${zf.pos}</b></span><span><small>Stück</small><b>${String(zf.stueck).replace('.', ',')}</b></span>
+      <span><small>davon Pfand</small><b>${geld(zf.pfand)}</b></span><span class="kc-park-gesamt"><small>Gesamt</small><b>${geld(zf.summe)}</b></span></div>` : '';
+    const leiste = l.length > 1 ? `<div class="kc-park-leiste">${zeile}<span>${mk.length ? `<b>${mk.length}</b> markiert` : 'Bons antippen zum Markieren'}</span>
       <button type="button" class="kc-park-verbinden" data-aktion="verbinden" ${mk.length >= 2 ? '' : 'disabled'}>🔗 VERBINDEN</button>
       <button type="button" class="kc-park-loesen" data-aktion="loesen" ${loesbar ? '' : 'disabled'}>✂ LÖSEN</button>${mk.length ? '<button type="button" class="kc-park-ab" data-aktion="ab">✕</button>' : ''}</div>` : '';
     $('.kc-park-liste', parkEbene).innerHTML = (l.length ? teile.join('') : '<div class="kc-park-leer">Keine geparkten Bons.</div>') + `<div class="kc-park-hinweis">${voll ? 'Der Warenkorb ist nicht leer - „Anhängen" fügt die Positionen dazu, „Holen" geht nur bei leerem Warenkorb.' : ''}</div>` + leiste;

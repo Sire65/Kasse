@@ -564,5 +564,9 @@ gezählt. In der Liste „Geparkte Bons" (blaues/rotes P) jetzt:
 - Verbindung überlebt Neuladen (gleicher Speicher wie das Parken). Einzelnen Bon löschen oder
   einzeln holen: der Rest bleibt verbunden; bleibt nur einer übrig, ist es keine Gruppe mehr.
 
-Dateien: `kc-oberflaechen-anwenden.js` 0.9.12, `kc-oberflaechen-anwenden.css` 0.9.22 (pos und
+- **Gesamtzeile unten** (Wunsch Betreiber): Bons · Positionen · Stück · davon Pfand · **Gesamt** –
+  für die markierten Bons, ohne Markierung für alle verbundenen. Gleiche Artikel zählen als eine Position;
+  Pfand = Pfand je Artikel (automatisch/enthalten) plus Pfand-Artikel, Rückgaben negativ.
+
+Dateien: `kc-oberflaechen-anwenden.js` 0.9.13, `kc-oberflaechen-anwenden.css` 0.9.23 (pos und
 schulung/pos), Buildnummern in index.html und service-worker.js. Test: `tests/park-verbinden.test.cjs`.

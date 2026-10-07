@@ -11,14 +11,20 @@ for (const pfad of ['pos/kc-oberflaechen-anwenden.js', 'schulung/pos/kc-oberflae
   const z = (key, qty, extra) => Object.assign({ key, qty, price: 2, portionFactor: 1, option: null }, extra || {});
   const r = zz([z('rum', 2), z('rum', 1), z('ama', 1), z('rum', 1, { price: 1, portionFactor: 0.5 }), z('ama', 1, { positionDiscount: { percent: 10 } })]);
   assert.deepStrictEqual(r.map((x) => [x.key, x.qty]), [['rum', 3], ['ama', 1], ['rum~2', 1], ['ama~2', 1]]);
+  // Gesamtzeile: Bons, Positionen (zusammengelegt), Stück, Pfand (automatisch + Pfand-Artikel), Gesamtsumme
+  const f0 = s.indexOf('function parkZusammenfassung(bons)'), f1 = s.indexOf('\n  }\n', f0) + 4;
+  const zf = new Function('zeilenZusammen', 'state', 'return ' + s.slice(f0, f1))(zz, { master: { depositRule: 'automatic' } });
+  const gw = (qty) => z('gw', qty, { price: 4, deposits: [{ price: 2 }] });
+  assert.deepStrictEqual(zf([{ summe: 12, cart: [gw(2)] }, { summe: 6, cart: [gw(1)] }, { summe: -2, cart: [z('rueck', 1, { price: -2, category: 'Pfand' })] }]),
+    { bons: 3, pos: 2, stueck: 4, pfand: 4, summe: 16 });
   const g = s.indexOf('function gruppenBereinigen(liste)'), h = s.indexOf('\n  }\n', g) + 4;
   const gb = new Function('return ' + s.slice(g, h))();
   assert.deepStrictEqual(gb([{ id: 1, gruppe: 'g1' }, { id: 2 }]).map((x) => x.gruppe), [undefined, undefined], 'Gruppe mit einem Bon ist keine Gruppe');
 }
 for (const pfad of ['pos/kc-oberflaechen-anwenden.css', 'schulung/pos/kc-oberflaechen-anwenden.css'])
-  assert(fs.readFileSync(pfad, 'utf8').includes('.kc-park-gruppe'), pfad + ': Gruppen-Rahmen fehlt');
+  { const c = fs.readFileSync(pfad, 'utf8'); assert(c.includes('.kc-park-gruppe') && c.includes('.kc-park-summe'), pfad + ': Gruppen-Rahmen/Gesamtzeile fehlt'); }
 for (const pfad of ['pos/index.html', 'schulung/pos/index.html', 'pos/service-worker.js', 'schulung/pos/service-worker.js']) {
   const s = fs.readFileSync(pfad, 'utf8');
-  assert(s.includes('kc-oberflaechen-anwenden.js?build=0.9.12') && s.includes('kc-oberflaechen-anwenden.css?build=0.9.22'), pfad + ': Buildnummer nicht erhöht');
+  assert(s.includes('kc-oberflaechen-anwenden.js?build=0.9.13') && s.includes('kc-oberflaechen-anwenden.css?build=0.9.23'), pfad + ': Buildnummer nicht erhöht');
 }
 console.log('park-verbinden: ok');
