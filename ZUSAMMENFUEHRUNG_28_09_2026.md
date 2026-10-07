@@ -570,3 +570,16 @@ gezählt. In der Liste „Geparkte Bons" (blaues/rotes P) jetzt:
 
 Dateien: `kc-oberflaechen-anwenden.js` 0.9.13, `kc-oberflaechen-anwenden.css` 0.9.23 (pos und
 schulung/pos), Buildnummern in index.html und service-worker.js. Test: `tests/park-verbinden.test.cjs`.
+
+## Nachtrag 07.10.2026 – halbe Portionen fest (Kasse und Schulung, app.js r53)
+
+Wunsch Betreiber: „3 Glühwein, 2 wollen einen halben: oben zweimal ½ – dann stehen zwei eigene Zeilen mit 0,5.
+Dort sind Plus/Minus gesperrt. Will der Kunde doch einen ganzen, geht das über den Mülleimer.“
+
+- ½-Zeilen stehen fest auf 0,5: **+ / −** in der Zeile, die Mengenknöpfe unten und „andere Menge“ sind gesperrt
+  (Hinweis: „½ Portion steht fest auf 0,5 – für eine ganze Portion den Mülleimer 🗑 antippen“).
+- **🗑 auf einer ½-Zeile** fragt „½ Portion auflösen“ und legt den halben wieder zur ganzen Zeile zurück
+  (z. B. 1× ganz + 2× ½ → 2× ganz + 1× ½). Gibt es keine ganze Zeile, wird die Zeile selbst wieder ganz.
+  Soll der Artikel ganz weg: danach bei der ganzen Zeile −.
+- **½ nochmal** auf einer ½-Zeile wirkt genauso (auflösen statt einer zweiten ganzen Zeile).
+- Test: `tests/halbe-portion-sperre.test.cjs`. Für Übungsliste/Karteikarten: Aufgaben mit halber Portion prüfen.

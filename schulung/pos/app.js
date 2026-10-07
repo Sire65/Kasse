@@ -1372,6 +1372,8 @@ function toggleSelectedHalfPortion(){
     state.cart.splice(state.cart.indexOf(item)+1,0,half);
     if(globalRabattAufZeile&&!state.discount.keys.includes(half.key))state.discount.keys.push(half.key);
     state.selectedCartKey=half.key;
+  }else if(isHalf){
+    return halbeAufloesen(state.cart.indexOf(item));
   }else{
     item.normalPrice=Number(item.normalPrice||item.price);
     item.portionFactor=isHalf?1:0.5;
@@ -1383,11 +1385,31 @@ function toggleSelectedHalfPortion(){
   renderCart();setSystemHint(`${item.name}: ${isHalf?"ganze":"½"} Portion gewählt`,"ok");
 }
 window.KCToggleHalfPortion=toggleSelectedHalfPortion;
+/* 07.10.2026 (Betreiber): "3 Glühwein, 2 wollen einen halben - oben zweimal ½, dann stehen
+   zwei eigene Zeilen mit je ½. Dort sind + und − gesperrt. Will der Kunde doch einen ganzen,
+   geht das über den Mülleimer: der halbe wird wieder aufgelöst."
+   Eine ½-Zeile steht fest auf 0,5 (intern 1 Stück zum halben Preis). Auflösen (🗑 oder ½ nochmal auf der halben Zeile) legt
+   sie zur passenden ganzen Zeile zurück (Menge +1); gibt es keine, wird die Zeile selbst wieder
+   zur ganzen Portion. Ganz streichen: danach bei der ganzen Zeile −. */
+function istHalbeZeile(x){return Number(x?.portionFactor||1)===0.5}
+var HALB_GESPERRT="½ Portion steht fest auf 0,5 – für eine ganze Portion den Mülleimer 🗑 antippen (löst den halben auf)";
+function halbeAufloesen(i){
+  const item=state.cart[i];if(!item||!istHalbeZeile(item))return;
+  const alterKey=item.key,teil=x=>`${x.id}|${x.option?.id||"base"}|${x.offerId||"normal"}`;
+  const ganz=state.cart.find(x=>x!==item&&teil(x)===teil(item)&&!istHalbeZeile(x)&&!x.positionDiscount&&!x.lockedQuantity);
+  rememberQuantityChange(ganz||item);
+  if(ganz&&!item.positionDiscount){ganz.qty=Number(ganz.qty||0)+1;state.cart.splice(i,1);state.selectedCartKey=ganz.key;
+    if(Array.isArray(state.discount?.keys))state.discount.keys=state.discount.keys.filter(k=>k!==alterKey)}
+  else{item.portionFactor=1;item.price=Number(item.normalPrice||item.price);item.qty=1;
+    item.key=`${item.id}:${item.option?.id||"base"}:${item.offerId||"normal"}:full:${crypto.randomUUID()}`;state.selectedCartKey=item.key;
+    if(Array.isArray(state.discount?.keys))state.discount.keys=state.discount.keys.map(k=>k===alterKey?item.key:k)}
+  renderCart();notify("info",`${item.name}: wieder ganze Portion${ganz&&!item.positionDiscount?` – jetzt ${ganz.qty}×`:""}`,`halb:${alterKey}`);
+}
 function syncCartQuantityBar(){
   const item=selectedCartItem(),buttons=document.querySelectorAll("[data-cart-qty]"),more=el("moreQuantityBtn");
-  buttons.forEach(button=>{button.disabled=!item;button.classList.toggle("active",!!item&&Number(button.dataset.cartQty)===item.qty)});
+  buttons.forEach(button=>{button.disabled=!item||istHalbeZeile(item);button.classList.toggle("active",!!item&&Number(button.dataset.cartQty)===item.qty)});
   if(more){
-    more.disabled=!item;
+    more.disabled=!item||istHalbeZeile(item);
     const overflow=!!item&&Number(item.qty)>7;
     more.classList.toggle("quantity-overflow-active",overflow);
     more.dataset.currentQty=overflow?String(item.qty):"";
@@ -1410,7 +1432,7 @@ function showExactCashSettlementNotice({due,received,tip}){
   if(paymentState){paymentState.textContent=tip>0?`${money(tip)} ALS TRINKGELD VERBUCHT`:"PASSEND BEZAHLT · KEIN RÜCKGELD";paymentState.classList.add("direct-settlement")}
 }
 
-function renderCart(){const list=el("cartList");if(state.cart.length)setCartNotice("Einkaufswagen geöffnet","info");if(!state.cart.length){state.selectedCartKey=null;resetDiscount();list.innerHTML='<div class="cart-empty">Artikel antippen oder Barcode scannen.</div>'}else{if(!selectedCartItem())state.selectedCartKey=state.cart[state.cart.length-1].key;list.innerHTML=state.cart.map((x,i)=>`<div class="cart-row ${x.key===state.selectedCartKey?"selected":""}" data-cart-index="${i}" tabindex="0" aria-label="${x.name}, Menge ${x.qty}"><img class="cart-thumb" src="${x.image}" alt=""><div class="cart-name"><strong>${Number(x.portionFactor||1)===0.5?"½ ":""}${x.name}</strong>${Number(x.portionFactor||1)===0.5?`<small class="cart-option">½ Portion</small>`:""}${x.option&&x.option.id!=="none"&&x.option.id!=="ohne"?`<small class="cart-option">+ ${x.option.name} (${money(x.option.price)})</small>`:""}${x.option&&(x.option.id==="kartoffeldip")?`<small class="cart-option">mit ${x.option.name}</small>`:""}${x.deposits.length?`<small class="cart-deposit">${x.deposits.map(d=>`${d.name} ${money(d.price)}`).join(" · ")} <span class="rule-chip">${state.master.depositRule==="automatic"?"extra":"inkl."}</span></small>`:""}<small>${money(lineUnit(x))} / Stk.</small>${x.positionDiscount?.percent?`<small class="cart-position-discount">Pos.-Rabatt ${Number(x.positionDiscount.percent).toLocaleString("de-DE")} % · − ${money(positionDiscountAmount(x))}</small>`:""}</div><div class="half-portion-cell">${halbePortionMoeglich(x)?`<button type="button" class="half-portion-button ${Number(x.portionFactor||1)===0.5?"active":""}" data-a="half" data-i="${i}" title="${Number(x.portionFactor||1)===0.5?`Zurück auf ganze Portion`:`½ Portion für ${x.name}`}" aria-label="Halbe Portion">½</button>`:""}</div><button class="position-discount-button ${x.positionDiscount?.percent?"active":""}" data-pos-discount="${i}" title="Positionsrabatt für ${x.name}">${x.positionDiscount?.percent?`${Number(x.positionDiscount.percent).toLocaleString("de-DE")} % Pos.`:"POS. RABATT"}</button><div class="qty-box"><button data-a="minus" data-i="${i}" ${x.lockedQuantity?"disabled":""}>−</button><span>${mengeAnzeige(x)}</span><button data-a="plus" data-i="${i}" ${x.lockedQuantity?"disabled":""}>+</button></div><div class="row-total ${lineUnit(x)<0?"negative":""} cart-line-price ${x.positionDiscount?.percent?"has-discount":"no-discount"}">${x.positionDiscount?.percent?`<small class="original-price">${money((lineUnit(x)+(state.master.depositRule==="automatic"?x.deposits.reduce((a,d)=>a+d.price,0):0))*x.qty)}</small><strong class="net-price">${signedMoney(fromCents(toCents((lineUnit(x)+(state.master.depositRule==="automatic"?x.deposits.reduce((a,d)=>a+d.price,0):0))*x.qty)-toCents(positionDiscountAmount(x))))}</strong>`:`<strong class="net-price">${signedMoney((lineUnit(x)+(state.master.depositRule==="automatic"?x.deposits.reduce((a,d)=>a+d.price,0):0))*x.qty)}</strong>`}</div><button class="delete-row" data-a="delete" data-i="${i}" title="Artikel stornieren">🗑</button></div>`).join("");list.querySelectorAll(".cart-row").forEach(row=>{row.onclick=()=>selectCartRow(+row.dataset.cartIndex);row.onkeydown=event=>{if(event.key==="Enter"||event.key===" "){event.preventDefault();selectCartRow(+row.dataset.cartIndex)}}});list.querySelectorAll("button").forEach(button=>button.onclick=event=>{
+function renderCart(){const list=el("cartList");if(state.cart.length)setCartNotice("Einkaufswagen geöffnet","info");if(!state.cart.length){state.selectedCartKey=null;resetDiscount();list.innerHTML='<div class="cart-empty">Artikel antippen oder Barcode scannen.</div>'}else{if(!selectedCartItem())state.selectedCartKey=state.cart[state.cart.length-1].key;list.innerHTML=state.cart.map((x,i)=>`<div class="cart-row ${x.key===state.selectedCartKey?"selected":""}" data-cart-index="${i}" tabindex="0" aria-label="${x.name}, Menge ${x.qty}"><img class="cart-thumb" src="${x.image}" alt=""><div class="cart-name"><strong>${Number(x.portionFactor||1)===0.5?"½ ":""}${x.name}</strong>${Number(x.portionFactor||1)===0.5?`<small class="cart-option">½ Portion</small>`:""}${x.option&&x.option.id!=="none"&&x.option.id!=="ohne"?`<small class="cart-option">+ ${x.option.name} (${money(x.option.price)})</small>`:""}${x.option&&(x.option.id==="kartoffeldip")?`<small class="cart-option">mit ${x.option.name}</small>`:""}${x.deposits.length?`<small class="cart-deposit">${x.deposits.map(d=>`${d.name} ${money(d.price)}`).join(" · ")} <span class="rule-chip">${state.master.depositRule==="automatic"?"extra":"inkl."}</span></small>`:""}<small>${money(lineUnit(x))} / Stk.</small>${x.positionDiscount?.percent?`<small class="cart-position-discount">Pos.-Rabatt ${Number(x.positionDiscount.percent).toLocaleString("de-DE")} % · − ${money(positionDiscountAmount(x))}</small>`:""}</div><div class="half-portion-cell">${halbePortionMoeglich(x)?`<button type="button" class="half-portion-button ${Number(x.portionFactor||1)===0.5?"active":""}" data-a="half" data-i="${i}" title="${Number(x.portionFactor||1)===0.5?`Zurück auf ganze Portion`:`½ Portion für ${x.name}`}" aria-label="Halbe Portion">½</button>`:""}</div><button class="position-discount-button ${x.positionDiscount?.percent?"active":""}" data-pos-discount="${i}" title="Positionsrabatt für ${x.name}">${x.positionDiscount?.percent?`${Number(x.positionDiscount.percent).toLocaleString("de-DE")} % Pos.`:"POS. RABATT"}</button><div class="qty-box"><button data-a="minus" data-i="${i}" ${x.lockedQuantity||istHalbeZeile(x)?"disabled":""}>−</button><span>${mengeAnzeige(x)}</span><button data-a="plus" data-i="${i}" ${x.lockedQuantity||istHalbeZeile(x)?"disabled":""}>+</button></div><div class="row-total ${lineUnit(x)<0?"negative":""} cart-line-price ${x.positionDiscount?.percent?"has-discount":"no-discount"}">${x.positionDiscount?.percent?`<small class="original-price">${money((lineUnit(x)+(state.master.depositRule==="automatic"?x.deposits.reduce((a,d)=>a+d.price,0):0))*x.qty)}</small><strong class="net-price">${signedMoney(fromCents(toCents((lineUnit(x)+(state.master.depositRule==="automatic"?x.deposits.reduce((a,d)=>a+d.price,0):0))*x.qty)-toCents(positionDiscountAmount(x))))}</strong>`:`<strong class="net-price">${signedMoney((lineUnit(x)+(state.master.depositRule==="automatic"?x.deposits.reduce((a,d)=>a+d.price,0):0))*x.qty)}</strong>`}</div><button class="delete-row" data-a="delete" data-i="${i}" title="Artikel stornieren">🗑</button></div>`).join("");list.querySelectorAll(".cart-row").forEach(row=>{row.onclick=()=>selectCartRow(+row.dataset.cartIndex);row.onkeydown=event=>{if(event.key==="Enter"||event.key===" "){event.preventDefault();selectCartRow(+row.dataset.cartIndex)}}});list.querySelectorAll("button").forEach(button=>button.onclick=event=>{
   event.stopPropagation();
   if(button.dataset.posDiscount!==undefined){
     const index=Number(button.dataset.posDiscount);
@@ -1467,6 +1489,8 @@ function cartAction(a,i){
      So lassen sich gemischte Bons tippen - ein halber und ein ganzer Gluehwein. */
   if(a==="half"){state.selectedCartKey=item.key;toggleSelectedHalfPortion();return}
   if((a==="plus"||a==="minus")&&item.lockedQuantity)return setSystemHint("Reklamationspositionen werden im Reklamationsdialog geändert","warn");
+  if((a==="plus"||a==="minus")&&istHalbeZeile(item))return setSystemHint(HALB_GESPERRT,"warn");
+  if(a==="delete"&&istHalbeZeile(item)){askConfirm("½ Portion auflösen",`½ ${item.name} wieder zu einer ganzen Portion machen? (Soll er ganz weg: danach bei der ganzen Zeile − antippen.)`,()=>halbeAufloesen(state.cart.indexOf(item)));return}
   if(a==="plus"){rememberQuantityChange(item);item.qty++;notify("info",`${item.name} – Menge auf ${item.qty} erhöht`,`qty:${item.key}`)}
   if(a==="minus"){rememberQuantityChange(item);item.qty=Math.max(0,item.qty-1);notify("info",`${item.name} – Menge auf ${item.qty} geändert`,`qty:${item.key}`)}
   if(a==="delete"){askConfirm("Artikel stornieren",`${item.name} aus dem Bon entfernen?`,()=>{const removedKey=item.key;state.cart.splice(i,1);if(Array.isArray(state.discount?.keys)&&state.discount.keys.includes(removedKey)){state.discount.keys=state.discount.keys.filter(key=>key!==removedKey);if(!state.discount.keys.length)resetDiscount()}notify("warning",`${item.name} wurde aus dem Einkaufswagen entfernt`,`remove:${removedKey}`);if(state.selectedCartKey===removedKey)state.selectedCartKey=state.cart[Math.min(i,state.cart.length-1)]?.key||null;renderCart()});return}
@@ -4433,7 +4457,7 @@ function setTrainingMode(active){if(active&&state.master.rushMode){setSystemHint
 el("trainingModeBtn").onclick=()=>setTrainingMode(!state.master.trainingMode);
 el("trainingModeTopBtn").onclick=()=>setTrainingMode(!state.master.trainingMode);
 el("exitTrainingModeBtn")?.addEventListener("click",()=>setTrainingMode(false));
-function openSelectedQuantity(){const item=selectedCartItem();if(!item)return setSystemHint("Zuerst eine Einkaufswagenzeile antippen","warn");el("quantityArticleName").textContent=item.name;el("customQuantity").value=item.qty;el("quantityDialog").showModal()}
+function openSelectedQuantity(){const item=selectedCartItem();if(!item)return setSystemHint("Zuerst eine Einkaufswagenzeile antippen","warn");if(istHalbeZeile(item))return setSystemHint(HALB_GESPERRT,"warn");el("quantityArticleName").textContent=item.name;el("customQuantity").value=item.qty;el("quantityDialog").showModal()}
 el("moreQuantityBtn").onclick=openSelectedQuantity;
 el("undoQuantityBtn").onclick=undoQuantityChange;
 let quickQuantityKey=null;
@@ -4441,6 +4465,7 @@ let quickQuantityLastAt=0;
 function applyQuantity(q){
   const item=selectedCartItem();
   if(!item)return;
+  if(istHalbeZeile(item))return setSystemHint(HALB_GESPERRT,"warn");
   rememberQuantityChange(item);
   item.qty=Math.max(1,Number(q)||1);
   quickQuantityKey=null;
@@ -4450,6 +4475,7 @@ function applyQuantity(q){
 function applyQuickQuantity(q){
   const item=selectedCartItem();
   if(!item)return;
+  if(istHalbeZeile(item))return setSystemHint(HALB_GESPERRT,"warn");
   const value=Math.max(1,Number(q)||1);
   const now=Date.now();
   rememberQuantityChange(item);
