@@ -38,7 +38,7 @@
     global.saveTransactions(zeilen);
     const speicher = global.KCTransactionStore;
     if (speicher && typeof speicher.replaceAll === 'function') {
-      try { await speicher.replaceAll(speicher.STORE_SALES, zeilen); }
+      try { await speicher.replaceAll(speicher.STORE_SALES, zeilen, {loeschen: true}); }
       catch (e) { throw new Error('Die Buchungen liessen sich nicht dauerhaft speichern: ' + e.message); }
     }
     return true;

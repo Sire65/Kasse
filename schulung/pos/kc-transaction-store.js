@@ -158,27 +158,71 @@
     return ohneKette.concat(kette);
   }
 
+  // 08.10.2026 (Gesamtpruefung, nachgestellt): EIN nicht lesbarer Verkauf (verschluesselt, Startkarte
+  // noch nicht eingelesen) liess bisher das ganze Laden scheitern - der Zwischenspeicher blieb leer,
+  // und der naechste Verkauf schrieb "alles neu" = loeschte den kompletten Bestand.
+  // JETZT: nicht lesbare Zeilen werden nur gemerkt (gesperrt) und bleiben in der Datenbank
+  // unangetastet; sobald die Karte da ist, laedt die Kasse sie nach (kc-security-card-pos.js).
+  const gesperrt = new Map();     // storeName -> Set(transactionId) der noch nicht lesbaren Zeilen
+  const geschrieben = new Map();  // storeName -> Map(transactionId -> {row, enc}) zuletzt gespeicherter Stand
+  const fuer = (karte, storeName, neu) => { if (!karte.has(storeName)) karte.set(storeName, neu()); return karte.get(storeName); };
+  function gesperrteAnzahl(storeName) {
+    if (storeName) return fuer(gesperrt, storeName, () => new Set()).size;
+    let n = 0; gesperrt.forEach((set) => { n += set.size; }); return n;
+  }
   function getAll(storeName) {
     return openDb().then((db) => new Promise((resolve, reject) => {
       const tx = db.transaction(storeName, 'readonly');
       const req = tx.objectStore(storeName).getAll();
       req.onsuccess = () => resolve(req.result || []);
       req.onerror = () => reject(req.error);
-    })).then((rows) => Promise.all(rows.map(entschluesseleZeile))).then(inBuchungsreihenfolge);
+    })).then(async (rows) => {
+      const zu = fuer(gesperrt, storeName, () => new Set()), stand = fuer(geschrieben, storeName, () => new Map());
+      zu.clear();
+      const lesbar = [];
+      for (const roh of rows) {
+        try {
+          const row = await entschluesseleZeile(roh);
+          lesbar.push(row);
+          if (row?.transactionId) stand.set(row.transactionId, {row, enc: !!roh?.kcEnc});
+        } catch (e) {
+          if (roh?.transactionId) zu.add(roh.transactionId);
+        }
+      }
+      return inBuchungsreihenfolge(lesbar);
+    });
   }
 
   // Ersetzt den GESAMTEN Inhalt eines Speichers - entspricht exakt dem bisherigen Verhalten von
   // localStorage.setItem(key, JSON.stringify(rows)) (die aufrufenden Stellen übergeben immer
   // das vollständige, bereits aktualisierte Array), nur dauerhaft und transaktional statt als
   // einzelner Blob.
-  async function performReplaceAll(storeName, rows) {
-    const verschluesselt = await Promise.all(rows.map(verschluesseleZeile));
+  // 08.10.2026: OHNE clear() und ohne jedes Mal alles neu zu verschluesseln: geschrieben werden nur
+  // neue/geaenderte Zeilen (bisher ~3 s je Bon bei 3000 Vorgaengen, Rueckstau im Andrang).
+  // Geloescht wird im normalen Betrieb NIE (die Kasse haengt Verkaeufe nur an, Storno ist ein neuer
+  // Gegenbon). Nur ausdrueckliches Ersetzen (Backup zuruecksichern, Vorfuehrdaten entfernen) loescht,
+  // was in rows fehlt - und auch dann nie eine gesperrte (noch nicht lesbare) Zeile.
+  async function performReplaceAll(storeName, rows, loeschen) {
+    const stand = fuer(geschrieben, storeName, () => new Map()), zu = fuer(gesperrt, storeName, () => new Set());
+    const mitSchluessel = !!kartenSchluessel();
+    const liste = (Array.isArray(rows) ? rows : []).filter((r) => r && r.transactionId);
+    const neu = liste.filter((r) => { const alt = stand.get(r.transactionId); return !alt || alt.row !== r || (mitSchluessel && !alt.enc); });
+    const verschluesselt = await Promise.all(neu.map(verschluesseleZeile));
+    const soll = new Set(liste.map((r) => r.transactionId));
     return openDb().then((db) => new Promise((resolve, reject) => {
       const tx = db.transaction(storeName, 'readwrite');
       const store = tx.objectStore(storeName);
-      store.clear();
-      verschluesselt.forEach((row) => store.put(row));
-      tx.oncomplete = () => resolve();
+      const weg = [];
+      const keys = store.getAllKeys();
+      keys.onsuccess = () => {
+        if (loeschen) (keys.result || []).forEach((k) => { if (!soll.has(k) && !zu.has(k)) { store.delete(k); weg.push(k); } });
+        verschluesselt.forEach((row) => store.put(row));
+      };
+      tx.oncomplete = () => {
+        neu.forEach((r, i) => { stand.set(r.transactionId, {row: r, enc: !!verschluesselt[i]?.kcEnc}); zu.delete(r.transactionId); });
+        weg.forEach((k) => stand.delete(k));
+        resolve();
+      };
       tx.onerror = () => reject(tx.error);
       tx.onabort = () => reject(tx.error || new Error('Speichervorgang abgebrochen'));
     }));
@@ -191,9 +235,19 @@
   // des vorherigen, bevor er selbst startet - die Bon-Freigabe selbst wartet weiterhin auf
   // nichts davon, das betrifft nur die Reihenfolge der Hintergrund-Schreibvorgänge untereinander.
   const writeQueues = new Map();
-  function replaceAll(storeName, rows) {
+  // 08.10.2026: Rueckstau zusammenfassen - wartet schon ein neuerer Stand, wird ein aelterer nicht
+  // mehr geschrieben (der neuere enthaelt ihn vollstaendig).
+  const neuesterAuftrag = new Map(), loeschenOffen = new Map();
+  function replaceAll(storeName, rows, optionen) {
+    const nummer = (neuesterAuftrag.get(storeName) || 0) + 1;
+    neuesterAuftrag.set(storeName, nummer);
+    if (optionen?.loeschen) loeschenOffen.set(storeName, true);   // geht beim Zusammenfassen nicht verloren
     const previous = writeQueues.get(storeName) || Promise.resolve();
-    const next = previous.catch(() => {}).then(() => performReplaceAll(storeName, rows));
+    const next = previous.catch(() => {}).then(() => {
+      if (neuesterAuftrag.get(storeName) !== nummer) return undefined;
+      const loeschen = !!loeschenOffen.get(storeName); loeschenOffen.delete(storeName);
+      return performReplaceAll(storeName, rows, loeschen);
+    });
     writeQueues.set(storeName, next);
     const cleanup = () => { if (writeQueues.get(storeName) === next) writeQueues.delete(storeName); };
     next.then(cleanup, cleanup);
@@ -247,5 +301,5 @@
     return status;
   }
 
-  global.KCTransactionStore = { openDb, getAll, replaceAll, mergeRows, reconcile, requestPersistence, inBuchungsreihenfolge, STORE_SALES, STORE_TRAINING };
+  global.KCTransactionStore = { openDb, getAll, replaceAll, mergeRows, reconcile, gesperrteAnzahl, requestPersistence, inBuchungsreihenfolge, STORE_SALES, STORE_TRAINING };
 })(window);

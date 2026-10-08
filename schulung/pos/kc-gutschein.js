@@ -104,8 +104,29 @@
   setInterval(melden, 60000);
   setTimeout(melden, 8000);
 
+  // Storno: Guthaben wieder gutschreiben (hoechstens bis zum Ausgabebetrag) und mitschreiben.
+  function gutschreiben(code, betrag, angaben) {
+    const liste = lies();
+    const g = liste.find((x) => x.code.toUpperCase() === String(code || '').trim().toUpperCase());
+    if (!g || !(betrag > 0)) return {ok: false};
+    const zurueck = Math.min(+Number(betrag).toFixed(2), +(g.amount - g.balance).toFixed(2));
+    if (zurueck <= 0) return {ok: false};
+    g.balance = +(g.balance + zurueck).toFixed(2);
+    g.redemptions.push({at: new Date().toISOString(), amount: -zurueck, storno: true,
+      registerId: global.KCSyncConnection?.config?.registerId || '', bon: angaben?.bon || '', originalBon: angaben?.originalBon || ''});
+    schreib(liste);
+    setTimeout(() => global.KCGutschein?.melden?.(), 200);
+    return {ok: true, zurueck, rest: g.balance};
+  }
+  // Vollzahlung per Gutschein: der Bon kennt den Code nicht, die Einloesung kennt den Bon.
+  function gutschreibenFuerBon(bon, angaben) {
+    if (!bon) return;
+    lies().forEach((g) => g.redemptions.filter((r) => r.bon === bon && r.amount > 0)
+      .forEach((r) => gutschreiben(g.code, r.amount, {bon: angaben?.bon || '', originalBon: bon})));
+  }
+
   global.KCGutschein = {
-    ausstellen, einloesen, finde, alle: lies, zustand, ZUSTAND_TEXT, melden,
+    ausstellen, einloesen, gutschreiben, gutschreibenFuerBon, finde, alle: lies, zustand, ZUSTAND_TEXT, melden,
     BETRAEGE, GUELTIG_JAHRE, abgelaufen,
     // Offene Verpflichtungen: Summe aller Restwerte. Das ist KEIN Gewinn, sondern Ware, die
     // der Verein noch schuldet - fuer die Jahresauswertung der entscheidende Wert.
@@ -382,8 +403,13 @@
       return;
     }
     try {
+      const knopf = el('gsBuchen'); if (knopf) knopf.disabled = true;   // Doppeltipp sperren
       const beleg = await global.completeSale('voucher', {silent: true});
-      const ergebnis = K.einloesen(g.code, offen, {bon: beleg?.bon || ''});
+      // 08.10.2026: nur abbuchen, wenn der Bon wirklich gespeichert wurde (Doppeltipp/Abbruch
+      // zog sonst doppelt bzw. ohne Bon ab) - und Trainingsbons verbrauchen kein Guthaben.
+      if (!beleg) { if (knopf) knopf.disabled = false; return; }
+      if (beleg.training) { el('gutscheinDialog').close(); global.showMessage?.('Training', geld(offen), 'Trainingsbon – das Guthaben bleibt unverändert.'); return; }
+      const ergebnis = K.einloesen(g.code, offen, {bon: beleg.bon || ''});
       if (!ergebnis.ok) { melde('gsPruefErgebnis', 'warn', ergebnis.grund); return; }
       el('gutscheinDialog').close();
       global.showMessage?.('Mit Gutschein bezahlt', geld(ergebnis.genutzt),

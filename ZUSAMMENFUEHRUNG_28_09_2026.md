@@ -636,3 +636,32 @@ Wunsch Betreiber: „Dann baue Teilzahlung mit ein.“ Bisher meldete die Kasse 
 - Test: `tests/gutschein-teilzahlung.test.cjs`; `tests/halbe-portion-sperre.test.cjs` prüft jetzt „r53 oder neuer“.
 - Übungsliste/Karteikarten Version 2 (63 Aufgaben): neue Karte Gutschein-Teilzahlung, Zeiterfassung aufgeteilt
   in „mit Ausweis“ und „Ausweis vergessen“ (Geburtstag TTMMJJ – mit eingetragener Test-Person durchgespielt).
+
+## Nachtrag 08.10.2026 – Gesamtprüfung der Kasse (app.js r56, Kasse und Schulung)
+
+Auftrag Betreiber: „Check nochmals die komplette Kasse durch auf Logik, bedienerfreundlich, TÜV, Geschwindigkeit,
+Sicherheit, Lücken.“ Drei Prüfrichtungen (Geldlogik, Sicherheit, Tempo/Robustheit) plus Bedien-/TÜV-Prüfung im Browser.
+Behoben wurde nur, was im Browser nachgestellt und danach erneut durchgespielt wurde:
+
+- **Datenverlust (schwerwiegend):** War die Startkarten-Verschlüsselung aktiv, galten nach einem Neustart alle älteren
+  Bons als unlesbar (Umsätze werden VOR dem Kartenmodul geladen), und der nächste Verkauf schrieb den Bestand „neu“ –
+  20 Bons → 1. Jetzt (kc-transaction-store.js 0.2.0): nie mehr `clear()`, normales Speichern hängt nur an, unlesbare
+  Bons bleiben unangetastet und werden nach Freigabe des Schlüssels nachgeladen (kc-security-card-pos.js 0.1.1, dort
+  auch die nach Neuladen fehlende Ausgabenummer ergänzt). Löschen nur noch beim ausdrücklichen Ersetzen (Backup,
+  Vorführdaten). Nachgestellt: 20 Bons, Neustart, 1 Verkauf → 21 Bons, alle lesbar.
+- **Tempo:** Speichern schreibt nur noch neue Bons und fasst Rückstau zusammen (50 Verkäufe bei 3000 Bons: Rückstand
+  0,3 s statt 157 s); Auto-Favoriten werden nur nach neuem Bon neu gezählt (Antippen 15 ms statt 67 ms bei 3000 Bons).
+- **Reklamation „Auszahlung“ (3-Schritt-Weg):** zog das Geld doppelt vom erwarteten Kassenbestand ab (−7,00 statt
+  −3,50 €). Das Protokoll hat jetzt Betrag 0 und `erstattungImBon`; das Geld läuft nur über die Minus-Zeile im Bon.
+- **Gutschein:** Vollzahlung buchte bei Doppeltipp/Abbruch ab ohne Bon und im Training echtes Guthaben; Storno gibt
+  Guthaben jetzt zurück (Teil- und Vollzahlung) und dreht den Umsatz-Anteil zurück (kc-gutschein.js 0.2.1).
+- **Personal/Helfer:** Bon mit Gutschein-Zeile gesperrt; bricht der Abschluss ab, kommt das Pfand zurück in den Bon.
+  Storno eines Personal-/Helferbons senkt den Umsatz nicht mehr (`originalType`).
+- **Konto:** Doppeltipp auf „AUF KONTO BUCHEN“ stürzt nicht mehr ab.
+- Test: `tests/kasse-pruefung-08-10.test.cjs`.
+
+Nicht geändert, Entscheidung des Betreibers nötig (siehe Bericht im Chat): Entwicklerzugang zum Adminbereich ist
+eingeschaltet (`shared/runtime-flags.js` candidateTestAccess), Kassen-Tokens liegen öffentlich in
+`pc-manager/kassen-verbindungen.json`, Trainingsmodus für jeden Bediener umschaltbar, Fernbefehle/Manager-Kanal ohne
+Absicherung gegen fremde Webseiten, Service-Worker-Update nicht atomar, große PNG-Bilder (34 MB Vorabspeicher),
+Gutschein-Verkauf nicht im Kassenbestand, Gutschein nur an der ausstellenden Kasse einlösbar.

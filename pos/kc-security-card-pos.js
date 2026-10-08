@@ -30,6 +30,16 @@
   // neu startet, hat ihn nicht mehr. Innerhalb des Markttags stört das nicht - die Kasse läuft
   // durch, und beim Neustart kommt er wieder übers Netz oder per Karte.
   const AUSGABE_KEY = 'kc_schluessel_ausgabe_v1';
+  // 08.10.2026: Die Umsaetze werden schon VOR diesem Modul geladen. Verschluesselte Verkaeufe sind
+  // dann noch gesperrt - sobald der Schluessel da ist, holt die Kasse sie nach (nichts geht verloren).
+  function nachladen() {
+    // erst warten, bis das erste Laden fertig ist - sonst ist noch gar nichts als gesperrt bekannt
+    Promise.resolve(global.__kcTxHydrated).catch(() => {}).then(() => {
+      try { if (global.KCTransactionStore?.gesperrteAnzahl?.() > 0) return global.__kcRehydrate?.(); } catch (e) { /* egal */ }
+    }).then((ok) => {
+      try { if (ok && typeof global.renderProducts === 'function') { global.renderHeader?.(); global.renderProducts(); } } catch (e) { /* egal */ }
+    });
+  }
   function setze(schluessel, weg, ausgabe) {
     datenschluessel = schluessel;
     // Wechselt die Ausgabenummer, ist ein NEUER Schlüssel im Einsatz. Das wird ausdrücklich
@@ -43,6 +53,7 @@
     }
     try { sessionStorage.setItem(DATENSCHLUESSEL_KEY, schluessel); } catch (e) { /* egal */ }
     global.KCSecurityCardPos?.beiFreigabe?.forEach((f) => { try { f(schluessel); } catch (e) {} });
+    nachladen();
     meldeStart(weg);
     verstecke();
   }
@@ -180,7 +191,13 @@
   async function starte() {
     // 1. Schon in dieser Sitzung freigegeben?
     const ausSitzung = (() => { try { return sessionStorage.getItem(DATENSCHLUESSEL_KEY); } catch (e) { return null; } })();
-    if (ausSitzung) { datenschluessel = ausSitzung; meldeStart('sitzung'); return; }
+    if (ausSitzung) {
+      datenschluessel = ausSitzung;
+      // 08.10.2026: auch die Ausgabenummer wiederherstellen - ohne sie galten die mit dieser Ausgabe
+      // verschluesselten Verkaeufe nach einem Neuladen als "fremder Schluessel" und waren nicht lesbar.
+      try { aktuelleAusgabe = Number(localStorage.getItem(AUSGABE_KEY) || 0) || null; } catch (e) { /* egal */ }
+      nachladen(); meldeStart('sitzung'); return;
+    }
 
     // 2. Über das Netz - der Normalfall am Stand. Passiert unsichtbar.
     try {

@@ -602,8 +602,10 @@ async function hydrateTransactionCache(){
   // Zusammenführung wirkt dann als reine Selbstheilung: liegt in IndexedDB etwas, das aus
   // irgendeinem Grund gerade nicht im Zwischenspeicher wäre, wird es zurückgeholt.
   const firstRun=localStorage.getItem(MIGRATION_DONE_KEY)!=="done";
-  const legacySales=firstRun?safeArray(TRANSACTION_KEY):[];
-  const legacyTraining=firstRun?safeArray(TRAINING_TRANSACTION_KEY):[];
+  // 08.10.2026: beim Nachladen (z. B. nach dem Einlesen der Startkarte) den laufenden Bestand
+  // mitgeben - Verkaeufe seit dem Start bleiben so erhalten.
+  const legacySales=firstRun?safeArray(TRANSACTION_KEY):_txCache;
+  const legacyTraining=firstRun?safeArray(TRAINING_TRANSACTION_KEY):_trainingTxCache;
   const [salesResult,trainingResult]=await Promise.all([
     window.KCTransactionStore.reconcile(window.KCTransactionStore.STORE_SALES,legacySales),
     window.KCTransactionStore.reconcile(window.KCTransactionStore.STORE_TRAINING,legacyTraining),
@@ -614,11 +616,13 @@ async function hydrateTransactionCache(){
     setSystemHint(`Umsatzdaten aus der dauerhaften Speicherung wiederhergestellt · ${_txCache.length} Vorgänge`,"ok");
   }
   window.KCTransactionStore.requestPersistence().then(status=>{window.KC_STORAGE_PERSISTENCE_STATUS=status});
+  const gesperrteZeilen=window.KCTransactionStore.gesperrteAnzahl?.()||0;
+  if(gesperrteZeilen)setSystemHint(`${gesperrteZeilen} ältere Verkäufe sind verschlüsselt und werden nach dem Einlesen der Startkarte angezeigt – es geht nichts verloren`,"warn");
   return true;
 }
 function readTransactions(){return _txCache}
 function readTrainingTransactions(){return _trainingTxCache}
-function saveTransactions(rows,training=false){
+function saveTransactions(rows,training=false,optionen=null){
   if(training)_trainingTxCache=rows;else _txCache=rows;
   // Der Zwischenspeicher wird SOFORT/synchron aktualisiert (Bon-Freigabe wartet auf nichts).
   // Die dauerhafte IndexedDB-Speicherung läuft im Hintergrund - schlägt sie fehl, wird erneut
@@ -626,13 +630,13 @@ function saveTransactions(rows,training=false){
   // dauerhafte Speicherung darf bei echten Kassendaten NIEMALS unbemerkt bleiben).
   if(window.KCTransactionStore){
     const storeName=training?window.KCTransactionStore.STORE_TRAINING:window.KCTransactionStore.STORE_SALES;
-    persistTransactionsWithRetry(storeName,rows);
+    persistTransactionsWithRetry(storeName,rows,1,optionen);
   }
 }
-function persistTransactionsWithRetry(storeName,rows,attempt=1){
-  window.KCTransactionStore.replaceAll(storeName,rows).catch(err=>{
+function persistTransactionsWithRetry(storeName,rows,attempt=1,optionen=null){
+  window.KCTransactionStore.replaceAll(storeName,rows,optionen).catch(err=>{
     console.error(`IndexedDB-Speicherung fehlgeschlagen (Versuch ${attempt})`,err);
-    if(attempt<3){setTimeout(()=>persistTransactionsWithRetry(storeName,rows,attempt+1),1000*attempt);return}
+    if(attempt<3){setTimeout(()=>persistTransactionsWithRetry(storeName,rows,attempt+1,optionen),1000*attempt);return}
     setSystemHint("Achtung: Umsatzdaten konnten nicht dauerhaft gespeichert werden - bitte Gerät nicht neu starten und KC Sync/Export prüfen","warn");
     notify("error","Dauerhafte Speicherung fehlgeschlagen","tx-persist-failed",15000);
   });
@@ -697,13 +701,24 @@ function salesForStats(){
 function articleSalesCount(id){
   return salesForStats().reduce((sum,t)=>sum+(t.items||[]).filter(i=>i.id===id).reduce((s,i)=>s+Number(i.qty||0),0),0);
 }
+// 08.10.2026 (Gesamtpruefung, gemessen): wurde bei JEDEM Antippen fuer JEDE Kachel ueber alle
+// Bons neu gezaehlt (bei 3000 Bons ~50 ms je Tipp, am Tablet bis 2 s). Jetzt einmal zaehlen und
+// merken, bis ein neuer Bon dazukommt oder sich die Artikelliste aendert - Ergebnis identisch.
+let _autoFavMerker={liste:null,anzahl:-1,artikel:"",ids:[]};
 function autoFavoriteIds(){
-  return [...PRODUCTS]
-    .map(p=>({id:p.id,count:articleSalesCount(p.id)}))
+  const liste=salesForStats();
+  const artikel=PRODUCTS.map(p=>p.id).join("|");
+  if(_autoFavMerker.liste===liste&&_autoFavMerker.anzahl===liste.length&&_autoFavMerker.artikel===artikel)return _autoFavMerker.ids;
+  const zaehler=new Map();
+  liste.forEach(t=>(t.items||[]).forEach(i=>zaehler.set(i.id,(zaehler.get(i.id)||0)+Number(i.qty||0))));
+  const ids=[...PRODUCTS]
+    .map(p=>({id:p.id,count:zaehler.get(p.id)||0}))
     .sort((a,b)=>b.count-a.count)
     .filter(x=>x.count>0)
     .slice(0,6)
     .map(x=>x.id);
+  _autoFavMerker={liste,anzahl:liste.length,artikel,ids};
+  return ids;
 }
 function setSystemHint(text,type="ok",richtung=null){
   if(window.KCMessageCore?.add){window.KCMessageCore.add(text,type,richtung);return;}
@@ -1494,6 +1509,7 @@ function staffBlockedCartItems(){
   };
   state.cart.forEach(item=>{
     if(item.refund)return;
+    if(gutscheinZeile(item)){if(!namen.includes(item.name))namen.push(item.name);return}
     if(item.isPackage&&Array.isArray(item.components))return item.components.forEach(component=>pruefe(component.id,component.name));
     pruefe(item.id,item.name);
   });
@@ -3146,8 +3162,8 @@ el("applyBackupImport").onclick=()=>{
   if(!pendingBackupImport||state.role!=="superadmin")return showMessage("Nicht erlaubt","!","Backup-Wiederherstellung benötigt Superadminrechte.");
   askConfirm("Backup wiederherstellen","Alle aktuellen lokalen Daten werden ersetzt.",()=>{
     applyConfig(pendingBackupImport.config);
-    saveTransactions(pendingBackupImport.transactions||[]);
-    saveTransactions(pendingBackupImport.trainingTransactions||[],true);
+    saveTransactions(pendingBackupImport.transactions||[],false,{loeschen:true});
+    saveTransactions(pendingBackupImport.trainingTransactions||[],true,{loeschen:true});
     localStorage.setItem("kc_voids_v040",JSON.stringify(pendingBackupImport.voids||[]));
     localStorage.setItem(WITHDRAWAL_KEY,JSON.stringify(pendingBackupImport.withdrawals||[]));
     localStorage.setItem("kc_discount_audit_v020",JSON.stringify(pendingBackupImport.discountAudit||[]));
@@ -3291,7 +3307,16 @@ async function reverseCompletedTransaction(original,reason){
   }
   const current=bonText(),endTime=new Date().toISOString(),previousHash=rows[rows.length-1]?.recordHash||null,due=-Number(original.due??original.total??0);
   const rec={transactionId:crypto.randomUUID(),formatVersion:4,bon:current,bonNumber:current,startTime:endTime,time:endTime,endTime,registerId:state.master.registerId,registerName:state.master.registerName,operator:state.master.operatorName,type:"reversal",training:false,method:original.method||original.payment||"reversal",payment:original.payment||original.method||"reversal",due,total:due,dueCents:toCents(due),given:0,givenCents:0,change:0,changeCents:0,depositRule:original.depositRule,items:(original.items||[]).map(item=>{const originalQty=Number(item.qty||0),originalLine=Number(item.lineTotal??Number(item.price||0)*originalQty);return {...cloneData(item),qty:-originalQty,lineTotal:-originalLine}}),originalTransactionId:original.transactionId,originalBon:original.bon||original.bonNumber,reason:safeText(reason,300),previousHash};
+  // 08.10.2026 Gutschein: Anteil im Gegenbon negativ fuehren (Umsatz geht auf 0) und das Guthaben
+  // wieder auf den Gutschein buchen - bei Teilzahlung (voucherPayments) und bei Vollzahlung (method voucher).
+  if(Array.isArray(original.voucherPayments)&&original.voucherPayments.length)rec.voucherPayments=original.voucherPayments.map(v=>({code:v.code,amount:-Math.abs(Number(v.amount||0))}));
+  if(original.type)rec.originalType=original.type;
   rec.recordHash=await sha256Hex(canonicalTransaction(rec));rows.push(rec);saveTransactions(rows);
+  if(!original.training&&window.KCGutschein?.gutschreiben){
+    const ob=String(original.bon||original.bonNumber||"");
+    (original.voucherPayments||[]).forEach(v=>window.KCGutschein.gutschreiben(v.code,Number(v.amount||0),{bon:rec.bon,originalBon:ob}));
+    if(originalMethod==="voucher")window.KCGutschein.gutschreibenFuerBon(ob,{bon:rec.bon});
+  }
   // Zu einem vollstaendig stornierten Bon gehoerende Trinkgeld-/Spendendatensaetze werden
   // nicht geloescht, sondern mit einer negativen Gegenbuchung neutralisiert. So bleibt die
   // Historie pruefbar und Tages-/Bargeldsummen werden exakt zurueckgedreht.
@@ -3658,7 +3683,7 @@ function closingSnapshot(){
   const accountTx=tx.filter(t=>t.type!=="personal"&&t.type!=="helfer"&&String(t.method||t.payment)==="account-charge");
   const accountSales=accountTx.reduce((sum,t)=>sum+Number(t.due??t.total??0),0);
   const accountBreakdown=(()=>{const je={};kcEvents().filter(e=>e.status!=="void"&&!e.training&&(!e.registerId||e.registerId===state.master.registerId)&&(!startAt||e.date>=startAt)).forEach(e=>{const k=e.accountName||e.accountId;je[k]=(je[k]||0)+Number(e.amount||0)});return Object.entries(je).map(([name,amount])=>({name,amount:+amount.toFixed(2)}))})();
-  const totalSales=tx.filter(t=>t.type!=="personal"&&t.type!=="helfer").reduce((sum,t)=>sum+Number(t.due??t.total??0)+(t.voucherPayments||[]).reduce((s,v)=>s+Number(v.amount||0),0),0);
+  const totalSales=tx.filter(t=>t.type!=="personal"&&t.type!=="helfer"&&t.originalType!=="personal"&&t.originalType!=="helfer").reduce((sum,t)=>sum+Number(t.due??t.total??0)+(t.voucherPayments||[]).reduce((s,v)=>s+Number(v.amount||0),0),0);
   // 09.09.2026 (Betreiber): "Anzahl Bons/Quittungen" bei der Abendzaehlung meint die
   // EINKAUFSBELEGE aus den Entnahmen (Lebensmittel/Reinigungsmittel/Baumarkt/...), nicht die
   // Verkaufsbons. Soll = wie viele Entnahmen des Zeitraums als "Bon/Quittung vorhanden" markiert
@@ -4026,7 +4051,7 @@ async function kcReklamationBuchen(produktId,grund,ergebnis,bonReferenz){
   // Protokoll fuer ALLE drei Ergebnisse (auch "Nichts") - im vorhandenen Entnahme-Speicher, damit
   // es dieselbe Auswertung findet wie die bisherigen Reklamationsauszahlungen.
   const rows=safeArray(WITHDRAWAL_KEY);
-  const eintrag={withdrawalId:crypto.randomUUID(),time:new Date().toISOString(),registerId:state.master.registerId,registerName:state.master.registerName,operator:state.master.operatorName,amount:+betrag.toFixed(2),amountCents:toCents(betrag),reason:"Reklamation",note:"",receiptAvailable:false,receiptAttachment:null,training:!!state.master.trainingMode,complaint:{reason:grund,outcome:ergebnis,reference:bonReferenz||null,articles:[{id:produkt.id,name:produkt.name,qty:1,unitPrice:preis,total:preis}],articleTotal:preis,adjustment:0,refundTransactionId:transactionId,refundBon:bon}};
+  const eintrag={withdrawalId:crypto.randomUUID(),time:new Date().toISOString(),registerId:state.master.registerId,registerName:state.master.registerName,operator:state.master.operatorName,amount:0,amountCents:0,erstattungImBon:+betrag.toFixed(2),reason:"Reklamation",note:"",receiptAvailable:false,receiptAttachment:null,training:!!state.master.trainingMode,complaint:{reason:grund,outcome:ergebnis,reference:bonReferenz||null,articles:[{id:produkt.id,name:produkt.name,qty:1,unitPrice:preis,total:preis}],articleTotal:preis,adjustment:0,refundTransactionId:transactionId,refundBon:bon}};
   rows.push(eintrag);localStorage.setItem(WITHDRAWAL_KEY,JSON.stringify(rows));
   return eintrag;
 }
@@ -4981,7 +5006,7 @@ el("cardBtn").onclick=()=>setSystemHint("EC-Kartenzahlung ist noch nicht verfüg
 el("staffBtn").onclick=()=>{
   if(!state.cart.length)return keinBonMeldung();
   if(toCents(total())<0)return pfandAlsSpendeVerbuchen();
-  const gesperrt=staffBlockedCartItems();if(gesperrt.length)return showMessage("Personalverbrauch nicht möglich",money(total()),`Nicht auf Personal buchbar: ${gesperrt.join(", ")}. Bitte diese Position${gesperrt.length>1?"en":""} entfernen oder normal abrechnen.`);const betragOhnePfand=internOhnePfand(()=>total());askConfirm("Personalverbrauch speichern",`${money(betragOhnePfand)} als Personalverbrauch protokollieren? (Pfand wird nicht berechnet - das Glas ist nur geliehen.)`,()=>{internPfandEntfernen();completeSale("internal-personal",{type:"personal"})})
+  const gesperrt=staffBlockedCartItems();if(gesperrt.length)return showMessage("Personalverbrauch nicht möglich",money(total()),`Nicht auf Personal buchbar: ${gesperrt.join(", ")}. Bitte diese Position${gesperrt.length>1?"en":""} entfernen oder normal abrechnen.`);const betragOhnePfand=internOhnePfand(()=>total());askConfirm("Personalverbrauch speichern",`${money(betragOhnePfand)} als Personalverbrauch protokollieren? (Pfand wird nicht berechnet - das Glas ist nur geliehen.)`,()=>{internPfandEntfernen();completeSale("internal-personal",{type:"personal"}).then(r=>{if(!r)internPfandZurueck()})})
 };
 // 23.09.2026 (Betreiber): "Personal bucht evtl. einen Gluehwein am Stand trinken, dann wird Pfand
 // verbucht, aber es findet kein Ruecklauf statt." Bei Personal und Helfern ist das Glas nur
@@ -4991,6 +5016,8 @@ el("staffBtn").onclick=()=>{
 // als leihPfand an der Bonzeile stehen - nachvollziehbar, aber ohne Betrag.
 function internPfandBleibt(item){const p=PRODUCTS.find(x=>x.id===item.id);return !!(p&&p.staffDeposit===true)}
 function internOhnePfand(fn){const alt=state.cart.map(i=>i.deposits);state.cart.forEach(i=>{if(!internPfandBleibt(i)&&Array.isArray(i.deposits)&&i.deposits.length)i.deposits=[]});try{return fn()}finally{state.cart.forEach((i,k)=>{i.deposits=alt[k]})}}
+// 08.10.2026: Gegenstueck - wurde der Personal-/Helfer-Bon NICHT gespeichert, kommt das Pfand zurueck.
+function internPfandZurueck(){state.cart.forEach(i=>{if(Array.isArray(i.leihPfand)&&i.leihPfand.length&&!(i.deposits||[]).length){i.deposits=i.leihPfand;delete i.leihPfand}});renderCart()}
 function internPfandEntfernen(){state.cart.forEach(i=>{if(!internPfandBleibt(i)&&Array.isArray(i.deposits)&&i.deposits.length){i.leihPfand=i.deposits;i.deposits=[]}})}
 // 23.09.2026 (Betreiber): Helfer bekommen Essen und Getraenke gratis. Erst den Warenkorb buchen,
 // dann MEHR -> HELFER -> Gruppe antippen. Eigene Buchungsart "helfer" (kein Geld in der Kasse,
@@ -5009,7 +5036,7 @@ el("helferGruppen")?.addEventListener("click",ev=>{
   const b=ev.target.closest("button[data-helfer-gruppe]");if(!b)return;
   el("helferDialog").close();
   internPfandEntfernen();
-  completeSale("internal-helfer",{type:"helfer",helperGroup:b.dataset.helferGruppe});
+  completeSale("internal-helfer",{type:"helfer",helperGroup:b.dataset.helferGruppe}).then(r=>{if(!r)internPfandZurueck()});
 });
 el("helferDialogCloseX")?.addEventListener("click",()=>el("helferDialog")?.close());
 el("depositBtn").onclick=()=>{state.activeCategory="Pfand";renderCategories();renderProducts()};
@@ -5513,6 +5540,7 @@ async function kcPostAccount(){
   const v=kcValidateAccountCart(a);if(!v.allOk)return setSystemHint(v.denied[0]?.reason||"Kontobuchung abgelehnt - Limit oder Gültigkeit verletzt.","error");
   const cartCopy=cloneData(state.cart),amount=+total().toFixed(2);
   const rec=await completeSale("account-charge",{silent:true});
+  if(!rec)return;
   // 10.09.2026 (Betreiber: "Manager-abhaengige Sachen sauber im Testmodus loesen"): ECHTER FUND
   // - eine Kontobuchung im Testmodus wurde bisher GENAUSO gespeichert wie eine echte und zaehlte
   // dadurch voll gegen das reale Limit von Bauhof/Stadtmarketing (kcLocalUnsynced() kennt kein
