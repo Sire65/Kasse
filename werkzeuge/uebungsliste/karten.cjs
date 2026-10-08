@@ -41,6 +41,8 @@ let seiten='';
 // Seite 1: Anleitung (A4, Stil der Club-App-Unterlagen), Seite 2 bleibt fuer den beidseitigen Druck leer
 seiten+=`<div class="seite anl"><div class="akopf"><img src="${LOGO}"><b>Köcheclub Werne</b><span>Kassen-Training · Karteikarten · ${VERSION}</span></div>
 <div class="titelblatt"><img src="${HUT}" style="width:62pt"><div class="t1">Köcheclub Werne</div><div class="t2">Kassen-Training — Karteikarten</div><div class="t3">${gesamt} Karten · ${VERSION} · Stand ${STAND} · dieselben Aufgaben wie in der Übungsliste</div></div>
+<div class="bleistift"><div class="bs-icon">✏️</div><div class="bs-text"><div class="bs-titel">Bitte mit Bleistift ankreuzen!</div>
+ <div>Die Kästchen <b>„Gewusst?“</b> <span class="bs-box"></span>&nbsp;<b style="color:#2e7d32">✓</b>&nbsp; <span class="bs-box"></span>&nbsp;<b style="color:#c62828">✗</b> nur mit <b>Bleistift</b> ausfüllen. Danach einfach <b>ausradieren</b> – so können die Karten immer wieder verwendet werden.</div></div></div>
 <h3 class="gruen">Alleine üben mit zwei Stapeln</h3>
 <div class="kasten"><ol>
  <li>Die <b>Ampel</b> oben auf jeder Karte zeigt die Schwierigkeit: <b style="color:#2e7d32">grün = einfach</b>, <b style="color:#d97706">gelb = mittel</b>, <b style="color:#c62828">rot = schwer</b>. Am besten mit den grünen anfangen.</li>
@@ -48,7 +50,7 @@ seiten+=`<div class="seite anl"><div class="akopf"><img src="${LOGO}"><b>Köchec
  <li><b>Vorderseite</b> lesen: was sagt der Kunde, was ist die Lage?</li>
  <li>An der <b>Schulungs-Kasse</b> ausführen – oder im Kopf durchgehen, welche Knöpfe du antippst.</li>
  <li>Karte umdrehen und mit der <b>Lösung</b> auf der Rückseite vergleichen. Oben steht der einfachste Weg, unter „<b>Andere Wege</b>“ weitere, die genauso richtig sind.</li>
- <li>Unten auf der Rückseite ankreuzen: <b style="color:#2e7d32">✓ gewusst</b> oder <b style="color:#c62828">✗ nicht gewusst</b> – Platz für drei Durchgänge. <b style="color:#2e7d32">Gewusst</b> → Karte auf den Stapel <b>„Kann ich“</b>. <b style="color:#c62828">Nicht gewusst</b> → auf den Stapel <b>„Üben“</b>.</li>
+ <li>Unten auf der Rückseite ankreuzen: <b style="color:#2e7d32">✓ gewusst</b> oder <b style="color:#c62828">✗ nicht gewusst</b> – mit <b>Bleistift</b>, Platz für drei Durchgänge. <b style="color:#2e7d32">Gewusst</b> → Karte auf den Stapel <b>„Kann ich“</b>. <b style="color:#c62828">Nicht gewusst</b> → auf den Stapel <b>„Üben“</b>.</li>
  <li>Wenn alle Karten durch sind: nur mit dem Stapel <b>„Üben“</b> weitermachen – so lange, bis er leer ist.</li></ol>
  <p>Zu zweit geht es auch: einer liest die Vorderseite vor wie ein Kunde, der andere kassiert.</p></div>
 <h3 class="gruen">Drucken und schneiden</h3>
@@ -62,7 +64,7 @@ seiten+=`<div class="seite anl"><div class="akopf"><img src="${LOGO}"><b>Köchec
 for(let i=0;i<karten.length;i+=JE){const gruppe=karten.slice(i,i+JE);
  seiten+=`<div class="seite">${marken()}${gruppe.map((k,j)=>karte(vorne(k),pos(j,false))).join('')}</div>`;
  seiten+=`<div class="seite">${marken()}${gruppe.map((k,j)=>karte(hinten(k),pos(j,true))).join('')}</div>`;}
-const CSS=`@page{size:A4;margin:0}*{box-sizing:border-box}html,body{margin:0}
+const CSS=`@page{size:A4;margin:0}.bleistift{display:flex;align-items:center;gap:12pt;margin:14pt 0 4pt;padding:11pt 14pt;border:1.6pt solid #173765;border-radius:6pt;background:linear-gradient(90deg,#fff7d6,#fffbe9);box-shadow:0 1.5pt 0 #d97706 inset}.bs-icon{font-size:30pt;line-height:1;transform:rotate(-8deg)}.bs-titel{font-size:15.5pt;font-weight:700;color:#173765;margin-bottom:3pt}.bs-text{font-size:11pt;line-height:1.38}.bs-box{display:inline-block;width:10pt;height:10pt;border:1.3pt solid #111;border-radius:1.5pt;vertical-align:-1pt;background:#fff}*{box-sizing:border-box}html,body{margin:0}
 body{font-family:Carlito,'Liberation Sans',sans-serif;color:#111;font-size:10pt;line-height:1.3;-webkit-print-color-adjust:exact;print-color-adjust:exact}
 .seite{width:210mm;height:297mm;position:relative;overflow:hidden;break-after:page}
 .m{position:absolute;background:#111}.m.v{width:.25mm}.m.h{height:.25mm}
@@ -84,7 +86,7 @@ ol{margin:0 0 2.5mm;padding-left:4.5mm}ol li{margin-bottom:1.6mm}ol b,.kontrolle
 .wege{font-size:.86em;color:#334155;background:#f1f5f9;border-left:.9mm solid #9aa3ad;padding:1.2mm 2.2mm;margin:0 0 2.2mm}.wege>b{color:#5b6572}.wege ul{margin:.6mm 0 0;padding-left:4mm}.wege li{margin-bottom:.6mm}.wege b{color:#173765}
 .kontrolle{border-left:.9mm solid #2e7d32;background:#e8f5ec;padding:1.5mm 2.4mm;font-size:.93em}
 .anl{padding:0}.akopf{position:absolute;left:19mm;right:19mm;top:8.5mm;height:11mm;border-bottom:.4mm solid #173765;display:flex;align-items:flex-end;padding-bottom:1.5mm}.akopf img{width:11mm;margin-right:2mm}.akopf b{color:#173765;font-size:11pt}.akopf span{margin-left:auto;color:#5b6572;font-size:9pt}
-.anl .titelblatt,.anl h3,.anl .kasten{margin-left:19mm;margin-right:19mm}
+.anl .titelblatt,.anl h3,.anl .kasten,.anl .bleistift{margin-left:19mm;margin-right:19mm}
 .titelblatt{text-align:center;padding-top:38mm}.t1{font-family:'Liberation Sans',sans-serif;color:#173765;font-size:26pt;margin-top:6pt}.t2{color:#5b6572;font-weight:700;font-size:15pt}.t3{color:#5b6572;font-size:8.5pt;margin-top:4pt}
 h3.gruen{color:#2e7d32;font-size:13.5pt;font-weight:400;margin-top:16pt;margin-bottom:6pt}
 .kasten{border:1pt solid #9fd3a8;border-left:3pt solid #2e7d32;background:#e8f5ec;padding:9pt 12pt;font-size:10.3pt}.kasten ol,.kasten ul{margin:0 0 4pt;padding-left:16pt}.kasten li{margin-bottom:3pt}.kasten p{margin:4pt 0 0}

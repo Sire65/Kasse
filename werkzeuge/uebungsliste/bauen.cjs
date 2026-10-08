@@ -27,7 +27,7 @@ const stufen=D.map(st=>{const von=nr+1;const html=st.aufgaben.map(a=>{nr++;const
   <div class="gewusst"><div class="t">Gewusst?</div><label data-nr="${nr}" data-w="ja"><span class="box"></span>Ja</label><label data-nr="${nr}" data-w="nein"><span class="box"></span>Nein</label></div>
  </div>`}).join('');bereiche.push([st.stufe,von,nr]);
  return `<section class="stufe"><h2>${esc(st.stufe)}</h2>${html}</section>`}).join('');
-const CSS=`*{box-sizing:border-box}
+const CSS=`*{box-sizing:border-box}.bleistift{display:flex;align-items:center;gap:12pt;margin:14pt 0 4pt;padding:11pt 14pt;border:1.6pt solid #173765;border-radius:6pt;background:linear-gradient(90deg,#fff7d6,#fffbe9);box-shadow:0 1.5pt 0 #d97706 inset}.bs-icon{font-size:30pt;line-height:1;transform:rotate(-8deg)}.bs-titel{font-size:15.5pt;font-weight:700;color:#173765;margin-bottom:3pt}.bs-text{font-size:11pt;line-height:1.38}.bs-box{display:inline-block;width:10pt;height:10pt;border:1.3pt solid #111;border-radius:1.5pt;vertical-align:-1pt;background:#fff}
 body{font-family:Carlito,'Liberation Sans',sans-serif;color:#111;font-size:10.5pt;line-height:1.32;margin:0;-webkit-print-color-adjust:exact;print-color-adjust:exact}
 .titelblatt{text-align:center;margin-top:28pt}.t1{font-family:'Liberation Sans',sans-serif;color:#173765;font-size:26pt;margin-top:6pt}.t2{color:#5b6572;font-weight:700;font-size:15pt}.t3{color:#5b6572;font-size:8.5pt;margin-top:4pt}
 h2{font-weight:400;color:#2e7d32;font-size:15pt;margin:14pt 0 4pt;break-after:avoid}
@@ -54,11 +54,13 @@ ol{margin:1pt 0 3pt;padding-left:15pt}ol li{margin-bottom:1pt}ol b,.kontrolle b{
 .auswertung h3{margin:0 0 6pt;color:#2e7d32;font-weight:400;font-size:13.5pt}.zeile{display:flex;gap:20pt;margin-bottom:8pt}.linie{border-bottom:.8pt solid #9aa3ad;height:20pt}
 .seitenumbruch{break-after:page}`;
 const titel=`<div class="titelblatt"><img src="${HUT}" style="width:62pt" alt=""><div class="t1">Köcheclub Werne</div><div class="t2">Kassen-Training — Übungsliste</div><div class="t3">Übungsliste ${VERSION} · ${KASSE} · Oberfläche KC003 · Stand ${STAND}</div></div>
+<div class="bleistift"><div class="bs-icon">✏️</div><div class="bs-text"><div class="bs-titel">Bitte mit Bleistift ankreuzen!</div>
+ <div>Die Kästchen <b>„Gewusst?“</b> <span class="bs-box"></span>&nbsp;<b style="color:#2e7d32">✓</b>&nbsp; <span class="bs-box"></span>&nbsp;<b style="color:#c62828">✗</b> nur mit <b>Bleistift</b> ausfüllen. Danach einfach <b>ausradieren</b> – so kann die Liste immer wieder verwendet werden.</div></div></div>
 <h3 class="gruen">Inhalt</h3><ul class="inhalt">${bereiche.map(([t,v,b])=>{const [s,r]=t.split(' · ');return `<li><b>${esc(s)}</b> – ${esc(r)} <span>· Aufgabe ${v}–${b}</span></li>`}).join('')}<li><b>Auswertung</b> <span>– am Ende der Liste</span></li></ul>
 <div class="kasten"><p><b>So wird geübt:</b> Zu zweit – eine Person bedient die Kasse, die andere ist der Kunde.</p><ol>
  <li>Der <b>Kunde</b> hält die Liste und liest „Kunde sagt“ vor – die Lösung nicht verraten.</li>
  <li>Die <b>Bedienung</b> erledigt den Vorgang an der Kasse.</li>
- <li>Der Kunde vergleicht mit den Schritten und der <b>Kontrolle</b> und kreuzt an: <b>Gewusst? Ja / Nein</b>.</li>
+ <li>Der Kunde vergleicht mit den Schritten und der <b>Kontrolle</b> und kreuzt mit <b>Bleistift</b> an: <b>Gewusst? Ja / Nein</b>.</li>
  <li>Bei „Nein“ die Schritte gemeinsam durchgehen und wiederholen. Danach Rollen tauschen.</li></ol>
  <p><b>Alleine üben:</b> Dieselben Aufgaben gibt es als <b>Karteikarten</b> – vorne die Aufgabe, hinten die Lösung. Oder am Handy/Tablet: <b>Karten online</b> (Knopf oben) – Karte antippen, Lösung ansehen, „Gewusst“ oder „Nicht gewusst“ antippen. Gewusste Karten auf den Stapel <b>„Kann ich“</b>, nicht gewusste auf den Stapel <b>„Üben“</b>, dann mit dem Stapel „Üben“ weitermachen, bis er leer ist.</p>
  <p><b>Geübt wird in der Schulungs-Kasse</b> (Schulungs-Link bzw. QR-Code) – dort zählt nichts zum Umsatz. „<b>Lage</b>“ = kein Kundensatz, sondern eine Situation am Stand. <span class="ge">ZUSÄTZLICH</span> = weitere Fälle, die am Stand vorkommen können.</p></div>
