@@ -86,7 +86,7 @@ const WEB=`.leiste{position:sticky;top:0;z-index:5;display:flex;flex-wrap:wrap;g
 body{max-width:860px;margin:0 auto;padding:0 14px 40px;background:#fff}
 @media (max-width:640px){.aufgabe{grid-template-columns:24pt 1fr}.gewusst{grid-column:2;border-left:0;border-top:.8pt dashed #c9ced6;padding:5px 0 0;flex-direction:row;align-items:center;gap:18px}.namen{grid-template-columns:1fr}h2 .schwer{float:none;display:block;margin-top:0}.leiste .stand{width:100%;order:3;margin-left:0}}
 @media print{.leiste{display:none}body{max-width:none;padding:0}}`;
-const leiste=`<div class="leiste"><img src="logo.png" alt=""><span class="name">Köcheclub Werne</span><span class="stand">Gewusst: <b class="zJa">0</b> Ja · <b class="zNein">0</b> Nein · <span class="zOffen">${gesamt}</span> offen</span><a href="Kassen-Training_Uebungsliste.pdf" download>PDF</a><a href="Kassen-Training_Karteikarten.pdf" download>Karteikarten</a><a href="karten.html">Karten online</a><button type="button" id="neu">Neu beginnen</button></div>`;
+const leiste=`<div class="leiste"><img src="logo.png" alt=""><span class="name">Köcheclub Werne</span><span class="stand">Gewusst: <b class="zJa">0</b> Ja · <b class="zNein">0</b> Nein · <span class="zOffen">${gesamt}</span> offen</span><a href="Kassen-Training_Uebungsliste.pdf" target="_blank" style="background:#2e7d32">📄 PDF drucken</a><a href="Kassen-Training_Karteikarten.pdf" target="_blank">📄 Karteikarten-PDF</a><a href="karten.html">Karten online</a><button type="button" id="neu">Neu beginnen</button></div>`;
 const skript=`<script>
 (function(){var K='kc.uebungsliste.v1',st={};try{st=JSON.parse(localStorage.getItem(K)||'{}')||{}}catch(e){st={}}
 function speichern(){try{localStorage.setItem(K,JSON.stringify(st))}catch(e){}}
@@ -109,7 +109,7 @@ let knr=0;const KARTEN=[];D.forEach(st=>st.aufgaben.forEach(a=>{knr++;const lage
 const KCSS=`*{box-sizing:border-box}html,body{margin:0}
 body{font-family:Carlito,'Liberation Sans',Calibri,sans-serif;color:#111;background:#eef1f5;font-size:17px;line-height:1.38;-webkit-text-size-adjust:100%}
 .kopf{position:sticky;top:0;z-index:5;background:#fff;border-bottom:2px solid #173765;padding:8px 12px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
-.kopf img{width:34px}.kopf .name{color:#173765;font-weight:700}.kopf a{margin-left:auto;color:#fff;background:#173765;border-radius:6px;padding:6px 10px;text-decoration:none;font-weight:700;font-size:14px}
+.kopf img{width:34px}.kopf .name{color:#173765;font-weight:700}.kopf a.druck{background:#2e7d32}.kopf a{margin-left:auto;color:#fff;background:#173765;border-radius:6px;padding:6px 10px;text-decoration:none;font-weight:700;font-size:14px}
 main{max-width:560px;margin:0 auto;padding:10px 12px 40px}
 .filter{display:flex;gap:6px;flex-wrap:wrap;margin:4px 0 8px}
 .filter button,.modus button{font:inherit;font-size:15px;font-weight:700;border:2px solid #c9ced6;background:#fff;color:#334155;border-radius:20px;padding:5px 12px;cursor:pointer}
@@ -173,13 +173,14 @@ document.addEventListener('click',function(ev){var t=ev.target.closest&&ev.targe
  if(t.id==='reset'&&confirm('Alle Ergebnisse löschen und neu beginnen? (Gilt auch für die Übungsliste.)')){st={};sp();idx=0;offen=false;neu()}});
 neu()})();`;
 const kartenWeb=`<!doctype html><html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Kassen-Training · Karten</title><link rel="icon" href="logo.png"><style>${KCSS}</style></head><body>
-<div class="kopf"><img src="logo.png" alt=""><span class="name">Köcheclub Werne · Karten</span><a href="Kassen-Training_Karteikarten.pdf" download>PDF</a><a href="index.html" style="margin-left:0">Übungsliste</a></div>
+<div class="kopf"><img src="logo.png" alt=""><span class="name">Köcheclub Werne · Karten</span><a href="Kassen-Training_Karteikarten.pdf" target="_blank" class="druck">📄 PDF drucken</a><a href="index.html" style="margin-left:0">Übungsliste</a></div>
 <main><div class="filter"><button type="button" data-f="alle">Alle</button><button type="button" data-f="einfach"><span class="mini"><i style="background:#4ade80"></i><i></i><i></i></span>Einfach</button><button type="button" data-f="mittel"><span class="mini"><i></i><i style="background:#fbbf24"></i><i></i></span>Mittel</button><button type="button" data-f="schwer"><span class="mini"><i></i><i></i><i style="background:#f87171"></i></span>Schwer</button></div>
 <div class="modus"><button type="button" data-m="alle">Alle Karten</button><button type="button" data-m="offen">Noch offen</button><button type="button" data-m="ueben">Stapel „Üben“</button></div>
 <div class="zaehler"><div class="z-ja"><b>0</b>Kann ich</div><div class="z-nein"><b>0</b>Üben</div><div class="z-offen"><b>0</b>offen</div></div>
 <div id="karte"></div>
 <div class="nav"><button type="button" id="zurueck">‹ Zurück</button><span id="pos"></span><button type="button" id="mischen">Mischen</button><button type="button" id="weiter">Weiter ›</button></div>
 <div class="hinweis">Geübt wird in der <b>Schulungs-Kasse</b> – dort zählt nichts zum Umsatz. Ergebnisse bleiben auf diesem Gerät gespeichert und stehen auch in der Übungsliste.</div>
+<div class="hinweis"><a href="Kassen-Training_Karteikarten.pdf" target="_blank" style="color:#173765;font-weight:700">📄 Alle Karten als A4-PDF zum Drucken</a> (beidseitig, an der langen Kante wenden, 100 %)</div>
 <div class="unten"><button type="button" id="reset">Neu beginnen</button></div></main>
 <script>${KJS}<\/script></body></html>`;
 fs.writeFileSync(path.join(ZIEL,'karten.html'),kartenWeb);
