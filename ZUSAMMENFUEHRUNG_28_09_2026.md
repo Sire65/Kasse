@@ -553,6 +553,17 @@ Betreiber: „Mache alle Mülleimer im Programm rot, besonders im Warenkorb.“
 * 08.10.2026 (Betreiber: „Karten kleiner, mehr nebeneinander/untereinander, damit ich Papier spare“): Karteikarten jetzt
   3 × 3 = 9 je Blatt (62 × 91 mm, Lösungsschrift 9,2 pt, 7 Blätter statt 13) als Standard und Sparversion
   `Kassen-Training_Karteikarten_klein.pdf` 3 × 4 = 12 je Blatt (62 × 67 mm, lange Lösungen bis 6,8 pt, 5 Blätter).
+* 08.10.2026 (Betreiber: „Unterscheidung einfach, mittel, schwer … Ampelsystem … hinten anklickbar, ob der User es
+  wusste … die ganz kleine Größe ist nicht so gut … zwei oder mehr Geparkte zusammenführen muss mit rein“):
+  - Jede Aufgabe hat eine Ampel-Stufe (14 einfach / 22 mittel / 13 schwer): Karteikarten oben ein farbiges Band mit
+    Ampel (grün/gelb/rot) vorne und hinten, Übungsliste farbiges Nummernfeld mit „einfach/mittel/schwer“.
+  - Karteikarten-Rückseite: Kästchen ✓ / ✗ für drei Durchgänge.
+  - Neu `schulung/uebungsliste/karten.html` („Karten online“): eine Karte nach der anderen, „Lösung zeigen“, dann
+    „✓ Gewusst“ / „✗ Nicht gewusst“; Filter einfach/mittel/schwer, „Noch offen“, „Stapel Üben“, Mischen. Ergebnisse im
+    selben Gerätespeicher wie die Übungsliste (`kc.uebungsliste.v1`).
+  - Sparversion 3 × 4 (`Kassen-Training_Karteikarten_klein.pdf`) entfernt, nur noch 3 × 3 = 9 je Blatt.
+  - Neue Aufgaben: geparkte Bons verbinden + ALLE HOLEN (23,00 €), Verbindung lösen, ½-Portion auflösen per 🗑
+    (Stand app.js r53) – in der Kasse durchgespielt. Jetzt 49 Aufgaben, Liste 12 Seiten, Karten 14 Seiten.
 * Quelle: `werkzeuge/uebungsliste/daten.js` (Aufgaben) und `bauen.cjs` (erzeugt Webseite und PDF). Nach Änderungen an
   der Bedienung die betroffenen Schritte erneut durchspielen.
 

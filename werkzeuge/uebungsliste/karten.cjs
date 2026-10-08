@@ -1,5 +1,5 @@
 // Karteikarten zum Kassen-Training erzeugen: node werkzeuge/uebungsliste/karten.cjs
-// Standard: 3 x 3 = 9 Karten je Blatt (Kassen-Training_Karteikarten.pdf). Sparversion: SP=3 ZE=4 OUT=../../schulung/uebungsliste/Kassen-Training_Karteikarten_klein.pdf node karten.cjs
+// Standard: 3 x 3 = 9 Karten je Blatt (Kassen-Training_Karteikarten.pdf).
 // Vorderseite = Aufgabe, Rueckseite = Loesung. A4 beidseitig drucken ("an der langen Kante wenden"),
 // je Blatt SP x ZE Karten mit Schnittmarken (Standard 3 x 3). Die Rueckseiten sind dafuer gespiegelt angeordnet
 // (linke Karte vorne = rechte Karte hinten), damit jede Loesung genau hinter ihrer Aufgabe liegt.
@@ -13,7 +13,10 @@ const esc=s=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;');
 const fett=s=>esc(s).replace(/\*\*(.+?)\*\*/g,'<b>$1</b>');
 // Karten sammeln
 let nr=0;const karten=[];
-D.forEach(st=>st.aufgaben.forEach(a=>{nr++;karten.push({nr,stufe:st.stufe,punkte:st.punkte,...a})}));
+D.forEach(st=>st.aufgaben.forEach(a=>{nr++;karten.push({nr,stufe:st.stufe,punkte:st.punkte,niveau:a.n||st.niveau,...a})}));
+// Ampel: einfach = gruen, mittel = gelb/orange, schwer = rot (oben auf jeder Karte, vorne und hinten)
+const NIV={einfach:{f:'#2e7d32',t:'EINFACH',i:0},mittel:{f:'#d97706',t:'MITTEL',i:1},schwer:{f:'#c62828',t:'SCHWER',i:2}};
+const ampel=k=>{const n=NIV[k.niveau];const dots=['#4ade80','#fbbf24','#f87171'].map((c,i)=>`<i style="background:${i===n.i?c:'#4b5563'};${i===n.i?'box-shadow:0 0 0 .3mm #fff':''}"></i>`).join('');return `<div class="ampel" style="background:${n.f}"><span class="lichter">${dots}</span><b>${n.t}</b><em>Kassen-Training · Nr. ${k.nr}</em></div>`};
 const gesamt=karten.length;
 // Masse (mm): Karte 95 x 130, Abstand 8, auf A4 zentriert
 // Raster: SP Karten nebeneinander, ZE untereinander (per Umgebung SP/ZE einstellbar). Karteninhalt ist fuer
@@ -26,12 +29,13 @@ const marken=()=>{let h='';const xs=[],ys=[];for(let c=0;c<SP;c++)xs.push(X0+c*(
  const L=Math.min(4.5,RAND-1.5);
  xs.forEach(x=>{h+=`<i class="m v" style="left:${x}mm;top:${Y0-L-1}mm;height:${L}mm"></i><i class="m v" style="left:${x}mm;top:${Y0+ZE*KH+(ZE-1)*AB+1}mm;height:${L}mm"></i>`;for(let r=0;r<ZE-1;r++)h+=`<i class="m v" style="left:${x}mm;top:${Y0+(r+1)*KH+r*AB+1}mm;height:${AB-2}mm"></i>`});
  ys.forEach(y=>{h+=`<i class="m h" style="top:${y}mm;left:${X0-L-1}mm;width:${L}mm"></i><i class="m h" style="top:${y}mm;left:${X0+SP*KB+(SP-1)*AB+1}mm;width:${L}mm"></i>`;for(let c=0;c<SP-1;c++)h+=`<i class="m h" style="top:${y}mm;left:${X0+(c+1)*KB+c*AB+1}mm;width:${AB-2}mm"></i>`});return h};
-const kopf=k=>`<div class="kk"><img src="${LOGO}"><span>Kassen-Training</span><em>${esc(k.stufe.split(' · ')[0])} · ${'●'.repeat(k.punkte)}${'○'.repeat(5-k.punkte)}</em></div>`;
-const vorne=k=>{const lage=k.k.startsWith('(');return `${kopf(k)}<div class="vinhalt"><div class="nrgross">${k.nr}</div><div class="thema">${esc(k.stufe.split(' · ')[1])}</div>
+const kopf=k=>ampel(k);
+const vorne=k=>{const lage=k.k.startsWith('(');return `${kopf(k)}<div class="vinhalt"><div class="nrgross" style="background:${NIV[k.niveau].f}">${k.nr}</div><div class="thema">${esc(k.stufe.split(' · ')[1])}</div>
  <div class="was ${lage?'lage':''}">${lage?'Lage':'Kunde sagt'}</div><div class="satz ${lage?'lage':''}">${esc(lage?k.k.slice(1,-1):'„'+k.k+'“')}</div>${k.neu?'<span class="ge">ZUSÄTZLICH</span>':''}</div>
  <div class="kf">Was tippst du an der Kasse? · Lösung auf der Rückseite ↻</div>`};
-const hinten=k=>`${kopf(k)}<div class="hinhalt"><div class="ltitel"><span class="nr">${k.nr}</span>Lösung</div><ol>${k.s.map(x=>`<li>${fett(x)}</li>`).join('')}</ol>${k.w?`<div class="wege"><b>Andere Wege:</b><ul>${k.w.map(x=>`<li>${fett(x)}</li>`).join('')}</ul></div>`:''}<div class="kontrolle"><b>Kontrolle:</b> ${fett(k.e)}</div></div>
- <div class="kf"><b style="color:#2e7d32">✓ Gewusst</b> → Stapel „Kann ich“ &nbsp;·&nbsp; <b style="color:#c62828">✗ Nicht gewusst</b> → Stapel „Üben“</div>`;
+const hinten=k=>`${kopf(k)}<div class="hinhalt"><div class="ltitel"><span class="nr" style="background:${NIV[k.niveau].f}">${k.nr}</span>Lösung</div><ol>${k.s.map(x=>`<li>${fett(x)}</li>`).join('')}</ol>${k.w?`<div class="wege"><b>Andere Wege:</b><ul>${k.w.map(x=>`<li>${fett(x)}</li>`).join('')}</ul></div>`:''}<div class="kontrolle"><b>Kontrolle:</b> ${fett(k.e)}</div></div>
+ <div class="ankreuzen"><span class="ak-t">Gewusst?</span>${[1,2,3].map(d=>`<span class="ak-d"><small>${d}.</small><span class="ak-b ok"></span>✓<span class="ak-b nein"></span>✗</span>`).join('')}</div>
+ <div class="kf"><b style="color:#2e7d32">✓</b> → Stapel „Kann ich“ · <b style="color:#c62828">✗</b> → Stapel „Üben“</div>`;
 const karte=(inhalt,p)=>`<div class="karte" style="left:${p.x}mm;top:${p.y}mm"><div class="kin">${inhalt}</div></div>`;
 let seiten='';
 // Seite 1: Anleitung (A4, Stil der Club-App-Unterlagen), Seite 2 bleibt fuer den beidseitigen Druck leer
@@ -39,11 +43,12 @@ seiten+=`<div class="seite anl"><div class="akopf"><img src="${LOGO}"><b>Köchec
 <div class="titelblatt"><img src="${HUT}" style="width:62pt"><div class="t1">Köcheclub Werne</div><div class="t2">Kassen-Training — Karteikarten</div><div class="t3">${gesamt} Karten · ${VERSION} · Stand ${STAND} · dieselben Aufgaben wie in der Übungsliste</div></div>
 <h3 class="gruen">Alleine üben mit zwei Stapeln</h3>
 <div class="kasten"><ol>
- <li>Karten gut mischen oder nach Nummer sortieren (die Nummern werden von 1 bis ${gesamt} schwieriger).</li>
+ <li>Die <b>Ampel</b> oben auf jeder Karte zeigt die Schwierigkeit: <b style="color:#2e7d32">grün = einfach</b>, <b style="color:#d97706">gelb = mittel</b>, <b style="color:#c62828">rot = schwer</b>. Am besten mit den grünen anfangen.</li>
+ <li>Karten mischen oder nach Nummer sortieren.</li>
  <li><b>Vorderseite</b> lesen: was sagt der Kunde, was ist die Lage?</li>
  <li>An der <b>Schulungs-Kasse</b> ausführen – oder im Kopf durchgehen, welche Knöpfe du antippst.</li>
  <li>Karte umdrehen und mit der <b>Lösung</b> auf der Rückseite vergleichen. Oben steht der einfachste Weg, unter „<b>Andere Wege</b>“ weitere, die genauso richtig sind.</li>
- <li><b style="color:#2e7d32">Gewusst</b> → Karte auf den Stapel <b>„Kann ich“</b>. <b style="color:#c62828">Nicht gewusst</b> → auf den Stapel <b>„Üben“</b>.</li>
+ <li>Unten auf der Rückseite ankreuzen: <b style="color:#2e7d32">✓ gewusst</b> oder <b style="color:#c62828">✗ nicht gewusst</b> – Platz für drei Durchgänge. <b style="color:#2e7d32">Gewusst</b> → Karte auf den Stapel <b>„Kann ich“</b>. <b style="color:#c62828">Nicht gewusst</b> → auf den Stapel <b>„Üben“</b>.</li>
  <li>Wenn alle Karten durch sind: nur mit dem Stapel <b>„Üben“</b> weitermachen – so lange, bis er leer ist.</li></ol>
  <p>Zu zweit geht es auch: einer liest die Vorderseite vor wie ein Kunde, der andere kassiert.</p></div>
 <h3 class="gruen">Drucken und schneiden</h3>
@@ -63,6 +68,8 @@ body{font-family:Carlito,'Liberation Sans',sans-serif;color:#111;font-size:10pt;
 .m{position:absolute;background:#111}.m.v{width:.25mm}.m.h{height:.25mm}
 .karte{position:absolute;width:${KB}mm;height:${KH}mm;border:.2mm dotted #c9ced6;overflow:hidden}
 .kin{position:absolute;left:${3/Z}mm;top:${3/Z}mm;width:85mm;height:${(KH-6)/Z}mm;zoom:${Z};display:flex;flex-direction:column}
+.ampel{display:flex;align-items:center;gap:2mm;color:#fff;border-radius:1mm;padding:1.4mm 2.2mm;margin-bottom:1mm}.ampel b{font-size:10.5pt;letter-spacing:.6pt}.ampel em{margin-left:auto;font-style:normal;font-size:8pt;opacity:.95}.lichter{display:inline-flex;gap:1.1mm;background:#1f2937;padding:.9mm 1.4mm;border-radius:2mm}.lichter i{width:2.6mm;height:2.6mm;border-radius:50%;display:block}
+.ankreuzen{display:flex;align-items:center;justify-content:space-between;gap:1mm;border-top:.2mm solid #c9ced6;padding-top:1.4mm;margin-top:1mm;font-size:9pt;font-weight:700;color:#173765}.ak-d{display:inline-flex;align-items:center;gap:.8mm}.ak-d small{color:#5b6572;font-weight:400;margin-right:.5mm}.ak-b{display:inline-block;width:3.6mm;height:3.6mm;border:.35mm solid #111;border-radius:.6mm;background:#fff}.ak-b.ok{border-color:#2e7d32}.ak-b.nein{border-color:#c62828;margin-left:1mm}
 .kk{display:flex;align-items:flex-end;gap:2mm;border-bottom:.35mm solid #173765;padding-bottom:1.2mm}.kk img{width:9mm}.kk span{color:#173765;font-weight:700;font-size:9.5pt}.kk em{margin-left:auto;font-style:normal;color:#5b6572;font-size:8pt;letter-spacing:.2pt}
 .vinhalt{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:2mm 1mm}
 .nrgross{width:15mm;height:15mm;background:#2e7d32;color:#fff;font-size:21pt;font-weight:700;display:flex;align-items:center;justify-content:center;border-radius:1mm;margin-bottom:2.5mm}
