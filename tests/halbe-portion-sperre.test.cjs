@@ -12,5 +12,5 @@ for (const pfad of ['pos/app.js', 'schulung/pos/app.js']) {
   assert(/function openSelectedQuantity\(\)\{[^\n]*if\(istHalbeZeile\(item\)\)return/.test(s), pfad + ': Menge-Fenster nicht gesperrt');
 }
 for (const pfad of ['pos/index.html', 'schulung/pos/index.html', 'pos/service-worker.js', 'schulung/pos/service-worker.js'])
-  assert(fs.readFileSync(pfad, 'utf8').includes('app.js?build=0.31.3.6-r53'), pfad + ': Build r53 fehlt');
+  assert(/app\.js\?build=0\.31\.3\.6-r(5[3-9]|[6-9]\d)/.test(fs.readFileSync(pfad, 'utf8')), pfad + ': Build r53 oder neuer fehlt');
 console.log('halbe-portion-sperre: ok');

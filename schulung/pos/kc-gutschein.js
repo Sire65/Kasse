@@ -346,13 +346,18 @@
     if (z === 'abgelaufen') { melde('gsPruefErgebnis', 'warn', `Dieser Gutschein war bis ${datum(g.expiresAt)} gültig.`); return; }
     if (z === 'eingeloest') { melde('gsPruefErgebnis', 'warn', 'Auf diesem Gutschein ist kein Guthaben mehr.'); return; }
     const offen = typeof global.total === 'function' ? +global.total().toFixed(2) : 0;
+    // Schon als Teilzahlung auf diesem Bon angerechnet? Dann nicht ein zweites Mal verwenden.
+    if (typeof global.kcGutscheinImBon === 'function' && global.kcGutscheinImBon(g.code) > 0) {
+      melde('gsPruefErgebnis', 'warn', 'Dieser Gutschein ist auf dem Bon schon angerechnet.'); return;
+    }
     const nutzbar = Math.min(g.balance, offen || g.balance);
+    const teil = offen > g.balance + 0.004;
     melde('gsPruefErgebnis', 'gut',
       `<strong>${esc(g.code)}</strong><br>Guthaben: <strong>${geld(g.balance)}</strong> · gültig bis ${datum(g.expiresAt)}<br>`
       + (offen > 0
         ? `Offener Bon: ${geld(offen)} \u2013 davon werden ${geld(nutzbar)} angerechnet.`
-          + (offen > g.balance ? `<br><em>Rest von ${geld(offen - g.balance)} bitte bar kassieren.</em>` : '')
-          + `<div class="kc-gs-aktion"><button type="button" id="gsBuchen" class="kc-gs-haupt">${geld(nutzbar)} einlösen und Bon abschließen</button></div>`
+          + (teil ? `<br><em>Rest von ${geld(offen - g.balance)} danach ganz normal kassieren (z. B. BAR).</em>` : '')
+          + `<div class="kc-gs-aktion"><button type="button" id="gsBuchen" class="kc-gs-haupt">${teil ? `${geld(nutzbar)} anrechnen \u2013 Rest ${geld(offen - g.balance)} kassieren` : `${geld(nutzbar)} einlösen und Bon abschließen`}</button></div>`
         : '<em>Zurzeit liegt kein Bon an. Bitte zuerst die Artikel erfassen.</em>'));
     el('gsBuchen')?.addEventListener('click', () => buchen(g));
   }
@@ -362,10 +367,18 @@
   async function buchen(g) {
     const offen = typeof global.total === 'function' ? +global.total().toFixed(2) : 0;
     if (offen <= 0) return;
-    if (offen > g.balance) {
-      melde('gsPruefErgebnis', 'warn',
-        `Das Guthaben von ${geld(g.balance)} deckt den Bon über ${geld(offen)} nicht vollständig. `
-        + 'Teilzahlung ist noch nicht eingebaut – bitte den Bon vorerst wie gewohnt abrechnen.');
+    // Teilzahlung (08.10.2026): Guthaben als Minus-Zeile in den Warenkorb, Rest normal kassieren.
+    // Abgezogen wird erst, wenn der Bon abgeschlossen ist (siehe kcGutscheinAnrechnen in app.js).
+    if (offen > g.balance + 0.004) {
+      if (typeof global.kcGutscheinAnrechnen !== 'function') {
+        melde('gsPruefErgebnis', 'warn', 'Teilzahlung ist an dieser Kasse nicht verfügbar – bitte den Bon wie gewohnt abrechnen.');
+        return;
+      }
+      const r = global.kcGutscheinAnrechnen(g.code, g.balance);
+      if (!r.ok) { melde('gsPruefErgebnis', 'warn', r.grund); return; }
+      el('gutscheinDialog').close();
+      global.showMessage?.('Gutschein angerechnet', geld(r.angerechnet),
+        `${g.code} \u00b7 Rest ${geld(r.rest)} jetzt ganz normal kassieren (z. B. BAR).`);
       return;
     }
     try {

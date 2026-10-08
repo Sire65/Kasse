@@ -1145,6 +1145,37 @@ function addDiversItem(betrag){
   state.lastAdded=key;state.selectedCartKey=key;renderProducts();renderCart();
   notify("success",found?`Divers ${money(fromCents(cents))} – Menge jetzt ${found.qty}`:`Divers ${money(fromCents(cents))} wurde dem Einkaufswagen hinzugefügt`,`add:${key}`);
 }
+// 08.10.2026 Gutschein-Teilzahlung (Betreiber: "Teilzahlung mit einbauen"): deckt das
+// Guthaben den Bon nicht, wird es als feste Minus-Zeile "Gutschein GS-..." in den Warenkorb
+// gelegt (gleiches Muster wie die Reklamationszeilen). Der Rest wird ganz normal bar, per Konto
+// usw. abgerechnet. Abgezogen wird das Guthaben ERST beim Abschluss des Bons (completeSale) -
+// wird die Zeile geloescht oder der Bon verworfen, bleibt der Gutschein unberuehrt.
+function gutscheinZeile(x){return !!x?.voucherCredit}
+function kcGutscheinImBon(code){const c=String(code||"").toUpperCase();return fromCents(state.cart.filter(x=>gutscheinZeile(x)&&String(x.voucherCredit.code).toUpperCase()===c).reduce((s,x)=>s+toCents(-lineUnit(x)*x.qty),0))}
+function kcGutscheinAnrechnen(code,betrag){
+  if(!state.cart.length)return {ok:false,grund:"Zurzeit liegt kein Bon an. Bitte zuerst die Artikel erfassen."};
+  if(kcGutscheinImBon(code)>0)return {ok:false,grund:"Dieser Gutschein ist auf dem Bon schon angerechnet."};
+  const offen=total(),cents=Math.min(toCents(betrag),toCents(offen));
+  if(cents<=0)return {ok:false,grund:"Auf dem Bon ist nichts mehr offen."};
+  const wert=fromCents(cents),key=`gutschein:${String(code).toUpperCase()}`;
+  state.cart.push({key,id:`VOUCHER-${code}`,name:`Gutschein ${code}`,price:-wert,normalPrice:-wert,halfAllowed:false,halfPrice:0,portionFactor:1,originalPrice:-wert,offerId:null,offerName:"",offerType:"",category:"Gutschein",image:"assets/divers.svg",manualDeposit:false,qty:1,option:null,deposits:[],lockedQuantity:true,voucherCredit:{code:String(code)}});
+  state.lastAdded=key;state.selectedCartKey=key;renderCart();
+  notify("success",`Gutschein ${code}: ${money(wert)} angerechnet – Rest ${money(total())}`,`gutschein:${key}`);
+  return {ok:true,angerechnet:wert,rest:total()};
+}
+// Vor dem Abschluss: reicht das Guthaben (noch) fuer alle Gutscheinzeilen? Sonst kein Abschluss.
+function kcGutscheinZeilenPruefen(type){
+  const zeilen=state.cart.filter(gutscheinZeile);if(!zeilen.length)return "";
+  if(type==="personal"||type==="helfer")return "Ein Bon mit Gutschein kann nicht als Personal oder Helfer gebucht werden. Bitte die Gutschein-Zeile löschen.";
+  if(toCents(total())<0)return "Der Gutschein ist höher als der Bon. Bitte die Gutschein-Zeile löschen und den Gutschein neu einlösen.";
+  const K=window.KCGutschein;if(!K)return "Gutscheine sind an dieser Kasse nicht verfügbar.";
+  for(const code of [...new Set(zeilen.map(x=>String(x.voucherCredit.code).toUpperCase()))]){
+    const g=K.finde(code);if(!g)return `Gutschein ${code} wurde nicht gefunden.`;
+    if(K.abgelaufen(g))return `Gutschein ${code} ist abgelaufen.`;
+    if(kcGutscheinImBon(code)>Number(g.balance)+0.004)return `Auf Gutschein ${code} sind nur noch ${money(g.balance)}. Bitte die Gutschein-Zeile löschen und neu einlösen.`;
+  }
+  return "";
+}
 function openProductVariants(id){if(!operatorReadyForArticle())return;const p=PRODUCTS.find(x=>x.id===id);if(!p?.optionGroup)return;state.lastSelectedProduct=id;renderProducts();openOptions(p)}
 function openOptions(p){state.pendingProduct=p;const group=OPTIONS[p.optionGroup];el("optionTitle").textContent=group.title;el("optionSubtitle").textContent=p.name;el("optionButtons").innerHTML=group.choices.map(o=>`<button type="button" class="option-choice" data-option="${o.id}"><span class="option-icon">${o.icon}</span><span><strong>${o.name}</strong><small>${o.price?`Aufpreis ${money(o.price)}`:"ohne Aufpreis"}</small></span><b>${o.price?`+ ${money(o.price)}`:""}</b></button>`).join("");el("optionButtons").querySelectorAll("button").forEach(b=>b.onclick=()=>{const o=group.choices.find(x=>x.id===b.dataset.option);el("optionDialog").close();addConfiguredProduct(p,o)});el("optionDialog").showModal()}
 function addConfiguredProduct(p,option){
@@ -1283,9 +1314,9 @@ function halbeAufloesen(i){
 }
 function syncCartQuantityBar(){
   const item=selectedCartItem(),buttons=document.querySelectorAll("[data-cart-qty]"),more=el("moreQuantityBtn");
-  buttons.forEach(button=>{button.disabled=!item||istHalbeZeile(item);button.classList.toggle("active",!!item&&Number(button.dataset.cartQty)===item.qty)});
+  buttons.forEach(button=>{button.disabled=!item||istHalbeZeile(item)||gutscheinZeile(item);button.classList.toggle("active",!!item&&Number(button.dataset.cartQty)===item.qty)});
   if(more){
-    more.disabled=!item||istHalbeZeile(item);
+    more.disabled=!item||istHalbeZeile(item)||gutscheinZeile(item);
     const overflow=!!item&&Number(item.qty)>7;
     more.classList.toggle("quantity-overflow-active",overflow);
     more.dataset.currentQty=overflow?String(item.qty):"";
@@ -1358,7 +1389,7 @@ function cartAction(a,i){
   /* ½-Knopf in der Zeile: er wirkt genau auf DIESE Zeile, nicht auf die markierte.
      So lassen sich gemischte Bons tippen - ein halber und ein ganzer Gluehwein. */
   if(a==="half"){state.selectedCartKey=item.key;toggleSelectedHalfPortion();return}
-  if((a==="plus"||a==="minus")&&item.lockedQuantity)return setSystemHint("Reklamationspositionen werden im Reklamationsdialog geändert","warn");
+  if((a==="plus"||a==="minus")&&item.lockedQuantity)return setSystemHint(gutscheinZeile(item)?"Gutschein-Betrag steht fest – zum Ändern 🗑 antippen und neu einlösen":"Reklamationspositionen werden im Reklamationsdialog geändert","warn");
   if((a==="plus"||a==="minus")&&istHalbeZeile(item))return setSystemHint(HALB_GESPERRT,"warn");
   if(a==="delete"&&istHalbeZeile(item)){askConfirm("½ Portion auflösen",`½ ${item.name} wieder zu einer ganzen Portion machen? (Soll er ganz weg: danach bei der ganzen Zeile − antippen.)`,()=>halbeAufloesen(state.cart.indexOf(item)));return}
   if(a==="plus"){rememberQuantityChange(item);item.qty++;notify("info",`${item.name} – Menge auf ${item.qty} erhöht`,`qty:${item.key}`)}
@@ -1786,6 +1817,7 @@ function playCompletedSaleSound(){
 function canonicalTransaction(row){const copy=cloneData(row);delete copy.recordHash;return JSON.stringify(copy)}
 async function completeSale(method,{type="sale",silent=false,changeTarget=null,directSettlement=false,payoutHandledWithoutCash=false,helperGroup=null}={}){
   if(!state.cart.length)return keinBonMeldung();
+  {const gsFehler=kcGutscheinZeilenPruefen(type);if(gsFehler){showMessage("Gutschein","!",gsFehler);return}}
   if(state.saleInProgress)return;
   state.saleInProgress=true;
   await _txHydrated; // Sicherheitsnetz: garantiert vollständig geladenen Umsatzspeicher vor der ersten echten Buchung
@@ -1799,7 +1831,11 @@ async function completeSale(method,{type="sale",silent=false,changeTarget=null,d
     if(globalDiscountValue>0)items.push({id:"DISCOUNT",name:`Rabatt ${Number(state.discount.percent).toLocaleString("de-DE")} %${state.discount.reason?` · ${state.discount.reason}`:""}`,category:"Rabatt",price:-globalDiscountValue,qty:1,unitTotal:-globalDiscountValue,lineTotal:-globalDiscountValue,discountLine:true});
     state.cart.filter(item=>item.positionDiscount?.percent).forEach(item=>{const value=+positionDiscountAmount(item).toFixed(2);if(value>0)items.push({id:`POSITION-DISCOUNT-${item.id}`,name:`Positionsrabatt ${Number(item.positionDiscount.percent).toLocaleString("de-DE")} % · ${item.name}`,category:"Positionsrabatt",price:-value,qty:1,unitTotal:-value,lineTotal:-value,discountLine:true,sourceItemKey:item.key,reason:item.positionDiscount.reason||null,note:item.positionDiscount.note||null})});
     const rec={transactionId:crypto.randomUUID(),formatVersion:6,bon:current,bonNumber:current,startTime:state.cartStartedAt||endTime,time:endTime,endTime,registerId:state.master.registerId,registerName:state.master.registerName,operator:state.master.operatorName,type,training,method,payment:method,...(helperGroup?{helperGroup}:{}),grossDue,grossDueCents:toCents(grossDue),discount:{percent:Number(state.discount.percent||0),amount:discountValue,amountCents:toCents(discountValue),globalAmount:globalDiscountValue,positionAmount:positionDiscountValue,base:discountBase(),reason:state.discount.reason||null,note:state.discount.note||null,keys:Array.isArray(state.discount.keys)?state.discount.keys:[],positions:state.cart.filter(item=>item.positionDiscount?.percent).map(item=>({key:item.key,id:item.id,name:item.name,percent:Number(item.positionDiscount.percent),amount:positionDiscountAmount(item),reason:item.positionDiscount.reason||null}))},due,total:due,dueCents:toCents(due),given,givenCents:toCents(given),settlementTarget:+settlementTarget.toFixed(2),isPayout,payout,payoutCents:toCents(payout),change,changeCents:toCents(change),depositRule:state.master.depositRule,items,previousHash};
+    {const gs=items.filter(i=>i.voucherCredit);if(gs.length)rec.voucherPayments=gs.map(i=>({code:i.voucherCredit.code,amount:+(-Number(i.lineTotal||0)).toFixed(2)}))}
     rec.recordHash=await sha256Hex(canonicalTransaction(rec));rows.push(rec);saveTransactions(rows,training);
+    // Gutschein-Teilzahlung: Guthaben erst jetzt abziehen, wo der Bon sicher gespeichert ist.
+    // Trainingsbons verbrauchen kein echtes Guthaben.
+    if(!training&&rec.voucherPayments&&window.KCGutschein)rec.voucherPayments.forEach(v=>{const r=window.KCGutschein.einloesen(v.code,v.amount,{bon:current});if(!r.ok)console.warn("Gutschein",v.code,r.grund)});
     // KC Sync Live-Monitor: rein zur Anzeige im PC Manager, kein Archiv, keine Auswirkung auf
     // die Buchung selbst (siehe kc-sync-live-event.js für die Begründung). NICHT awaited.
     if(!training&&window.KCSyncLiveEvent)window.KCSyncLiveEvent.send("sale",{registerId:rec.registerId,registerName:rec.registerName,operator:rec.operator,bon:rec.bon,type:rec.type,method:rec.method,due:rec.due,given:rec.given,change:rec.change,isPayout:rec.isPayout,payout:rec.payout,itemCount:rec.items.filter(i=>!i.discountLine).length,time:rec.time});
@@ -3438,7 +3474,7 @@ function closingSnapshot(){
   const accountTx=tx.filter(t=>t.type!=="personal"&&t.type!=="helfer"&&String(t.method||t.payment)==="account-charge");
   const accountSales=accountTx.reduce((sum,t)=>sum+Number(t.due??t.total??0),0);
   const accountBreakdown=(()=>{const je={};kcEvents().filter(e=>e.status!=="void"&&!e.training&&(!e.registerId||e.registerId===state.master.registerId)&&(!startAt||e.date>=startAt)).forEach(e=>{const k=e.accountName||e.accountId;je[k]=(je[k]||0)+Number(e.amount||0)});return Object.entries(je).map(([name,amount])=>({name,amount:+amount.toFixed(2)}))})();
-  const totalSales=tx.filter(t=>t.type!=="personal"&&t.type!=="helfer").reduce((sum,t)=>sum+Number(t.due??t.total??0),0);
+  const totalSales=tx.filter(t=>t.type!=="personal"&&t.type!=="helfer").reduce((sum,t)=>sum+Number(t.due??t.total??0)+(t.voucherPayments||[]).reduce((s,v)=>s+Number(v.amount||0),0),0);
   const receiptExpected=withdrawals.filter(w=>w.receiptAvailable===true).length;
   return {startAt,tx,movements,withdrawals,tips,staffCount:staffTx.length,staffTotal:+staffTotal.toFixed(2),helperCount:helperTx.length,helperTotal:+helperTotal.toFixed(2),helperBreakdown,cashIn:+cashIn.toFixed(2),cashSales:+cashSales.toFixed(2),accountSales:+accountSales.toFixed(2),accountBreakdown,totalSales:+totalSales.toFixed(2),cashTips:+cashTipsDrawer.toFixed(2),tipTotal:+cashTips.toFixed(2),cashOut:+cashOut.toFixed(2),expectedCash:+(cashIn+cashSales+cashTipsDrawer-cashOut).toFixed(2),receiptExpected};
 }
@@ -4199,7 +4235,7 @@ function setTrainingMode(active){if(active&&state.master.rushMode){setSystemHint
 el("trainingModeBtn").onclick=()=>setTrainingMode(!state.master.trainingMode);
 el("trainingModeTopBtn").onclick=()=>setTrainingMode(!state.master.trainingMode);
 el("exitTrainingModeBtn")?.addEventListener("click",()=>setTrainingMode(false));
-function openSelectedQuantity(){const item=selectedCartItem();if(!item)return setSystemHint("Zuerst eine Einkaufswagenzeile antippen","warn");if(istHalbeZeile(item))return setSystemHint(HALB_GESPERRT,"warn");el("quantityArticleName").textContent=item.name;el("customQuantity").value=item.qty;el("quantityDialog").showModal()}
+function openSelectedQuantity(){const item=selectedCartItem();if(!item)return setSystemHint("Zuerst eine Einkaufswagenzeile antippen","warn");if(istHalbeZeile(item))return setSystemHint(HALB_GESPERRT,"warn");if(gutscheinZeile(item))return setSystemHint("Gutschein-Betrag steht fest","warn");el("quantityArticleName").textContent=item.name;el("customQuantity").value=item.qty;el("quantityDialog").showModal()}
 el("moreQuantityBtn").onclick=openSelectedQuantity;
 el("undoQuantityBtn").onclick=undoQuantityChange;
 let quickQuantityKey=null;
@@ -4208,6 +4244,7 @@ function applyQuantity(q){
   const item=selectedCartItem();
   if(!item)return;
   if(istHalbeZeile(item))return setSystemHint(HALB_GESPERRT,"warn");
+  if(gutscheinZeile(item))return setSystemHint("Gutschein-Betrag steht fest","warn");
   rememberQuantityChange(item);
   item.qty=Math.max(1,Number(q)||1);
   quickQuantityKey=null;
@@ -4218,6 +4255,7 @@ function applyQuickQuantity(q){
   const item=selectedCartItem();
   if(!item)return;
   if(istHalbeZeile(item))return setSystemHint(HALB_GESPERRT,"warn");
+  if(gutscheinZeile(item))return setSystemHint("Gutschein-Betrag steht fest","warn");
   const value=Math.max(1,Number(q)||1);
   const now=Date.now();
   rememberQuantityChange(item);

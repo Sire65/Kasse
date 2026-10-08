@@ -610,3 +610,29 @@ Dort sind Plus/Minus gesperrt. Will der Kunde doch einen ganzen, geht das über 
   Soll der Artikel ganz weg: danach bei der ganzen Zeile −.
 - **½ nochmal** auf einer ½-Zeile wirkt genauso (auflösen statt einer zweiten ganzen Zeile).
 - Test: `tests/halbe-portion-sperre.test.cjs`. Für Übungsliste/Karteikarten: Aufgaben mit halber Portion prüfen.
+
+## Nachtrag 08.10.2026 – Gutschein-Teilzahlung (Kasse und Schulung, app.js r54, kc-gutschein.js 0.2.0)
+
+Wunsch Betreiber: „Dann baue Teilzahlung mit ein.“ Bisher meldete die Kasse bei zu kleinem Guthaben
+„Teilzahlung ist noch nicht eingebaut“.
+
+- **Gutschein prüfen** zeigt bei zu kleinem Guthaben jetzt **„3,50 € anrechnen – Rest 14,50 € kassieren“**.
+  Das Guthaben kommt als feste Minus-Zeile „Gutschein GS-…“ in den Warenkorb (Muster wie die
+  Reklamationszeilen: + / − / Mengenknöpfe / „…“ gesperrt, 🗑 löscht sie). Der Rest wird ganz normal
+  kassiert (BAR, Rückgeld, KONTO, auch ein zweiter Gutschein).
+- Abgezogen wird das Guthaben **erst beim Abschluss** des Bons (`completeSale`), nachdem der Bon
+  gespeichert ist. Zeile gelöscht oder Bon verworfen → Gutschein unverändert. Trainingsbons verbrauchen
+  kein Guthaben.
+- Vor dem Abschluss wird geprüft: Gutschein vorhanden, nicht abgelaufen, Guthaben reicht noch; Bon nicht
+  negativ (Gutschein höher als Bon → „Gutschein-Zeile löschen und neu einlösen“); kein Personal/Helfer.
+  Derselbe Gutschein kann auf einem Bon nicht zweimal angerechnet werden.
+- Buchung: `due` = kassierter Rest (Bargeld stimmt im Kassensturz), neues Feld `voucherPayments`
+  [{code, amount}] am Bon; im Abschluss/X-Bericht zählt der Gutschein-Anteil zum **Umsatz** (Einlösen =
+  Umsatz, siehe kc-gutschein.js), aber nicht zum Bargeld.
+- Im Browser durchgespielt: 18,00 € Bon + 3,50 € Gutschein → 14,50 € bar, Rückgeld 5,50 €, Guthaben 0,
+  Umsatz 18,00 €, Bargeld 14,50 €; zwei Gutscheine à 10 € auf 16,50 € → Bon fertig, Restguthaben 3,50 €.
+- Offen (wie bisher auch beim vollen Einlösen): Storno eines Bons gibt das Gutschein-Guthaben nicht
+  automatisch zurück; der PC-Manager wertet `voucherPayments` noch nicht gesondert aus.
+- Test: `tests/gutschein-teilzahlung.test.cjs`; `tests/halbe-portion-sperre.test.cjs` prüft jetzt „r53 oder neuer“.
+- Übungsliste/Karteikarten Version 2 (63 Aufgaben): neue Karte Gutschein-Teilzahlung, Zeiterfassung aufgeteilt
+  in „mit Ausweis“ und „Ausweis vergessen“ (Geburtstag TTMMJJ – mit eingetragener Test-Person durchgespielt).
