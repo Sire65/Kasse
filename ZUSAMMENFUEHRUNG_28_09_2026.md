@@ -565,11 +565,11 @@ Betreiber: „Mache alle Mülleimer im Programm rot, besonders im Warenkorb.“
   - Neue Aufgaben: geparkte Bons verbinden + ALLE HOLEN (23,00 €), Verbindung lösen, ½-Portion auflösen per 🗑
     (Stand app.js r53) – in der Kasse durchgespielt. Jetzt 49 Aufgaben, Liste 12 Seiten, Karten 14 Seiten.
 * 08.10.2026 Version 2 (Betreiber: „prüfe, ob alle möglichen Sachen an der Kasse abgedeckt sind, außer Tagesabschluss“):
-  Alle Knöpfe der Oberfläche KC003, MEHR und Zahlen-Seite durchgesehen; 13 neue Aufgaben, jede in der Schulungs-Kasse
+  Alle Knöpfe der Oberfläche KC003, MEHR und Zahlen-Seite durchgesehen; 12 neue Aufgaben, jede in der Schulungs-Kasse
   durchgespielt: Außer-Haus-Becher, 12 Stück über „… → Andere Menge“ (↶ zurück), zu wenig Geld („NOCH … FEHLEN“),
-  falschen Schein mit ↶ zurücknehmen, Gutschein verkaufen und einlösen, altes Glas zurück + neues Getränk,
+  Gutschein verkaufen und einlösen, altes Glas zurück + neues Getränk,
   Kontostände, Währungsrechner, Bildschirm sperren, Kommen & Gehen, Dienstplan, Stoßzeiten. Zusätzlicher Weg bei
-  „Glühwein weiß“ (Favoriten). Jetzt 62 Aufgaben (18 einfach / 30 mittel / 14 schwer), Liste 14 Seiten, Karten 16 Seiten.
+  „Glühwein weiß“ (Favoriten). Jetzt 61 Aufgaben (18 einfach / 29 mittel / 14 schwer), Liste 14 Seiten, Karten 16 Seiten.
   Nicht aufgenommen: Wertmarke (in der Kasse „noch nicht freigeschaltet“), Happy Hour (kein Angebot eingerichtet).
   Befund für den Betreiber: Gutschein-Teilzahlung fehlt – deckt das Guthaben den Bon nicht, meldet die Kasse
   „Teilzahlung ist noch nicht eingebaut“.
