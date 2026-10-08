@@ -30,10 +30,10 @@ const marken=()=>{let h='';const xs=[],ys=[];for(let c=0;c<SP;c++)xs.push(X0+c*(
  xs.forEach(x=>{h+=`<i class="m v" style="left:${x}mm;top:${Y0-L-1}mm;height:${L}mm"></i><i class="m v" style="left:${x}mm;top:${Y0+ZE*KH+(ZE-1)*AB+1}mm;height:${L}mm"></i>`;for(let r=0;r<ZE-1;r++)h+=`<i class="m v" style="left:${x}mm;top:${Y0+(r+1)*KH+r*AB+1}mm;height:${AB-2}mm"></i>`});
  ys.forEach(y=>{h+=`<i class="m h" style="top:${y}mm;left:${X0-L-1}mm;width:${L}mm"></i><i class="m h" style="top:${y}mm;left:${X0+SP*KB+(SP-1)*AB+1}mm;width:${L}mm"></i>`;for(let c=0;c<SP-1;c++)h+=`<i class="m h" style="top:${y}mm;left:${X0+(c+1)*KB+c*AB+1}mm;width:${AB-2}mm"></i>`});return h};
 const kopf=k=>ampel(k);
-const vorne=k=>{const lage=k.k.startsWith('(');return `${kopf(k)}<div class="vinhalt"><div class="nrgross" style="background:${NIV[k.niveau].f}">${k.nr}</div><div class="thema">${esc(k.stufe.split(' · ')[1])}</div>
+const vorne=k=>{const lage=k.k.startsWith('(');return `${kopf(k)}<div class="vinhalt"><div class="nrgross">${k.nr}</div><div class="thema">${esc(k.stufe.split(' · ')[1])}</div>
  <div class="was ${lage?'lage':''}">${lage?'Lage':'Kunde sagt'}</div><div class="satz ${lage?'lage':''}">${esc(lage?k.k.slice(1,-1):'„'+k.k+'“')}</div>${k.neu?'<span class="ge">ZUSÄTZLICH</span>':''}</div>
  <div class="kf">Was tippst du an der Kasse? · Lösung auf der Rückseite ↻</div>`};
-const hinten=k=>`${kopf(k)}<div class="hinhalt"><div class="ltitel"><span class="nr" style="background:${NIV[k.niveau].f}">${k.nr}</span>Lösung</div><ol>${k.s.map(x=>`<li>${fett(x)}</li>`).join('')}</ol>${k.w?`<div class="wege"><b>Andere Wege:</b><ul>${k.w.map(x=>`<li>${fett(x)}</li>`).join('')}</ul></div>`:''}<div class="kontrolle"><b>Kontrolle:</b> ${fett(k.e)}</div></div>
+const hinten=k=>`${kopf(k)}<div class="hinhalt"><div class="ltitel"><span class="nr">${k.nr}</span>Lösung</div><ol>${k.s.map(x=>`<li>${fett(x)}</li>`).join('')}</ol>${k.w?`<div class="wege"><b>Andere Wege:</b><ul>${k.w.map(x=>`<li>${fett(x)}</li>`).join('')}</ul></div>`:''}<div class="kontrolle"><b>Kontrolle:</b> ${fett(k.e)}</div></div>
  <div class="ankreuzen"><span class="ak-t">Gewusst?</span>${[1,2,3].map(d=>`<span class="ak-d"><small>${d}.</small><span class="ak-b ok"></span>✓<span class="ak-b nein"></span>✗</span>`).join('')}</div>
  <div class="kf"><b style="color:#2e7d32">✓</b> → Stapel „Kann ich“ · <b style="color:#c62828">✗</b> → Stapel „Üben“</div>`;
 const karte=(inhalt,p)=>`<div class="karte" style="left:${p.x}mm;top:${p.y}mm"><div class="kin">${inhalt}</div></div>`;
@@ -72,14 +72,14 @@ body{font-family:Carlito,'Liberation Sans',sans-serif;color:#111;font-size:10pt;
 .ankreuzen{display:flex;align-items:center;justify-content:space-between;gap:1mm;border-top:.2mm solid #c9ced6;padding-top:1.4mm;margin-top:1mm;font-size:9pt;font-weight:700;color:#173765}.ak-d{display:inline-flex;align-items:center;gap:.8mm}.ak-d small{color:#5b6572;font-weight:400;margin-right:.5mm}.ak-b{display:inline-block;width:3.6mm;height:3.6mm;border:.35mm solid #111;border-radius:.6mm;background:#fff}.ak-b.ok{border-color:#2e7d32}.ak-b.nein{border-color:#c62828;margin-left:1mm}
 .kk{display:flex;align-items:flex-end;gap:2mm;border-bottom:.35mm solid #173765;padding-bottom:1.2mm}.kk img{width:9mm}.kk span{color:#173765;font-weight:700;font-size:9.5pt}.kk em{margin-left:auto;font-style:normal;color:#5b6572;font-size:8pt;letter-spacing:.2pt}
 .vinhalt{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:2mm 1mm}
-.nrgross{width:15mm;height:15mm;background:#2e7d32;color:#fff;font-size:21pt;font-weight:700;display:flex;align-items:center;justify-content:center;border-radius:1mm;margin-bottom:2.5mm}
+.nrgross{width:15mm;height:15mm;background:#173765;color:#fff;font-size:21pt;font-weight:700;display:flex;align-items:center;justify-content:center;border-radius:1mm;margin-bottom:2.5mm}
 .thema{color:#2e7d32;font-size:10.5pt;margin-bottom:5mm}
 .was{font-size:7.5pt;font-weight:700;letter-spacing:.3pt;text-transform:uppercase;color:#fff;background:#173765;border-radius:.6mm;padding:.3mm 1.5mm;margin-bottom:2mm}.was.lage{background:#5b6572}
 .satz{font-size:14.5pt;font-weight:700;color:#173765;line-height:1.25}.satz.lage{color:#5b6572;font-style:italic;font-size:13pt}
 .ge{display:inline-block;color:#fff;font-size:7pt;font-weight:700;padding:.3mm 1.2mm;border-radius:.6mm;background:#c2410c;margin-top:3mm}
 .kf{border-top:.2mm solid #c9ced6;padding-top:1.2mm;color:#5b6572;font-size:7.6pt;text-align:center}
 .hinhalt{flex:1;padding-top:2.5mm;overflow:hidden}
-.ltitel{color:#2e7d32;font-size:13pt;margin-bottom:2mm;display:flex;align-items:center;gap:2mm}.ltitel .nr{width:7.5mm;height:7.5mm;background:#2e7d32;color:#fff;font-weight:700;font-size:11pt;display:flex;align-items:center;justify-content:center;border-radius:.6mm}
+.ltitel{color:#2e7d32;font-size:13pt;margin-bottom:2mm;display:flex;align-items:center;gap:2mm}.ltitel .nr{width:7.5mm;height:7.5mm;background:#173765;color:#fff;font-weight:700;font-size:11pt;display:flex;align-items:center;justify-content:center;border-radius:.6mm}
 ol{margin:0 0 2.5mm;padding-left:4.5mm}ol li{margin-bottom:1.6mm}ol b,.kontrolle b{color:#173765}
 .wege{font-size:.86em;color:#334155;background:#f1f5f9;border-left:.9mm solid #9aa3ad;padding:1.2mm 2.2mm;margin:0 0 2.2mm}.wege>b{color:#5b6572}.wege ul{margin:.6mm 0 0;padding-left:4mm}.wege li{margin-bottom:.6mm}.wege b{color:#173765}
 .kontrolle{border-left:.9mm solid #2e7d32;background:#e8f5ec;padding:1.5mm 2.4mm;font-size:.93em}

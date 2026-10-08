@@ -13,18 +13,20 @@ const esc=s=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;');
 const fett=s=>esc(s).replace(/\*\*(.+?)\*\*/g,'<b>$1</b>');
 const gesamt=D.reduce((n,s)=>n+s.aufgaben.length,0);
 let nr=0;const bereiche=[];
-const NIV={einfach:['#2e7d32','einfach'],mittel:['#d97706','mittel'],schwer:['#c62828','schwer']};
+const NIV={einfach:['#2e7d32','einfach',0],mittel:['#d97706','mittel',1],schwer:['#c62828','schwer',2]};
+// Einheitliches Zeichen fuer die Schwierigkeit (wie auf den Karteikarten): farbiges Feld mit drei Ampel-Lichtern + Wort
+const ampelChip=n=>{const v=NIV[n];return `<span class="ampelchip" style="background:${v[0]}"><span class="lichter">${['#4ade80','#fbbf24','#f87171'].map((c,i)=>`<i style="background:${i===v[2]?c:'#4b5563'}"></i>`).join('')}</span>${v[1]}</span>`};
 const stufen=D.map(st=>{const von=nr+1;const html=st.aufgaben.map(a=>{nr++;const lage=a.k.startsWith('(');const nv=NIV[a.n||st.niveau];return `<div class="aufgabe">
-  <div class="nr" style="background:${nv[0]}">${nr}<small>${nv[1]}</small></div>
+  <div class="nr">${nr}</div>
   <div class="zt">
-   <h4 class="${lage?'lage':''}"><span class="was">${lage?'Lage':'Kunde sagt'}</span>${esc(lage?a.k.slice(1,-1):'„'+a.k+'“')}${a.neu?' <span class="ge">ZUSÄTZLICH</span>':''}</h4>
+   <h4 class="${lage?'lage':''}">${ampelChip(a.n||st.niveau)}<span class="was">${lage?'Lage':'Kunde sagt'}</span>${esc(lage?a.k.slice(1,-1):'„'+a.k+'“')}${a.neu?' <span class="ge">ZUSÄTZLICH</span>':''}</h4>
    <ol>${a.s.map(x=>`<li>${fett(x)}</li>`).join('')}</ol>
    ${a.w?`<div class="wege"><b>Andere Wege:</b><ul>${a.w.map(x=>`<li>${fett(x)}</li>`).join('')}</ul></div>`:''}
    <div class="kontrolle"><b>Kontrolle:</b> ${fett(a.e)}</div>
   </div>
   <div class="gewusst"><div class="t">Gewusst?</div><label data-nr="${nr}" data-w="ja"><span class="box"></span>Ja</label><label data-nr="${nr}" data-w="nein"><span class="box"></span>Nein</label></div>
  </div>`}).join('');bereiche.push([st.stufe,von,nr]);
- return `<section class="stufe"><h2>${esc(st.stufe)} <span class="schwer">${{einfach:'🟢 einfach',mittel:'🟡 mittel',schwer:'🔴 schwer'}[st.niveau]}</span></h2>${html}</section>`}).join('');
+ return `<section class="stufe"><h2>${esc(st.stufe)}</h2>${html}</section>`}).join('');
 const CSS=`*{box-sizing:border-box}
 body{font-family:Carlito,'Liberation Sans',sans-serif;color:#111;font-size:10.5pt;line-height:1.32;margin:0;-webkit-print-color-adjust:exact;print-color-adjust:exact}
 .titelblatt{text-align:center;margin-top:28pt}.t1{font-family:'Liberation Sans',sans-serif;color:#173765;font-size:26pt;margin-top:6pt}.t2{color:#5b6572;font-weight:700;font-size:15pt}.t3{color:#5b6572;font-size:8.5pt;margin-top:4pt}
@@ -35,7 +37,10 @@ h3.gruen{color:#2e7d32;font-size:13.5pt;font-weight:400;margin:16pt 0 6pt}
 .kasten{margin-top:12pt;border:1pt solid #9fd3a8;border-left:3pt solid #2e7d32;background:#e8f5ec;padding:9pt 12pt;font-size:9.8pt}.kasten p{margin:0 0 5pt}.kasten ol,.kasten ul{margin:2pt 0 4pt;padding-left:15pt}.kasten li{margin-bottom:1.5pt}
 .namen{display:grid;grid-template-columns:1fr 1fr .7fr;gap:14pt;margin-top:16pt;font-size:10pt;color:#5b6572}.namen div{border-bottom:.8pt solid #9aa3ad;padding-top:14pt}
 .aufgabe{display:grid;grid-template-columns:26pt 1fr 62pt;gap:10pt;padding:6pt 0;border-bottom:.5pt solid #c9ced6;break-inside:avoid}
-.nr{width:24pt;height:26pt;background:#2e7d32;color:#fff;font-size:12.5pt;font-weight:700;display:flex;flex-direction:column;align-items:center;justify-content:center;border-radius:2pt;margin-top:1pt;line-height:1}.nr small{font-size:5.6pt;font-weight:700;text-transform:uppercase;letter-spacing:.2pt;margin-top:1.5pt}
+.ampelchip{display:inline-flex;align-items:center;gap:3pt;color:#fff;font-style:normal;font-size:6.8pt;font-weight:700;letter-spacing:.3pt;text-transform:uppercase;border-radius:1.5pt;padding:.8pt 3.5pt .8pt 1.5pt;margin-right:4pt;vertical-align:1.5pt;line-height:1}
+.ampelchip .lichter{display:inline-flex;gap:1.3pt;background:#1f2937;border-radius:4pt;padding:1pt 1.8pt}.ampelchip .lichter i{width:4.6pt;height:4.6pt;border-radius:50%;display:block}
+h2 .schwer .ampelchip{font-size:8.5pt;padding:1.5pt 5pt 1.5pt 2pt}h2 .schwer .ampelchip .lichter i{width:6pt;height:6pt}
+.nr{width:24pt;height:26pt;background:#173765;color:#fff;font-size:12.5pt;font-weight:700;display:flex;flex-direction:column;align-items:center;justify-content:center;border-radius:2pt;margin-top:1pt;line-height:1}.nr small{font-size:5.6pt;font-weight:700;text-transform:uppercase;letter-spacing:.2pt;margin-top:1.5pt}
 h4{margin:0 0 2pt;color:#173765;font-size:11.5pt;line-height:1.25}h4.lage{color:#5b6572;font-style:italic}
 h4 .was{display:inline-block;font-style:normal;font-size:6.8pt;font-weight:700;letter-spacing:.3pt;text-transform:uppercase;color:#fff;background:#173765;border-radius:1.5pt;padding:.5pt 3pt;margin-right:5pt;vertical-align:2pt}h4.lage .was{background:#5b6572}
 .ge{display:inline-block;color:#fff;font-size:6.5pt;font-weight:700;font-style:normal;padding:.5pt 2.5pt;border-radius:1.5pt;vertical-align:2pt;background:#c2410c}
@@ -109,6 +114,7 @@ main{max-width:560px;margin:0 auto;padding:10px 12px 40px}
 .filter{display:flex;gap:6px;flex-wrap:wrap;margin:4px 0 8px}
 .filter button,.modus button{font:inherit;font-size:15px;font-weight:700;border:2px solid #c9ced6;background:#fff;color:#334155;border-radius:20px;padding:5px 12px;cursor:pointer}
 .filter button.an{color:#fff;border-color:transparent}.filter button[data-f=alle].an{background:#173765}.filter button[data-f=einfach].an{background:#2e7d32}.filter button[data-f=mittel].an{background:#d97706}.filter button[data-f=schwer].an{background:#c62828}
+.mini{display:inline-flex;gap:2px;background:#1f2937;border-radius:8px;padding:3px 4px;margin-right:5px;vertical-align:-1px}.mini i{width:8px;height:8px;border-radius:50%;background:#4b5563;display:block}
 .modus{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px}.modus button.an{background:#173765;color:#fff;border-color:#173765}
 .zaehler{display:flex;gap:8px;margin-bottom:10px;font-size:15px}.zaehler div{flex:1;background:#fff;border-radius:8px;padding:6px 8px;text-align:center;border:1px solid #d5dae1}.zaehler b{display:block;font-size:22px;line-height:1.1}
 .z-ja b{color:#2e7d32}.z-nein b{color:#c62828}.z-offen b{color:#5b6572}
@@ -168,7 +174,7 @@ document.addEventListener('click',function(ev){var t=ev.target.closest&&ev.targe
 neu()})();`;
 const kartenWeb=`<!doctype html><html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Kassen-Training · Karten</title><link rel="icon" href="logo.png"><style>${KCSS}</style></head><body>
 <div class="kopf"><img src="logo.png" alt=""><span class="name">Köcheclub Werne · Karten</span><a href="index.html">Übungsliste</a></div>
-<main><div class="filter"><button type="button" data-f="alle">Alle</button><button type="button" data-f="einfach">🟢 Einfach</button><button type="button" data-f="mittel">🟡 Mittel</button><button type="button" data-f="schwer">🔴 Schwer</button></div>
+<main><div class="filter"><button type="button" data-f="alle">Alle</button><button type="button" data-f="einfach"><span class="mini"><i style="background:#4ade80"></i><i></i><i></i></span>Einfach</button><button type="button" data-f="mittel"><span class="mini"><i></i><i style="background:#fbbf24"></i><i></i></span>Mittel</button><button type="button" data-f="schwer"><span class="mini"><i></i><i></i><i style="background:#f87171"></i></span>Schwer</button></div>
 <div class="modus"><button type="button" data-m="alle">Alle Karten</button><button type="button" data-m="offen">Noch offen</button><button type="button" data-m="ueben">Stapel „Üben“</button></div>
 <div class="zaehler"><div class="z-ja"><b>0</b>Kann ich</div><div class="z-nein"><b>0</b>Üben</div><div class="z-offen"><b>0</b>offen</div></div>
 <div id="karte"></div>
