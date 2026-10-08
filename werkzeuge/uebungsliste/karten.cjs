@@ -25,7 +25,7 @@ const kopf=k=>`<div class="kk"><img src="${LOGO}"><span>Kassen-Training</span><e
 const vorne=k=>{const lage=k.k.startsWith('(');return `${kopf(k)}<div class="vinhalt"><div class="nrgross">${k.nr}</div><div class="thema">${esc(k.stufe.split(' · ')[1])}</div>
  <div class="was ${lage?'lage':''}">${lage?'Lage':'Kunde sagt'}</div><div class="satz ${lage?'lage':''}">${esc(lage?k.k.slice(1,-1):'„'+k.k+'“')}</div>${k.neu?'<span class="ge">ZUSÄTZLICH</span>':''}</div>
  <div class="kf">Was tippst du an der Kasse? · Lösung auf der Rückseite ↻</div>`};
-const hinten=k=>`${kopf(k)}<div class="hinhalt"><div class="ltitel"><span class="nr">${k.nr}</span>Lösung</div><ol>${k.s.map(x=>`<li>${fett(x)}</li>`).join('')}</ol><div class="kontrolle"><b>Kontrolle:</b> ${fett(k.e)}</div></div>
+const hinten=k=>`${kopf(k)}<div class="hinhalt"><div class="ltitel"><span class="nr">${k.nr}</span>Lösung</div><ol>${k.s.map(x=>`<li>${fett(x)}</li>`).join('')}</ol>${k.w?`<div class="wege"><b>Andere Wege:</b><ul>${k.w.map(x=>`<li>${fett(x)}</li>`).join('')}</ul></div>`:''}<div class="kontrolle"><b>Kontrolle:</b> ${fett(k.e)}</div></div>
  <div class="kf"><b style="color:#2e7d32">✓ Gewusst</b> → Stapel „Kann ich“ &nbsp;·&nbsp; <b style="color:#c62828">✗ Nicht gewusst</b> → Stapel „Üben“</div>`;
 const karte=(inhalt,p)=>`<div class="karte" style="left:${p.x}mm;top:${p.y}mm"><div class="kin">${inhalt}</div></div>`;
 let seiten='';
@@ -37,7 +37,7 @@ seiten+=`<div class="seite anl"><div class="akopf"><img src="${LOGO}"><b>Köchec
  <li>Karten gut mischen oder nach Nummer sortieren (die Nummern werden von 1 bis ${gesamt} schwieriger).</li>
  <li><b>Vorderseite</b> lesen: was sagt der Kunde, was ist die Lage?</li>
  <li>An der <b>Schulungs-Kasse</b> ausführen – oder im Kopf durchgehen, welche Knöpfe du antippst.</li>
- <li>Karte umdrehen und mit der <b>Lösung</b> auf der Rückseite vergleichen.</li>
+ <li>Karte umdrehen und mit der <b>Lösung</b> auf der Rückseite vergleichen. Oben steht der einfachste Weg, unter „<b>Andere Wege</b>“ weitere, die genauso richtig sind.</li>
  <li><b style="color:#2e7d32">Gewusst</b> → Karte auf den Stapel <b>„Kann ich“</b>. <b style="color:#c62828">Nicht gewusst</b> → auf den Stapel <b>„Üben“</b>.</li>
  <li>Wenn alle Karten durch sind: nur mit dem Stapel <b>„Üben“</b> weitermachen – so lange, bis er leer ist.</li></ol>
  <p>Zu zweit geht es auch: einer liest die Vorderseite vor wie ein Kunde, der andere kassiert.</p></div>
@@ -69,6 +69,7 @@ body{font-family:Carlito,'Liberation Sans',sans-serif;color:#111;font-size:10pt;
 .hinhalt{flex:1;padding-top:2.5mm;overflow:hidden}
 .ltitel{color:#2e7d32;font-size:13pt;margin-bottom:2mm;display:flex;align-items:center;gap:2mm}.ltitel .nr{width:7.5mm;height:7.5mm;background:#2e7d32;color:#fff;font-weight:700;font-size:11pt;display:flex;align-items:center;justify-content:center;border-radius:.6mm}
 ol{margin:0 0 2.5mm;padding-left:4.5mm}ol li{margin-bottom:1.6mm}ol b,.kontrolle b{color:#173765}
+.wege{font-size:.86em;color:#334155;background:#f1f5f9;border-left:.9mm solid #9aa3ad;padding:1.2mm 2.2mm;margin:0 0 2.2mm}.wege>b{color:#5b6572}.wege ul{margin:.6mm 0 0;padding-left:4mm}.wege li{margin-bottom:.6mm}.wege b{color:#173765}
 .kontrolle{border-left:.9mm solid #2e7d32;background:#e8f5ec;padding:1.5mm 2.4mm;font-size:.93em}
 .anl{padding:0}.akopf{position:absolute;left:19mm;right:19mm;top:8.5mm;height:11mm;border-bottom:.4mm solid #173765;display:flex;align-items:flex-end;padding-bottom:1.5mm}.akopf img{width:11mm;margin-right:2mm}.akopf b{color:#173765;font-size:11pt}.akopf span{margin-left:auto;color:#5b6572;font-size:9pt}
 .anl .titelblatt,.anl h3,.anl .kasten{margin-left:19mm;margin-right:19mm}

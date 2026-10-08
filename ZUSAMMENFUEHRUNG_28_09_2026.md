@@ -546,6 +546,10 @@ Betreiber: „Mache alle Mülleimer im Programm rot, besonders im Warenkorb.“
   einen Stapel, nicht gewusste auf einen anderen“): `schulung/uebungsliste/Kassen-Training_Karteikarten.pdf` – 46 Karten
   95 × 130 mm, 4 je A4-Blatt mit Schnittmarken, beidseitig „an der langen Kante wenden“ (Rückseiten gespiegelt
   angeordnet), Anleitungsseite mit Stapel-Methode und Druckhinweisen. Erzeugt mit `werkzeuge/uebungsliste/karten.cjs`.
+* 08.10.2026 (Betreiber: „manchmal gibt es mehrere Wege … den einfachsten als erstes und dann noch alternative Wege“):
+  22 Aufgaben zeigen unter der Lösung „Andere Wege“ (z. B. Schuss als eigene Kachel, Menge per mehrmals tippen / + /
+  Mengenknopf / „…“, Stimmt so statt Aufrunden, Reklamation/Entnahme/Trinkgeld auch über MEHR bzw. Menü ☰). Jeder Weg
+  in der Kasse durchgespielt, Beträge gleich. Liste jetzt 10 Seiten, Karteikarten weiter 26 Seiten.
 * Quelle: `werkzeuge/uebungsliste/daten.js` (Aufgaben) und `bauen.cjs` (erzeugt Webseite und PDF). Nach Änderungen an
   der Bedienung die betroffenen Schritte erneut durchspielen.
 

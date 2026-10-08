@@ -18,6 +18,7 @@ const stufen=D.map(st=>{const von=nr+1;const html=st.aufgaben.map(a=>{nr++;const
   <div class="zt">
    <h4 class="${lage?'lage':''}"><span class="was">${lage?'Lage':'Kunde sagt'}</span>${esc(lage?a.k.slice(1,-1):'„'+a.k+'“')}${a.neu?' <span class="ge">ZUSÄTZLICH</span>':''}</h4>
    <ol>${a.s.map(x=>`<li>${fett(x)}</li>`).join('')}</ol>
+   ${a.w?`<div class="wege"><b>Andere Wege:</b><ul>${a.w.map(x=>`<li>${fett(x)}</li>`).join('')}</ul></div>`:''}
    <div class="kontrolle"><b>Kontrolle:</b> ${fett(a.e)}</div>
   </div>
   <div class="gewusst"><div class="t">Gewusst?</div><label data-nr="${nr}" data-w="ja"><span class="box"></span>Ja</label><label data-nr="${nr}" data-w="nein"><span class="box"></span>Nein</label></div>
@@ -38,6 +39,7 @@ h4{margin:0 0 2pt;color:#173765;font-size:11.5pt;line-height:1.25}h4.lage{color:
 h4 .was{display:inline-block;font-style:normal;font-size:6.8pt;font-weight:700;letter-spacing:.3pt;text-transform:uppercase;color:#fff;background:#173765;border-radius:1.5pt;padding:.5pt 3pt;margin-right:5pt;vertical-align:2pt}h4.lage .was{background:#5b6572}
 .ge{display:inline-block;color:#fff;font-size:6.5pt;font-weight:700;font-style:normal;padding:.5pt 2.5pt;border-radius:1.5pt;vertical-align:2pt;background:#c2410c}
 ol{margin:1pt 0 3pt;padding-left:15pt}ol li{margin-bottom:1pt}ol b,.kontrolle b{color:#173765}
+.wege{font-size:9.4pt;color:#334155;background:#f1f5f9;border-left:3pt solid #9aa3ad;padding:2pt 7pt;margin:0 0 3pt}.wege>b{color:#5b6572}.wege ul{margin:1pt 0 0;padding-left:13pt}.wege li{margin-bottom:.5pt}.wege b{color:#173765}
 .kontrolle{border-left:3pt solid #2e7d32;background:#e8f5ec;padding:2pt 7pt;font-size:9.6pt}
 .gewusst{border-left:.8pt dashed #c9ced6;padding-left:8pt;display:flex;flex-direction:column;justify-content:center;gap:4pt}
 .gewusst .t{font-size:8.5pt;color:#5b6572;font-weight:700}.gewusst label{display:flex;align-items:center;gap:5pt;font-weight:700;font-size:10.5pt}
@@ -57,6 +59,7 @@ const titel=`<div class="titelblatt"><img src="${HUT}" style="width:62pt" alt=""
 <div class="kasten"><p><b>Gut zu wissen:</b></p><ul>
  <li>Glaspfand (2,00 €) kommt bei Getränken <b>von selbst</b> dazu. Bei der halben Portion wird das Pfand <b>nie</b> halbiert, auf Pfand gibt es <b>nie</b> Rabatt.</li>
  <li>Mengenknöpfe erst <b>nach</b> dem Artikel antippen.</li>
+ <li>Oft führen <b>mehrere Wege</b> zum Ziel: oben steht der einfachste, darunter unter „<b>Andere Wege</b>“ weitere, die genauso richtig sind.</li>
  <li>Nach Helfer, Personal und Auszahlung erscheint ein Fenster – mit <b>Fertig</b> schließen.</li>
  <li><b>Beachte:</b> Einige Funktionen können sich mit der Zeit noch ändern, weil ständig am Bilderrechner weiterentwickelt wird.</li></ul></div>
 <div class="namen"><div>Bedienung:</div><div>Kunde:</div><div>Datum:</div></div>`;
