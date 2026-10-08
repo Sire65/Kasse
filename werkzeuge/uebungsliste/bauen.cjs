@@ -173,7 +173,7 @@ document.addEventListener('click',function(ev){var t=ev.target.closest&&ev.targe
  if(t.id==='reset'&&confirm('Alle Ergebnisse löschen und neu beginnen? (Gilt auch für die Übungsliste.)')){st={};sp();idx=0;offen=false;neu()}});
 neu()})();`;
 const kartenWeb=`<!doctype html><html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Kassen-Training · Karten</title><link rel="icon" href="logo.png"><style>${KCSS}</style></head><body>
-<div class="kopf"><img src="logo.png" alt=""><span class="name">Köcheclub Werne · Karten</span><a href="index.html">Übungsliste</a></div>
+<div class="kopf"><img src="logo.png" alt=""><span class="name">Köcheclub Werne · Karten</span><a href="Kassen-Training_Karteikarten.pdf" download>PDF</a><a href="index.html" style="margin-left:0">Übungsliste</a></div>
 <main><div class="filter"><button type="button" data-f="alle">Alle</button><button type="button" data-f="einfach"><span class="mini"><i style="background:#4ade80"></i><i></i><i></i></span>Einfach</button><button type="button" data-f="mittel"><span class="mini"><i></i><i style="background:#fbbf24"></i><i></i></span>Mittel</button><button type="button" data-f="schwer"><span class="mini"><i></i><i></i><i style="background:#f87171"></i></span>Schwer</button></div>
 <div class="modus"><button type="button" data-m="alle">Alle Karten</button><button type="button" data-m="offen">Noch offen</button><button type="button" data-m="ueben">Stapel „Üben“</button></div>
 <div class="zaehler"><div class="z-ja"><b>0</b>Kann ich</div><div class="z-nein"><b>0</b>Üben</div><div class="z-offen"><b>0</b>offen</div></div>
