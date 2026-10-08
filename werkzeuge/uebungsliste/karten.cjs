@@ -6,7 +6,7 @@
 // Gleiche Aufgaben (daten.js) und Gestaltung wie die Uebungsliste bzw. die Club-App-Unterlagen.
 const fs=require('fs'),path=require('path');const pw=require('playwright');const D=require('./daten.js');
 const ZIEL=path.join(__dirname,'..','..','schulung','uebungsliste');
-const VERSION='Version 1',STAND='07.10.2026';
+const VERSION='Version 2',STAND='08.10.2026';
 const b64=f=>'data:image/png;base64,'+fs.readFileSync(path.join(__dirname,f)).toString('base64');
 const LOGO=b64('logo.png'),HUT=b64('hut.png');
 const esc=s=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;');

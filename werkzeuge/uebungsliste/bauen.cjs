@@ -5,7 +5,7 @@
 // Kochmuetze + "Koecheclub Werne" in #173765, Ueberschriften #2e7d32, Grau #5b6572, Schrift Carlito.
 const fs=require('fs'),path=require('path');const pw=require('playwright');const D=require('./daten.js');
 const ZIEL=path.join(__dirname,'..','..','schulung','uebungsliste');fs.mkdirSync(ZIEL,{recursive:true});
-const VERSION='Version 1',STAND='07.10.2026',KASSE='Bilderrechner V0.31.3.6';
+const VERSION='Version 2',STAND='08.10.2026',KASSE='Bilderrechner V0.31.3.6';
 const b64=f=>'data:image/png;base64,'+fs.readFileSync(path.join(__dirname,f)).toString('base64');
 const LOGO=b64('logo.png'),HUT=b64('hut.png');
 for(const f of ['logo.png','hut.png'])fs.copyFileSync(path.join(__dirname,f),path.join(ZIEL,f));
