@@ -550,6 +550,9 @@ Betreiber: „Mache alle Mülleimer im Programm rot, besonders im Warenkorb.“
   22 Aufgaben zeigen unter der Lösung „Andere Wege“ (z. B. Schuss als eigene Kachel, Menge per mehrmals tippen / + /
   Mengenknopf / „…“, Stimmt so statt Aufrunden, Reklamation/Entnahme/Trinkgeld auch über MEHR bzw. Menü ☰). Jeder Weg
   in der Kasse durchgespielt, Beträge gleich. Liste jetzt 10 Seiten, Karteikarten weiter 26 Seiten.
+* 08.10.2026 (Betreiber: „Karten kleiner, mehr nebeneinander/untereinander, damit ich Papier spare“): Karteikarten jetzt
+  3 × 3 = 9 je Blatt (62 × 91 mm, Lösungsschrift 9,2 pt, 7 Blätter statt 13) als Standard und Sparversion
+  `Kassen-Training_Karteikarten_klein.pdf` 3 × 4 = 12 je Blatt (62 × 67 mm, lange Lösungen bis 6,8 pt, 5 Blätter).
 * Quelle: `werkzeuge/uebungsliste/daten.js` (Aufgaben) und `bauen.cjs` (erzeugt Webseite und PDF). Nach Änderungen an
   der Bedienung die betroffenen Schritte erneut durchspielen.
 
