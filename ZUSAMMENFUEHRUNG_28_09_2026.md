@@ -665,3 +665,21 @@ eingeschaltet (`shared/runtime-flags.js` candidateTestAccess), Kassen-Tokens lie
 `pc-manager/kassen-verbindungen.json`, Trainingsmodus für jeden Bediener umschaltbar, Fernbefehle/Manager-Kanal ohne
 Absicherung gegen fremde Webseiten, Service-Worker-Update nicht atomar, große PNG-Bilder (34 MB Vorabspeicher),
 Gutschein-Verkauf nicht im Kassenbestand, Gutschein nur an der ausstellenden Kasse einlösbar.
+
+### Zweite Runde 08./09.10.2026 (app.js r57) – Betreiber: „erst mal nur Abstürze, falsche Berechnungen, Fehlbedienung; an Zugang usw. noch nichts ändern“
+
+- **Abschluss abgesichert:** Nach dem Speichern eines Bons ist jeder Folgeschritt (Gutschein, Meldung an den Manager,
+  Ton, Bonnummer speichern, Anzeige) einzeln abgesichert – ein Fehler dort ließ den Warenkorb voll (Doppelbuchung möglich).
+  Nachgestellt: Ton wirft einen Fehler → 1 Bon, Warenkorb leer.
+- **Konto/Gutschein-Bon:** zeigte vorher angetippte Scheine als „Gegeben/Rückgeld“ – jetzt 0.
+- **PERSONAL bei Minus-Bon (Pfandrückgabe):** buchte ohne Rückfrage eine Spende – jetzt Rückfrage „Pfand als Spende buchen?“.
+- **Geparkten Bon anhängen:** Rabatt des geparkten Bons ging verloren bzw. ein Bon-Rabatt galt auch für fremde Zeilen –
+  jetzt gilt jeder Rabatt nur für seine Zeilen; zwei verschiedene Rabatte → Hinweis (kc-oberflaechen-anwenden.js 0.9.14).
+  Nachgestellt: 8,00 € (20 %) + 5,50 € = 13,50 € (vorher 15,50 €).
+- **Gutschein-Verkauf** zählt jetzt zum erwarteten Bargeldbestand (Anzahlung, kein Umsatz); X-Bericht mit „Gutscheine
+  verkauft“ und „Mit Gutschein bezahlt“; Gültigkeit bis 31.12. des dritten Folgejahres (kc-gutschein.js 0.2.2).
+- **Zeiterfassung:** Minutenrad rundete 14:58 auf 14:00 statt 15:00 (time-clock-pos.js 0.1.2).
+- **Netz:** Abfragen ohne Zeitlimit (Team-Status, Bargeldübergabe) brechen nach 4 s ab; die Nachmelde-Warteschlange
+  an den Manager verwirft nicht mehr still, sondern meldet es sichtbar (kc-sync-live-event.js 0.1.1).
+- Zusätzlich gemeldet, nicht geändert: Wird der Schulungs-Link auf einem echten Kassen-Tablet geöffnet, bleibt dieses
+  Gerät im Schulungsmodus (Band „SCHULUNG … kein Umsatz“), bis `?schulung=0` aufgerufen wird.

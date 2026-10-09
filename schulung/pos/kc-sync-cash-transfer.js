@@ -4,6 +4,8 @@
 // keine zweite, eigene Annahme-Logik, dieselbe Prüfsummen- und Duplikat-Sicherheit.
 (function () {
   'use strict';
+  const kcZeitlimit = (ms) => (typeof AbortSignal !== 'undefined' && AbortSignal.timeout) ? AbortSignal.timeout(ms) : undefined;  // 08.10.2026: haengende Netzanfragen beenden
+
   if (!window.KCSyncConnection) return; // kein Companion konfiguriert - Funktion bleibt einfach inaktiv
 
   let pruefeGeradeSchon = false;
@@ -12,7 +14,7 @@
     if (pruefeGeradeSchon) return;
     pruefeGeradeSchon = true;
     try {
-      const antwort = await fetch(window.KCSyncConnection.buildUrl('/kc-sync-cash-transfer'));
+      const antwort = await fetch(window.KCSyncConnection.buildUrl('/kc-sync-cash-transfer'), { signal: kcZeitlimit(4000) });
       const daten = await antwort.json();
       if (!daten?.ok || !daten.pending) return;
 

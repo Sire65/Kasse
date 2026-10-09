@@ -17,6 +17,8 @@
 //   rot   - kein offenes "Kommen" (nie gestempelt oder schon wieder gegangen)
 (function (global) {
   'use strict';
+  const kcZeitlimit = (ms) => (typeof AbortSignal !== 'undefined' && AbortSignal.timeout) ? AbortSignal.timeout(ms) : undefined;  // 08.10.2026: haengende Netzanfragen beenden
+
   const core = global.KCTimeClockCore;
   if (!core) return;
   const GELB_STUNDEN = 9; // laenger als ein normaler Markttag ohne Checkout = vermutlich vergessen
@@ -65,7 +67,7 @@
 
   async function aktualisiere() {
     try {
-      const res = await fetch(URL_TEAM_STATUS, { cache: 'no-store' });
+      const res = await fetch(URL_TEAM_STATUS, { cache: 'no-store', signal: kcZeitlimit(4000) });
       if (!res.ok) throw new Error('team-status-' + res.status);
       const daten = await res.json();
       const events = Array.isArray(daten?.ereignisse) ? daten.ereignisse : [];

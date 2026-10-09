@@ -25,6 +25,6 @@ for (const pfad of ['pos/kc-oberflaechen-anwenden.css', 'schulung/pos/kc-oberfla
   { const c = fs.readFileSync(pfad, 'utf8'); assert(c.includes('.kc-park-gruppe') && c.includes('.kc-park-summe'), pfad + ': Gruppen-Rahmen/Gesamtzeile fehlt'); }
 for (const pfad of ['pos/index.html', 'schulung/pos/index.html', 'pos/service-worker.js', 'schulung/pos/service-worker.js']) {
   const s = fs.readFileSync(pfad, 'utf8');
-  assert(s.includes('kc-oberflaechen-anwenden.js?build=0.9.13') && s.includes('kc-oberflaechen-anwenden.css?build=0.9.23'), pfad + ': Buildnummer nicht erhöht');
+  assert(/kc-oberflaechen-anwenden\.js\?build=0\.9\.(1[3-9]|[2-9]\d)/.test(s) && s.includes('kc-oberflaechen-anwenden.css?build=0.9.23'), pfad + ': Buildnummer nicht erhöht');
 }
 console.log('park-verbinden: ok');

@@ -1841,7 +1841,7 @@ async function completeSale(method,{type="sale",silent=false,changeTarget=null,d
     const training=!!state.master.trainingMode,endTime=new Date().toISOString();
     const trainingCounter=Number(localStorage.getItem("kc_training_next_bon_v018")||1);
     const current=training?`T-${String(trainingCounter).padStart(6,"0")}`:bonText();
-    const grossDue=+grossTotal().toFixed(2),globalDiscountValue=+globalDiscountAmount().toFixed(2),positionDiscountValue=+totalPositionDiscountAmount().toFixed(2),discountValue=+(globalDiscountValue+positionDiscountValue).toFixed(2),due=+total().toFixed(2),given=(type==="personal"||type==="helfer")?0:+state.given.toFixed(2),settlementTarget=changeTarget!==null&&Number.isFinite(Number(changeTarget))?Number(changeTarget):due,isPayout=toCents(due)<0,payout=isPayout&&!payoutHandledWithoutCash?+Math.abs(due).toFixed(2):0,change=type==="personal"||type==="helfer"||payoutHandledWithoutCash?0:(isPayout?payout:+Math.max(0,given-settlementTarget).toFixed(2));
+    const grossDue=+grossTotal().toFixed(2),globalDiscountValue=+globalDiscountAmount().toFixed(2),positionDiscountValue=+totalPositionDiscountAmount().toFixed(2),discountValue=+(globalDiscountValue+positionDiscountValue).toFixed(2),due=+total().toFixed(2),unbar=method==="account-charge"||method==="voucher",given=(type==="personal"||type==="helfer"||unbar)?0:+state.given.toFixed(2),settlementTarget=changeTarget!==null&&Number.isFinite(Number(changeTarget))?Number(changeTarget):due,isPayout=toCents(due)<0,payout=isPayout&&!payoutHandledWithoutCash?+Math.abs(due).toFixed(2):0,change=type==="personal"||type==="helfer"||payoutHandledWithoutCash||unbar?0:(isPayout?payout:+Math.max(0,given-settlementTarget).toFixed(2));
     const rows=training?readTrainingTransactions():readTransactions(),previousHash=rows[rows.length-1]?.recordHash||null;
     const items=state.cart.map(item=>({...cloneData(item),unitTotal:+(lineUnit(item)+(state.master.depositRule==="automatic"?item.deposits.reduce((sum,d)=>sum+Number(d.price||0),0):0)).toFixed(2),lineTotal:+((lineUnit(item)+(state.master.depositRule==="automatic"?item.deposits.reduce((sum,d)=>sum+Number(d.price||0),0):0))*item.qty).toFixed(2)}));
     if(globalDiscountValue>0)items.push({id:"DISCOUNT",name:`Rabatt ${Number(state.discount.percent).toLocaleString("de-DE")} %${state.discount.reason?` · ${state.discount.reason}`:""}`,category:"Rabatt",price:-globalDiscountValue,qty:1,unitTotal:-globalDiscountValue,lineTotal:-globalDiscountValue,discountLine:true});
@@ -1851,18 +1851,23 @@ async function completeSale(method,{type="sale",silent=false,changeTarget=null,d
     rec.recordHash=await sha256Hex(canonicalTransaction(rec));rows.push(rec);saveTransactions(rows,training);
     // Gutschein-Teilzahlung: Guthaben erst jetzt abziehen, wo der Bon sicher gespeichert ist.
     // Trainingsbons verbrauchen kein echtes Guthaben.
-    if(!training&&rec.voucherPayments&&window.KCGutschein)rec.voucherPayments.forEach(v=>{const r=window.KCGutschein.einloesen(v.code,v.amount,{bon:current});if(!r.ok)console.warn("Gutschein",v.code,r.grund)});
+    // 08.10.2026 (Gesamtpruefung): ab hier ist der Bon gespeichert. Jeder weitere Schritt ist einzeln
+    // abgesichert - wirft einer (Speicher voll, Ton, Meldung ...), bleibt sonst der Warenkorb voll und
+    // derselbe Bon koennte ein zweites Mal abgerechnet werden.
+    const sicher=(f,was)=>{try{f()}catch(err){console.error(`Nach dem Speichern von Bon ${current}: ${was}`,err)}};
+    sicher(()=>{if(!training&&rec.voucherPayments&&window.KCGutschein)rec.voucherPayments.forEach(v=>{const r=window.KCGutschein.einloesen(v.code,v.amount,{bon:current});if(!r.ok)console.warn("Gutschein",v.code,r.grund)});},"Gutschein")
     // KC Sync Live-Monitor: rein zur Anzeige im PC Manager, kein Archiv, keine Auswirkung auf
     // die Buchung selbst (siehe kc-sync-live-event.js für die Begründung). NICHT awaited.
-    if(!training&&window.KCSyncLiveEvent)window.KCSyncLiveEvent.send("sale",{registerId:rec.registerId,registerName:rec.registerName,operator:rec.operator,bon:rec.bon,type:rec.type,method:rec.method,due:rec.due,given:rec.given,change:rec.change,isPayout:rec.isPayout,payout:rec.payout,itemCount:rec.items.filter(i=>!i.discountLine).length,time:rec.time});
+    sicher(()=>{if(!training&&window.KCSyncLiveEvent)window.KCSyncLiveEvent.send("sale",{registerId:rec.registerId,registerName:rec.registerName,operator:rec.operator,bon:rec.bon,type:rec.type,method:rec.method,due:rec.due,given:rec.given,change:rec.change,isPayout:rec.isPayout,payout:rec.payout,itemCount:rec.items.filter(i=>!i.discountLine).length,time:rec.time});},"Live-Monitor")
     // BISHER FEHLENDE Brücke zum zuverlässigen KC-Sync-Kanal (Outbox mit Wiederholung/
     // Duplikatschutz) - das war die eigentliche Lücke, die dazu führte, dass die Aktivitäts-LED
     // bei echten Verkäufen nie reagierte. Ebenfalls NICHT awaited, aber anders als der
     // Live-Monitor-Kanal mit echter Wiederholungslogik bei Fehlschlag (siehe kc-sync-live-event.js).
-    if(!training&&window.KCSyncLiveEvent)window.KCSyncLiveEvent.recordReliable("sale",rec);
-    playCompletedSaleSound();
-    if(training)localStorage.setItem("kc_training_next_bon_v018",String(trainingCounter+1));else{state.master.nextBon++;saveMaster()}
+    sicher(()=>{if(!training&&window.KCSyncLiveEvent)window.KCSyncLiveEvent.recordReliable("sale",rec)},"Nachreichen");
+    sicher(()=>playCompletedSaleSound(),"Ton");
+    if(training)sicher(()=>localStorage.setItem("kc_training_next_bon_v018",String(trainingCounter+1)),"Trainingsnummer");else{state.master.nextBon++;sicher(()=>saveMaster(),"Bonnummer speichern")}
     state.cart=[];state.cartStartedAt=null;state.lastAdded=null;state.selectedCartKey=null;state.given=0;state.cashSelections=[];state.keypadBuffer="";quantityUndoStack.length=0;updateQuantityUndoButton();if(state.master.requireOperatorConfirmation===true)state.operatorConfirmedForSale=false;
+    try{
     // Vergroesserte Zahlabwicklung sofort wieder zu - niemand soll etwas schliessen muessen.
     document.dispatchEvent(new CustomEvent("kc:sale-completed"));
     renderHeader();renderCart();
@@ -1888,6 +1893,7 @@ async function completeSale(method,{type="sale",silent=false,changeTarget=null,d
     // Digitaler Bon (26.09.2026, Standard AUS). Abgesichert: ein Fehler beim QR-Code darf den
     // bereits gespeicherten Verkauf nicht nachtraeglich als fehlgeschlagen melden.
     if(!training&&state.master.digitalBonEnabled===true){try{zeigeDigitalenBon(rec)}catch(err){console.warn("Digitaler Bon",err)}}
+    }catch(err){console.error(`Anzeige nach Bon ${current}`,err);notify("warning",`Bon ${current} ist gespeichert – Anzeige wurde neu aufgebaut`,"sale-after-error",6000);try{renderHeader();renderCart()}catch(e){}}
     return rec;
   }finally{state.saleInProgress=false}
 }
@@ -3499,9 +3505,13 @@ function closingSnapshot(){
   const accountTx=tx.filter(t=>t.type!=="personal"&&t.type!=="helfer"&&String(t.method||t.payment)==="account-charge");
   const accountSales=accountTx.reduce((sum,t)=>sum+Number(t.due??t.total??0),0);
   const accountBreakdown=(()=>{const je={};kcEvents().filter(e=>e.status!=="void"&&!e.training&&(!e.registerId||e.registerId===state.master.registerId)&&(!startAt||e.date>=startAt)).forEach(e=>{const k=e.accountName||e.accountId;je[k]=(je[k]||0)+Number(e.amount||0)});return Object.entries(je).map(([name,amount])=>({name,amount:+amount.toFixed(2)}))})();
+  // 08.10.2026 (Gesamtpruefung): Gutschein-VERKAUF bringt Bargeld, aber keinen Umsatz - fehlte bisher im
+  // erwarteten Kassenbestand (Ueberschuss beim Zaehlen). Gutschein-EINLOESEN ist Umsatz ohne Bargeld.
+  const voucherSalesCash=(window.KCGutschein?.alle?.()||[]).filter(g=>!g.training&&(!g.registerId||g.registerId===state.master.registerId)&&inRange(g.issuedAt)).reduce((sum,g)=>sum+Number(g.amount||0),0);
+  const voucherRedeemed=tx.filter(t=>t.type!=="personal"&&t.type!=="helfer").reduce((sum,t)=>sum+(String(t.method||t.payment)==="voucher"?Number(t.due??t.total??0):0)+(t.voucherPayments||[]).reduce((s2,v)=>s2+Number(v.amount||0),0),0);
   const totalSales=tx.filter(t=>t.type!=="personal"&&t.type!=="helfer"&&t.originalType!=="personal"&&t.originalType!=="helfer").reduce((sum,t)=>sum+Number(t.due??t.total??0)+(t.voucherPayments||[]).reduce((s,v)=>s+Number(v.amount||0),0),0);
   const receiptExpected=withdrawals.filter(w=>w.receiptAvailable===true).length;
-  return {startAt,tx,movements,withdrawals,tips,staffCount:staffTx.length,staffTotal:+staffTotal.toFixed(2),helperCount:helperTx.length,helperTotal:+helperTotal.toFixed(2),helperBreakdown,cashIn:+cashIn.toFixed(2),cashSales:+cashSales.toFixed(2),accountSales:+accountSales.toFixed(2),accountBreakdown,totalSales:+totalSales.toFixed(2),cashTips:+cashTipsDrawer.toFixed(2),tipTotal:+cashTips.toFixed(2),cashOut:+cashOut.toFixed(2),expectedCash:+(cashIn+cashSales+cashTipsDrawer-cashOut).toFixed(2),receiptExpected};
+  return {startAt,tx,movements,withdrawals,tips,staffCount:staffTx.length,staffTotal:+staffTotal.toFixed(2),helperCount:helperTx.length,helperTotal:+helperTotal.toFixed(2),helperBreakdown,cashIn:+cashIn.toFixed(2),cashSales:+cashSales.toFixed(2),accountSales:+accountSales.toFixed(2),accountBreakdown,totalSales:+totalSales.toFixed(2),cashTips:+cashTipsDrawer.toFixed(2),tipTotal:+cashTips.toFixed(2),cashOut:+cashOut.toFixed(2),expectedCash:+(cashIn+cashSales+cashTipsDrawer-cashOut+voucherSalesCash).toFixed(2),voucherSalesCash:+voucherSalesCash.toFixed(2),voucherRedeemed:+voucherRedeemed.toFixed(2),receiptExpected};
 }
 // Ruhiger Hinweis im Abschluss, wenn fuer heute kein Anfangsbestand eingelesen wurde. Der
 // Uebergabecode gilt den ganzen Tag - er kann an dieser Stelle also noch nachgeholt werden,
@@ -3561,9 +3571,11 @@ function xBerichtAbschnitte(s){
       ["Barverkäufe",money(s.cashSales)],
       ["Bar-Trinkgeld / Aufrundung",money(s.cashTips)],
       ["Entnahmen / Auszahlungen",money(s.cashOut)],
+      ["Gutscheine verkauft (Anzahlung, kein Umsatz)",money(s.voucherSalesCash||0)],
       ["Erwarteter Bargeldbestand",money(s.expectedCash),"summe"]]},
     {titel:"🧾 Ohne Bargeld",zeilen:[
       ["Auf Konto gebucht",money(s.accountSales)],
+      ["Mit Gutschein bezahlt",money(s.voucherRedeemed||0)],
       ...s.accountBreakdown.map(k=>["· "+k.name,money(k.amount),"klein"]),
       ["Personalverbrauch",`${money(s.staffTotal)} (${anz(s.staffCount)})`],
       ["Helfer-Verpflegung",`${money(s.helperTotal)} (${anz(s.helperCount)})`],
@@ -3635,7 +3647,7 @@ function createClosing(){
   try{cashCount=window.KCClosingCountUI?.buildPayload?.({registerId:state.master.registerId,businessDate,closingId})||null}
   catch(err){setSystemHint(err.message||String(err),"warn");return null}
   if(cashCount)cashCount.checksum=checksumObject(cashCount);
-  const payload={format:"KC_CASH_CLOSING",version:4,closingId,registerId:state.master.registerId,registerName:state.master.registerName,operator:state.master.operatorName,businessDate,createdAt,periodStart:s.startAt,periodEnd:createdAt,cashIn:s.cashIn,cashSales:s.cashSales,cashTips:s.cashTips,cashOut:s.cashOut,expectedCash:s.expectedCash,staffTotal:s.staffTotal,staffCount:s.staffCount,helperTotal:s.helperTotal,helperCount:s.helperCount,helperBreakdown:s.helperBreakdown,accountSales:s.accountSales,accountBreakdown:s.accountBreakdown,totalSales:s.totalSales,transactionCount:s.tx.length,receiptExpected:s.receiptExpected,firstTransactionId:s.tx[0]?.transactionId||null,lastTransactionId:s.tx[s.tx.length-1]?.transactionId||null,note:el("closingNote").value.trim(),cashCount};
+  const payload={format:"KC_CASH_CLOSING",version:4,closingId,registerId:state.master.registerId,registerName:state.master.registerName,operator:state.master.operatorName,businessDate,createdAt,periodStart:s.startAt,periodEnd:createdAt,cashIn:s.cashIn,cashSales:s.cashSales,cashTips:s.cashTips,cashOut:s.cashOut,expectedCash:s.expectedCash,voucherSalesCash:s.voucherSalesCash,voucherRedeemed:s.voucherRedeemed,staffTotal:s.staffTotal,staffCount:s.staffCount,helperTotal:s.helperTotal,helperCount:s.helperCount,helperBreakdown:s.helperBreakdown,accountSales:s.accountSales,accountBreakdown:s.accountBreakdown,totalSales:s.totalSales,transactionCount:s.tx.length,receiptExpected:s.receiptExpected,firstTransactionId:s.tx[0]?.transactionId||null,lastTransactionId:s.tx[s.tx.length-1]?.transactionId||null,note:el("closingNote").value.trim(),cashCount};
   payload.checksum=checksumObject(payload);const code=encodePayload("KCLOSE1:",payload);
   const closings=safeArray(CLOSING_KEY);closings.push(payload);localStorage.setItem(CLOSING_KEY,JSON.stringify(closings));el("closingPayload").value=code;
   try{drawRealQr(el("closingQrCanvas"),code);el("closingQrCanvas").classList.add("ready")}catch(err){setSystemHint(`Abschluss gespeichert, QR nicht darstellbar: ${err.message}`,"warn")}
@@ -4706,7 +4718,9 @@ el("keepAsTipBtn")?.addEventListener("click",pfandAlsTrinkgeldVerbuchen);
 el("cardBtn").onclick=()=>setSystemHint("EC-Kartenzahlung ist noch nicht verfügbar","warn");
 el("staffBtn").onclick=()=>{
   if(!state.cart.length)return keinBonMeldung();
-  if(toCents(total())<0)return pfandAlsSpendeVerbuchen();
+  // 08.10.2026 (Gesamtpruefung): Bei einem Minus-Bon (Pfandrueckgabe) bucht dieser Knopf eine SPENDE statt
+  // auszuzahlen - ein Fehltipp kostete den Kunden sein Pfand. Jetzt erst nachfragen.
+  if(toCents(total())<0)return askConfirm("Pfand als Spende buchen?",`${money(Math.abs(total()))} Pfand NICHT auszahlen, sondern als Spende für den Verein buchen? (Zum Auszahlen: Abbrechen und BAR antippen.)`,()=>pfandAlsSpendeVerbuchen());
   const gesperrt=staffBlockedCartItems();if(gesperrt.length)return showMessage("Personalverbrauch nicht möglich",money(total()),`Nicht auf Personal buchbar: ${gesperrt.join(", ")}. Bitte diese Position${gesperrt.length>1?"en":""} entfernen oder normal abrechnen.`);const betragOhnePfand=internOhnePfand(()=>total());askConfirm("Personalverbrauch speichern",`${money(betragOhnePfand)} als Personalverbrauch protokollieren? (Pfand wird nicht berechnet - das Glas ist nur geliehen.)`,()=>{internPfandEntfernen();completeSale("internal-personal",{type:"personal"}).then(r=>{if(!r)internPfandZurueck()})})
 };
 // 23.09.2026 (Betreiber): "Personal bucht evtl. einen Gluehwein am Stand trinken, dann wird Pfand

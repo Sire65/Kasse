@@ -43,3 +43,17 @@ for (const pfad of ['pos/app.js', 'schulung/pos/app.js']) {
   for (const d of ['pos/index.html', 'pos/service-worker.js']) assert(fs.readFileSync(pfad.replace('app.js', d.split('/')[1]), 'utf8').includes('kc-transaction-store.js?build=0.2.0'), pfad + ': Build Speicher fehlt');
 }
 console.log('kasse-pruefung-08-10 (Speicher): ok');
+// Zweite Runde (Betreiber: "nur Abstuerze, falsche Berechnungen, Fehlbedienung") - jeweils im Browser durchgespielt
+for (const pfad of ['pos/app.js', 'schulung/pos/app.js']) {
+  const s = fs.readFileSync(pfad, 'utf8');
+  assert(s.includes('unbar=method==="account-charge"||method==="voucher",given=(type==="personal"||type==="helfer"||unbar)?0:'), pfad + ': Konto-/Gutscheinbon zeigt Gegeben/Rueckgeld');
+  assert(s.includes('const sicher=(f,was)=>{try{f()}catch(err)') && s.includes('sicher(()=>saveMaster(),"Bonnummer speichern")'), pfad + ': Schritte nach dem Speichern ungesichert');
+  assert(s.includes('return askConfirm("Pfand als Spende buchen?"'), pfad + ': PERSONAL bucht Spende ohne Rueckfrage');
+  assert(s.includes('expectedCash:+(cashIn+cashSales+cashTipsDrawer-cashOut+voucherSalesCash).toFixed(2)'), pfad + ': Gutscheinverkauf fehlt im Kassenbestand');
+  assert(s.includes('["Mit Gutschein bezahlt",money(s.voucherRedeemed||0)]'), pfad + ': X-Bericht ohne Gutschein');
+}
+for (const pfad of ['pos/kc-gutschein.js', 'schulung/pos/kc-gutschein.js']) assert(fs.readFileSync(pfad, 'utf8').includes('new Date(jetzt.getFullYear() + GUELTIG_JAHRE, 11, 31, 23, 59, 59)'), pfad + ': Gueltigkeit nicht bis Jahresende');
+for (const pfad of ['pos/time-clock-pos.js', 'schulung/pos/time-clock-pos.js']) assert(fs.readFileSync(pfad, 'utf8').includes('Math.round(new Date(vorschlag).getTime() / (MINUTENSCHRITT * 60000))'), pfad + ': Minutenrad ohne Stundenuebertrag');
+for (const pfad of ['pos/kc-oberflaechen-anwenden.js', 'schulung/pos/kc-oberflaechen-anwenden.js']) assert(fs.readFileSync(pfad, 'utf8').includes('else if (proz(geparkt) > 0) st.discount = Object.assign({}, geparkt, {keys: schluessel(geparkt, e.cart)});'), pfad + ': Rabatt geht beim Anhaengen verloren');
+for (const pfad of ['pos/kc-sync-live-event.js', 'schulung/pos/kc-sync-live-event.js']) assert(fs.readFileSync(pfad, 'utf8').includes('function meldeLuecke(text)'), pfad + ': Nachmelde-Luecke still');
+console.log('kasse-pruefung-08-10 (Runde 2): ok');

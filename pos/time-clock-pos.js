@@ -153,8 +153,10 @@
     });
   }
   function zeigeRaeder() {
-    const d = new Date(vorschlag);
-    const minuteGerundet = Math.round(d.getMinutes() / MINUTENSCHRITT) * MINUTENSCHRITT % 60;
+    // 08.10.2026 (Gesamtpruefung): auf den gerundeten ZEITPUNKT runden - vorher wurde aus 14:58 die
+    // Anzeige 14:00 (Minute auf 00, Stunde blieb 14), und wer das Rad bewegte, buchte eine Stunde zu frueh.
+    const d = new Date(Math.round(new Date(vorschlag).getTime() / (MINUTENSCHRITT * 60000)) * MINUTENSCHRITT * 60000);
+    const minuteGerundet = d.getMinutes();
     radBereit = false;
     setzeRad(el('tcPosStunde'), d.getHours());
     setzeRad(el('tcPosMinute'), minuteGerundet);

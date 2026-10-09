@@ -481,12 +481,24 @@
     const liste = geparkte(); const i = liste.findIndex((x) => x.id === id); if (i < 0) return false;
     const e = liste[i];
     if (st.cart.length && !anhaengen) return 'voll';
+    // 08.10.2026 (Gesamtpruefung): Beim ANHAENGEN ging der Rabatt des geparkten Bons verloren, und ein
+    // Rabatt auf den ganzen aktuellen Bon galt danach auch fuer die angehaengten Zeilen. Jetzt gilt jeder
+    // Rabatt nur fuer die Zeilen, zu denen er gehoerte; zwei verschiedene Rabatte gehen nicht -> Hinweis.
+    let rabattHinweis = false;
+    if (anhaengen) {
+      const proz = (d) => Number(d && d.percent || 0);
+      const schluessel = (d, cart) => (Array.isArray(d && d.keys) && d.keys.length ? d.keys.slice() : cart.map((x) => x.key));
+      const jetzt = st.discount || {}, geparkt = e.discount || {};
+      if (proz(jetzt) > 0 && proz(geparkt) > 0 && proz(jetzt) !== proz(geparkt)) rabattHinweis = true;
+      if (proz(jetzt) > 0) st.discount = Object.assign({}, jetzt, {keys: schluessel(jetzt, st.cart).concat(proz(geparkt) === proz(jetzt) ? schluessel(geparkt, e.cart) : [])});
+      else if (proz(geparkt) > 0) st.discount = Object.assign({}, geparkt, {keys: schluessel(geparkt, e.cart)});
+    }
     st.cart = anhaengen ? st.cart.concat(e.cart) : e.cart;
     if (!anhaengen && e.discount) st.discount = e.discount;
     if (!st.cart.length) { /* nichts */ } else if (!st.cartStartedAt) st.cartStartedAt = e.zeit;
     liste.splice(i, 1); geparkteSchreiben(gruppenBereinigen(liste)); parkMarkiert.delete(id);
     neuZeichnen(); parkSeite(false);
-    try { notify && notify('success', 'Geparkter Bon zurückgeholt'); } catch (e2) { /* egal */ }
+    try { notify && notify(rabattHinweis ? 'warn' : 'success', rabattHinweis ? 'Geparkter Bon angehängt – die Bons hatten verschiedene Rabatte, bitte Rabatt prüfen' : 'Geparkter Bon zurückgeholt'); } catch (e2) { /* egal */ }
     return true;
   }
   function verwerfen(id) { geparkteSchreiben(gruppenBereinigen(geparkte().filter((x) => x.id !== id))); parkSeiteZeichnen(); }

@@ -46,7 +46,11 @@
 
   function ausstellen(betrag, art) {
     const jetzt = new Date();
-    const ablauf = new Date(jetzt); ablauf.setFullYear(ablauf.getFullYear() + GUELTIG_JAHRE);
+    // 08.10.2026: gueltig bis zum 31.12. des dritten Folgejahres (Verjaehrung nach §§ 195, 199 BGB
+    // laeuft bis Jahresende) - vorher genau drei Jahre ab Ausstellungstag.
+    const ablauf = new Date(jetzt.getFullYear() + GUELTIG_JAHRE, 11, 31, 23, 59, 59);
+    let training = false;
+    try { training = JSON.parse(localStorage.getItem('kc_master_v040') || '{}').trainingMode === true; } catch (e) { training = false; }
     const gutschein = {
       code: neueNummer(),
       kind: art || 'gutschein',           // 'gutschein' oder 'wertmarke'
@@ -55,6 +59,7 @@
       issuedAt: jetzt.toISOString(),
       expiresAt: ablauf.toISOString(),
       registerId: global.KCSyncConnection?.config?.registerId || '',
+      training,   // Uebungs-Gutscheine zaehlen nicht zum Kassenbestand
       redemptions: [],
     };
     const liste = lies(); liste.push(gutschein); schreib(liste);

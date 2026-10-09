@@ -104,7 +104,16 @@
   const schreibWarteschlange = (liste) => {
     // Aeltestes zuerst verwerfen, falls der Speicher wirklich voll laufen sollte - dann lieber
     // die aeltesten Buchungen als gar keine neuen mehr annehmen.
-    try { localStorage.setItem(WARTESCHLANGE_KEY, JSON.stringify(liste.slice(-500))); } catch (e) { /* Speicher voll */ }
+    // 08.10.2026 (Gesamtpruefung): bisher still verworfen - dem Manager fehlten dann Verkaeufe ohne jeden
+    // Hinweis. Die Bons bleiben auf der Kasse; jetzt wird es aber sichtbar gemeldet.
+    const verworfen = Math.max(0, liste.length - 500);
+    try { localStorage.setItem(WARTESCHLANGE_KEY, JSON.stringify(liste.slice(-500))); }
+    catch (e) { meldeLuecke('Speicher voll – neue Buchungen können nicht an den Manager nachgemeldet werden'); return; }
+    if (verworfen) meldeLuecke(`${verworfen} ältere Buchungen konnten nicht an den Manager nachgemeldet werden (lange ohne Verbindung)`);
+  };
+  function meldeLuecke(text) {
+    try { localStorage.setItem('kc_sync_nachmeldung_luecke_v1', JSON.stringify({zeit: new Date().toISOString(), text})); } catch (e) { /* egal */ }
+    try { global.setSystemHint?.(`${text} – Bons bleiben auf dieser Kasse, bitte X-Bericht/Abschluss nutzen`, 'warn'); } catch (e) { /* egal */ }
   };
   function merkeOffen(type, payload) {
     const liste = liesWarteschlange();
