@@ -3770,6 +3770,47 @@ async function recordComplaintRefund(amount){
   const rec={transactionId:crypto.randomUUID(),formatVersion:5,bon:current,bonNumber:current,startTime:endTime,time:endTime,endTime,registerId:state.master.registerId,registerName:state.master.registerName,operator:state.master.operatorName,type:"refund",training,method:"complaint-refund",payment:"complaint-refund",grossDue:due,grossDueCents:toCents(due),discount:{percent:0,amount:0,amountCents:0,base:0,reason:null,note:null},due,total:due,dueCents:toCents(due),given:0,givenCents:0,change:0,changeCents:0,depositRule:state.master.depositRule,items,reason:`Reklamation: ${complaintReason}`,complaint:{reason:complaintReason,reference:reference||null,articleTotal,adjustment,note:safeText(el("withdrawNote").value,300)},originalTransactionId:original?.transactionId||null,originalBon:original?.bon||original?.bonNumber||reference||null,previousHash};
   rec.recordHash=await sha256Hex(canonicalTransaction(rec));rows.push(rec);saveTransactions(rows,training);if(!training){state.master.nextBon++;saveMaster()}return rec;
 }
+// 09.10.2026 (Betreiber: "unter Reklamation die Warengruppen wie auf der Kassenseite, darunter die Bilder
+// der Artikel mit einer Anzahl - z. B. 3 kalte Glühwein, die zusammen bestellt wurden; Schuss Rum und
+// Amaretto muss berücksichtigt werden"): mehrere Posten in EINEM Vorgang. posten=[{id,optionId,qty}].
+// Gleiche Buchungsart wie bisher (Auszahlung = feste Minus-Zeile im Warenkorb, Ersatz = eigener 0-€-Bon,
+// Nichts = nur Protokoll), nur je Posten mit Menge und ggf. Schuss.
+function kcReklamationPostenAufloesen(posten){
+  return (Array.isArray(posten)?posten:[]).map(x=>{
+    const produkt=PRODUCTS.find(p=>p.id===x.id);if(!produkt)throw new Error("Artikel nicht gefunden");
+    const qty=Math.max(1,Math.floor(Number(x.qty)||1));
+    const opt=x.optionId&&produkt.optionGroup?(OPTIONS[produkt.optionGroup]?.choices||[]).find(c=>c.id===x.optionId&&Number(c.price||0)>0)||null:null;
+    const preis=+(Number(produkt.price||0)+Number(opt?.price||0)).toFixed(2);
+    return {produkt,opt,qty,preis,name:opt?`${produkt.name} + ${opt.name}`:produkt.name};
+  });
+}
+async function kcReklamationBuchenPosten(posten,grund,ergebnis,bonReferenz){
+  const liste=kcReklamationPostenAufloesen(posten);
+  if(!liste.length)throw new Error("Bitte mindestens einen Artikel antippen");
+  if(!grund)throw new Error("Bitte einen Grund auswählen");
+  let betrag=0,transactionId=null,bon=null;
+  if(ergebnis==="auszahlung"){
+    liste.forEach(({produkt,opt,qty,preis,name})=>state.cart.push({key:`reklamation:${produkt.id}:${opt?.id||"base"}:${crypto.randomUUID()}`,id:`REFUND-${produkt.id}`,name:`Reklamation · ${name}`,price:-Math.abs(preis),category:"Reklamation",image:produkt.image,manualDeposit:false,qty,option:null,deposits:[],refund:true,lockedQuantity:true,complaint:{reason:grund,reference:bonReferenz||null,sourceProductId:produkt.id,optionId:opt?.id||null}}));
+    if(!state.cartStartedAt)state.cartStartedAt=new Date().toISOString();
+    state.selectedCartKey=state.cart.at(-1)?.key||null;renderCart();
+    betrag=liste.reduce((s,x)=>s+x.preis*x.qty,0);
+  }else if(ergebnis==="ersatz"){
+    const gesichert={cart:state.cart,cartStartedAt:state.cartStartedAt,given:state.given,discount:state.discount,selectedCartKey:state.selectedCartKey,cashSelections:state.cashSelections};
+    state.cart=liste.map(({produkt,opt,qty,name})=>({key:`ersatz:${produkt.id}:${opt?.id||"base"}:${crypto.randomUUID()}`,id:produkt.id,name:`Ersatz – ${name}`,price:0,category:produkt.category,image:produkt.image,manualDeposit:false,qty,option:opt?{id:opt.id,name:opt.name,price:0}:null,deposits:[],halfAllowed:false,halfPrice:0,portionFactor:1,offerId:null,offerName:"",offerType:""}));
+    state.cartStartedAt=new Date().toISOString();state.given=0;state.discount={percent:0,reason:"",note:"",keys:[]};state.selectedCartKey=null;state.cashSelections=[];
+    let rec=null;
+    try{rec=await completeSale("ersatz-reklamation",{silent:true})}
+    finally{state.cart=gesichert.cart;state.cartStartedAt=gesichert.cartStartedAt;state.given=gesichert.given;state.discount=gesichert.discount;state.selectedCartKey=gesichert.selectedCartKey;state.cashSelections=gesichert.cashSelections;renderCart()}
+    if(rec){transactionId=rec.transactionId;bon=rec.bon}
+  }
+  // Protokoll fuer alle drei Ergebnisse; Bargeldbetrag 0 - das Geld laeuft ueber die Minus-Zeilen im Bon.
+  const articles=liste.map(({produkt,opt,qty,preis,name})=>({id:produkt.id,name,optionId:opt?.id||null,qty,unitPrice:preis,total:+(preis*qty).toFixed(2)}));
+  const articleTotal=+articles.reduce((s,a)=>s+a.total,0).toFixed(2);
+  const rows=safeArray(WITHDRAWAL_KEY);
+  const eintrag={withdrawalId:crypto.randomUUID(),time:new Date().toISOString(),registerId:state.master.registerId,registerName:state.master.registerName,operator:state.master.operatorName,amount:0,amountCents:0,erstattungImBon:+betrag.toFixed(2),reason:"Reklamation",note:"",receiptAvailable:false,receiptAttachment:null,training:!!state.master.trainingMode,complaint:{reason:grund,outcome:ergebnis,reference:bonReferenz||null,articles,articleTotal,adjustment:0,refundTransactionId:transactionId,refundBon:bon}};
+  rows.push(eintrag);localStorage.setItem(WITHDRAWAL_KEY,JSON.stringify(rows));
+  return eintrag;
+}
 async function kcReklamationBuchen(produktId,grund,ergebnis,bonReferenz){
   const produkt=PRODUCTS.find(p=>p.id===produktId);
   if(!produkt)throw new Error("Artikel nicht gefunden");

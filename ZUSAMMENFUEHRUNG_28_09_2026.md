@@ -683,3 +683,24 @@ Gutschein-Verkauf nicht im Kassenbestand, Gutschein nur an der ausstellenden Kas
   an den Manager verwirft nicht mehr still, sondern meldet es sichtbar (kc-sync-live-event.js 0.1.1).
 - Zusätzlich gemeldet, nicht geändert: Wird der Schulungs-Link auf einem echten Kassen-Tablet geöffnet, bleibt dieses
   Gerät im Schulungsmodus (Band „SCHULUNG … kein Umsatz“), bis `?schulung=0` aufgerufen wird.
+
+## Nachtrag 09.10.2026 – Reklamation mit Bildern und Anzahl (kc-reklamation.js 0.2.0, app.js r58, Kasse und Schulung)
+
+Wunsch Betreiber: „Unter Reklamation die Warengruppen wie auf der Kassenseite anzeigen und darunter jeweils die Bilder
+der Artikel mit einer Anzahl – z. B. 3 kalte Glühwein, die zusammen bestellt wurden. Auf die Bildgröße achten, dass
+alles sauber drauf passt und gut zu erkennen ist. Schuss Rum und Amaretto muss berücksichtigt werden.“
+
+- Schritt 1: Warengruppen oben, darunter Bildkacheln (Bild quadratisch, ganz sichtbar; Name und Preis darunter).
+  Jedes Antippen zählt 1 Stück, rote Zahl auf der Kachel. Bei Artikeln mit Schuss darunter „+ Rum“ / „+ Amaretto“.
+  Rechts „Reklamiert“ mit − / +, Stückzahl, Summe und „Weiter → Grund“. Mehrere Artikel in einem Vorgang.
+  Pfand, Pfand-Rückgaben, Wertmarke und freie Beträge erscheinen nicht.
+- Schritt 2 (Grund) und 3 (Ersatz / Auszahlung / Nichts) wie bisher, mit Liste und Summe. Auszahlung = je Posten eine
+  feste Minus-Zeile mit Menge (z. B. „Reklamation · Glühwein rot ×2 −7,00 €“, „… + Schuss Rum ×1 −4,50 €“), dann BAR;
+  Ersatz = ein 0-€-Bon mit allen Posten; Protokoll mit allen Artikeln (Bargeldbetrag 0, siehe Nachtrag 08.10.).
+- Geprüft bei 1280×800, 1024×768 und 800×1280 (Bilder 160 / 144 / 127 px, keine abgeschnittenen Namen,
+  deutsche Silbentrennung). Buchung `kcReklamationBuchenPosten()` in app.js; der bisherige `kcReklamationBuchen()`
+  bleibt unverändert erhalten. Test: `tests/reklamation-mehrere-artikel.test.cjs`.
+- Übungsliste/Karten (64 Aufgaben): Reklamations-Aufgaben auf den neuen Ablauf umgestellt, neue Aufgabe
+  „3 kalte Glühwein, einer mit Rum“ (11,50 €), im Browser durchgespielt.
+- Beobachtung (nicht geändert): Die Schulungs-Kasse zeigt nach einer Auszahlung kein Fenster „Auszahlung … Fertig“,
+  sondern nur einen grünen Hinweis – anders als die echte Kasse.
