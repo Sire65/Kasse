@@ -21,6 +21,6 @@ for (const pfad of ['pos/app.js', 'schulung/pos/app.js']) {
 }
 for (const pfad of ['pos/index.html', 'schulung/pos/index.html', 'pos/service-worker.js', 'schulung/pos/service-worker.js']) {
   const s = fs.readFileSync(pfad, 'utf8');
-  assert(s.includes('kc-reklamation.js?build=0.2.0') && s.includes('app.js?build=0.31.3.6-r59'), pfad + ': Build fehlt');
+  assert(s.includes('kc-reklamation.js?build=0.2.0') && s.includes('app.js?build=0.31.3.6-r60'), pfad + ': Build fehlt');
 }
 console.log('reklamation-mehrere-artikel: ok');

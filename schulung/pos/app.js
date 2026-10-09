@@ -2013,11 +2013,11 @@ async function completeSale(method,{type="sale",silent=false,changeTarget=null,d
     // mit "Fertig" schliessen). Vorher stand hier ein aelterer Zwischenstand mit einer Meldungszeile, die
     // von allein verschwand - beim Ueben fehlte damit z. B. der Hinweis "Betrag an den Kunden auszahlen".
     if(silent)setSystemHint(`${training?"Training":"Verkauf"} abgeschlossen · bereit für den nächsten Verkauf`);
-    else if(type==="personal")showMessage("Personalverbrauch",money(due),`${training?"Trainingsvorgang":"Vorgang"} ${current} wurde protokolliert.`);
-    else if(type==="helfer")showMessage("Helfer-Verpflegung",money(due),`${training?"Trainingsvorgang":"Vorgang"} ${current} für ${helperGroup||"Helfer"} wurde protokolliert.`);
+    else if(type==="personal")showMessageAuto("Personalverbrauch",money(due),`${training?"Trainingsvorgang":"Vorgang"} ${current} wurde protokolliert.`);
+    else if(type==="helfer")showMessageAuto("Helfer-Verpflegung",money(due),`${training?"Trainingsvorgang":"Vorgang"} ${current} für ${helperGroup||"Helfer"} wurde protokolliert.`);
     else if(isPayout)showMessage(training?"Training abgeschlossen":"Auszahlung",money(payout),`${training?"Trainingsbon":"Bon"} ${current} gespeichert. Betrag an den Kunden auszahlen.`);
-    else if(state.master.requireChangeFlow===true)showMessage(training?"Training abgeschlossen":"Rückgeld",money(change),`${training?"Trainingsbon":"Bon"} ${current} gespeichert.`);
-    else showMessage(training?"Training abgeschlossen":"Verkauf abgeschlossen","✓",`${training?"Trainingsbon":"Bon"} ${current} gespeichert.`);
+    else if(state.master.requireChangeFlow===true)showMessageAuto(training?"Training abgeschlossen":"Rückgeld",money(change),`${training?"Trainingsbon":"Bon"} ${current} gespeichert.`);
+    else showMessageAuto(training?"Training abgeschlossen":"Verkauf abgeschlossen","✓",`${training?"Trainingsbon":"Bon"} ${current} gespeichert.`);
     // Bondruck nach dem Verkauf.
     // BEFUND: in den Vorgaben stand receipt.autoPrint - die Einstellung wurde aber NIRGENDS
     // ausgewertet. Ein toter Schalter: wer ihn umlegte, änderte nichts.
@@ -2100,7 +2100,20 @@ function zeigeDigitalenBon(rec){
   box.querySelector("[data-schliessen]").onclick=weg;
   const uhr=setTimeout(weg,20000);
 }
-function showMessage(t,v,txt){el("messageTitle").textContent=t;el("messageValue").textContent=v;el("messageText").textContent=txt;el("messageDialog").showModal()}
+// 09.10.2026 (Betreiber: "Meldungen nach der Buchung sollen von alleine weggehen" - "Bau ein in beide"):
+// showMessageAuto() zeigt dasselbe Fenster mit einer ablaufenden Leiste und schliesst es nach einigen Sekunden.
+// "Fertig" schliesst sofort. Jede andere Meldung (z. B. Auszahlung) bleibt wie bisher stehen, bis "Fertig".
+function showMessageAuto(t,v,txt,sekunden=4){
+  showMessage(t,v,txt);
+  const d=el("messageDialog");if(!d)return;
+  const kennung={};d._kcAuto=kennung;
+  const leiste=document.createElement("div");leiste.className="kc-auto-zu";leiste.setAttribute("aria-hidden","true");
+  leiste.style.cssText="height:6px;border-radius:3px;background:#16a34a;margin-top:12px;width:100%;transition:width "+sekunden+"s linear";
+  (d.querySelector("form")||d).appendChild(leiste);
+  requestAnimationFrame(()=>requestAnimationFrame(()=>{leiste.style.width="0%"}));
+  setTimeout(()=>{if(d._kcAuto===kennung&&d.open)d.close()},sekunden*1000);
+}
+function showMessage(t,v,txt){{const d=el("messageDialog");if(d){d._kcAuto=null;d.querySelectorAll(".kc-auto-zu").forEach(x=>x.remove())}}el("messageTitle").textContent=t;el("messageValue").textContent=v;el("messageText").textContent=txt;el("messageDialog").showModal()}
 // Betreiber: bei "Freie Zahlung" mitten in der Eingabe (Betrag getippt, aber OK noch nicht
 // gedrueckt) zeigte ein Tipp auf BAR/PERSONAL/etc. das allgemeine "Bitte zuerst Artikel
 // wählen" - fachlich richtig (der Warenkorb ist ja noch leer), aber irrefuehrend in genau
@@ -5606,6 +5619,8 @@ async function kcPostAccount(){
   // Pfand-Rueckgabe aufs Konto) ist Geld, das rausgeht -> Pfeil rechts; eine normale Belastung
   // ist wie ein Verkauf -> Pfeil links.
   setSystemHint(`${money(Math.abs(amount))} auf ${a.name} ${amount<0?"gutgeschrieben":"gebucht"}`,"success",amount<0?"aus":"ein");
+  // 09.10.2026: dasselbe Fenster wie an der echten Kasse (schliesst sich nach 4 Sekunden von allein).
+  try{showMessageAuto("Auf Konto gebucht",money(amount),`${a.name} · neuer lokaler Gesamtstand ${money(kcBalanceView(a.id).total)}`)}catch(err){console.warn("Konto-Meldung",err)}
 }
 function kcRenderBalanceOverview(){
   const accounts=kcAccounts().filter(kcAccountValid);

@@ -724,3 +724,13 @@ Betreiber: „Ja, passe beide Kassen an.“ Die Schulungs-Kasse hatte nach dem A
 jeweils mit „Fertig“; normaler Verkauf ohne Rückgeld wie bisher ohne Fenster. Im Browser verglichen (fünf Fälle, beide
 Kassen gleich). Echte Kasse unverändert (Build r59 nur zur gemeinsamen Kennung). Hinweise dazu in Übungsliste und
 Karteikarten entfernt.
+
+## Nachtrag 09.10.2026 – Meldungen schließen von allein (app.js r60, Kasse und Schulung)
+
+Betreiber: „Bau ein in beide“ (Meldungen nach der Buchung sollen von allein weggehen, Wunsch vom 10.09.).
+- `showMessageAuto()`: Fenster wie bisher, darunter eine grüne Leiste, die in 4 Sekunden abläuft; dann schließt es
+  sich. „Fertig“ schließt sofort. Gilt für Verkauf mit Rückgeld, Personalverbrauch, Helfer-Verpflegung und Konto.
+- **Auszahlung bleibt stehen**, bis „Fertig“ getippt ist (sonst wird leicht vergessen auszuzahlen). Eine normale
+  Meldung beendet einen laufenden Zeitgeber, damit nie ein Auszahlungsfenster versehentlich zugeht.
+- Schulungs-Kasse zeigt jetzt auch bei Konto dasselbe Fenster. Im Browser in beiden Kassen geprüft.
+- Übungsliste/Karteikarten angepasst. Test: `tests/meldung-schliesst-selbst.test.cjs`.

@@ -69,7 +69,7 @@ const titel=`<div class="titelblatt"><img src="${HUT}" style="width:62pt" alt=""
  <li>Die <b>Ampel</b> zeigt die Schwierigkeit: <b style="color:#2e7d32">grün = einfach</b>, <b style="color:#d97706">gelb = mittel</b>, <b style="color:#c62828">rot = schwer</b>.</li>
  <li>Mengenknöpfe erst <b>nach</b> dem Artikel antippen.</li>
  <li>Oft führen <b>mehrere Wege</b> zum Ziel: oben steht der einfachste, darunter unter „<b>Andere Wege</b>“ weitere, die genauso richtig sind.</li>
- <li>Nach Helfer, Personal und Auszahlung erscheint ein Fenster – mit <b>Fertig</b> schließen.</li>
+ <li>Nach Rückgeld, Personal, Helfer und Konto erscheint ein Fenster, das sich <b>nach 4 Sekunden von allein schließt</b> (grüne Leiste läuft ab; <b>Fertig</b> schließt sofort). Das Fenster <b>Auszahlung</b> bleibt stehen, bis das Geld ausgezahlt und <b>Fertig</b> getippt ist.</li>
  <li><b>Reklamation:</b> Artikel als Bild antippen – jedes Antippen zählt 1 Stück, bei Glühwein und Punsch gibt es darunter „+ Rum“ und „+ Amaretto“. Mehr dazu in der <b>Kurzanleitung Bilderrechner 4.2</b> (Club-App → Meine Dokumente).</li>
  <li><b>Beachte:</b> Einige Funktionen können sich mit der Zeit noch ändern, weil ständig am Bilderrechner weiterentwickelt wird.</li></ul></div>
 <div class="namen"><div>Bedienung:</div><div>Kunde:</div><div>Datum:</div></div>`;
