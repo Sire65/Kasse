@@ -225,7 +225,7 @@
     const knopf = el('gsAusstellen'), klein = knopf?.querySelector('small');
     if (knopf) knopf.disabled = !(betrag > 0) || betrag > 500;
     if (klein) {
-      const bis = new Date(); bis.setFullYear(bis.getFullYear() + Number(global.KCGutschein?.GUELTIG_JAHRE || 3));
+      const bis = new Date(new Date().getFullYear() + Number(global.KCGutschein?.GUELTIG_JAHRE || 3), 11, 31);   // wie kc-gutschein.js: bis 31.12.
       klein.textContent = betrag > 500 ? 'Höchstbetrag ist 500,00 €'
         : betrag > 0 ? `${geld(betrag)} · gültig bis ${bis.toLocaleDateString('de-DE', {day: '2-digit', month: '2-digit', year: 'numeric'})}`
         : 'Bitte zuerst einen Betrag wählen';
