@@ -5,7 +5,7 @@
 // Kochmuetze + "Koecheclub Werne" in #173765, Ueberschriften #2e7d32, Grau #5b6572, Schrift Carlito.
 const fs=require('fs'),path=require('path');const pw=require('playwright');const D=require('./daten.js');
 const ZIEL=path.join(__dirname,'..','..','schulung','uebungsliste');fs.mkdirSync(ZIEL,{recursive:true});
-const VERSION='Version 2',STAND='08.10.2026',KASSE='Bilderrechner V0.31.3.6';
+const VERSION='Version 3',STAND='09.10.2026',KASSE='Bilderrechner V0.31.3.6';
 const b64=f=>'data:image/png;base64,'+fs.readFileSync(path.join(__dirname,f)).toString('base64');
 const LOGO=b64('logo.png'),HUT=b64('hut.png');
 for(const f of ['logo.png','hut.png'])fs.copyFileSync(path.join(__dirname,f),path.join(ZIEL,f));
@@ -69,7 +69,8 @@ const titel=`<div class="titelblatt"><img src="${HUT}" style="width:62pt" alt=""
  <li>Die <b>Ampel</b> zeigt die Schwierigkeit: <b style="color:#2e7d32">grün = einfach</b>, <b style="color:#d97706">gelb = mittel</b>, <b style="color:#c62828">rot = schwer</b>.</li>
  <li>Mengenknöpfe erst <b>nach</b> dem Artikel antippen.</li>
  <li>Oft führen <b>mehrere Wege</b> zum Ziel: oben steht der einfachste, darunter unter „<b>Andere Wege</b>“ weitere, die genauso richtig sind.</li>
- <li>Nach Helfer, Personal und Auszahlung erscheint ein Fenster – mit <b>Fertig</b> schließen.</li>
+ <li>Nach Helfer, Personal und Auszahlung erscheint ein Fenster – mit <b>Fertig</b> schließen. In der <b>Schulungs-Kasse</b> steht statt des Fensters nur ein grüner Hinweis unten – das ist dort richtig so.</li>
+ <li><b>Reklamation:</b> Artikel als Bild antippen – jedes Antippen zählt 1 Stück, bei Glühwein und Punsch gibt es darunter „+ Rum“ und „+ Amaretto“. Mehr dazu in der <b>Kurzanleitung Bilderrechner 4.2</b> (Club-App → Meine Dokumente).</li>
  <li><b>Beachte:</b> Einige Funktionen können sich mit der Zeit noch ändern, weil ständig am Bilderrechner weiterentwickelt wird.</li></ul></div>
 <div class="namen"><div>Bedienung:</div><div>Kunde:</div><div>Datum:</div></div>`;
 const auswertung=`<div class="auswertung"><h3>Auswertung</h3><div class="zeile"><span>Gewusst <b>Ja</b>: <b class="zJa">______</b> von ${gesamt}</span><span>Gewusst <b>Nein</b>: <b class="zNein">______</b></span><span>Wiederholt am: ____________</span></div>

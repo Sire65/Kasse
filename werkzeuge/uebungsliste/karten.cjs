@@ -6,7 +6,7 @@
 // Gleiche Aufgaben (daten.js) und Gestaltung wie die Uebungsliste bzw. die Club-App-Unterlagen.
 const fs=require('fs'),path=require('path');const pw=require('playwright');const D=require('./daten.js');
 const ZIEL=path.join(__dirname,'..','..','schulung','uebungsliste');
-const VERSION='Version 2',STAND='08.10.2026';
+const VERSION='Version 3',STAND='09.10.2026';
 const b64=f=>'data:image/png;base64,'+fs.readFileSync(path.join(__dirname,f)).toString('base64');
 const LOGO=b64('logo.png'),HUT=b64('hut.png');
 const esc=s=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;');
@@ -52,7 +52,8 @@ seiten+=`<div class="seite anl"><div class="akopf"><img src="${LOGO}"><b>Köchec
  <li>Karte umdrehen und mit der <b>Lösung</b> auf der Rückseite vergleichen. Oben steht der einfachste Weg, unter „<b>Andere Wege</b>“ weitere, die genauso richtig sind.</li>
  <li>Unten auf der Rückseite ankreuzen: <b style="color:#2e7d32">✓ gewusst</b> oder <b style="color:#c62828">✗ nicht gewusst</b> – mit <b>Bleistift</b>, Platz für drei Durchgänge. <b style="color:#2e7d32">Gewusst</b> → Karte auf den Stapel <b>„Kann ich“</b>. <b style="color:#c62828">Nicht gewusst</b> → auf den Stapel <b>„Üben“</b>.</li>
  <li>Wenn alle Karten durch sind: nur mit dem Stapel <b>„Üben“</b> weitermachen – so lange, bis er leer ist.</li></ol>
- <p>Zu zweit geht es auch: einer liest die Vorderseite vor wie ein Kunde, der andere kassiert.</p></div>
+ <p>Zu zweit geht es auch: einer liest die Vorderseite vor wie ein Kunde, der andere kassiert.</p>
+ <p><b>Schulungs-Kasse:</b> Wo auf der Karte „Fenster Auszahlung … → Fertig“ steht, zeigt die Schulungs-Kasse nur einen grünen Hinweis unten. Alles andere ist wie an der echten Kasse. Ausführlich mit Bildern: <b>Kurzanleitung Bilderrechner 4.2</b> in der Club-App.</p></div>
 <h3 class="gruen">Drucken und schneiden</h3>
 <div class="kasten"><ul>
  <li><b>Beidseitig</b> drucken, Einstellung <b>„an der langen Kante wenden“</b>, Größe <b>100 %</b> (nicht „an Seite anpassen“).</li>

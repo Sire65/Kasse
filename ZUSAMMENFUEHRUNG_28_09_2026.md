@@ -704,3 +704,14 @@ alles sauber drauf passt und gut zu erkennen ist. Schuss Rum und Amaretto muss b
   „3 kalte Glühwein, einer mit Rum“ (11,50 €), im Browser durchgespielt.
 - Beobachtung (nicht geändert): Die Schulungs-Kasse zeigt nach einer Auszahlung kein Fenster „Auszahlung … Fertig“,
   sondern nur einen grünen Hinweis – anders als die echte Kasse.
+
+## Nachtrag 09.10.2026 – Handbuch 4.2 und Lernmaterial Version 3
+
+Betreiber: „Passe das Handbuch an und die Karteikarten zum Lernen.“
+- **Kurzanleitung Bilderrechner Version 4.2** (33 Seiten) in der Club-App unter Meine Dokumente (kc-clubapp 2.154.1,
+  Datei `dokumente/Kurzanleitung_Bilderrechner_V4.2.pdf`, Version 4.1 bleibt erhalten). Teil 7 neu: Reklamation mit
+  Bildkacheln und Anzahl, Pfand als Spende mit Rückfrage, Personalverbrauch/Konto/Menge mit aktuellen Bildern.
+  Neuer Teil 8: geparkte Bons verbinden, halbe Portion fest auf 0,5, Gutschein-Teilzahlung. Gutschein-Gültigkeit
+  „bis 31.12. des dritten Jahres“. Alle Bilder neu aus der laufenden Kasse (Tablet 1024×768).
+- **Übungsliste und Karteikarten Version 3** (64 Aufgaben): Hinweis, dass die Schulungs-Kasse nach einer Auszahlung
+  nur einen grünen Hinweis statt des Fensters zeigt; Verweis auf die Kurzanleitung 4.2; Reklamation mit Bildern.
