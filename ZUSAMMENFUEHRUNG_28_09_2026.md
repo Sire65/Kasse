@@ -715,3 +715,12 @@ Betreiber: „Passe das Handbuch an und die Karteikarten zum Lernen.“
   „bis 31.12. des dritten Jahres“. Alle Bilder neu aus der laufenden Kasse (Tablet 1024×768).
 - **Übungsliste und Karteikarten Version 3** (64 Aufgaben): Hinweis, dass die Schulungs-Kasse nach einer Auszahlung
   nur einen grünen Hinweis statt des Fensters zeigt; Verweis auf die Kurzanleitung 4.2; Reklamation mit Bildern.
+
+## Nachtrag 09.10.2026 – Schulungs-Kasse zeigt dieselben Fenster wie die echte Kasse (schulung/pos/app.js r59)
+
+Betreiber: „Ja, passe beide Kassen an.“ Die Schulungs-Kasse hatte nach dem Abschluss noch einen älteren Zwischenstand
+(Meldungszeile, die von allein verschwindet) statt der Fenster der echten Kasse. Jetzt identisch: Auszahlung
+(„Betrag an den Kunden auszahlen“), Personalverbrauch, Helfer-Verpflegung, „Verkauf abgeschlossen“ mit Rückgeld –
+jeweils mit „Fertig“; normaler Verkauf ohne Rückgeld wie bisher ohne Fenster. Im Browser verglichen (fünf Fälle, beide
+Kassen gleich). Echte Kasse unverändert (Build r59 nur zur gemeinsamen Kennung). Hinweise dazu in Übungsliste und
+Karteikarten entfernt.

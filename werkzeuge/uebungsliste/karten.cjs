@@ -53,7 +53,7 @@ seiten+=`<div class="seite anl"><div class="akopf"><img src="${LOGO}"><b>Köchec
  <li>Unten auf der Rückseite ankreuzen: <b style="color:#2e7d32">✓ gewusst</b> oder <b style="color:#c62828">✗ nicht gewusst</b> – mit <b>Bleistift</b>, Platz für drei Durchgänge. <b style="color:#2e7d32">Gewusst</b> → Karte auf den Stapel <b>„Kann ich“</b>. <b style="color:#c62828">Nicht gewusst</b> → auf den Stapel <b>„Üben“</b>.</li>
  <li>Wenn alle Karten durch sind: nur mit dem Stapel <b>„Üben“</b> weitermachen – so lange, bis er leer ist.</li></ol>
  <p>Zu zweit geht es auch: einer liest die Vorderseite vor wie ein Kunde, der andere kassiert.</p>
- <p><b>Schulungs-Kasse:</b> Wo auf der Karte „Fenster Auszahlung … → Fertig“ steht, zeigt die Schulungs-Kasse nur einen grünen Hinweis unten. Alles andere ist wie an der echten Kasse. Ausführlich mit Bildern: <b>Kurzanleitung Bilderrechner 4.2</b> in der Club-App.</p></div>
+ <p>Die Schulungs-Kasse verhält sich genauso wie die echte Kasse. Ausführlich mit Bildern: <b>Kurzanleitung Bilderrechner 4.2</b> in der Club-App.</p></div>
 <h3 class="gruen">Drucken und schneiden</h3>
 <div class="kasten"><ul>
  <li><b>Beidseitig</b> drucken, Einstellung <b>„an der langen Kante wenden“</b>, Größe <b>100 %</b> (nicht „an Seite anpassen“).</li>

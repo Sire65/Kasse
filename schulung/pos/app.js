@@ -2008,18 +2008,16 @@ async function completeSale(method,{type="sale",silent=false,changeTarget=null,d
     setCartNotice("Einkaufswagen abgerechnet","success");
     if(directSettlement)showDirectSettlementNotice();
     notify("success","Einkaufswagen abgerechnet","sale-complete",7000);
-    // 10.09.2026 (Betreiber: "nach jeder Buchung ein Fenster mit grünem Haken... Pfeile
-    // nutzen - links für Einnahme, rechts für Ausgabe. Soll von alleine weggehen"): die
-    // bisherigen showMessage()-Fenster (mussten weggetippt werden) hier durch dieselbe
-    // Meldungszeile ersetzt, die schon überall sonst benutzt wird - deckt damit auf einen
-    // Schlag jeden normalen Verkaufsabschluss, jede Auszahlung und jedes Rückgeld ab, ohne
-    // jede einzelne Stelle im Programm einzeln anfassen zu müssen.
-    if(silent)setSystemHint(`${training?"Training":"Verkauf"} abgeschlossen · bereit für den nächsten Verkauf`,"success","ein");
-    else if(type==="personal")setSystemHint(`${money(due)} Personalverbrauch verbucht`,"success");
-    else if(type==="helfer")setSystemHint(`${money(due)} Helfer-Verpflegung verbucht · ${helperGroup||"Helfer"}`,"success");
-    else if(isPayout)setSystemHint(`${money(payout)} ${training?"Training-":""}Auszahlung verbucht`,"success","aus");
-    else if(state.master.requireChangeFlow===true)setSystemHint(`${money(due)} verbucht · ${money(change)} Rückgeld`,"success","aus");
-    else setSystemHint(`${money(due)} verbucht`,"success","ein");
+    // 09.10.2026 (Betreiber: "Ja, passe beide Kassen an"): die Schulungs-Kasse zeigt nach dem Abschluss
+    // dieselben Fenster wie die echte Kasse (Auszahlung, Personal, Helfer, Rückgeld, Verkauf abgeschlossen -
+    // mit "Fertig" schliessen). Vorher stand hier ein aelterer Zwischenstand mit einer Meldungszeile, die
+    // von allein verschwand - beim Ueben fehlte damit z. B. der Hinweis "Betrag an den Kunden auszahlen".
+    if(silent)setSystemHint(`${training?"Training":"Verkauf"} abgeschlossen · bereit für den nächsten Verkauf`);
+    else if(type==="personal")showMessage("Personalverbrauch",money(due),`${training?"Trainingsvorgang":"Vorgang"} ${current} wurde protokolliert.`);
+    else if(type==="helfer")showMessage("Helfer-Verpflegung",money(due),`${training?"Trainingsvorgang":"Vorgang"} ${current} für ${helperGroup||"Helfer"} wurde protokolliert.`);
+    else if(isPayout)showMessage(training?"Training abgeschlossen":"Auszahlung",money(payout),`${training?"Trainingsbon":"Bon"} ${current} gespeichert. Betrag an den Kunden auszahlen.`);
+    else if(state.master.requireChangeFlow===true)showMessage(training?"Training abgeschlossen":"Rückgeld",money(change),`${training?"Trainingsbon":"Bon"} ${current} gespeichert.`);
+    else showMessage(training?"Training abgeschlossen":"Verkauf abgeschlossen","✓",`${training?"Trainingsbon":"Bon"} ${current} gespeichert.`);
     // Bondruck nach dem Verkauf.
     // BEFUND: in den Vorgaben stand receipt.autoPrint - die Einstellung wurde aber NIRGENDS
     // ausgewertet. Ein toter Schalter: wer ihn umlegte, änderte nichts.

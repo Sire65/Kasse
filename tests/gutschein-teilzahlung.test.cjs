@@ -26,6 +26,6 @@ for (const pfad of ['pos/kc-gutschein.js', 'schulung/pos/kc-gutschein.js']) {
 }
 for (const pfad of ['pos/index.html', 'schulung/pos/index.html', 'pos/service-worker.js', 'schulung/pos/service-worker.js']) {
   const s = fs.readFileSync(pfad, 'utf8');
-  assert(s.includes('app.js?build=0.31.3.6-r58') && s.includes('kc-gutschein.js?build=0.2.2'), pfad + ': Build r58 / Gutschein 0.2.2 fehlt');
+  assert(s.includes('app.js?build=0.31.3.6-r59') && s.includes('kc-gutschein.js?build=0.2.2'), pfad + ': Build r59 / Gutschein 0.2.2 fehlt');
 }
 console.log('gutschein-teilzahlung: ok');
