@@ -769,3 +769,16 @@ geänderte Wege in Kasse und Schulungs-Kasse im Browser nachgespielt.
 - Bewusst ohne Aufgabe: Tagesabschluss (Betreiber), Wertmarke (noch nicht freigeschaltet), Training/Vorführdaten/
   Servicefreigabe (geschützter Bereich, Zugang bleibt unverändert).
 - Kleinste Lösungsschrift auf den Karten 8,1 pt; Aufgaben 1–18 unverändert (Probedruck bleibt gültig).
+
+## Nachtrag 10.10.2026 – Karteikarten Version 4 (Druck auf 200 g, weniger Schneiden)
+
+Betreiber nach Probedruck: Schrift zu klein, vorne viel Platz, Karten dürfen größer werden, nur ein Schnitt zwischen
+den Karten, mehrere Kästchen nebeneinander, Nummer immer auf gleicher Höhe, „ZUSÄTZLICH“ unklar.
+- Karten 64,7 × 93,7 mm ohne Zwischenraum, 8 mm Blattrand, Schnittmarken nur am Rand: 8 durchgehende Schnitte je
+  Blatt statt 12. In jeder Karte 3 mm Sicherheitsrand. `VX`/`VY` verschieben bei Bedarf nur die Rückseiten.
+- Schrift füllt die Karte (Halbierungssuche): Kundensatz 14,7–22 pt, Lösung 8,5–13 pt gedruckt. Nummer und Thema fest
+  unter der Kopfzeile. Rückseite: zwei Reihen mit je 5 Kästchen „✓ Gewusst“ / „✗ Nicht gewusst“, darunter
+  „← Stapel ‚Kann ich‘ · Stapel ‚Üben‘ →“.
+- Letztes Blatt aufgefüllt: Stapelkarten „Kann ich“ und „Üben“, zwei leere Karten „Eigene Aufgabe“.
+- Markierung „ZUSÄTZLICH“ (nur intern: nachträglich ergänzte Aufgaben) aus Karten, Liste und Online-Karten entfernt.
+- Texte der Karten 17, 29, 33, 51, 54, 67 gekürzt (Inhalt unverändert), Kundensatz 51 umformuliert.

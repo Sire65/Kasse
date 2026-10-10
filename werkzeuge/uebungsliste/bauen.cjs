@@ -5,7 +5,7 @@
 // Kochmuetze + "Koecheclub Werne" in #173765, Ueberschriften #2e7d32, Grau #5b6572, Schrift Carlito.
 const fs=require('fs'),path=require('path');const pw=require('playwright');const D=require('./daten.js');
 const ZIEL=path.join(__dirname,'..','..','schulung','uebungsliste');fs.mkdirSync(ZIEL,{recursive:true});
-const VERSION='Version 3.1',STAND='10.10.2026',KASSE='Bilderrechner V0.31.3.6';
+const VERSION='Version 4',STAND='10.10.2026',KASSE='Bilderrechner V0.31.3.6';
 const b64=f=>'data:image/png;base64,'+fs.readFileSync(path.join(__dirname,f)).toString('base64');
 const LOGO=b64('logo.png'),HUT=b64('hut.png');
 for(const f of ['logo.png','hut.png'])fs.copyFileSync(path.join(__dirname,f),path.join(ZIEL,f));
@@ -19,7 +19,7 @@ const ampelChip=n=>{const v=NIV[n];return `<span class="ampelchip" style="backgr
 const stufen=D.map(st=>{const von=nr+1;const html=st.aufgaben.map(a=>{nr++;const lage=a.k.startsWith('(');const nv=NIV[a.n||st.niveau];return `<div class="aufgabe">
   <div class="nr">${nr}</div>
   <div class="zt">
-   <h4 class="${lage?'lage':''}">${ampelChip(a.n||st.niveau)}<span class="was">${lage?'Lage':'Kunde sagt'}</span>${esc(lage?a.k.slice(1,-1):'„'+a.k+'“')}${a.neu?' <span class="ge">ZUSÄTZLICH</span>':''}</h4>
+   <h4 class="${lage?'lage':''}">${ampelChip(a.n||st.niveau)}<span class="was">${lage?'Lage':'Kunde sagt'}</span>${esc(lage?a.k.slice(1,-1):'„'+a.k+'“')}</h4>
    <ol>${a.s.map(x=>`<li>${fett(x)}</li>`).join('')}</ol>
    ${a.w?`<div class="wege"><b>Andere Wege:</b><ul>${a.w.map(x=>`<li>${fett(x)}</li>`).join('')}</ul></div>`:''}
    <div class="kontrolle"><b>Kontrolle:</b> ${fett(a.e)}</div>
@@ -63,7 +63,7 @@ const titel=`<div class="titelblatt"><img src="${HUT}" style="width:62pt" alt=""
  <li>Der Kunde vergleicht mit den Schritten und der <b>Kontrolle</b> und kreuzt mit <b>Bleistift</b> an: <b>Gewusst? Ja / Nein</b>.</li>
  <li>Bei „Nein“ die Schritte gemeinsam durchgehen und wiederholen. Danach Rollen tauschen.</li></ol>
  <p><b>Alleine üben:</b> Dieselben Aufgaben gibt es als <b>Karteikarten</b> – vorne die Aufgabe, hinten die Lösung. Oder am Handy/Tablet: <b>Karten online</b> (Knopf oben) – Karte antippen, Lösung ansehen, „Gewusst“ oder „Nicht gewusst“ antippen. Gewusste Karten auf den Stapel <b>„Kann ich“</b>, nicht gewusste auf den Stapel <b>„Üben“</b>, dann mit dem Stapel „Üben“ weitermachen, bis er leer ist.</p>
- <p><b>Geübt wird in der Schulungs-Kasse</b> (Schulungs-Link bzw. QR-Code) – dort zählt nichts zum Umsatz. „<b>Lage</b>“ = kein Kundensatz, sondern eine Situation am Stand. <span class="ge">ZUSÄTZLICH</span> = weitere Fälle, die am Stand vorkommen können.</p></div>
+ <p><b>Geübt wird in der Schulungs-Kasse</b> (Schulungs-Link bzw. QR-Code) – dort zählt nichts zum Umsatz. „<b>Lage</b>“ = kein Kundensatz, sondern eine Situation am Stand.</p></div>
 <div class="kasten"><p><b>Gut zu wissen:</b></p><ul>
  <li>Glaspfand (2,00 €) kommt bei Getränken <b>von selbst</b> dazu. Bei der halben Portion wird das Pfand <b>nie</b> halbiert, auf Pfand gibt es <b>nie</b> Rabatt.</li>
  <li>Die <b>Ampel</b> zeigt die Schwierigkeit: <b style="color:#2e7d32">grün = einfach</b>, <b style="color:#d97706">gelb = mittel</b>, <b style="color:#c62828">rot = schwer</b>.</li>
@@ -159,7 +159,7 @@ function zeigen(){var alle=KARTEN.filter(function(k){return filter==='alle'||k.n
  var box=$('#karte');if(!liste.length){box.innerHTML='<div class="leer">'+(modus==='ueben'?'🎉 Stapel „Üben“ ist leer!':modus==='offen'?'🎉 Alle Karten sind durch!':'Keine Karten.')+'<small>'+(modus!=='alle'?'Oben „Alle Karten“ wählen oder unten neu beginnen.':'')+'</small></div>';$('#pos').textContent='0 / 0';return}
  if(idx>=liste.length)idx=0;var k=liste[idx],s=st[k.nr];
  var h='<div class="karte">'+ampel(k)+'<div class="inhalt">';
- if(!offen)h+='<div class="thema">'+k.thema+'</div><span class="was'+(k.lage?' lage':'')+'">'+(k.lage?'Lage':'Kunde sagt')+'</span><div class="satz'+(k.lage?' lage':'')+'">'+k.satz.replace(/</g,'&lt;')+'</div>'+(k.neu?'<span class="ge">ZUSÄTZLICH</span>':'');
+ if(!offen)h+='<div class="thema">'+k.thema+'</div><span class="was'+(k.lage?' lage':'')+'">'+(k.lage?'Lage':'Kunde sagt')+'</span><div class="satz'+(k.lage?' lage':'')+'">'+k.satz.replace(/</g,'&lt;')+'</div>';
  else h+='<div class="l-titel">Lösung</div><ol>'+k.s.map(function(x){return '<li>'+x+'</li>'}).join('')+'</ol>'+(k.w.length?'<div class="wege"><b>Andere Wege:</b><ul>'+k.w.map(function(x){return '<li>'+x+'</li>'}).join('')+'</ul></div>':'')+'<div class="kontrolle"><b>Kontrolle:</b> '+k.e+'</div>';
  h+='</div>'+(s?'<div class="status '+s+'">'+(s==='ja'?'✓ Zuletzt: gewusst':'✗ Zuletzt: nicht gewusst')+'</div>':'');
  h+=offen?'<div class="knoepfe"><button type="button" class="b-ja" data-a="ja">✓ Gewusst</button><button type="button" class="b-nein" data-a="nein">✗ Nicht gewusst</button></div>':'<div class="knoepfe"><button type="button" class="b-zeigen" data-a="zeigen">Lösung zeigen ↻</button></div>';
