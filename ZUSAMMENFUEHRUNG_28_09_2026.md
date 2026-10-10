@@ -751,3 +751,21 @@ alten wieder laden.“
   und Lebenszeichen an Supabase brechen nach 8 s ab und werden als Fehler vermerkt, statt bei hängender Verbindung
   offen zu bleiben. Kassenverkäufe laufen nicht über diese Datei.
 - Tests: `tests/altbrowser-regeln.test.cjs` (erweitert), `tests/datenfluss-zeitlimit.test.cjs` (neu).
+
+## Nachtrag 10.10.2026 – Übungsliste und Karteikarten Version 3.1 (68 Aufgaben)
+
+Betreiber: „Prüfe nochmal, ob jetzt alle Geschäftsfälle abgedeckt sind und logisch und alle alternativen Wege
+aufgebaut sind.“ Alle Knöpfe der Kasse (Hauptseite, Warenkorb, MEHR/☰) mit den Aufgaben abgeglichen; neue und
+geänderte Wege in Kasse und Schulungs-Kasse im Browser nachgespielt.
+- **Rechenfehler behoben (Aufgabe 50, drei kalte Glühwein):** Die Reklamation erstattet nur das Getränk. Gibt der
+  Kunde die Gläser mit ab, gehören 3× Glasrückgabe dazu – 17,50 € statt 11,50 € (in der Kasse geprüft).
+- **Neu:** Gutschein-Restwert abfragen (Nr. 29) · zu viel berechnet, Bon schon bezahlt → Reklamation „Falscher
+  Artikel“ + Glasrückgabe, 5,50 € (Nr. 51) · Wechselgeld vom Kassenwart über Bargeldübergabe/Kurzcode (Nr. 67) ·
+  WLAN weg, weiter kassieren (Nr. 68, Verkauf ohne Netz geprüft).
+- **Korrigiert:** Aufgabe 17 „Unten …“ → „Oben im Warenkorb …“.
+- **Weitere Wege ergänzt:** Mengenknopf zweimal kurz hintereinander zählt zusammen (6 + 6 = 12) · MEHR →
+  Pfandrückgabe · Reklamation „NICHTS“ bzw. Auszahlung statt Ersatz · MEHR → Letzten Bon / Bonnummer suchen ·
+  MEHR → Bediener wechseln · MEHR → Stoßbetrieb.
+- Bewusst ohne Aufgabe: Tagesabschluss (Betreiber), Wertmarke (noch nicht freigeschaltet), Training/Vorführdaten/
+  Servicefreigabe (geschützter Bereich, Zugang bleibt unverändert).
+- Kleinste Lösungsschrift auf den Karten 8,1 pt; Aufgaben 1–18 unverändert (Probedruck bleibt gültig).
