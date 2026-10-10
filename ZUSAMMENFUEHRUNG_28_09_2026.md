@@ -782,3 +782,19 @@ den Karten, mehrere Kästchen nebeneinander, Nummer immer auf gleicher Höhe, �
 - Letztes Blatt aufgefüllt: Stapelkarten „Kann ich“ und „Üben“, zwei leere Karten „Eigene Aufgabe“.
 - Markierung „ZUSÄTZLICH“ (nur intern: nachträglich ergänzte Aufgaben) aus Karten, Liste und Online-Karten entfernt.
 - Texte der Karten 17, 29, 33, 51, 54, 67 gekürzt (Inhalt unverändert), Kundensatz 51 umformuliert.
+
+## Nachtrag 10.10.2026 – Kombi-Bilder: halb Getränk, halb Essen, Wurst gut erkennbar (app.js r61, Kasse und Schulung)
+
+Betreiber: „Die Bilder sind nicht gut. Halb das Getränk und halb das Essen, z. B. Grünkohl/Wurst – die Wurst muss zu
+sehen sein, aber keine zusätzliche Wurst.“ / „Wichtig ist, dass die Wurst gut zu erkennen ist.“
+- `packageProductView`: Gibt es einen Artikel, der Essen und drittes Teil schon zusammen zeigt (Name „Grünkohl +
+  Mettwurst“), steht dessen Bild unten rechts; der runde Wurst-Ausschnitt (07.10.) entfällt dann. Ohne solchen
+  Artikel bleibt der Ausschnitt als Rückfall.
+- `styles.css`: beide Hälften um 25 % vergrößert und so verschoben, dass das eingebrannte Namensband (ab 84 %) und das
+  „i“ (bis 16 %) der Einzelbilder nicht mehr hervorschauen; clip-path in Bildkoordinaten umgerechnet, Schnittkante
+  bleibt auf der Kachel-Diagonalen. `#productGrid` + `!important`, weil allgemeine Kachelregeln jedes Bild auf
+  100 % zwingen. pos/styles.css hat jetzt eine Buildkennung (r61), Schulung training-ui6.
+- Im Browser in beiden Kassen geprüft (6 Kombis, Wurst groß sichtbar). Test `warengruppen-reihenfolge-dreier-kombi`
+  angepasst. Karteikarte 7 und Übungsliste angepasst.
+- Hinweis an den Betreiber: „Grünkohl-Wurst + Eierlikörpunsch“ und „Eierlikörpunsch + Grünkohl + Mettwurst“ (je
+  11,50 €) bzw. die beiden Glühwein-Varianten (10,50 €) haben denselben Inhalt und sehen jetzt gleich aus.

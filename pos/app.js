@@ -319,10 +319,16 @@ function packageProductView(pkg,index=0){
   // Welches Teil vorne steht, legt vorneProductId fest; sonst das dritte Teil mit Bild.
   const vorneTeil=mitBild.length>=3?(mitBild.find(c=>c.id===pkg.vorneProductId)||mitBild.find(c=>c!==getraenk&&c!==speise)):null;
   const speiseHinten=vorneTeil&&speise===vorneTeil?mitBild.find(c=>c!==getraenk&&c!==vorneTeil):speise;
+  // 10.10.2026 (Betreiber): "halb Getraenk, halb Essen - die Wurst muss zu sehen sein, aber keine zusaetzliche
+  // Wurst". Gibt es einen Artikel, der Essen und drittes Teil schon zusammen zeigt (Name "Grünkohl + Mettwurst"),
+  // steht dessen Bild unten rechts und der runde Ausschnitt entfaellt. Nur ohne solchen Artikel bleibt der Ausschnitt.
+  const kombiNorm=s=>String(s||"").toLowerCase().replace(/\s+/g," ").trim();
+  const essenZusammen=vorneTeil&&speiseHinten?PRODUCTS.find(x=>x.image&&!x.isPackage&&[kombiNorm(speiseHinten.name+" + "+vorneTeil.name),kombiNorm(vorneTeil.name+" + "+speiseHinten.name)].includes(kombiNorm(x.name))):null;
+  const untenTeil=essenZusammen||speiseHinten||mitBild[1],vorneBild=essenZusammen?null:vorneTeil;
   const kombiBilder=mitBild.length>=2
     ? {oben:(getraenk||mitBild[0]).image, obenName:(getraenk||mitBild[0]).name,
-       unten:(speiseHinten||mitBild[1]).image, untenName:(speiseHinten||mitBild[1]).name,
-       vorne:vorneTeil?.image||"", vorneName:vorneTeil?.name||""}
+       unten:untenTeil.image, untenName:untenTeil.name,
+       vorne:vorneBild?.image||"", vorneName:vorneBild?.name||""}
     : null;
   return {...pkg,isPackage:true,category:KOMBI_GRUPPE,image:lead?.image||"assets/logo.webp",color:"#6d28d9",kombiBilder,
     barcode:pkg.barcode||window.KCArtikelnummern?.fuerArtikel(pkg.id)

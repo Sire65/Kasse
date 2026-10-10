@@ -7,7 +7,8 @@
    Kasse und Schulung:
    - Reihenfolge Getraenke | Speisen | Pfand | Favoriten | Kombi | Sonstiges - frisch, mit alter gespeicherter
      Reihenfolge (einmalig verworfen) und mit der neuen Reihenfolge vom Manager (kennt "Kombi" nicht)
-   - Dreier-Kombi Eierlikoerpunsch + Gruenkohl + Mettwurst, Preis = Summe, Mettwurst als runder Ausschnitt vorne
+   - Dreier-Kombi Eierlikoerpunsch + Gruenkohl + Mettwurst, Preis = Summe. Bild seit 10.10.2026 (Betreiber: "keine
+     zusaetzliche Wurst"): Punsch oben, unten das fertige Bild "Grünkohl + Mettwurst" - kein runder Ausschnitt mehr
    PC-Manager (und Schulungs-Manager):
    - Pfand-Rueckgaben zusaetzlich unter Getraenke, Glas-/Zangenpfand nur unter Sonstiges, Apfelpunsch mit Schuss
    - Feld "Zusaetzlich anzeigen in": Speichern behaelt die Einstellung, Haken weg entfernt sie
@@ -39,11 +40,11 @@ for(const seite of ['pos','schulung/pos'])for(const fall of ['frisch','alte Reih
    return {pk:pk&&[pk.name,pk.price,pk.componentIds.join(',')],oben:t&&t.querySelector('.kombi-oben').getAttribute('src'),unten:t&&t.querySelector('.kombi-unten').getAttribute('src'),vorne:vi&&vi.getAttribute('src'),
      rund:v&&getComputedStyle(v).borderRadius,anteil:kr&&kb?Math.round(kr.width/kb.width*100):0,anzahl:document.querySelectorAll('#productGrid .product-tile').length}});
   pr(`${n}: Dreier-Kombi angelegt, Preis = Summe (11,50)`,!!k.pk&&k.pk[0]==='Eierlikörpunsch + Grünkohl + Mettwurst'&&k.pk[1]===11.5&&k.pk[2]==='eier,gruenkohl,mettwurst',JSON.stringify(k.pk));
-  pr(`${n}: Kachel: Punsch oben, Grünkohl unten, Mettwurst rund vorne`,/eierpunsch/.test(k.oben||'')&&/gruenkohl_version_3/.test(k.unten||'')&&/mettwurst/.test(k.vorne||'')&&k.rund==='50%'&&k.anteil>=45,JSON.stringify(k));
+  pr(`${n}: Kachel: Punsch oben, unten Grünkohl mit Wurst (ein Bild), keine zusätzliche Wurst`,/eierpunsch/.test(k.oben||'')&&/gruenkohl_wurst_version_3/.test(k.unten||'')&&!k.vorne,JSON.stringify(k));
   pr(`${n}: die vier bisherigen Kombis bleiben, zwei Dreier-Kombis dazu`,k.anzahl===6,String(k.anzahl));
   const g=await p.evaluate(()=>{const pk=JSON.parse(localStorage.getItem('kc_packages_v100')).find(x=>x.id==='PKG-GR-GK-MW');const t=[...document.querySelectorAll('#productGrid .product-tile')].find(x=>x.dataset.id==='PKG-GR-GK-MW');
-   return {pk:pk&&[pk.name,pk.price,pk.componentIds.join(',')],oben:t&&t.querySelector('.kombi-oben').getAttribute('src'),vorne:t&&t.querySelector('.kombi-vorne img')?.getAttribute('src')}});
-  pr(`${n}: Glühwein rot + Grünkohl + Mettwurst (10,50), Wurst vorne`,!!g.pk&&g.pk[0]==='Glühwein rot + Grünkohl + Mettwurst'&&g.pk[1]===10.5&&g.pk[2]==='grot,gruenkohl,mettwurst'&&/gluehwein_version_3/.test(g.oben||'')&&/mettwurst/.test(g.vorne||''),JSON.stringify(g));
+   return {pk:pk&&[pk.name,pk.price,pk.componentIds.join(',')],oben:t&&t.querySelector('.kombi-oben').getAttribute('src'),unten:t&&t.querySelector('.kombi-unten').getAttribute('src'),vorne:t&&t.querySelector('.kombi-vorne img')?.getAttribute('src')}});
+  pr(`${n}: Glühwein rot + Grünkohl + Mettwurst (10,50), unten Grünkohl mit Wurst`,!!g.pk&&g.pk[0]==='Glühwein rot + Grünkohl + Mettwurst'&&g.pk[1]===10.5&&g.pk[2]==='grot,gruenkohl,mettwurst'&&/gluehwein_version_3/.test(g.oben||'')&&/gruenkohl_wurst_version_3/.test(g.unten||'')&&!g.vorne,JSON.stringify(g));
  }
  pr(`${n}: keine JS-Fehler`,!ohneLaerm(js).length,js.join('|').slice(0,200));
  await p.close()}

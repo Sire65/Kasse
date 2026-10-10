@@ -53,7 +53,9 @@ const frei=async pg=>pg.evaluate(()=>{["fullscreenGate","kcStartupSummary","kcPi
    const r=k.getBoundingClientRect(), ro=oben.getBoundingClientRect(), ru=unten.getBoundingClientRect();
    return {obenBild:oben.getAttribute('src'), untenBild:unten.getAttribute('src'),
      obenClip:so.clipPath, untenClip:su.clipPath, strich:linie?getComputedStyle(linie).stroke:null,
-     deckungsgleich:Math.abs(ro.width-r.width)<2&&Math.abs(ru.height-r.height)<2,
+     // 10.10.2026: Haelften sind um 25 % vergroessert (eingebranntes Band/"i" liegen ausserhalb) - geprueft wird,
+     // dass jede Haelfte die ganze Kachel bedeckt, also keine graue Ecke frei bleibt.
+     deckungsgleich:[ro,ru].every(x=>x.left<=r.left+1&&x.top<=r.top+1&&x.right>=r.right-1&&x.bottom>=r.bottom-1),
      obenGeladen:oben.naturalWidth>0, untenGeladen:unten.naturalWidth>0};
  });
  p('die Kombi-Kachel traegt ZWEI Bilder', !!bild&&!!bild.obenBild&&!!bild.untenBild,
