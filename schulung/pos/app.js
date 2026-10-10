@@ -341,24 +341,14 @@ let PACKAGES=JSON.parse(localStorage.getItem(PACKAGE_STORAGE_KEY)||"null")||DEFA
   if(neu)localStorage.setItem(PACKAGE_STORAGE_KEY,JSON.stringify(PACKAGES));
   localStorage.setItem(MARKE,"1");
  }}
-// 07.10.2026 (Betreiber): Dreier-Kombis Eierlikoerpunsch bzw. Gluehwein rot + Gruenkohl + Mettwurst, die Wurst im Bild
-// vorne. Einmalig ergaenzt wie die Kombis vom 24.09.; wer sie loescht, bekommt sie nicht wieder.
-// Preis = Summe der Einzelpreise, Pfand kommt ueber den Punsch extra dazu.
-{const MARKE="kc_kombi_ei_gk_mw_ergaenzt_v1";
- if(!localStorage.getItem(MARKE)){
-  // Dazu (Betreiber, gleicher Tag): dieselbe Dreier-Kombi mit Gluehwein rot. Die Kombi ohne Wurst
-  // ("Gruenkohl + Gluehwein rot") gibt es schon seit Werk.
-  const NEUE=[{id:"PKG-EI-GK-MW",name:"Eierlikörpunsch + Grünkohl + Mettwurst",componentIds:["eier","gruenkohl","mettwurst"],vorneProductId:"mettwurst"},
-   {id:"PKG-GR-GK-MW",name:"Glühwein rot + Grünkohl + Mettwurst",componentIds:["grot","gruenkohl","mettwurst"],vorneProductId:"mettwurst"}];
-  let neu=0;
-  NEUE.forEach(k=>{
-   if(PACKAGES.some(p=>p.id===k.id)||!k.componentIds.every(id=>PRODUCTS.some(p=>p.id===id)))return;
-   const summe=k.componentIds.reduce((n,id)=>n+Number((PRODUCTS.find(p=>p.id===id)||{}).price||0),0);
-   PACKAGES.push({...k,price:+summe.toFixed(2),category:"Kombi",active:true,autoManaged:false,source:"manual",note:"Kombi 07.10.2026"});neu++;
-  });
-  if(neu)localStorage.setItem(PACKAGE_STORAGE_KEY,JSON.stringify(PACKAGES));
-  localStorage.setItem(MARKE,"1");
- }}
+// 10.10.2026 (Betreiber): "jede Kombi nur einmal - Getraenk und Essen". Die Dreier-Kombis vom 07.10.
+// (Eierlikoerpunsch bzw. Gluehwein rot + Gruenkohl + Mettwurst) hatten denselben Inhalt und Preis wie
+// "Gruenkohl-Wurst + Eierlikoerpunsch" bzw. "Gruenkohl-Wurst + Gluehwein rot" und werden nicht mehr angelegt.
+// Vorhandene werden bei jedem Start entfernt - auch wenn sie ueber einen Stammdaten-Abgleich zurueckkaemen.
+// Nur genau diese zwei Kennungen; alle anderen Kombis bleiben unberuehrt. Gebuchte Bons bleiben, wie sie sind.
+{const DOPPELT=["PKG-EI-GK-MW","PKG-GR-GK-MW"];
+ const vorher=PACKAGES.length;PACKAGES=PACKAGES.filter(p=>!DOPPELT.includes(p&&p.id));
+ if(PACKAGES.length!==vorher)localStorage.setItem(PACKAGE_STORAGE_KEY,JSON.stringify(PACKAGES));}
 let PACKAGE_SUGGESTIONS=[];
 // Die Warengruppe hiess "Packages". Am Stand sagt niemand "Package" - es sind Kombinationen
 // aus Essen und Getraenk. Der Name steht auf dem Warengruppenknopf, im Bon, in der

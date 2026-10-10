@@ -798,3 +798,15 @@ sehen sein, aber keine zusätzliche Wurst.“ / „Wichtig ist, dass die Wurst g
   angepasst. Karteikarte 7 und Übungsliste angepasst.
 - Hinweis an den Betreiber: „Grünkohl-Wurst + Eierlikörpunsch“ und „Eierlikörpunsch + Grünkohl + Mettwurst“ (je
   11,50 €) bzw. die beiden Glühwein-Varianten (10,50 €) haben denselben Inhalt und sehen jetzt gleich aus.
+
+## Nachtrag 10.10.2026 – Jede Kombi nur einmal (app.js r62, Kasse und Schulung)
+
+Betreiber: „Nein, jede Kombi nur einmal – Getränk und Essen.“ Die Dreier-Kombis vom 07.10. (Eierlikörpunsch bzw.
+Glühwein rot + Grünkohl + Mettwurst) hatten denselben Inhalt und Preis wie „Grünkohl-Wurst + Eierlikörpunsch“ (11,50 €)
+bzw. „Grünkohl-Wurst + Glühwein rot“ (10,50 €).
+- Sie werden nicht mehr angelegt; vorhandene (`PKG-EI-GK-MW`, `PKG-GR-GK-MW`) entfernt die Kasse bei jedem Start,
+  auch nach einem Stammdaten-Abgleich. Nur diese zwei Kennungen – eigene Kombis bleiben (im Test geprüft).
+  Gebuchte Bons bleiben unverändert.
+- Es bleiben vier Kombis: Grünkohl + Glühwein rot, Grünkohl + Eierlikörpunsch, Grünkohl-Wurst + Glühwein rot,
+  Grünkohl-Wurst + Eierlikörpunsch. Mit Wurst zeigt das Bild Grünkohl mit Wurst, ohne Wurst nur Grünkohl.
+- Karteikarte/Übungsliste Aufgabe 7 nennt jetzt „Grünkohl-Wurst + Eierlikörpunsch“.

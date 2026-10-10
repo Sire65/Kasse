@@ -7,8 +7,8 @@
    Kasse und Schulung:
    - Reihenfolge Getraenke | Speisen | Pfand | Favoriten | Kombi | Sonstiges - frisch, mit alter gespeicherter
      Reihenfolge (einmalig verworfen) und mit der neuen Reihenfolge vom Manager (kennt "Kombi" nicht)
-   - Dreier-Kombi Eierlikoerpunsch + Gruenkohl + Mettwurst, Preis = Summe. Bild seit 10.10.2026 (Betreiber: "keine
-     zusaetzliche Wurst"): Punsch oben, unten das fertige Bild "Grünkohl + Mettwurst" - kein runder Ausschnitt mehr
+   - 10.10.2026 (Betreiber: "jede Kombi nur einmal"): Dreier-Kombis vom 07.10. entfernt, vier Kombis bleiben;
+     mit Wurst zeigt das Bild Grünkohl mit Wurst, ohne Wurst nur Grünkohl
    PC-Manager (und Schulungs-Manager):
    - Pfand-Rueckgaben zusaetzlich unter Getraenke, Glas-/Zangenpfand nur unter Sonstiges, Apfelpunsch mit Schuss
    - Feld "Zusaetzlich anzeigen in": Speichern behaelt die Einstellung, Haken weg entfernt sie
@@ -25,7 +25,8 @@ try{
 for(const seite of ['pos','schulung/pos'])for(const fall of ['frisch','alte Reihenfolge','Reihenfolge vom Manager']){
  const p=await b.newPage({viewport:{width:1280,height:800}});const js=[];p.on('pageerror',e=>js.push(e.message));
  await p.addInitScript(fall=>{if(sessionStorage.getItem('x'))return;sessionStorage.setItem('x','1');const m={registerId:'KASSE-01',pinLockEnabled:false};
-  if(fall==='alte Reihenfolge')m.categoryOrder=['Favoriten','WG05','WG01','WG02','WG03','WG04'];
+  if(fall==='alte Reihenfolge'){m.categoryOrder=['Favoriten','WG05','WG01','WG02','WG03','WG04'];
+   localStorage.setItem('kc_packages_v100',JSON.stringify([{id:'PKG-EI-GK-MW',name:'Eierlikörpunsch + Grünkohl + Mettwurst',componentIds:['eier','gruenkohl','mettwurst'],price:11.5,category:'Kombi',active:true},{id:'PKG-GR-GK-MW',name:'Glühwein rot + Grünkohl + Mettwurst',componentIds:['grot','gruenkohl','mettwurst'],price:10.5,category:'Kombi',active:true},{id:'EIGENE-TEST',name:'Test-Kombi',componentIds:['grot','mettwurst'],price:5,category:'Kombi',active:true}]))}
   if(fall==='Reihenfolge vom Manager'){m.categoryOrder=['WG01','WG02','WG03','Favoriten','WG04'];localStorage.setItem('kc_warengruppen_reihenfolge_v1','1')}
   localStorage.setItem('kc_master_v040',JSON.stringify(m))},fall);
  await p.goto(`http://127.0.0.1:${PORT}/Kasse/${seite}/index.html`);await p.waitForTimeout(3000);
@@ -33,18 +34,21 @@ for(const seite of ['pos','schulung/pos'])for(const fall of ['frisch','alte Reih
  const r=await p.evaluate(()=>[...document.querySelectorAll('#categories button')].map(b=>b.dataset.cat).join(' | '));
  pr(`${n}: Warengruppen ${SOLL}`,r===SOLL,r);
  if(fall==='frisch'){
+  // 10.10.2026 (Betreiber): "jede Kombi nur einmal - Getraenk und Essen" - die Dreier-Kombis vom 07.10. sind weg.
   const k=await p.evaluate(()=>{document.querySelectorAll('dialog[open]').forEach(d=>d.close());document.querySelector('#categories button[data-cat="Kombi"]').click();
-   const pk=JSON.parse(localStorage.getItem('kc_packages_v100')).find(x=>x.id==='PKG-EI-GK-MW');
-   const t=[...document.querySelectorAll('#productGrid .product-tile')].find(x=>x.dataset.id==='PKG-EI-GK-MW');
-   const v=t&&t.querySelector('.kombi-vorne'),vi=v&&v.querySelector('img'),kr=v&&v.getBoundingClientRect(),kb=t&&t.getBoundingClientRect();
-   return {pk:pk&&[pk.name,pk.price,pk.componentIds.join(',')],oben:t&&t.querySelector('.kombi-oben').getAttribute('src'),unten:t&&t.querySelector('.kombi-unten').getAttribute('src'),vorne:vi&&vi.getAttribute('src'),
-     rund:v&&getComputedStyle(v).borderRadius,anteil:kr&&kb?Math.round(kr.width/kb.width*100):0,anzahl:document.querySelectorAll('#productGrid .product-tile').length}});
-  pr(`${n}: Dreier-Kombi angelegt, Preis = Summe (11,50)`,!!k.pk&&k.pk[0]==='Eierlikörpunsch + Grünkohl + Mettwurst'&&k.pk[1]===11.5&&k.pk[2]==='eier,gruenkohl,mettwurst',JSON.stringify(k.pk));
-  pr(`${n}: Kachel: Punsch oben, unten Grünkohl mit Wurst (ein Bild), keine zusätzliche Wurst`,/eierpunsch/.test(k.oben||'')&&/gruenkohl_wurst_version_3/.test(k.unten||'')&&!k.vorne,JSON.stringify(k));
-  pr(`${n}: die vier bisherigen Kombis bleiben, zwei Dreier-Kombis dazu`,k.anzahl===6,String(k.anzahl));
-  const g=await p.evaluate(()=>{const pk=JSON.parse(localStorage.getItem('kc_packages_v100')).find(x=>x.id==='PKG-GR-GK-MW');const t=[...document.querySelectorAll('#productGrid .product-tile')].find(x=>x.dataset.id==='PKG-GR-GK-MW');
-   return {pk:pk&&[pk.name,pk.price,pk.componentIds.join(',')],oben:t&&t.querySelector('.kombi-oben').getAttribute('src'),unten:t&&t.querySelector('.kombi-unten').getAttribute('src'),vorne:t&&t.querySelector('.kombi-vorne img')?.getAttribute('src')}});
-  pr(`${n}: Glühwein rot + Grünkohl + Mettwurst (10,50), unten Grünkohl mit Wurst`,!!g.pk&&g.pk[0]==='Glühwein rot + Grünkohl + Mettwurst'&&g.pk[1]===10.5&&g.pk[2]==='grot,gruenkohl,mettwurst'&&/gluehwein_version_3/.test(g.oben||'')&&/gruenkohl_wurst_version_3/.test(g.unten||'')&&!g.vorne,JSON.stringify(g));
+   const pk=JSON.parse(localStorage.getItem('kc_packages_v100')||'[]');
+   const kacheln=[...document.querySelectorAll('#productGrid .product-tile')];
+   return {ids:pk.map(x=>x.id),anzahl:kacheln.length,
+     bilder:kacheln.map(t=>(t.querySelector('.product-label strong')||{}).textContent+': '+(t.querySelector('.kombi-unten')||{getAttribute:()=>''}).getAttribute('src').split('/').pop()+(t.querySelector('.kombi-vorne')?' +rund':''))}});
+  pr(`${n}: keine Dreier-Kombis mehr`,!k.ids.includes('PKG-EI-GK-MW')&&!k.ids.includes('PKG-GR-GK-MW'),k.ids.join(','));
+  pr(`${n}: genau vier Kombis (je Getränk mit und ohne Wurst)`,k.anzahl===4,String(k.anzahl));
+  pr(`${n}: mit Wurst = Bild Grünkohl mit Wurst, ohne Wurst = Grünkohl, kein runder Ausschnitt`,
+   k.bilder.filter(x=>/Wurst/.test(x.split(':')[0])).every(x=>/gruenkohl_wurst_version_3/.test(x))&&k.bilder.filter(x=>!/Wurst/.test(x.split(':')[0])).every(x=>/gruenkohl_version_3/.test(x))&&!k.bilder.some(x=>/rund/.test(x)),k.bilder.join(' | '));
+ }
+ if(fall==='alte Reihenfolge'){
+  // Tablet mit altem Stand: Dreier-Kombis gespeichert, dazu eine eigene Kombi -> nur die Dreier verschwinden.
+  const k=await p.evaluate(()=>JSON.parse(localStorage.getItem('kc_packages_v100')||'[]').map(x=>x.id));
+  pr(`${n}: alte Dreier-Kombis entfernt, eigene Kombi bleibt`,!k.includes('PKG-EI-GK-MW')&&!k.includes('PKG-GR-GK-MW')&&k.includes('EIGENE-TEST'),k.join(','));
  }
  pr(`${n}: keine JS-Fehler`,!ohneLaerm(js).length,js.join('|').slice(0,200));
  await p.close()}

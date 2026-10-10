@@ -5,7 +5,7 @@
    mit dem ECHTEN Paket: Im PC-Manager "Stammdaten senden" -> das gesendete Paket wird abgefangen -> die Kasse
    bekommt es beim Start als Abgleich (/kc-sync-master-data) -> was zeigt die Kasse?
    Erwartet: Getraenke enden mit den drei Pfand-Rueckgaben, Glas-/Zangenpfand nur unter Sonstiges, Apfelpunsch mit
-   Schuss-Auswahl, Reihenfolge Getraenke | Speisen | Pfand | Favoriten | Kombi | Sonstiges, alle 6 Kombis bleiben
+   Schuss-Auswahl, Reihenfolge Getraenke | Speisen | Pfand | Favoriten | Kombi | Sonstiges, alle 4 Kombis bleiben
    (der Manager sendet keine Kombis), ein im Manager geaenderter Preis kommt an. */
 const pw=require('playwright');const http=require('http'),fs=require('fs'),path=require('path');
 const W=path.join(__dirname,'..');const T={'.html':'text/html','.js':'text/javascript','.css':'text/css','.json':'application/json','.png':'image/png','.webp':'image/webp','.jpg':'image/jpeg','.svg':'image/svg+xml','.woff2':'font/woff2'};
@@ -44,7 +44,8 @@ for(const [mgr,kasse] of [['pc-manager','pos'],['schulung/pc-manager','schulung/
  pr(`${n}: Apfelpunsch mit „+“ (Schuss)`,g.includes('Apfelpunsch [+]'));
  pr(`${n}: Pfand zeigt nur die drei Rückgaben`,pf.join('|')==='Glasrückgabe|Feuerzange Rückgabe|Glas + Feuerzange Rückgabe',pf.join(' | '));
  pr(`${n}: Glas-/Zangenpfand unter Sonstiges`,so.some(x=>/^Glaspfand/.test(x))&&so.some(x=>/^Feuerzangenpfand/.test(x)),so.join(' | '));
- pr(`${n}: alle 6 Kombis bleiben (Manager sendet keine)`,ko.length===6&&ko.some(x=>/Glühwein rot \+ Grünkohl \+ Mettwurst/.test(x))&&ko.some(x=>/Eierlikörpunsch \+ Grünkohl \+ Mettwurst/.test(x)),ko.join(' | '));
+ // 10.10.2026 (Betreiber: "jede Kombi nur einmal"): vier Kombis, je Getraenk mit und ohne Wurst
+ pr(`${n}: alle 4 Kombis bleiben (Manager sendet keine)`,ko.length===4&&['Grünkohl + Glühwein rot','Grünkohl + Eierlikörpunsch','Grünkohl-Wurst + Glühwein rot','Grünkohl-Wurst + Eierlikörpunsch'].every(x=>ko.includes(x)),ko.join(' | '));
  const preis=await p.evaluate(()=>(PRODUCTS.find(x=>x.id==='grot')||{}).price);
  pr(`${n}: im Manager geänderter Preis kommt an (3,70)`,preis===3.7,String(preis));
  pr(`${n}: keine JS-Fehler`,!ohneLaerm(js).length,js.join('|').slice(0,200));
