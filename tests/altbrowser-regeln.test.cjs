@@ -51,7 +51,7 @@ for(const base of ['pos','schulung/pos']){
   pruefe(`${base}: kleine Kopien sind wirklich klein (unter 150 KB)`,!zuGross.length,zuGross.join(', '));
   pruefe(`${base}: Ersatzschrift fuer fehlende Symbole ist da und offline gespeichert`,fs.existsSync(path.join(W,base,'assets/kc-emoji-ersatz.woff2'))&&sw.includes('"./assets/kc-emoji-ersatz.woff2"')&&/html\.kc-ohne-seitenverhaeltnis body\{[^}]*KC Emoji Ersatz/.test(fs.readFileSync(path.join(W,base,'kc-legacy-fallback.css'),'utf8')));
 }
-function baueDom(mitSeitenverhaeltnis){
+function baueDom(mitSeitenverhaeltnis,speicher){
   const log=[];
   function El(tag){this.tagName=tag;this.nodeType=1;this.attr={}}
   El.prototype.getAttribute=function(n){return n in this.attr?this.attr[n]:null};
@@ -62,7 +62,7 @@ function baueDom(mitSeitenverhaeltnis){
   function Img(){El.call(this,'IMG')}Img.prototype=Object.create(El.prototype);
   Object.defineProperty(Img.prototype,'src',{configurable:true,get(){return this.getAttribute('src')},set(v){this.setAttribute('src',v)}});
   const root=new El('HTML');let fehlerHoerer=null;
-  const win={CSS:{supports:()=>mitSeitenverhaeltnis}};
+  const win={CSS:{supports:()=>mitSeitenverhaeltnis},localStorage:speicher};
   const ctx={window:win,CSS:win.CSS,Array,String,Object,Math,JSON,AbortSignal,AbortController,setTimeout,Element:El,HTMLImageElement:Img,
     MutationObserver:function(){this.observe=()=>log.push('beobachtet')},
     document:{documentElement:root,addEventListener:(t,f)=>{if(t==='error')fehlerHoerer=f},createTextNode:t=>t}};
@@ -81,8 +81,24 @@ function baueDom(mitSeitenverhaeltnis){
  img.src='assets/rum_version_3.png';
  pruefe('Danach wird dieses Bild nicht mehr getauscht (keine Endlosschleife)',img.getAttribute('src')==='assets/rum_version_3.png');
  pruefe('Alter Browser: kleineBilder in der Diagnose',d.win.KC_ALTBROWSER_NACHGERUESTET.includes('kleineBilder'));}
+// 10.10.2026 (Betreiber): kleine Bilder jetzt auf allen Geraeten; die grossen bleiben im Ordner und
+// lassen sich per localStorage "kc.bilder"="gross" (ein Geraet) oder KLEINE_BILDER=false zurueckholen.
 {const d=baueDom(true);
+ const div=new d.El('DIV');div.innerHTML='<img src="assets/gluehwein_version_3.png">';
+ const img=new d.Img();img.src='assets/rum_version_3.png';
+ pruefe('Aktueller Browser: Kacheln bekommen ebenfalls das kleine Bild',div.html.includes('src="assets/klein/gluehwein_version_3.webp"')&&img.getAttribute('src')==='assets/klein/rum_version_3.webp',div.html);
+ pruefe('Aktueller Browser: Diagnose meldet keine Altbrowser-Nachruestung',!d.win.KC_ALTBROWSER_NACHGERUESTET.includes('kleineBilder')&&d.win.KC_KLEINE_BILDER===true);}
+{const d=baueDom(true,{getItem:k=>k==='kc.bilder'?'gross':null});
  const div=new d.El('DIV');const html='<img src="assets/gluehwein_version_3.png">';div.innerHTML=html;
  const img=new d.Img();img.src='assets/rum_version_3.png';
- pruefe('Aktueller Browser: Bilder bleiben unveraendert gross',div.html===html&&img.getAttribute('src')==='assets/rum_version_3.png'&&!d.win.KC_ALTBROWSER_NACHGERUESTET.includes('kleineBilder'));}
+ pruefe('Schalter "kc.bilder"="gross": Bilder bleiben unveraendert gross',div.html===html&&img.getAttribute('src')==='assets/rum_version_3.png'&&!d.win.KC_KLEINE_BILDER);}
+{const d=baueDom(false,{getItem:k=>k==='kc.bilder'?'gross':null});const img=new d.Img();img.src='assets/rum_version_3.png';
+ pruefe('Alter Browser bekommt trotz Schalter die kleinen Bilder',img.getAttribute('src')==='assets/klein/rum_version_3.webp');}
+for(const base of ['pos','schulung/pos']){
+  const sw=fs.readFileSync(path.join(W,base,'service-worker.js'),'utf8');
+  const gross=[...sw.matchAll(/"\.\/assets\/([\w-]+_version_3)\.png"/g)].map(m=>m[1]).filter(n=>fs.existsSync(path.join(W,base,'assets/klein',n+'.webp')));
+  pruefe(`${base}: grosse Bilder mit kleiner Kopie werden nicht mehr vorab gespeichert`,!gross.length,gross.join(', '));
+  const vorhanden=fs.readdirSync(path.join(W,base,'assets')).filter(f=>/_version_3\.png$/.test(f));
+  pruefe(`${base}: grosse Bilder liegen weiterhin im Ordner (Rueckweg)`,vorhanden.length>=17,String(vorhanden.length));
+}
 console.log(fehler?`\n${fehler} FEHLER`:'\nAlles OK');process.exit(fehler?1:0);

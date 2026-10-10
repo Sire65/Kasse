@@ -48,6 +48,12 @@ def sammle():
     # Offline-Speicher vergleicht Adressen zeichengenau. Ohne das fielen ausgerechnet die
     # Sync-Module und das Ausverkauft-Modul aus der Liste, und die Kasse startete ohne Netz gar
     # nicht mehr.
+    # 10.10.2026: Die Kasse zeigt die Artikelbilder aus assets/klein/ (640 px, webp, siehe
+    # kc-altbrowser.js). Die grossen PNG-Fassungen bleiben im Ordner, werden aber nicht mehr
+    # vorab gespeichert (28 MB weniger pro Update). Nur wenn eine kleine Kopie existiert.
+    dateien = {d for d in dateien
+               if not (re.match(r'^\./assets/[\w-]+_version_3\.png$', d)
+                       and os.path.exists(d.replace('./assets/', './assets/klein/').replace('.png', '.webp')))}
     return sorted(d for d in dateien if os.path.exists(d.split('?')[0]))
 
 def main():

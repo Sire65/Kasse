@@ -65,9 +65,23 @@
   // assets/klein/ (640 px, webp) getauscht - schon im HTML-Text, bevor der Browser es anfordert.
   // Nur <img src>, nie gespeicherte Daten oder Eingabefelder. Fehlt eine kleine Kopie, kommt
   // automatisch das grosse Bild zurueck. Aktuelle Geraete (iPad, neuer Chrome): keine Aenderung.
+  //
+  // 10.10.2026 (Betreiber: "Ja umbauen, aber die alten Bilder noch nicht loeschen"): Die kleinen
+  // Kopien gelten jetzt auf ALLEN Geraeten, nicht nur auf alten. Die Kacheln zeigen die Bilder mit
+  // 140-200 Punkten Breite (auf scharfen Bildschirmen 300-400 echte Pixel); 640 px reichen dafuer
+  // sichtbar gleich gut, laden aber rund 50-mal weniger (28 MB -> 0,6 MB fuer alle Artikelbilder).
+  // Die grossen PNG-Bilder bleiben unveraendert im Ordner assets/ liegen.
+  // ZURUECK ZU DEN GROSSEN BILDERN:
+  //   - fuer alle Geraete: KLEINE_BILDER unten auf false setzen (neue Buildkennung),
+  //   - nur auf einem Geraet: localStorage "kc.bilder" = "gross" (Pruefung/Vergleich vor Ort).
+  // Alte Browser bekommen die kleinen Bilder immer (dort war das schon vorher so).
+  var KLEINE_BILDER = true;
   var html = typeof document !== 'undefined' && document.documentElement;
   var ohneSeitenverhaeltnis = false;
   try { ohneSeitenverhaeltnis = !(window.CSS && CSS.supports && CSS.supports('aspect-ratio', '1 / 1')); } catch (e) { ohneSeitenverhaeltnis = true; }
+  var grossGewuenscht = false;
+  try { grossGewuenscht = window.localStorage && window.localStorage.getItem('kc.bilder') === 'gross'; } catch (e) { grossGewuenscht = false; }
+  var kleineBilder = ohneSeitenverhaeltnis || (KLEINE_BILDER && !grossGewuenscht);
   var GROSS = /(^|\/)assets\/([\w-]+_version_3)\.png(?=$|\?)/;
   var KLEIN = /(^|\/)assets\/klein\/([\w-]+_version_3)\.webp(?=$|\?)/;
   var IMG_IM_TEXT = /(<img\b[^>]*?\ssrc\s*=\s*["'])([^"']*)/gi;
@@ -96,8 +110,9 @@
     Object.defineProperty(proto, name, { configurable: true, enumerable: d.enumerable, get: d.get,
       set: function (wert) { d.set.call(this, tausch.call(this, wert)); } });
   }
-  if (html && ohneSeitenverhaeltnis && typeof MutationObserver === 'function') {
-    nachgeruestet.push('kleineBilder');
+  if (html && kleineBilder && typeof MutationObserver === 'function') {
+    if (ohneSeitenverhaeltnis) nachgeruestet.push('kleineBilder');
+    window.KC_KLEINE_BILDER = true;
     try {
       umhuelle(Element.prototype, 'innerHTML', kleinerText);
       umhuelle(HTMLImageElement.prototype, 'src', kleinerPfad);

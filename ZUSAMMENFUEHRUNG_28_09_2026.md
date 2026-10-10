@@ -734,3 +734,20 @@ Betreiber: „Bau ein in beide“ (Meldungen nach der Buchung sollen von allein 
   Meldung beendet einen laufenden Zeitgeber, damit nie ein Auszahlungsfenster versehentlich zugeht.
 - Schulungs-Kasse zeigt jetzt auch bei Konto dasselbe Fenster. Im Browser in beiden Kassen geprüft.
 - Übungsliste/Karteikarten angepasst. Test: `tests/meldung-schliesst-selbst.test.cjs`.
+
+## Nachtrag 10.10.2026 – Kleine Artikelbilder auf allen Geräten, Zeitgrenze für Supabase-Meldungen
+
+Betreiber: „Ja umbauen, aber die alten Bilder noch nicht löschen. Wenn es nicht gut aussieht, kannst du evtl. die
+alten wieder laden.“
+- **Artikelbilder** (Kasse und Schulung, `kc-altbrowser.js` Build 1.1.0): Die Kacheln, das Reklamationsfenster und
+  die Kombi-Bilder zeigen jetzt die vorhandenen kleinen Kopien `assets/klein/*_version_3.webp` (640 px) statt der
+  großen PNGs (1254 px). Vorher galt das nur für alte Browser. Geladen werden statt 27,6 MB nur noch 0,7 MB; im
+  Browser bei doppelter Bildschirmschärfe nebeneinander verglichen, sichtbar gleich.
+- **Die großen PNGs bleiben im Ordner `assets/`.** Sie werden nur nicht mehr vorab offline gespeichert
+  (Service Worker; `werkzeuge/offline-liste.py` lässt PNGs mit kleiner Kopie weg). Rückweg: in `kc-altbrowser.js`
+  `KLEINE_BILDER = false` setzen (neue Buildkennung, PNGs wieder in die Offline-Liste), oder für ein einzelnes Gerät
+  `localStorage["kc.bilder"] = "gross"`. Fehlt eine kleine Kopie, kommt automatisch das große Bild.
+- **PC-Manager Datenfluss-Melder** (`kc-datenfluss-melder.js` Build 1.0.1, Manager und Schulungs-Manager): Meldung
+  und Lebenszeichen an Supabase brechen nach 8 s ab und werden als Fehler vermerkt, statt bei hängender Verbindung
+  offen zu bleiben. Kassenverkäufe laufen nicht über diese Datei.
+- Tests: `tests/altbrowser-regeln.test.cjs` (erweitert), `tests/datenfluss-zeitlimit.test.cjs` (neu).

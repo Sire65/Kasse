@@ -98,6 +98,17 @@
     return liste;
   }
 
+  // 10.10.2026 (Geschwindigkeitspruefung): fetch hat von sich aus keine Zeitgrenze. Haengt die
+  // Verbindung zu Supabase (schwaches WLAN, Hotspot), blieben Meldung und Lebenszeichen offen und
+  // stauten sich alle 10/30 s auf. Nach 8 s wird jetzt abgebrochen und als Fehler vermerkt;
+  // gemessen antwortet Supabase in 0,3-0,7 s. Kassenverkaeufe laufen nicht ueber diese Datei.
+  const ZEITLIMIT_MS = 8000;
+  function zeitlimit() {
+    try { if (typeof AbortSignal !== 'undefined' && AbortSignal.timeout) return AbortSignal.timeout(ZEITLIMIT_MS); } catch (e) { /* Rueckfall unten */ }
+    if (typeof AbortController === 'undefined') return undefined;
+    const c = new AbortController(); setTimeout(() => c.abort(), ZEITLIMIT_MS); return c.signal;
+  }
+
   async function broadcast() {
     if (!geaendert) return;
     geaendert = false;
@@ -108,7 +119,7 @@
         method: 'POST',
         headers: { 'Content-Type': 'application/json', apikey: SUPABASE_ANON_KEY, Authorization: 'Bearer ' + bearer() },
         body: JSON.stringify({ messages: liste.map((payload) => ({ topic: KANAL, event: 'fluss', payload })) }),
-        cache: 'no-store', credentials: 'omit',
+        cache: 'no-store', credentials: 'omit', signal: zeitlimit(),
       });
       letzterBroadcast = { ok: antwort.ok, zeit: Date.now(), fehler: antwort.ok ? '' : `HTTP ${antwort.status}` };
     } catch (e) { letzterBroadcast = { ok: false, zeit: Date.now(), fehler: e.message || String(e) }; }
@@ -137,7 +148,7 @@
         method: 'POST',
         headers: { 'Content-Type': 'application/json', apikey: SUPABASE_ANON_KEY, Authorization: 'Bearer ' + bearer() },
         body: JSON.stringify({ schema: 'kicc.remote-program-heartbeat.v1', nonce: crypto.randomUUID ? crypto.randomUUID() : `${Date.now()}-${Math.random()}`, sentAt: gemessen, authState: 'AUTHENTICATED', sourceId: instanz(), heartbeat: hb }),
-        cache: 'no-store', credentials: 'omit',
+        cache: 'no-store', credentials: 'omit', signal: zeitlimit(),
       });
       letzterHeartbeat = { ok: antwort.ok, zeit: Date.now(), fehler: antwort.ok ? '' : `HTTP ${antwort.status}` };
     } catch (e) { letzterHeartbeat = { ok: false, zeit: Date.now(), fehler: e.message || String(e) }; }
