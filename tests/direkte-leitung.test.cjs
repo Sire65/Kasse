@@ -25,6 +25,7 @@ function baueUmgebung({ kanal = 'kc-rt-test', angemeldet = true } = {}) {
     WebSocket: FakeWS, addEventListener() {},
     KCSupabase: { istAngemeldet: () => angemeldet, rufeFunktionAuf: async (name, arg) => { aufrufe.push(['rpc', name, arg.p_bereich]); return kanal; } },
     KCMoneyButlerCloudIntake: { poll: () => aufrufe.push(['geld']) },
+    KCFinanceUebergaben: { listeLaden: (m) => aufrufe.push(['eingangsliste', m]) },
     KCCashMeasureCentralSync: { pull: (o) => aufrufe.push(['einstellungen', !!(o && o.publish)]) },
     KCDienstplanManager: { holeUndVeroeffentliche: () => aufrufe.push(['dienstplan']) },
   };
@@ -60,6 +61,7 @@ function baueUmgebung({ kanal = 'kc-rt-test', angemeldet = true } = {}) {
   const signal = (art) => ws.antworte({ event: 'broadcast', topic: 'realtime:kc-rt-test', payload: { event: 'neu', payload: { art } } });
   signal('geld'); signal('zaehlung'); signal('geld'); await warte(900);
   pr('Drei Geld-Signale kurz hintereinander → einmal abholen', u.aufrufe.filter((a) => a[0] === 'geld').length === 1, JSON.stringify(u.aufrufe));
+  pr('Geld-Signal lädt auch die Eingangsliste im Bereich Money Butler neu (einmal)', u.aufrufe.filter((a) => a[0] === 'eingangsliste' && a[1] === false).length === 1, JSON.stringify(u.aufrufe));
   signal('einstellungen'); await warte(900);
   pr('Signal "einstellungen" → Messwerte-Einstellungen holen', u.aufrufe.some((a) => a[0] === 'einstellungen' && a[1] === true));
   signal('dienstplan'); await warte(1600);
@@ -95,7 +97,7 @@ function baueUmgebung({ kanal = 'kc-rt-test', angemeldet = true } = {}) {
   // 6. Einbindung und Gleichstand
   for (const b of ['pc-manager', 'schulung/pc-manager']) {
     const h = lies(`${b}/index.html`);
-    pr(`${b}: Baustein und Anschluss eingebunden (nach der Supabase-Anmeldung)`, h.indexOf('kc-direkte-leitung.js?build=1.0.0') > h.indexOf('kc-manager-supabase-status.js') && h.includes('kc-direkte-leitung-manager.js?build=1.0.0'));
+    pr(`${b}: Baustein und Anschluss eingebunden (nach der Supabase-Anmeldung)`, h.indexOf('kc-direkte-leitung.js?build=1.0.0') > h.indexOf('kc-manager-supabase-status.js') && h.includes('kc-direkte-leitung-manager.js?build=1.1.0'));
   }
   pr('Manager und Schulungs-Manager gleich', lies('pc-manager/kc-direkte-leitung-manager.js') === lies('schulung/pc-manager/kc-direkte-leitung-manager.js') && lies('shared/kc-direkte-leitung.js') === lies('schulung/shared/kc-direkte-leitung.js') && lies('pc-manager/kc-money-butler-cloud-intake.js') === lies('schulung/pc-manager/kc-money-butler-cloud-intake.js'));
   const quelle = lies('shared/kc-direkte-leitung.js');

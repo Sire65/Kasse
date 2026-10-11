@@ -836,3 +836,9 @@ KC-CLUB-REALTIME 2.226–2.230). Die **Kassen bleiben unverändert** (sie sprech
   (kc-finance-bridge) nach, ob **seine** Übergabe/Zählung übernommen ist, und zeigt „✓ hh:mm: 50,00 € vom PC-Manager
   übernommen und an die Kasse weitergegeben“ (bisher gab es keine Rückmeldung). Signal „einstellungen“ → gemeinsame
   Messwerte sofort neu laden. Test: `tests/direkte-leitung-money-butler.test.cjs`.
+- **Money Butler im PC-Manager** (Betreiber: „Den Money Butler gibt es zweimal“): Der Bereich „Money Butler“ im Manager
+  bettet dieselbe App `money-butler/index.html` ein (iframe) – sie hat damit dieselbe Leitung und dieselbe Rückmeldung
+  (im Browser geprüft: Baustein geladen, keine Fehler). Zusätzlich angeschlossen: die **Eingangsliste der
+  Geldübergaben** im Manager (`kc-finance-uebergaben.js` 1.1.0, fragte alle 30 s die Cloud): Signal „geld“/„zaehlung“ →
+  sofort neu laden; bei stehender Leitung nur alle 2 Minuten zur Sicherheit. `kc-direkte-leitung-manager.js` 1.1.0.
+  Der alte Rückfallweg „Manager-Notfallwerkzeug / bisherige Bargeldmaske“ läuft über den Kassen-Dienst und bleibt unverändert.

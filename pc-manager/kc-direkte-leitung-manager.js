@@ -1,7 +1,8 @@
-/* PC-Manager an der direkten Leitung (KC-RT-PROGRAMME, 11.10.2026)                     Build 1.0.0
+/* PC-Manager an der direkten Leitung (KC-RT-PROGRAMME, 11.10.2026)                     Build 1.1.0
  *
  * Signale (nur Art, nie Inhalt) und was der Manager daraufhin SOFORT tut – jeweils über den bisherigen Weg:
  *   geld, zaehlung  → Money-Butler-Übergaben/Zählungen aus der Cloud abholen (KCMoneyButlerCloudIntake.poll)
+ *                     und die Eingangsliste im Bereich Money Butler neu laden (KCFinanceUebergaben.listeLaden)
  *   einstellungen   → gemeinsame Messwerte-Einstellungen holen (KCCashMeasureCentralSync.pull)
  *   dienstplan      → veröffentlichten Sollplan aus dp2 holen (KCDienstplanManager.holeUndVeroeffentliche)
  * Steht die Leitung, fragt die Geld-Abholung nur noch jede Minute zur Sicherheit nach statt alle 15 s
@@ -17,7 +18,8 @@
     clearTimeout(warte[schluessel]);
     warte[schluessel] = setTimeout(() => { Promise.resolve().then(fn).catch(() => { /* nächster Takt versucht es erneut */ }); }, ms);
   }
-  const geldHolen = () => global.KCMoneyButlerCloudIntake?.poll?.();
+  // Cloud-Abholung und (falls sichtbar/geladen) die Eingangsliste der Geldübergaben im Bereich Money Butler
+  const geldHolen = () => Promise.all([global.KCMoneyButlerCloudIntake?.poll?.(), global.KCFinanceUebergaben?.listeLaden?.(false)]);
   const einstellungenHolen = () => global.KCCashMeasureCentralSync?.pull?.({ publish: true });
   const dienstplanHolen = () => global.KCDienstplanManager?.holeUndVeroeffentliche?.();
   function zeigeStatus(z) {
@@ -43,5 +45,5 @@
     nachholen() { einmal('geld', geldHolen, 300); einmal('dienstplan', dienstplanHolen, 2000); },
     beiStatus: zeigeStatus,
   });
-  global.KCDirekteLeitungManager = { version: '1.0.0', steht: leitung.steht, zustand: leitung.zustand, neuVerbinden: leitung.neuVerbinden };
+  global.KCDirekteLeitungManager = { version: '1.1.0', steht: leitung.steht, zustand: leitung.zustand, neuVerbinden: leitung.neuVerbinden };
 })(window);

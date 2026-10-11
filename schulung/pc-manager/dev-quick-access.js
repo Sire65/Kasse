@@ -21,7 +21,7 @@
     ['kc-communication-adapters.js?build=0.2.0','data-kc-communication-adapters'],
     ['kc-finance-bridge.js?build=1.0.0','data-kc-finance-bridge'],
     ['kc-supabase-tabellen.js?build=1.0.0','data-kc-supabase-tabellen'],
-    ['kc-finance-uebergaben.js?build=1.0.0','data-kc-finance-uebergaben'],
+    ['kc-finance-uebergaben.js?build=1.1.0','data-kc-finance-uebergaben'],
     ['kc-tagesabschluss-versand.js?build=1.0.0','data-kc-tagesabschluss-versand'],
     ['time-clock-supabase-sync.js?build=1.0.0','data-kc-timeclock-sync'],
     ['kc-schulung-kachel.js?build=1.0.0','data-kc-schulung-kachel'],

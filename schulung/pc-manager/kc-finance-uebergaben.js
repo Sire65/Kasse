@@ -24,6 +24,10 @@
   async function bestaetigungenAbholenUndMelden() { const fb = bridge(); if (!fb) return; try { const seit = localStorage.getItem(LETZTE_BESTAETIGUNG_KEY) || ''; const antwort = await fetch(`http://127.0.0.1:47392/gelduebergaben-bestaetigungen-abholen${seit ? `?seit=${encodeURIComponent(seit)}` : ''}`); if (!antwort.ok) return; const daten = await antwort.json(); localStorage.setItem(LETZTE_BESTAETIGUNG_KEY, daten.abgefragtUm || new Date().toISOString()); const bestaetigungen = Array.isArray(daten.bestaetigungen) ? daten.bestaetigungen : []; for (const b of bestaetigungen) { const antwortListe = await fb.listCashTransfers({ statuses: ['manager_received'], limit: 100 }).catch(() => null); const passend = antwortListe?.items?.find((t) => (t.correlation_id || `finance-${t.id}`) === b.transferId); if (passend) await fb.markCashTransfer(passend.id, 'handed_to_register').catch(() => {}); } } catch (e) {} }
   el('ftAktualisieren')?.addEventListener('click', () => listeLaden(true));
   document.querySelectorAll('[data-view="cashprep"]').forEach((b) => b.addEventListener('click', () => setTimeout(() => listeLaden(false), 150)));
-  setInterval(() => listeLaden(false), 30000);
-  global.KCFinanceUebergaben = { listeLaden };
+  // KC-RT-PROGRAMME (11.10.2026): Steht die direkte Leitung, meldet jede neue Übergabe sich selbst
+  // (kc-direkte-leitung-manager.js lädt die Liste dann sofort). Dann nur alle 2 Minuten zur Sicherheit statt alle 30 s.
+  let zuletztGeladen = 0;
+  const laden = (manuell) => { zuletztGeladen = Date.now(); return listeLaden(manuell); };
+  setInterval(() => { if (global.KCDirekteLeitungManager?.steht?.() && Date.now() - zuletztGeladen < 120000) return; laden(false); }, 30000);
+  global.KCFinanceUebergaben = { listeLaden: laden };
 })(window);
