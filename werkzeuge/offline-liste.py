@@ -35,7 +35,10 @@ def sammle():
             if n.endswith(('.webp', '.png', '.jpg', '.svg', '.mp3', '.css', '.woff2')):
                 dateien.add(os.path.join(ordner, n).replace('\\', '/'))
     for pfad in ['../shared/runtime-flags.js', '../shared/kc-bargeld-statistik.js',
-                 '../shared/kc-bargeld-statistik.css', '../pc-manager/vendor/qrcode-generator.js']:
+                 '../shared/kc-bargeld-statistik.css', '../pc-manager/vendor/qrcode-generator.js',
+                 # Schulungsvideos (kc-schulungsvideos.js): Laura und Marc aus dem gemeinsamen avatar-core
+                 '../avatar-core/assets/chef/chef_female_neutral_armless_v0257.webp',
+                 '../avatar-core/assets/chef/chef_male_neutral_armless_v0257.webp']:
         dateien.add(pfad)
     for wurzel in ['../cores', '../exchange-core-v31']:
         for ordner, _u, namen in os.walk(wurzel):

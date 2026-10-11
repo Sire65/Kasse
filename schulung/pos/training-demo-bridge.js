@@ -1,7 +1,10 @@
 (() => {
 'use strict';
 const params=new URLSearchParams(location.search);
-if(params.get('embeddedTraining')!=='1')return;
+// 11.10.2026 KC-KASSE-SCHULUNGSVIDEOS: Finger, Lichtkegel und Klick stehen jetzt auch der Kasse selbst zur Verfuegung
+// (window.KCLiveDemo, genutzt von kc-schulungsvideos.js). Die Fernsteuerung aus der eingebetteten Schulung
+// (postMessage) bleibt wie bisher NUR mit ?embeddedTraining=1 an.
+const embedded=params.get('embeddedTraining')==='1';
 let token=0,cursor=null;
 const wait=ms=>new Promise(r=>setTimeout(r,ms));
 function inject(){
@@ -86,6 +89,8 @@ async function demo(name){
   parent.postMessage({type:'KC_TRAINING_DEMO_DONE',name},'*');
  }catch(e){if(e.message!=='cancelled')parent.postMessage({type:'KC_TRAINING_DEMO_ERROR',name,message:e.message},'*')}
 }
+window.KCLiveDemo={move,click,focus,clearFocus,reset};
+if(!embedded)return;
 window.addEventListener('message',e=>{const m=e.data;if(!m||m.type!=='KC_TRAINING_DEMO')return;if(m.action==='cancel')reset();else demo(m.name)});
 window.addEventListener('load',()=>{inject();parent.postMessage({type:'KC_TRAINING_DEMO_READY'},'*')});
 })();
