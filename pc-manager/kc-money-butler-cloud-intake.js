@@ -101,7 +101,11 @@
     }finally{running=false;}
   }
 
-  setInterval(poll,POLL_MS);
-  setTimeout(poll,5000);
-  global.KCMoneyButlerCloudIntake={poll};
+  // KC-RT-PROGRAMME (11.10.2026): Steht die direkte Leitung, meldet sich jede neue Übergabe/Zählung sofort
+  // (kc-direkte-leitung-manager.js ruft poll() auf). Dann nur noch jede Minute zur Sicherheit nachfragen statt alle 15 s.
+  let letzterPoll=0;
+  const pollGezaehlt=()=>{letzterPoll=Date.now();return poll();};
+  setInterval(()=>{if(global.KCDirekteLeitungManager?.steht?.()&&Date.now()-letzterPoll<60000)return;pollGezaehlt();},POLL_MS);
+  setTimeout(pollGezaehlt,5000);
+  global.KCMoneyButlerCloudIntake={poll:pollGezaehlt};
 })(window);

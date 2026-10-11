@@ -810,3 +810,24 @@ bzw. „Grünkohl-Wurst + Glühwein rot“ (10,50 €).
 - Es bleiben vier Kombis: Grünkohl + Glühwein rot, Grünkohl + Eierlikörpunsch, Grünkohl-Wurst + Glühwein rot,
   Grünkohl-Wurst + Eierlikörpunsch. Mit Wurst zeigt das Bild Grünkohl mit Wurst, ohne Wurst nur Grünkohl.
 - Karteikarte/Übungsliste Aufgabe 7 nennt jetzt „Grünkohl-Wurst + Eierlikörpunsch“.
+
+## Nachtrag 11.10.2026 – Direkte Leitung (Supabase Realtime) für PC-Manager · Feature KC-RT-PROGRAMME
+
+Betreiber: „Hänge PC-Manager, Money Butler und dp2 an die Standleitung“ (dieselbe direkte Leitung wie die Club-App,
+KC-CLUB-REALTIME 2.226–2.230). Die **Kassen bleiben unverändert** (sie sprechen nur mit dem Kassen-Dienst im eigenen Netz).
+- **Datenbank** (`supabase/migrations/20261011_kc_rt_programme.sql`, eingespielt über den Ablauf „Datenbank einspielen“
+  der Club-App mit Probelauf + Nachprüfung): Auslöser an `kc_finance_cash_transfers`/`_counts`/`_measure_settings`
+  (Signal „geld“/„zaehlung“/„einstellungen“ an Manager und Money Butler), `kc_dp_sync_operations` (je Anweisung ein
+  Signal „abgleich“ an dp2), `kc_dp_plan_published` (Signal „dienstplan“ an den Manager). **Nur die Art, nie Inhalt.**
+  Kanal = HMAC(vorhandenes Club-Geheimnis, „programm:Bereich:Verein“); `kc_rt_programm_kanal(bereich)` gibt ihn nur
+  angemeldeten, berechtigten Benutzern. Gemeinsamer Monatszähler/Sparbremse mit der Club-App (ab 95 % keine Signale).
+  Direkt in Supabase geprüft (zurückgerollt): geld=4, abgleich=1, dienstplan=1, Inhalt=0, fremd=kein Kanal,
+  Manager=richtiger Kanal, Kanäle getrennt. DB-Test: kc-clubapp `tools/db-test/70_rt_programme_test.sql`.
+- **Baustein** `shared/kc-direkte-leitung.js` 1.0.0 (ohne Bibliothek, Phoenix-Protokoll wie Club-App): Lebenszeichen
+  25 s, stumme Leitung (65 s nichts gehört) wird neu aufgebaut, Neuverbinden 1 s … 60 s, nach jedem Verbinden nachholen.
+  Ohne Kanal (nicht angemeldet/berechtigt) keine Leitung – Programm fragt wie bisher selbst nach.
+- **PC-Manager** `kc-direkte-leitung-manager.js` 1.0.0: geld/zaehlung → Money-Butler-Abholung sofort, einstellungen →
+  Messwerte holen, dienstplan → Sollplan holen (mehrere Signale kurz hintereinander = einmal). Hinweis im Tooltip der
+  Supabase-LED. `kc-money-butler-cloud-intake.js` 1.1.0: bei stehender Leitung nur noch jede Minute statt alle 15 s.
+- Tests: `tests/direkte-leitung.test.cjs` (neu). Live-Verbindung aus der Cloud-Sitzung nicht prüfbar (Proxy lässt keine
+  WebSocket-Verbindung zu) – auf dem Manager-PC prüfbar über den Tooltip der Supabase-LED.
