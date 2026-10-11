@@ -1,4 +1,4 @@
-// KC Schulungsvideos – kleine Erklär-Videos mit Ton direkt in der Kasse       KC-KASSE-SCHULUNGSVIDEOS 0.2.0 · 11.10.2026
+// KC Schulungsvideos – kleine Erklär-Videos mit Ton direkt in der Kasse       KC-KASSE-SCHULUNGSVIDEOS 0.3.0 · 11.10.2026
 //
 // ANLASS (Betreiber 11.10.2026): "Video-Schulung für die Kasse wie das Muster der Club-App – kleine Videos,
 // immer ein Thema. Auf der Schulungskasse immer, an der echten Kasse nur im Trainingsmodus, unter MEHR →
@@ -21,6 +21,13 @@
 //   * satzweise vorlesen (lange Saetze brechen auf manchen Tablets sonst ab), etwas ruhigeres Tempo
 //   * je Station ein kurzer Satz und genau EIN Fingertipp dazu (tipp); erwaehnte Knoepfe pulsieren (zeig)
 //   * ⏸ Pause / ▶ Weiter, Fortschritt "3 / 15" mit Balken
+// 0.3.0 (Betreiber: "mach die naechsten Videos wie geplant; so flexibel, dass die Stimmen je nach Geraet ausgetauscht werden koennen"):
+//   * Inhalte (Themen, Videos) stehen in kc-schulungsvideos-inhalt.js – dieser Teil ist nur noch der Abspieler.
+//   * STIMMEN je Geraet: 🔊 Stimmen in der Video-Uebersicht – Stimme fuer Laura und Marc frei waehlbar (oder automatisch die
+//     beste), Tempo, Probe hoeren. Gespeichert nur auf diesem Geraet (kc_schulungsvideo_stimmen_v1).
+//     Die Stimmen kommen ueber austauschbare Stimm-Quellen (STIMM_QUELLEN, Adapter): heute die Sprachausgabe des Geraets;
+//     eine weitere Quelle (z. B. vorab aufgenommene Tondateien) ist ein neuer Eintrag mit stimmen() und sprich().
+//   * Pruefmodus fuer automatische Tests (pruefung({streng, tempo})): fehlende Knoepfe werden als Fehler gemeldet.
 // AUFBAU wie in der Club-App: Registry VIDEOS (ein Eintrag = ein kleines Video), Registry THEMEN (Kacheln).
 // Station: { wer: 'laura'|'marc', x: gesprochener Text (kurz), tafel?: Bild-Tafel (HTML), tipp?: Waehler – der Finger
 //            tippt darauf, zeig?: [Waehler] – pulsieren, tun?: async F => weitere Vorfuehrung, vor?: () => vorbereiten }. Neue Videos = neuer Eintrag; Fassung "stand" hochzaehlen, wenn ein Video
@@ -31,9 +38,9 @@
 // (Edge Function + Tabelle kc_kasse_video_bewertung); bis dahin bleibt jede Bewertung hier erhalten.
 (function (global) {
   'use strict';
-  const VERSION = '0.2.0';
+  const VERSION = '0.3.0';
   const el = id => document.getElementById(id);
-  const warte = ms => new Promise(r => setTimeout(r, ms));
+  const warte = ms => new Promise(r => setTimeout(r, ms * (SV.tempo || 1)));
   const esc = v => String(v == null ? '' : v).replace(/[&<>"']/g, c => ({'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'}[c]));
   const BEWERTUNG = 'kc_schulungsvideo_bewertung_v1';
   const GESEHEN = 'kc_schulungsvideo_gesehen_v1';
@@ -44,63 +51,41 @@
     marc: {name: 'Marc', bild: AVATAR + 'chef_male_neutral_armless_v0257.webp', art: 'm'}
   };
 
-  // ---------- Registry THEMEN: Kacheln unter MEHR → Schulungsvideos ----------
-  const THEMEN = [
-    {id: 'oberflaeche', sym: '🖥️', t: 'Oberfläche'},
-    {id: 'verkaufen', sym: '🛒', t: 'Verkaufen'},
-    {id: 'rueckgeld', sym: '💶', t: 'Rückgeld & Bezahlen'},
-    {id: 'entnahmen', sym: '💸', t: 'Entnahmen'}
-  ];
-
   // ---------- Hilfen fuer die Stationen ----------
   const tafel = (art, titel, zeilen, fuss) => `<div class="kc-sv-tafel kc-sv-${art}"><b>${titel}</b><ol>${zeilen.map(z => `<li>${z}</li>`).join('')}</ol>${fuss ? `<p>${fuss}</p>` : ''}</div>`;
   function alleFensterZu() { document.querySelectorAll('dialog[open]').forEach(d => { try { d.close(); } catch (e) { /* egal */ } }); }
 
-  // ---------- Registry VIDEOS ----------
-  // 0.2.0 (Betreiber: "die Videos der Club-App gefallen mir besser – klare Stimme, und der Finger zeigt es"):
-  // wie dort EIN Gedanke je Station, ein kurzer Satz, ein Fingertipp genau dazu (tipp), erwaehnte Knoepfe pulsieren (zeig).
-  const VIDEOS = [
-    {id: 'entnahme-zeitpunkt', stand: '2', thema: 'entnahmen', sym: '🛒', t: 'Erst einkaufen, dann entnehmen',
-      u: 'Warum die Entnahme erst nach dem Einkauf gebucht wird (ca. 1½ Min.)', uebung: 'Aufgabe 56 und 57',
-      st: [
-        {wer: 'laura', tafel: tafel('frage', '🛒 Schnell etwas einkaufen', ['Jemand vom Team kauft im Supermarkt ein.', 'Das Geld kommt aus der Kasse.']),
-          x: 'Hallo, ich bin Laura. Heute zeigen Marc und ich dir die Entnahme. Jemand vom Team kauft im Supermarkt ein. Das Geld kommt aus der Kasse.'},
-        {wer: 'marc', tafel: tafel('falsch', '❌ So bitte nicht', ['50 € nehmen und <b>sofort</b> 50 € buchen']),
-          x: 'So bitte nicht: fünfzig Euro nehmen und sofort fünfzig Euro buchen.'},
-        {wer: 'marc', tafel: tafel('falsch', '❌ So bitte nicht', ['50 € nehmen und <b>sofort</b> 50 € buchen', 'Einkauf kostet nur 38,40 €', '11,60 € kommen zurück → <b>zweite Buchung</b>']),
-          x: 'Der Einkauf kostet aber nur achtunddreißig Euro vierzig. Elf Euro sechzig kommen zurück. Dann brauchst du eine zweite Buchung.'},
-        {wer: 'laura', tafel: tafel('richtig', '✅ So ist es richtig', ['<b>Erst einkaufen</b> – Geld mitgeben, noch nichts buchen']),
-          x: 'Richtig ist: Erst einkaufen. Du gibst das Geld mit, buchst aber noch nichts.'},
-        {wer: 'laura', tafel: tafel('richtig', '✅ So ist es richtig', ['<b>Erst einkaufen</b> – Geld mitgeben, noch nichts buchen', 'Rückgeld zurück in die Kasse', '<b>Einmal</b> den Betrag vom Bon buchen']),
-          x: 'Kommt der Einkauf zurück, legst du das Rückgeld in die Kasse. Dann buchst du einmal den Betrag vom Bon.'},
-        {wer: 'marc', x: 'So geht es an der Kasse. Tippe unten auf Mehr.', tipp: '#moreBtn'},
-        {wer: 'marc', x: 'Dann auf Entnahme.', tipp: '#moreDialog [data-action="withdraw"]'},
-        {wer: 'laura', x: 'Wähle den Grund: Einkauf Lebensmittel.', tipp: '[data-withdraw-reason="Einkauf Lebensmittel"]'},
-        {wer: 'marc', x: 'Auf dem Bon stehen achtunddreißig Euro vierzig. Tippe auf Anderer Betrag.', tipp: '[data-geld-anders]'},
-        {wer: 'marc', x: 'Drei, acht, Komma, vier, null. Und OK.',
-          tun: async F => {
-            for (const z of ['3', '8', ',', '4', '0']) await F.click(`[data-ziffer="${z}"]`, {after: 250, ms: 450});
-            await F.click('[data-ziffern-ok]', {after: 700, ms: 600});
-          }},
-        {wer: 'laura', x: 'Jetzt steht oben der Betrag vom Bon.', zeig: ['#kcGeldSumme']},
-        {wer: 'laura', x: 'Schreib kurz dazu, wo eingekauft wurde.',
-          tun: async F => {
-            const notiz = el('withdrawNote');
-            if (notiz) { await F.click('#withdrawNote', {perform: false, after: 300}); notiz.value = 'Supermarkt'; notiz.dispatchEvent(new Event('input', {bubbles: true})); await warte(700); }
-          }},
-        {wer: 'marc', x: 'Der Bon ist da. Dann muss Bon oder Quittung vorhanden angehakt sein. Den Bon legst du zur Kasse.', zeig: ['#withdrawReceiptToggle'],
-          // Je nach Kassenstand setzt ein Einkaufs-Grund den Haken schon selbst – dann nur zeigen, nicht wegtippen
-          tun: async F => { if (el('withdrawReceiptToggle')?.getAttribute('aria-pressed') !== 'true') await F.click('#withdrawReceiptToggle', {after: 800}); }},
-        {wer: 'marc', x: 'Zum Schluss: Entnahme speichern. Hier im Video speichere ich nichts.', zeig: ['#saveWithdrawal'],
-          tun: async F => { await F.move('#saveWithdrawal', 1000); }},
-        {wer: 'laura', tafel: tafel('merke', '💡 Merke', ['Erst einkaufen.', 'Dann <b>einmal</b> den Betrag vom Bon buchen.'], 'Üben: Übungsliste Aufgabe 56 und 57'),
-          x: 'Merke: Erst einkaufen. Dann einmal den Betrag vom Bon buchen. Üben kannst du das mit Aufgabe sechsundfünfzig und siebenundfünfzig.',
-          vor: () => alleFensterZu()}
-      ]}
-  ];
+  // Hilfen fuer die Inhalte (kc-schulungsvideos-inhalt.js) – Waehler fuer Kacheln und kleine Vorfuehr-Bausteine
+  const artikel = name => `.product-tile[aria-label="${name} direkt verkaufen"]`;
+  const gruppe = name => `#categories [data-cat="${name}"]`;
+  const variante = name => `.product-variant-button[aria-label^="Varianten zu ${name}"]`;
+  const info = name => `.product-info-button[aria-label^="Informationen zu ${name}"]`;
+  const gruppeWaehlen = name => { const b = document.querySelector(gruppe(name)); if (b && !b.classList.contains('active')) b.click(); };
+  // Artikel ohne Finger in den Warenkorb legen (Vorbereitung, wenn der Weg dorthin nicht Thema des Videos ist)
+  async function lege(name) {
+    const t = document.querySelector(artikel(name));
+    if (!t) { const api = global.KCTrainingAPI; if (api && api.addStandardProduct) api.addStandardProduct(name); await warte(1200); return; }
+    t.click(); await warte(500);
+  }
+  const H = {
+    tafel, el, warte, alleFensterZu, artikel, gruppe, variante, info, gruppeWaehlen, lege,
+    // Ziffern im kleinen Ziffernfeld (Entnahme) tippen, dann OK
+    ziffern: text => async F => { for (const z of String(text)) await F.click(`[data-ziffer="${z}"]`, {after: 250, ms: 450}); await F.click('[data-ziffern-ok]', {after: 700, ms: 600}); },
+    notiz: text => async F => { const n = el('withdrawNote'); if (!n) return; await F.click('#withdrawNote', {perform: false, after: 300}); n.value = text; n.dispatchEvent(new Event('input', {bubbles: true})); await warte(700); },
+    // Haken "Bon / Quittung vorhanden" auf soll bringen – nur tippen, wenn er anders steht (manche Kassenstaende setzen ihn selbst)
+    bonHaken: soll => async F => { const k = el('withdrawReceiptToggle'); if (k && (k.getAttribute('aria-pressed') === 'true') !== soll) await F.click('#withdrawReceiptToggle', {after: 800}); }
+  };
+  let INHALT = null;
+  function inhalt() {
+    if (!INHALT) {
+      try { INHALT = global.KCSchulungsvideoInhalt ? global.KCSchulungsvideoInhalt(H) : null; } catch (e) { console.warn('KC Schulungsvideos: Inhalt fehlerhaft', e); }
+      if (!INHALT) return {THEMEN: [], VIDEOS: []}; // Inhaltsdatei (noch) nicht geladen – spaeter erneut versuchen
+    }
+    return INHALT;
+  }
 
   // ---------- Zustand ----------
-  const SV = {an: false, lauf: 0, video: null, i: 0, ton: 'speechSynthesis' in global, wahl: new Set(), reihe: [], pause: false};
+  const SV = {an: false, lauf: 0, video: null, i: 0, ton: 'speechSynthesis' in global, wahl: new Set(), reihe: [], pause: false, streng: false, tempo: 1, fehler: []};
   // Trainingsmodus: massgeblich ist der Kassenzustand (state.master.trainingMode). Die Klasse am body kommt
   // in app.js erst beim naechsten Neuzeichnen; die Schulungskasse setzt den Modus fest (KCSchulung).
   function training() {
@@ -178,6 +163,16 @@
 #kcSvFenster .kc-sv-fuss button { min-height: 50px; padding: 0 16px; border-radius: 12px; font: 800 16px Arial, sans-serif; }
 #kcSvFenster .kc-sv-hinweis { margin: 12px 0 0; padding: 10px 12px; border-radius: 10px; background: #fff7ed; color: #9a3412; font: 700 14px/1.35 Arial, sans-serif; }
 #kcSvBewertung .dialog-card { background: #fff; text-align: center; }
+#kcSvFenster .kc-sv-stimm-zeile { display: grid; grid-template-columns: 44px 70px minmax(0, 1fr) auto; gap: 10px; align-items: center; margin: 10px 0; }
+#kcSvFenster .kc-sv-stimm-zeile img { width: 44px; height: 54px; object-fit: contain; }
+#kcSvFenster .kc-sv-stimm-zeile b { font: 900 17px Arial, sans-serif; }
+#kcSvFenster .kc-sv-stimm-zeile select { min-height: 46px; font-size: 15px; border-radius: 10px; border: 2px solid #cbd5e1; padding: 0 8px; min-width: 0; }
+#kcSvFenster .kc-sv-stimm-zeile > button, #kcSvFenster .kc-sv-tempo button { min-height: 46px; padding: 0 14px; border-radius: 10px; border: 2px solid #cbd5e1; background: #f8fafc; font: 800 15px Arial, sans-serif; }
+#kcSvFenster .kc-sv-tempo { display: flex; gap: 8px; grid-column: 3 / -1; }
+#kcSvFenster .kc-sv-tempo button.aktiv { background: #10243a; color: #fff; border-color: #10243a; }
+#kcSvFenster .kc-sv-tipps { margin-top: 12px; padding: 10px 12px; border-radius: 10px; background: #f1f5f9; font: 600 14px/1.45 Arial, sans-serif; color: #334155; }
+#kcSvFenster .kc-sv-tipps summary { font-weight: 800; cursor: pointer; }
+#kcSvFenster .kc-sv-zurueck { min-height: 40px; border-radius: 10px; border: 0; background: #eef0f3; font: 800 14px Arial, sans-serif; padding: 0 12px; }
 #kcSvBewertung .kc-sv-frage-zeile { display: flex; align-items: center; justify-content: center; gap: 12px; margin: 12px 0; font: 800 18px Arial, sans-serif; }
 #kcSvBewertung .kc-sv-frage-zeile button { width: 70px; height: 60px; font-size: 30px; border-radius: 14px; border: 2px solid #cbd5e1; background: #f8fafc; }
 #kcSvBewertung .kc-sv-frage-zeile button.aktiv { border-color: #10243a; background: #10243a; }
@@ -215,73 +210,156 @@
     document.body.appendChild(d);
     return d;
   }
-  function videosVon(thema) { return VIDEOS.filter(v => v.thema === thema); }
-  function uebersicht(thema) {
+  function videosVon(thema) { return inhalt().VIDEOS.filter(v => v.thema === thema); }
+  function uebersicht(thema, versuch) {
     if (!training()) return;
-    const d = fenster(), inhalt = el('kcSvInhalt');
+    const d = fenster(), box = el('kcSvInhalt');
+    // Die Inhaltsdatei laedt kurz nach dem Abspieler – bis dahin kurz warten statt leerer Kacheln
+    if (!global.KCSchulungsvideoInhalt && (versuch || 0) < 40) {
+      box.innerHTML = '<h2>🎬 Schulungsvideos</h2><p class="kc-sv-unter">Videos werden geladen …</p><div class="kc-sv-fuss"><span></span><button value="close">Schließen</button></div>';
+      if (!d.open) d.showModal();
+      setTimeout(() => { if (d.open) uebersicht(thema, (versuch || 0) + 1); }, 250);
+      return;
+    }
     if (!thema) {
-      inhalt.innerHTML = `<h2>🎬 Schulungsvideos</h2><p class="kc-sv-unter">Kleine Videos mit Ton – Laura und Marc zeigen dir jede Sache an der echten Kasse. Es wird nichts gebucht.</p>
-        <div class="kc-sv-kacheln">${THEMEN.map(t => {
+      box.innerHTML = `<h2>🎬 Schulungsvideos</h2><p class="kc-sv-unter">Kleine Videos mit Ton – Laura und Marc zeigen dir jede Sache an der echten Kasse. Es wird nichts gebucht.</p>
+        <div class="kc-sv-kacheln">${inhalt().THEMEN.map(t => {
           const liste = videosVon(t.id), schon = liste.filter(v => gesehen(v.id)).length;
           const info = liste.length ? `${liste.length} ${liste.length === 1 ? 'Video' : 'Videos'}${schon ? ` · ✓ ${schon} von ${liste.length} angesehen` : ''}` : 'Videos in Vorbereitung';
           return `<button type="button" class="kc-sv-kachel" data-sv-thema="${t.id}"${liste.length ? '' : ' disabled'}><span class="kc-sv-ksym" aria-hidden="true">${t.sym}</span><b>${esc(t.t)}</b><small>${info}</small></button>`;
         }).join('')}</div>${SV.ton ? '' : '<p class="kc-sv-hinweis">Dieses Gerät kann nicht vorlesen – die Videos laufen mit Text zum Mitlesen.</p>'}
-        <div class="kc-sv-fuss"><span></span><button value="close">Schließen</button></div>`;
-      inhalt.querySelectorAll('[data-sv-thema]').forEach(b => b.onclick = () => uebersicht(b.dataset.svThema));
+        <div class="kc-sv-fuss"><button type="button" data-sv-stimmen="1">🔊 Stimmen</button><button value="close">Schließen</button></div>`;
+      box.querySelectorAll('[data-sv-thema]').forEach(b => b.onclick = () => uebersicht(b.dataset.svThema));
+      box.querySelector('[data-sv-stimmen]').onclick = () => stimmenAnsicht();
     } else {
-      const t = THEMEN.find(x => x.id === thema), liste = videosVon(thema);
+      const t = inhalt().THEMEN.find(x => x.id === thema), liste = videosVon(thema);
       SV.wahl = new Set(liste.map(v => v.id));
-      inhalt.innerHTML = `<button type="button" class="kc-sv-zurueck">‹ Alle Themen</button><h2>${t.sym} ${esc(t.t)}</h2><p class="kc-sv-unter">${liste.length} ${liste.length === 1 ? 'Video' : 'Videos'} · anhaken und nacheinander abspielen oder einzeln mit ▶</p>
+      box.innerHTML = `<button type="button" class="kc-sv-zurueck">‹ Alle Themen</button><h2>${t.sym} ${esc(t.t)}</h2><p class="kc-sv-unter">${liste.length} ${liste.length === 1 ? 'Video' : 'Videos'} · anhaken und nacheinander abspielen oder einzeln mit ▶</p>
         <div class="kc-sv-liste">${liste.map(v => `<label class="kc-sv-zeile"><input type="checkbox" data-sv-wahl="${v.id}" checked><span class="kc-sv-ksym" aria-hidden="true">${v.sym}</span><span><b>${esc(v.t)}</b><small>${esc(v.u)}${gesehen(v.id) ? ` · 👁 ${gesehen(v.id)} ✅` : ''}</small></span><button type="button" class="kc-sv-play" data-sv-start="${v.id}" aria-label="${esc(v.t)} abspielen">▶</button></label>`).join('')}</div>
         <div class="kc-sv-fuss"><button value="close">Schließen</button><button type="button" class="primary-action" data-sv-reihe="1">▶ Angehakte nacheinander</button></div>`;
-      inhalt.querySelector('.kc-sv-zurueck').onclick = () => uebersicht(null);
-      inhalt.querySelectorAll('[data-sv-wahl]').forEach(c => c.onchange = () => { c.checked ? SV.wahl.add(c.dataset.svWahl) : SV.wahl.delete(c.dataset.svWahl); });
-      inhalt.querySelectorAll('[data-sv-start]').forEach(b => b.onclick = e => { e.preventDefault(); d.close(); start([b.dataset.svStart]); });
-      inhalt.querySelector('[data-sv-reihe]').onclick = () => { const ids = liste.map(v => v.id).filter(id => SV.wahl.has(id)); if (!ids.length) return; d.close(); start(ids); };
+      box.querySelector('.kc-sv-zurueck').onclick = () => uebersicht(null);
+      box.querySelectorAll('[data-sv-wahl]').forEach(c => c.onchange = () => { c.checked ? SV.wahl.add(c.dataset.svWahl) : SV.wahl.delete(c.dataset.svWahl); });
+      box.querySelectorAll('[data-sv-start]').forEach(b => b.onclick = e => { e.preventDefault(); d.close(); start([b.dataset.svStart]); });
+      box.querySelector('[data-sv-reihe]').onclick = () => { const ids = liste.map(v => v.id).filter(id => SV.wahl.has(id)); if (!ids.length) return; d.close(); start(ids); };
     }
     if (!d.open) d.showModal();
   }
 
-  // ---------- Sprechen: eine klare Stimme wie in der Club-App ----------
+  // ---------- 🔊 Stimmen: je Geraet einstellen ----------
+  // Betreiber: "so flexibel, dass die Stimmen je nach Geraet ausgetauscht werden koennen". Jedes Tablet merkt sich seine Wahl.
+  function stimmenAnsicht() {
+    const d = fenster(), inhaltEl = el('kcSvInhalt'), e = stimmenEinstellung(), q = quelle();
+    const liste = q ? q.stimmen() : [];
+    const quellen = Object.values(STIMM_QUELLEN).filter(x => x.verfuegbar());
+    const wahl = wer => {
+      const auto = autoStimme(wer, liste);
+      return `<select data-sv-stimme="${wer}"><option value="">Automatisch – beste Stimme${auto ? ` (${esc(auto.name)})` : ''}</option>${liste.map(v => `<option value="${esc(v.id)}"${v.id === e[wer] ? ' selected' : ''}>${esc(v.name)} · ${v.gut}</option>`).join('')}</select>`;
+    };
+    inhaltEl.innerHTML = `<button type="button" class="kc-sv-zurueck">‹ Alle Themen</button><h2>🔊 Stimmen auf diesem Gerät</h2>
+      <p class="kc-sv-unter">Jedes Gerät hat eigene Stimmen. Hier wählst du, wer für Laura und Marc spricht. Die Wahl gilt nur für dieses Gerät.</p>
+      ${quellen.length > 1 ? `<label class="kc-sv-stimm-zeile"><b>Quelle</b><select data-sv-quelle="1">${quellen.map(x => `<option value="${x.id}"${x.id === e.quelle ? ' selected' : ''}>${esc(x.name)}</option>`).join('')}</select></label>` : ''}
+      ${liste.length ? `
+      <div class="kc-sv-stimm-zeile"><img src="${FIGUR.laura.bild}" alt=""><b>Laura</b>${wahl('laura')}<button type="button" data-sv-probe="laura">▶ Probe</button></div>
+      <div class="kc-sv-stimm-zeile"><img src="${FIGUR.marc.bild}" alt=""><b>Marc</b>${wahl('marc')}<button type="button" data-sv-probe="marc">▶ Probe</button></div>
+      <div class="kc-sv-stimm-zeile"><span></span><b>Tempo</b><div class="kc-sv-tempo">${TEMPI.map(t => `<button type="button" data-sv-tempo="${t.w}" class="${Math.abs(t.w - e.tempo) < 0.01 ? 'aktiv' : ''}">${t.t}</button>`).join('')}</div></div>`
+      : '<p class="kc-sv-hinweis">Auf diesem Gerät ist keine deutsche Stimme eingerichtet. Die Videos laufen dann mit Text zum Mitlesen.</p>'}
+      <details class="kc-sv-tipps"><summary>Bessere Stimmen auf dem Gerät einrichten</summary>
+        <p><b>iPad:</b> Einstellungen → Bedienungshilfen → Gesprochene Inhalte → Stimmen → Deutsch → z. B. „Anna (Erweitert)“ oder „Markus (Erweitert)“ laden.</p>
+        <p><b>Android / Samsung:</b> Einstellungen → Allgemeine Verwaltung bzw. Bedienungshilfen → Sprachausgabe → bevorzugtes Modul „Google“ → Sprachdaten Deutsch (hohe Qualität) installieren.</p>
+        <p><b>Windows:</b> Einstellungen → Zeit und Sprache → Sprache → Deutsch → Optionen → Sprachausgabe hinzufügen.</p>
+        <p>Danach diese Seite neu öffnen – neue Stimmen erscheinen in der Liste, „Automatisch“ nimmt sie von selbst.</p>
+      </details>
+      <div class="kc-sv-fuss"><button type="button" data-sv-zuruecksetzen="1">Auf automatisch zurücksetzen</button><button value="close">Schließen</button></div>`;
+    inhaltEl.querySelector('.kc-sv-zurueck').onclick = () => uebersicht(null);
+    inhaltEl.querySelectorAll('[data-sv-stimme]').forEach(x => x.onchange = () => stimmenEinstellung({[x.dataset.svStimme]: x.value}));
+    inhaltEl.querySelectorAll('[data-sv-quelle]').forEach(x => x.onchange = () => { stimmenEinstellung({quelle: x.value, laura: '', marc: ''}); stimmenAnsicht(); });
+    inhaltEl.querySelectorAll('[data-sv-tempo]').forEach(x => x.onclick = () => { stimmenEinstellung({tempo: Number(x.dataset.svTempo)}); stimmenAnsicht(); });
+    inhaltEl.querySelectorAll('[data-sv-probe]').forEach(x => x.onclick = () => {
+      const wer = x.dataset.svProbe;
+      const q2 = quelle(); if (!q2) return;
+      q2.sprich([wer === 'marc' ? 'Hallo, ich bin Marc. So klinge ich in den Schulungsvideos.' : 'Hallo, ich bin Laura. So klinge ich in den Schulungsvideos.'], (stimme(wer) || {}).id, Number(stimmenEinstellung().tempo) || 0.95);
+    });
+    inhaltEl.querySelector('[data-sv-zuruecksetzen]').onclick = () => { stimmenEinstellung({laura: '', marc: '', tempo: 0.95, quelle: 'geraet'}); stimmenAnsicht(); };
+    if (!d.open) d.showModal();
+  }
+
+  // ---------- Sprechen: austauschbare Stimm-Quellen, Stimme je Geraet waehlbar ----------
   // Rangfolge aus der Club-App (stimmeWert): Premium/Natural/Online-Stimmen zuerst, bekannte gute Stimmen, keine Spassstimmen.
   const STIMME_SCHLECHT = /eddy|flo\b|grandma|grandpa|oma\b|opa\b|reed|rocko|sandy|shelley|albert|bad news|bahh|bells|boing|bubbles|cellos|good news|jester|organ|superstar|trinoids|whisper|wobble|zarvox|fred|junior|kathy|ralph|hysterical|deranged|pipe|princess/i;
   const STIMME_GUT = /anna|helena|markus|yannick|petra|viktor|martin|katja|conrad|amala|hedda|stefan|google|microsoft|siri/i;
   const STIMME_M = /markus|yannick|viktor|martin|stefan|conrad|hans|jonas|killian|florian|ralf|daniel|male\b|männlich|mann\b/i;
   const stimmeWert = v => (/premium|erweitert|enhanced|verbessert|neural|natural|online/i.test(v.name) ? 6 : 0) + (STIMME_GUT.test(v.name) ? 3 : 0)
     + (STIMME_SCHLECHT.test(v.name) ? -20 : 0) + (/^de[-_]DE/i.test(v.lang) ? 1 : 0) + (v.default ? 1 : 0);
-  function stimme(art) {
-    try {
-      const de = speechSynthesis.getVoices().filter(v => /^de/i.test(v.lang)).sort((a, b) => stimmeWert(b) - stimmeWert(a));
-      if (!de.length) return null;
-      const beste = de[0];
-      if (art === 'm') { const m = de.find(v => STIMME_M.test(v.name)); if (m && stimmeWert(m) >= Math.min(stimmeWert(beste), 4)) return m; }
-      else if (STIMME_M.test(beste.name)) { const w = de.find(v => !STIMME_M.test(v.name) && stimmeWert(v) >= 4); if (w) return w; }
-      return beste;
-    } catch (e) { return null; }
-  }
-  // Satzweise vorlesen; fertig, wenn der letzte Satz gesprochen ist. Ohne Stimme: Lesezeit nach Wortzahl.
-  function sprich(text, art, lauf) {
-    const worte = String(text).split(/\s+/).length, lesezeit = 1500 + worte * 400;
-    return new Promise(fertig => {
-      let erledigt = false; const ende = () => { if (!erledigt) { erledigt = true; fertig(); } };
-      if (!SV.ton) return setTimeout(ende, lesezeit);
-      try {
-        speechSynthesis.cancel();
-        const v = stimme(art), saetze = String(text).match(/[^.!?]+[.!?]*/g) || [text];
-        saetze.forEach((x, n) => {
-          const u = new SpeechSynthesisUtterance(x.trim());
-          u.lang = 'de-DE'; u.rate = 0.95; if (v) { u.voice = v; u.lang = v.lang; }
-          if (n === saetze.length - 1) { u.onend = ende; u.onerror = ende; }
-          speechSynthesis.speak(u);
+
+  // Stimm-Quellen (Adapter). Jede Quelle: { id, name, verfuegbar(), stimmen() → [{id, name, gut}], sprich(saetze, stimmeId, tempo) → Promise }
+  // Heute: die Sprachausgabe des Geraets. Weitere Quellen (z. B. vorab aufgenommene Tondateien) = neuer Eintrag hier.
+  const STIMM_QUELLEN = {
+    geraet: {
+      id: 'geraet', name: 'Sprachausgabe dieses Geräts',
+      verfuegbar: () => 'speechSynthesis' in global,
+      roh: () => { try { return speechSynthesis.getVoices().filter(v => /^de/i.test(v.lang)).sort((a, b) => stimmeWert(b) - stimmeWert(a)); } catch (e) { return []; } },
+      stimmen() { return this.roh().map(v => ({id: v.voiceURI || v.name, name: v.name, gut: stimmeWert(v) >= 6 ? 'sehr gut' : stimmeWert(v) >= 3 ? 'gut' : stimmeWert(v) < 0 ? 'Spaßstimme' : 'einfach', mann: STIMME_M.test(v.name)})); },
+      sprich(saetze, stimmeId, tempo) {
+        return new Promise(fertig => {
+          let erledigt = false; const ende = () => { if (!erledigt) { erledigt = true; fertig(); } };
+          try {
+            speechSynthesis.cancel();
+            const v = this.roh().find(x => (x.voiceURI || x.name) === stimmeId) || null;
+            saetze.forEach((x, n) => {
+              const u = new SpeechSynthesisUtterance(x);
+              u.lang = 'de-DE'; u.rate = tempo;
+              if (v) { try { u.voice = v; u.lang = v.lang; } catch (e) { /* manche Browser lehnen die Stimme ab – dann Standardstimme */ } u.kcStimme = v.name; }
+              if (n === saetze.length - 1) { u.onend = ende; u.onerror = ende; }
+              speechSynthesis.speak(u);
+            });
+          } catch (e) { ende(); }
+          const worte = saetze.join(' ').split(/\s+/).length;
+          setTimeout(ende, (1500 + worte * 400) * 2.5 / tempo + 4000); // Notausgang, falls die Sprachausgabe haengt
         });
-        setTimeout(ende, lesezeit * 2.5 + 4000); // Notausgang, falls die Sprachausgabe haengt
-      } catch (e) { setTimeout(ende, lesezeit); }
-    }).then(() => { if (lauf !== SV.lauf) throw new Error('abbruch'); });
+      },
+      halt() { try { speechSynthesis.cancel(); } catch (e) { /* egal */ } },
+      pause(an) { try { an ? speechSynthesis.pause() : speechSynthesis.resume(); } catch (e) { /* egal */ } }
+    }
+  };
+  // Einstellung je Geraet: { quelle, laura: stimmeId|'' (automatisch), marc: stimmeId|'', tempo }
+  const STIMMEN_KEY = 'kc_schulungsvideo_stimmen_v1';
+  const TEMPI = [{t: 'Langsam', w: 0.85}, {t: 'Normal', w: 0.95}, {t: 'Schnell', w: 1.08}];
+  function stimmenEinstellung(neu) {
+    const alt = Object.assign({quelle: 'geraet', laura: '', marc: '', tempo: 0.95}, lesen(STIMMEN_KEY, {}));
+    if (neu) { const w = Object.assign(alt, neu); schreiben(STIMMEN_KEY, w); return w; }
+    return alt;
+  }
+  function quelle() { const q = STIMM_QUELLEN[stimmenEinstellung().quelle] || STIMM_QUELLEN.geraet; return q.verfuegbar() ? q : null; }
+  // Automatische Wahl: Laura die beste (nicht maennliche) Stimme, Marc eine gute Maennerstimme – sonst dieselbe klare Stimme.
+  // Nie verstellte Tonhoehe (Betreiber: "klare Stimme wie in der Club-App").
+  function autoStimme(wer, liste) {
+    if (!liste.length) return null;
+    const wert = s => (s.gut === 'sehr gut' ? 6 : s.gut === 'gut' ? 3 : s.gut === 'Spaßstimme' ? -20 : 0);
+    const beste = liste[0];
+    if (wer === 'marc') { const m = liste.find(x => x.mann); if (m && wert(m) >= Math.min(wert(beste), 3)) return m; }
+    else if (beste.mann) { const w = liste.find(x => !x.mann && wert(x) >= 3); if (w) return w; }
+    return beste;
+  }
+  // Welche Stimme spricht fuer Laura bzw. Marc? Gewaehlte Stimme, wenn auf dem Geraet vorhanden – sonst automatisch.
+  function stimme(wer) {
+    const q = quelle(); if (!q) return null;
+    const liste = q.stimmen(), id = stimmenEinstellung()[wer === 'm' ? 'marc' : wer === 'w' ? 'laura' : wer];
+    return liste.find(x => x.id === id) || autoStimme(wer === 'm' ? 'marc' : wer === 'w' ? 'laura' : wer, liste);
+  }
+  // Satzweise vorlesen (lange Saetze brechen auf manchen Tablets sonst ab); ohne Stimme: Lesezeit nach Wortzahl.
+  function sprich(text, wer, lauf) {
+    const saetze = (String(text).match(/[^.!?]+[.!?]*/g) || [text]).map(x => x.trim()).filter(Boolean);
+    const lesezeit = 1500 + String(text).split(/\s+/).length * 400, q = SV.ton ? quelle() : null;
+    const tempo = Number(stimmenEinstellung().tempo) || 0.95;
+    const weg = q ? q.sprich(saetze, (stimme(wer) || {}).id, tempo) : warte(lesezeit);
+    return weg.then(() => { if (lauf !== SV.lauf) throw new Error('abbruch'); });
   }
   // Erwaehnte Knoepfe pulsieren (wie Club-App rg-puls)
   function pulsStart(liste) {
     pulsStop();
-    (liste || []).forEach(q => { try { document.querySelectorAll(q).forEach(n => n.classList.add('kc-sv-puls')); } catch (e) { /* egal */ } });
+    let treffer = 0;
+    (liste || []).forEach(q => { try { document.querySelectorAll(q).forEach(n => { n.classList.add('kc-sv-puls'); treffer++; }); } catch (e) { /* egal */ } });
+    if (liste && liste.length && !treffer) { const m = `nichts zu zeigen: ${liste.join(' , ')}`; SV.fehler.push(`${SV.video && SV.video.id}: ${m}`); if (SV.streng) throw new Error(m); }
   }
   function pulsStop() { document.querySelectorAll('.kc-sv-puls').forEach(n => n.classList.remove('kc-sv-puls')); }
 
@@ -323,11 +401,19 @@
     const pruef = () => { if (lauf !== SV.lauf) throw new Error('abbruch'); };
     const mitLage = fn => async (ziel, ...rest) => { pruef(); ausweichen(ziel); const r = await fn(ziel, ...rest); pruef(); lage(); return r; }; // erst pruefen, dann zeichnen – nach ✕ Beenden entsteht keine Buehne mehr
     // Zeigen, dann tippen: das Ziel leuchtet auf, waehrend der Finger hinfaehrt
-    const tippe = async ziel => { pruef(); const n = document.querySelector(ziel); if (n) n.classList.add('kc-sv-puls'); try { await mitLage((z, o) => F.click(z, o))(ziel, {after: 900}); } finally { n && n.classList.remove('kc-sv-puls'); } };
+    const fehlt = ziel => { const m = `Ziel fehlt: ${ziel}`; SV.fehler.push(`${SV.video && SV.video.id}: ${m}`); if (SV.streng) throw new Error(m); };
+    const tippe = async ziel => {
+      if (Array.isArray(ziel)) { for (const z of ziel) await tippe(z); return; }
+      pruef(); const n = document.querySelector(ziel);
+      if (!n) return fehlt(ziel);
+      n.classList.add('kc-sv-puls');
+      try { await mitLage((z, o) => F.click(z, o))(ziel, {after: 900}); } finally { n.classList.remove('kc-sv-puls'); }
+    };
+    const klick = mitLage((z, o) => F.click(z, o));
     return {
       tippe,
       move: mitLage((z, ms) => F.move(z, ms)),
-      click: mitLage((z, o) => F.click(z, o)),
+      click: async (z, o) => { if (!document.querySelector(z)) return fehlt(z); return klick(z, o); },
       focus: mitLage((z, ms) => F.focus(z, ms))
     };
   }
@@ -355,11 +441,11 @@
     SV.reihe = ids.slice();
     stilEinbauen();
     while (SV.reihe.length) {
-      const v = VIDEOS.find(x => x.id === SV.reihe.shift());
+      const id = SV.reihe.shift(), v = inhalt().VIDEOS.find(x => x.id === id); // erst entnehmen, dann suchen (frueher: shift im Suchlauf)
       if (!v) continue;
       const ok = await abspielen(v);
       if (!ok) break;
-      const weiter = await bewerten(v, SV.reihe[0] && VIDEOS.find(x => x.id === SV.reihe[0]));
+      const weiter = await bewerten(v, SV.reihe[0] && inhalt().VIDEOS.find(x => x.id === SV.reihe[0]));
       if (!weiter) break;
     }
     SV.reihe = [];
@@ -376,12 +462,15 @@
     SV.fensterWache = new MutationObserver(() => { if (SV.an) lage(); }); SV.fensterWache.observe(document.body, {subtree: true, attributes: true, attributeFilter: ['open']});
     const F = finger();
     try {
+      startHinweisWeg();
+      if (v.vor) await v.vor();
       for (let n = 0; n < v.st.length; n++) {
         const s = v.st[n];
-        if (s.vor) s.vor();
+        if (s.vor) await s.vor();
+        if (lauf !== SV.lauf) throw new Error('abbruch');
         zeige(v, s, n);
         pulsStart(s.zeig);
-        const reden = sprich(s.x, (FIGUR[s.wer] || FIGUR.laura).art, lauf);
+        const reden = sprich(s.x, FIGUR[s.wer] ? s.wer : 'laura', lauf);
         // wie Club-App: der Finger setzt kurz nach dem Sprechbeginn ein – Ursache, dann Wirkung
         const zeigen = (s.tipp || s.tun) ? warte(700).then(async () => { if (s.tipp) await F.tippe(s.tipp); if (s.tun) await s.tun(F); }) : Promise.resolve();
         await Promise.all([reden, zeigen]);
@@ -395,7 +484,7 @@
       aufraeumen();
       return true;
     } catch (e) {
-      if (e && e.message !== 'abbruch' && e.message !== 'cancelled') console.warn('KC Schulungsvideos:', e);
+      if (e && e.message !== 'abbruch' && e.message !== 'cancelled') { console.warn('KC Schulungsvideos:', e); SV.fehler.push(`${v.id}: ${e.message}`); }
       aufraeumen();
       return false;
     }
@@ -403,17 +492,36 @@
   function pause(an) {
     SV.pause = an;
     const k = document.querySelector('#kcSvLage .kc-sv-pause'); if (k) k.textContent = an ? '▶ Weiter' : '⏸ Pause';
-    try { an ? speechSynthesis.pause() : speechSynthesis.resume(); } catch (e) { /* egal */ }
+    const q = quelle(); if (q && q.pause) q.pause(an);
   }
   function aufraeumen() {
     SV.an = false; SV.pause = false; clearInterval(SV.oben); pulsStop();
     if (SV.fensterWache) { SV.fensterWache.disconnect(); SV.fensterWache = null; }
-    try { speechSynthesis.cancel(); } catch (e) { /* egal */ }
+    const q = quelle(); if (q && q.halt) q.halt();
     try { global.KCLiveDemo && global.KCLiveDemo.reset(); } catch (e) { /* egal */ }
     alleFensterZu();
+    kasseZurueck();
     try { global.KCTrainingAPI && global.KCTrainingAPI.clearCart(); } catch (e) { /* egal */ }
     el('kcSvLage')?.remove();
     document.body.classList.remove('kc-sv-laeuft');
+  }
+  // Rueckgeld-Seite: Gegebenes loeschen und zurueck zur Kasse – das Video hinterlaesst keine halbe Eingabe
+  const sichtbar = n => !!n && n.getBoundingClientRect().width > 0 && getComputedStyle(n).visibility !== 'hidden';
+  function kasseZurueck() {
+    try {
+      const loeschen = el('kcGegebenLoeschen'); if (sichtbar(loeschen) && !loeschen.disabled) loeschen.click();
+      const zurueck = el('kcZahlenZurueckTaste'); if (sichtbar(zurueck)) zurueck.click();
+      const g = document.querySelector('#categories [data-cat="Getränke"]'); if (g && !g.classList.contains('active')) g.click();
+    } catch (e) { /* egal */ }
+  }
+  // Der Start-Hinweis der Kasse (schliesst sich sonst nach ein paar Sekunden selbst) soll nicht ueber dem Video liegen
+  function startHinweisWeg() { document.querySelectorAll('[data-kc-sperrend="0"]').forEach(n => n.remove()); }
+  // Pruefmodus fuer automatische Tests: streng = fehlende Ziele sind Fehler, tempo < 1 = schneller (auch der Finger)
+  function pruefung(o) {
+    const bisher = SV.fehler;
+    o = o || {}; SV.streng = !!o.streng; SV.tempo = Number(o.tempo) || 1; SV.fehler = [];
+    global.KCLiveDemoTempo = SV.tempo === 1 ? undefined : SV.tempo;
+    return {fehler: bisher}; // Fehler des bisherigen Pruefabschnitts
   }
   function stopp(grund) {
     SV.lauf++; SV.reihe = [];
@@ -446,7 +554,7 @@
         d.close(); fertig(senden || !naechstes);
       });
       d.showModal();
-      if (SV.ton) sprich('Hat dir das Video gefallen? Und hilft es dir weiter? Tippe auf Daumen hoch oder Daumen runter.', 'w', SV.lauf).catch(() => {});
+      if (SV.ton) sprich('Hat dir das Video gefallen? Und hilft es dir weiter? Tippe auf Daumen hoch oder Daumen runter.', 'laura', SV.lauf).catch(() => {});
     });
   }
 
@@ -457,8 +565,10 @@
     // Beim Oeffnen von MEHR immer frisch pruefen (der Modus kann ohne Neuzeichnen umgestellt worden sein)
     const mehr = el('moreDialog'); if (mehr) new MutationObserver(sichtbarkeit).observe(mehr, {attributes: true, attributeFilter: ['open']});
     try { speechSynthesis.getVoices(); } catch (e) { /* egal */ }
+    // Stimmen kommen auf manchen Geraeten erst spaeter – offene Stimmen-Ansicht dann neu aufbauen
+    try { speechSynthesis.addEventListener('voiceschanged', () => { if (el('kcSvFenster')?.open && el('kcSvInhalt')?.querySelector('[data-sv-stimme], [data-sv-zuruecksetzen]')) stimmenAnsicht(); }); } catch (e) { /* egal */ }
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', los); else los();
 
-  global.KCSchulungsvideos = {VERSION, VIDEOS, THEMEN, start, stopp, pause, uebersicht, stimme, bewertungen: () => lesen(BEWERTUNG, [])};
+  global.KCSchulungsvideos = {VERSION, get VIDEOS() { return inhalt().VIDEOS; }, get THEMEN() { return inhalt().THEMEN; }, start, stopp, pause, uebersicht, stimme, stimmen: stimmenEinstellung, stimmQuellen: STIMM_QUELLEN, pruefung, bewertungen: () => lesen(BEWERTUNG, [])};
 })(window);

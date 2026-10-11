@@ -1,6 +1,6 @@
 # Schulungsvideos für die Kasse (KC-KASSE-SCHULUNGSVIDEOS)
 
-Stand 11.10.2026 · Modul `pos/kc-schulungsvideos.js` 0.2.0 (Kasse und Schulung gleich)
+Stand 11.10.2026 · Abspieler `pos/kc-schulungsvideos.js` 0.3.0 · Inhalte `pos/kc-schulungsvideos-inhalt.js` 0.3.0 (Kasse und Schulung gleich)
 
 ## Wunsch Betreiber
 * Video-Schulung nach dem Muster der Club-App: **kleine Videos, immer ein Thema** (30–90 Sekunden).
@@ -34,6 +34,27 @@ Betreiber: „Die Videos in der Club-App gefallen mir besser – klare Stimme, u
 * **⏸ Pause / ▶ Weiter** und Fortschritt „3 / 15“ mit Balken. Größere Schrift in der Sprechblase.
 * Die Sprechblase springt sofort mit, wenn ein Fenster auf- oder zugeht.
 
+## 0.3.0 – 22 Videos und Stimmen je Gerät
+Betreiber: „Mach die nächsten Videos wie geplant. Bau das so flexibel, dass die Stimmen je nach Gerät ausgetauscht werden können.“
+* **Inhalte getrennt vom Abspieler:** `kc-schulungsvideos-inhalt.js` enthält nur Themen, Texte und Fingerwege.
+  Ein neues Video ist ein neuer Eintrag dort.
+* **22 kleine Videos:** Oberfläche 6, Verkaufen 7, Rückgeld & Bezahlen 5, Entnahmen 4. Jedes verweist auf die passende
+  Aufgabe der Übungsliste.
+* **🔊 Stimmen je Gerät** (Video-Übersicht → 🔊 Stimmen): Stimme für Laura und Marc wählen oder „Automatisch – beste
+  Stimme“, Tempo Langsam/Normal/Schnell, ▶ Probe hören, Hilfe zum Einrichten besserer Stimmen (iPad, Android, Windows).
+  Gespeichert nur auf diesem Gerät (`kc_schulungsvideo_stimmen_v1`). Fehlt die gewählte Stimme, spricht automatisch die
+  beste vorhandene.
+* **Stimm-Quellen als Adapter** (`STIMM_QUELLEN`): heute die Sprachausgabe des Geräts. Eine weitere Quelle, z. B. vorab
+  aufgenommene Tondateien für überall gleichen Klang, ist ein neuer Eintrag mit `stimmen()` und `sprich()`. Die
+  Auswahl „Quelle“ erscheint, sobald es mehr als eine gibt.
+* **Nie buchen:** BAR, STIMMT SO, Speichern und das Bestätigen beim Bon-Verwerfen werden nur gezeigt. Das Verwerfen
+  würde einen Storno protokollieren, deshalb tippt das Video dort auf Abbrechen. Eine einzelne Zeile zu löschen
+  protokolliert nichts und wird vorgeführt.
+* **Prüfmodus** (`KCSchulungsvideos.pruefung({streng, tempo})`): Der Test spielt alle Videos in Kasse und Schulung ab.
+  Jeder Knopf, den der Finger antippt oder der pulsiert, muss vorhanden sein. Gebucht werden darf nichts.
+* Behoben: Mit mehreren Videos in einer Reihe wurde die Reihe beim Suchen geleert (Fehler seit 0.1.0, fiel mit nur
+  einem Video nicht auf).
+
 ## Aufbau (wie in der Club-App)
 * `THEMEN`: die Kacheln. `VIDEOS`: ein Eintrag ist ein kleines Video mit `id`, `stand` (Fassung), `thema`, Stationen.
 * Station: `wer` (laura/marc), `x` (gesprochener Text), optional `tafel` (Bild-Tafel), `tun` (Finger-Vorführung),
@@ -45,12 +66,12 @@ Betreiber: „Die Videos in der Club-App gefallen mir besser – klare Stimme, u
 ## Videokatalog (geplant, rund 54 kleine Videos)
 | Kachel | Kleine Videos |
 |---|---|
-| 🖥️ Oberfläche | Kopfzeile und Lampen · Warengruppen · Artikelkacheln · Warenkorb · BAR und RÜCKGELD · MEHR und ☰ |
-| 🛒 Verkaufen | Ein Artikel · Mehrere Warengruppen · Menge · ½ Portion · Variante über ＋ · Kombi und Favoriten · Löschen |
-| 💶 Rückgeld & Bezahlen | BAR passend · RÜCKGELD mit Schein · „Stimmt so“ und Trinkgeld · Zu wenig gegeben · Bons verbinden und trennen |
+| 🖥️ Oberfläche | Kopfzeile und Lampen · Warengruppen · Artikelkacheln · Warenkorb · BAR und RÜCKGELD · MEHR und Menü **(fertig)** |
+| 🛒 Verkaufen | Ein Artikel · Getränk und Essen · Menge · ½ Portion · Variante über ＋ · Kombi und Favoriten · Löschen **(fertig)** |
+| 💶 Rückgeld & Bezahlen | BAR passend · RÜCKGELD mit Schein · „Stimmt so“ und Aufrunden · Zu wenig gegeben · Vertippt? Korrigieren **(fertig)** |
 | 🍷 Pfand | Pfand kommt von selbst · Glas zurück · Mehrere Gläser · Pfand als Spende oder Trinkgeld |
 | ↩ Reklamationen | Geld zurück · Ersatz · Falsch berechnet |
-| 💸 Entnahmen | **Erst einkaufen, dann entnehmen (fertig)** · Mit Bon · Ohne Bon · Rückgeld richtig behandeln |
+| 💸 Entnahmen | Erst einkaufen, dann entnehmen · Mit Bon · Ohne Bon · Betrag korrigieren **(fertig)** |
 | 🍽️ Personal & Helfer | Personalverpflegung · Feierabend-Essen · Helfer-Verpflegung |
 | ⭐ Sonderfälle | Gäste/Spendieren · Konto · Rabatt/Stammgast · Gutschein · Wertmarke · Happy Hour · Ausverkauft · Allergene |
 | 👤 Schicht & Team | Schicht beginnen · Ausweis vergessen · Bediener wechseln · Kasse sperren · Schichtwechsel |
@@ -60,7 +81,7 @@ Betreiber: „Die Videos in der Club-App gefallen mir besser – klare Stimme, u
 ## Etappen
 1. **Erledigt (0.1.0, 0.2.0):** Knopf unter MEHR, Themen-Kacheln, Player mit Laura, Marc, Finger und Ton, Bewertung auf dem
    Gerät, erstes Video „Erst einkaufen, dann entnehmen“.
-2. Oberfläche, Verkaufen, Rückgeld & Bezahlen, restliche Entnahmen.
+2. **Erledigt (0.3.0):** Oberfläche, Verkaufen, Rückgeld & Bezahlen, restliche Entnahmen; Stimmen je Gerät.
 3. Pfand, Reklamationen, Personal & Helfer.
 4. Sonderfälle, Schicht & Team, Störungen.
 5. Kassenwart-Videos. Zentrale Bewertung: Tabelle `kc_kasse_video_bewertung` in Supabase-Core, Schreiben nur über

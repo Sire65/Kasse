@@ -6,7 +6,9 @@
    - offener Bon: kein Start
    - Video laeuft durch: Finger tippt bis Entnahme-Fenster mit 38,40 €, Grund und Bon – gespeichert wird NICHTS,
      am Ende alle Fenster zu, Warenkorb leer, "gesehen" gezaehlt, Bewertung wird in die Warteschlange gelegt
-   - Trainingsmodus waehrend des Videos aus: Video stoppt sofort */
+   - Trainingsmodus waehrend des Videos aus: Video stoppt sofort
+   0.3.0: alle 22 Videos streng (jeder Knopf vorhanden) in Kasse und Schulung, nichts gebucht;
+   🔊 Stimmen je Geraet waehlen, Probe, Tempo, fehlende Stimme → automatisch, zuruecksetzen */
 try{require.resolve('playwright')}catch(e){console.log('  ueberspringen: Playwright nicht installiert');process.exit(0)}
 const {chromium}=require('playwright');const http=require('http'),fs=require('fs'),path=require('path');
 const W=path.join(__dirname,'..');
@@ -40,7 +42,7 @@ try{
    pruefe('Kasse mit Training: Knopf Schulungsvideos sichtbar',await sichtbar(p,'#kcSvMehrBtn'));
    await p.click('#kcSvMehrBtn');await p.waitForTimeout(700);
    const k=await p.evaluate(()=>[...document.querySelectorAll('[data-sv-thema]')].map(x=>x.dataset.svThema+':'+(x.disabled?'aus':'an')+':'+x.querySelector('small').textContent));
-   pruefe('Themen-Kacheln Oberflaeche, Verkaufen, Rueckgeld, Entnahmen; Entnahmen mit 1 Video',k.length===4&&/^entnahmen:an:1 Video/.test(k[3])&&k.slice(0,3).every(x=>/:aus:Videos in Vorbereitung/.test(x)),k.join(' | '));
+   pruefe('Themen-Kacheln: Oberflaeche 6, Verkaufen 7, Rueckgeld & Bezahlen 5, Entnahmen 4 Videos',k.length===4&&/^oberflaeche:an:6 Videos/.test(k[0])&&/^verkaufen:an:7 Videos/.test(k[1])&&/^rueckgeld:an:5 Videos/.test(k[2])&&/^entnahmen:an:4 Videos/.test(k[3]),k.join(' | '));
    await p.click('[data-sv-thema="entnahmen"]');await p.waitForTimeout(400);
    pruefe('Entnahmen: Video „Erst einkaufen, dann entnehmen“ mit ▶',await p.evaluate(()=>/Erst einkaufen, dann entnehmen/.test(document.getElementById('kcSvInhalt').textContent)&&!!document.querySelector('[data-sv-start="entnahme-zeitpunkt"]')));
    await p.evaluate(()=>document.getElementById('kcSvFenster').close());
@@ -84,6 +86,47 @@ try{
    await p.evaluate(()=>{state.master.trainingMode=false;renderWorkspaceModePanel()});await p.waitForTimeout(800);
    {const z=await p.evaluate(()=>({lage:!!document.getElementById('kcSvLage'),knopf:document.getElementById('kcSvMehrBtn').hidden,training:state.master.trainingMode,offen:[...document.querySelectorAll('dialog[open]')].map(d=>d.id)}));
    pruefe('Training aus: Video stoppt sofort, Knopf verschwindet',!z.lage&&z.knopf,JSON.stringify(z));}
+   pruefe('keine Programmfehler',!js.length,js.join(' | '));await ctx.close();}
+
+  // 4. Alle Videos im strengen Pruefmodus, Kasse und Schulung: jeder Knopf, den der Finger antippt oder der pulsiert, muss
+  //    da sein; am Ende ist nichts gebucht (Verkauf, Entnahme, Storno, Trinkgeld), kein Fenster offen, Warenkorb leer.
+  for(const [name,url,m] of [['Kasse',B+'pos/index.html',{registerId:'KASSE-01',pinLockEnabled:false,trainingMode:true}],['Schulung',B+'schulung/pos/index.html?schulung=1',{registerId:'KASSE-01',pinLockEnabled:false}]]){
+   const {p,ctx,js}=await seite(b,url,m);
+   const zst=()=>p.evaluate(()=>{const s=KCTrainingAPI.getTrainingState();return `Verkauf ${s.transactionCount} · Entnahme ${s.withdrawalCount} · Storno ${s.voidCount} · Trinkgeld ${s.tipCount}`});
+   const vor=await zst();const ids=await p.evaluate(()=>KCSchulungsvideos.VIDEOS.map(v=>v.id));const kaputt=[];
+   for(const id of ids){
+    const r=await p.evaluate(async id=>{KCSchulungsvideos.pruefung({streng:true,tempo:0.15});
+      const w=setInterval(()=>{const d=document.getElementById('kcSvBewertung');if(d&&d.open)d.querySelector('[data-sv-ende="0"]').click()},100);
+      await KCSchulungsvideos.start([id]);clearInterval(w);const fe=KCSchulungsvideos.pruefung({}).fehler;
+      return {fe,gesehen:JSON.parse(localStorage.getItem('kc_schulungsvideo_gesehen_v1')||'{}')[id]||0,offen:[...document.querySelectorAll('dialog[open]')].map(d=>d.id),cart:KCTrainingAPI.getCartSnapshot().items.length,lage:!!document.getElementById('kcSvLage')};
+    },id);
+    if(!r.gesehen||r.fe.length||r.offen.length||r.cart||r.lage)kaputt.push(`${id}: ${r.fe.join(' ')} ${r.offen.join(',')} ${r.cart?'Warenkorb '+r.cart:''}`);
+   }
+   pruefe(`${name}: alle ${ids.length} Videos laufen streng durch, nichts bleibt offen`,ids.length===22&&!kaputt.length,kaputt.join(' | '));
+   pruefe(`${name}: nichts gebucht`,(await zst())===vor,vor+' → '+(await zst()));
+   pruefe(`${name}: keine Programmfehler`,!js.length,js.join(' | '));await ctx.close();
+  }
+
+  // 5. 🔊 Stimmen je Geraet: waehlen, Probe, gespeichert nur hier, zuruecksetzen
+  {const {p,ctx,js}=await seite(b,B+'pos/index.html',{registerId:'KASSE-01',pinLockEnabled:false,trainingMode:true});
+   await p.evaluate(()=>{const V=n=>({name:n,lang:'de-DE',voiceURI:n,default:false});const liste=[V('Anna'),V('Markus (Erweitert)'),V('Petra'),V('Grandma')];speechSynthesis.getVoices=()=>liste;window.__gesagt=[];speechSynthesis.speak=u=>{__gesagt.push((u.kcStimme||(u.voice&&u.voice.name))+': '+u.text);setTimeout(()=>u.onend&&u.onend(),30)}});
+   await p.evaluate(()=>KCSchulungsvideos.uebersicht(null));await p.waitForTimeout(300);
+   await p.click('[data-sv-stimmen]');await p.waitForTimeout(300);
+   const opts=await p.evaluate(()=>[...document.querySelectorAll('[data-sv-stimme="marc"] option')].map(o=>o.textContent));
+   pruefe('Stimmen: Auswahl fuer Laura und Marc mit allen Geraete-Stimmen und Automatik',opts.length===5&&/Automatisch – beste Stimme \(Markus \(Erweitert\)\)/.test(opts[0])&&opts.some(o=>/Petra/.test(o)),opts.join(' | '));
+   await p.selectOption('[data-sv-stimme="marc"]','Petra');await p.click('[data-sv-tempo="0.85"]');await p.waitForTimeout(200);
+   const e=await p.evaluate(()=>JSON.parse(localStorage.getItem('kc_schulungsvideo_stimmen_v1')));
+   pruefe('Stimmen: Wahl und Tempo auf diesem Geraet gespeichert',e.marc==='Petra'&&e.tempo===0.85,JSON.stringify(e));
+   pruefe('Stimmen: Marc spricht jetzt mit der gewaehlten Stimme',(await p.evaluate(()=>KCSchulungsvideos.stimme('marc').name))==='Petra');
+   await p.click('[data-sv-probe="marc"]');await p.waitForTimeout(300);
+   pruefe('Stimmen: Probe hoeren mit der gewaehlten Stimme',(await p.evaluate(()=>__gesagt.join(' / '))).startsWith('Petra: Hallo, ich bin Marc'),await p.evaluate(()=>__gesagt.join(' / ')));
+   // gewaehlte Stimme fehlt auf einem anderen Geraet → automatisch
+   await p.evaluate(()=>{const V=n=>({name:n,lang:'de-DE',voiceURI:n,default:false});speechSynthesis.getVoices=()=>[V('Google Deutsch')]});
+   pruefe('Stimmen: gewaehlte Stimme fehlt → automatisch die beste vorhandene',(await p.evaluate(()=>KCSchulungsvideos.stimme('marc').name))==='Google Deutsch');
+   await p.evaluate(()=>{const V=n=>({name:n,lang:'de-DE',voiceURI:n,default:false});speechSynthesis.getVoices=()=>[V('Anna'),V('Markus (Erweitert)'),V('Petra')]});
+   await p.click('[data-sv-zuruecksetzen]');await p.waitForTimeout(200);
+   pruefe('Stimmen: zuruecksetzen → wieder automatisch',(await p.evaluate(()=>KCSchulungsvideos.stimme('marc').name))==='Markus (Erweitert)'&&(await p.evaluate(()=>KCSchulungsvideos.stimmen().tempo))===0.95);
+   pruefe('Stimmen: Quelle als austauschbarer Adapter (heute: Geraet)',await p.evaluate(()=>Object.keys(KCSchulungsvideos.stimmQuellen).join()==='geraet'&&typeof KCSchulungsvideos.stimmQuellen.geraet.sprich==='function'));
    pruefe('keine Programmfehler',!js.length,js.join(' | '));await ctx.close();}
 
   // 3. Schulungskasse: immer da (Trainingsmodus fest an)

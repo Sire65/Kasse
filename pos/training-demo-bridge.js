@@ -6,7 +6,8 @@ const params=new URLSearchParams(location.search);
 // (postMessage) bleibt wie bisher NUR mit ?embeddedTraining=1 an.
 const embedded=params.get('embeddedTraining')==='1';
 let token=0,cursor=null;
-const wait=ms=>new Promise(r=>setTimeout(r,ms));
+// window.KCLiveDemoTempo: nur fuer automatische Pruefungen (z. B. 0.1 = zehnmal schneller); im Betrieb nicht gesetzt
+const wait=ms=>new Promise(r=>setTimeout(r,ms*(Number(window.KCLiveDemoTempo)||1)));
 function inject(){
  if(document.getElementById('kc-live-demo-style'))return;
  const s=document.createElement('style');s.id='kc-live-demo-style';s.textContent=`
