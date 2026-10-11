@@ -842,3 +842,14 @@ KC-CLUB-REALTIME 2.226–2.230). Die **Kassen bleiben unverändert** (sie sprech
   Geldübergaben** im Manager (`kc-finance-uebergaben.js` 1.1.0, fragte alle 30 s die Cloud): Signal „geld“/„zaehlung“ →
   sofort neu laden; bei stehender Leitung nur alle 2 Minuten zur Sicherheit. `kc-direkte-leitung-manager.js` 1.1.0.
   Der alte Rückfallweg „Manager-Notfallwerkzeug / bisherige Bargeldmaske“ läuft über den Kassen-Dienst und bleibt unverändert.
+
+## Nachtrag 11.10.2026 – Sammelbestellung: Kombis wie auf der Hauptseite · Kurzanleitung 4.3
+
+Betreiber: „Mach das mit den Bildern“ (Kurzanleitung zeigte noch alte Kombi-Bilder).
+- **Sammelbestellung** (`kc-oberflaechen-anwenden.js` 0.9.15 / `.css` 0.9.24, Kasse und Schulung): Kombi-Karten
+  schräg geteilt wie auf der Hauptseite (Getränk oben, Essen unten; mit Wurst das Bild „Grünkohl mit Wurst“), statt zwei
+  Bildchen mit „+“. Bildwahl aus derselben Quelle (`kombiBilder` aus `packageProductView`). Test
+  `tests/sammel-kombi-bild.test.cjs` (neu); `park-verbinden` akzeptiert jetzt auch spätere CSS-Builds.
+- **Kurzanleitung 4.3** (Club-App 2.232.1, `dokumente/Kurzanleitung_Bilderrechner_V4.3.pdf`, 33 Seiten): Seite 12
+  „Sammelbestellung“ neu aus der laufenden Kasse fotografiert (aktuelle Reihenfolge der Warengruppen, neue Kombi-Bilder),
+  Version 4.3 auf allen Seiten, Hinweis „Neu in 4.3“ auf Seite 1. Version 4.2 bleibt als Datei unverändert.

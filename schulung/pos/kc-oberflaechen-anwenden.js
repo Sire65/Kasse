@@ -920,7 +920,15 @@
            Kombis zeigten nur das Gruenkohl-Bild und sahen gleich aus. Kombi-Kacheln zeigen jetzt die
            Bilder ALLER enthaltenen Artikel nebeneinander mit "+" dazwischen, darunter hell die Namen. */
         const teile = p.isPackage ? (p.componentIds || []).map((id) => kPROD().find((x) => x.id === id)).filter(Boolean) : [];
-        const bild = sammelAnsicht === 'bild' && teile.length > 1
+        /* 11.10.2026 (Betreiber: Kombi-Bilder "halb das Getränk und halb das Essen, die Wurst muss zu sehen
+           sein, aber keine zusätzliche Wurst"): Sammelbestellung zeigt Kombis jetzt wie die Hauptseite -
+           schräg geteilt, Getränk oben links, Essen unten rechts (mit Wurst: Bild Grünkohl mit Wurst).
+           Die Bildwahl kommt aus derselben Quelle (p.kombiBilder aus packageProductView in app.js).
+           Nur wenn sie fehlt (z. B. Kombi mit rundem Zusatzteil), bleibt die bisherige Darstellung mit "+". */
+        const kb = p.isPackage && p.kombiBilder && !p.kombiBilder.vorne ? p.kombiBilder : null;
+        const bild = sammelAnsicht === 'bild' && kb
+          ? `<span class="kc-sammel-kombi kc-sammel-kombi-schraeg"><img class="kc-sk-oben" src="${kb.oben}" alt=""><img class="kc-sk-unten" src="${kb.unten}" alt=""><svg class="kc-sk-linie" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"><line x1="0" y1="100" x2="100" y2="0" vector-effect="non-scaling-stroke"/></svg></span><span class="kc-sammel-kombi-name">${p.name}</span>`
+          : sammelAnsicht === 'bild' && teile.length > 1
           ? `<span class="kc-sammel-kombi">${teile.map((t) => `<img src="${t.image}" alt="">`).join('<b class="kc-sammel-kombi-plus">+</b>')}</span><span class="kc-sammel-kombi-name">${p.name}</span>`
           : (sammelAnsicht === 'bild' && p.image ? `<img src="${p.image}" alt="">` : '');
         const name = o && !alsHauptartikel ? (o.label || o.name) : p.name;
