@@ -831,3 +831,8 @@ KC-CLUB-REALTIME 2.226–2.230). Die **Kassen bleiben unverändert** (sie sprech
   Supabase-LED. `kc-money-butler-cloud-intake.js` 1.1.0: bei stehender Leitung nur noch jede Minute statt alle 15 s.
 - Tests: `tests/direkte-leitung.test.cjs` (neu). Live-Verbindung aus der Cloud-Sitzung nicht prüfbar (Proxy lässt keine
   WebSocket-Verbindung zu) – auf dem Manager-PC prüfbar über den Tooltip der Supabase-LED.
+- **Money Butler** (`money-butler/kc-direkte-leitung-mb.js` 1.0.0, nur der echte Money Butler – die Schulungsfassung hat
+  keine Anmeldung): Nach „Über KC Communicator senden“ und Signal „geld“/„zaehlung“ sieht er über den bisherigen Weg
+  (kc-finance-bridge) nach, ob **seine** Übergabe/Zählung übernommen ist, und zeigt „✓ hh:mm: 50,00 € vom PC-Manager
+  übernommen und an die Kasse weitergegeben“ (bisher gab es keine Rückmeldung). Signal „einstellungen“ → gemeinsame
+  Messwerte sofort neu laden. Test: `tests/direkte-leitung-money-butler.test.cjs`.
