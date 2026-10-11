@@ -1,6 +1,6 @@
 # Schulungsvideos für die Kasse (KC-KASSE-SCHULUNGSVIDEOS)
 
-Stand 11.10.2026 · Modul `pos/kc-schulungsvideos.js` 0.1.0 (Kasse und Schulung gleich)
+Stand 11.10.2026 · Modul `pos/kc-schulungsvideos.js` 0.2.0 (Kasse und Schulung gleich)
 
 ## Wunsch Betreiber
 * Video-Schulung nach dem Muster der Club-App: **kleine Videos, immer ein Thema** (30–90 Sekunden).
@@ -22,6 +22,17 @@ Stand 11.10.2026 · Modul `pos/kc-schulungsvideos.js` 0.1.0 (Kasse und Schulung 
 6. Laura und Marc sind die Figuren aus `avatar-core`. Der Ton kommt aus der Sprachausgabe des Geräts
    (kostenlos, offline). Ohne Sprachausgabe läuft das Video mit Lesezeit.
 7. Die Sprechblase weicht nach oben aus, wenn sie das gezeigte Element verdecken würde.
+
+## 0.2.0 – so klar wie die Club-App
+Betreiber: „Die Videos in der Club-App gefallen mir besser – klare Stimme, und der Finger zeigt es.“
+* **Eine klare Stimme:** die beste deutsche Stimme des Geräts, mit derselben Rangfolge wie in der Club-App
+  (Premium/Natural vor bekannten guten Stimmen, keine Spaßstimmen). Marc bekommt nur dann eine Männerstimme, wenn
+  eine gute vorhanden ist. Die Tonhöhe wird nie mehr verstellt.
+* **Satzweise vorlesen** in ruhigem Tempo. Lange Texte brechen sonst auf manchen Tablets ab.
+* **Ein Gedanke je Schritt:** ein kurzer Satz, und genau dabei tippt der Finger (`tipp`). Das Ziel leuchtet auf,
+  während der Finger hinfährt. Erwähnte Knöpfe pulsieren (`zeig`).
+* **⏸ Pause / ▶ Weiter** und Fortschritt „3 / 15“ mit Balken. Größere Schrift in der Sprechblase.
+* Die Sprechblase springt sofort mit, wenn ein Fenster auf- oder zugeht.
 
 ## Aufbau (wie in der Club-App)
 * `THEMEN`: die Kacheln. `VIDEOS`: ein Eintrag ist ein kleines Video mit `id`, `stand` (Fassung), `thema`, Stationen.
@@ -47,7 +58,7 @@ Stand 11.10.2026 · Modul `pos/kc-schulungsvideos.js` 0.1.0 (Kasse und Schulung 
 | 🗂️ Kassenwart | Eröffnung · Übergabecode · Bargeldübergabe · X-Bericht · Tagesabschluss |
 
 ## Etappen
-1. **Erledigt (0.1.0):** Knopf unter MEHR, Themen-Kacheln, Player mit Laura, Marc, Finger und Ton, Bewertung auf dem
+1. **Erledigt (0.1.0, 0.2.0):** Knopf unter MEHR, Themen-Kacheln, Player mit Laura, Marc, Finger und Ton, Bewertung auf dem
    Gerät, erstes Video „Erst einkaufen, dann entnehmen“.
 2. Oberfläche, Verkaufen, Rückgeld & Bezahlen, restliche Entnahmen.
 3. Pfand, Reklamationen, Personal & Helfer.

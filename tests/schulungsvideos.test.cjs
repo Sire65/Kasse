@@ -63,12 +63,27 @@ try{
    pruefe('am Ende: Entnahme-Fenster zu, Buehne weg, Warenkorb leer',await p.evaluate(()=>!document.getElementById('withdrawDialog').open&&!document.getElementById('kcSvLage')&&!KCTrainingAPI.getCartSnapshot().items.length));
    await p.click('[data-frage="gefallen"] [data-w="1"]');await p.click('[data-frage="hilft"] [data-w="0"]');await p.click('[data-sv-ende="1"]');await p.waitForTimeout(300);
    const bw=await p.evaluate(()=>KCSchulungsvideos.bewertungen());
-   pruefe('Bewertung in der Warteschlange (Video, Fassung, gefallen, hilft)',bw.length===1&&bw[0].video==='entnahme-zeitpunkt'&&bw[0].stand==='1'&&bw[0].gefallen===true&&bw[0].hilft===false&&bw[0].gesendet===false,JSON.stringify(bw));
+   pruefe('Bewertung in der Warteschlange (Video, Fassung, gefallen, hilft)',bw.length===1&&bw[0].video==='entnahme-zeitpunkt'&&bw[0].stand==='2'&&bw[0].gefallen===true&&bw[0].hilft===false&&bw[0].gesendet===false,JSON.stringify(bw));
    pruefe('„gesehen“ gezaehlt',await p.evaluate(()=>JSON.parse(localStorage.getItem('kc_schulungsvideo_gesehen_v1')||'{}')['entnahme-zeitpunkt'])===1);
+   // Stimme wie Club-App: beste Stimme, keine verstellte Tonhoehe; Marc nur mit guter Maennerstimme
+   const st=await p.evaluate(()=>{const V=(name,lang='de-DE')=>({name,lang,voiceURI:name,default:false});const echt=speechSynthesis.getVoices;
+     const probe=liste=>{speechSynthesis.getVoices=()=>liste;const r=[KCSchulungsvideos.stimme('w')?.name,KCSchulungsvideos.stimme('m')?.name];speechSynthesis.getVoices=echt;return r};
+     return {android:probe([V('Google Deutsch'),V('Albert')]),ipad:probe([V('Anna'),V('Markus (Erweitert)'),V('Grandma')]),schlecht:probe([V('Anna'),V('Hans')])}});
+   pruefe('Stimme: Android → Google Deutsch fuer beide (eine klare Stimme)',st.android.join()==='Google Deutsch,Google Deutsch',JSON.stringify(st.android));
+   pruefe('Stimme: iPad → Anna fuer Laura, Markus (Erweitert) fuer Marc',st.ipad.join()==='Anna,Markus (Erweitert)',JSON.stringify(st.ipad));
+   pruefe('Stimme: schwache Maennerstimme → Marc spricht mit der besten Stimme',st.schlecht.join()==='Anna,Anna',JSON.stringify(st.schlecht));
+   // Pause haelt nach dem aktuellen Schritt an, Weiter laeuft weiter
+   await p.evaluate(()=>{KCSchulungsvideos.start(['entnahme-zeitpunkt'])});await p.waitForTimeout(800);
+   await p.click('#kcSvLage .kc-sv-pause');const nr1=await p.textContent('#kcSvLage .kc-sv-nr');await p.waitForTimeout(6000);const nr2=await p.textContent('#kcSvLage .kc-sv-nr');
+   pruefe('Pause: Video bleibt beim Schritt stehen, Knopf zeigt ▶ Weiter',nr1===nr2&&/Weiter/.test(await p.textContent('#kcSvLage .kc-sv-pause')),nr1+' → '+nr2);
+   await p.click('#kcSvLage .kc-sv-pause');await p.waitForTimeout(4500);
+   pruefe('Weiter: Video laeuft weiter',(await p.textContent('#kcSvLage .kc-sv-nr'))!==nr2);
+   await p.evaluate(()=>KCSchulungsvideos.stopp());await p.waitForTimeout(300);
    // Trainingsmodus waehrend des Videos aus
    await p.evaluate(()=>{KCSchulungsvideos.start(['entnahme-zeitpunkt'])});await p.waitForTimeout(1500);
    await p.evaluate(()=>{state.master.trainingMode=false;renderWorkspaceModePanel()});await p.waitForTimeout(800);
-   pruefe('Training aus: Video stoppt sofort, Knopf verschwindet',!(await p.evaluate(()=>!!document.getElementById('kcSvLage')))&&await p.evaluate(()=>document.getElementById('kcSvMehrBtn').hidden));
+   {const z=await p.evaluate(()=>({lage:!!document.getElementById('kcSvLage'),knopf:document.getElementById('kcSvMehrBtn').hidden,training:state.master.trainingMode,offen:[...document.querySelectorAll('dialog[open]')].map(d=>d.id)}));
+   pruefe('Training aus: Video stoppt sofort, Knopf verschwindet',!z.lage&&z.knopf,JSON.stringify(z));}
    pruefe('keine Programmfehler',!js.length,js.join(' | '));await ctx.close();}
 
   // 3. Schulungskasse: immer da (Trainingsmodus fest an)
