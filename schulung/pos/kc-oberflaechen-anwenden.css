@@ -1238,3 +1238,33 @@ body.kc-layout-neu #withdrawDialog .withdraw-card > .withdraw-reason-field, #wit
 .kc-sammel-karte.ansicht-bild > .kc-sammel-kombi.kc-sammel-kombi-schraeg > img.kc-sk-unten { left: -22.5% !important; top: -4.25% !important; clip-path: polygon(98% 3.4%, 98% 83.4%, 18% 83.4%); }
 .kc-sammel-karte.ansicht-bild > .kc-sammel-kombi.kc-sammel-kombi-schraeg > .kc-sk-linie { position: absolute; left: 0; top: 0; width: 100%; height: 100%; pointer-events: none; }
 .kc-sammel-karte.ansicht-bild > .kc-sammel-kombi.kc-sammel-kombi-schraeg > .kc-sk-linie line { stroke: #fff; stroke-width: 3; }
+
+/* 12.10.2026 (Betreiber: "In der Rückgeld-Funktion gibt es auch KONTO. Der Button war von einem QR-Code
+   überdeckt, so konnte ich ihn nicht drücken. Daneben wird BEHALTEN als Trinkgeld angezeigt, dadurch
+   verschiebt sich was"). BEFUND: bei einem Minus-Bon (Pfandrückgabe) teilen sich BAR, KONTO und BEHALTEN
+   die Zeile, BAR wird schmaler. Der Text "AUSZAHLUNG 2,00 €" durfte nicht umbrechen und nicht schrumpfen,
+   und der QR-Code erbte aus styles.css eine Mindestgröße von 100 px. Auf iPads (Safari lässt den Text
+   nicht schrumpfen) und auf niedrigen Bildschirmen schob das den QR-Code aus BAR hinaus über KONTO.
+   Jetzt an der Quelle: der QR-Code behält seine feste Größe und bleibt IMMER innerhalb von BAR, der Text
+   bricht bei Platzmangel um bzw. wird kleiner, und BAR kann grundsätzlich nichts mehr über seine
+   Nachbarn legen. Bedienung, Abläufe und der Scan-Code selbst bleiben unverändert. */
+.kc-bereich.zahlen.arten > #payBtn, #kcZahlenEbene .kc-bereich.tasten > #payBtn { overflow: hidden !important; }
+.kc-bereich.zahlen.arten > #payBtn #checkoutQrMini, .kc-bereich.zahlen.arten > #payBtn .pay-qr-canvas,
+#kcZahlenEbene .kc-bereich.tasten > #payBtn #checkoutQrMini { min-width: 0 !important; min-height: 0 !important; max-height: 100%; flex: 0 0 auto !important; }
+.kc-bereich.zahlen.arten > #payBtn .pay-label, #kcZahlenEbene .kc-bereich.tasten > #payBtn .pay-label { flex: 1 1 auto; min-width: 0 !important; overflow: hidden; }
+.kc-bereich.zahlen.arten > #payBtn .pay-label::before { display: block; white-space: normal !important; line-height: 1.08; overflow-wrap: break-word; }
+.kc-bereich.zahlen.arten > #payBtn::after { flex: 0 0 auto; }
+/* Minus-Bon: drei Knöpfe in der Zeile -> Text etwas kleiner, damit "AUSZAHLUNG" in eine Zeile passt */
+body.kc-aufbau.kc-bon-auszahlung .kc-bereich.zahlen.arten > #payBtn .pay-label::before { font-size: 15px !important; }
+@media (max-width: 900px) {
+  .kc-bereich.zahlen.arten > #payBtn .pay-qr-canvas, .kc-bereich.zahlen.arten > #payBtn #checkoutQrMini { width: 62px !important; height: 62px !important; }
+  body.kc-aufbau.kc-bon-auszahlung .kc-bereich.zahlen.arten > #payBtn .pay-label::before { font-size: 13px !important; }
+  body.kc-aufbau.kc-bon-auszahlung .kc-bereich.zahlen.arten > #payBtn::after { display: none; }
+  #kcZahlenEbene .kc-bereich.tasten > #payBtn #checkoutQrMini { width: 56px !important; height: 56px !important; }
+  #kcZahlenEbene .kc-bereich.tasten > #payBtn .pay-label { font-size: 18px; }
+  #kcZahlenEbene .kc-bereich.tasten > #payBtn { padding: 4px 5px !important; gap: 4px; }
+}
+@media (max-height: 700px) {
+  #kcZahlenEbene .kc-bereich.tasten > #payBtn #checkoutQrMini { width: 52px !important; height: 52px !important; }
+  #kcZahlenEbene .kc-bereich.tasten > #payBtn { padding: 3px 5px !important; }
+}

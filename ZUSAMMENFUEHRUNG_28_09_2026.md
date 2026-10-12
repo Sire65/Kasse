@@ -853,3 +853,27 @@ Betreiber: „Mach das mit den Bildern“ (Kurzanleitung zeigte noch alte Kombi-
 - **Kurzanleitung 4.3** (Club-App 2.232.1, `dokumente/Kurzanleitung_Bilderrechner_V4.3.pdf`, 33 Seiten): Seite 12
   „Sammelbestellung“ neu aus der laufenden Kasse fotografiert (aktuelle Reihenfolge der Warengruppen, neue Kombi-Bilder),
   Version 4.3 auf allen Seiten, Hinweis „Neu in 4.3“ auf Seite 1. Version 4.2 bleibt als Datei unverändert.
+
+## Nachtrag 12.10.2026 – KONTO vom QR-Code verdeckt · PERSONAL blieb „ALS SPENDE“ · Feature KC-KASSE-BAR-QR-FREI
+
+Betreiber: „In der Rückgeld-Funktion gibt es auch KONTO. Der Button war von einem QR-Code überdeckt … Daneben wird
+BEHALTEN als Trinkgeld angezeigt, dadurch verschiebt sich was. Und der PERSONAL-Button war auf einmal Spendenbutton.
+Er sollte hinterher wieder PERSONAL sein, war er aber nicht.“
+- **Befund 1 (QR über KONTO):** Bei einem Minus-Bon (Pfandrückgabe) teilen sich BAR, KONTO und BEHALTEN die Zeile, BAR
+  wird schmaler. Der Text „AUSZAHLUNG x,xx €“ durfte weder umbrechen noch schrumpfen, und der QR-Code erbte aus
+  `styles.css` eine Mindestgröße von 100 px (dadurch auch verzerrt 74×100 bzw. 38×100 px). Auf iPads und niedrigen
+  Bildschirmen schob das den QR-Code aus BAR heraus über KONTO.
+  **Behebung** (`kc-oberflaechen-anwenden.css` 0.9.25, Kasse und Schulung): Der QR-Code bleibt quadratisch und
+  vollständig innerhalb von BAR. Der Text bricht um oder wird bei Minus-Bons kleiner. BAR kann nichts mehr über seine
+  Nachbarn legen. Auf schmalen oder niedrigen Geräten ist der QR-Code kleiner (Hauptseite 62 px, Zahlen-Seite 56/52 px).
+  Abläufe und Scan-Code bleiben unverändert.
+- **Befund 2 (PERSONAL blieb SPENDE):** Die Schulungskasse (auch der Trainingsmodus der Kasse) beschriftet PERSONAL
+  bei einem Minus-Bon als „♥ ALS SPENDE“. `kc-layout-neu.js` überschrieb diesen Zustandstext und merkte sich nur den
+  allerersten Text als „Original“. Danach hing die Beschriftung eine Buchung hinterher: Während der Pfandrückgabe stand
+  PERSONAL, danach dauerhaft „ALS SPENDE“.
+  **Behebung** (`kc-layout-neu.js` 0.1.1, Kasse und Schulung gleich): Knöpfe in einem von der Kasse gesetzten Zustand
+  (`staff-spende`) werden nicht angefasst, gemerkt wird immer der zuletzt gesehene Text. Die echte Kasse ändert die
+  Beschriftung nicht und fragt bei Minus-Bon wie bisher „Pfand als Spende buchen?“.
+- Test `tests/bar-qr-konto-frei.test.cjs` (neu; Kasse und Schulung; 1024×768, 1024×700, 1180×820, 768×1024, 962×601;
+  Minus-Bon und normaler Bon; Hauptseite und Zahlen-Seite; PERSONAL nach Auszahlung). Gegenprobe mit altem Stand:
+  33 Fehler. Zusätzlich im alten Chromium 83 geprüft: KONTO frei, QR 84×84 in BAR.

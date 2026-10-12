@@ -31,16 +31,24 @@
   // erneut ausloest - eine Endlosschleife, die den Browser zum Absturz bringt. Genau das ist
   // beim Testen passiert: sobald ein Artikel in den Bon kam, wurde der Zahlknopf neu
   // beschriftet und die Kasse ist abgestuerzt.
+  // 12.10.2026 (Betreiber: "Der PERSONAL-Knopf war auf einmal Spenden-Knopf. Er sollte hinterher wieder
+  // PERSONAL sein, war er aber nicht"): bei einem Minus-Bon beschriftet die Kasse den Knopf selbst um
+  // ("ALS SPENDE", Klasse staff-spende). BEFUND: hier wurde dieser Zustandstext ueberschrieben und - weil
+  // nur der ALLERERSTE Text gemerkt wurde - als "Original" gespeichert und spaeter wieder eingesetzt; die
+  // Beschriftung hing dadurch eine Buchung hinterher bzw. blieb auf SPENDE stehen. Jetzt: Knoepfe in einem
+  // von der Kasse gesetzten Zustand werden nicht angefasst, und gemerkt wird immer der zuletzt gesehene Text.
+  const ZUSTAND_DER_KASSE = ['staff-spende'];
+  const imZustand = (knopf) => ZUSTAND_DER_KASSE.some((k) => knopf.classList.contains(k));
   function setzeText(id, text) {
     const knopf = document.getElementById(id);
-    if (!knopf) return;
+    if (!knopf || imZustand(knopf)) return;
     if (knopf.textContent === text) return;
-    if (!(id in original)) original[id] = knopf.textContent;
+    original[id] = knopf.textContent;
     knopf.textContent = text;
   }
   function stelleHer(id) {
     const knopf = document.getElementById(id);
-    if (!knopf || !(id in original)) return;
+    if (!knopf || !(id in original) || imZustand(knopf)) return;
     if (knopf.textContent === original[id]) return;
     knopf.textContent = original[id];
   }
