@@ -4,7 +4,7 @@
    - Minus-Bon (Pfandrückgabe) und normaler Bon, Hauptseite und Zahlen-Seite
    - der QR-Code liegt vollständig INNERHALB von BAR und ist quadratisch (lesbar)
    - KONTO und BEHALTEN sind an jeder Stelle antippbar (nichts liegt darüber)
-   - PERSONAL bleibt beschriftet und fragt nach Abschluss des Minus-Bons wieder nach Personalverbrauch */
+   - PERSONAL heisst beim Minus-Bon "ALS SPENDE" (fragt nach) und ist danach wieder PERSONAL - Kasse und Schulung gleich */
 const pw = require('playwright'); const http = require('http'), fs = require('fs'), path = require('path');
 const W = path.join(__dirname, '..');
 const T = { '.html': 'text/html', '.js': 'text/javascript', '.css': 'text/css', '.json': 'application/json', '.png': 'image/png', '.webp': 'image/webp', '.jpg': 'image/jpeg', '.svg': 'image/svg+xml', '.woff2': 'font/woff2' };
@@ -41,17 +41,38 @@ const ANSICHTEN = process.env.NUR ? [[1024, 768]] : [[1024, 768], [1024, 700], [
         await p.evaluate(() => document.getElementById('kcZahlenZurueckTaste')?.click()); await p.waitForTimeout(300);
       }
       if (w === 1024 && h === 768) {
-        // Minus-Bon über BAR auszahlen -> PERSONAL ist danach wieder Personalverbrauch
-        await p.evaluate(() => { state.cart = []; addConfiguredProduct(PRODUCTS.find((x) => x.id === 'glasminus'), null); renderCart(); }); await p.waitForTimeout(200);
+        // Kasse und Schulung gleich (Betreiber 12.10.: "Spende anbieten, aber wieder Personal danach machen")
+        const knopf = () => p.evaluate(() => document.getElementById('staffBtn').textContent.trim());
+        const minusBon = () => p.evaluate(() => { state.cart = []; addConfiguredProduct(PRODUCTS.find((x) => x.id === 'glasminus'), null); renderCart(); });
+        const gluehwein = () => p.evaluate(() => { addConfiguredProduct(PRODUCTS.find((x) => /Glühwein/.test(x.name) && x.price > 0), null); renderCart(); });
+        const zu = () => p.evaluate(() => document.querySelectorAll('dialog[open]').forEach((d) => d.close()));
+        // a) Minus-Bon -> "ALS SPENDE", fragt nach; Auszahlung über BAR -> wieder PERSONAL
+        await minusBon(); await p.waitForTimeout(200);
+        const waehrend = await knopf();
         await p.click('#staffBtn', { force: true }); await p.waitForTimeout(200);
-        const vorher = await p.evaluate(() => document.getElementById('confirmTitle').textContent);
-        await p.evaluate(() => document.getElementById('confirmDialog').close());
-        await p.click('#payBtn', { force: true }); await p.waitForTimeout(1200); await p.evaluate(() => document.querySelectorAll('dialog[open]').forEach((d) => d.close()));
-        await p.evaluate(() => { addConfiguredProduct(PRODUCTS.find((x) => /Glühwein/.test(x.name) && x.price > 0), null); renderCart(); }); await p.waitForTimeout(200);
+        const frage = await p.evaluate(() => document.getElementById('confirmTitle').textContent); await zu();
+        await p.click('#payBtn', { force: true }); await p.waitForTimeout(1200); await zu();
+        const nachBar = await knopf();
+        await gluehwein(); await p.waitForTimeout(200);
         await p.click('#staffBtn', { force: true }); await p.waitForTimeout(200);
-        const nachher = await p.evaluate(() => ({ titel: document.getElementById('confirmTitle').textContent, text: document.getElementById('staffBtn').textContent }));
-        await p.evaluate(() => document.getElementById('confirmDialog').close());
-        pr(`${seite}: PERSONAL bei Minus-Bon fragt nach Spende, danach wieder Personalverbrauch`, /Spende/.test(vorher) && /Personalverbrauch/.test(nachher.titel) && /PERSONAL/.test(nachher.text), `${vorher} → ${nachher.titel} | Knopf: ${nachher.text}`);
+        const frage2 = await p.evaluate(() => document.getElementById('confirmTitle').textContent); await zu();
+        pr(`${seite}: Minus-Bon zeigt "ALS SPENDE" und fragt nach, nach BAR wieder PERSONAL (Personalverbrauch)`,
+          /ALS SPENDE/.test(waehrend) && /Spende/.test(frage) && /PERSONAL/.test(nachBar) && /Personalverbrauch/.test(frage2), `${waehrend} / ${frage} → ${nachBar} / ${frage2}`);
+        // b) als Spende gebucht -> danach wieder PERSONAL
+        await minusBon(); await p.waitForTimeout(200);
+        await p.click('#staffBtn', { force: true }); await p.waitForTimeout(200); await p.click('#confirmAction'); await p.waitForTimeout(1200); await zu();
+        const nachSpende = await knopf();
+        pr(`${seite}: nach Spende-Buchung wieder PERSONAL`, /PERSONAL/.test(nachSpende) && !/SPENDE/.test(nachSpende), nachSpende);
+        // c) Bon durch weiteren Artikel wieder positiv -> sofort wieder PERSONAL
+        await minusBon(); await gluehwein(); await p.waitForTimeout(200);
+        const gemischt = await knopf();
+        pr(`${seite}: Bon wieder positiv -> PERSONAL`, /PERSONAL/.test(gemischt), gemischt);
+        // d) eigene Beschriftung aus den Knopf-Einstellungen bleibt erhalten
+        await p.evaluate(() => { state.master.workspaceButtons = { staffBtn: { label: 'TEAM-VERZEHR', symbol: '☕' } }; applyWorkspace(); state.cart = []; renderCart(); });
+        await minusBon(); await p.waitForTimeout(200); const eigenWaehrend = await knopf();
+        await p.evaluate(() => { state.cart = []; renderCart(); }); await p.waitForTimeout(200); const eigenDanach = await knopf();
+        pr(`${seite}: eigene Beschriftung kommt nach dem Minus-Bon zurück`, /ALS SPENDE/.test(eigenWaehrend) && eigenDanach === '☕ TEAM-VERZEHR', `${eigenWaehrend} → ${eigenDanach}`);
+        await p.evaluate(() => { state.master.workspaceButtons = {}; applyWorkspace(); });
       }
       pr(`${tag}: keine JS-Fehler`, !js.filter((x) => !/fetch|Failed|47391|47392|kc-sync/.test(x)).length, js.join(' | ').slice(0, 200));
       await ctx.close();

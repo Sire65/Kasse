@@ -1515,16 +1515,23 @@ function staffBlockedCartItems(){
 // Knopf abgeblendet und nicht mehr klickbar - der Grund steht in der Kurzinfo (title).
 function updateStaffButtonState(){
   const button=el("staffBtn");if(!button)return;
-  const leer=!state.cart.length,isPayout=!leer&&toCents(total())<0;
-  // 10.09.2026: bei Auszahlung uebernimmt der Knopf "ALS SPENDE" - die Personal-Sperrliste
-  // (allowStaff:false je Artikel) ist in diesem Zustand nicht das Thema, gilt nur noch fuer den
-  // normalen Personalverbrauch-Weg.
+  // 12.10.2026 (Betreiber: "Beide angleichen. Spende anbieten, aber wieder Personal danach machen"):
+  // Kasse und Schulung gleich. Bei einem Minus-Bon (Pfandrueckgabe) heisst der Knopf "ALS SPENDE" (Klick
+  // fragt vorher nach, siehe staffBtn.onclick); sobald der Bon nicht mehr negativ ist, steht wieder genau
+  // die vorherige Beschriftung darauf (auch eine eigene aus den Knopf-Einstellungen, mit Bild).
+  const isPayout=state.cart.length>0&&toCents(total())<0;
   const blockiert=isPayout?[]:staffBlockedCartItems();
-  button.disabled=blockiert.length>0||leer;
+  button.disabled=blockiert.length>0;
   button.classList.toggle("staff-blocked",blockiert.length>0);
+  const SPENDE="\u2665 ALS SPENDE";
+  if(isPayout){
+    if(button.textContent!==SPENDE){button.dataset.kcPersonalText=button.innerHTML;button.textContent=SPENDE}
+  }else if(button.classList.contains("staff-spende")||button.textContent===SPENDE){
+    const vorher=button.dataset.kcPersonalText;delete button.dataset.kcPersonalText;
+    button.innerHTML=vorher&&vorher.indexOf("ALS SPENDE")<0?vorher:"\uD83D\uDC65 PERSONAL";
+  }
   button.classList.toggle("staff-spende",isPayout);
-  button.textContent=isPayout?"♥ ALS SPENDE":"👥 PERSONAL";
-  button.title=isPayout?"Pfandbetrag als Spende an den Köcheclub verbuchen (kein Geld auszahlen)":blockiert.length?`Nicht auf Personal buchbar: ${blockiert.join(", ")}`:leer?"Bitte zuerst Artikel wählen":"";
+  button.title=isPayout?"Pfandbetrag als Spende an den Köcheclub verbuchen (kein Geld auszahlen)":blockiert.length?`Nicht auf Personal buchbar: ${blockiert.join(", ")}`:"";
 }
 function cartAction(a,i){
   const item=state.cart[i];if(!item)return;

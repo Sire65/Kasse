@@ -1,4 +1,4 @@
-// KC Schulungsvideos – INHALTE (Themen und kleine Videos)                     KC-KASSE-SCHULUNGSVIDEOS-INHALT 0.3.0 · 11.10.2026
+// KC Schulungsvideos – INHALTE (Themen und kleine Videos)                     KC-KASSE-SCHULUNGSVIDEOS-INHALT 0.3.1 · 12.10.2026
 //
 // Getrennt vom Abspieler (kc-schulungsvideos.js): hier stehen nur Texte und Fingerwege. Ein neues Video = ein neuer
 // Eintrag in VIDEOS; eine Ueberarbeitung zaehlt "stand" hoch (die Bewertung zaehlt dann neu).
@@ -227,16 +227,17 @@
           {wer: 'marc', x: 'Grund: Getränke Personal.', tipp: '[data-withdraw-reason="Getränke Personal"]'},
           {wer: 'marc', x: 'Anderer Betrag: eins, zwei, Komma, acht, null und OK.', tipp: '[data-geld-anders]', tun: H.ziffern('12,80')},
           {wer: 'laura', x: 'Schreib dazu, wo eingekauft wurde.', tun: H.notiz('Getränkemarkt, Bon fehlt')},
-          {wer: 'laura', x: 'Ohne Bon darf der Haken nicht gesetzt sein.', zeig: ['#withdrawReceiptToggle'], tun: H.bonHaken(false)},
+          {wer: 'laura', x: 'Ohne Bon tippst du auf Kein Bon. Der Haken bei Bon vorhanden bleibt leer.', zeig: ['#kcKeinBonKnopf'], tun: H.bonHaken(false)},
           {wer: 'marc', x: 'Dann speichern. Hier im Video speichere ich nicht.', zeig: ['#saveWithdrawal']}
         ]},
       {id: 'e-korrigieren', stand: '1', thema: 'entnahmen', sym: '↶', t: 'Betrag korrigieren', u: 'Letzte zurück und Leeren in der Entnahme (ca. 1 Min.)',
         st: [
           {wer: 'marc', x: 'Mehr, dann Entnahme.', tipp: ['#moreBtn', '#moreDialog [data-action="withdraw"]']},
+          {wer: 'laura', x: 'Zuerst immer der Grund – vorher ist alles andere grau. Hier: Essen Personal.', tipp: '[data-withdraw-reason="Essen Personal"]'},
           {wer: 'marc', x: 'Jedes Antippen zählt dazu: zwei Fünfer sind zehn Euro.', tipp: ['#kcBetragBlock [data-geld="5"]', '#kcBetragBlock [data-geld="5"]']},
           {wer: 'laura', x: 'Ein Fünfer zu viel? Letzte zurück.', tipp: '#kcBetragBlock [data-geld-zurueck]'},
           {wer: 'laura', x: 'Ganz neu anfangen? Leeren.', tipp: '#kcBetragBlock [data-geld-leeren]'},
-          {wer: 'marc', x: 'Ohne Grund und Betrag bleibt Speichern grau. So kann nichts Falsches gebucht werden.', zeig: ['#saveWithdrawal']}
+          {wer: 'marc', x: 'Erst Grund, dann Betrag, dann Bon ja oder nein. Vorher bleibt Speichern grau. So kann nichts Falsches gebucht werden.', zeig: ['#saveWithdrawal']}
         ]}
     ];
     return {THEMEN, VIDEOS};

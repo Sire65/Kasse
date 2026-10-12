@@ -34,9 +34,17 @@ try{
   const misch=await p.evaluate(()=>{const st=document.createElement('style');st.id='altStil';st.textContent='#withdrawDialog #kcBetragBlock button { width: 100% !important; height: 42px !important; }';document.head.insertBefore(st,document.head.firstChild);
     const y=[...document.querySelectorAll('#kcBetragBlock [data-geld]')].map(x=>{const r=x.getBoundingClientRect();return r.top+r.height/2});st.remove();return {stil:!!document.getElementById('kcGeldStil'),spanne:Math.max(...y)-Math.min(...y)}});
   pruefe(`${n}: auch mit alter Stildatei in einer Reihe (Gestaltung im Programm)`,misch.stil&&misch.spanne<25,Math.round(misch.spanne)+' px');
+  // 12.10.2026 (Betreiber): Schritt fuer Schritt - vor dem Grund ist Betrag, Notiz, Bon und Speichern gesperrt
+  const sperre=()=>p.evaluate(()=>({geld:[...document.querySelectorAll('#kcBetragBlock button')].every(x=>x.disabled),bon:document.getElementById('withdrawReceiptToggle').disabled&&document.getElementById('kcKeinBonKnopf').disabled,notiz:document.getElementById('withdrawNote').disabled,grau:document.getElementById('kcBetragBlock').classList.contains('kc-schritt-gesperrt')}));
+  const s0=await sperre();
+  pruefe(`${n}: vor dem Grund ist nur der Grund frei (Betrag, Notiz, Bon, Speichern grau)`,s0.geld&&s0.bon&&s0.notiz&&s0.grau&&await gesperrt()&&/Schritt 1/.test(await p.textContent('#kcSpeichernHinweis')),JSON.stringify(s0));
+  await p.tap('[data-withdraw-reason="WC-Geld"]');await p.waitForTimeout(200);
+  const s1=await sperre();
+  pruefe(`${n}: nach dem Grund ist der Betrag frei, Bon und Notiz noch grau`,!s1.grau&&s1.bon&&s1.notiz&&await gesperrt()&&/Schritt 2/.test(await p.textContent('#kcSpeichernHinweis')),JSON.stringify(s1));
   for(const w of ['5','5','0.5'])await p.tap(`[data-geld="${w}"]`);
   pruefe(`${n}: 2× 5 € + 0,50 € = 10,50 € mit Zaehler`,await wert()==='10.50'&&/2× 5 €/.test(await p.textContent('#kcGeldSumme'))&&(await p.textContent('[data-geld="5"] .kc-geld-zahl'))==='2×',await wert());
-  pruefe(`${n}: Speichern noch grau ohne Grund (mit Hinweis)`,await gesperrt()&&/Grund/.test(await p.textContent('#kcSpeichernHinweis')));
+  const s2=await sperre();
+  pruefe(`${n}: nach dem Betrag sind Bon und Notiz frei, Speichern grau bis zur Bon-Angabe`,!s2.bon&&!s2.notiz&&await gesperrt()&&/Schritt 3/.test(await p.textContent('#kcSpeichernHinweis')),JSON.stringify(s2));
   await p.tap('[data-geld-zurueck]');
   pruefe(`${n}: Letzte zurueck nimmt 0,50 € weg`,await wert()==='10.00');
   await p.tap('[data-geld-leeren]');
@@ -50,7 +58,9 @@ try{
   pruefe(`${n}: danach Muenze dazu = 6,00, Ziffernfeld zu`,await wert()==='6.00'&&!(await offen()),await wert());
   await p.tap('[data-withdraw-reason="WC-Geld"]');await p.waitForTimeout(200);
   const farben=await p.evaluate(()=>new Set([...document.querySelectorAll('#withdrawReasonButtons > button:not([hidden])')].map(x=>getComputedStyle(x).backgroundColor)).size);
-  pruefe(`${n}: Gruende farbig unterscheidbar, Speichern jetzt frei`,farben>=6&&!(await gesperrt())&&/bereit/.test(await p.textContent('#kcSpeichernHinweis')),farben+' Farben');
+  pruefe(`${n}: Gruende farbig unterscheidbar, Speichern ohne Bon-Angabe noch grau`,farben>=6&&await gesperrt(),farben+' Farben');
+  await p.tap('#kcKeinBonKnopf');await p.waitForTimeout(100);
+  pruefe(`${n}: "Kein Bon" angetippt -> Speichern frei (ohne Bon)`,!(await gesperrt())&&/ohne Bon.*bereit/.test(await p.textContent('#kcSpeichernHinweis')));
   pruefe(`${n}: Notiz oeffnet die Bildschirmtastatur (inputmode text)`,await p.evaluate(()=>document.getElementById('withdrawNote').getAttribute('inputmode')==='text'));
   const bonH=await p.evaluate(()=>document.getElementById('withdrawReceiptToggle').getBoundingClientRect().height);
   pruefe(`${n}: Bon/Quittung als grosser Knopf`,bonH>=56,Math.round(bonH)+' px');

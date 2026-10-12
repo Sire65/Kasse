@@ -877,3 +877,35 @@ Er sollte hinterher wieder PERSONAL sein, war er aber nicht.“
 - Test `tests/bar-qr-konto-frei.test.cjs` (neu; Kasse und Schulung; 1024×768, 1024×700, 1180×820, 768×1024, 962×601;
   Minus-Bon und normaler Bon; Hauptseite und Zahlen-Seite; PERSONAL nach Auszahlung). Gegenprobe mit altem Stand:
   33 Fehler. Zusätzlich im alten Chromium 83 geprüft: KONTO frei, QR 84×84 in BAR.
+
+## Nachtrag 12.10.2026 – PERSONAL/SPENDE in Kasse und Schulung angeglichen (app.js r63)
+
+Betreiber: „Beide angleichen. Spende anbieten, aber wieder Personal danach machen.“
+- `updateStaffButtonState` ist jetzt in Kasse und Schulung identisch. Bei einem Minus-Bon (Pfandrückgabe) heißt der
+  Knopf „♥ ALS SPENDE“, und ein Tipp fragt wie bisher „Pfand als Spende buchen?“. Sobald der Bon nicht mehr negativ ist
+  (ausgezahlt, als Spende oder Trinkgeld gebucht, geleert oder durch weitere Artikel positiv), steht sofort wieder die
+  vorherige Beschriftung darauf. Das gilt auch für eine eigene Beschriftung aus den Knopf-Einstellungen (Text oder Bild).
+- Angeglichen an die Kasse: In der Schulung ist PERSONAL bei leerem Bon nicht mehr gesperrt, sondern zeigt wie in der
+  Kasse den Hinweis „kein Bon“.
+- Test `tests/bar-qr-konto-frei.test.cjs` erweitert: Spende-Beschriftung, Rückkehr nach BAR, nach Spende-Buchung, bei
+  wieder positivem Bon und mit eigener Beschriftung, jeweils in Kasse und Schulung.
+
+## Nachtrag 12.10.2026 – Entnahme Schritt für Schritt · Feature KC-KASSE-ENTNAHME-SCHRITTE
+
+Betreiber: „Der Ablauf muss logisch sein. Was noch nicht dran ist, muss ausgegraut sein. Erst freigeben, wenn die
+erforderliche Eingabe gemacht wurde: erst den Entnahmegrund wie Essen Personal, vorher nix freigegeben. Dann Betrag,
+dann Bon vorhanden, dann die Buchungstaste freigeben.“
+- `kc-erfassung-getrennt.js` 0.3.0 (Kasse und Schulung gleich, nur im Entnahme-Modus, Reklamation unverändert):
+  1. **Grund** – beim Öffnen ist nur die Grundauswahl frei. Münzen, Scheine, „Anderer Betrag“, Notiz, Bon und
+     Speichern sind ausgegraut und gesperrt.
+  2. **Betrag** – erst nach dem Grund frei.
+  3. **Bon / Quittung vorhanden?** – erst nach einem Betrag frei, zusammen mit der Notiz. Neu ist der Knopf
+     „✗ KEIN BON“ neben „☐ BON / QUITTUNG VORHANDEN“. Einer von beiden muss bewusst angetippt werden.
+  4. **Entnahme speichern** – erst danach grün.
+  Überschriften „1. Grund auswählen / 2. Betrag / 3. Bon / Quittung vorhanden?“ und ein Hinweis zum nächsten Schritt.
+  Buchung, Protokoll und Beleg bleiben unverändert (app.js); „Kein Bon“ wird wie bisher ohne Haken gespeichert
+  (`receiptAvailable:false`).
+- Schulungsvideos 0.3.1: „Betrag korrigieren“ wählt zuerst den Grund, „Entnahme ohne Bon“ tippt „Kein Bon“ an.
+- Übungsliste und Karteikarten Version 4.1: Aufgabe 57 „KEIN BON antippen“, Aufgabe 56 „grün, sobald Grund, Betrag
+  und Bon gewählt sind“.
+- Test `tests/entnahme-ziffernfeld.test.cjs` auf die Schrittfolge umgestellt (Sperren je Schritt, Kein Bon).

@@ -24,6 +24,7 @@
   function modusSetzen(modus) {
     const dlg = el('withdrawDialog');
     if (!dlg) return;
+    if (modus !== 'entnahme') { const lg = dlg.querySelector('.withdraw-reason-field > legend'); if (lg && lg.textContent !== 'Grund ausw\u00e4hlen') lg.textContent = 'Grund ausw\u00e4hlen'; }
     dlg.classList.toggle('kc-modus-entnahme', modus === 'entnahme');
     dlg.classList.toggle('kc-modus-reklamation', modus === 'reklamation');
     const titel = dlg.querySelector('h2');
@@ -154,6 +155,15 @@
 #withdrawDialog .kc-speichern-hinweis { margin: 8px 0 4px !important; padding: 8px 12px; border-radius: 10px; background: #f1f5f9; color: #475569; font-size: 14px; font-weight: 700; text-align: center; }
 #withdrawDialog .kc-speichern-hinweis.kc-bereit { background: #dcfce7; color: #14532d; }
 #withdrawDialog .kc-speichern-hinweis[hidden] { display: none !important; }
+/* 0.3.0 (Betreiber 12.10.2026): Schritt fuer Schritt - was noch nicht dran ist, ist ausgegraut und gesperrt */
+#withdrawDialog .kc-schritt-gesperrt { opacity: .35 !important; filter: grayscale(.7); pointer-events: none !important; }
+#withdrawDialog .kc-schritt-titel { margin: 8px 0 4px !important; font-size: 15px; font-weight: 900; color: #0f172a; }
+#withdrawDialog .kc-schritt-titel.kc-schritt-gesperrt { color: #64748b; }
+#withdrawDialog:not(.kc-modus-entnahme) .kc-schritt-titel, #withdrawDialog:not(.kc-modus-entnahme) #kcKeinBonKnopf { display: none !important; }
+#withdrawDialog .kc-bon-wahl { display: flex; gap: 10px; align-items: stretch; }
+#withdrawDialog .kc-bon-wahl > #withdrawReceiptToggle { flex: 2 1 0; min-width: 0; }
+#withdrawDialog.kc-modus-entnahme #kcKeinBonKnopf { flex: 1 1 0; min-width: 0; height: 72px !important; font-size: 18px !important; font-weight: 900 !important; border: 3px solid #94a3b8 !important; border-radius: 12px !important; background: #f8fafc !important; color: #1f2937 !important; }
+#withdrawDialog.kc-modus-entnahme #kcKeinBonKnopf.active { background: #fef3c7 !important; border-color: #d97706 !important; color: #78350f !important; }
 `;
   function stilEinbauen() {
     if (el('kcGeldStil')) return;
@@ -327,30 +337,97 @@
   // ---- "Entnahme speichern" erst, wenn Betrag UND Grund gewaehlt sind ------------------------
   // Nur die Bedienung: app.js prueft beim Speichern weiterhin selbst. Im Reklamationsmodus bleibt
   // alles wie bisher.
+  // 0.3.0 (Betreiber 12.10.2026: "Der Ablauf muss logisch sein. Nicht vorhanden muss ausgegraut sein. Erst
+  // freigeben, wenn die erforderliche Eingabe gemacht wurde: erst den Entnahmegrund, vorher nix freigegeben.
+  // Dann Betrag, dann Bon vorhanden, dann Buchungstaste freigeben"). Nur im Entnahme-Modus, nur die Bedienung:
+  //   1. Grund   -> erst danach Muenzen/Scheine/Anderer Betrag
+  //   2. Betrag  -> erst danach Notiz und die Bon-Frage
+  //   3. Bon     -> "Bon/Quittung vorhanden" ODER "Kein Bon" muss bewusst angetippt werden
+  //   4. erst dann "Entnahme speichern"
+  // app.js prueft beim Speichern weiterhin selbst; Buchung und Protokoll bleiben unveraendert.
+  let keinBon = false;
+  function bonWahlAufbauen() {
+    const toggle = el('withdrawReceiptToggle');
+    if (!toggle || el('kcKeinBonKnopf')) return;
+    const wahl = document.createElement('div');
+    wahl.className = 'kc-bon-wahl';
+    toggle.insertAdjacentElement('beforebegin', wahl);
+    wahl.appendChild(toggle);
+    const kein = document.createElement('button');
+    kein.type = 'button'; kein.id = 'kcKeinBonKnopf'; kein.textContent = '\u2717 KEIN BON';
+    kein.setAttribute('aria-pressed', 'false');
+    kein.addEventListener('click', () => {
+      if (toggle.classList.contains('active')) toggle.click();   // Haken ueber app.js wieder entfernen
+      keinBon = true; speichernPruefen();
+    });
+    wahl.appendChild(kein);
+    toggle.addEventListener('click', () => { keinBon = false; });
+  }
+  function titel(id, text, vor) {
+    let t = el(id);
+    if (!t && vor) { t = document.createElement('p'); t.id = id; t.className = 'kc-schritt-titel'; vor.insertAdjacentElement('beforebegin', t); }
+    if (t && t.textContent !== text) t.textContent = text;
+    return t;
+  }
+  function sperren(knoten, gesperrt) {
+    if (!knoten) return;
+    knoten.classList.toggle('kc-schritt-gesperrt', gesperrt);
+    knoten.setAttribute('aria-disabled', String(gesperrt));
+  }
+  function schritteAnwenden(entnahme, grund, betrag) {
+    const block = el('kcBetragBlock'), notiz = el('withdrawNote'), toggle = el('withdrawReceiptToggle'), kein = el('kcKeinBonKnopf');
+    const wahl = toggle?.parentElement?.classList.contains('kc-bon-wahl') ? toggle.parentElement : toggle;
+    const schritt2 = !entnahme || !!grund, schritt3 = !entnahme || (!!grund && betrag > 0);
+    if (block) {
+      sperren(block, !schritt2);
+      block.querySelectorAll('button').forEach(b => {
+        if (b.matches('[data-geld-zurueck]')) b.disabled = !schritt2 || (!stapel.length && !(basis > 0));
+        else if (b.matches('[data-geld-leeren]')) b.disabled = !schritt2 || !(betrag > 0);
+        else b.disabled = !schritt2;
+      });
+      if (!schritt2 && el('kcZiffernFeld')) el('kcZiffernFeld').hidden = true;
+    }
+    const betragFeld = el('withdrawAmount');
+    if (betragFeld) betragFeld.readOnly = !schritt2;
+    sperren(notiz?.closest('label'), !schritt3); if (notiz) notiz.disabled = !schritt3;
+    sperren(wahl, !schritt3);
+    if (toggle) toggle.disabled = !schritt3;
+    if (kein) { kein.disabled = !schritt3; kein.classList.toggle('active', keinBon); kein.setAttribute('aria-pressed', String(keinBon)); }
+    if (entnahme) {
+      const legende = document.querySelector('#withdrawDialog .withdraw-reason-field > legend');
+      if (legende && legende.textContent !== '1. Grund ausw\u00e4hlen') legende.textContent = '1. Grund ausw\u00e4hlen';
+      sperren(titel('kcSchrittBetrag', '2. Betrag \u2013 M\u00fcnzen und Scheine antippen', block), !schritt2);
+      sperren(titel('kcSchrittBon', '3. Bon / Quittung vorhanden?', wahl), !schritt3);
+    }
+  }
   function speichernPruefen() {
     const dlg = el('withdrawDialog'), knopf = el('saveWithdrawal');
     if (!dlg || !knopf) return;
+    bonWahlAufbauen();
     let hinweis = el('kcSpeichernHinweis');
     const grund = dlg.querySelector('[data-withdraw-reason].active');
-    dlg.classList.toggle('kc-grund-gewaehlt', !!grund && dlg.classList.contains('kc-modus-entnahme'));
-    if (!dlg.classList.contains('kc-modus-entnahme')) { if (hinweis) hinweis.hidden = true; return; }
+    const entnahme = dlg.classList.contains('kc-modus-entnahme');
+    const betrag = Number(el('withdrawAmount')?.value) || 0;
+    dlg.classList.toggle('kc-grund-gewaehlt', !!grund && entnahme);
+    schritteAnwenden(entnahme, grund, betrag);
+    if (!entnahme) { if (hinweis) hinweis.hidden = true; return; }
     if (!hinweis) {
       hinweis = document.createElement('p');
       hinweis.id = 'kcSpeichernHinweis';
       hinweis.className = 'kc-speichern-hinweis';
       dlg.querySelector('.dialog-actions')?.insertAdjacentElement('beforebegin', hinweis);
     }
-    const betrag = Number(el('withdrawAmount')?.value) || 0;
-    const fehlt = [grund ? '' : 'Grund', betrag > 0 ? '' : 'Betrag'].filter(Boolean);
-    if (knopf.textContent !== 'WIRD GESPEICHERT …') knopf.disabled = fehlt.length > 0;
+    const bon = !!el('withdrawReceiptToggle')?.classList.contains('active');
+    if (bon) keinBon = false;
+    const schritt = !grund ? 1 : !(betrag > 0) ? 2 : !(bon || keinBon) ? 3 : 4;
+    if (knopf.textContent !== 'WIRD GESPEICHERT \u2026') knopf.disabled = schritt < 4;
     hinweis.hidden = false;
-    hinweis.classList.toggle('kc-bereit', !fehlt.length);
-    const bon = el('withdrawReceiptToggle')?.classList.contains('active');
-    hinweis.textContent = fehlt.length
-      ? `Bitte zuerst ${fehlt.join(' und ')} wählen – dann lässt sich die Entnahme speichern.`
-      : `✓ ${euro(betrag)} · ${grund.dataset.withdrawReason}${bon ? ' · mit Bon' : ''} – bereit zum Speichern`;
+    hinweis.classList.toggle('kc-bereit', schritt === 4);
+    hinweis.textContent = schritt === 1 ? 'Schritt 1: Zuerst den Grund w\u00e4hlen (z. B. Essen Personal).'
+      : schritt === 2 ? 'Schritt 2: Betrag \u2013 M\u00fcnzen und Scheine antippen oder \u201e\u2328 Anderer Betrag\u201c.'
+      : schritt === 3 ? 'Schritt 3: Ist ein Bon / eine Quittung da? \u201eBon vorhanden\u201c oder \u201eKein Bon\u201c antippen.'
+      : `\u2713 ${euro(betrag)} \u00b7 ${grund.dataset.withdrawReason} \u00b7 ${bon ? 'mit Bon' : 'ohne Bon'} \u2013 bereit zum Speichern`;
   }
-
   function verdrahten() {
     const reklaKnopf = el('complaintBtn');
     if (reklaKnopf && !reklaKnopf.dataset.kcGetrennt) {
@@ -401,6 +478,8 @@
     el('withdrawDialog')?.addEventListener('close', () => {
       const dlg = el('withdrawDialog');
       dlg.classList.remove('kc-modus-entnahme', 'kc-modus-reklamation', 'kc-grund-gewaehlt');
+      keinBon = false;
+      schritteAnwenden(false, null, 0);   // andere Nutzer des Fensters (Reklamation) sehen alles frei
       el('kcVerrechnungHinweis')?.remove();
       if (el('kcSpeichernHinweis')) el('kcSpeichernHinweis').hidden = true;
       if (el('saveWithdrawal') && el('saveWithdrawal').textContent !== 'WIRD GESPEICHERT \u2026') el('saveWithdrawal').disabled = false;

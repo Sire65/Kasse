@@ -38,7 +38,7 @@
 // (Edge Function + Tabelle kc_kasse_video_bewertung); bis dahin bleibt jede Bewertung hier erhalten.
 (function (global) {
   'use strict';
-  const VERSION = '0.3.0';
+  const VERSION = '0.3.1';
   const el = id => document.getElementById(id);
   const warte = ms => new Promise(r => setTimeout(r, ms * (SV.tempo || 1)));
   const esc = v => String(v == null ? '' : v).replace(/[&<>"']/g, c => ({'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'}[c]));
@@ -73,7 +73,8 @@
     ziffern: text => async F => { for (const z of String(text)) await F.click(`[data-ziffer="${z}"]`, {after: 250, ms: 450}); await F.click('[data-ziffern-ok]', {after: 700, ms: 600}); },
     notiz: text => async F => { const n = el('withdrawNote'); if (!n) return; await F.click('#withdrawNote', {perform: false, after: 300}); n.value = text; n.dispatchEvent(new Event('input', {bubbles: true})); await warte(700); },
     // Haken "Bon / Quittung vorhanden" auf soll bringen – nur tippen, wenn er anders steht (manche Kassenstaende setzen ihn selbst)
-    bonHaken: soll => async F => { const k = el('withdrawReceiptToggle'); if (k && (k.getAttribute('aria-pressed') === 'true') !== soll) await F.click('#withdrawReceiptToggle', {after: 800}); }
+    // 12.10.2026: Die Bon-Frage ist ein eigener Schritt - ohne Bon wird "Kein Bon" angetippt (Speichern erst danach frei)
+    bonHaken: soll => async F => { const k = el('withdrawReceiptToggle'); if (soll) { if (k && k.getAttribute('aria-pressed') !== 'true') await F.click('#withdrawReceiptToggle', {after: 800}); } else if (el('kcKeinBonKnopf')) await F.click('#kcKeinBonKnopf', {after: 800}); else if (k && k.getAttribute('aria-pressed') === 'true') await F.click('#withdrawReceiptToggle', {after: 800}); }
   };
   let INHALT = null;
   function inhalt() {
