@@ -46,7 +46,22 @@
       //   nextBon, Betriebszustand - gehört dem einzelnen Gerät
       if (daten.settings && typeof daten.settings === 'object') {
         const NICHT_UEBERNEHMEN = new Set(['registerId', 'registerName', 'neuesLayout',
-          'spiegelModus', 'nextBon', 'trainingMode', 'rushMode', 'superAdminAccess', 'pinLockEnabled']);
+          'spiegelModus', 'nextBon', 'trainingMode', 'rushMode', 'superAdminAccess', 'pinLockEnabled',
+          'zeiterfassung']);   // eigener Weg, siehe unten - gehoert nicht in die Kasseneinstellungen
+        // 12.10.2026 (KC-ZEITERFASSUNG-ZUGAENGE): Zugaenge der Stechuhr (Ausweis + Geburtstagscode, nur
+        // Pseudonyme) vom PC-Manager. Abgelegt und gemeldet - uebernommen wird es in time-clock-pos.js.
+        const zt = daten.settings.zeiterfassung;
+        if (zt && zt.schema === 'KC_TIME_CLOCK_CONFIG_V1' && Array.isArray(zt.people) && zt.people.length) {
+          try {
+            const bisher = localStorage.getItem('kc_time_clock_zugaenge_stand_v1');
+            const stand = String(zt.packageId || '') + '|' + zt.people.length;
+            if (bisher !== stand) {
+              localStorage.setItem('kc_time_clock_zugaenge_eingang_v1', JSON.stringify(zt));
+              localStorage.setItem('kc_time_clock_zugaenge_stand_v1', stand);
+              global.dispatchEvent(new CustomEvent('kc-zeiterfassung-zugaenge'));
+            }
+          } catch (e) { /* Speicher gesperrt - beim naechsten Abgleich erneut */ }
+        }
         try {
           const master = JSON.parse(localStorage.getItem('kc_master_v040') || '{}');
           let geaendert = false;

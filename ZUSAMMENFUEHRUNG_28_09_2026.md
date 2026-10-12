@@ -909,3 +909,27 @@ dann Bon vorhanden, dann die Buchungstaste freigeben.“
 - Übungsliste und Karteikarten Version 4.1: Aufgabe 57 „KEIN BON antippen“, Aufgabe 56 „grün, sobald Grund, Betrag
   und Bon gewählt sind“.
 - Test `tests/entnahme-ziffernfeld.test.cjs` auf die Schrittfolge umgestellt (Sperren je Schritt, Kein Bon).
+
+## Nachtrag 12.10.2026 – Zeiterfassung: Zugänge für alle (Ausweis + Geburtstag) · Feature KC-ZEITERFASSUNG-ZUGAENGE
+
+Betreiber: „Richte jetzt für alle ein, dass sie sich mit ihren Ausweisen und Geburtstag einloggen können bei der
+Zeiterfassung.“
+- **Quelle:** zentrale Mitgliederverwaltung (Supabase `kc_core_personen`). Neue Datenbankfunktion
+  `kc_zeiterfassung_zugaenge()` (Migration `supabase/migrations/20261012_kc_zeiterfassung_zugaenge.sql`, auch in der
+  Club-App mit Probelauf `tools/db-test/71_*`). Sie liefert nur Mitgliedsnummer (= QR auf dem Ausweis), Pseudonym,
+  Mitgliedsart und den Geburtstagscode TTMMJJ der aktiven Mitglieder. Es gibt keine Klarnamen, keine Anschrift und kein
+  volles Geburtsdatum, und nur angemeldete Manager-Administratoren des eigenen Vereins bekommen die Daten.
+  Stand Verwaltung: 18 aktive Personen, 14 mit Geburtstag, keine doppelten Codes.
+- **PC-Manager** (`time-clock-manager.js` 0.4.0, Manager und Schulungs-Manager gleich): Knopf „Zugänge für alle
+  einrichten (Ausweis + Geburtstag)“ unter Zeiterfassung. Zusätzlich holt er die Zugänge einmal von selbst nach dem
+  Start, sobald die Supabase-Anmeldung steht. Er führt die Liste zusammen (über die Mitgliedsnummer, niemand wird
+  gelöscht oder verdoppelt), schaltet Stechuhr und Geburtstagscode ein und sendet das Kassenpaket (nur Pseudonyme) mit
+  dem vorhandenen Stammdaten-Abgleich als `settings.zeiterfassung`. Mit leeren Artikeln wird nie gesendet. Die Datei
+  „Kassenpaket“ bleibt als Rückfallweg.
+- **Kasse** (`kc-sync-master-data.js` 1.0.2 / Schulung 1.1.2, `time-clock-pos.js` 0.1.3, Kasse und Schulung gleich):
+  Sie übernimmt das Paket aus dem Abgleich. Es landet nicht in den Kasseneinstellungen. Danach ist eine Anmeldung mit
+  Ausweis-QR oder mit Geburtstag TTMMJJ möglich. Wer unter derselben Mitgliedsnummer schon eingestempelt ist, bleibt
+  eingestempelt, weil die interne Kennung erhalten bleibt.
+- Personen ohne Geburtstag in der Verwaltung melden sich nur mit dem Ausweis an. Den Geburtstag dort nachtragen, dann
+  im Manager erneut „Zugänge für alle einrichten“ drücken.
+- Test `tests/zeiterfassung-zugaenge.test.cjs` (neu, frei erfundene Testdaten).

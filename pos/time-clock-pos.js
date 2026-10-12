@@ -19,7 +19,7 @@
 // unveraendert als recordedAt erhalten, die angepasste Zeit steht daneben als effectiveAt.
 (function (global) {
   'use strict';
-  const VERSION = '0.2.0', CONFIG_KEY = 'kc_time_clock_config_v1', PEOPLE_KEY = 'kc_time_clock_people_v1', EVENTS_KEY = 'kc_time_clock_events_v1';
+  const VERSION = '0.3.0', CONFIG_KEY = 'kc_time_clock_config_v1', PEOPLE_KEY = 'kc_time_clock_people_v1', EVENTS_KEY = 'kc_time_clock_events_v1';
   const core = global.KCTimeClockCore;
   if (!core) return;
   const read = (key, fallback) => { try { return JSON.parse(localStorage.getItem(key) || 'null') ?? fallback; } catch { return fallback; } };
@@ -500,12 +500,37 @@
     anzeige.className = `tc-offen ${offen === 0 ? 'ok' : 'warn'}`;
   }
 
+  // 12.10.2026 (KC-ZEITERFASSUNG-ZUGAENGE): Zugaenge fuer alle kommen vom PC-Manager ueber den
+  // Stammdaten-Abgleich (kc-sync-master-data.js legt das Paket ab und meldet es). Das Paket ist massgeblich
+  // (wer im Manager fuer die Veranstaltung ausgenommen ist, kann sich nicht mehr anmelden). Wer hier schon
+  // unter derselben Mitgliedsnummer gefuehrt wird, behaelt seine interne Kennung - so bleibt jemand, der
+  // gerade eingestempelt ist, eingestempelt. Klarnamen werden wie beim Datei-Weg nicht gespeichert.
+  const ZUGAENGE_KEY = 'kc_time_clock_zugaenge_eingang_v1';
+  function zugaengeAnwenden(paket) {
+    if (!paket || paket.schema !== 'KC_TIME_CLOCK_CONFIG_V1' || !Array.isArray(paket.people) || !paket.people.length) return false;
+    const neu = uebernimmPersonen(paket.people).map((p) => {
+      const alt = p.credential && people.find((x) => x.credential === p.credential);
+      return alt ? Object.assign({}, p, {id: alt.id}) : p;
+    });
+    config = Object.assign({}, config, paket.config || {});
+    people = neu;
+    try {
+      localStorage.setItem(CONFIG_KEY, JSON.stringify(config)); localStorage.setItem(PEOPLE_KEY, JSON.stringify(people));
+      localStorage.removeItem(ZUGAENGE_KEY);
+    } catch (e) { /* Speicher gesperrt - beim naechsten Abgleich erneut */ }
+    applyConfig();
+    return true;
+  }
+  function zugaengeAusEingang() { const paket = read(ZUGAENGE_KEY, null); if (paket) zugaengeAnwenden(paket); }
+  global.addEventListener('kc-zeiterfassung-zugaenge', () => zugaengeAusEingang());
+  zugaengeAusEingang();
+
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', mount); else mount();
   // Alle 30 Sekunden nachmelden, was noch offen ist.
   setInterval(meldeZeiten, 30000);
   setTimeout(meldeZeiten, 6000);
   global.KCTimeClockPOS = {
-    version: VERSION, applyConfig,
+    version: VERSION, applyConfig, zugaengeAnwenden,
     // Fuer Pruefungen und spaetere Bausteine erreichbar gemacht:
     anzeigenameFuer, rundeAufHalbeStunde, uebernimmPersonen, profilZuMitgliedsnummer, teamProfil,
     meldeZeiten, offeneEreignisse: () => offeneEreignisse().map(e => e.id),

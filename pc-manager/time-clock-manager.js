@@ -1,6 +1,6 @@
 (function (global) {
   'use strict';
-  const VERSION = '0.3.0', CONFIG_KEY = 'kcm_time_clock_config_v1', PEOPLE_KEY = 'kcm_time_clock_people_v1', EVENTS_KEY = 'kcm_time_clock_events_v1';
+  const VERSION = '0.4.0', CONFIG_KEY = 'kcm_time_clock_config_v1', PEOPLE_KEY = 'kcm_time_clock_people_v1', EVENTS_KEY = 'kcm_time_clock_events_v1';
   // Teil B der Dienstzeiten: die Kassen melden ihre Buchungen laufend an den Manager-Dienst
   // (Loopback 47392, /zeiterfassung/melden). Bisher landeten sie dort in der Datenbank und
   // BLIEBEN LIEGEN - diese Seite kannte nur den Weg ueber eine von Hand ausgetauschte Datei.
@@ -193,6 +193,8 @@
           <label class="check">Geburtstagscode TTMMJJ zulassen <input id="tcBirthEnabled" type="checkbox"></label>
           <label class="check">Uhrzeitkorrektur zulassen <input id="tcManualEnabled" type="checkbox"></label>
           <div class="tc-actions"><button id="tcSaveConfig" class="primary">Einstellungen speichern</button><button id="tcExportConfig">Kassenpaket erstellen</button><button type="button" id="tcImportMembersBtn" title="Mitgliederliste aus dem Vereins-Verwaltungsprogramm einlesen">Mitglieder einlesen</button><input type="file" id="tcImportMembers" accept=".json" hidden></div>
+          <div class="tc-actions"><button type="button" id="tcZugaengeHolen" class="primary" title="Mitgliedsnummer (Ausweis) und Geburtstagscode TTMMJJ aller aktiven Mitglieder aus der Mitgliederverwaltung holen und an alle Kassen senden">Zugänge für alle einrichten (Ausweis + Geburtstag)</button></div>
+          <p id="tcZugaengeStand" class="tc-status" aria-live="polite"></p>
         </article>
         <article class="panel"><h3>Mitglied / Aushilfe anlegen</h3>
           <div class="form-grid">
@@ -550,9 +552,84 @@
         <td>${esc(QUELLE[e.source] || e.source || '')}</td></tr>`;
     }).join('') || '<tr><td colspan="6">Noch keine Buchungen eingegangen.</td></tr>';
   }
+  // ---- Zugaenge fuer alle (12.10.2026, KC-ZEITERFASSUNG-ZUGAENGE) --------------------------
+  // Betreiber: "Richte jetzt fuer alle ein, dass sie sich mit ihren Ausweisen und Geburtstag einloggen
+  // koennen bei der Zeiterfassung." Quelle ist die zentrale Mitgliederverwaltung (Supabase,
+  // kc_zeiterfassung_zugaenge - nur fuer Manager-Admins): Mitgliedsnummer (= QR auf dem Ausweis),
+  // Pseudonym und Geburtstagscode TTMMJJ. Keine Klarnamen, kein volles Geburtsdatum.
+  // Zusammenfuehren wie beim Einlesen der Mitgliederliste: vorhandene Personen werden ueber die
+  // Mitgliedsnummer erkannt und ergaenzt, niemand wird geloescht; ein im Manager gepflegtes Pseudonym
+  // bleibt, wenn die Verwaltung keines hat.
+  // Zu den Kassen kommt es ueber den vorhandenen Stammdaten-Abgleich (Manager-Dienst, nur gekoppelte
+  // Kassen): settings.zeiterfassung = Kassenpaket (nur Pseudonyme). Die Datei "Kassenpaket" bleibt
+  // als Rueckfallweg bestehen.
+  function zugaengeUebernehmen(liste) {
+    let neu = 0, ergaenzt = 0, mitCode = 0;
+    (liste || []).forEach((e) => {
+      const nummer = String(e?.mitgliedsnummer || '').trim();
+      if (!nummer) return;
+      const code = String(e.geburtstagscode || '').replace(/\D/g, '');
+      if (code.length === 6) mitCode++;
+      const pseudonym = String(e.pseudonym || '').trim();
+      if (pseudonym && !pseudonyme[nummer]) pseudonyme[nummer] = pseudonym;
+      const vorhanden = people.find((x) => schluessel(x) === nummer);
+      if (vorhanden) {
+        if (code.length === 6) vorhanden.birthCode = code;
+        if (!vorhanden.credential) vorhanden.credential = nummer;
+        vorhanden.updatedAt = new Date().toISOString();
+        ergaenzt++;
+      } else {
+        people.push(core.normalizePerson({
+          id: `m_${nummer}`.toLowerCase().replace(/[^a-z0-9]+/g, '_'),
+          type: personenart(e), displayName: pseudonym || nummer, credential: nummer,
+          birthCode: code.length === 6 ? code : '', active: true,
+        }));
+        neu++;
+      }
+    });
+    return {neu, ergaenzt, mitCode, gesamt: (liste || []).length};
+  }
+  function anKassenSenden() {
+    // Ins gemeinsame Einstellungs-Objekt - jeder Stammdaten-Abgleich nimmt es dann mit.
+    const s = global.settings;
+    if (!s || typeof s !== 'object') return Promise.resolve(false);
+    s.zeiterfassung = kassenPaket();
+    try { global.saveAll?.(); } catch (e) { /* Speicher voll - Paket bleibt im Speicher */ }
+    const gruppen = Array.isArray(global.groups) ? global.groups : [], artikel = Array.isArray(global.articles) ? global.articles : [];
+    // Nie mit leeren Stammdaten senden: das wuerde im Manager-Dienst den guten Stand ersetzen.
+    if (!gruppen.length || !artikel.length) return Promise.resolve(false);
+    const konten = (() => { try { return JSON.parse(localStorage.getItem('kcm_accounts') || '[]'); } catch (e) { return []; } })();
+    return fetch(`http://127.0.0.1:${DIENST_PORT}/master-data/push`, {
+      method: 'POST', headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({groups: gruppen, articles: artikel, packages: [], accounts: konten, settings: s}),
+      signal: AbortSignal.timeout(4500),
+    }).then((r) => r.ok).catch(() => false);
+  }
+  async function zugaengeEinrichten({still = false} = {}) {
+    const stand = (text, art) => { const f = document.getElementById('tcZugaengeStand'); if (f) { f.textContent = text; f.className = 'tc-status' + (art === 'warn' ? ' warn' : art === 'gut' ? ' ok' : ''); } };
+    const sb = global.KCSupabase;
+    if (!sb?.istAngemeldet?.()) { if (!still) stand('Bitte zuerst bei Supabase anmelden (oben rechts) – die Zugänge kommen aus der Mitgliederverwaltung.', 'warn'); return false; }
+    stand('Zugänge werden aus der Mitgliederverwaltung geholt …');
+    let liste;
+    try { liste = await sb.rufeFunktionAuf('kc_zeiterfassung_zugaenge', {}); } catch (e) { liste = undefined; }
+    if (!Array.isArray(liste)) { stand('Die Mitgliederverwaltung hat keine Zugänge geliefert (keine Verbindung oder keine Manager-Berechtigung). Die Kassen arbeiten mit dem bisherigen Stand weiter.', 'warn'); return false; }
+    const r = zugaengeUebernehmen(liste);
+    config = {...config, enabled: true, allowBirthCode: true};
+    speicherePseudonyme(); save(); render();
+    const gesendet = await anKassenSenden();
+    const ohne = r.gesamt - r.mitCode;
+    stand(`${r.gesamt} Mitglieder: Ausweis für alle, Geburtstag für ${r.mitCode}${ohne ? ` (bei ${ohne} ist in der Mitgliederverwaltung kein Geburtstag hinterlegt – nur Ausweis)` : ''}. `
+      + (gesendet ? 'An die Kassen gesendet – jede Kasse übernimmt es beim nächsten Abgleich.' : 'Noch nicht an die Kassen gesendet (Manager-Dienst nicht erreichbar) – wird beim nächsten Stammdaten-Senden mitgenommen.'),
+      gesendet ? 'gut' : 'warn');
+    return true;
+  }
+  document.addEventListener('click', (ev) => { if (ev.target?.closest?.('#tcZugaengeHolen')) zugaengeEinrichten(); });
+  // Einmal nach dem Start von selbst, sobald die Supabase-Anmeldung steht (still - ohne Meldung, wenn nicht angemeldet).
+  setTimeout(() => zugaengeEinrichten({still: true}), 9000);
+
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', mount); else mount();
   // dienstplanZeilen wird mit herausgegeben, damit der Dienstplan-Export pruefbar ist, ohne
   // dafuer QR-Codes scannen zu muessen - genau die Faelle (nur Kommen / nur Gehen) lassen
   // sich von Hand kaum zuverlaessig herstellen.
-  global.KCTimeClockManager = {version:VERSION, refresh:render, dienstplanZeilen};
+  global.KCTimeClockManager = {version:VERSION, refresh:render, dienstplanZeilen, zugaengeEinrichten, zugaengeUebernehmen, kassenPaket};
 })(window);
