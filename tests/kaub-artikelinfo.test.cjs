@@ -30,6 +30,11 @@ let f = 0; const pr = (n, b, z = '') => { console.log(`${b ? '  OK  ' : 'FEHLER'
       pr(`${seite}: Apfelpunsch – gepflegte Felder bleiben, Kaub-Angaben ergänzt`, r.apfel.ingredients === 'Vom Verein gepflegt' && r.apfel.additives === 'Vom Verein gepflegt' && r.apfel.nutrition?.energyKcal === 50 && /7602/.test(r.apfel.supplier));
       pr(`${seite}: Zusatzstoffe/Nährwerte nicht erfunden, Hinweis auf Anfrage bei Kaub`, !r.grot.additives && Object.values(r.grot.nutrition || {}).every((v) => v == null) && /info@gluehweine\.com/.test(r.grot.notes || ''));
       pr(`${seite}: Kurzbeschreibung ist eine Beschreibung, nicht der Hinweistext`, r.grot.shortDescription === 'Heißer roter Glühwein' && r.roterfeger.shortDescription === 'Alkoholfreier Früchtepunsch mit Glühweingewürz', r.grot.shortDescription);
+      const e = await p.evaluate(() => { localStorage.removeItem('kcm_eierpunsch_angaben_v1'); const a = JSON.parse(JSON.stringify(articles)); a.find((x) => x.id === 'eier').info = {}; localStorage.setItem('kcm_articles', JSON.stringify(a)); });
+      await p.reload(); await p.waitForTimeout(2500);
+      const ei = await p.evaluate(() => articles.find((x) => x.id === 'eier')?.info || {});
+      pr(`${seite}: Eierlikörpunsch – Rezeptur-Zutaten (halbtrocken, Sahne, Backkakao), Allergene Eier + Sulfite + Milch, Rezeptur in der Notiz`, /Rebenschoppen/.test(ei.ingredients) && /Advocaat/.test(ei.ingredients) && /Vanillezucker/.test(ei.ingredients)
+        && /halbtrocken/.test(ei.ingredients) && /Backkakao/.test(ei.ingredients) && ei.allergens?.eggs === 'contained' && ei.allergens?.sulphites === 'contained' && ei.allergens?.milk === 'contained' && /3 × 0,7 l Advocaat/.test(ei.notes || '') && /Sahnehaube/.test(ei.shortDescription) && !ei.additives, JSON.stringify(ei).slice(0, 160));
       await ctx.close();
     }
     const quelle = fs.readFileSync(path.join(W, 'pos', 'app.js'), 'utf8');
@@ -37,6 +42,9 @@ let f = 0; const pr = (n, b, z = '') => { console.log(`${b ? '  OK  ' : 'FEHLER'
     const {execFileSync} = require('child_process');
     execFileSync(process.execPath, [path.join(W, 'werkzeuge', 'etiketten', 'kesselschild.cjs'), 'apfel', '--probe'], {stdio: 'pipe', env: process.env});
     const html = fs.readFileSync(path.join(require('os').tmpdir(), 'kc-kesselschild', 'Kesselschild_Probe_apfel.html'), 'utf8');
+    execFileSync(process.execPath, [path.join(W, 'werkzeuge', 'etiketten', 'kesselschild.cjs'), 'eier', '--probe'], {stdio: 'pipe', env: process.env});
+    const eh = fs.readFileSync(path.join(require('os').tmpdir(), 'kc-kesselschild', 'Kesselschild_Probe_eier.html'), 'utf8');
+    pr('Kesselschild Eierlikörpunsch: Allergene Eier, Milch und Sulfite, 6,50 € inkl. Pfand', (() => { const z = (eh.match(/Allergene:<\/b> ([^<]*)/) || [])[1] || ''; return /Eier/.test(z) && /Milch/.test(z) && /Sulfite/.test(z); })() && eh.includes('6,50\u00a0€'));
     pr('Kesselschild Apfelpunsch: Sulfite als Allergen, Zusatzstoffe rot "nicht erfasst"', /Allergene:<\/b> Schwefeldioxid \/ Sulfite/.test(html) && /Zusatzstoffe:<\/b> <span class="fehlt">/.test(html));
   } finally { await b.close(); s.close(); }
   console.log(f ? `\n${f} FEHLER` : '\nAlles OK'); process.exit(f ? 1 : 0);

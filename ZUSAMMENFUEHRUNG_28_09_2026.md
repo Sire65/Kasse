@@ -996,3 +996,21 @@ mit übernehmen.“ Grundlage ist die Preisliste Saison 2026/27 (Foto). Bestellt
 - **Offen:** Die Werte von Glühwein rot/weiß in der Grundausstattung der Kasse (85/84 kcal, „Lieferantenangabe“ vom
   17.07.) sind nicht belegt. Sie werden ersetzt, sobald die Kaub-Spezifikation oder das Kanister-Etikett vorliegt.
 - Test `tests/kaub-artikelinfo.test.cjs` (neu).
+
+## Nachtrag 13.10.2026 – Eierlikörpunsch: Rezeptur, Allergene · Feature KC-ARTIKELINFO-EIERPUNSCH
+
+Betreiber: „Und für unseren Eierpunsch: 3 × 0,7 Liter Advocaat Eierlikör von Aldi und Rebenschoppen von Aldi
+6 Liter und 3 Esslöffel Vanillezucker.“
+- **Recherche:**
+  - Aldi Süd (Bastei Advocaat 0,7 l): 14 % vol. Die Nährwerttabelle ist widersprüchlich (290 kcal, aber 0 g Fett,
+    Kohlenhydrate und Eiweiß), also nicht übernommen.
+  - Zum Rebenschoppen gibt es online keine Zutaten oder Nährwerte (Aldi Nord, Supermarktcheck, Codecheck: Sulfite).
+  - Belegt: Eierlikör/Advocaat enthält nach EU-Spirituosenverordnung 2019/787 Eigelb → Allergen **Eier**; Wein →
+    **Sulfite**.
+- **PC-Manager** (`app.js` bilder-v10), einmalig (`kcm_eierpunsch_angaben_v1`), nur leere Felder: Kurzbeschreibung,
+  Zutaten aus der Rezeptur, Allergene Eier und Sulfite, „Alkoholhaltig“, Lieferant ALDI. Die Rezeptur steht als
+  Notiz: 6 l Rebenschoppen + 3 × 0,7 l Advocaat + 3 EL Vanillezucker ≈ 8,1 l. Zusatzstoffe und Nährwerte bleiben leer.
+- **Kasse und Schulung** (`app.js` r65): dieselben Angaben in der Grundausstattung.
+- **Nachgetragen (Betreiber: „Ja mit Sahne, Rebenschoppen halbtrocken, Backkakao“):** Allergen **Milch** (Sahnehaube), Zutaten um „halbtrocken“, Sahnehaube und Backkakao ergänzt. Vorher offen: Wird die Sahne ausgegeben, kommt das Allergen
+  **Milch** dazu.
+- Test `tests/kaub-artikelinfo.test.cjs` erweitert.

@@ -102,6 +102,26 @@ const managerArtikelGespeichert=!!localStorage.getItem("kcm_articles"),managerGr
    geaendert=true;});
   if(geaendert)localStorage.setItem('kcm_articles',JSON.stringify(articles));
   localStorage.setItem(MERK,'1');}}
+// 13.10.2026 (Betreiber: "Und fuer unseren Eierpunsch: 3 x 0,7 Liter Advocaat Eierlikoer von Aldi, Rebenschoppen von
+// Aldi 6 Liter und 3 Essloeffel Vanillezucker"). KC-ARTIKELINFO-EIERPUNSCH. Belegt: Rezeptur (Betreiber), Allergen EIER
+// (Eierlikoer/Advocaat enthaelt nach EU-Spirituosenverordnung 2019/787 Eigelb), Allergen SULFITE (Wein), MILCH (Sahnehaube, Betreiber: "Ja mit Sahne ... Backkakao"). Zusatzstoffe
+// und Naehrwerte von Aldi nicht verlaesslich veroeffentlicht -> leer lassen. EINMALIG, nur leere Felder.
+{const MERK='kcm_eierpunsch_angaben_v1';
+ if(!localStorage.getItem(MERK)){
+  const a=articles.find(x=>x.id==='eier');
+  if(a){const i=a.info=a.info||{};
+   if(!i.shortDescription)i.shortDescription='Heißer Punsch aus Wein und Eierlikör mit Sahnehaube';
+   if(!i.ingredients)i.ingredients='Wein „Rebenschoppen“ halbtrocken (ALDI), Eierlikör „Advocaat“ 14 % vol (ALDI), Vanillezucker; Sahnehaube mit Backkakao';
+   if(typeof i.allergens==='string'){if(!i.legacyAllergens)i.legacyAllergens=i.allergens;i.allergens={};}
+   if(!i.allergens||typeof i.allergens!=='object'||Array.isArray(i.allergens))i.allergens={};
+   i.allergens.eggs='contained';i.allergens.sulphites='contained';i.allergens.milk='contained';   // Sahnehaube (Betreiber 13.10.)
+   if(!i.important)i.important='Alkoholhaltig.';
+   if(!i.supplier)i.supplier='ALDI (Eierlikör „Advocaat“ 0,7 l, Wein „Rebenschoppen“)';
+   const REZ='Rezeptur je Ansatz (13.10.2026): 6 l Rebenschoppen halbtrocken + 3 × 0,7 l Advocaat + 3 EL Vanillezucker (≈ 8,1 l); serviert mit Sahnehaube und Backkakao. Zusatzstoffe und Nährwerte bitte von den Etiketten (Flasche/Karton) übernehmen.';
+   if(!String(i.notes||'').includes('Rezeptur je Ansatz'))i.notes=[i.notes,REZ].filter(Boolean).join(' ');
+   if(!i.source)i.source='Rezeptur des Vereins; Allergene: Eierlikör (EU-VO 2019/787: Eigelb), Wein (Sulfite), Sahne (Milch)';
+   localStorage.setItem('kcm_articles',JSON.stringify(articles));}
+  localStorage.setItem(MERK,'1');}}
 // Artikelnummern aus derselben Tabelle wie die Kasse (shared/kc-artikelnummern-core.js).
 // Dadurch traegt ein Artikel im Manager, in der Kasse und auf dem gedruckten Etikett
 // dieselbe Nummer - sonst zeigt ein Etikett spaeter auf einen Artikel, den die Kasse
