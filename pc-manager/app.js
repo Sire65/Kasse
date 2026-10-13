@@ -73,6 +73,35 @@ const managerArtikelGespeichert=!!localStorage.getItem("kcm_articles"),managerGr
 // Doppeleintrag keine eigene Nummer traegt. Vergangene Verkaeufe bleiben unberuehrt (sie fuehren den Namen).
 {const i=articles.findIndex(x=>x.id==='mett'),richtig=articles.find(x=>x.id==='mettwurst');
  if(i>=0&&richtig&&!String(articles[i].barcode||'').trim()){articles.splice(i,1);localStorage.setItem('kcm_articles',JSON.stringify(articles));}}
+// 13.10.2026 (Betreiber: "Rechnung von Kaub - Allergene und Zusatzstoffe recherchieren und in die Artikeldaten
+// eintragen, damit die Kasse sie uebernimmt"). KC-ARTIKELINFO-KAUB. Belegt sind nur: Hersteller, Kaub-Artikel
+// (Preisliste 2026/27), Zutaten-Beschreibung von Kaub (Preisliste/Flyer), Allergen Schwefeldioxid/Sulfite (Haendler-
+// angabe Getraenke Volz zu Kaub-Produkten), 0 % vol bei Roter Feger/Weihnachtsapfel. Zusatzstoffe und Naehrwerte
+// veroeffentlicht Kaub online NICHT - sie bleiben leer (Etikett/Kasse zeigen "nicht erfasst", nie "keine").
+// EINMALIG, ueberschreibt keine gepflegten Felder (nur leere; beim Roten Feger die unbelegte Angabe "Kirschsaft").
+{const MERK='kcm_kaub_angaben_v1';
+ if(!localStorage.getItem(MERK)){
+  const K={grot:{kurz:'Heißer roter Glühwein',art:'7104 „Luana Glühwein“ (Originalrezept)',zutaten:'Rotwein, Zucker, natürliche Gewürze',alk:true},
+   gweiss:{kurz:'Heißer weißer Glühwein',art:'7301 „Weihnachtsmarkt Glühwein“ aus Weißwein',zutaten:'Weißwein, Zucker, natürliche Gewürze',alk:true},
+   roterfeger:{kurz:'Alkoholfreier Früchtepunsch mit Glühweingewürz',art:'7601 „Roter Feger“ alkoholfreier Punsch',zutaten:'Fruchtsäfte, Glühweingewürz',alk:false},
+   apfel:{kurz:'Alkoholfreier Apfelpunsch mit Gewürzen',art:'7602 „Kaub’s Weihnachtsapfel“ alkoholfreier Punsch',zutaten:'Naturtrüber Apfelsaft, Gewürze',alk:false}};
+  const HINWEIS='Kaub (13.10.2026): Zusatzstoffe und Nährwerte online nicht veröffentlicht – Produktspezifikation bei info@gluehweine.com anfragen oder vom Etikett/QR-Code am Kanister übernehmen.';
+  let geaendert=false;
+  articles.forEach(a=>{const k=K[a.id];if(!k)return;const i=a.info=a.info||{};
+   // Kurzbeschreibung zuerst: der Manager nimmt sonst die Notiz als Beschreibung - dann stuende der Hinweis an der Kasse
+   if(!i.shortDescription||(a.id==='roterfeger'&&/Kirsch/.test(i.shortDescription)))i.shortDescription=k.kurz;
+   if(!i.manufacturer)i.manufacturer='Weinkellerei Emil Kaub & Co KG, 67433 Neustadt a. d. Weinstraße';
+   if(!i.supplier)i.supplier='Kaub '+k.art;
+   if(!i.ingredients||(a.id==='roterfeger'&&/Kirschsaft/.test(i.ingredients)))i.ingredients=k.zutaten;
+   if(typeof i.allergens==='string'){if(!i.legacyAllergens)i.legacyAllergens=i.allergens;i.allergens={};}
+   if(!i.allergens||typeof i.allergens!=='object'||Array.isArray(i.allergens))i.allergens={};
+   i.allergens.sulphites='contained';
+   if(!i.important)i.important=k.alk?'Alkoholhaltig.':'Alkoholfrei (0 % vol).';
+   if(!String(i.notes||'').includes('Kaub (13.10.2026)'))i.notes=[i.notes,HINWEIS].filter(Boolean).join(' ');
+   if(!i.source)i.source='Kaub-Preisliste 2026/27 und Kaub-Flyer (Zutaten); Händlerangabe Getränke Volz (Allergene)';
+   geaendert=true;});
+  if(geaendert)localStorage.setItem('kcm_articles',JSON.stringify(articles));
+  localStorage.setItem(MERK,'1');}}
 // Artikelnummern aus derselben Tabelle wie die Kasse (shared/kc-artikelnummern-core.js).
 // Dadurch traegt ein Artikel im Manager, in der Kasse und auf dem gedruckten Etikett
 // dieselbe Nummer - sonst zeigt ein Etikett spaeter auf einen Artikel, den die Kasse

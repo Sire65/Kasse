@@ -973,3 +973,26 @@ doppelte Mettwurst löschen, keine Happy Hour berücksichtigen, und Nebenbefunde
   ein verworfener offener Bon im Storno-Protokoll (`kc_voids_v040`, Hash-Kette, Grund `parked-cart-discarded`, mit
   Positionen). `kc-oberflaechen-anwenden.js` 0.9.16, Kasse und Schulung gleich.
 - Tests: `tests/nebenbefunde-13-10.test.cjs` (neu), `artikelnummern-und-qr` (keine Doppelung mehr erlaubt).
+
+## Nachtrag 13.10.2026 – Kaub-Getränke: Allergene, Zutaten, Hersteller in den Artikeldaten · Feature KC-ARTIKELINFO-KAUB
+
+Betreiber: „Du hast die Rechnung von Kaub (unsere meisten Getränke). Recherchiere Allergene und Zusatzstoffe, trage sie
+in die Artikeldaten des PC-Managers ein, damit die Kasse sie übernimmt. Wenn Nährwerte (kcal/kJ) verfügbar sind,
+mit übernehmen.“ Grundlage ist die Preisliste Saison 2026/27 (Foto). Bestellt: 7104 Luana Glühwein (65 Kanister),
+7301 Weihnachtsmarkt Glühwein aus Weißwein (35), 7601 Roter Feger alkoholfrei (20), 7602 Kaub's Weihnachtsapfel (20).
+- **Recherche:**
+  - Kaub-Seiten gluehweine.de, gluehweinsorten.de und Flyer: nur Beschreibungen („ausgewählte Rot-/Weißweine, natürliche
+    Gewürze“, Roter Feger „von Früchten geprägt, mit Glühweingewürz“, Weihnachtsapfel „aus naturtrübem Apfelsaft, mit
+    feinen Gewürzen“).
+  - Händler Getränke Volz zu Roter Feger, Weihnachtsapfel und Reinig: Allergen Schwefeldioxid/Sulfite (> 10 mg/l),
+    0 % vol bei den alkoholfreien. Nährwerte überall „k.A.“.
+  - **Zusatzstoffe und Nährwerte veröffentlicht Kaub nicht.**
+- **PC-Manager** (`app.js` bilder-v9, Manager und Schulungs-Manager), einmalig (`kcm_kaub_angaben_v1`), nur leere
+  Felder: Hersteller, Kaub-Artikel, Kurzbeschreibung, Zutaten laut Kaub, Allergen Sulfite (alter Freitext bleibt),
+  Alkohol-Hinweis, Quelle und der Hinweis, die Spezifikation bei Kaub anzufragen. Beim Roten Feger wird das unbelegte
+  „Kirschsaft“ ersetzt. Zusatzstoffe und Nährwerte bleiben leer. Etikett und Kasse zeigen dort „nicht erfasst“, nie
+  „keine“.
+- **Kasse und Schulung** (`app.js` r64): Grundausstattung mit denselben belegten Angaben.
+- **Offen:** Die Werte von Glühwein rot/weiß in der Grundausstattung der Kasse (85/84 kcal, „Lieferantenangabe“ vom
+  17.07.) sind nicht belegt. Sie werden ersetzt, sobald die Kaub-Spezifikation oder das Kanister-Etikett vorliegt.
+- Test `tests/kaub-artikelinfo.test.cjs` (neu).
