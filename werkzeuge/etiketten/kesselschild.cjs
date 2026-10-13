@@ -139,7 +139,9 @@ const b64 = (f) => `data:${f.endsWith('.png') ? 'image/png' : f.endsWith('.webp'
         let d = ''; for (let y = 0; y < c; y++) for (let x = 0; x < c; x++) if (q.isDark(y, x)) d += 'M' + (x + r) + ' ' + (y + r) + 'h1v1h-1z';
         n.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ' + g + ' ' + g + '" shape-rendering="crispEdges"><rect width="' + g + '" height="' + g + '" fill="#fff"/><path d="' + d + '" fill="#000"/></svg>'; });</script></body></html>`;
     const name = PROBE ? `Kesselschild_Probe_${artikel[0].id}` : 'Kesselschilder_A4';
-    fs.writeFileSync(path.join(ZIEL, name + '.html'), html);
+    // Zwischenstand (HTML mit eingebettetem QR-Baustein) nur im Temp-Ordner - nicht im Projekt
+    const zwischen = path.join(require('os').tmpdir(), 'kc-kesselschild'); fs.mkdirSync(zwischen, {recursive: true});
+    fs.writeFileSync(path.join(zwischen, name + '.html'), html);
     const seite = await (await b.newContext({deviceScaleFactor: 4})).newPage();
     await seite.setContent(html, {waitUntil: 'load'}); await seite.waitForTimeout(300);
     await seite.pdf({path: path.join(ZIEL, name + '.pdf'), format: 'A4', printBackground: true, margin: {top: 0, right: 0, bottom: 0, left: 0}});

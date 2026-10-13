@@ -501,7 +501,24 @@
     try { notify && notify(rabattHinweis ? 'warn' : 'success', rabattHinweis ? 'Geparkter Bon angehängt – die Bons hatten verschiedene Rabatte, bitte Rabatt prüfen' : 'Geparkter Bon zurückgeholt'); } catch (e2) { /* egal */ }
     return true;
   }
-  function verwerfen(id) { geparkteSchreiben(gruppenBereinigen(geparkte().filter((x) => x.id !== id))); parkSeiteZeichnen(); }
+  /* 13.10.2026 (Pruefung Kassenfunktionen, Betreiber: "Nebenbefunde korrigieren"): ein verworfener GEPARKTER Bon
+     verschwand ohne jede Spur - ein offener Bon dagegen wird beim Verwerfen ins Storno-Protokoll geschrieben
+     (app.js voidBon, kc_voids_v040, Hash-Kette). Jetzt derselbe Eintrag, Grund "parked-cart-discarded". */
+  function verwerfen(id) {
+    const e = geparkte().find((x) => x.id === id);
+    if (e && Array.isArray(e.cart) && e.cart.length) {
+      try {
+        const st = kasseState() || {}, m = st.master || {};
+        const eintrag = {voidId: (global.crypto && crypto.randomUUID) ? crypto.randomUUID() : 'v' + Date.now().toString(36), bon: e.bon || '',
+          time: new Date().toISOString(), parkedAt: e.zeit || null, registerId: m.registerId, operator: m.operatorName,
+          training: !!m.trainingMode, reason: 'parked-cart-discarded', items: JSON.parse(JSON.stringify(e.cart))};
+        const log = (() => { try { return JSON.parse(localStorage.getItem('kc_voids_v040') || '[]') || []; } catch (x) { return []; } })();
+        if (global.KCHashChain) global.KCHashChain.appendChained(log, eintrag).then(() => localStorage.setItem('kc_voids_v040', JSON.stringify(log)));
+        else { log.push(eintrag); localStorage.setItem('kc_voids_v040', JSON.stringify(log)); }
+      } catch (x) { /* Protokoll darf das Verwerfen nie blockieren */ }
+    }
+    geparkteSchreiben(gruppenBereinigen(geparkte().filter((x) => x.id !== id))); parkSeiteZeichnen();
+  }
 
   /* ------------------------------------------- Geparkte Bons verbinden / lösen   07.10.2026
      Betreiber: "Eine Gruppe trinkt, holt die nächste Runde, zum Schluss wird alles zusammen

@@ -116,8 +116,9 @@ const frei=async pg=>pg.evaluate(()=>{["fullscreenGate","kcStartupSummary","kcPi
  const unerwartet=mStamm.ohne.filter(id=>!ALTBESTAND.includes(id));
  p('Manager: aktive Artikel tragen eine Nummer (ausser bekanntem Altbestand)',
    unerwartet.length===0, unerwartet.join(', ')||`${mStamm.anzahl} Artikel, Altbestand: ${mStamm.ohne.join(', ')||'keiner'}`);
- p('Manager: kein NEUER doppelter Artikelname',
-   mStamm.doppelt.length<=1&&(mStamm.doppelt[0]||'').startsWith('Mettwurst'),
+ // 13.10.2026: der Doppeleintrag "mett" ist auf Wunsch des Betreibers geloescht - jetzt gar keine Doppelung mehr.
+p('Manager: kein doppelter Artikelname (doppelte Mettwurst geloescht)',
+   mStamm.doppelt.length===0,
    mStamm.doppelt.join(' | ')||'keine Doppelung');
  p('Manager und Kasse geben Gluehwein rot dieselbe Nummer',
    mStamm.map.grot===stamm.grot, `Manager ${mStamm.map.grot} / Kasse ${stamm.grot}`);

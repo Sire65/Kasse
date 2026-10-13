@@ -6,7 +6,7 @@ const {execFileSync} = require('child_process'); const fs = require('fs'), path 
 const W = path.join(__dirname, '..'); const A = path.join(W, 'werkzeuge', 'etiketten', 'ausgabe');
 let f = 0; const pr = (n, b, z = '') => { console.log(`${b ? '  OK  ' : 'FEHLER'}  ${n}${z ? '  [' + z + ']' : ''}`); if (!b) f++; };
 execFileSync(process.execPath, [path.join(W, 'werkzeuge', 'etiketten', 'kesselschild.cjs'), 'grot', '--probe'], {stdio: 'pipe', env: process.env});
-const html = fs.readFileSync(path.join(A, 'Kesselschild_Probe_grot.html'), 'utf8');
+const html = fs.readFileSync(path.join(require('os').tmpdir(), 'kc-kesselschild', 'Kesselschild_Probe_grot.html'), 'utf8');
 pr('Preis inkl. Pfand 5,50 €', html.includes('<div class="betrag">5,50 €</div>'));
 pr('Pfand aufgeschlüsselt (3,50 € + 2,00 € Glaspfand)', html.includes('inkl. 2,00 € Pfand') && html.includes('+ 2,00 € Glaspfand'));
 pr('Allergene aus dem Artikelstamm', /Allergene:<\/b> Schwefeldioxid \/ Sulfite/.test(html));

@@ -21,7 +21,6 @@ const DEFAULT_ARTICLES=[
 // Preisliste - hier zu 3,50 aus den alten Vorgabedaten des Managers und als "mettwurst"
 // zu 1,50 aus der Kasse, wo sie als Beilage gefuehrt wird. Derselbe Name mit zwei Preisen.
 // NICHT geloescht, nur inaktiv: alte Auswertungen bleiben dadurch aufloesbar.
-{id:"mett",name:"Mettwurst",category:"Speisen",price:3.5,receiptText:"Mettwurst",color:"#713b24",active:false,quantity:1,unit:"Stück",taxRate:7,priceListVisible:false},
 {id:"sauerkraut",name:"Sauerkrauteintopf",category:"Speisen",price:5.5,receiptText:"Sauerkrauteintopf",color:"#77643d",active:true,quantity:1,unit:"Portion",taxRate:7},
 {id:"hering",name:"Kartoffel mit Hering",category:"Speisen",price:4.5,image:"assets/hering_kartoffeln_auth.webp",receiptText:"Kartoffel m. Hering",color:"#42657d",active:true,quantity:1,unit:"Portion",taxRate:7},
 
@@ -69,6 +68,11 @@ const managerArtikelGespeichert=!!localStorage.getItem("kcm_articles"),managerGr
    const a=articles.find(x=>x.id==='mett'), b=articles.find(x=>x.id==='mettwurst');
    if(a&&b){a.active=false;a.priceListVisible=false;localStorage.setItem('kcm_articles',JSON.stringify(articles));}
    localStorage.setItem(MERK,'1');}}
+// 13.10.2026 (Betreiber: "Ja, doppelte Mettwurst loeschen"): der stillgelegte Doppeleintrag "mett" (3,50 EUR,
+// ohne Artikelnummer) wird jetzt geloescht - aber nur, wenn die richtige Mettwurst (02005) da ist und der
+// Doppeleintrag keine eigene Nummer traegt. Vergangene Verkaeufe bleiben unberuehrt (sie fuehren den Namen).
+{const i=articles.findIndex(x=>x.id==='mett'),richtig=articles.find(x=>x.id==='mettwurst');
+ if(i>=0&&richtig&&!String(articles[i].barcode||'').trim()){articles.splice(i,1);localStorage.setItem('kcm_articles',JSON.stringify(articles));}}
 // Artikelnummern aus derselben Tabelle wie die Kasse (shared/kc-artikelnummern-core.js).
 // Dadurch traegt ein Artikel im Manager, in der Kasse und auf dem gedruckten Etikett
 // dieselbe Nummer - sonst zeigt ein Etikett spaeter auf einen Artikel, den die Kasse

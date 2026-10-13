@@ -949,3 +949,27 @@ Etiketten … auf Metallschilder 9 × 11 cm, oben 3 Löcher, am Glühweinkessel.
 - Fehlende Pflichtangaben werden nie als „keine“ gedruckt, sondern rot markiert. Beim Glühwein rot fehlen die
   Zusatzstoffe: im Artikelstamm steht „Keine Angaben“.
 - Prüfung: QR aus dem PDF bei 300/150/100 dpi gelesen → „01001“. Test `tests/kesselschild-etikett.test.cjs`.
+
+## Nachtrag 13.10.2026 – Prüfung aller Kassenfunktionen gegen die Karteikarten · doppelte Mettwurst · Park-Storno
+
+Betreiber: „Checke nochmals alle Funktionen der Kasse und prüfe, ob alle auf den Karteikarten vorkommen“, danach „Ja,
+doppelte Mettwurst löschen, keine Happy Hour berücksichtigen, und Nebenbefunde korrigieren“.
+- **Prüfung:** Inventar aller Kassenfunktionen (Knöpfe, MEHR, Kopfzeile, Module) gegen die 68 Aufgaben. Ergebnis:
+  3 Karten veraltet, 6 Lücken für Mitglieder; Kassenwart- und Admin-Funktionen gehören bewusst nicht auf die Karten.
+- **Übungsliste und Karteikarten Version 4.2** (74 Karten):
+  - Karte 35: Spende jetzt über „♥ ALS SPENDE“ mit Rückfrage.
+  - Karte 66: anderer Weg „MEHR → Stoßbetrieb“ entfernt, in KC003 ausgeblendet.
+  - Karte 67: Bargeldübergabe durch Scannen oder über das Fenster „Neue Kassenfüllung vom PC Manager“.
+  - Karte 68: Lampen heißen jetzt „Sicherung/Online“.
+  - Weitere Wege auf den Karten 21, 59, 60 und 63.
+  - **Neu als Stufe 9 · Ergänzungen (Nr. 69–74):** Aufrunden mit Rückgeld, Trinkgeld mit freiem Betrag,
+    Sammelbestellung, geparkten Bon löschen, Trainingsmodus versehentlich an, Startkarte beim Start ohne Netz.
+  - Die neuen Karten stehen am Ende, damit die gedruckten Karten 1–68 ihre Nummern behalten.
+  - Happy Hour ist auf Wunsch nicht berücksichtigt.
+- **Doppelte Mettwurst** (`mett`, 3,50 €, ohne Artikelnummer) im PC-Manager gelöscht (`app.js` bilder-v8, Manager und
+  Schulungs-Manager). Sie verschwindet auch aus den gespeicherten Artikeln, aber nur wenn die richtige Mettwurst
+  (02005) vorhanden ist und der Doppeleintrag keine eigene Nummer hat.
+- **Park-Storno:** Ein über P → 🗑 → WIRKLICH? verworfener geparkter Bon wurde ohne Spur gelöscht. Jetzt steht er wie
+  ein verworfener offener Bon im Storno-Protokoll (`kc_voids_v040`, Hash-Kette, Grund `parked-cart-discarded`, mit
+  Positionen). `kc-oberflaechen-anwenden.js` 0.9.16, Kasse und Schulung gleich.
+- Tests: `tests/nebenbefunde-13-10.test.cjs` (neu), `artikelnummern-und-qr` (keine Doppelung mehr erlaubt).
