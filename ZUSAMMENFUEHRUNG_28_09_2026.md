@@ -933,3 +933,19 @@ Zeiterfassung.“
 - Personen ohne Geburtstag in der Verwaltung melden sich nur mit dem Ausweis an. Den Geburtstag dort nachtragen, dann
   im Manager erneut „Zugänge für alle einrichten“ drücken.
 - Test `tests/zeiterfassung-zugaenge.test.cjs` (neu, frei erfundene Testdaten).
+
+## Nachtrag 13.10.2026 – Kesselschild-Etikett 8 × 8 cm (Probe) · Feature KC-ETIKETT-KESSELSCHILD
+
+Betreiber: „Artikeletiketten im Format 8 × 8 mit abgerundetem Rahmen, gut lesbarer QR-Code, Foto, Preis inkl. Pfand,
+Allergene, Zusatzstoffe … erst ein Etikett zur Probe … später Schnittmarken, A4 gut ausnutzen … wasserfeste
+Etiketten … auf Metallschilder 9 × 11 cm, oben 3 Löcher, am Glühweinkessel.“
+- Werkzeug `werkzeuge/etiketten/kesselschild.cjs`. Daten aus dem Artikelstamm der Kasse (Preis, Pfandbestandteile,
+  Artikelinformation), Allergene über `shared/kc-allergene.js`, QR mit dem Generator des PC-Managers. Der QR enthält
+  genau die Artikelnummer (wie der Etikettendruck im Manager), der Kassen-Scanner legt den Artikel also direkt in den
+  Bon. Kachelbilder `_version_3` werden ohne eingebranntes „i“ und ohne Bildunterschrift ausgeschnitten.
+- `--probe`: ein Etikett in Originalgröße auf A4 mit Schnittmarken und 5-cm-Messbalken
+  (`ausgabe/Kesselschild_Probe_grot.pdf`). Ohne `--probe`: Bogen A4 mit 2 × 3 Etiketten, die ohne Abstand aneinander
+  stoßen, sodass zwischen zwei Etiketten nur ein Schnitt nötig ist. Nur die Schnittmarken liegen außen.
+- Fehlende Pflichtangaben werden nie als „keine“ gedruckt, sondern rot markiert. Beim Glühwein rot fehlen die
+  Zusatzstoffe: im Artikelstamm steht „Keine Angaben“.
+- Prüfung: QR aus dem PDF bei 300/150/100 dpi gelesen → „01001“. Test `tests/kesselschild-etikett.test.cjs`.
