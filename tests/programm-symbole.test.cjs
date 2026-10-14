@@ -1,4 +1,4 @@
-// KC-PROGRAMM-SYMBOLE (14.10.2026, Wunsch Hansi): Kasse und PC-Manager (normal + Schulung) lassen sich als
+// KC-PROGRAMM-SYMBOLE (14.10.2026, Wunsch Hansi): Kasse, PC-Manager und Money Butler (normal + Schulung) lassen sich als
 // Desktop-Symbol mit Kochmuetze (CD Weinrot/Beige) ablegen. Prueft Manifest, Bilddateien, HTML-Kopf und
 // bei der Kasse die Offline-Liste (neuer Speichername -> kein Mischstand alt/neu).
 'use strict';
@@ -7,7 +7,7 @@ const R = path.join(__dirname, '..');
 let ok = 0, fehl = 0;
 const p = (t, b, d = '') => { if (b) ok++; else { fehl++; console.log('FEHLER: ' + t + (d ? ' – ' + d : '')); } };
 const png = (f) => { const b = fs.readFileSync(f); return b.slice(1, 4).toString() === 'PNG' ? [b.readUInt32BE(16), b.readUInt32BE(20)] : null; };
-for (const [ordner, pfx, sw] of [['pos', 'kasse', true], ['schulung/pos', 'kasse-schulung', true], ['pc-manager', 'manager', false], ['schulung/pc-manager', 'manager-schulung', false]]) {
+for (const [ordner, pfx, sw] of [['pos', 'kasse', true], ['schulung/pos', 'kasse-schulung', true], ['pc-manager', 'manager', false], ['schulung/pc-manager', 'manager-schulung', false], ['money-butler', 'money-butler', false], ['schulung/money-butler', 'money-butler-schulung', false]]) {
   const d = path.join(R, ordner);
   const m = JSON.parse(fs.readFileSync(path.join(d, 'manifest.webmanifest'), 'utf8'));
   p(ordner + ': Manifest hat 192er und 512er Symbol', ['192x192', '512x512'].every((s) => m.icons.some((i) => i.sizes === s)));
