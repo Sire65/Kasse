@@ -18,37 +18,53 @@
 
   // KC System Check: nur NACH einem erfolgreichen echten Supabase-I/O melden.
   // Die Telemetrie selbst darf den eigentlichen Manager-Vorgang niemals fehlschlagen lassen.
+  // 14.10.2026 (Datenbank schonen): vorher löste JEDER Datenbankaufruf sofort einen zweiten Aufruf
+  // (kicc_report_program_flow) aus und verdoppelte so die Last. Jetzt wird gesammelt (Anzahl + Bytes je Art)
+  // und höchstens einmal pro Minute gemeldet.
+  const flussSammel = new Map();
+  let flussTimer = 0;
   async function meldeEchtenDatenfluss(flowType, requestBody, responseBody) {
     try {
-      // Die DB-Funktion akzeptiert absichtlich nur angemeldete Benutzer/service_role.
-      // Ohne echte Manager-Sitzung gar keinen Telemetrieversuch erzeugen.
-      const token = accessToken();
-      if (!token) return;
       const enc = new TextEncoder();
       const bytes = enc.encode(requestBody == null ? '' : String(requestBody)).byteLength
         + enc.encode(responseBody == null ? '' : String(responseBody)).byteLength;
-      const antwort = await fetch(`${SUPABASE_URL}/rest/v1/rpc/kicc_report_program_flow`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          apikey: SUPABASE_ANON_KEY,
-          Authorization: 'Bearer ' + token,
-        },
-        body: JSON.stringify({
-          p_program_id: 'kc-pc-manager',
-          p_instance_id: 'browser',
-          p_source_id: 'pc-manager',
-          p_target_id: 'supabase-kc-core',
-          p_flow_type: flowType,
-          p_event_count: 1,
-          p_byte_count: bytes,
-          p_status: 'OK',
-          p_measured_at: new Date().toISOString(),
-        }),
-      });
-      if (!antwort.ok) throw new Error(`Flow-Telemetrie HTTP ${antwort.status}`);
-    } catch (e) {
-      console.warn('KC Datenfluss-Telemetrie:', e?.message || e);
+      const alt = flussSammel.get(flowType) || { anzahl: 0, bytes: 0 };
+      flussSammel.set(flowType, { anzahl: alt.anzahl + 1, bytes: alt.bytes + bytes });
+      if (!flussTimer) flussTimer = setTimeout(() => { flussTimer = 0; void flussSenden(); }, 60000);
+    } catch (_e) { /* Telemetrie darf nie stören */ }
+  }
+  async function flussSenden() {
+    const teile = [...flussSammel.entries()];
+    flussSammel.clear();
+    for (const [flowType, summe] of teile) {
+      try {
+        // Die DB-Funktion akzeptiert absichtlich nur angemeldete Benutzer/service_role.
+        // Ohne echte Manager-Sitzung gar keinen Telemetrieversuch erzeugen.
+        const token = accessToken();
+        if (!token) return;
+        const antwort = await fetch(`${SUPABASE_URL}/rest/v1/rpc/kicc_report_program_flow`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            apikey: SUPABASE_ANON_KEY,
+            Authorization: 'Bearer ' + token,
+          },
+          body: JSON.stringify({
+            p_program_id: 'kc-pc-manager',
+            p_instance_id: 'browser',
+            p_source_id: 'pc-manager',
+            p_target_id: 'supabase-kc-core',
+            p_flow_type: flowType,
+            p_event_count: summe.anzahl,
+            p_byte_count: summe.bytes,
+            p_status: 'OK',
+            p_measured_at: new Date().toISOString(),
+          }),
+        });
+        if (!antwort.ok) throw new Error(`Flow-Telemetrie HTTP ${antwort.status}`);
+      } catch (e) {
+        console.warn('KC Datenfluss-Telemetrie:', e?.message || e);
+      }
     }
   }
 
@@ -376,7 +392,9 @@
     if (!ledGruppeContainer()) { setTimeout(init, 500); return; }
     aktualisiereStatusLed();
     pruefeVerbindungLeise();
-    setInterval(pruefeVerbindungLeise, 30000);
+    // 14.10.2026: im Hintergrund nur noch jede 2. Minute prüfen (vorher immer alle 30 s)
+    let letzteProbe = Date.now();
+    setInterval(() => { if (document.hidden && Date.now() - letzteProbe < 120000) return; letzteProbe = Date.now(); pruefeVerbindungLeise(); }, 30000);
   }
 
   global.KCSupabase = { rufeFunktionAuf, rufeEdgeFunktionAuf, rufeTabelleAuf, listeTabellen, istAngemeldet: () => !!accessToken(), holeZugriffsToken: () => accessToken() };

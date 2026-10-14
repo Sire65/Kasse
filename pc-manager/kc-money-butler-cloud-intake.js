@@ -105,7 +105,9 @@
   // (kc-direkte-leitung-manager.js ruft poll() auf). Dann nur noch jede Minute zur Sicherheit nachfragen statt alle 15 s.
   let letzterPoll=0;
   const pollGezaehlt=()=>{letzterPoll=Date.now();return poll();};
-  setInterval(()=>{if(global.KCDirekteLeitungManager?.steht?.()&&Date.now()-letzterPoll<60000)return;pollGezaehlt();},POLL_MS);
+  // 14.10.2026 (Datenbank schonen): auch im Hintergrund nur jede Minute statt alle 15 s – beim Zurückkommen sofort.
+  setInterval(()=>{if((global.KCDirekteLeitungManager?.steht?.()||global.document?.hidden)&&Date.now()-letzterPoll<60000)return;pollGezaehlt();},POLL_MS);
+  global.document?.addEventListener?.('visibilitychange',()=>{if(!global.document.hidden&&Date.now()-letzterPoll>POLL_MS)pollGezaehlt();});
   setTimeout(pollGezaehlt,5000);
   global.KCMoneyButlerCloudIntake={poll:pollGezaehlt};
 })(window);
