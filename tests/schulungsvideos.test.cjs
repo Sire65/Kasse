@@ -8,7 +8,10 @@
      am Ende alle Fenster zu, Warenkorb leer, "gesehen" gezaehlt, Bewertung wird in die Warteschlange gelegt
    - Trainingsmodus waehrend des Videos aus: Video stoppt sofort
    0.3.0: alle 22 Videos streng (jeder Knopf vorhanden) in Kasse und Schulung, nichts gebucht;
-   🔊 Stimmen je Geraet waehlen, Probe, Tempo, fehlende Stimme → automatisch, zuruecksetzen */
+   🔊 Stimmen je Geraet waehlen, Probe, Tempo, fehlende Stimme → automatisch, zuruecksetzen
+   14.10.2026: Programmfehler werden mit Fundstelle (Datei:Zeile, drei Aufrufebenen) gemeldet - der Fehler
+   "Cannot set properties of null (setting 'innerHTML')" trat zweimal sporadisch auf (unter Last, 2 von ~30
+   Laeufen) und liess sich gezielt nicht nachstellen; beim naechsten Auftreten zeigt die Meldung die Stelle. */
 try{require.resolve('playwright')}catch(e){console.log('  ueberspringen: Playwright nicht installiert');process.exit(0)}
 const {chromium}=require('playwright');const http=require('http'),fs=require('fs'),path=require('path');
 const W=path.join(__dirname,'..');
@@ -16,7 +19,7 @@ const T={'.html':'text/html','.js':'text/javascript','.css':'text/css','.json':'
 const s=http.createServer((q,r)=>{const p=path.join(W,decodeURIComponent(q.url.split('?')[0]).replace(/^\/Kasse/,''));fs.readFile(p,(e,d)=>{if(e){r.writeHead(404);return r.end()}r.writeHead(200,{'Content-Type':T[path.extname(p)]||'application/octet-stream'});r.end(d)})});
 let fehler=0;const pruefe=(n,b,z='')=>{console.log(`${b?'  OK  ':'FEHLER'}  ${n}${z?'  ['+z+']':''}`);if(!b)fehler++};
 async function seite(b,url,master){
-  const ctx=await b.newContext({viewport:{width:1280,height:800},hasTouch:true});const p=await ctx.newPage();const js=[];p.on('pageerror',e=>js.push(e.message));
+  const ctx=await b.newContext({viewport:{width:1280,height:800},hasTouch:true});const p=await ctx.newPage();const js=[];p.on('pageerror',e=>js.push(e.message+' @ '+String(e.stack||'').split('\n').slice(1,4).map(z=>z.trim().replace(/^at /,'').replace(/https?:\/\/[^/]+\//,'')).join(' <- ')));
   // Ohne Stimme im Testbrowser: Sprechen dauert hier nur kurz
   await p.addInitScript(()=>{window.speechSynthesis.speak=u=>setTimeout(()=>u.onend&&u.onend(),60);window.speechSynthesis.cancel=()=>{};});
   await p.addInitScript(m=>{if(!localStorage.getItem('kc_master_v040'))localStorage.setItem('kc_master_v040',JSON.stringify(m))},master);

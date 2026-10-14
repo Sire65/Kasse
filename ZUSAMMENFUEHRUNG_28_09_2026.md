@@ -1046,3 +1046,18 @@ Betreiber: „Ja, Rum aus Supabase übernehmen.“
   - Danach sendet er über den vorhandenen Stammdaten-Abgleich an die Kassen (`KCTimeClockManager.anKassenSenden`,
     `time-clock-manager.js` 0.4.1).
 - Test `tests/artikelinfo-supabase.test.cjs` (neu): Manager, Schulungs-Manager, Weg bis zur Kasse.
+
+## Nachtrag 14.10.2026 – Sporadischer Programmfehler im Videotest untersucht
+
+- Befund: `tests/schulungsvideos.test.cjs` meldete zweimal „Cannot set properties of null (setting 'innerHTML')“.
+  Beide Male während bzw. direkt nach einer kompletten Testsuite, einmal liefen zwei Suites gleichzeitig.
+- Untersucht, jeweils mit Stack-Ausgabe, insgesamt rund 25 weitere Läufe:
+  - einzeln, 3 Läufe parallel, unter künstlicher Rechenlast
+  - gegen nachgestellte Kassen- und Manager-Dienste (Port 47391/47392)
+  - direkt nach dem Geldweg-Test
+  - Kein einziges Mal aufgetreten.
+- Im Code geprüft und abgesichert vorgefunden: Zeitgeber der Kasse, Park-Liste, Sammelbestellung, Reklamation,
+  Dienstplan, Verbindungsanzeige, Bildschirmschoner und Videobühne. Alle Ziel-Elemente existieren in der Seite.
+- Maßnahme: Der Test meldet Programmfehler jetzt mit Fundstelle (Datei:Zeile, drei Aufrufebenen). Tritt der Fehler
+  wieder auf, steht die Ursache direkt in der Meldung. Bewusst keine Absicherung „auf Verdacht“ an Stellen, die nicht
+  als Ursache belegt sind.
