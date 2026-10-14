@@ -5,7 +5,20 @@
   "display": "standalone",
   "background_color": "#07111f",
   "theme_color": "#07111f",
-  "icons": [],
+  "icons": [
+    {
+      "src": "./icons/kasse-schulung-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "./icons/kasse-schulung-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ],
   "scope": "./",
   "orientation": "any",
   "id": "./?schulung=1",

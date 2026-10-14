@@ -1,0 +1,26 @@
+{
+  "name": "KC PC-Manager - SCHULUNG",
+  "short_name": "Manager Schulung",
+  "start_url": "./index.html",
+  "scope": "./",
+  "id": "./",
+  "display": "standalone",
+  "background_color": "#741521",
+  "theme_color": "#741521",
+  "lang": "de-DE",
+  "description": "KC PC-Manager - SCHULUNG - Schulungsversion, keine echten Daten",
+  "icons": [
+    {
+      "src": "./icons/manager-schulung-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "./icons/manager-schulung-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ]
+}
