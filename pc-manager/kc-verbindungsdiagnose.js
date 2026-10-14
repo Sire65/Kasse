@@ -491,6 +491,11 @@
   // darauf. Der Live-Monitor bekommt zusätzlich einen ausdrücklichen Knopf.
   function haengeAnLeds() {
     document.querySelectorAll('.kc-live-led-group').forEach((g) => {
+      // KC-PCM-SUPABASE-LED-FREI (14.10.2026, Meldung Hansi): Die Supabase-LED hat ein eigenes Fenster mit
+      // Anmeldung (kc-manager-supabase-status.js). Das Prüffenster hat diesen Klick bisher abgefangen
+      // (stopPropagation) – dadurch war keine Supabase-Anmeldung mehr möglich. Prüffenster bleibt über
+      // den Knopf „Verbindungen prüfen“ und die Kassen-LEDs erreichbar.
+      if (g.id === 'kcSupabaseLedGroup') return;
       if (g.dataset.kcdiag) return;
       g.dataset.kcdiag = '1';
       g.style.cursor = 'pointer';

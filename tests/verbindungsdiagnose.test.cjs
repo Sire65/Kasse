@@ -98,6 +98,19 @@ async function lies(pg) {
   p('es gibt auch einen ausdrücklichen Knopf "Verbindungen prüfen"',
     await pg.locator('#kcdiagOeffnen').count() > 0);
 
+  // KC-PCM-SUPABASE-LED-FREI (14.10.2026): Die Supabase-LED öffnet ihr eigenes Anmeldefenster, NICHT das Prüffenster
+  if (await pg.locator('#kcSupabaseLedGroup').count()) {
+    await pg.evaluate(() => document.getElementById('kcdiagDialog')?.close());
+    await pg.evaluate(() => document.getElementById('kcSupabaseLedGroup').click());
+    await pg.waitForTimeout(800);
+    const sb = await pg.evaluate(() => ({ diag: !!document.getElementById('kcdiagDialog')?.open, info: !!document.getElementById('kcSupabaseInfoOverlay')?.open }));
+    p('die Supabase-LED öffnet die Supabase-Anmeldung, nicht das Prüffenster', !sb.diag && sb.info, JSON.stringify(sb));
+    await pg.evaluate(() => document.getElementById('kcSupabaseInfoOverlay')?.close());
+    await pg.evaluate(() => window.KCVerbindungsdiagnose.oeffne());
+    await pg.waitForTimeout(2500);
+    s = await lies(pg);
+  }
+
   // ---- Es wird wirklich gemessen ----
   const titel = s.zeilen.map((z) => z.titel);
   p('Manager-Dienst, Webserver, beide Kassen, Speicher und Datenbank stehen drin',
