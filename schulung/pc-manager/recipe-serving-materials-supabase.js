@@ -88,11 +88,12 @@
     finally{busy=false}
   }
   async function syncNow(forcePush=false){if(busy||!config())return false;busy=true;try{if(!ready&&!forcePush)await pull();else if(forcePush&&!pending())await push();else if(!forcePush)await pull();return true}catch(e){console.warn('Ausgabegefäß-Sync:',e.message);return false}finally{busy=false}}
+  let pullFehler=0,pullWarteBis=0;
   function watch(){setInterval(()=>{
     if(busy||!config())return;
     const now=snapshot();
     if(!navigator.onLine){if(now!==lastSnapshot)capturePending('offline-change');return}
-    if(!ready){syncNow(false);return}
+    if(!ready){if(Date.now()<pullWarteBis)return;syncNow(false).then(ok=>{if(ok&&ready){pullFehler=0;pullWarteBis=0;}else{pullFehler=Math.min(pullFehler+1,6);pullWarteBis=Date.now()+Math.min(300000,15000*Math.pow(2,pullFehler-1));}});return} // 14.10.2026: fehlgeschlagener Erstabruf nicht alle 1,5 s wiederholen, sondern 15 s … 5 Min.
     if(pending())return;
     if(now!==lastSnapshot)syncNow(true);
   },1500)}

@@ -44,7 +44,7 @@
 (function(){
   if(window.KCServingMaterialsSupabase||document.querySelector('script[data-kc-serving-supabase="1"]'))return;
   const s=document.createElement('script');
-  s.src='recipe-serving-materials-supabase.js?v=1.0.0';
+  s.src='recipe-serving-materials-supabase.js?v=1.0.1';
   s.async=false;
   s.dataset.kcServingSupabase='1';
   document.head.appendChild(s);
