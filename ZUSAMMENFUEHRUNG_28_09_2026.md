@@ -1014,3 +1014,35 @@ Betreiber: „Und für unseren Eierpunsch: 3 × 0,7 Liter Advocaat Eierlikör vo
 - **Nachgetragen (Betreiber: „Ja mit Sahne, Rebenschoppen halbtrocken, Backkakao“):** Allergen **Milch** (Sahnehaube), Zutaten um „halbtrocken“, Sahnehaube und Backkakao ergänzt. Vorher offen: Wird die Sahne ausgegeben, kommt das Allergen
   **Milch** dazu.
 - Test `tests/kaub-artikelinfo.test.cjs` erweitert.
+
+## Nachtrag 14.10.2026 – Artikelinformationen gehen beim Stammdaten-Abgleich nicht mehr verloren (app.js r66)
+
+Betreiber: „Sind jetzt die Daten drin, alle und vollständig, und werden sie bei der nächsten Kassenanmeldung
+übernommen?“
+- **Kette geprüft** (PC-Manager → Stammdaten senden → Kasse): Kaub-Getränke und Eierlikörpunsch kommen mit Zutaten und
+  Allergenen an.
+- **Befund:** Der Abgleich ersetzt die Artikel der Kasse komplett. Wo der Manager keine Information führt
+  (Feuerzangenbowle, Speisen, Schüsse), verschwanden die Angaben, die die Kasse selbst kannte, z. B. „Enthält Sulfite“
+  oder Senf/Sellerie.
+- **Behebung** (`app.js` r66, Kasse und Schulung): Ist die Information eines Artikels vom Manager komplett leer, gilt die
+  bekannte Angabe aus der Grundausstattung der Kasse. Gepflegte Manager-Angaben haben immer Vorrang.
+- Test `tests/artikelinfo-kette.test.cjs` (neu).
+- **Weiter offen:**
+  - Zusatzstoffe und Nährwerte bei allen Getränken; Etiketten- oder Spezifikationsfotos werden benötigt.
+  - Mettwurst, Kartoffel mit Hering, Schuss Rum/Amaretto ohne Angaben. Rum ist in Supabase `kc_manager_articles`
+    geprüft vorhanden, wird aber von keinem Programm gelesen.
+
+## Nachtrag 14.10.2026 – Geprüfte Artikelinformationen aus Supabase (Rum) · Feature KC-ARTIKELINFO-SUPABASE
+
+Betreiber: „Ja, Rum aus Supabase übernehmen.“
+- In Supabase liegen geprüfte Produktinformationen (`kc_manager_articles` + `kc_manager_article_allergens`). POTT Rum 40 %
+  ist am 11.09.2026 freigegeben: Zutat Rum, keine deklarationspflichtigen Zusatzstoffe, keine Big-14-Allergene,
+  916 kJ / 221 kcal je 100 ml, Hersteller. Bisher las kein Programm diese Tabelle.
+- Neuer Baustein `pc-manager/kc-artikelinfo-supabase.js` 1.0.0 (Manager und Schulungs-Manager):
+  - Nach der Supabase-Anmeldung liest er alle **freigegebenen** Einträge, über die Berechtigung als Manager-Mitglied.
+  - Er trägt sie beim zugehörigen Kassenartikel ein: POTT_RUM_40 → Schuss Rum, RAVINI_AMARETTO_21_5 → Schuss Amaretto.
+  - Amaretto ist „in Prüfung“ und wird nicht übernommen.
+  - Von Hand gepflegte Angaben bleiben. Supabase bleibt die Quelle: Änderungen dort kommen beim nächsten Start mit.
+  - Danach sendet er über den vorhandenen Stammdaten-Abgleich an die Kassen (`KCTimeClockManager.anKassenSenden`,
+    `time-clock-manager.js` 0.4.1).
+- Test `tests/artikelinfo-supabase.test.cjs` (neu): Manager, Schulungs-Manager, Weg bis zur Kasse.

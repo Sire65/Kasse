@@ -1,6 +1,6 @@
 (function (global) {
   'use strict';
-  const VERSION = '0.4.0', CONFIG_KEY = 'kcm_time_clock_config_v1', PEOPLE_KEY = 'kcm_time_clock_people_v1', EVENTS_KEY = 'kcm_time_clock_events_v1';
+  const VERSION = '0.4.1', CONFIG_KEY = 'kcm_time_clock_config_v1', PEOPLE_KEY = 'kcm_time_clock_people_v1', EVENTS_KEY = 'kcm_time_clock_events_v1';
   // Teil B der Dienstzeiten: die Kassen melden ihre Buchungen laufend an den Manager-Dienst
   // (Loopback 47392, /zeiterfassung/melden). Bisher landeten sie dort in der Datenbank und
   // BLIEBEN LIEGEN - diese Seite kannte nur den Weg ueber eine von Hand ausgetauschte Datei.
@@ -631,5 +631,5 @@
   // dienstplanZeilen wird mit herausgegeben, damit der Dienstplan-Export pruefbar ist, ohne
   // dafuer QR-Codes scannen zu muessen - genau die Faelle (nur Kommen / nur Gehen) lassen
   // sich von Hand kaum zuverlaessig herstellen.
-  global.KCTimeClockManager = {version:VERSION, refresh:render, dienstplanZeilen, zugaengeEinrichten, zugaengeUebernehmen, kassenPaket};
+  global.KCTimeClockManager = {version:VERSION, refresh:render, dienstplanZeilen, zugaengeEinrichten, zugaengeUebernehmen, kassenPaket, anKassenSenden};
 })(window);

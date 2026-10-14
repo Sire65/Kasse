@@ -81,7 +81,7 @@
       "label": "Studio TimeClockCore"
     },
     "timeClockManager": {
-      "requiredVersion": "0.4.0",
+      "requiredVersion": "0.4.1",
       "label": "Zeiterfassung im PC-Manager"
     },
     "timeClockDutyRosterAdapter": {

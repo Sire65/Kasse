@@ -30,7 +30,7 @@
       eventProgramTuvRules: Object.freeze({ requiredVersion: '1.0.0', label: 'TÜV-Regelsatz Programmübergabe' }),
       christmasPresentationTemplate: Object.freeze({ requiredVersion: '1.3.0', label: 'Weihnachtsmarkt-Vorlage mit bestätigter Mitglieder-Fotozuordnung', runtimeRequired: true }),
       timeClockCore: Object.freeze({ requiredVersion: '0.1.0', label: 'Studio TimeClockCore' }),
-      timeClockManager: Object.freeze({ requiredVersion: '0.4.0', label: 'Zeiterfassung im PC-Manager' }),
+      timeClockManager: Object.freeze({ requiredVersion: '0.4.1', label: 'Zeiterfassung im PC-Manager' }),
       timeClockDutyRosterAdapter: Object.freeze({ requiredVersion: '0.2.0', label: 'Dienstplan Soll-/Ist-Schnittstelle' }),
       timeClockPOS: Object.freeze({ requiredVersion: '0.1.1', label: 'Schnellerfassung an der Kasse mit Candidate-Testzugang', runtimeRequired: false }),
       recipeManager: Object.freeze({ requiredVersion: '0.2.1', label: 'Rezepturpflege mit Grünkohl-/Sauerkraut-Arbeitsständen' }),

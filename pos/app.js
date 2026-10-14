@@ -96,6 +96,17 @@ const DEFAULT_PRODUCTS=[
  {id:"becher",name:"Außer-Haus-Becher",price:1.00,category:"Sonstiges",image:"assets/becher_auth.jpg"}
 ];
 let PRODUCTS=JSON.parse(localStorage.getItem("kc_products_v050")||"null")||DEFAULT_PRODUCTS;
+// 14.10.2026 (Betreiber: "Sind jetzt alle Daten drin und werden bei der naechsten Kassenanmeldung uebernommen?") -
+// BEFUND bei der Pruefung: der Stammdaten-Abgleich ersetzt die Artikel der Kasse komplett durch die des PC-Managers. Fuehrte
+// der Manager zu einem Artikel GAR KEINE Produktinformation, verschwanden die Angaben, die die Kasse selbst kannte
+// (z. B. Feuerzangenbowle "Enthaelt Sulfite", Gruenkohl/Sauerkraut Senf/Sellerie) - Allergene waren dann am Stand
+// unsichtbar. Jetzt: ist die Information vom Manager leer, gilt die bekannte Angabe aus der Grundausstattung der Kasse.
+// Was der Manager pflegt, hat immer Vorrang - ersetzt wird nur eine komplett leere Information.
+function produktInfoHatInhalt(i){if(!i||typeof i!=="object")return false;const n=i.nutrition||{};
+  return [i.ingredients,i.legacyAllergens,i.shortDescription].some(x=>String(x||"").trim())||(typeof i.allergens==="string"&&i.allergens.trim())
+    ||(i.allergens&&typeof i.allergens==="object"&&Object.values(i.allergens).some(v=>v==="contained"||v==="traces"))
+    ||(String(i.additives||"").trim()&&!/^keine angaben?$/i.test(String(i.additives).trim()))||Object.values(n).some(v=>v!==null&&v!==""&&v!==undefined)}
+if(PRODUCTS!==DEFAULT_PRODUCTS)PRODUCTS.forEach(p=>{if(produktInfoHatInhalt(p.info))return;const d=DEFAULT_PRODUCTS.find(x=>x.id===p.id);if(d&&produktInfoHatInhalt(d.info))p.info=JSON.parse(JSON.stringify(d.info))});
 // Außer-Haus-Becher als Zweitplatzierung: Stammdaten/Auswertung bleiben "Sonstiges",
 // zusaetzlich erscheint derselbe Artikel unter "Speisen" als Schnellzugriff.
 {
