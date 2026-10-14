@@ -1061,3 +1061,21 @@ Betreiber: „Ja, Rum aus Supabase übernehmen.“
 - Maßnahme: Der Test meldet Programmfehler jetzt mit Fundstelle (Datei:Zeile, drei Aufrufebenen). Tritt der Fehler
   wieder auf, steht die Ursache direkt in der Meldung. Bewusst keine Absicherung „auf Verdacht“ an Stellen, die nicht
   als Ursache belegt sind.
+
+## Nachtrag 14.10.2026 – Edelstahlschild als Ständer · Feature KC-SCHILD-STAENDER
+
+Betreiber: „Baue noch das Edelstahlschild genau so, aber als Ständer: Front etwas nach hinten geneigt, unten dreht sich
+das Metall zu einer Bodenplatte (wie ein Reserviert-Schild). Maße bleiben, Langlöcher nicht, mittiges Loch bleibt.“
+- Grundlage ist die Originalzeichnung SCH-001 Rev. C „Schild mit Bandbefestigung“. Daraus übernommen:
+  - 90 × 100 mm, Edelstahl 1.4301, Blech 1,5 mm
+  - Ecken R8 oben
+  - Rundloch Ø8 mittig, Mitte 8 mm unter der Oberkante
+  - Etikett 80 × 80 ab 16 mm unter der Oberkante
+  - Die 2 Langlöcher 16 × 4 entfallen.
+- Ständer: Die Biegekante liegt an der Unterkante der Schildfläche; die Bodenplatte 90 × 60 mm hat hinten Ecken R8.
+  Neigung 15° nach hinten, Bodenplatte 60 mm und Biegeradius R≈2 sind Annahmen und in der Zeichnung mit * markiert.
+- Generator `werkzeuge/etiketten/staender-zeichnung.cjs` erzeugt `ausgabe/Staender_Schild_Zeichnung.pdf` und `.png`:
+  eine A4-Seite quer mit Vorderansicht und Seitenansicht (M 1:2), Perspektive und Schriftfeld SCH-002 Rev. A.
+- Test `tests/staender-zeichnung.test.cjs` (neu): prüft die Maße gegen SCH-001, dass keine Langlöcher gezeichnet sind,
+  dass alle drei Ansichten vorhanden sind und dass das PDF genau eine Seite hat. Der Test fand eine leere zweite
+  PDF-Seite; behoben an der Quelle (Seitenformat fest, SVG als Block).
