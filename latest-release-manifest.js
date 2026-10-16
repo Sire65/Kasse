@@ -4,17 +4,17 @@
   global.KC_CENTRAL_RELEASE_MANIFEST = Object.freeze({
     schema: 'KC_CENTRAL_RELEASE_MANIFEST_V2',
     product: 'KC MarktKasse',
-    releaseVersion: '0.31.3.6.63-symbol-job-code-parity',
-    displayVersion: 'V0.31.3.6 Repair 63 · Symbol- und Aktivierungscode-Parität Candidate',
+    releaseVersion: '0.31.3.6.64-golden-master-20260919',
+    displayVersion: 'V0.31.3.6 Repair 64 · Golden Master 19.09.2026',
     productBaseVersion: '0.31.3.6.19',
     productBaseDisplayVersion: 'V0.31.3.6 Repair 19',
     uiSchemaVersion: '0.31.3.6-r18-ui.1',
-    releaseDate: '2026-07-24',
+    releaseDate: '2026-09-19',
     status: 'Candidate',
-    releaseName: 'Frei positionierte Symbole auf Bau- und TV-Bildschirm sowie eindeutige Auftragscodes',
+    releaseName: 'Konsolidierter Golden Master · Bilder V3 · Supabase Top-Layer Fix',
     priority: Object.freeze({ component: 'tv-presentation-manager', label: 'TV-Präsentation im Manager', freezeOtherFeatures: true }),
     components: Object.freeze({
-      manager: Object.freeze({ requiredVersion: '0.31.2.5', label: 'KC MarktKasse Manager' }),
+      manager: Object.freeze({ requiredVersion: '0.31.3.6.64', label: 'KC MarktKasse Manager · Golden Master' }),
       tvPresentation: Object.freeze({ requiredVersion: '0.29.38', label: 'TV-Präsentation mit Mitglieder- und Preislistenmigration' }),
       unifiedEditor: Object.freeze({ requiredVersion: '1.2.0', label: 'Unified Editor ohne auswahlbedingten Schriftgrößenwechsel' }),
       displayMatrix: Object.freeze({ requiredVersion: '0.2.3', label: 'DisplayMatrixCore' }),
@@ -42,12 +42,13 @@
       managerEventSimulation: Object.freeze({ requiredVersion: '0.1.0', label: 'Isolierter PC-Manager-Testadapter', runtimeRequired: false }),
       managerImportProgress: Object.freeze({ requiredVersion: '0.1.0', label: 'Sichtbarer Umsatzimport-FortschrittsCore' })
     }),
-    training: Object.freeze({ version: '0.29.3', supportedUiSchema: '0.31.3.6-r15-ui.1' }),
+    training: Object.freeze({ version: 'Bilder V3', supportedUiSchema: '0.31.3.6-r18-ui.1', sourceCommit: '783330305d0420a2338d6faa9e1d152f6c3e7b73' }),
     releaseGate: Object.freeze({ blockOnMissingManifest: true, blockOnVersionMismatch: true, blockOnMissingComponent: true, requirePracticalVisualCheck: true }),
-    verification: Object.freeze({ practicalVisualCheck: 'PENDING_TARGET_DEVICE', checkedBy: 'Codex Static and Regression Tests', checkedAt: '2026-07-24T18:00:00+02:00' }),
+    verification: Object.freeze({ practicalVisualCheck: 'PENDING_TARGET_DEVICE', checkedBy: 'Golden Master Guard + PC Manager Real Flow Telemetry TÜV', checkedAt: '2026-09-19T18:20:00+02:00' }),
     sourceOfTruth: 'latest-release-manifest.js',
-    sourceRelease: 'KC_MarktKasse_Suite_V0_31_3_6_Repair_15_Fluid_Text_Input_Candidate',
-    updatedAt: '2026-09-18T17:58:00+02:00',
-    update: Object.freeze({ schema: 'KC_UPDATE_V1', buildId: 2026091803, channel: 'candidate', source: 'github-main', checkUrl: 'https://raw.githubusercontent.com/Sire65/Kasse/main/latest-release-manifest.json' })
+    sourceRelease: 'Kasse/main@783330305d0420a2338d6faa9e1d152f6c3e7b73',
+    updatedAt: '2026-09-19T18:20:00+02:00',
+    goldenMaster: Object.freeze({ sourceCommit: '783330305d0420a2338d6faa9e1d152f6c3e7b73', governanceCommit: '7e64d030e43b548a260e586f2f3bbfc59d377abf', imagesVersion: '3', supabaseTopLayerFix: true }),
+    update: Object.freeze({ schema: 'KC_UPDATE_V1', buildId: 2026091901, channel: 'candidate', source: 'github-main', checkUrl: 'https://raw.githubusercontent.com/Sire65/Kasse/main/latest-release-manifest.json' })
   });
 })(window);

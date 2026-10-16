@@ -1,14 +1,14 @@
 {
   "schema": "KC_CENTRAL_RELEASE_MANIFEST_V2",
   "product": "KC MarktKasse",
-  "releaseVersion": "0.31.3.6.63-symbol-job-code-parity",
-  "displayVersion": "V0.31.3.6 Repair 63 · Symbol- und Aktivierungscode-Parität Candidate",
+  "releaseVersion": "0.31.3.6.64-golden-master-20260919",
+  "displayVersion": "V0.31.3.6 Repair 64 · Golden Master 19.09.2026",
   "productBaseVersion": "0.31.3.6.19",
   "productBaseDisplayVersion": "V0.31.3.6 Repair 19",
   "uiSchemaVersion": "0.31.3.6-r18-ui.1",
-  "releaseDate": "2026-07-24",
+  "releaseDate": "2026-09-19",
   "status": "Candidate",
-  "releaseName": "Frei positionierte Symbole auf Bau- und TV-Bildschirm sowie eindeutige Auftragscodes",
+  "releaseName": "Konsolidierter Golden Master · Bilder V3 · Supabase Top-Layer Fix",
   "priority": {
     "component": "tv-presentation-manager",
     "label": "TV-Präsentation im Manager",
@@ -16,8 +16,8 @@
   },
   "components": {
     "manager": {
-      "requiredVersion": "0.31.2.5",
-      "label": "KC MarktKasse Manager"
+      "requiredVersion": "0.31.3.6.64",
+      "label": "KC MarktKasse Manager · Golden Master"
     },
     "tvPresentation": {
       "requiredVersion": "0.29.38",
@@ -129,8 +129,9 @@
     }
   },
   "training": {
-    "version": "0.29.3",
-    "supportedUiSchema": "0.31.3.6-r15-ui.1"
+    "version": "Bilder V3",
+    "supportedUiSchema": "0.31.3.6-r18-ui.1",
+    "sourceCommit": "783330305d0420a2338d6faa9e1d152f6c3e7b73"
   },
   "releaseGate": {
     "blockOnMissingManifest": true,
@@ -140,19 +141,25 @@
   },
   "verification": {
     "practicalVisualCheck": "PENDING_TARGET_DEVICE",
-    "checkedBy": "Codex Static and Regression Tests",
-    "checkedAt": "2026-07-24T18:00:00+02:00"
+    "checkedBy": "Golden Master Guard + PC Manager Real Flow Telemetry TÜV",
+    "checkedAt": "2026-09-19T18:20:00+02:00"
   },
   "sourceOfTruth": "latest-release-manifest.js",
-  "sourceRelease": "KC_MarktKasse_Suite_V0_31_3_6_Repair_15_Fluid_Text_Input_Candidate",
-  "updatedAt": "2026-09-18T17:58:00+02:00",
+  "sourceRelease": "Kasse/main@783330305d0420a2338d6faa9e1d152f6c3e7b73",
+  "updatedAt": "2026-09-19T18:20:00+02:00",
   "hinweis": "Automatisch mit latest-release-manifest.js abzugleichen. Das Update-Build dient der lokalen Update-Erkennung; Nutzdaten und Supabase werden durch die Prüfung nicht verändert.",
-  "abgeglichenAm": "2026-09-02",
+  "abgeglichenAm": "2026-09-19",
   "update": {
     "schema": "KC_UPDATE_V1",
-    "buildId": 2026091803,
+    "buildId": 2026091901,
     "channel": "candidate",
     "source": "github-main",
     "checkUrl": "https://raw.githubusercontent.com/Sire65/Kasse/main/latest-release-manifest.json"
+  },
+  "goldenMaster": {
+    "sourceCommit": "783330305d0420a2338d6faa9e1d152f6c3e7b73",
+    "governanceCommit": "7e64d030e43b548a260e586f2f3bbfc59d377abf",
+    "imagesVersion": "3",
+    "supabaseTopLayerFix": true
   }
 }
