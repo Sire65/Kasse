@@ -6,7 +6,7 @@
 // Gleiche Aufgaben (daten.js) und Gestaltung wie die Uebungsliste bzw. die Club-App-Unterlagen.
 const fs=require('fs'),path=require('path');const pw=require('playwright');const D=require('./daten.js');
 const ZIEL=path.join(__dirname,'..','..','schulung','uebungsliste');
-const VERSION='Version 4.2',STAND='13.10.2026';
+const VERSION='Version 4.3',STAND='22.10.2026';
 const b64=f=>'data:image/png;base64,'+fs.readFileSync(path.join(__dirname,f)).toString('base64');
 const LOGO=b64('logo.png'),HUT=b64('hut.png');
 const esc=s=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;');
@@ -33,6 +33,14 @@ const pos=(i,rueck)=>{const r=Math.floor(i/SP),c=i%SP;const cc=rueck?SP-1-c:c;re
 const marken=(dx=0,dy=0)=>{let h='';const L=RAND-3;
  for(let c=0;c<=SP;c++){const x=X0+c*KB+dx;h+=`<i class="m v" style="left:${x}mm;top:2mm;height:${L}mm"></i><i class="m v" style="left:${x}mm;top:${297-2-L}mm;height:${L}mm"></i>`}
  for(let r=0;r<=ZE;r++){const y=Y0+r*KH+dy;h+=`<i class="m h" style="top:${y}mm;left:2mm;width:${L}mm"></i><i class="m h" style="top:${y}mm;left:${210-2-L}mm;width:${L}mm"></i>`}
+ // Version 4.3 (Betreiber 22.10.2026: "ich schneide mit dem Schneidegeraet (Blatt auflegen, Messer runter) – ich brauche mehr Schnittmarken,
+ // damit ich an jeder Stelle sehe, wo ich schneiden muss"): nach dem ersten Schnitt fehlten den inneren Streifen die Striche vom Blattrand.
+ // Jetzt zusaetzlich (1) an JEDER Ecke jeder Karte ein Kreuz (Arme 2,5 mm – liegen im 3-mm-Freirand, treffen nie Text) und
+ // (2) jede Schnittlinie als feine graue Strichellinie quer ueber das ganze Blatt. So sieht man auf jedem Streifen und jeder Karte, wo das Messer hin muss.
+ const A=2.5,xs=[...Array(SP+1)].map((_,c)=>X0+c*KB+dx),ys=[...Array(ZE+1)].map((_,r)=>Y0+r*KH+dy);
+ for(const x of xs)h+=`<i class="sl v" style="left:${x}mm;top:${Y0+dy}mm;height:${ZE*KH}mm"></i>`;
+ for(const y of ys)h+=`<i class="sl h" style="top:${y}mm;left:${X0+dx}mm;width:${SP*KB}mm"></i>`;
+ for(const x of xs)for(const y of ys)h+=`<i class="m v" style="left:${x}mm;top:${y-A}mm;height:${2*A}mm"></i><i class="m h" style="top:${y}mm;left:${x-A}mm;width:${2*A}mm"></i>`;
  return h};
 const kopf=k=>ampel(k);
 const vorne=k=>{const lage=k.k.startsWith('(');return `${kopf(k)}<div class="vkopf"><div class="nrgross">${k.nr}</div><div class="thema">${esc(k.stufe.split(' · ')[1])}</div></div><div class="vinhalt">
@@ -66,6 +74,7 @@ seiten+=`<div class="seite anl"><div class="akopf"><img src="${LOGO}"><b>Köchec
  <li>Am besten auf festerem Papier (160–200 g/m²). Seite 2 bleibt leer, damit Vorder- und Rückseiten zusammenpassen.</li>
  <li>Die Karten liegen ohne Abstand aneinander: Lineal von Strich zu Strich am Blattrand anlegen und <b>einmal durchgehend schneiden</b> – je Blatt nur ${SP+1} Schnitte längs und ${ZE+1} quer. Ergibt ${JE} Karten, ${KB.toFixed(0)} × ${KH.toFixed(0)} mm.</li>
  <li>Jede Karte hat innen 3 mm freien Rand – ein leicht schiefer Schnitt trifft keinen Text.</li>
+ <li><b>Schneidegerät:</b> Jede Schnittlinie ist als feine graue Strichellinie über das ganze Blatt gedruckt, an jeder Kartenecke steht ein kleines Kreuz <b>+</b>. Auch nach den ersten Schnitten siehst du auf jedem Streifen, wo das Messer hin muss.</li>
  <li>Probe: Auf Karte 1 steht vorne „Eierpunsch“ und hinten die Lösung zu Aufgabe 1.</li></ul>
  <p><b>Beachte:</b> Einige Funktionen können sich mit der Zeit noch ändern, weil ständig am Bilderrechner weiterentwickelt wird.</p></div>
 </div><div class="seite"><div class="leer">Diese Seite bleibt für den beidseitigen Druck leer.</div></div>`;
@@ -87,7 +96,8 @@ for(let i=0;i<alle.length;i+=JE){const gruppe=alle.slice(i,i+JE);
 const CSS=`@page{size:A4;margin:0}.bleistift{display:flex;align-items:center;gap:12pt;margin:14pt 0 4pt;padding:11pt 14pt;border:1.6pt solid #173765;border-radius:6pt;background:linear-gradient(90deg,#fff7d6,#fffbe9);box-shadow:0 1.5pt 0 #d97706 inset}.bs-icon{font-size:30pt;line-height:1;transform:rotate(-8deg)}.bs-titel{font-size:15.5pt;font-weight:700;color:#173765;margin-bottom:3pt}.bs-text{font-size:11pt;line-height:1.38}.bs-box{display:inline-block;width:10pt;height:10pt;border:1.3pt solid #111;border-radius:1.5pt;vertical-align:-1pt;background:#fff}*{box-sizing:border-box}html,body{margin:0}
 body{font-family:Carlito,'Liberation Sans',sans-serif;color:#111;font-size:10pt;line-height:1.3;-webkit-print-color-adjust:exact;print-color-adjust:exact}
 .seite{width:210mm;height:297mm;position:relative;overflow:hidden;break-after:page}
-.m{position:absolute;background:#111}.m.v{width:.25mm}.m.h{height:.25mm}
+.m{position:absolute;background:#111;z-index:3}.m.v{width:.25mm;margin-left:-.125mm}.m.h{height:.25mm;margin-top:-.125mm}
+.sl{position:absolute;z-index:2}.sl.v{width:0;border-left:.18mm dashed #8a929c;margin-left:-.09mm}.sl.h{height:0;border-top:.18mm dashed #8a929c;margin-top:-.09mm}
 .karte{position:absolute;width:${KB}mm;height:${KH}mm;overflow:hidden}
 .kin{position:absolute;left:${3/Z}mm;top:${3/Z}mm;width:85mm;height:${(KH-6)/Z}mm;zoom:${Z};display:flex;flex-direction:column}
 .ampel{display:flex;align-items:center;gap:2mm;color:#fff;border-radius:1mm;padding:1.4mm 2.2mm;margin-bottom:1mm}.ampel b{font-size:13pt;letter-spacing:.6pt}.ampel em{margin-left:auto;font-style:normal;font-size:11pt;opacity:.95}.lichter{display:inline-flex;gap:1.1mm;background:#1f2937;padding:.9mm 1.4mm;border-radius:2mm}.lichter i{width:2.6mm;height:2.6mm;border-radius:50%;display:block}
