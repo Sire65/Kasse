@@ -3,9 +3,9 @@
 // Aufgaben stehen in daten.js - nach jeder Aenderung an der Kasse die Schritte erneut durchspielen.
 // Gestaltung wie die Unterlagen in der Club-App (Kurzanleitung Bilderrechner, Club-App-Anleitung):
 // Kochmuetze + "Koecheclub Werne" in #173765, Ueberschriften #2e7d32, Grau #5b6572, Schrift Carlito.
-const fs=require('fs'),path=require('path');const pw=require('playwright');const D=require('./daten.js');
+const fs=require('fs'),path=require('path');const pw=require('playwright');const D=require('./daten.js');const exaktA4=require('./a4.cjs');
 const ZIEL=path.join(__dirname,'..','..','schulung','uebungsliste');fs.mkdirSync(ZIEL,{recursive:true});
-const VERSION='Version 4.2',STAND='13.10.2026',KASSE='Bilderrechner V0.31.3.6';
+const VERSION='Version 4.3',STAND='26.10.2026',KASSE='Bilderrechner V0.31.3.6';
 const b64=f=>'data:image/png;base64,'+fs.readFileSync(path.join(__dirname,f)).toString('base64');
 const LOGO=b64('logo.png'),HUT=b64('hut.png');
 for(const f of ['logo.png','hut.png'])fs.copyFileSync(path.join(__dirname,f),path.join(ZIEL,f));
@@ -192,4 +192,4 @@ fs.writeFileSync(path.join(ZIEL,'karten.html'),kartenWeb);
   headerTemplate:`<div style="font-family:Carlito,sans-serif;width:100%;margin:0 19mm;display:flex;align-items:flex-end;border-bottom:1.1pt solid #173765;padding-bottom:4pt;-webkit-print-color-adjust:exact"><img src="${LOGO}" style="width:31pt;margin-right:6pt"><b style="color:#173765;font-size:11pt">Köcheclub Werne</b><span style="margin-left:auto;color:#5b6572;font-size:9pt">Kassen-Training · Übungsliste · ${VERSION}</span></div>`,
   footerTemplate:`<div style="font-family:Carlito,sans-serif;width:100%;text-align:center;color:#5b6572;font-size:9pt">Seite <span class="pageNumber" style="color:#111;font-size:10.5pt"></span> von <span class="totalPages" style="color:#111;font-size:10.5pt"></span></div>`,
   margin:{top:'22mm',bottom:'17mm',left:'19mm',right:'19mm'}});
- await b.close();fs.unlinkSync(druckDatei);console.log('fertig: Webseite + PDF in',ZIEL)})();
+ await b.close();fs.unlinkSync(druckDatei);console.log('A4 exakt:',exaktA4(path.join(ZIEL,'Kassen-Training_Uebungsliste.pdf')),'Seiten');console.log('fertig: Webseite + PDF in',ZIEL)})();

@@ -4,9 +4,9 @@
 // je Blatt SP x ZE Karten mit Schnittmarken (Standard 3 x 3). Die Rueckseiten sind dafuer gespiegelt angeordnet
 // (linke Karte vorne = rechte Karte hinten), damit jede Loesung genau hinter ihrer Aufgabe liegt.
 // Gleiche Aufgaben (daten.js) und Gestaltung wie die Uebungsliste bzw. die Club-App-Unterlagen.
-const fs=require('fs'),path=require('path');const pw=require('playwright');const D=require('./daten.js');
+const fs=require('fs'),path=require('path');const pw=require('playwright');const D=require('./daten.js');const exaktA4=require('./a4.cjs');
 const ZIEL=path.join(__dirname,'..','..','schulung','uebungsliste');
-const VERSION='Version 4.3',STAND='22.10.2026';
+const VERSION='Version 4.4',STAND='26.10.2026';
 const b64=f=>'data:image/png;base64,'+fs.readFileSync(path.join(__dirname,f)).toString('base64');
 const LOGO=b64('logo.png'),HUT=b64('hut.png');
 const esc=s=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;');
@@ -25,8 +25,11 @@ const gesamt=karten.length;
 // (AB=0) -> je Blatt nur 8 durchgehende Schnitte. Aussen 8 mm Rand fuer die Schnittmarken; in jeder Karte bleiben
 // 3 mm rundum frei (Sicherheitsrand), damit ein schiefer Schnitt oder 1-2 mm Druckversatz nie Text trifft.
 // VX/VY (mm): verschiebt nur die Rueckseiten, falls ein Drucker sie immer gleich versetzt druckt.
-const SP=Number(process.env.SP||3),ZE=Number(process.env.ZE||3),JE=SP*ZE,RAND=8,AB=0,VX=Number(process.env.VX||0),VY=Number(process.env.VY||0);
-const KB=(210-2*RAND-(SP-1)*AB)/SP,KH=(297-2*RAND-(ZE-1)*AB)/ZE,X0=RAND,Y0=RAND,Z=(KB-6)/85;
+// Version 4.4 (Betreiber 26.10.2026: "Text nicht zu nah an den Schneiderand, ich schneide manuell"): Freirand in jeder Karte
+// von 3 auf 6 mm (SICHER). Reicht fuer ca. 2 mm Schnittungenauigkeit plus 1-2 mm Versatz der Rueckseite im Duplexdruck.
+// Kartengroesse und "1 Schnitt zwischen den Karten" bleiben; der Inhalt wird entsprechend kleiner (Z).
+const SP=Number(process.env.SP||3),ZE=Number(process.env.ZE||3),JE=SP*ZE,RAND=8,AB=0,SICHER=6,VX=Number(process.env.VX||0),VY=Number(process.env.VY||0);
+const KB=(210-2*RAND-(SP-1)*AB)/SP,KH=(297-2*RAND-(ZE-1)*AB)/ZE,X0=RAND,Y0=RAND,Z=(KB-2*SICHER)/85;
 const pos=(i,rueck)=>{const r=Math.floor(i/SP),c=i%SP;const cc=rueck?SP-1-c:c;return {x:X0+cc*(KB+AB)+(rueck?VX:0),y:Y0+r*(KH+AB)+(rueck?VY:0)}};
 // Schnittmarken nur am Blattrand: je Schnittlinie ein Strich oben+unten bzw. links+rechts (Lineal von Strich zu Strich).
 // Striche von 2 bis 7 mm vom Blattrand - auch Drucker mit 4 mm unbedruckbarem Rand zeigen davon noch genug.
@@ -35,7 +38,7 @@ const marken=(dx=0,dy=0)=>{let h='';const L=RAND-3;
  for(let r=0;r<=ZE;r++){const y=Y0+r*KH+dy;h+=`<i class="m h" style="top:${y}mm;left:2mm;width:${L}mm"></i><i class="m h" style="top:${y}mm;left:${210-2-L}mm;width:${L}mm"></i>`}
  // Version 4.3 (Betreiber 22.10.2026: "ich schneide mit dem Schneidegeraet (Blatt auflegen, Messer runter) – ich brauche mehr Schnittmarken,
  // damit ich an jeder Stelle sehe, wo ich schneiden muss"): nach dem ersten Schnitt fehlten den inneren Streifen die Striche vom Blattrand.
- // Jetzt zusaetzlich (1) an JEDER Ecke jeder Karte ein Kreuz (Arme 2,5 mm – liegen im 3-mm-Freirand, treffen nie Text) und
+ // Jetzt zusaetzlich (1) an JEDER Ecke jeder Karte ein Kreuz (Arme 2,5 mm – liegen im Freirand, treffen nie Text) und
  // (2) jede Schnittlinie als feine graue Strichellinie quer ueber das ganze Blatt. So sieht man auf jedem Streifen und jeder Karte, wo das Messer hin muss.
  const A=2.5,xs=[...Array(SP+1)].map((_,c)=>X0+c*KB+dx),ys=[...Array(ZE+1)].map((_,r)=>Y0+r*KH+dy);
  for(const x of xs)h+=`<i class="sl v" style="left:${x}mm;top:${Y0+dy}mm;height:${ZE*KH}mm"></i>`;
@@ -73,7 +76,7 @@ seiten+=`<div class="seite anl"><div class="akopf"><img src="${LOGO}"><b>Köchec
  <li><b>Beidseitig</b> drucken, Einstellung <b>„an der langen Kante wenden“</b>, Größe <b>100 %</b> (nicht „an Seite anpassen“).</li>
  <li>Am besten auf festerem Papier (160–200 g/m²). Seite 2 bleibt leer, damit Vorder- und Rückseiten zusammenpassen.</li>
  <li>Die Karten liegen ohne Abstand aneinander: Lineal von Strich zu Strich am Blattrand anlegen und <b>einmal durchgehend schneiden</b> – je Blatt nur ${SP+1} Schnitte längs und ${ZE+1} quer. Ergibt ${JE} Karten, ${KB.toFixed(0)} × ${KH.toFixed(0)} mm.</li>
- <li>Jede Karte hat innen 3 mm freien Rand – ein leicht schiefer Schnitt trifft keinen Text.</li>
+ <li>Jede Karte hat innen ${SICHER} mm freien Rand – auch ein schiefer Schnitt oder eine leicht verschobene Rückseite trifft keinen Text.</li>
  <li><b>Schneidegerät:</b> Jede Schnittlinie ist als feine graue Strichellinie über das ganze Blatt gedruckt, an jeder Kartenecke steht ein kleines Kreuz <b>+</b>. Auch nach den ersten Schnitten siehst du auf jedem Streifen, wo das Messer hin muss.</li>
  <li>Probe: Auf Karte 1 steht vorne „Eierpunsch“ und hinten die Lösung zu Aufgabe 1.</li></ul>
  <p><b>Beachte:</b> Einige Funktionen können sich mit der Zeit noch ändern, weil ständig am Bilderrechner weiterentwickelt wird.</p></div>
@@ -99,7 +102,7 @@ body{font-family:Carlito,'Liberation Sans',sans-serif;color:#111;font-size:10pt;
 .m{position:absolute;background:#111;z-index:3}.m.v{width:.25mm;margin-left:-.125mm}.m.h{height:.25mm;margin-top:-.125mm}
 .sl{position:absolute;z-index:2}.sl.v{width:0;border-left:.18mm dashed #8a929c;margin-left:-.09mm}.sl.h{height:0;border-top:.18mm dashed #8a929c;margin-top:-.09mm}
 .karte{position:absolute;width:${KB}mm;height:${KH}mm;overflow:hidden}
-.kin{position:absolute;left:${3/Z}mm;top:${3/Z}mm;width:85mm;height:${(KH-6)/Z}mm;zoom:${Z};display:flex;flex-direction:column}
+.kin{position:absolute;left:${SICHER/Z}mm;top:${SICHER/Z}mm;width:85mm;height:${(KH-2*SICHER)/Z}mm;zoom:${Z};display:flex;flex-direction:column}
 .ampel{display:flex;align-items:center;gap:2mm;color:#fff;border-radius:1mm;padding:1.4mm 2.2mm;margin-bottom:1mm}.ampel b{font-size:13pt;letter-spacing:.6pt}.ampel em{margin-left:auto;font-style:normal;font-size:11pt;opacity:.95}.lichter{display:inline-flex;gap:1.1mm;background:#1f2937;padding:.9mm 1.4mm;border-radius:2mm}.lichter i{width:2.6mm;height:2.6mm;border-radius:50%;display:block}
 .ankreuzen{border-top:.25mm solid #c9ced6;padding-top:1.6mm;margin-top:1mm;display:flex;flex-direction:column;gap:1mm}.ak-reihe{display:flex;align-items:center;justify-content:space-between;font-size:12pt;font-weight:700;color:#173765}.ak-reihe.ok b{color:#2e7d32}.ak-reihe.nein b{color:#c62828}.ak-boxen{display:inline-flex;gap:2.2mm}.ak-b{display:inline-block;width:5.8mm;height:5.8mm;border:.45mm solid #2e7d32;border-radius:.8mm;background:#fff}.ak-reihe.nein .ak-b{border-color:#c62828}
 .kk{display:flex;align-items:flex-end;gap:2mm;border-bottom:.35mm solid #173765;padding-bottom:1.2mm}.kk img{width:9mm}.kk span{color:#173765;font-weight:700;font-size:9.5pt}.kk em{margin-left:auto;font-style:normal;color:#5b6572;font-size:8pt;letter-spacing:.2pt}
@@ -128,7 +131,8 @@ const datei=path.join(__dirname,'.karten.html');fs.writeFileSync(datei,html);
  // Version 4: Schrift fuellt die Karte. Groesste Schrift suchen, die noch ganz hineinpasst (Halbierungssuche):
  // Rueckseite ganze Loesung 12,3-19 pt, Vorderseite der Kundensatz 14-40 pt (Angaben vor der Verkleinerung um Z).
  const ergebnis=await p.evaluate(()=>{
-  const passt=h=>h.scrollHeight<=h.clientHeight+1;
+  // Version 4.4: auch die Breite pruefen - sonst wird ein langes Wort (z. B. TRAININGSMODUS) am rechten Rand abgeschnitten.
+  const passt=h=>h.scrollHeight<=h.clientHeight+1&&h.scrollWidth<=h.clientWidth+1;
   const suche=(h,ziel,min,max)=>{let lo=min,hi=max;ziel.style.fontSize=lo+'pt';if(!passt(h))return {f:lo,voll:true};
    while(hi-lo>0.2){const m=(lo+hi)/2;ziel.style.fontSize=m+'pt';if(passt(h))lo=m;else hi=m}ziel.style.fontSize=lo+'pt';return {f:lo,voll:false}};
   const r={hinten:[],vorne:[],voll:[]};
@@ -137,7 +141,9 @@ const datei=path.join(__dirname,'.karten.html');fs.writeFileSync(datei,html);
   return r});
  const pt=v=>(v*Z).toFixed(1);
  if(ergebnis.voll.length)console.log('ZU VOLL:',ergebnis.voll.join(', '));
- console.log(`Raster ${SP}x${ZE} = ${JE} je Blatt, Karte ${KB.toFixed(1)} x ${KH.toFixed(1)} mm, Rand ${RAND} mm, Rueckseiten-Versatz ${VX}/${VY} mm`);
+ console.log(`Raster ${SP}x${ZE} = ${JE} je Blatt, Karte ${KB.toFixed(1)} x ${KH.toFixed(1)} mm, Rand ${RAND} mm, Freirand ${SICHER} mm, Rueckseiten-Versatz ${VX}/${VY} mm`);
  console.log(`Loesung ${pt(Math.min(...ergebnis.hinten))}-${pt(Math.max(...ergebnis.hinten))} pt, Kundensatz ${pt(Math.min(...ergebnis.vorne))}-${pt(Math.max(...ergebnis.vorne))} pt (gedruckt)`);
- await p.pdf({path:process.env.OUT||path.join(ZIEL,'Kassen-Training_Karteikarten.pdf'),width:'210mm',height:'297mm',printBackground:true,margin:{top:0,bottom:0,left:0,right:0}});
+ const ausgabe=process.env.OUT||path.join(ZIEL,'Kassen-Training_Karteikarten.pdf');
+ await p.pdf({path:ausgabe,width:'210mm',height:'297mm',printBackground:true,margin:{top:0,bottom:0,left:0,right:0}});
+ console.log('A4 exakt:',exaktA4(ausgabe),'Seiten');
  await b.close();fs.unlinkSync(datei);console.log('fertig: Karteikarten-PDF in',ZIEL,'·',gesamt,'Karten')})();
