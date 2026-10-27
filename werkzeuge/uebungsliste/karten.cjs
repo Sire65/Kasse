@@ -6,7 +6,7 @@
 // Gleiche Aufgaben (daten.js) und Gestaltung wie die Uebungsliste bzw. die Club-App-Unterlagen.
 const fs=require('fs'),path=require('path');const pw=require('playwright');const D=require('./daten.js');const exaktA4=require('./a4.cjs');
 const ZIEL=path.join(__dirname,'..','..','schulung','uebungsliste');
-const VERSION='Version 4.4',STAND='26.10.2026';
+const VERSION='Version 4.5',STAND='27.10.2026';
 const b64=f=>'data:image/png;base64,'+fs.readFileSync(path.join(__dirname,f)).toString('base64');
 const LOGO=b64('logo.png'),HUT=b64('hut.png');
 const esc=s=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;');
@@ -56,7 +56,7 @@ const karte=(inhalt,p)=>`<div class="karte" style="left:${p.x}mm;top:${p.y}mm"><
 let seiten='';
 // Seite 1: Anleitung (A4, Stil der Club-App-Unterlagen), Seite 2 bleibt fuer den beidseitigen Druck leer
 seiten+=`<div class="seite anl"><div class="akopf"><img src="${LOGO}"><b>Köcheclub Werne</b><span>Kassen-Training · Karteikarten · ${VERSION}</span></div>
-<div class="titelblatt"><img src="${HUT}" style="width:62pt"><div class="t1">Köcheclub Werne</div><div class="t2">Kassen-Training — Karteikarten</div><div class="t3">${gesamt} Karten · ${VERSION} · Stand ${STAND} · dieselben Aufgaben wie in der Übungsliste</div></div>
+<div class="titelblatt"><img src="${HUT}" style="width:44pt"><div class="t1">Köcheclub Werne</div><div class="t2">Kassen-Training — Karteikarten</div><div class="t3">${gesamt} Karten · ${VERSION} · Stand ${STAND} · dieselben Aufgaben wie in der Übungsliste</div></div>
 <div class="bleistift"><div class="bs-icon">✏️</div><div class="bs-text"><div class="bs-titel">Bitte mit Bleistift ankreuzen!</div>
  <div>Die Kästchen <b>„Gewusst?“</b> <span class="bs-box"></span>&nbsp;<b style="color:#2e7d32">✓</b>&nbsp; <span class="bs-box"></span>&nbsp;<b style="color:#c62828">✗</b> nur mit <b>Bleistift</b> ausfüllen. Danach einfach <b>ausradieren</b> – so können die Karten immer wieder verwendet werden.</div></div></div>
 <h3 class="gruen">Alleine üben mit zwei Stapeln</h3>
@@ -121,8 +121,8 @@ ol{margin:0 0 .6em;padding-left:1.35em}ol li{margin-bottom:1.6mm}ol b,.kontrolle
 .kontrolle{border-left:.9mm solid #2e7d32;background:#e8f5ec;padding:1.5mm 2.4mm;font-size:.93em}
 .anl{padding:0}.akopf{position:absolute;left:19mm;right:19mm;top:8.5mm;height:11mm;border-bottom:.4mm solid #173765;display:flex;align-items:flex-end;padding-bottom:1.5mm}.akopf img{width:11mm;margin-right:2mm}.akopf b{color:#173765;font-size:11pt}.akopf span{margin-left:auto;color:#5b6572;font-size:9pt}
 .anl .titelblatt,.anl h3,.anl .kasten,.anl .bleistift{margin-left:19mm;margin-right:19mm}
-.titelblatt{text-align:center;padding-top:38mm}.t1{font-family:'Liberation Sans',sans-serif;color:#173765;font-size:26pt;margin-top:6pt}.t2{color:#5b6572;font-weight:700;font-size:15pt}.t3{color:#5b6572;font-size:8.5pt;margin-top:4pt}
-h3.gruen{color:#2e7d32;font-size:13.5pt;font-weight:400;margin-top:16pt;margin-bottom:6pt}
+.titelblatt{text-align:center;padding-top:24mm}.t1{font-family:'Liberation Sans',sans-serif;color:#173765;font-size:26pt;margin-top:6pt}.t2{color:#5b6572;font-weight:700;font-size:15pt}.t3{color:#5b6572;font-size:8.5pt;margin-top:4pt}
+h3.gruen{color:#2e7d32;font-size:13.5pt;font-weight:400;margin-top:11pt;margin-bottom:5pt}
 .kasten{border:1pt solid #9fd3a8;border-left:3pt solid #2e7d32;background:#e8f5ec;padding:9pt 12pt;font-size:10.3pt}.kasten ol,.kasten ul{margin:0 0 4pt;padding-left:16pt}.kasten li{margin-bottom:3pt}.kasten p{margin:4pt 0 0}
 .leer{position:absolute;top:140mm;width:100%;text-align:center;color:#9aa3ad;font-size:9pt}`;
 const html=`<!doctype html><html lang="de"><head><meta charset="utf-8"><title>Kassen-Training · Karteikarten</title><style>${CSS}</style></head><body>${seiten}</body></html>`;
@@ -139,6 +139,12 @@ const datei=path.join(__dirname,'.karten.html');fs.writeFileSync(datei,html);
   document.querySelectorAll('.hinhalt').forEach(h=>{const x=suche(h,h,12.3,19);r.hinten.push(x.f);if(x.voll)r.voll.push('hinten '+h.querySelector('.nr')?.textContent)});
   document.querySelectorAll('.vinhalt').forEach(h=>{const x=suche(h,h.querySelector('.satz'),14,32);r.vorne.push(x.f);if(x.voll)r.voll.push('vorne '+h.querySelector('.nrgross')?.textContent)});
   return r});
+ // Version 4.5 (Betreiber 27.10.2026: "die erste Seite passt nicht auf eine Seite und hat unten keinen Rand"): Titel weiter nach oben
+ // (Abstand 38 -> 24 mm, Muetze 62 -> 44 pt, Zwischenueberschriften etwas enger - nur Seite 1). Pruefung: der Inhalt der Anleitung endet mindestens 15 mm ueber dem Blattende, sonst Abbruch.
+ const anlUnten=await p.evaluate(()=>{const s=document.querySelector('.seite.anl'),o=s.getBoundingClientRect().top;
+  return Math.max(...[...s.children].map(e=>e.getBoundingClientRect().bottom-o))*25.4/96});
+ if(anlUnten>297-15)throw new Error(`Seite 1 (Anleitung) zu lang: Inhalt endet ${anlUnten.toFixed(1)} mm, erlaubt 282 mm`);
+ console.log(`Seite 1: Inhalt endet bei ${anlUnten.toFixed(1)} mm (unten ${(297-anlUnten).toFixed(1)} mm frei)`);
  const pt=v=>(v*Z).toFixed(1);
  if(ergebnis.voll.length)console.log('ZU VOLL:',ergebnis.voll.join(', '));
  console.log(`Raster ${SP}x${ZE} = ${JE} je Blatt, Karte ${KB.toFixed(1)} x ${KH.toFixed(1)} mm, Rand ${RAND} mm, Freirand ${SICHER} mm, Rueckseiten-Versatz ${VX}/${VY} mm`);
