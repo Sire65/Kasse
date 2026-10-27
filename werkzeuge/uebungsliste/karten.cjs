@@ -1,5 +1,5 @@
-// Karteikarten zum Kassen-Training erzeugen: node werkzeuge/uebungsliste/karten.cjs
-// Standard: 3 x 3 = 9 Karten je Blatt (Kassen-Training_Karteikarten.pdf).
+// Karteikarten zum Bilderrechner-Training erzeugen: node werkzeuge/uebungsliste/karten.cjs
+// Standard: 3 x 3 = 9 Karten je Blatt (Bilderrechner-Training_Karteikarten.pdf).
 // Vorderseite = Aufgabe, Rueckseite = Loesung. A4 beidseitig drucken ("an der langen Kante wenden"),
 // je Blatt SP x ZE Karten mit Schnittmarken (Standard 3 x 3). Die Rueckseiten sind dafuer gespiegelt angeordnet
 // (linke Karte vorne = rechte Karte hinten), damit jede Loesung genau hinter ihrer Aufgabe liegt.
@@ -157,7 +157,7 @@ const datei=path.join(__dirname,'.karten.html');fs.writeFileSync(datei,html);
  if(ergebnis.voll.length)console.log('ZU VOLL:',ergebnis.voll.join(', '));
  console.log(`Raster ${SP}x${ZE} = ${JE} je Blatt, Karte ${KB.toFixed(1)} x ${KH.toFixed(1)} mm, Rand ${RAND} mm, Freirand ${SICHER} mm, Rueckseiten-Versatz ${VX}/${VY} mm`);
  console.log(`Loesung ${pt(Math.min(...ergebnis.hinten))}-${pt(Math.max(...ergebnis.hinten))} pt, Kundensatz ${pt(Math.min(...ergebnis.vorne))}-${pt(Math.max(...ergebnis.vorne))} pt (gedruckt)`);
- const ausgabe=process.env.OUT||path.join(ZIEL,'Kassen-Training_Karteikarten.pdf');
+ const ausgabe=process.env.OUT||path.join(ZIEL,'Bilderrechner-Training_Karteikarten.pdf');
  await p.pdf({path:ausgabe,width:'210mm',height:'297mm',printBackground:true,margin:{top:0,bottom:0,left:0,right:0}});
  console.log('A4 exakt:',exaktA4(ausgabe),'Seiten');
  await b.close();fs.unlinkSync(datei);console.log('fertig: Karteikarten-PDF in',ZIEL,'·',gesamt,'Karten')})();
