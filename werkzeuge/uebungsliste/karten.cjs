@@ -6,7 +6,7 @@
 // Gleiche Aufgaben (daten.js) und Gestaltung wie die Uebungsliste bzw. die Club-App-Unterlagen.
 const fs=require('fs'),path=require('path');const pw=require('playwright');const D=require('./daten.js');const exaktA4=require('./a4.cjs');
 const ZIEL=path.join(__dirname,'..','..','schulung','uebungsliste');
-const VERSION='Version 4.5',STAND='27.10.2026';
+const VERSION='Version 4.6',STAND='27.10.2026';
 const b64=f=>'data:image/png;base64,'+fs.readFileSync(path.join(__dirname,f)).toString('base64');
 const LOGO=b64('logo.png'),HUT=b64('hut.png');
 const esc=s=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;');
@@ -16,7 +16,7 @@ let nr=0;const karten=[];
 D.forEach(st=>st.aufgaben.forEach(a=>{nr++;karten.push({nr,stufe:st.stufe,punkte:st.punkte,niveau:a.n||st.niveau,...a})}));
 // Ampel: einfach = gruen, mittel = gelb/orange, schwer = rot (oben auf jeder Karte, vorne und hinten)
 const NIV={einfach:{f:'#2e7d32',t:'EINFACH',i:0},mittel:{f:'#d97706',t:'MITTEL',i:1},schwer:{f:'#c62828',t:'SCHWER',i:2}};
-const ampel=k=>{const n=NIV[k.niveau];const dots=['#4ade80','#fbbf24','#f87171'].map((c,i)=>`<i style="background:${i===n.i?c:'#4b5563'};${i===n.i?'box-shadow:0 0 0 .3mm #fff':''}"></i>`).join('');return `<div class="ampel" style="background:${n.f}"><span class="lichter">${dots}</span><b>${n.t}</b><em>Kassen-Training · Nr. ${k.nr}</em></div>`};
+const ampel=k=>{const n=NIV[k.niveau];const dots=['#4ade80','#fbbf24','#f87171'].map((c,i)=>`<i style="background:${i===n.i?c:'#4b5563'};${i===n.i?'box-shadow:0 0 0 .3mm #fff':''}"></i>`).join('');return `<div class="ampel" style="background:${n.f}"><span class="lichter">${dots}</span><b>${n.t}</b><em>Bilderrechner-Training · Nr. ${k.nr}</em></div>`};
 const gesamt=karten.length;
 // Masse (mm): Karte 95 x 130, Abstand 8, auf A4 zentriert
 // Raster: SP Karten nebeneinander, ZE untereinander (per Umgebung SP/ZE einstellbar). Karteninhalt ist fuer
@@ -55,8 +55,8 @@ const hinten=k=>`${kopf(k)}<div class="hinhalt"><div class="ltitel"><span class=
 const karte=(inhalt,p)=>`<div class="karte" style="left:${p.x}mm;top:${p.y}mm"><div class="kin">${inhalt}</div></div>`;
 let seiten='';
 // Seite 1: Anleitung (A4, Stil der Club-App-Unterlagen), Seite 2 bleibt fuer den beidseitigen Druck leer
-seiten+=`<div class="seite anl"><div class="akopf"><img src="${LOGO}"><b>Köcheclub Werne</b><span>Kassen-Training · Karteikarten · ${VERSION}</span></div>
-<div class="titelblatt"><img src="${HUT}" style="width:44pt"><div class="t1">Köcheclub Werne</div><div class="t2">Kassen-Training — Karteikarten</div><div class="t3">${gesamt} Karten · ${VERSION} · Stand ${STAND} · dieselben Aufgaben wie in der Übungsliste</div></div>
+seiten+=`<div class="seite anl"><div class="akopf"><img src="${LOGO}"><b>Köcheclub Werne</b><span>Bilderrechner-Training · Karteikarten · ${VERSION}</span></div>
+<div class="titelblatt"><img src="${HUT}" style="width:44pt"><div class="t1">Köcheclub Werne</div><div class="t2">Bilderrechner-Training — Karteikarten</div><div class="t3">${gesamt} Karten · ${VERSION} · Stand ${STAND} · dieselben Aufgaben wie in der Übungsliste</div></div>
 <div class="bleistift"><div class="bs-icon">✏️</div><div class="bs-text"><div class="bs-titel">Bitte mit Bleistift ankreuzen!</div>
  <div>Die Kästchen <b>„Gewusst?“</b> <span class="bs-box"></span>&nbsp;<b style="color:#2e7d32">✓</b>&nbsp; <span class="bs-box"></span>&nbsp;<b style="color:#c62828">✗</b> nur mit <b>Bleistift</b> ausfüllen. Danach einfach <b>ausradieren</b> – so können die Karten immer wieder verwendet werden.</div></div></div>
 <h3 class="gruen">Alleine üben mit zwei Stapeln</h3>
@@ -80,30 +80,30 @@ seiten+=`<div class="seite anl"><div class="akopf"><img src="${LOGO}"><b>Köchec
  <li><b>Schneidegerät:</b> Jede Schnittlinie ist als feine graue Strichellinie über das ganze Blatt gedruckt, an jeder Kartenecke steht ein kleines Kreuz <b>+</b>. Auch nach den ersten Schnitten siehst du auf jedem Streifen, wo das Messer hin muss.</li>
  <li>Probe: Auf Karte 1 steht vorne „Eierpunsch“ und hinten die Lösung zu Aufgabe 1.</li></ul>
  <p><b>Beachte:</b> Einige Funktionen können sich mit der Zeit noch ändern, weil ständig am Bilderrechner weiterentwickelt wird.</p></div>
-</div><div class="seite"><div class="leer">Diese Seite bleibt für den beidseitigen Druck leer.</div></div>`;
+<div class="afuss"><span>Köcheclub Werne · Bilderrechner-Training · Karteikarten</span><span>${VERSION} · Stand ${STAND}</span></div></div><div class="seite"><div class="leer">Diese Seite bleibt für den beidseitigen Druck leer.</div></div>`;
 // Freie Plaetze auf dem letzten Blatt (Betreiber 10.10.2026: "bleibt noch Platz?"): zuerst die zwei Stapelkarten
 // als Trenner, dann leere Karten fuer eigene Aufgaben (mit Bleistift beschreiben).
 const rest=(JE-karten.length%JE)%JE;
 const extra=[{sp:'kann'},{sp:'ueben'},{sp:'eigen'},{sp:'eigen'},{sp:'eigen'},{sp:'eigen'},{sp:'eigen'},{sp:'eigen'},{sp:'eigen'}].slice(0,rest);
 const SPEZ={kann:{f:'#2e7d32',z:'✓',t:'Kann ich',x:'Hierhin kommen die Karten, die du <b>gewusst</b> hast.'},ueben:{f:'#c62828',z:'✗',t:'Üben',x:'Hierhin kommen die Karten, die du <b>noch nicht gewusst</b> hast. Mit diesem Stapel machst du weiter, bis er leer ist.'}};
-const band=(f,t)=>`<div class="ampel" style="background:${f}"><b>${t}</b><em>Kassen-Training</em></div>`;
+const band=(f,t)=>`<div class="ampel" style="background:${f}"><b>${t}</b><em>Bilderrechner-Training</em></div>`;
 const linien=n=>'<div class="linie"></div>'.repeat(n);
 const sVorne=e=>e.sp==='eigen'?`${band('#173765','EIGENE AUFGABE')}<div class="eigen"><div class="was">Kunde sagt / Lage</div>${linien(6)}</div><div class="kf">Mit Bleistift ausfüllen · Lösung auf der Rückseite ↻</div>`
- :`${band(SPEZ[e.sp].f,'STAPEL')}<div class="stapelkarte" style="color:${SPEZ[e.sp].f}"><div class="sz">${SPEZ[e.sp].z}</div><div class="st">${SPEZ[e.sp].t}</div></div><div class="kf">Kassen-Training · Stapelkarte</div>`;
+ :`${band(SPEZ[e.sp].f,'STAPEL')}<div class="stapelkarte" style="color:${SPEZ[e.sp].f}"><div class="sz">${SPEZ[e.sp].z}</div><div class="st">${SPEZ[e.sp].t}</div></div><div class="kf">Bilderrechner-Training · Stapelkarte</div>`;
 const sHinten=e=>e.sp==='eigen'?`${band('#173765','EIGENE AUFGABE')}<div class="eigen"><div class="ltitel">Lösung</div>${linien(8)}</div>`
  :`${band(SPEZ[e.sp].f,'STAPEL')}<div class="stapelkarte klein" style="color:${SPEZ[e.sp].f}"><div class="sz">${SPEZ[e.sp].z}</div><div class="st">${SPEZ[e.sp].t}</div><p>${SPEZ[e.sp].x}</p></div>`;
 const alle=[...karten,...extra];
 for(let i=0;i<alle.length;i+=JE){const gruppe=alle.slice(i,i+JE);
  seiten+=`<div class="seite">${marken()}${gruppe.map((k,j)=>karte(k.sp?sVorne(k):vorne(k),pos(j,false))).join('')}</div>`;
  seiten+=`<div class="seite">${marken(VX,VY)}${gruppe.map((k,j)=>karte(k.sp?sHinten(k):hinten(k),pos(j,true))).join('')}</div>`;}
-const CSS=`@page{size:A4;margin:0}.bleistift{display:flex;align-items:center;gap:12pt;margin:14pt 0 4pt;padding:11pt 14pt;border:1.6pt solid #173765;border-radius:6pt;background:linear-gradient(90deg,#fff7d6,#fffbe9);box-shadow:0 1.5pt 0 #d97706 inset}.bs-icon{font-size:30pt;line-height:1;transform:rotate(-8deg)}.bs-titel{font-size:15.5pt;font-weight:700;color:#173765;margin-bottom:3pt}.bs-text{font-size:11pt;line-height:1.38}.bs-box{display:inline-block;width:10pt;height:10pt;border:1.3pt solid #111;border-radius:1.5pt;vertical-align:-1pt;background:#fff}*{box-sizing:border-box}html,body{margin:0}
+const CSS=`@page{size:A4;margin:0}.bleistift{display:flex;align-items:center;gap:12pt;margin:10pt 0 4pt;padding:11pt 14pt;border:1.6pt solid #173765;border-radius:6pt;background:linear-gradient(90deg,#fff7d6,#fffbe9);box-shadow:0 1.5pt 0 #d97706 inset}.bs-icon{font-size:30pt;line-height:1;transform:rotate(-8deg)}.bs-titel{font-size:15.5pt;font-weight:700;color:#173765;margin-bottom:3pt}.bs-text{font-size:11pt;line-height:1.38}.bs-box{display:inline-block;width:10pt;height:10pt;border:1.3pt solid #111;border-radius:1.5pt;vertical-align:-1pt;background:#fff}*{box-sizing:border-box}html,body{margin:0}
 body{font-family:Carlito,'Liberation Sans',sans-serif;color:#111;font-size:10pt;line-height:1.3;-webkit-print-color-adjust:exact;print-color-adjust:exact}
 .seite{width:210mm;height:297mm;position:relative;overflow:hidden;break-after:page}
 .m{position:absolute;background:#111;z-index:3}.m.v{width:.25mm;margin-left:-.125mm}.m.h{height:.25mm;margin-top:-.125mm}
 .sl{position:absolute;z-index:2}.sl.v{width:0;border-left:.18mm dashed #8a929c;margin-left:-.09mm}.sl.h{height:0;border-top:.18mm dashed #8a929c;margin-top:-.09mm}
 .karte{position:absolute;width:${KB}mm;height:${KH}mm;overflow:hidden}
 .kin{position:absolute;left:${SICHER/Z}mm;top:${SICHER/Z}mm;width:85mm;height:${(KH-2*SICHER)/Z}mm;zoom:${Z};display:flex;flex-direction:column}
-.ampel{display:flex;align-items:center;gap:2mm;color:#fff;border-radius:1mm;padding:1.4mm 2.2mm;margin-bottom:1mm}.ampel b{font-size:13pt;letter-spacing:.6pt}.ampel em{margin-left:auto;font-style:normal;font-size:11pt;opacity:.95}.lichter{display:inline-flex;gap:1.1mm;background:#1f2937;padding:.9mm 1.4mm;border-radius:2mm}.lichter i{width:2.6mm;height:2.6mm;border-radius:50%;display:block}
+.ampel{display:flex;align-items:center;gap:2mm;color:#fff;border-radius:1mm;padding:1.4mm 2.2mm;margin-bottom:1mm}.ampel b{font-size:13pt;letter-spacing:.6pt}.ampel em{margin-left:auto;font-style:normal;font-size:10pt;opacity:.95;white-space:nowrap}.lichter{display:inline-flex;gap:1.1mm;background:#1f2937;padding:.9mm 1.4mm;border-radius:2mm}.lichter i{width:2.6mm;height:2.6mm;border-radius:50%;display:block}
 .ankreuzen{border-top:.25mm solid #c9ced6;padding-top:1.6mm;margin-top:1mm;display:flex;flex-direction:column;gap:1mm}.ak-reihe{display:flex;align-items:center;justify-content:space-between;font-size:12pt;font-weight:700;color:#173765}.ak-reihe.ok b{color:#2e7d32}.ak-reihe.nein b{color:#c62828}.ak-boxen{display:inline-flex;gap:2.2mm}.ak-b{display:inline-block;width:5.8mm;height:5.8mm;border:.45mm solid #2e7d32;border-radius:.8mm;background:#fff}.ak-reihe.nein .ak-b{border-color:#c62828}
 .kk{display:flex;align-items:flex-end;gap:2mm;border-bottom:.35mm solid #173765;padding-bottom:1.2mm}.kk img{width:9mm}.kk span{color:#173765;font-weight:700;font-size:9.5pt}.kk em{margin-left:auto;font-style:normal;color:#5b6572;font-size:8pt;letter-spacing:.2pt}
 .vinhalt{flex:1;min-height:0;overflow:hidden;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:2mm 1mm}
@@ -120,12 +120,13 @@ ol{margin:0 0 .6em;padding-left:1.35em}ol li{margin-bottom:1.6mm}ol b,.kontrolle
 .wege{font-size:.86em;color:#334155;background:#f1f5f9;border-left:.9mm solid #9aa3ad;padding:1.2mm 2.2mm;margin:0 0 2.2mm}.wege>b{color:#5b6572}.wege ul{margin:.6mm 0 0;padding-left:4mm}.wege li{margin-bottom:.6mm}.wege b{color:#173765}
 .kontrolle{border-left:.9mm solid #2e7d32;background:#e8f5ec;padding:1.5mm 2.4mm;font-size:.93em}
 .anl{padding:0}.akopf{position:absolute;left:19mm;right:19mm;top:8.5mm;height:11mm;border-bottom:.4mm solid #173765;display:flex;align-items:flex-end;padding-bottom:1.5mm}.akopf img{width:11mm;margin-right:2mm}.akopf b{color:#173765;font-size:11pt}.akopf span{margin-left:auto;color:#5b6572;font-size:9pt}
+.afuss{position:absolute;left:19mm;right:19mm;bottom:8mm;border-top:.4mm solid #173765;padding-top:1.5mm;display:flex;justify-content:space-between;color:#5b6572;font-size:9pt}
 .anl .titelblatt,.anl h3,.anl .kasten,.anl .bleistift{margin-left:19mm;margin-right:19mm}
-.titelblatt{text-align:center;padding-top:24mm}.t1{font-family:'Liberation Sans',sans-serif;color:#173765;font-size:26pt;margin-top:6pt}.t2{color:#5b6572;font-weight:700;font-size:15pt}.t3{color:#5b6572;font-size:8.5pt;margin-top:4pt}
-h3.gruen{color:#2e7d32;font-size:13.5pt;font-weight:400;margin-top:11pt;margin-bottom:5pt}
-.kasten{border:1pt solid #9fd3a8;border-left:3pt solid #2e7d32;background:#e8f5ec;padding:9pt 12pt;font-size:10.3pt}.kasten ol,.kasten ul{margin:0 0 4pt;padding-left:16pt}.kasten li{margin-bottom:3pt}.kasten p{margin:4pt 0 0}
+.titelblatt{text-align:center;padding-top:23mm}.t1{font-family:'Liberation Sans',sans-serif;color:#173765;font-size:26pt;margin-top:6pt}.t2{color:#5b6572;font-weight:700;font-size:15pt}.t3{color:#5b6572;font-size:8.5pt;margin-top:4pt}
+h3.gruen{color:#2e7d32;font-size:13.5pt;font-weight:400;margin-top:9pt;margin-bottom:5pt}
+.kasten{border:1pt solid #9fd3a8;border-left:3pt solid #2e7d32;background:#e8f5ec;padding:8pt 12pt;font-size:10pt}.kasten ol,.kasten ul{margin:0 0 4pt;padding-left:16pt}.kasten li{margin-bottom:3pt}.kasten p{margin:4pt 0 0}
 .leer{position:absolute;top:140mm;width:100%;text-align:center;color:#9aa3ad;font-size:9pt}`;
-const html=`<!doctype html><html lang="de"><head><meta charset="utf-8"><title>Kassen-Training · Karteikarten</title><style>${CSS}</style></head><body>${seiten}</body></html>`;
+const html=`<!doctype html><html lang="de"><head><meta charset="utf-8"><title>Bilderrechner-Training · Karteikarten</title><style>${CSS}</style></head><body>${seiten}</body></html>`;
 const datei=path.join(__dirname,'.karten.html');fs.writeFileSync(datei,html);
 (async()=>{const b=await pw.chromium.launch();const p=await b.newPage();await p.goto('file://'+datei);await p.waitForTimeout(500);
  // Version 4: Schrift fuellt die Karte. Groesste Schrift suchen, die noch ganz hineinpasst (Halbierungssuche):
@@ -140,11 +141,18 @@ const datei=path.join(__dirname,'.karten.html');fs.writeFileSync(datei,html);
   document.querySelectorAll('.vinhalt').forEach(h=>{const x=suche(h,h.querySelector('.satz'),14,32);r.vorne.push(x.f);if(x.voll)r.voll.push('vorne '+h.querySelector('.nrgross')?.textContent)});
   return r});
  // Version 4.5 (Betreiber 27.10.2026: "die erste Seite passt nicht auf eine Seite und hat unten keinen Rand"): Titel weiter nach oben
- // (Abstand 38 -> 24 mm, Muetze 62 -> 44 pt, Zwischenueberschriften etwas enger - nur Seite 1). Pruefung: der Inhalt der Anleitung endet mindestens 15 mm ueber dem Blattende, sonst Abbruch.
- const anlUnten=await p.evaluate(()=>{const s=document.querySelector('.seite.anl'),o=s.getBoundingClientRect().top;
-  return Math.max(...[...s.children].map(e=>e.getBoundingClientRect().bottom-o))*25.4/96});
- if(anlUnten>297-15)throw new Error(`Seite 1 (Anleitung) zu lang: Inhalt endet ${anlUnten.toFixed(1)} mm, erlaubt 282 mm`);
- console.log(`Seite 1: Inhalt endet bei ${anlUnten.toFixed(1)} mm (unten ${(297-anlUnten).toFixed(1)} mm frei)`);
+ // (Abstand 38 -> 24 mm, Muetze 62 -> 44 pt, Zwischenueberschriften etwas enger - nur Seite 1).
+ // Version 4.6 (Betreiber 27.10.2026: "nenne das ganze Bilderrechner-Training, nicht Kasse. Auf der ersten Seite eine Fusszeile"):
+ // Name Bilderrechner-Training auf allen Seiten; Seite 1 mit Fusszeile im Stil der Kopfzeile (dafuer Titel 23 mm, Kaesten 10 pt, Abstaende etwas enger). Pruefung: der Inhalt endet mindestens
+ // 4 mm ueber der Fusszeile, sonst Abbruch.
+ // 4.6: der laengere Name darf das Ampel-Band nicht umbrechen oder ueberlaufen (alle Baender gleich hoch, Text passt hinein)
+ const band=await p.evaluate(()=>{const b=[...document.querySelectorAll('.ampel')];const h=new Set(b.map(x=>Math.round(x.getBoundingClientRect().height)));
+  return {hoehen:[...h],voll:b.filter(x=>x.scrollWidth>x.clientWidth+1).length}});
+ if(band.hoehen.length>1||band.voll)throw new Error(`Ampel-Band bricht um oder laeuft ueber: Hoehen ${band.hoehen.join('/')}, zu voll ${band.voll}`);
+ const anl=await p.evaluate(()=>{const s=document.querySelector('.seite.anl'),o=s.getBoundingClientRect().top,mm=v=>(v-o)*25.4/96;
+  return {unten:Math.max(...[...s.children].filter(e=>!e.matches('.akopf,.afuss')).map(e=>mm(e.getBoundingClientRect().bottom))),fuss:mm(s.querySelector('.afuss').getBoundingClientRect().top)}});
+ if(anl.unten>anl.fuss-4)throw new Error(`Seite 1 (Anleitung) zu lang: Inhalt endet ${anl.unten.toFixed(1)} mm, Fusszeile beginnt ${anl.fuss.toFixed(1)} mm`);
+ console.log(`Seite 1: Inhalt endet bei ${anl.unten.toFixed(1)} mm, Fusszeile ab ${anl.fuss.toFixed(1)} mm (Abstand ${(anl.fuss-anl.unten).toFixed(1)} mm)`);
  const pt=v=>(v*Z).toFixed(1);
  if(ergebnis.voll.length)console.log('ZU VOLL:',ergebnis.voll.join(', '));
  console.log(`Raster ${SP}x${ZE} = ${JE} je Blatt, Karte ${KB.toFixed(1)} x ${KH.toFixed(1)} mm, Rand ${RAND} mm, Freirand ${SICHER} mm, Rueckseiten-Versatz ${VX}/${VY} mm`);
