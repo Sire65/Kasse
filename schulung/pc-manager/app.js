@@ -2128,8 +2128,10 @@ document.addEventListener('DOMContentLoaded',()=>setTimeout(initTv296,0));
 // den Manager-Companion (loopback, derselbe Rechner), der es beim nächsten Sync jeder Kasse
 // zur Verfügung stellt. PC-Manager bleibt dadurch die alleinige Pflegestelle.
 document.getElementById('masterDataPushBtn')?.addEventListener('click', () => requireAuth(async () => {
-  await window.KCCashMeasureCentralSync?.pull?.({publish:false});
   const statusFeld = document.getElementById('masterDataPushStatus');
+  statusFeld.textContent = 'Stammdaten und Händlerausweisliste werden aktualisiert …';
+  await window.KCCashMeasureCentralSync?.pull?.({publish:false});
+  const haendlerStand = await window.KCHaendlerausweiseManager?.pull?.({publish:false});
   statusFeld.textContent = 'Wird gesendet …';
   try {
     const antwort = await fetch('http://127.0.0.1:47392/master-data/push', {
@@ -2143,7 +2145,8 @@ document.getElementById('masterDataPushBtn')?.addEventListener('click', () => re
     if (!antwort.ok) throw new Error('Manager antwortete mit ' + antwort.status);
     const daten = await antwort.json();
     statusFeld.textContent = `Gesendet - Stand Nr. ${daten.revision}: Warengruppen, Artikel, Konten und Darstellung. `
-      + 'Jede Kasse übernimmt es beim nächsten Abgleich. Die am Stand gewählte Ansicht bleibt unangetastet.';
+      + 'Jede Kasse übernimmt es beim nächsten Abgleich. Die am Stand gewählte Ansicht bleibt unangetastet.'
+      + (haendlerStand?.ok ? ` Händlerausweise: ${haendlerStand.anzahl}.` : ' Händlerausweisliste nicht aktualisiert; bitte Anmeldung und Datenbankfreigabe prüfen.');
   } catch (e) {
     statusFeld.textContent = 'Konnte nicht gesendet werden - läuft der Manager-Companion? (Marktag-Start.js)';
   }

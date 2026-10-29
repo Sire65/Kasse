@@ -7,5 +7,7 @@
   "uiSchemaVersion": "0.31.3.6-r12-training-ui.2-bv3",
   "buildDate": "2026-09-19",
   "trainingCompatibility": "0.27.x",
-  "sourceRelease": "KC_MarktKasse_Suite_V0_31_3_6_Repair_12_POS_UI_Profile_Technical_Preview"
+  "sourceRelease": "KC_MarktKasse_Suite_V0_31_3_6_Repair_12_POS_UI_Profile_Technical_Preview",
+  "haendlerausweisVersion": "1.0.0",
+  "haendlerausweisBuildDate": "2026-10-29"
 }

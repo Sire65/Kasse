@@ -87,5 +87,6 @@
     } catch (e) { /* Companion nicht erreichbar (z. B. offline) - zuletzt bekannter Stand bleibt gültig, kein Fehler für die Kasse */ }
   }
 
-  global.KCMasterDataSync = { bereit: holeUndUebernehmeStammdaten() };
+  global.KCMasterDataSync = { bereit: holeUndUebernehmeStammdaten(), aktualisieren: holeUndUebernehmeStammdaten };
+  setInterval(holeUndUebernehmeStammdaten, 60000);
 })(window);
