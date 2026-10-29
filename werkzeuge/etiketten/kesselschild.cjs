@@ -13,6 +13,7 @@
 // --probe: ein Etikett in Originalgroesse auf A4 mit Schnittmarken und 5-cm-Messbalken (zum Pruefen der Druckgroesse).
 // ohne --probe: Bogen A4 mit 2 x 3 Etiketten (8 x 8 cm passt nur zweimal nebeneinander) und Schnittmarken.
 const fs = require('fs'), path = require('path'), http = require('http'); const pw = require('playwright');
+const exaktA4 = require('../uebungsliste/a4.cjs'); // 29.10.2026: Chromium-A4 ist etwas zu gross -> exakt A4 (sonst ggf. kein Duplex/Fehlermeldung am Drucker)
 const W = path.join(__dirname, '..', '..');
 const ZIEL = path.join(__dirname, 'ausgabe'); fs.mkdirSync(ZIEL, {recursive: true});
 const args = process.argv.slice(2); const PROBE = args.includes('--probe'); const IDS = args.filter((a) => !a.startsWith('--'));
@@ -40,9 +41,11 @@ const b64 = (f) => `data:${f.endsWith('.png') ? 'image/png' : f.endsWith('.webp'
           allergene: window.KCAllergene.alsText(info.allergens) || String(info.legacyAllergens || '').trim(),
           allergeneGeprueft: info.status === 'approved',
           zusatz: /^(keine angaben?|unbekannt|-)?$/i.test(zusatz) ? null : zusatz,
-          alkohol: /alkohol/i.test(String(info.important || '') + ' ' + String(info.shortDescription || ''))};
+          // 29.10.2026: „Alkoholfrei (0 % vol)“ / „Alkoholfreier …“ ist KEIN Alkohol (vorher stand beim Apfelpunsch „Enthält Alkohol“)
+          alkohol: /alkohol(?!fre)/i.test(String(info.important || '') + ' ' + String(info.shortDescription || ''))};
       }), IDS);
     await ctx.close();
+    if (IDS.length) artikel.sort((x, y) => IDS.indexOf(x.id) - IDS.indexOf(y.id)); // 29.10.2026: Reihenfolge wie angegeben
     if (!artikel.length) throw new Error('Keine passenden Artikel gefunden: ' + IDS.join(', '));
     const qrQuelle = fs.readFileSync(path.join(W, 'pc-manager', 'vendor', 'qrcode-generator.js'), 'utf8');
     const hut = b64(path.join(W, 'werkzeuge', 'uebungsliste', 'hut.png'));
@@ -145,6 +148,7 @@ const b64 = (f) => `data:${f.endsWith('.png') ? 'image/png' : f.endsWith('.webp'
     const seite = await (await b.newContext({deviceScaleFactor: 4})).newPage();
     await seite.setContent(html, {waitUntil: 'load'}); await seite.waitForTimeout(300);
     await seite.pdf({path: path.join(ZIEL, name + '.pdf'), format: 'A4', printBackground: true, margin: {top: 0, right: 0, bottom: 0, left: 0}});
+    exaktA4(path.join(ZIEL, name + '.pdf'));
     // Vorschau des ersten Etiketts in hoher Aufloesung
     await seite.setViewportSize({width: 900, height: 1300});
     const e = await seite.$('.etikett'); await e.screenshot({path: path.join(ZIEL, name + '_Vorschau.png'), scale: 'device'});
