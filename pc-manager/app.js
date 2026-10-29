@@ -1,5 +1,5 @@
 
-const VERSION="V0.31.2.5";
+const VERSION="V0.31.2.6";
 window.KCManagerAppVersion=VERSION;
 window.KCTVPresentationVersion="0.29.38";
 window.KCGetTVPresentation=()=>tvPresentation;
