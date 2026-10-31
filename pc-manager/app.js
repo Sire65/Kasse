@@ -1314,7 +1314,7 @@ async function queueCashTransferPayload(payload){
       :"http://127.0.0.1:47392/api/v1/cash-transfer/queue";
     const antwort=await fetch(endpoint,{
       method:"POST",headers:{"Content-Type":"application/json"},
-      body:JSON.stringify({transferId:ziel.queueId,registerLabel:ziel.kasse,payload})
+      body:JSON.stringify({transferId:ziel.queueId,registerLabel:ziel.kasse,payload}),signal:AbortSignal.timeout(6000)
     });
     if(!antwort.ok)throw new Error("Companion antwortete mit Fehler "+antwort.status);
   }

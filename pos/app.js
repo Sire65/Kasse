@@ -542,6 +542,15 @@ async function hydrateTransactionCache(){
     window.KCTransactionStore.reconcile(window.KCTransactionStore.STORE_TRAINING,legacyTraining),
   ]);
   _txCache=salesResult.rows;_trainingTxCache=trainingResult.rows;
+  // Auch nach einem abgebrochenen Schreiben der Einstellungen keine Bonnummer doppelt vergeben.
+  const letzteNummer=_txCache.reduce((max,row)=>{
+    const nr=String(row.bonNumber??row.bon??"");
+    return row.registerId===state.master.registerId&&/^\d+$/.test(nr)?Math.max(max,Number(nr)):max;
+  },0);
+  if(letzteNummer>=Number(state.master.nextBon||0)){
+    state.master.nextBon=letzteNummer+1;try{saveMaster()}catch{}
+  }
+
   if(firstRun)localStorage.setItem(MIGRATION_DONE_KEY,"done");
   if(salesResult.recovered||trainingResult.recovered){
     setSystemHint(`Umsatzdaten aus der dauerhaften Speicherung wiederhergestellt · ${_txCache.length} Vorgänge`,"ok");
@@ -791,7 +800,8 @@ function applyVisibility(){applyModes();
   document.body.classList.toggle("hide-print",state.master.showPrint===false);
   document.body.classList.toggle("hide-more",state.master.showMore===false);
   document.body.classList.toggle("hide-change",state.master.showChange===false&&state.master.requireChangeFlow!==true);
-  document.body.classList.toggle("hide-card",state.master.showCard===false);
+  // EC ist derzeit nur ein Platzhalter ohne Buchungsweg und gehört nicht an den Stand.
+  document.body.classList.add("hide-card");
   document.body.classList.toggle("hide-account",state.master.showAccount===false);
   document.body.classList.toggle("hide-discount",state.master.showDiscount===false);
   document.body.classList.toggle("hide-happyhour",state.master.showHappyHour===false);
@@ -1118,20 +1128,22 @@ function productInfoRecord(p){
   const base={productId:p.id,version:raw.version||'1.0.0',status:raw.status||'incomplete',shortDescription:raw.shortDescription||raw.notes||'',ingredients:raw.ingredients||'',additives:raw.additives||raw.contents||'',important:raw.important||'',allergens:raw.allergens||{},nutrition:raw.nutrition||{},manufacturer:raw.manufacturer||'',supplier:raw.supplier||'',source:raw.source||'',validAt:raw.validAt||'',approvedBy:raw.approvedBy||'',approvedAt:raw.approvedAt||''};
   return window.ProductInfoCore?ProductInfoCore.normalize(base):base;
 }
-function openProductInfo(id){
+async function openProductInfo(id){
+  await _txHydrated;
   const p=PRODUCTS.find(x=>x.id===id)||activePackageProducts().find(x=>x.id===id);if(!p)return;currentInfoProduct=p;
   const r=productInfoRecord(p);el('productInfoTitle').textContent=p.name;el('productInfoImage').src=p.image;
+  const head=el('productInfoTitle').closest('.info-dialog-head');if(head&&!head.contains(el('productInfoImage')))head.insertBefore(el('productInfoImage'),head.querySelector('.icon-close'));
   const allergenSummary=r.legacyAllergens||Object.entries(r.allergens||{}).filter(([,v])=>v==='contained'||v==='traces').map(([k,v])=>`${ALLERGEN_LABELS[k]||k}: ${ALLERGEN_STATUS[v]}`).join(' · ');
   const sections=[];if(r.shortDescription)sections.push(infoSection('Kurzinformation',r.shortDescription,''));if(allergenSummary)sections.push(infoSection('Allergene',allergenSummary,state.master.highlightAllergens?'allergen':''));if(r.important)sections.push(infoSection('Wichtiger Hinweis',r.important,'important'));
   if(r.status!=='approved')sections.push(infoSection('Datenstatus','Produktinformation nicht vollständig geprüft – bitte Marktleitung fragen.','important'));
-  el('productInfoContent').innerHTML=sections.join('')||'<p class="info-empty">Keine freigegebenen Schnellinformationen hinterlegt.</p>';
+  el('productInfoContent').innerHTML=(window.KCVerkaufskurve?.infoHtml?.(p.id)||'')+sections.join('')||'<p class="info-empty">Keine freigegebenen Schnellinformationen hinterlegt.</p>';
   el('productInfoDetailsBtn').hidden=false;el('productInfoDialog').showModal();notify('info',`${p.name}: Information geöffnet`,'product-info');
   // 25.09.2026 (Betreiber: "Jeder Artikel Button hat einen Info Button. Einige haben
   // Favoriten Sterne, der eine Verkaufsauswertung oeffnet. Baue ueberall im Info-Bereich einen
   // Knopf ein, der dieselbe Info aufruft wie der Stern"): ruft dieselbe Funktion auf wie der
   // Favoriten-Stern (openSalesTimeBreakdown) - jetzt bei JEDEM Artikel erreichbar, nicht nur
   // bei den automatisch erkannten Renner-Artikeln mit Stern.
-  el('productInfoSalesBtn').onclick=()=>openSalesTimeBreakdown(p.id);
+  el('productInfoSalesBtn').onclick=()=>{el('productInfoDialog').close();openSalesTimeBreakdown(p.id);};
 }
 function infoSection(title,text,cls){return `<section class="info-section ${cls}"><h3>${escapeHtml(title)}</h3><p>${escapeHtml(text)}</p></section>`}
 function escapeHtml(value){return String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
@@ -1142,7 +1154,7 @@ function openFullProductInfo(){const p=currentInfoProduct;if(!p)return;const r=p
   el('productDetailsContent').innerHTML=`<section class="info-section"><h3>Übersicht</h3><p>${escapeHtml(r.shortDescription||'Keine Kurzbeschreibung hinterlegt.')}</p></section><section class="info-section"><h3>Zutaten</h3><p>${escapeHtml(r.ingredients||'Nicht hinterlegt')}</p></section><section class="info-section"><h3>Zusatzstoffe</h3><p>${escapeHtml(r.additives||'Nicht hinterlegt')}</p></section><section class="info-section"><h3>Big 14 – Allergene</h3><table class="allergen-table"><thead><tr><th>Allergen</th><th>Status</th></tr></thead><tbody>${allergenRows}</tbody></table></section><section class="info-section"><h3>Nährwerte je 100 g / 100 ml</h3><table class="nutrition-table"><tbody>${nutritionRows}</tbody></table></section><section class="info-section"><h3>Verantwortung, Quelle und Freigabe</h3><p>Hersteller: ${escapeHtml(r.manufacturer||'Nicht hinterlegt')}<br>Lieferant: ${escapeHtml(r.supplier||'Nicht hinterlegt')}<br>Quelle: ${escapeHtml(r.source||'Nicht hinterlegt')}<br>Gültig ab: ${escapeHtml(r.validAt||'Nicht hinterlegt')}<br>Freigegeben von: ${escapeHtml(r.approvedBy||'Nicht hinterlegt')}<br>Freigabe: ${escapeHtml(r.approvedAt||'Nicht hinterlegt')}<br>Datensatz-Version: ${escapeHtml(r.version||'1.0.0')}</p></section>`;el('productDetailsDialog').showModal();}
 function notify(type,message,key='',duration){setSystemHint(message,type==='error'?'error':type==='warning'?'warn':type==='info'?'info':'ok');return true;}
 function operatorReadyForArticle(){if(state.master.requireOperatorConfirmation!==true||state.operatorConfirmedForSale)return true;showMessage("Bediener bestätigen","👤","Bitte vor dem ersten Artikel den Bediener-QR scannen oder oben die Bedienertaste verwenden.");el("operatorBtn").classList.add("needs-confirmation");return false}
-function selectProduct(id){if(!operatorReadyForArticle())return;const p=productsForSale().find(x=>x.id===id);if(!p)return;if(p.isFreieZahlung)return openFreieZahlung();state.lastSelectedProduct=id;addConfiguredProduct(p,null)}
+function selectProduct(id){if(state.saleInProgress)return;if(!operatorReadyForArticle())return;const p=productsForSale().find(x=>x.id===id);if(!p)return;if(p.isFreieZahlung)return openFreieZahlung();state.lastSelectedProduct=id;addConfiguredProduct(p,null)}
 // Freie Zahlung: kein fester Preis wie bei einem normalen Artikel, deshalb kein
 // addConfiguredProduct - stattdessen wird derselbe Zahlenblock unten (Cent-Eingabe) auf die
 // Erfassung eines Divers-Postens umgeschaltet.
@@ -1854,24 +1866,29 @@ function playCompletedSaleSound(){
 
 function canonicalTransaction(row){const copy=cloneData(row);delete copy.recordHash;return JSON.stringify(copy)}
 async function completeSale(method,{type="sale",silent=false,changeTarget=null,directSettlement=false,payoutHandledWithoutCash=false,helperGroup=null}={}){
+  if(state.saleInProgress)return false;
   if(!state.cart.length)return keinBonMeldung();
   if(!haendlerNochGueltig())return false;
   {const gsFehler=kcGutscheinZeilenPruefen(type);if(gsFehler){showMessage("Gutschein","!",gsFehler);return}}
-  if(state.saleInProgress)return;
   state.saleInProgress=true;
-  await _txHydrated; // Sicherheitsnetz: garantiert vollständig geladenen Umsatzspeicher vor der ersten echten Buchung
+  document.body.classList.add("sale-in-progress");el("app")?.setAttribute("aria-busy","true");
   try{
+    if(!await _txHydrated)throw new Error("Umsatzspeicher nicht bereit. Bitte den Betreiber informieren.");
     const training=!!state.master.trainingMode,endTime=new Date().toISOString();
     const trainingCounter=Number(localStorage.getItem("kc_training_next_bon_v018")||1);
     const current=training?`T-${String(trainingCounter).padStart(6,"0")}`:bonText();
     const grossDue=+grossTotal().toFixed(2),globalDiscountValue=+globalDiscountAmount().toFixed(2),positionDiscountValue=+totalPositionDiscountAmount().toFixed(2),discountValue=+(globalDiscountValue+positionDiscountValue).toFixed(2),due=+total().toFixed(2),unbar=method==="account-charge"||method==="voucher",given=(type==="personal"||type==="helfer"||unbar)?0:+state.given.toFixed(2),settlementTarget=changeTarget!==null&&Number.isFinite(Number(changeTarget))?Number(changeTarget):due,isPayout=toCents(due)<0,payout=isPayout&&!payoutHandledWithoutCash?+Math.abs(due).toFixed(2):0,change=type==="personal"||type==="helfer"||payoutHandledWithoutCash||unbar?0:(isPayout?payout:+Math.max(0,given-settlementTarget).toFixed(2));
-    const rows=training?readTrainingTransactions():readTransactions(),previousHash=rows[rows.length-1]?.recordHash||null;
+    const rows=[...(training?readTrainingTransactions():readTransactions())],previousHash=rows[rows.length-1]?.recordHash||null;
     const items=state.cart.map(item=>({...cloneData(item),unitTotal:+(lineUnit(item)+(state.master.depositRule==="automatic"?item.deposits.reduce((sum,d)=>sum+Number(d.price||0),0):0)).toFixed(2),lineTotal:+((lineUnit(item)+(state.master.depositRule==="automatic"?item.deposits.reduce((sum,d)=>sum+Number(d.price||0),0):0))*item.qty).toFixed(2)}));
     if(globalDiscountValue>0)items.push({id:"DISCOUNT",name:`Rabatt ${Number(state.discount.percent).toLocaleString("de-DE")} %${state.discount.reason?` · ${state.discount.reason}`:""}${state.discount.haendlerausweis?` · Händler-Ausweis Nr. ${state.discount.haendlerausweis.nr}`:""}`,category:"Rabatt",price:-globalDiscountValue,qty:1,unitTotal:-globalDiscountValue,lineTotal:-globalDiscountValue,discountLine:true});
     state.cart.filter(item=>item.positionDiscount?.percent).forEach(item=>{const value=+positionDiscountAmount(item).toFixed(2);if(value>0)items.push({id:`POSITION-DISCOUNT-${item.id}`,name:`Positionsrabatt ${Number(item.positionDiscount.percent).toLocaleString("de-DE")} % · ${item.name}`,category:"Positionsrabatt",price:-value,qty:1,unitTotal:-value,lineTotal:-value,discountLine:true,sourceItemKey:item.key,reason:item.positionDiscount.reason||null,note:item.positionDiscount.note||null})});
     const rec={transactionId:crypto.randomUUID(),formatVersion:6,bon:current,bonNumber:current,startTime:state.cartStartedAt||endTime,time:endTime,endTime,registerId:state.master.registerId,registerName:state.master.registerName,operator:state.master.operatorName,type,training,method,payment:method,...(helperGroup?{helperGroup}:{}),grossDue,grossDueCents:toCents(grossDue),discount:{haendlerausweis:haendlerBeleg(),percent:Number(state.discount.percent||0),amount:discountValue,amountCents:toCents(discountValue),globalAmount:globalDiscountValue,positionAmount:positionDiscountValue,base:discountBase(),reason:state.discount.reason||null,note:state.discount.note||null,keys:Array.isArray(state.discount.keys)?state.discount.keys:[],positions:state.cart.filter(item=>item.positionDiscount?.percent).map(item=>({key:item.key,id:item.id,name:item.name,percent:Number(item.positionDiscount.percent),amount:positionDiscountAmount(item),reason:item.positionDiscount.reason||null}))},due,total:due,dueCents:toCents(due),given,givenCents:toCents(given),settlementTarget:+settlementTarget.toFixed(2),isPayout,payout,payoutCents:toCents(payout),change,changeCents:toCents(change),depositRule:state.master.depositRule,items,previousHash};
     {const gs=items.filter(i=>i.voucherCredit);if(gs.length)rec.voucherPayments=gs.map(i=>({code:i.voucherCredit.code,amount:+(-Number(i.lineTotal||0)).toFixed(2)}))}
-    rec.recordHash=await sha256Hex(canonicalTransaction(rec));rows.push(rec);saveTransactions(rows,training);
+    rec.recordHash=await sha256Hex(canonicalTransaction(rec));rows.push(rec);
+    // Erst die lokale, dauerhafte Speicherung bestätigen. Kein Warten auf Netz/Manager.
+    if(!window.KCTransactionStore)throw new Error("Dauerhafter Umsatzspeicher fehlt");
+    await window.KCTransactionStore.replaceAll(training?window.KCTransactionStore.STORE_TRAINING:window.KCTransactionStore.STORE_SALES,rows,{verbindlich:true});
+    if(training)_trainingTxCache=rows;else _txCache=rows;
     // Gutschein-Teilzahlung: Guthaben erst jetzt abziehen, wo der Bon sicher gespeichert ist.
     // Trainingsbons verbrauchen kein echtes Guthaben.
     // 08.10.2026 (Gesamtpruefung): ab hier ist der Bon gespeichert. Jeder weitere Schritt ist einzeln
@@ -1918,7 +1935,11 @@ async function completeSale(method,{type="sale",silent=false,changeTarget=null,d
     if(!training&&state.master.digitalBonEnabled===true){try{zeigeDigitalenBon(rec)}catch(err){console.warn("Digitaler Bon",err)}}
     }catch(err){console.error(`Anzeige nach Bon ${current}`,err);notify("warning",`Bon ${current} ist gespeichert – Anzeige wurde neu aufgebaut`,"sale-after-error",6000);try{renderHeader();renderCart()}catch(e){}}
     return rec;
-  }finally{state.saleInProgress=false}
+  }catch(err){
+    console.error("Verkauf nicht gespeichert",err);
+    showMessage("Nicht gebucht","!","Der Bon wurde nicht abgeschlossen. Warenkorb bleibt erhalten. Bitte erneut versuchen; bei erneutem Fehler den Betreiber informieren.");
+    return false;
+  }finally{state.saleInProgress=false;document.body.classList.remove("sale-in-progress");el("app")?.removeAttribute("aria-busy")}
 }
 
 // Fragt oder druckt, je nach Einstellung. Bewusst NACH der Abschlussmeldung, damit der
@@ -1930,7 +1951,7 @@ function kcBonDruckModus(){
 }
 function kcBonDruckAnbieten(bonNummer){
   const modus=kcBonDruckModus();
-  if(modus==="nie")return;
+  if(modus==="nie"||(state.master.rushMode&&modus==="fragen"))return;
   if(modus==="immer"){setTimeout(()=>printBonByNumber(bonNummer),350);return;}
   // "fragen": kleine Rückfrage, die den Verkauf nicht aufhält - sie lässt sich mit einem
   // Fingertipp beantworten und verschwindet nach 12 Sekunden von selbst mit "nein".
@@ -1986,18 +2007,10 @@ function zeigeDigitalenBon(rec){
   const uhr=setTimeout(weg,20000);
 }
 // 09.10.2026 (Betreiber: "Meldungen nach der Buchung sollen von alleine weggehen" - "Bau ein in beide"):
-// showMessageAuto() zeigt dasselbe Fenster mit einer ablaufenden Leiste und schliesst es nach einigen Sekunden.
-// "Fertig" schliesst sofort. Jede andere Meldung (z. B. Auszahlung) bleibt wie bisher stehen, bis "Fertig".
-function showMessageAuto(t,v,txt,sekunden=4){
-  showMessage(t,v,txt);
-  const d=el("messageDialog");if(!d)return;
-  const kennung={};d._kcAuto=kennung;
-  const leiste=document.createElement("div");leiste.className="kc-auto-zu";leiste.setAttribute("aria-hidden","true");
-  leiste.style.cssText="height:6px;border-radius:3px;background:#16a34a;margin-top:12px;width:100%;transition:width "+sekunden+"s linear";
-  (d.querySelector("form")||d).appendChild(leiste);
-  requestAnimationFrame(()=>requestAnimationFrame(()=>{leiste.style.width="0%"}));
-  setTimeout(()=>{if(d._kcAuto===kennung&&d.open)d.close()},sekunden*1000);
-}
+// Erfolgsinformationen stehen im Statusbereich. Wichtige Fehler und Auszahlungen bleiben ausdrücklich sichtbar.
+// Erfolgreiche Buchungen unterbrechen keine weitere Bedienung. Fehler bleiben als Dialog sichtbar.
+function showMessageAuto(t,v,txt){setSystemHint(`${t}${v&&v!=="✓"?` · ${v}`:""} · ${txt}`,"ok");}
+
 function showMessage(t,v,txt){{const d=el("messageDialog");if(d){d._kcAuto=null;d.querySelectorAll(".kc-auto-zu").forEach(x=>x.remove())}}el("messageTitle").textContent=t;el("messageValue").textContent=v;el("messageText").textContent=txt;el("messageDialog").showModal()}
 // Betreiber: bei "Freie Zahlung" mitten in der Eingabe (Betrag getippt, aber OK noch nicht
 // gedrueckt) zeigte ein Tipp auf BAR/PERSONAL/etc. das allgemeine "Bitte zuerst Artikel
@@ -3416,7 +3429,8 @@ function applyCashPayload(text,source="unknown"){
 
   const key=cashTransferKey(p);
   const used=JSON.parse(localStorage.getItem("kc_cash_used_transfers")||"[]");
-  if(used.includes(key)){
+  const movements=JSON.parse(localStorage.getItem("kc_cash_movements")||"[]");
+  if(used.includes(key)||movements.some(row=>row.transferId===key)){
     recordCashImportAttempt({
       time:new Date().toISOString(),
       result:"rejected-duplicate",
@@ -3425,10 +3439,9 @@ function applyCashPayload(text,source="unknown"){
       registerId:p.registerId,
       total:p.total
     });
-    throw new Error("Diese Bargeldübergabe wurde bereits eingelesen. Eine doppelte Buchung wurde verhindert.");
+    const fehler=new Error("Diese Bargeldübergabe wurde bereits eingelesen. Eine doppelte Buchung wurde verhindert.");fehler.code="KC_CASH_DUPLICATE";throw fehler;
   }
 
-  const movements=JSON.parse(localStorage.getItem("kc_cash_movements")||"[]");
   if(p.type==="opening"&&movements.some(row=>row.type==="opening"&&((p.scope==="shared"&&row.poolId===p.poolId)||(p.scope!=="shared"&&row.registerId===p.registerId))&&cashMovementDate(row)===p.effectiveDate)){
     recordCashImportAttempt({time:new Date().toISOString(),result:"rejected-second-opening",source,transferId:key,registerId:p.registerId,effectiveDate:p.effectiveDate,total:p.total});
     throw new Error(`Für ${displayBusinessDate(p.effectiveDate)} wurde bereits ein Anfangsbestand übernommen. Weiteres Wechselgeld bitte als Nachfüllung erzeugen.`);
@@ -3804,7 +3817,11 @@ async function recordComplaintRefund(amount){
   if(toCents(adjustment)!==0)items.push({id:"REFUND-ADJUSTMENT",name:"Reklamationsausgleich",category:"Reklamation",price:adjustment,qty:-1,unitTotal:adjustment,lineTotal:-adjustment,refund:true});
   const training=!!state.master.trainingMode,rows=training?readTrainingTransactions():readTransactions(),current=training?`T-REK-${String(rows.length+1).padStart(5,"0")}`:bonText(),endTime=new Date().toISOString(),previousHash=rows[rows.length-1]?.recordHash||null,reference=safeText(el("complaintBonReference").value,40),original=reference?rows.find(row=>String(row.bon||row.bonNumber)===reference||row.transactionId===reference):null,due=-Math.abs(Number(amount));
   const rec={transactionId:crypto.randomUUID(),formatVersion:5,bon:current,bonNumber:current,startTime:endTime,time:endTime,endTime,registerId:state.master.registerId,registerName:state.master.registerName,operator:state.master.operatorName,type:"refund",training,method:"complaint-refund",payment:"complaint-refund",grossDue:due,grossDueCents:toCents(due),discount:{percent:0,amount:0,amountCents:0,base:0,reason:null,note:null},due,total:due,dueCents:toCents(due),given:0,givenCents:0,change:0,changeCents:0,depositRule:state.master.depositRule,items,reason:`Reklamation: ${complaintReason}`,complaint:{reason:complaintReason,reference:reference||null,articleTotal,adjustment,note:safeText(el("withdrawNote").value,300)},originalTransactionId:original?.transactionId||null,originalBon:original?.bon||original?.bonNumber||reference||null,previousHash};
-  rec.recordHash=await sha256Hex(canonicalTransaction(rec));rows.push(rec);saveTransactions(rows,training);if(!training){state.master.nextBon++;saveMaster()}return rec;
+  rec.recordHash=await sha256Hex(canonicalTransaction(rec));rows.push(rec);
+    // Erst die lokale, dauerhafte Speicherung bestätigen. Kein Warten auf Netz/Manager.
+    if(!window.KCTransactionStore)throw new Error("Dauerhafter Umsatzspeicher fehlt");
+    await window.KCTransactionStore.replaceAll(training?window.KCTransactionStore.STORE_TRAINING:window.KCTransactionStore.STORE_SALES,rows,{verbindlich:true});
+    if(training)_trainingTxCache=rows;else _txCache=rows;if(!training){state.master.nextBon++;saveMaster()}return rec;
 }
 // 09.10.2026 (Betreiber: "unter Reklamation die Warengruppen wie auf der Kassenseite, darunter die Bilder
 // der Artikel mit einer Anzahl - z. B. 3 kalte Glühwein, die zusammen bestellt wurden; Schuss Rum und
@@ -4260,7 +4277,7 @@ function updateScreenSaverCountdown(){
   const node=el("screenSaverCountdown");
   if(!node)return;
   if(screenSaverActive){
-    node.textContent="Zum Entsperren Bildschirm berühren";
+    node.textContent="Zum Aufwecken Bildschirm berühren – keine PIN nötig";
     return;
   }
   if(state.master.rushMode){
@@ -4273,8 +4290,8 @@ function updateScreenSaverCountdown(){
   node.textContent=`Automatische Abdunklung in ${String(min).padStart(2,"0")}:${String(sec).padStart(2,"0")}`;
 }
 function showScreenSaver(reason="manual"){
-  if(KC_EMBEDDED_TRAINING)return;
-  if(state.master.rushMode&&reason==="idle")return;
+  if(KC_EMBEDDED_TRAINING||state.master.rushMode)return;
+  if(reason==="idle"&&(state.cart.length||state.saleInProgress||state.discount.haendlerausweis||document.querySelector('dialog[open],#kcPinLockOverlay,#kcStartkarteOverlay'))){resetScreenSaverTimer();return;}
   const saver=el("screenSaver");
   if(!saver)return;
   screenSaverActive=true;
@@ -4309,16 +4326,23 @@ function resetScreenSaverTimer(){
   if(screenSaverActive||state.master.rushMode)return;
   screenSaverTimer=setTimeout(()=>showScreenSaver("idle"),SCREEN_SAVER_IDLE_MS);
 }
+let wakeTouch=false,wakeTouchTimer=null;
 function registerScreenActivity(event){
+  if(wakeTouch&&['pointerup','touchend','click'].includes(event.type)){
+    event.preventDefault();event.stopImmediatePropagation();
+    if(event.type==='click'){wakeTouch=false;clearTimeout(wakeTouchTimer);}return;
+  }
   if(screenSaverActive){
-    event?.preventDefault?.();
-    hideScreenSaver();
-    return;
+    const pointer=['pointerdown','touchstart'].includes(event.type);
+    if(pointer){wakeTouch=true;clearTimeout(wakeTouchTimer);wakeTouchTimer=setTimeout(()=>{wakeTouch=false},700);}
+    event.preventDefault();hideScreenSaver();
+    // Ein Scan weckt auf UND wird vollständig verarbeitet. Enter/Touch weckt nur auf.
+    if(pointer||event.key==='Enter'||event.key===' '||event.key==='Escape'){event.stopImmediatePropagation();return;}
   }
   resetScreenSaverTimer();
 }
-["pointerdown","touchstart","keydown"].forEach(type=>{
-  document.addEventListener(type,registerScreenActivity,{passive:type!=="keydown"});
+['pointerdown','pointerup','touchstart','touchend','click','keydown'].forEach(type=>{
+  document.addEventListener(type,registerScreenActivity,{capture:true,passive:false});
 });
 el("screenSaver")?.addEventListener("click",hideScreenSaver);
 el("screenSaver")?.addEventListener("keydown",event=>{
@@ -4330,12 +4354,29 @@ if(el("screenLockBtn")){
 }
 resetScreenSaverTimer();
 setInterval(updateScreenSaverCountdown,1000);
+// Unterstützte Browser können in Stoßzeiten auch die Geräte-Abschaltung verhindern.
+let rushWakeLock=null,rushWakePending=false;
+async function updateRushWakeLock(){
+  if(!state.master.rushMode||document.visibilityState!=="visible"){
+    const old=rushWakeLock;rushWakeLock=null;try{await old?.release?.()}catch{}return;
+  }
+  if(rushWakeLock||rushWakePending||!navigator.wakeLock?.request)return;
+  rushWakePending=true;
+  try{const lock=await navigator.wakeLock.request('screen');
+    if(!state.master.rushMode||document.visibilityState!=="visible"){await lock.release();return;}
+    rushWakeLock=lock;lock.addEventListener('release',()=>{if(rushWakeLock===lock)rushWakeLock=null;});
+  }catch{}finally{rushWakePending=false;}
+}
+document.addEventListener('visibilitychange',updateRushWakeLock);
+document.addEventListener('pointerdown',()=>{if(state.master.rushMode)updateRushWakeLock()},{passive:true});
+updateRushWakeLock();
 
 el("rushModeBtn").onclick=()=>{
   const activating=!state.master.rushMode;
   state.master.rushMode=activating;
   if(activating&&state.master.trainingMode){state.master.trainingMode=false;notify("warning","Trainingsmodus wurde beendet, weil Stoßzeiten aktiviert wurden","training-rush-exclusive",5000)}
   if(state.master.rushMode){clearTimeout(screenSaverTimer);if(screenSaverActive)hideScreenSaver()}else resetScreenSaverTimer();
+  updateRushWakeLock();
   saveMaster();applyModes();renderCategories();renderProducts();
   setSystemHint(state.master.rushMode?"Stoßzeiten aktiv – Trainingsmodus und automatische Displayabdunklung sind pausiert":"Normalbetrieb aktiv");
 };
@@ -4764,6 +4805,7 @@ el("voidBonBtn").onclick=voidBon;
 })();
 el("undoLastBtn").onclick=()=>{const i=state.cart.findIndex(x=>x.key===state.lastAdded);if(i>=0){state.cart[i].qty--;if(state.cart[i].qty<=0){const removed=state.cart.splice(i,1)[0];if(state.selectedCartKey===removed.key)state.selectedCartKey=state.cart.at(-1)?.key||null}if(!state.cart.length)state.cartStartedAt=null;renderCart()}};
 async function checkoutSale(source="button"){
+  if(state.saleInProgress)return false;
   if(!state.cart.length)return keinBonMeldung();
   const due=total(),isPayout=toCents(due)<0;
   let result;
@@ -5387,6 +5429,7 @@ function haendlerWagenOeffnen(){
   window.KCAufbau?.funktionenSeite?.(false);window.KCAufbau?.sammelSeite?.(false);window.KCAufbau?.zahlenSeite?.(false);
 }
 function haendlerScan(code){
+  if(state.saleInProgress)return false;
   // Die Liste wird direkt aus dem letzten Stammdaten-Abgleich gelesen, auch ohne Neustart.
   const master=haendlerMaster();
   const r=window.KCHaendlerausweis.pruefen(code,master,!!state.master.trainingMode);

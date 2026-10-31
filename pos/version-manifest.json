@@ -9,5 +9,8 @@
   "trainingCompatibility": "0.27.x",
   "sourceRelease": "KC_MarktKasse_Suite_V0_31_3_6_Repair_12_POS_UI_Profile_Technical_Preview",
   "haendlerausweisVersion": "1.0.0",
-  "haendlerausweisBuildDate": "2026-10-29"
+  "haendlerausweisBuildDate": "2026-10-29",
+  "betriebsBuild": "0.31.3.6-r68-marktbetrieb-integration",
+  "betriebsBuildDatum": "2026-10-31",
+  "verkaufskurveVersion": "1.1.0"
 }

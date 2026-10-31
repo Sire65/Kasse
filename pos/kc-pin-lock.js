@@ -1,6 +1,5 @@
 // KC Sync – PIN-Sperre (Sicherheitsebene 3): verhindert Bedienung durch Unbefugte, falls ein
-// Tablet entsperrt und unbeaufsichtigt herumliegt. Sperrt sich nach Inaktivität automatisch
-// wieder.
+// Tablet morgens gestartet wird. Im laufenden Marktbetrieb keine erneute PIN-Abfrage.
 //
 // WICHTIGE LEHRE aus einem früheren, teuren Fund: dieses Fenster erscheint erst, NACHDEM die
 // anderen Start-Fenster (Vollbild-Hinweis, Systemprüfung) tatsächlich verschwunden sind - sonst
@@ -9,9 +8,9 @@
 (function (global) {
   'use strict';
   const PIN_HASH_KEY = 'kc_pin_lock_hash_v1';
-  const LOCK_TIMEOUT_MS = 5 * 60 * 1000; // 5 Minuten Inaktivität -> erneut sperren
+  const SESSION_KEY = 'kc_pin_markttag_v1';
   let unlocked = false;
-  let inactivityTimer = null;
+  let submitBusy = false;
   let encryptionKeyBytes = null; // Sicherheitsebene 1: aus der PIN abgeleiteter Schlüssel für die Datenverschlüsselung
 
   // BEFUND 01.09.2026 am echten iPad: hier stand crypto.subtle.digest. Das gibt es nur im
@@ -32,10 +31,25 @@
     });
   }
 
-  function resetInactivityTimer() {
-    if (!unlocked) return;
-    clearTimeout(inactivityTimer);
-    inactivityTimer = setTimeout(() => { unlocked = false; zeigeSperre(); }, LOCK_TIMEOUT_MS);
+  function tag() {
+    const d = new Date(); return `${d.getFullYear()}-${d.getMonth()+1}-${d.getDate()}`;
+  }
+  function merkeFreigabe(hash) {
+    // Nur dieser Browser-Tab und dieser Markttag. Kein Klartext-PIN und kein Schlüssel im dauerhaften localStorage.
+    try { sessionStorage.setItem(SESSION_KEY, JSON.stringify({tag:tag(),hash,key:Array.from(new Uint8Array(encryptionKeyBytes))})); } catch (e) {}
+  }
+  function sitzungFreigeben() {
+    try {
+      const s = JSON.parse(sessionStorage.getItem(SESSION_KEY) || 'null');
+      if (!s || s.tag !== tag() || s.hash !== localStorage.getItem(PIN_HASH_KEY)
+        || !Array.isArray(s.key) || s.key.length !== 32 || !s.key.every(n=>Number.isInteger(n)&&n>=0&&n<=255)) return false;
+      encryptionKeyBytes = Uint8Array.from(s.key).buffer; unlocked = true;
+      // Alte PIN-verschlüsselte Bons wurden vor diesem Modul geladen: nach Freigabe nachholen.
+      Promise.resolve(global.__kcTxHydrated).then(()=>{
+        if(global.KCTransactionStore?.gesperrteAnzahl?.()>0)return global.__kcRehydrate?.();
+      }).catch(e=>console.warn('Umsatzdaten konnten nach PIN-Freigabe nicht nachgeladen werden',e));
+      return true;
+    } catch (e) { return false; }
   }
 
   function zeigeSperre() {
@@ -90,19 +104,19 @@
     async function pruefen() {
       const pin = input.value.trim();
       const errorEl = document.getElementById('kcPinError');
-      if (pin.length < 4) { errorEl.textContent = 'Mindestens 4 Ziffern.'; return; }
+      if (!/^\d{4,8}$/.test(pin)) { errorEl.textContent = 'Bitte 4 bis 8 Ziffern eingeben.'; return; }
       const hash = await sha256(pin);
       if (!bereitsEingerichtet) {
         localStorage.setItem(PIN_HASH_KEY, hash);
         encryptionKeyBytes = await sha256Bytes('kc-encryption-key:' + pin);
-        unlocked = true; overlay.remove(); resetInactivityTimer();
-        global.__kcRehydrate?.();
+        unlocked = true; merkeFreigabe(hash); overlay.remove();
+        await global.__kcRehydrate?.();
         return;
       }
       if (hash === localStorage.getItem(PIN_HASH_KEY)) {
         encryptionKeyBytes = await sha256Bytes('kc-encryption-key:' + pin);
-        unlocked = true; overlay.remove(); resetInactivityTimer();
-        global.__kcRehydrate?.();
+        unlocked = true; merkeFreigabe(hash); overlay.remove();
+        await global.__kcRehydrate?.();
       } else {
         errorEl.textContent = 'Falsche PIN.'; input.value = ''; input.focus();
       }
@@ -111,12 +125,14 @@
     // kann - man tippt ihn zehnmal und weiss immer noch nichts. Deshalb faengt hier ein catch
     // JEDEN Fehler ab und schreibt ihn sichtbar in die Fehlerzeile.
     const pruefenSichtbar = async () => {
+      if (submitBusy) return;
+      submitBusy = true;
       try { await pruefen(); }
       catch (err) {
         const feld = document.getElementById('kcPinError');
         if (feld) feld.textContent = 'Fehler: ' + (err && err.message ? err.message : err);
         try { console.error('PIN-Sperre:', err); } catch (e) {}
-      }
+      } finally { submitBusy = false; }
     };
     document.getElementById('kcPinSubmit').addEventListener('click', pruefenSichtbar);
     input.addEventListener('keydown', (e) => { if (e.key === 'Enter') pruefenSichtbar(); });
@@ -132,12 +148,13 @@
 
   async function starteWennBereit() {
     if (global.__kcPinLockEnabled === false) return; // in den Voreinstellungen deaktiviert
+    if (sitzungFreigeben()) return;
+    await global.KCStartupReady;
     // Wartet, bis Vollbild-Hinweis UND Start-Systemprüfung tatsächlich weg sind - verhindert
     // die Überlagerung mehrerer Fenster, die vorher echte Klicks blockiert hat.
     await wartenBisWeg(() => { const g = document.getElementById('fullscreenGate'); return g && !g.hidden; });
     await wartenBisWeg(() => document.getElementById('kcStartupOk'));
     zeigeSperre();
-    ['click', 'touchstart', 'keydown'].forEach((ev) => document.addEventListener(ev, resetInactivityTimer, { passive: true }));
   }
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', starteWennBereit);
