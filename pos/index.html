@@ -41,6 +41,7 @@
 <link rel="stylesheet" href="images-v3.css?build=7">
 <link rel="stylesheet" href="kc-ameisenrahmen.css?build=1.1.1">
 <style>#haendlerAusweisStatus{display:block;white-space:normal;color:#075f40;font-weight:700;font-size:13px;padding:3px 8px;text-align:right}#haendlerAusweisStatus[hidden]{display:none}body.haendler-rabatt-aktiv.kc-bon-leer .kc-bereich.bon .cart-discount-button{pointer-events:auto!important;background:#f4b634!important;color:#172338!important}</style>
+<style>body.sale-in-progress #app{pointer-events:none;cursor:progress}</style>
 </head>
 <body class="public-beta">
 <div id="app" class="app-shell">
@@ -1538,13 +1539,13 @@
 <script src="kc-sync-connection.js?build=0.2.0"></script>
 <script src="../shared/kc-haendlerausweis.js?build=1.0.0"></script>
 <script src="kc-sync-master-data.js?build=1.1.3"></script>
-<script src="kc-sync-remote-command.js?build=1.0.0"></script>
+<script src="kc-sync-remote-command.js?build=1.1.0"></script>
 <script src="kc-spiegel-modus.js?build=1.0.0"></script>
 <script src="kc-ausverkauft.js?build=1.0.2"></script>
 <script src="kc-ameisenrahmen.js?build=1.1.0"></script>
 <script src="kc-sync-cash-transfer.js?build=1.0.1"></script>
 <script src="kc-finance-transfer-kasse.js?build=1.0.1"></script>
-<script src="kc-transaction-store.js?build=0.2.0"></script>
+<script src="kc-transaction-store.js?build=0.3.0"></script>
 <script src="../shared/kc-artikelnummern-core.js?build=1.0.2"></script>
 <script src="../shared/kc-tastaturlayout.js?build=1.0.0"></script>
 <script>
@@ -1561,7 +1562,7 @@
     document.body.appendChild(s);
   }
   window.KCMasterDataSync.bereit.finally(() => {
-    ladeNacheinander(['images-v3.js?build=4-alt', 'app.js?build=0.31.3.6-r67-haendler', '../shared/kc-happyhour.js?build=0.1.0', 'kc-happyhour-pos.js?build=0.1.0', 'kc-meldeweg.js?build=0.1.0', '../shared/kc-security-card.js?build=0.1.0', 'kc-security-card-pos.js?build=0.1.1', 'kc-zahl-zoom.js?build=0.1.0', 'kc-ansicht-umschalter.js?build=0.1.0', 'kc-startup-check.js?build=0.1.0', 'kc-pin-lock.js?build=0.1.1', 'kc-layout-neu.js?build=0.1.1', 'kc-erfassung-getrennt.js?build=0.3.0', 'kc-gutschein.js?build=0.2.2', 'kc-bedienung-farbig.js?build=0.1.3', 'kc-vorfuehrdaten.js?build=0.1.1', '../shared/kc-oberflaechen-format.js?build=0.1.0', 'kc-oberflaechen-pos.js?build=0.1.0', 'kc-oberflaechen-anwenden.js?build=0.9.16', 'kc-kopfzeile.js?build=0.3.0', 'kc-schulung.js?build=0.1.0', 'kc-schulungsvideos.js?build=0.3.1', 'kc-schulungsvideos-inhalt.js?build=0.3.2', 'kc-reklamation.js?build=0.2.0', 'kc-tse-relay.js?build=0.1.0']);
+    ladeNacheinander(['images-v3.js?build=4-alt', 'app.js?build=0.31.3.6-r68-marktbetrieb', '../shared/kc-happyhour.js?build=0.1.0', 'kc-happyhour-pos.js?build=0.1.0', 'kc-meldeweg.js?build=0.1.0', '../shared/kc-security-card.js?build=0.1.0', 'kc-security-card-pos.js?build=0.1.1', 'kc-zahl-zoom.js?build=0.1.0', 'kc-ansicht-umschalter.js?build=0.1.0', 'kc-startup-check.js?build=0.2.0', 'kc-pin-lock.js?build=0.2.0', 'kc-layout-neu.js?build=0.1.1', 'kc-erfassung-getrennt.js?build=0.3.0', 'kc-gutschein.js?build=0.2.2', 'kc-bedienung-farbig.js?build=0.1.3', 'kc-vorfuehrdaten.js?build=0.1.1', '../shared/kc-oberflaechen-format.js?build=0.1.0', 'kc-oberflaechen-pos.js?build=0.1.0', 'kc-oberflaechen-anwenden.js?build=0.9.16', 'kc-kopfzeile.js?build=0.3.0', 'kc-schulung.js?build=0.1.0', 'kc-schulungsvideos.js?build=0.3.1', 'kc-schulungsvideos-inhalt.js?build=0.3.2', 'kc-reklamation.js?build=0.2.0', 'kc-tse-relay.js?build=0.1.0']);
   });
 </script>
 <script src="pos-ui-profile-consumer.js?build=0.1.0"></script>

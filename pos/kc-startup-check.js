@@ -39,7 +39,7 @@
   async function pruefeDatenbank() {
     try {
       const ok = await (global.__kcTxHydrated || Promise.resolve(false));
-      return ok !== false ? { ok: true, text: 'Speicherung auf diesem Gerät aktiv' } : { ok: false, text: 'Konnte nicht geladen werden - Kasse arbeitet vorerst nur im Arbeitsspeicher' };
+      return ok !== false ? { ok: true, text: 'Speicherung auf diesem Gerät aktiv' } : { ok: false, text: 'Speicherung nicht bereit - vor dem Kassieren beheben' };
     } catch (e) {
       return { ok: false, text: 'Fehler beim Laden: ' + e.message };
     }
@@ -105,13 +105,13 @@
     okBtn.style.opacity = '1';
     if (!bereit) {
       okBtn.style.background = '#b91c1c';
-      okBtn.textContent = 'Trotzdem fortfahren';
+      okBtn.textContent = 'Erneut prüfen';
       zuSperrfensterMachen();          // nur hier ist Sperren gerechtfertigt
     }
-    okBtn.addEventListener('click', () => overlay.remove());
+    okBtn.addEventListener('click', () => { if (bereit) overlay.remove(); else location.reload(); });
     // Ist die Kasse einsatzfaehig, verschwindet der Hinweis von selbst - niemand muss ihn
     // wegklicken, bevor der erste Gast bedient werden kann.
-    if (bereit) setTimeout(() => overlay.remove(), 7000);
+    if (bereit) setTimeout(() => overlay.remove(), 1200);
     // Vor dem Markttag will man mehr wissen als "geht/geht nicht": die ausfuehrliche Pruefung
     // nennt jeden Punkt einzeln und sagt dazu, was zu tun ist. Verbindungsangaben werden
     // mitgegeben, damit die Seite dieselbe Kasse prueft wie diese hier.
@@ -148,6 +148,10 @@
     await zeigeStartpruefung();
   }
 
-  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', zeigeStartpruefungWennBereit);
-  else zeigeStartpruefungWennBereit();
+  // Nachfolgende Startmodule warten auf dieselbe Prüfung statt unabhängig Fenster zu öffnen.
+  global.KCStartupReady = new Promise(resolve => {
+    const start = () => zeigeStartpruefungWennBereit().then(resolve, resolve);
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start);
+    else start();
+  });
 })(window);

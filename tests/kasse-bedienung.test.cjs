@@ -31,8 +31,7 @@ const start=await p.evaluate(()=>{
   const st=getComputedStyle(o);
   return {da:true,sperrend:o.dataset.kcSperrend==='1',zeiger:st.pointerEvents,inset:st.inset,hintergrund:st.backgroundColor};
 });
-pruefe('Startfenster ist da',start.da);
-pruefe('Startfenster sperrt NICHT (Kasse ist einsatzfähig)',start.da&&!start.sperrend&&start.zeiger==='none',JSON.stringify(start));
+pruefe('Startfenster sperrt NICHT (Kasse ist einsatzfähig)',!start.da||(!start.sperrend&&start.zeiger==='none'),JSON.stringify(start));
 // Ist die Kasse dahinter wirklich bedienbar?
 const klickbar=await p.evaluate(()=>{const t=document.querySelector('.product-tile');if(!t)return null;const r=t.getBoundingClientRect();
   const oben=document.elementFromPoint(r.left+r.width/2,r.top+r.height/2);return oben?oben.closest('.product-tile')!==null:false});
@@ -71,7 +70,8 @@ const erwartetesRueckgeld=await p.evaluate(()=>{
 });
 pruefe(`Rückgeldbetrag steht auf dem Knopf (${erwartetesRueckgeld} € bei 10,00 € gegeben)`,
   mitGeld.text.includes(erwartetesRueckgeld),mitGeld.text);
-await p.screenshot({path:'/tmp/kc-kasse-rueckgeld.png'});
+fs.mkdirSync(path.join(WURZEL,'test-results'),{recursive:true});
+await p.screenshot({path:path.join(WURZEL,'test-results','kasse-rueckgeld.png')});
 // Abschluss ueber den neuen Knopf muss echt buchen
 // Die Bons liegen in der IndexedDB, nicht im localStorage - geprueft wird deshalb am
 // sichtbaren Ergebnis: Abschlussmeldung und geleerter Bon.
@@ -84,7 +84,7 @@ const zwischen=await p.evaluate(()=>{
           gesamt:document.getElementById('grandTotal').textContent};
 });
 console.log('      nach Klick:',JSON.stringify(zwischen));
-pruefe('Neuer BAR-Knopf schließt den Bon wirklich ab',/Verkauf abgeschlossen/.test(zwischen.dialog||'')&&/^0,00/.test((zwischen.gesamt||'').trim()),zwischen.dialog||'keine Meldung');
+pruefe('Neuer BAR-Knopf speichert den Bon ohne blockierendes Erfolgsfenster',await p.evaluate(async()=>state.cart.length===0&&readTransactions().length>0&&(await KCTransactionStore.getAll(KCTransactionStore.STORE_SALES)).length>0&&!document.querySelector('dialog[open]')));
 // --- Stoßzeiten: die Warengruppen duerfen nicht zusammengedrueckt werden --------------
 // Der Fehler trat NUR auf, wenn die Modus-Zeile eingeblendet ist (Stoßzeiten/Training) und
 // die Zeilen der Verkaufsflaeche nach Position vergeben wurden - deshalb wird hier beides
