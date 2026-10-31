@@ -1,7 +1,7 @@
 # Einsatzprüfung Bilderrechner und Schulung – 31.10.2026
 
 Ausgangspunkt: GitHub main `62b0a56` einschließlich Händlerausweis-Erweiterung #20.
-Frontend-Build: `0.31.3.6-r68-marktbetrieb`.
+Frontend-Build: `0.31.3.6-r68-marktbetrieb-info`.
 
 ## Für die Bedienung
 
@@ -57,3 +57,25 @@ für eingerichtete verschlüsselte Geräte und geschützte Verwaltungsfunktionen
 
 Technische Grundlage zur optionalen Geräte-Wachhaltung:
 https://www.w3.org/TR/screen-wake-lock/
+
+## Ergänzung: Artikel-Info, Verkaufskurve und Prognose
+
+Beim Info-Klick stehen Absatz, Artikelwert, Kurve und Hochrechnung direkt im Fenster.
+Die große Ansicht ist über „Verkäufe & Prognose“ erreichbar und ersetzt das Infofenster,
+so dass keine Dialoge übereinander liegen. Der Favoriten-Stern verwendet dieselbe Auswertung.
+
+Gezählt wird der lokal gespeicherte Nettoabsatz des heutigen Tages: Verkauf abzüglich
+Storno und Reklamation. Personal/Helfer, Pfand und Gutschein-Zahlzeilen zählen nicht mit.
+Halbe Portionen zählen als 0,5; ihr bereits gespeicherter Halbpreis wird nicht nochmals
+halbiert. Kombis werden in ihre Artikel aufgeteilt, auch im Nenner des Tagesanteils.
+Der Artikelwert versteht sich ohne Pfand und vor zusätzlichen Bon-/Positionsrabatten.
+
+Die Prognose betrifft die nächsten 60 Minuten und rechnet den jüngsten Absatz hoch.
+Erst ab drei Verkaufsbons und 15 Minuten Beobachtung erscheint ein Zahlenwert; sonst
+„Noch zu wenig Daten“. Es ist eine Hochrechnung, keine feste Bedarfszusage und keine
+Tagesschlussprognose. Trainingsmodus verwendet ausschließlich die getrennten Trainingsbons.
+Die laufende Stunde ist als unvollständig gekennzeichnet. Ein leeres neues Stundenintervall
+wird am Stundenwechsel nicht als plötzlicher Absatzabsturz eingezeichnet.
+
+`tests/verkaufskurve-prognose.test.cjs`: 22 Prüfungen zu Nettoabsatz, Kombis, Halbpreisen,
+Rücknahmen, Prognose und beiden echten Info-Oberflächen auf Tablet-Abmessungen.

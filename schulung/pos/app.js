@@ -1252,20 +1252,22 @@ function productInfoRecord(p){
   const base={productId:p.id,version:raw.version||'1.0.0',status:raw.status||'incomplete',shortDescription:raw.shortDescription||raw.notes||'',ingredients:raw.ingredients||'',additives:raw.additives||raw.contents||'',important:raw.important||'',allergens:raw.allergens||{},nutrition:raw.nutrition||{},manufacturer:raw.manufacturer||'',supplier:raw.supplier||'',source:raw.source||'',validAt:raw.validAt||'',approvedBy:raw.approvedBy||'',approvedAt:raw.approvedAt||''};
   return window.ProductInfoCore?ProductInfoCore.normalize(base):base;
 }
-function openProductInfo(id){
+async function openProductInfo(id){
+  await _txHydrated;
   const p=PRODUCTS.find(x=>x.id===id)||activePackageProducts().find(x=>x.id===id);if(!p)return;currentInfoProduct=p;
   const r=productInfoRecord(p);el('productInfoTitle').textContent=p.name;el('productInfoImage').src=p.image;
+  const head=el('productInfoTitle').closest('.info-dialog-head');if(head&&!head.contains(el('productInfoImage')))head.insertBefore(el('productInfoImage'),head.querySelector('.icon-close'));
   const allergenSummary=r.legacyAllergens||Object.entries(r.allergens||{}).filter(([,v])=>v==='contained'||v==='traces').map(([k,v])=>`${ALLERGEN_LABELS[k]||k}: ${ALLERGEN_STATUS[v]}`).join(' · ');
   const sections=[];if(r.shortDescription)sections.push(infoSection('Kurzinformation',r.shortDescription,''));if(allergenSummary)sections.push(infoSection('Allergene',allergenSummary,state.master.highlightAllergens?'allergen':''));if(r.important)sections.push(infoSection('Wichtiger Hinweis',r.important,'important'));
   if(r.status!=='approved')sections.push(infoSection('Datenstatus','Produktinformation nicht vollständig geprüft – bitte Marktleitung fragen.','important'));
-  el('productInfoContent').innerHTML=sections.join('')||'<p class="info-empty">Keine freigegebenen Schnellinformationen hinterlegt.</p>';
+  el('productInfoContent').innerHTML=(window.KCVerkaufskurve?.infoHtml?.(p.id)||'')+sections.join('')||'<p class="info-empty">Keine freigegebenen Schnellinformationen hinterlegt.</p>';
   el('productInfoDetailsBtn').hidden=false;el('productInfoDialog').showModal();notify('info',`${p.name}: Information geöffnet`,'product-info');
   // 25.09.2026 (Betreiber: "Jeder Artikel Button hat einen Info Button. Einige haben
   // Favoriten Sterne, der eine Verkaufsauswertung oeffnet. Baue ueberall im Info-Bereich einen
   // Knopf ein, der dieselbe Info aufruft wie der Stern"): ruft dieselbe Funktion auf wie der
   // Favoriten-Stern (openSalesTimeBreakdown) - jetzt bei JEDEM Artikel erreichbar, nicht nur
   // bei den automatisch erkannten Renner-Artikeln mit Stern.
-  el('productInfoSalesBtn').onclick=()=>openSalesTimeBreakdown(p.id);
+  el('productInfoSalesBtn').onclick=()=>{el('productInfoDialog').close();openSalesTimeBreakdown(p.id);};
 }
 function infoSection(title,text,cls){return `<section class="info-section ${cls}"><h3>${escapeHtml(title)}</h3><p>${escapeHtml(text)}</p></section>`}
 function escapeHtml(value){return String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}

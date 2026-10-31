@@ -1,10 +1,10 @@
 name: Kassen-Marktbetrieb
 on:
   pull_request:
-    paths: ['pos/**', 'schulung/pos/**', 'tests/marktbetrieb.test.cjs', 'tests/haendlerausweis.test.cjs', '.github/workflows/kassen-marktbetrieb.yml']
+    paths: ['pos/**', 'schulung/pos/**', 'tests/marktbetrieb.test.cjs', 'tests/verkaufskurve-prognose.test.cjs', 'tests/haendlerausweis.test.cjs', '.github/workflows/kassen-marktbetrieb.yml']
   push:
     branches: [main]
-    paths: ['pos/**', 'schulung/pos/**', 'tests/marktbetrieb.test.cjs', '.github/workflows/kassen-marktbetrieb.yml']
+    paths: ['pos/**', 'schulung/pos/**', 'tests/marktbetrieb.test.cjs', 'tests/verkaufskurve-prognose.test.cjs', '.github/workflows/kassen-marktbetrieb.yml']
   workflow_dispatch:
 permissions:
   contents: read
@@ -23,6 +23,7 @@ jobs:
         run: |
           node tests/marktbetrieb.test.cjs
           node tests/haendlerausweis.test.cjs
+          node tests/verkaufskurve-prognose.test.cjs
       - name: Geldwege und ruhige Abschlussmeldungen
         run: |
           node tests/kasse-pruefung-08-10.test.cjs
