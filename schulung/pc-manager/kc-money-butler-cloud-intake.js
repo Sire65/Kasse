@@ -10,7 +10,7 @@
   }
   function token(){
     const c=cfg();
-    return String(global.KC_COMMUNICATION_ACCESS_TOKEN||c.token||'').trim();
+    return String(global.KCSupabase?.holeZugriffsToken?.()||global.KC_COMMUNICATION_ACCESS_TOKEN||c.token||'').trim();
   }
   function client(){
     const c=cfg(),t=token();
@@ -19,7 +19,7 @@
       baseUrl:c.url||undefined,
       publishableKey:c.publicKey||undefined,
       sourceProgram:'kc-money-butler',
-      getAccessToken:async()=>t,
+      getAccessToken:async()=>token(),
       defaultTestOnly:false
     });
   }
@@ -59,7 +59,8 @@
     for(const row of items){
       try{
         const payload=decodeCountRow(row);
-        global.KCClosingCore?.ingestCashCountPayload?.(payload,'communicator-cloud');
+        if(typeof global.KCClosingCore?.ingestCashCountPayload!=='function')throw new Error('Tagesabschluss ist noch nicht bereit. Zählung bleibt zur Abholung erhalten.');
+        global.KCClosingCore.ingestCashCountPayload(payload,'communicator-cloud');
         await markCount(c,row.id);
         localStorage.removeItem(LAST_ERROR_KEY);
         const status=document.getElementById('communicatorCashResult');

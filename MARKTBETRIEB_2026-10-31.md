@@ -1,7 +1,7 @@
 # Einsatzprüfung Bilderrechner und Schulung – 31.10.2026
 
 Ausgangspunkt: GitHub main `62b0a56` einschließlich Händlerausweis-Erweiterung #20.
-Frontend-Build: `0.31.3.6-r68-marktbetrieb-info`.
+Frontend-Build: `0.31.3.6-r68-marktbetrieb-integration`.
 
 ## Für die Bedienung
 
@@ -79,3 +79,18 @@ wird am Stundenwechsel nicht als plötzlicher Absatzabsturz eingezeichnet.
 
 `tests/verkaufskurve-prognose.test.cjs`: 22 Prüfungen zu Nettoabsatz, Kombis, Halbpreisen,
 Rücknahmen, Prognose und beiden echten Info-Oberflächen auf Tablet-Abmessungen.
+
+
+## Abgleich Money Butler, PC-Manager und Kasse
+
+Produktiv- und Schulungsversion sind im Geldweg angeglichen:
+- Bestätigte Übergaben verwenden die tatsächliche Kassenkennung und bei Kassetten nur den eigenen Anteil.
+- QR, Direktübertragung und bestätigte Übergabe teilen sich Buchungs-ID und Duplikatschutz. Eine vorhandene Geldbewegung schützt auch nach einem unterbrochenen Speichervorgang vor erneuter Buchung.
+- Falsches Datum, fremde Kasse und beschädigte Pakete werden nicht als erfolgreich zugestellt quittiert. Für morgen vorbereitete Übergaben bleiben erhalten.
+- Bestätigungsdialoge warten bei offenem Verkauf, anderen Dialogen und Stoßzeiten.
+- Money Butler erlaubt Nullzählungen, aber keine Null-Euro-Geldübergaben. Doppeltippen sendet nur einmal.
+- PC-Manager verwendet die aktuelle Anmeldung statt eines veralteten gespeicherten Tokens. Zählungen werden erst nach Übernahme durch das Abschlussmodul quittiert. Lokale Übertragungsanfragen haben Zeitlimits.
+
+Verifikation: 26 Prüfungen in `tests/kassen-programmverbund.test.cjs`, alle neun Money-Butler-Regressionstests und Tagesabschluss. Echter lokaler Manager-Dienst mit temporärer SQLite-Datenbank: normale und bestätigte Übergabe ablegen, Kasse koppeln und beide Übergaben abrufen. Der Test nutzt einen eigenen lokalen Port und verändert keinen laufenden Manager-Dienst. Cloud und Push werden ausschließlich mit Testantworten geprüft; keine Nachrichten an Mitglieder.
+
+Die Veröffentlichung ist weiterhin ausstehend. Vor Ort bleiben Tablet, Scanner, Drucker und reales WLAN gemeinsam abzunehmen.

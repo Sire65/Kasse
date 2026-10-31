@@ -3583,7 +3583,8 @@ function applyCashPayload(text,source="unknown"){
 
   const key=cashTransferKey(p);
   const used=JSON.parse(localStorage.getItem("kc_cash_used_transfers")||"[]");
-  if(used.includes(key)){
+  const movements=JSON.parse(localStorage.getItem("kc_cash_movements")||"[]");
+  if(used.includes(key)||movements.some(row=>row.transferId===key)){
     recordCashImportAttempt({
       time:new Date().toISOString(),
       result:"rejected-duplicate",
@@ -3592,10 +3593,9 @@ function applyCashPayload(text,source="unknown"){
       registerId:p.registerId,
       total:p.total
     });
-    throw new Error("Diese Bargeldübergabe wurde bereits eingelesen. Eine doppelte Buchung wurde verhindert.");
+    const fehler=new Error("Diese Bargeldübergabe wurde bereits eingelesen. Eine doppelte Buchung wurde verhindert.");fehler.code="KC_CASH_DUPLICATE";throw fehler;
   }
 
-  const movements=JSON.parse(localStorage.getItem("kc_cash_movements")||"[]");
   if(p.type==="opening"&&movements.some(row=>row.type==="opening"&&((p.scope==="shared"&&row.poolId===p.poolId)||(p.scope!=="shared"&&row.registerId===p.registerId))&&cashMovementDate(row)===p.effectiveDate)){
     recordCashImportAttempt({time:new Date().toISOString(),result:"rejected-second-opening",source,transferId:key,registerId:p.registerId,effectiveDate:p.effectiveDate,total:p.total});
     throw new Error(`Für ${displayBusinessDate(p.effectiveDate)} wurde bereits ein Anfangsbestand übernommen. Weiteres Wechselgeld bitte als Nachfüllung erzeugen.`);
