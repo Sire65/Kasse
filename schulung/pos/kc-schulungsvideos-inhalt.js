@@ -1,4 +1,4 @@
-// KC Schulungsvideos – INHALTE (Themen und kleine Videos)                     KC-KASSE-SCHULUNGSVIDEOS-INHALT 0.3.1 · 12.10.2026
+// KC Schulungsvideos – INHALTE (Themen und kleine Videos)                     KC-KASSE-SCHULUNGSVIDEOS-INHALT 0.3.2 · 29.10.2026
 //
 // Getrennt vom Abspieler (kc-schulungsvideos.js): hier stehen nur Texte und Fingerwege. Ein neues Video = ein neuer
 // Eintrag in VIDEOS; eine Ueberarbeitung zaehlt "stand" hoch (die Bewertung zaehlt dann neu).
@@ -24,6 +24,15 @@
     ];
 
     const VIDEOS = [
+      {id:'v-haendlerausweis',stand:'1',thema:'verkaufen',sym:'🪪',t:'Händler-Ausweis und Gesamtrabatt',u:'Ausweis scannen, 10 % übernehmen und bei Bedarf ändern',
+        st:[
+          {wer:'laura',x:'Der Händler zeigt seinen Ausweis. Scanne den QR-Code. Die Kasse prüft das Marktjahr, den Prüfcode und ob der Ausweis gesperrt ist.'},
+          {wer:'marc',x:'Ein gültiger Ausweis öffnet den Einkaufswagen und setzt 10 Prozent Gesamtrabatt. Du kannst den Ausweis schon vor dem ersten Artikel scannen.'},
+          {wer:'laura',x:'Speisen und Getränke erhalten den Rabatt. Pfand bleibt vollständig zu bezahlen. Der Rabatt steht unten als Gesamtrabatt.',zeig:['#discountDisplay']},
+          {wer:'marc',x:'Über RABATT kannst du den Prozentsatz ändern oder den Rabatt entfernen. Noch einmal derselbe Ausweis verändert deine Einstellung nicht.',zeig:['#discountBtn']},
+          {wer:'laura',x:'Nach Bezahlung oder Bon-Abbruch ist der Rabatt wieder gelöscht. Für den nächsten Händler wird neu gescannt.'},
+          {wer:'marc',x:'Den Musterausweis Nummer 000 mit Prüfcode MSTR kannst du ausschließlich im Trainingsmodus ausprobieren. Fehlt die Ausweisliste, bitte die Stammdaten abgleichen.'}
+        ]},
       // ===================================== 🖥️ OBERFLÄCHE =====================================
       {id: 'o-kopfzeile', stand: '1', thema: 'oberflaeche', sym: '🔝', t: 'Kopfzeile und Lampen', u: 'Was oben steht und was die Lampen sagen (ca. 1 Min.)',
         st: [

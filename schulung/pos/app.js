@@ -1348,16 +1348,17 @@ function grossTotal(){return fromCents(state.cart.reduce((sum,item)=>sum+toCents
 // unten definiert, wird hier bereits verwendet, da Funktionsdeklarationen gehoisted werden).
 function positionDiscountAmount(item){const percent=Math.max(0,Math.min(100,Number(item?.positionDiscount?.percent||0))),unit=Number(item?.price||0)+Number(item?.option?.price||0);if(!item||item.category==="Pfand"||item.manualDeposit||unit<=0||percent<=0)return 0;const basis=fromCents(toCents(unit*Number(item.qty||0)));return rabattBetragGerundet(basis,percent)}
 function totalPositionDiscountAmount(){return fromCents(state.cart.reduce((sum,item)=>sum+toCents(positionDiscountAmount(item)),0))}
-function discountBase(keysOverride=null){const selected=Array.isArray(keysOverride)?keysOverride:(Array.isArray(state.discount?.keys)?state.discount.keys:[]),restrict=selected.length>0;return fromCents(state.cart.reduce((sum,item)=>{const unit=Number(item.price||0)+Number(item.option?.price||0),eligible=item.category!=="Pfand"&&!item.manualDeposit&&unit>0&&!Number(item.positionDiscount?.percent||0);if(!eligible)return sum;if(restrict&&!selected.includes(item.key))return sum;return sum+toCents(unit*Number(item.qty||0))},0))}
+function discountBase(keysOverride=null){const selected=Array.isArray(keysOverride)?keysOverride:(Array.isArray(state.discount?.keys)?state.discount.keys:[]),restrict=selected.length>0;return fromCents(state.cart.reduce((sum,item)=>{const unit=Number(item.price||0)+Number(item.option?.price||0),eligible=item.category!=="Pfand"&&!item.manualDeposit&&unit>0&&!Number(item.positionDiscount?.percent||0)&&(!state.discount.haendlerausweis||haendlerArtikel(item));if(!eligible)return sum;if(restrict&&!selected.includes(item.key))return sum;return sum+toCents(unit*Number(item.qty||0))},0))}
 function globalDiscountAmount(){const percent=Math.max(0,Math.min(100,Number(state.discount?.percent||0)));if(percent<=0)return 0;return rabattBetragGerundet(discountBase(),percent)}
 function discountAmount(){return fromCents(toCents(globalDiscountAmount())+toCents(totalPositionDiscountAmount()))}
 function total(){return fromCents(toCents(grossTotal())-toCents(discountAmount()))}
 function resetDiscount(){state.discount={percent:0,reason:"",note:"",keys:[]}}
 function renderDiscountSummary(){
+  haendlerHinweis();
   const amount=discountAmount(),button=el("discountBtn"),banner=el("discountBannerText"),display=el("discountDisplay");
   if(banner)banner.textContent=amount>0?`${Number(state.discount.percent).toLocaleString("de-DE")} % Rabatt · − ${money(amount)}`:"Rabatt aktiv";
   if(display)display.textContent=amount?`− ${money(amount)} (${Number(state.discount.percent).toLocaleString("de-DE")} %)`:"0,00 € Rabatt";
-  if(button){button.disabled=!state.cart.length||discountBase()<=0;button.classList.toggle("active",amount>0);button.title=amount?`${state.discount.percent} % Rabatt${state.discount.reason?` · ${state.discount.reason}`:""}`:"Rabatt festlegen"}
+  if(button){button.disabled=(!state.cart.length||discountBase()<=0)&&!state.discount.haendlerausweis;button.classList.toggle("active",amount>0);button.title=amount?`${state.discount.percent} % Rabatt${state.discount.reason?` · ${state.discount.reason}`:""}`:"Rabatt festlegen"}
   renderWorkspaceModePanel()
 }
 const quantityUndoStack=[];
@@ -1485,7 +1486,7 @@ function showExactCashSettlementNotice({due,received,tip}){
   if(paymentState){paymentState.textContent=tip>0?`${money(tip)} ALS TRINKGELD VERBUCHT`:"PASSEND BEZAHLT · KEIN RÜCKGELD";paymentState.classList.add("direct-settlement")}
 }
 
-function renderCart(){const list=el("cartList");if(state.cart.length)setCartNotice("Einkaufswagen geöffnet","info");if(!state.cart.length){state.selectedCartKey=null;resetDiscount();list.innerHTML='<div class="cart-empty">Artikel antippen oder Barcode scannen.</div>'}else{if(!selectedCartItem())state.selectedCartKey=state.cart[state.cart.length-1].key;list.innerHTML=state.cart.map((x,i)=>`<div class="cart-row ${x.key===state.selectedCartKey?"selected":""}" data-cart-index="${i}" tabindex="0" aria-label="${x.name}, Menge ${x.qty}"><img class="cart-thumb" src="${x.image}" alt=""><div class="cart-name"><strong>${Number(x.portionFactor||1)===0.5?"½ ":""}${x.name}</strong>${Number(x.portionFactor||1)===0.5?`<small class="cart-option">½ Portion</small>`:""}${x.option&&x.option.id!=="none"&&x.option.id!=="ohne"?`<small class="cart-option">+ ${x.option.name} (${money(x.option.price)})</small>`:""}${x.option&&(x.option.id==="kartoffeldip")?`<small class="cart-option">mit ${x.option.name}</small>`:""}${x.deposits.length?`<small class="cart-deposit">${x.deposits.map(d=>`${d.name} ${money(d.price)}`).join(" · ")} <span class="rule-chip">${state.master.depositRule==="automatic"?"extra":"inkl."}</span></small>`:""}<small>${money(lineUnit(x))} / Stk.</small>${x.positionDiscount?.percent?`<small class="cart-position-discount">Pos.-Rabatt ${Number(x.positionDiscount.percent).toLocaleString("de-DE")} % · − ${money(positionDiscountAmount(x))}</small>`:""}</div><div class="half-portion-cell">${halbePortionMoeglich(x)?`<button type="button" class="half-portion-button ${Number(x.portionFactor||1)===0.5?"active":""}" data-a="half" data-i="${i}" title="${Number(x.portionFactor||1)===0.5?`Zurück auf ganze Portion`:`½ Portion für ${x.name}`}" aria-label="Halbe Portion">½</button>`:""}</div><button class="position-discount-button ${x.positionDiscount?.percent?"active":""}" data-pos-discount="${i}" title="Positionsrabatt für ${x.name}">${x.positionDiscount?.percent?`${Number(x.positionDiscount.percent).toLocaleString("de-DE")} % Pos.`:"POS. RABATT"}</button><div class="qty-box"><button data-a="minus" data-i="${i}" ${x.lockedQuantity||istHalbeZeile(x)?"disabled":""}>−</button><span>${mengeAnzeige(x)}</span><button data-a="plus" data-i="${i}" ${x.lockedQuantity||istHalbeZeile(x)?"disabled":""}>+</button></div><div class="row-total ${lineUnit(x)<0?"negative":""} cart-line-price ${x.positionDiscount?.percent?"has-discount":"no-discount"}">${x.positionDiscount?.percent?`<small class="original-price">${money((lineUnit(x)+(state.master.depositRule==="automatic"?x.deposits.reduce((a,d)=>a+d.price,0):0))*x.qty)}</small><strong class="net-price">${signedMoney(fromCents(toCents((lineUnit(x)+(state.master.depositRule==="automatic"?x.deposits.reduce((a,d)=>a+d.price,0):0))*x.qty)-toCents(positionDiscountAmount(x))))}</strong>`:`<strong class="net-price">${signedMoney((lineUnit(x)+(state.master.depositRule==="automatic"?x.deposits.reduce((a,d)=>a+d.price,0):0))*x.qty)}</strong>`}</div><button class="delete-row" data-a="delete" data-i="${i}" title="Artikel stornieren">🗑</button></div>`).join("");list.querySelectorAll(".cart-row").forEach(row=>{row.onclick=()=>selectCartRow(+row.dataset.cartIndex);row.onkeydown=event=>{if(event.key==="Enter"||event.key===" "){event.preventDefault();selectCartRow(+row.dataset.cartIndex)}}});list.querySelectorAll("button").forEach(button=>button.onclick=event=>{
+function renderCart(){if(state.discount.haendlerausweis){if(state.cart.length)state.discount.haendlerausweis.hatArtikel=true;else if(state.discount.haendlerausweis.hatArtikel)resetDiscount();}const list=el("cartList");if(state.cart.length)setCartNotice("Einkaufswagen geöffnet","info");if(!state.cart.length){state.selectedCartKey=null;if(!state.discount.haendlerausweis)resetDiscount();list.innerHTML='<div class="cart-empty">Artikel antippen oder Barcode scannen.</div>'}else{if(!selectedCartItem())state.selectedCartKey=state.cart[state.cart.length-1].key;list.innerHTML=state.cart.map((x,i)=>`<div class="cart-row ${x.key===state.selectedCartKey?"selected":""}" data-cart-index="${i}" tabindex="0" aria-label="${x.name}, Menge ${x.qty}"><img class="cart-thumb" src="${x.image}" alt=""><div class="cart-name"><strong>${Number(x.portionFactor||1)===0.5?"½ ":""}${x.name}</strong>${Number(x.portionFactor||1)===0.5?`<small class="cart-option">½ Portion</small>`:""}${x.option&&x.option.id!=="none"&&x.option.id!=="ohne"?`<small class="cart-option">+ ${x.option.name} (${money(x.option.price)})</small>`:""}${x.option&&(x.option.id==="kartoffeldip")?`<small class="cart-option">mit ${x.option.name}</small>`:""}${x.deposits.length?`<small class="cart-deposit">${x.deposits.map(d=>`${d.name} ${money(d.price)}`).join(" · ")} <span class="rule-chip">${state.master.depositRule==="automatic"?"extra":"inkl."}</span></small>`:""}<small>${money(lineUnit(x))} / Stk.</small>${x.positionDiscount?.percent?`<small class="cart-position-discount">Pos.-Rabatt ${Number(x.positionDiscount.percent).toLocaleString("de-DE")} % · − ${money(positionDiscountAmount(x))}</small>`:""}</div><div class="half-portion-cell">${halbePortionMoeglich(x)?`<button type="button" class="half-portion-button ${Number(x.portionFactor||1)===0.5?"active":""}" data-a="half" data-i="${i}" title="${Number(x.portionFactor||1)===0.5?`Zurück auf ganze Portion`:`½ Portion für ${x.name}`}" aria-label="Halbe Portion">½</button>`:""}</div><button class="position-discount-button ${x.positionDiscount?.percent?"active":""}" data-pos-discount="${i}" title="Positionsrabatt für ${x.name}">${x.positionDiscount?.percent?`${Number(x.positionDiscount.percent).toLocaleString("de-DE")} % Pos.`:"POS. RABATT"}</button><div class="qty-box"><button data-a="minus" data-i="${i}" ${x.lockedQuantity||istHalbeZeile(x)?"disabled":""}>−</button><span>${mengeAnzeige(x)}</span><button data-a="plus" data-i="${i}" ${x.lockedQuantity||istHalbeZeile(x)?"disabled":""}>+</button></div><div class="row-total ${lineUnit(x)<0?"negative":""} cart-line-price ${x.positionDiscount?.percent?"has-discount":"no-discount"}">${x.positionDiscount?.percent?`<small class="original-price">${money((lineUnit(x)+(state.master.depositRule==="automatic"?x.deposits.reduce((a,d)=>a+d.price,0):0))*x.qty)}</small><strong class="net-price">${signedMoney(fromCents(toCents((lineUnit(x)+(state.master.depositRule==="automatic"?x.deposits.reduce((a,d)=>a+d.price,0):0))*x.qty)-toCents(positionDiscountAmount(x))))}</strong>`:`<strong class="net-price">${signedMoney((lineUnit(x)+(state.master.depositRule==="automatic"?x.deposits.reduce((a,d)=>a+d.price,0):0))*x.qty)}</strong>`}</div><button class="delete-row" data-a="delete" data-i="${i}" title="Artikel stornieren">🗑</button></div>`).join("");list.querySelectorAll(".cart-row").forEach(row=>{row.onclick=()=>selectCartRow(+row.dataset.cartIndex);row.onkeydown=event=>{if(event.key==="Enter"||event.key===" "){event.preventDefault();selectCartRow(+row.dataset.cartIndex)}}});list.querySelectorAll("button").forEach(button=>button.onclick=event=>{
   event.stopPropagation();
   if(button.dataset.posDiscount!==undefined){
     const index=Number(button.dataset.posDiscount);
@@ -1697,7 +1698,7 @@ let discountDraftPercent=0,discountDraftReason="",discountDraftKeys=[],discountD
 function eligibleDiscountItems(){
   return state.cart.filter(item=>{
     const unit=Number(item.price||0)+Number(item.option?.price||0);
-    const eligible=item.category!=="Pfand"&&!item.manualDeposit&&unit>0;
+    const eligible=item.category!=="Pfand"&&!item.manualDeposit&&unit>0&&(!state.discount.haendlerausweis||haendlerArtikel(item));
     return eligible&&(!positionDiscountTargetKey||item.key===positionDiscountTargetKey);
   })
 }
@@ -1738,6 +1739,7 @@ function renderDiscountDraft(){
   el("applyDiscountBtn").disabled=!discountDraftReason||!(percent>0&&percent<=100);
 }
 function prepareDiscountDialog(){
+  document.querySelector('[data-discount-reason="Marktbeschicker"]').dataset.discountPreset=state.discount.haendlerausweis?"10":"20";
   const card=el("discountDialog").querySelector(".discount-card");
   const target=positionDiscountTargetKey?state.cart.find(item=>item.key===positionDiscountTargetKey):null;
   card.classList.toggle("position-discount-mode",!!target);
@@ -1746,7 +1748,7 @@ function prepareDiscountDialog(){
 }
 function openDiscountDialog(){
   positionDiscountTargetKey=null;
-  if(!state.cart.length||eligibleDiscountItems().length===0)return setSystemHint("Für diesen Einkaufswagen ist kein Rabatt möglich","warn");
+  if((!state.cart.length||eligibleDiscountItems().length===0)&&!state.discount.haendlerausweis)return setSystemHint("Für diesen Einkaufswagen ist kein Rabatt möglich","warn");
   // 26.09.2026: keine Artikel-Auswahl mehr - der ganze Warenkorb wird rabattiert, immer alle
   // rabattfaehigen Positionen (Pfand/Rueckgabe bleiben wie bisher automatisch aussen vor). Ein
   // bereits gesetzter Rabatt wird beim erneuten Oeffnen wieder angezeigt (editierbar), nicht
@@ -1774,7 +1776,7 @@ function openPositionDiscount(index){
   renderDiscountDraft();
   el("discountDialog").showModal();
 }
-function recordDiscountAudit(operation){const entry={discountId:crypto.randomUUID(),time:new Date().toISOString(),operation,registerId:state.master.registerId,operator:state.master.operatorName,percent:Number(state.discount.percent||0),amount:discountAmount(),reason:state.discount.reason||null,note:state.discount.note||null,keys:Array.isArray(state.discount.keys)?state.discount.keys:[],cartItems:state.cart.map(item=>({id:item.id,name:item.name,qty:item.qty}))};
+function recordDiscountAudit(operation){const entry={haendlerausweis:haendlerBeleg(),discountId:crypto.randomUUID(),time:new Date().toISOString(),operation,registerId:state.master.registerId,operator:state.master.operatorName,percent:Number(state.discount.percent||0),amount:discountAmount(),reason:state.discount.reason||null,note:state.discount.note||null,keys:Array.isArray(state.discount.keys)?state.discount.keys:[],cartItems:state.cart.map(item=>({id:item.id,name:item.name,qty:item.qty}))};
   if(window.KCHashChain){const rows=safeArray("kc_discount_audit_v020");window.KCHashChain.appendChained(rows,entry).then(()=>localStorage.setItem("kc_discount_audit_v020",JSON.stringify(rows.slice(-2000))))}else{const rows=safeArray("kc_discount_audit_v020");rows.push(entry);localStorage.setItem("kc_discount_audit_v020",JSON.stringify(rows.slice(-2000)))}}
 el("discountBtn").onclick=()=>{positionDiscountTargetKey=null;openDiscountDialog()};
 el("discountDialog").addEventListener("close",()=>{positionDiscountTargetKey=null;el("discountDialog").querySelector(".discount-card")?.classList.remove("position-discount-mode")});
@@ -1812,7 +1814,7 @@ el("discountMiniKeypadOk").onclick=()=>{
   schliesseDiscountKeypad();
   renderDiscountDraft();
 };
-el("applyDiscountBtn").onclick=()=>{const percent=Number(discountDraftPercent);if(!Number.isFinite(percent)||percent<=0||percent>100)return setSystemHint("Rabatt muss größer als 0 und höchstens 100 Prozent sein","warn");if(positionDiscountTargetKey){const item=state.cart.find(row=>row.key===positionDiscountTargetKey);if(!item)return setSystemHint("Die gewählte Position ist nicht mehr vorhanden","warn");item.positionDiscount={percent:+percent.toFixed(1),reason:safeText(discountDraftReason,80),note:safeText(el("discountReasonNote").value,160)};const name=item.name,value=positionDiscountAmount(item);positionDiscountTargetKey=null;el("discountDialog").close();renderCart();setSystemHint(`${percent.toLocaleString("de-DE")} % Positionsrabatt für ${name} · − ${money(value)}`,"ok");return}if(!discountDraftKeys.length)return setSystemHint("Mindestens einen Artikel für den Rabatt auswählen","warn");state.discount={percent:+percent.toFixed(1),reason:safeText(discountDraftReason,80),note:safeText(el("discountReasonNote").value,160),keys:[...discountDraftKeys]};recordDiscountAudit("apply");el("discountDialog").close();renderCart();setSystemHint(`${state.discount.percent.toLocaleString("de-DE")} % Rabatt · − ${money(globalDiscountAmount())}`,"ok")};
+el("applyDiscountBtn").onclick=()=>{const percent=Number(discountDraftPercent);if(!Number.isFinite(percent)||percent<=0||percent>100)return setSystemHint("Rabatt muss größer als 0 und höchstens 100 Prozent sein","warn");if(positionDiscountTargetKey){const item=state.cart.find(row=>row.key===positionDiscountTargetKey);if(!item)return setSystemHint("Die gewählte Position ist nicht mehr vorhanden","warn");item.positionDiscount={percent:+percent.toFixed(1),reason:safeText(discountDraftReason,80),note:safeText(el("discountReasonNote").value,160)};const name=item.name,value=positionDiscountAmount(item);positionDiscountTargetKey=null;el("discountDialog").close();renderCart();setSystemHint(`${percent.toLocaleString("de-DE")} % Positionsrabatt für ${name} · − ${money(value)}`,"ok");return}if(!discountDraftKeys.length&&!state.discount.haendlerausweis)return setSystemHint("Mindestens einen Artikel für den Rabatt auswählen","warn");state.discount={percent:+percent.toFixed(1),reason:safeText(discountDraftReason,80),note:safeText(el("discountReasonNote").value,160),keys:state.discount.haendlerausweis?[]:[...discountDraftKeys],...(state.discount.haendlerausweis?{haendlerausweis:state.discount.haendlerausweis}:{})};recordDiscountAudit("apply");el("discountDialog").close();renderCart();setSystemHint(`${state.discount.percent.toLocaleString("de-DE")} % Rabatt · − ${money(globalDiscountAmount())}`,"ok")};
 el("clearDiscountBtn").onclick=()=>{if(positionDiscountTargetKey){const item=state.cart.find(row=>row.key===positionDiscountTargetKey);if(item)delete item.positionDiscount;positionDiscountTargetKey=null;el("discountDialog").close();renderCart();setSystemHint("Positionsrabatt entfernt","ok");return}const hadDiscount=globalDiscountAmount()>0;if(hadDiscount)recordDiscountAudit("remove");resetDiscount();el("discountDialog").close();renderCart();setSystemHint("Rabatt entfernt","ok")};
 el("exitDiscountModeBtn")?.addEventListener("click",()=>{const hadDiscount=discountAmount()>0;if(hadDiscount)recordDiscountAudit("remove");resetDiscount();renderCart();setSystemHint("Rabattmodus beendet")});
 
@@ -1981,6 +1983,7 @@ function playCompletedSaleSound(){
 function canonicalTransaction(row){const copy=cloneData(row);delete copy.recordHash;return JSON.stringify(copy)}
 async function completeSale(method,{type="sale",silent=false,changeTarget=null,directSettlement=false,payoutHandledWithoutCash=false,helperGroup=null}={}){
   if(!state.cart.length)return keinBonMeldung();
+  if(!haendlerNochGueltig())return false;
   {const gsFehler=kcGutscheinZeilenPruefen(type);if(gsFehler){showMessage("Gutschein","!",gsFehler);return}}
   if(state.saleInProgress)return;
   state.saleInProgress=true;
@@ -1992,9 +1995,9 @@ async function completeSale(method,{type="sale",silent=false,changeTarget=null,d
     const grossDue=+grossTotal().toFixed(2),globalDiscountValue=+globalDiscountAmount().toFixed(2),positionDiscountValue=+totalPositionDiscountAmount().toFixed(2),discountValue=+(globalDiscountValue+positionDiscountValue).toFixed(2),due=+total().toFixed(2),unbar=method==="account-charge"||method==="voucher",given=(type==="personal"||type==="helfer"||unbar)?0:+state.given.toFixed(2),settlementTarget=changeTarget!==null&&Number.isFinite(Number(changeTarget))?Number(changeTarget):due,isPayout=toCents(due)<0,payout=isPayout&&!payoutHandledWithoutCash?+Math.abs(due).toFixed(2):0,change=type==="personal"||type==="helfer"||payoutHandledWithoutCash||unbar?0:(isPayout?payout:+Math.max(0,given-settlementTarget).toFixed(2));
     const rows=training?readTrainingTransactions():readTransactions(),previousHash=rows[rows.length-1]?.recordHash||null;
     const items=state.cart.map(item=>({...cloneData(item),unitTotal:+(lineUnit(item)+(state.master.depositRule==="automatic"?item.deposits.reduce((sum,d)=>sum+Number(d.price||0),0):0)).toFixed(2),lineTotal:+((lineUnit(item)+(state.master.depositRule==="automatic"?item.deposits.reduce((sum,d)=>sum+Number(d.price||0),0):0))*item.qty).toFixed(2)}));
-    if(globalDiscountValue>0)items.push({id:"DISCOUNT",name:`Rabatt ${Number(state.discount.percent).toLocaleString("de-DE")} %${state.discount.reason?` · ${state.discount.reason}`:""}`,category:"Rabatt",price:-globalDiscountValue,qty:1,unitTotal:-globalDiscountValue,lineTotal:-globalDiscountValue,discountLine:true});
+    if(globalDiscountValue>0)items.push({id:"DISCOUNT",name:`Rabatt ${Number(state.discount.percent).toLocaleString("de-DE")} %${state.discount.reason?` · ${state.discount.reason}`:""}${state.discount.haendlerausweis?` · Händler-Ausweis Nr. ${state.discount.haendlerausweis.nr}`:""}`,category:"Rabatt",price:-globalDiscountValue,qty:1,unitTotal:-globalDiscountValue,lineTotal:-globalDiscountValue,discountLine:true});
     state.cart.filter(item=>item.positionDiscount?.percent).forEach(item=>{const value=+positionDiscountAmount(item).toFixed(2);if(value>0)items.push({id:`POSITION-DISCOUNT-${item.id}`,name:`Positionsrabatt ${Number(item.positionDiscount.percent).toLocaleString("de-DE")} % · ${item.name}`,category:"Positionsrabatt",price:-value,qty:1,unitTotal:-value,lineTotal:-value,discountLine:true,sourceItemKey:item.key,reason:item.positionDiscount.reason||null,note:item.positionDiscount.note||null})});
-    const rec={transactionId:crypto.randomUUID(),formatVersion:6,bon:current,bonNumber:current,startTime:state.cartStartedAt||endTime,time:endTime,endTime,registerId:state.master.registerId,registerName:state.master.registerName,operator:state.master.operatorName,type,training,method,payment:method,...(helperGroup?{helperGroup}:{}),grossDue,grossDueCents:toCents(grossDue),discount:{percent:Number(state.discount.percent||0),amount:discountValue,amountCents:toCents(discountValue),globalAmount:globalDiscountValue,positionAmount:positionDiscountValue,base:discountBase(),reason:state.discount.reason||null,note:state.discount.note||null,keys:Array.isArray(state.discount.keys)?state.discount.keys:[],positions:state.cart.filter(item=>item.positionDiscount?.percent).map(item=>({key:item.key,id:item.id,name:item.name,percent:Number(item.positionDiscount.percent),amount:positionDiscountAmount(item),reason:item.positionDiscount.reason||null}))},due,total:due,dueCents:toCents(due),given,givenCents:toCents(given),settlementTarget:+settlementTarget.toFixed(2),isPayout,payout,payoutCents:toCents(payout),change,changeCents:toCents(change),depositRule:state.master.depositRule,items,previousHash};
+    const rec={transactionId:crypto.randomUUID(),formatVersion:6,bon:current,bonNumber:current,startTime:state.cartStartedAt||endTime,time:endTime,endTime,registerId:state.master.registerId,registerName:state.master.registerName,operator:state.master.operatorName,type,training,method,payment:method,...(helperGroup?{helperGroup}:{}),grossDue,grossDueCents:toCents(grossDue),discount:{haendlerausweis:haendlerBeleg(),percent:Number(state.discount.percent||0),amount:discountValue,amountCents:toCents(discountValue),globalAmount:globalDiscountValue,positionAmount:positionDiscountValue,base:discountBase(),reason:state.discount.reason||null,note:state.discount.note||null,keys:Array.isArray(state.discount.keys)?state.discount.keys:[],positions:state.cart.filter(item=>item.positionDiscount?.percent).map(item=>({key:item.key,id:item.id,name:item.name,percent:Number(item.positionDiscount.percent),amount:positionDiscountAmount(item),reason:item.positionDiscount.reason||null}))},due,total:due,dueCents:toCents(due),given,givenCents:toCents(given),settlementTarget:+settlementTarget.toFixed(2),isPayout,payout,payoutCents:toCents(payout),change,changeCents:toCents(change),depositRule:state.master.depositRule,items,previousHash};
     {const gs=items.filter(i=>i.voucherCredit);if(gs.length)rec.voucherPayments=gs.map(i=>({code:i.voucherCredit.code,amount:+(-Number(i.lineTotal||0)).toFixed(2)}))}
     rec.recordHash=await sha256Hex(canonicalTransaction(rec));rows.push(rec);saveTransactions(rows,training);
     // Gutschein-Teilzahlung: Guthaben erst jetzt abziehen, wo der Bon sicher gespeichert ist.
@@ -2014,7 +2017,7 @@ async function completeSale(method,{type="sale",silent=false,changeTarget=null,d
     sicher(()=>{if(!training&&window.KCSyncLiveEvent)window.KCSyncLiveEvent.recordReliable("sale",rec)},"Nachreichen");
     sicher(()=>playCompletedSaleSound(),"Ton");
     if(training)sicher(()=>localStorage.setItem("kc_training_next_bon_v018",String(trainingCounter+1)),"Trainingsnummer");else{state.master.nextBon++;sicher(()=>saveMaster(),"Bonnummer speichern")}
-    state.cart=[];state.cartStartedAt=null;state.lastAdded=null;state.selectedCartKey=null;state.given=0;state.cashSelections=[];state.keypadBuffer="";quantityUndoStack.length=0;updateQuantityUndoButton();if(state.master.requireOperatorConfirmation===true)state.operatorConfirmedForSale=false;
+    resetDiscount();state.cart=[];state.cartStartedAt=null;state.lastAdded=null;state.selectedCartKey=null;state.given=0;state.cashSelections=[];state.keypadBuffer="";quantityUndoStack.length=0;updateQuantityUndoButton();if(state.master.requireOperatorConfirmation===true)state.operatorConfirmedForSale=false;
     try{
     // Vergroesserte Zahlabwicklung sofort wieder zu - niemand soll etwas schliessen muessen.
     document.dispatchEvent(new CustomEvent("kc:sale-completed"));
@@ -2139,11 +2142,11 @@ function keinBonMeldung(){
 }
 function renderMoney(){const notes=[5,10,20,50,100,200]; // 08.09.2026 (Betreiber): 200 EUR dazu; 22.09.2026: Platzhalter durch echtes EZB-Specimen-Bild ersetzt
 el("banknotes").innerHTML=notes.map(v=>`<button class="banknote-button" data-value="${v}" data-cash-label="${v} €"><span class="banknote-visual banknote-foto n${v}" style="background-image:url('assets/schein_${v}.jpg')"><small>${v} €</small></span></button>`).join("");el("banknotes").querySelectorAll("button").forEach(button=>button.onclick=()=>addCashSelection(Number(button.dataset.value),button.dataset.cashLabel));const MUENZ_FOTOS={2:"assets/muenze_2.webp",1:"assets/muenze_1.webp",.5:"assets/muenze_0.5.webp",.2:"assets/muenze_0.2.webp",.1:"assets/muenze_0.1.webp",.05:"assets/muenze_0.05.webp",.02:"assets/muenze_0.02.webp",.01:"assets/muenze_0.01.webp"};const coins=[{v:2,l:"2 €",c:"gold"},{v:1,l:"1 €",c:""},{v:.5,l:"50 ct",c:"gold"},{v:.2,l:"20 ct",c:"gold"},{v:.1,l:"10 ct",c:"gold"},{v:.05,l:"5 ct",c:"gold"},{v:.02,l:"2 ct",c:""},{v:.01,l:"1 ct",c:""}];el("coins").innerHTML=coins.map(c=>`<button class="coin-button" data-value="${c.v}" data-cash-label="${c.l}">${MUENZ_FOTOS[c.v]?`<span class="coin coin-foto" style="background-image:url('${MUENZ_FOTOS[c.v]}')"></span>`:`<span class="coin ${c.c}">${c.l.split(" ")[0]}</span>`}${c.l}</button>`).join("");el("coins").querySelectorAll("button").forEach(button=>button.onclick=()=>addCashSelection(Number(button.dataset.value),button.dataset.cashLabel))}
-function voidBon(){if(!state.cart.length)return;askConfirm("Offenen Bon verwerfen",`Den noch nicht gebuchten Bon ${bonText()} mit allen Positionen verwerfen?`,()=>{const entry={voidId:crypto.randomUUID(),bon:bonText(),time:new Date().toISOString(),registerId:state.master.registerId,operator:state.master.operatorName,training:!!state.master.trainingMode,reason:"unbooked-cart-discarded",items:cloneData(state.cart)};
+function voidBon(){if(!state.cart.length){resetDiscount();renderCart();return;}askConfirm("Offenen Bon verwerfen",`Den noch nicht gebuchten Bon ${bonText()} mit allen Positionen verwerfen?`,()=>{const entry={voidId:crypto.randomUUID(),bon:bonText(),time:new Date().toISOString(),registerId:state.master.registerId,operator:state.master.operatorName,training:!!state.master.trainingMode,reason:"unbooked-cart-discarded",items:cloneData(state.cart)};
   // Sicherheitsebene 4: hash-verkettetes Protokoll, falls verfügbar - läuft im Hintergrund,
   // blockiert die eigentliche (sofortige) Bon-Löschung für den Bediener nicht.
   if(window.KCHashChain){const log=safeArray("kc_voids_v040");window.KCHashChain.appendChained(log,entry).then(()=>localStorage.setItem("kc_voids_v040",JSON.stringify(log)))}else{const log=safeArray("kc_voids_v040");log.push(entry);localStorage.setItem("kc_voids_v040",JSON.stringify(log))}
-  state.cart=[];state.cartStartedAt=null;state.lastAdded=null;state.selectedCartKey=null;state.given=0;state.cashSelections=[];state.keypadBuffer="";quantityUndoStack.length=0;updateQuantityUndoButton();renderCart()})}
+  resetDiscount();state.cart=[];state.cartStartedAt=null;state.lastAdded=null;state.selectedCartKey=null;state.given=0;state.cashSelections=[];state.keypadBuffer="";quantityUndoStack.length=0;updateQuantityUndoButton();renderCart()})}
 function openDisplaySettings(){
   normalizeDisplayProfile();
   const groupList=el("displayGroupList");
@@ -4592,7 +4595,7 @@ el("compactWorkspaceBtn")?.addEventListener("click",()=>workspacePreset("compact
 el("touchWorkspaceBtn")?.addEventListener("click",()=>workspacePreset("touch"));
 el("professionalWorkspaceBtn")?.addEventListener("click",()=>workspacePreset("professional"));
 
-function setTrainingMode(active){if(active&&state.master.rushMode){setSystemHint("Trainingsmodus ist während Stoßzeiten nicht verfügbar","warn");return false}state.master.trainingMode=!!active;saveMaster();applyModes();setSystemHint(state.master.trainingMode?"Testmodus aktiv – keine echten Umsätze":"Testmodus beendet – Produktivmodus aktiv",state.master.trainingMode?"warn":"ok");return true}
+function setTrainingMode(active){if(active&&state.master.rushMode){setSystemHint("Trainingsmodus ist während Stoßzeiten nicht verfügbar","warn");return false}if(!!active!==!!state.master.trainingMode){resetDiscount();renderCart();}state.master.trainingMode=!!active;saveMaster();applyModes();setSystemHint(state.master.trainingMode?"Testmodus aktiv – keine echten Umsätze":"Testmodus beendet – Produktivmodus aktiv",state.master.trainingMode?"warn":"ok");return true}
 el("trainingModeBtn").onclick=()=>setTrainingMode(!state.master.trainingMode);
 el("trainingModeTopBtn").onclick=()=>setTrainingMode(!state.master.trainingMode);
 el("exitTrainingModeBtn")?.addEventListener("click",()=>setTrainingMode(false));
@@ -5277,14 +5280,14 @@ window.KCTrainingAPI={
     addConfiguredProduct(product,null);return true;
   },
   clearCart(){
-    state.cart=[];state.cartStartedAt=null;state.lastAdded=null;state.selectedCartKey=null;renderCart();return true;
+    resetDiscount();state.cart=[];state.cartStartedAt=null;state.lastAdded=null;state.selectedCartKey=null;renderCart();return true;
   },
   getCartSnapshot(){return {items:cloneData(state.cart),total:total()}},
   getTrainingState(){
     const transactions=readTrainingTransactions(),withdrawals=safeArray(WITHDRAWAL_KEY),voids=safeArray("kc_voids_v040"),tips=tipRecords();
     return {items:cloneData(state.cart),total:total(),given:Number(state.given||0),activeCategory:state.activeCategory,trainingMode:!!state.master.trainingMode,rushMode:!!state.master.rushMode,selectedCartKey:state.selectedCartKey,openDialogs:[...document.querySelectorAll("dialog[open]")].map(x=>x.id),actions:cloneData(KC_TRAINING_ACTION_LOG),transactionCount:transactions.length,lastTransaction:cloneData(transactions.at(-1)||null),withdrawalCount:withdrawals.length,lastWithdrawal:cloneData(withdrawals.at(-1)||null),voidCount:voids.length,lastVoid:cloneData(voids.at(-1)||null),tipCount:tips.length,lastTip:cloneData(tips.at(-1)||null)};
   },
-  resetTrainingTask(){state.cart=[];state.cartStartedAt=null;state.lastAdded=null;state.selectedCartKey=null;state.given=0;state.cashSelections=[];state.keypadBuffer="";KC_TRAINING_ACTION_LOG.length=0;document.querySelectorAll("dialog[open]").forEach(d=>{try{d.close()}catch{}});renderMoney();renderCart();return true},
+  resetTrainingTask(){resetDiscount();state.cart=[];state.cartStartedAt=null;state.lastAdded=null;state.selectedCartKey=null;state.given=0;state.cashSelections=[];state.keypadBuffer="";KC_TRAINING_ACTION_LOG.length=0;document.querySelectorAll("dialog[open]").forEach(d=>{try{d.close()}catch{}});renderMoney();renderCart();return true},
   closeAllDialogs(){
     document.querySelectorAll('dialog[open]').forEach(d=>{try{d.close()}catch{}});
     return true;
@@ -5730,3 +5733,76 @@ kcSeedAccounts();
 // SoundCore darf erst nach einer Benutzerinteraktion einen AudioContext aktivieren.
 document.addEventListener("pointerdown",()=>window.KCSoundCore?.unlock?.(),{once:true,passive:true});
 document.addEventListener("keydown",()=>window.KCSoundCore?.unlock?.(),{once:true});
+
+// Händlerstatus gehört ausschließlich zu diesem Bon und bleibt auch vor dem ersten Artikel erhalten.
+function haendlerBeleg(){const h=state.discount.haendlerausweis;return h?{jahr:h.jahr,nr:h.nr,muster:h.muster}:null;}
+function haendlerArtikel(item){return ['Getränke','Speisen','Kombi','Packages'].includes(item.category)&&!item.refund&&!item.voucherCredit;}
+function haendlerMaster(){
+  try{return {...state.master,...JSON.parse(localStorage.getItem('kc_master_v040')||'{}')};}catch{return state.master;}
+}
+function haendlerNochGueltig(){
+  const h=state.discount.haendlerausweis;if(!h)return true;
+  const r=window.KCHaendlerausweis.pruefen(`Koecheclub Werne Haendler-Ausweis ${h.jahr} Nr ${h.nr} Code ${h.code}`,haendlerMaster(),!!state.master.trainingMode);
+  if(r.ok)return true;
+  resetDiscount();renderCart();showMessage('Händler-Ausweis','!',r.grund+' – Rabatt entfernt. Bitte Zahlbetrag erneut prüfen.');return false;
+}
+function haendlerHinweis(){
+  const d=state.discount,ausweis=d?.haendlerausweis;
+  document.body.classList.toggle('haendler-rabatt-aktiv',!!ausweis);
+  let feld=el('haendlerAusweisStatus');
+  if(!feld){feld=document.createElement('small');feld.id='haendlerAusweisStatus';feld.setAttribute('role','status');const summary=el('discountDisplay')?.closest('.cart-summary');summary?.insertBefore(feld,summary.querySelector('.grand-total'));}
+  if(feld){feld.hidden=!ausweis;feld.textContent=ausweis?`Händler-Ausweis Nr. ${ausweis.nr}${ausweis.muster?' · MUSTER':''} · ${Number(d.percent).toLocaleString('de-DE')} % Gesamtrabatt`:'';}
+}
+function haendlerWagenOeffnen(){
+  document.querySelectorAll('dialog[open]').forEach(d=>d.close());
+  window.KCAufbau?.funktionenSeite?.(false);window.KCAufbau?.sammelSeite?.(false);window.KCAufbau?.zahlenSeite?.(false);
+}
+function haendlerScan(code){
+  // Die Liste wird direkt aus dem letzten Stammdaten-Abgleich gelesen, auch ohne Neustart.
+  const master=haendlerMaster();
+  const r=window.KCHaendlerausweis.pruefen(code,master,!!state.master.trainingMode);
+  if(!r.ok){showMessage('Händler-Ausweis','!',r.grund);return false;}
+  if(state.cart.some(i=>Number(i.positionDiscount?.percent)>0)){
+    showMessage('Händlerrabatt','!','Bitte zuerst den vorhandenen Positionsrabatt entfernen. Der Händlerrabatt gilt für den gesamten Einkauf.');return false;
+  }
+  if(state.discount.haendlerausweis?.jahr===r.jahr&&state.discount.haendlerausweis?.nr===r.nr){
+    haendlerWagenOeffnen();renderCart();
+    setSystemHint('Händler-Ausweis bereits übernommen – eingestellter Rabatt bleibt erhalten','ok');return true;
+  }
+  const anwenden=()=>{
+    state.discount={percent:r.percent,reason:'Marktbeschicker',note:`Händler-Ausweis Nr. ${r.nr}`,keys:[],haendlerausweis:{jahr:r.jahr,nr:r.nr,code:r.code,muster:r.muster}};
+    recordDiscountAudit('haendler-scan');
+    haendlerWagenOeffnen();
+    renderCart();
+    el('cartList')?.scrollIntoView?.({block:'nearest'});
+    setSystemHint(`Händler-Ausweis Nr. ${r.nr} · 10 % Gesamtrabatt übernommen`,'ok');
+  };
+  if(Number(state.discount.percent)>0)askConfirm('Händlerrabatt übernehmen','Den bisherigen Gesamtrabatt durch 10 % Händlerrabatt ersetzen?',anwenden);
+  else anwenden();
+  return true;
+}
+// Eigenständiger Scanner-Weg, auch wenn der Cursor z. B. im Artikelsuchfeld steht.
+// Andere Scanner-Wege behalten ihre vorhandene Verarbeitung. Erst Enter entscheidet.
+(function(){
+  let buffer='',timer=null,feld=null,vorher='';
+  document.addEventListener('keydown',e=>{
+    if(e.ctrlKey||e.altKey||e.metaKey)return;
+    const sperre=el('kcPinLockOverlay');if(sperre&&sperre.getBoundingClientRect().width>0){buffer='';return;}
+    if(e.key==='Enter'){
+      const raw=buffer.trim();buffer='';clearTimeout(timer);
+      const varianten=window.KCTastaturlayout?.schreibweisen(raw)||[raw];
+      const kandidaten=varianten.filter(c=>/^Koecheclub Werne Haendler-Ausweis\b/i.test(c));
+      const code=kandidaten.find(c=>window.KCHaendlerausweis.pruefen(c,haendlerMaster(),!!state.master.trainingMode).ok)||kandidaten[0];
+      if(!code)return;
+      e.preventDefault();e.stopImmediatePropagation();state.scanBuffer='';clearTimeout(state.scanTimer);
+      if(feld&&typeof feld.value==='string'){feld.value=vorher;feld.dispatchEvent(new Event('input',{bubbles:true}));feld.blur();}
+      haendlerScan(code);return;
+    }
+    if(e.key.length!==1)return;
+    if(!buffer){feld=e.target;vorher=typeof feld.value==='string'?feld.value:'';}
+    // Leerzeichen des Ausweistexts dürfen einen fokussierten BAR-/Rabattknopf nicht anklicken.
+    if(e.key===' '&&/^Koecheclub(?: |$)/i.test(buffer)&&!['INPUT','TEXTAREA'].includes(e.target.tagName))e.preventDefault();
+    buffer+=e.key;clearTimeout(timer);
+    timer=setTimeout(()=>{buffer='';feld=null;},300);
+  },true);
+})();
