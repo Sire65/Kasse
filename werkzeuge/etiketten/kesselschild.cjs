@@ -100,7 +100,6 @@ const b64 = (f) => `data:${f.endsWith('.png') ? 'image/png' : f.endsWith('.webp'
             <p><b>Allergene:</b> ${a.allergene ? esc(a.allergene) : fehlt('nicht erfasst')}</p>
             <p><b>Zusatzstoffe:</b> ${a.zusatz ? esc(a.zusatz) : fehlt('nicht erfasst')}</p>
             ${a.alkohol ? '<p class="alk">Enthält Alkohol</p>' : ''}
-            <p class="k7-verein"><img src="${hut}" alt="">Köcheclub Werne</p>
           </div>
           <div class="qr"><div class="code" data-qr="${esc(a.nummer)}"></div><small>${esc(a.nummer)}</small></div>
         </div>
