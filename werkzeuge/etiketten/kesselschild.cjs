@@ -20,7 +20,9 @@ const args = process.argv.slice(2); const PROBE = args.includes('--probe');
 // 09.11.2026 (Betreiber: "Etikett muss kleiner werden – 7 x 7 cm, oben links das Bild, nicht zu gross, rechts daneben der Preis inkl. Pfand
 // ohne Euro-Zeichen, darunter der QR-Code; links neben dem QR-Code Allergene und Zusatzstoffe – der QR-Code ist das Wichtigste"): --7x7
 const IDS = args.filter((a) => !a.startsWith('--'));
-const KLEIN = args.includes('--7x7'), K = KLEIN ? 70 : 80; // Etikettgroesse in mm
+// 09.11.2026 (Betreiber: "mach 6 x 6 cm"): --6x6 = dasselbe Etikett wie 7 x 7, gleichmaessig auf 60 mm verkleinert (Schrift und QR-Code
+// werden mit kleiner, die Aufteilung bleibt); Bogen 3 x 4 = 12 je A4
+const SECHS = args.includes('--6x6'), KLEIN = SECHS || args.includes('--7x7'), K = SECHS ? 60 : KLEIN ? 70 : 80; // Etikettgroesse in mm
 const MM = 8, ABSTAND = 0; // Etikett 80 mm; Bogen: Etiketten stossen aneinander -> nur ein Schnitt dazwischen
 const T = {'.html': 'text/html', '.js': 'text/javascript', '.css': 'text/css', '.json': 'application/json', '.png': 'image/png', '.webp': 'image/webp', '.jpg': 'image/jpeg', '.svg': 'image/svg+xml', '.woff2': 'font/woff2'};
 const esc = (s) => String(s ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/"/g, '&quot;');
@@ -139,6 +141,7 @@ const b64 = (f) => `data:${f.endsWith('.png') ? 'image/png' : f.endsWith('.webp'
       .mass { position: absolute; height: 2mm; border: 0.25mm solid #000; border-top: 0; }
       .mass span { position: absolute; top: 2.4mm; left: 0; right: 0; text-align: center; font-size: 2.8mm; }
       .zelle.k7z, .etikett.k7 { width: 70mm; height: 70mm; }
+      .zelle.k6z { width: 60mm; height: 60mm; overflow: hidden; } .zelle.k6z > .etikett { transform: scale(${60 / 70}); transform-origin: 0 0; }
       .etikett.k7 { padding: 2mm 2.6mm 1.8mm; border-width: 0.8mm; border-radius: 5mm; }
       .k7 > * { flex-shrink: 0; }
       .k7 h1 { font-size: 4.8mm; line-height: 1.05; margin: 0 0 0.8mm; }
@@ -164,7 +167,7 @@ const b64 = (f) => `data:${f.endsWith('.png') ? 'image/png' : f.endsWith('.webp'
     let seiten = '';
     if (PROBE) {
       const x = (210 - K) / 2, y = 40;
-      seiten = `<div class="blatt"><div class="zelle${KLEIN ? ' k7z' : ''}" style="left:${x}mm;top:${y}mm">${(KLEIN ? etikettKlein : etikett)(artikel[0])}</div>${marken(x, y, K, K)}
+      seiten = `<div class="blatt"><div class="zelle${SECHS ? ' k6z' : KLEIN ? ' k7z' : ''}" style="left:${x}mm;top:${y}mm">${(KLEIN ? etikettKlein : etikett)(artikel[0])}</div>${marken(x, y, K, K)}
         <div class="mass" style="left:80mm;top:140mm;width:50mm"><span>Messbalken: muss genau 5 cm lang sein</span></div>
         <div class="hinweis" style="top:155mm"><b>Probe-Etikett ${esc(artikel[0].name)} – ${K / 10} × ${K / 10} cm</b><br>
         Drucken mit <b>Originalgröße / 100 %</b> (nicht „an Seite anpassen“). Messbalken nachmessen: 5,0 cm.<br>
@@ -174,11 +177,11 @@ const b64 = (f) => `data:${f.endsWith('.png') ? 'image/png' : f.endsWith('.webp'
         (oben 3 cm frei für die 3 Löcher, seitlich je 5 mm Rand).</div></div>`;
     } else {
       // 8 x 8: 2 x 3 je A4 · 7 x 7: 2 x 4 je A4 (3 nebeneinander waeren 210 mm = ohne Rand)
-      const SP = 2, ZE = KLEIN ? 4 : 3, JE = SP * ZE;
+      const SP = SECHS ? 3 : 2, ZE = KLEIN ? 4 : 3, JE = SP * ZE;
       const x0 = (210 - SP * K - ABSTAND) / 2, y0 = (297 - ZE * K - (ZE - 1) * ABSTAND) / 2;
       for (let i = 0; i < artikel.length; i += JE) {
         let zellen = '';
-        artikel.slice(i, i + JE).forEach((a, k) => { const x = x0 + (k % SP) * (K + ABSTAND), y = y0 + Math.floor(k / SP) * (K + ABSTAND); zellen += `<div class="zelle${KLEIN ? ' k7z' : ''}" style="left:${x}mm;top:${y}mm">${(KLEIN ? etikettKlein : etikett)(a)}</div>`; });
+        artikel.slice(i, i + JE).forEach((a, k) => { const x = x0 + (k % SP) * (K + ABSTAND), y = y0 + Math.floor(k / SP) * (K + ABSTAND); zellen += `<div class="zelle${SECHS ? ' k6z' : KLEIN ? ' k7z' : ''}" style="left:${x}mm;top:${y}mm">${(KLEIN ? etikettKlein : etikett)(a)}</div>`; });
         seiten += `<div class="blatt">${zellen}${marken(x0, y0, SP * K + ABSTAND, ZE * K + (ZE - 1) * ABSTAND)}</div>`;
       }
     }
@@ -186,7 +189,7 @@ const b64 = (f) => `data:${f.endsWith('.png') ? 'image/png' : f.endsWith('.webp'
       <script>document.querySelectorAll('[data-qr]').forEach((n) => { const q = qrcode(0, 'M'); q.addData(n.dataset.qr); q.make(); const c = q.getModuleCount(), r = 4, g = c + 2 * r;
         let d = ''; for (let y = 0; y < c; y++) for (let x = 0; x < c; x++) if (q.isDark(y, x)) d += 'M' + (x + r) + ' ' + (y + r) + 'h1v1h-1z';
         n.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ' + g + ' ' + g + '" shape-rendering="crispEdges"><rect width="' + g + '" height="' + g + '" fill="#fff"/><path d="' + d + '" fill="#000"/></svg>'; });</script></body></html>`;
-    const name = (PROBE ? `Kesselschild_Probe_${artikel[0].id}` : 'Kesselschilder_A4') + (KLEIN ? '_7x7' : '');
+    const name = (PROBE ? `Kesselschild_Probe_${artikel[0].id}` : 'Kesselschilder_A4') + (SECHS ? '_6x6' : KLEIN ? '_7x7' : '');
     // Zwischenstand (HTML mit eingebettetem QR-Baustein) nur im Temp-Ordner - nicht im Projekt
     const zwischen = path.join(require('os').tmpdir(), 'kc-kesselschild'); fs.mkdirSync(zwischen, {recursive: true});
     fs.writeFileSync(path.join(zwischen, name + '.html'), html);
@@ -196,7 +199,7 @@ const b64 = (f) => `data:${f.endsWith('.png') ? 'image/png' : f.endsWith('.webp'
     exaktA4(path.join(ZIEL, name + '.pdf'));
     // Vorschau des ersten Etiketts in hoher Aufloesung
     await seite.setViewportSize({width: 900, height: 1300});
-    const e = await seite.$('.etikett'); await e.screenshot({path: path.join(ZIEL, name + '_Vorschau.png'), scale: 'device'});
+    const e = await seite.$(SECHS ? '.zelle' : '.etikett'); await e.screenshot({path: path.join(ZIEL, name + '_Vorschau.png'), scale: 'device'});
     const fehlend = artikel.filter((a) => !a.zusatz || !a.allergene).map((a) => `${a.nummer} ${a.name}: ${[!a.allergene && 'Allergene', !a.zusatz && 'Zusatzstoffe'].filter(Boolean).join(', ')}`);
     console.log(`fertig: ${artikel.length} Etikett(en) -> ${path.join(ZIEL, name + '.pdf')}`);
     if (fehlend.length) console.log('Fehlende Angaben im Artikelstamm:\n  ' + fehlend.join('\n  '));
