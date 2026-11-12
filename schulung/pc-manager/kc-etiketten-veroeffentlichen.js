@@ -26,7 +26,8 @@
   }
   function artikelListe(quelle) {
     const alsText = (a) => (global.KCAllergene?.alsText ? global.KCAllergene.alsText(a) : '') || '';
-    return (Array.isArray(quelle) ? quelle : []).filter((x) => x && x.active !== false && Number(x.price) > 0 && /^0[12]/.test(String(x.barcode || '')))
+    // 12.11.2026 (Wunsch Betreiber „auch Pfand und Sonstiges, z. B. Außer-Haus-Becher“): alle Artikel mit fünfstelliger Nummer und Preis ≠ 0 (Rückgaben negativ)
+    return (Array.isArray(quelle) ? quelle : []).filter((x) => x && x.active !== false && Number(x.price) !== 0 && /^\d{5}$/.test(String(x.barcode || '')))
       .map((x) => {
         const info = x.info || {}, zusatz = String(info.additives || '').trim(), bild = String(x.image || '');
         return {

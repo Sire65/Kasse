@@ -35,7 +35,7 @@ const b64 = (f) => `data:${f.endsWith('.png') ? 'image/png' : f.endsWith('.webp'
   const b = await pw.chromium.launch();
   try {
     // 1. Artikelstamm aus der Kasse lesen (wie er am Stand gilt) – gemeinsamer Kern mit artikel-export.cjs (Club-App-Preisetiketten)
-    const artikel = await artikelstammLesen(b, PORT, IDS);
+    const artikel = await artikelstammLesen(b, PORT, IDS, {nur01und02: true}); // Kesselschilder: wie bisher Getraenke/Speisen
     if (IDS.length) artikel.sort((x, y) => IDS.indexOf(x.id) - IDS.indexOf(y.id)); // 29.10.2026: Reihenfolge wie angegeben
     if (!artikel.length) throw new Error('Keine passenden Artikel gefunden: ' + IDS.join(', '));
     const qrQuelle = fs.readFileSync(path.join(W, 'pc-manager', 'vendor', 'qrcode-generator.js'), 'utf8');

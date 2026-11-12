@@ -1,5 +1,5 @@
 {
- "stand": "2026-11-12T13:11:53.465Z",
+ "stand": "2026-11-12T13:58:39.700Z",
  "quelle": "Kasse pos/app.js (PRODUCTS)",
  "artikel": [
   {
@@ -243,6 +243,143 @@
     0.093,
     0.082
    ]
+  },
+  {
+   "id": "zangeplus",
+   "name": "Feuerzangenpfand",
+   "preis": 2,
+   "pfand": [],
+   "nummer": "03002",
+   "bild": "pos/assets/feuerzangenpfand_version_3.webp",
+   "farbe": "#173765",
+   "kategorie": "Pfand",
+   "sortierung": 999,
+   "allergene": "",
+   "allergeneGeprueft": false,
+   "zusatz": null,
+   "alkohol": false,
+   "bildAusschnitt": null,
+   "bildSymbol": null
+  },
+  {
+   "id": "glasplus",
+   "name": "Glaspfand",
+   "preis": 2,
+   "pfand": [],
+   "nummer": "03001",
+   "bild": "pos/assets/pfand_aufschlag_version_3.png",
+   "farbe": "#173765",
+   "kategorie": "Pfand",
+   "sortierung": 999,
+   "allergene": "",
+   "allergeneGeprueft": false,
+   "zusatz": null,
+   "alkohol": false,
+   "bildAusschnitt": [
+    0,
+    0,
+    1,
+    0.83
+   ],
+   "bildSymbol": [
+    0.093,
+    0.093,
+    0.082
+   ]
+  },
+  {
+   "id": "glasminus",
+   "name": "Glasrückgabe",
+   "preis": -2,
+   "pfand": [],
+   "nummer": "03101",
+   "bild": "pos/assets/pfandrueckgabe_version_3.png",
+   "farbe": "#173765",
+   "kategorie": "Pfand",
+   "sortierung": 9100,
+   "allergene": "",
+   "allergeneGeprueft": false,
+   "zusatz": null,
+   "alkohol": false,
+   "bildAusschnitt": [
+    0,
+    0,
+    1,
+    0.83
+   ],
+   "bildSymbol": [
+    0.093,
+    0.093,
+    0.082
+   ]
+  },
+  {
+   "id": "zangeminus",
+   "name": "Feuerzange Rückgabe",
+   "preis": -2,
+   "pfand": [],
+   "nummer": "03102",
+   "bild": "pos/assets/feuerzangerueckgabe_version_3.webp",
+   "farbe": "#173765",
+   "kategorie": "Pfand",
+   "sortierung": 9101,
+   "allergene": "",
+   "allergeneGeprueft": false,
+   "zusatz": null,
+   "alkohol": false,
+   "bildAusschnitt": null,
+   "bildSymbol": null
+  },
+  {
+   "id": "glaszangebundleminus",
+   "name": "Glas + Feuerzange Rückgabe",
+   "preis": -4,
+   "pfand": [],
+   "nummer": "03103",
+   "bild": "pos/assets/glas_feuerzangerueckgabe_version_3.webp",
+   "farbe": "#9f1239",
+   "kategorie": "Pfand",
+   "sortierung": 9102,
+   "allergene": "",
+   "allergeneGeprueft": false,
+   "zusatz": null,
+   "alkohol": false,
+   "bildAusschnitt": null,
+   "bildSymbol": null
+  },
+  {
+   "id": "becher",
+   "name": "Außer-Haus-Becher",
+   "preis": 1,
+   "pfand": [],
+   "nummer": "04002",
+   "bild": "pos/assets/becher_auth.jpg",
+   "farbe": "#173765",
+   "kategorie": "Sonstiges",
+   "sortierung": 999,
+   "allergene": "",
+   "allergeneGeprueft": false,
+   "zusatz": null,
+   "alkohol": false,
+   "bildAusschnitt": null,
+   "bildSymbol": null
+  },
+  {
+   "id": "wertmarke",
+   "name": "Wertmarke",
+   "preis": 5,
+   "pfand": [],
+   "nummer": "04001",
+   "bild": "pos/assets/wertmarke.svg",
+   "farbe": "#7c3aed",
+   "kategorie": "Sonstiges",
+   "sortierung": 999,
+   "allergene": "",
+   "allergeneGeprueft": false,
+   "zusatz": null,
+   "alkohol": false,
+   "bildAusschnitt": null,
+   "bildSymbol": null
   },
   {
    "id": "gruenkohlmett",
