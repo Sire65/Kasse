@@ -20,8 +20,8 @@ const args = process.argv.slice(2); const PROBE = args.includes('--probe');
 // 09.11.2026 (Betreiber: "Etikett muss kleiner werden – 7 x 7 cm, oben links das Bild, nicht zu gross, rechts daneben der Preis inkl. Pfand
 // ohne Euro-Zeichen, darunter der QR-Code; links neben dem QR-Code Allergene und Zusatzstoffe – der QR-Code ist das Wichtigste"): --7x7
 const IDS = args.filter((a) => !a.startsWith('--'));
-// 09.11.2026 (Betreiber: "mach 6 x 6 cm"): --6x6 = dasselbe Etikett wie 7 x 7, gleichmaessig auf 60 mm verkleinert (Schrift und QR-Code
-// werden mit kleiner, die Aufteilung bleibt); Bogen 3 x 4 = 12 je A4
+// 09.11.2026 (Betreiber: "mach 6 x 6 cm"): --6x6 = dasselbe Etikett wie 7 x 7, alle Masse mal 60/70 (Schrift und QR-Code werden mit
+// kleiner, die Aufteilung bleibt); Bogen 3 x 4 = 12 je A4
 const SECHS = args.includes('--6x6'), KLEIN = SECHS || args.includes('--7x7'), K = SECHS ? 60 : KLEIN ? 70 : 80; // Etikettgroesse in mm
 const MM = 8, ABSTAND = 0; // Etikett 80 mm; Bogen: Etiketten stossen aneinander -> nur ein Schnitt dazwischen
 const T = {'.html': 'text/html', '.js': 'text/javascript', '.css': 'text/css', '.json': 'application/json', '.png': 'image/png', '.webp': 'image/webp', '.jpg': 'image/jpeg', '.svg': 'image/svg+xml', '.woff2': 'font/woff2'};
@@ -86,17 +86,22 @@ const b64 = (f) => `data:${f.endsWith('.png') ? 'image/png' : f.endsWith('.webp'
     };
     // 7 x 7 cm: QR-Code so gross wie moeglich (rechts unten, ca. 36 mm), Foto oben links 26 mm, Preis ohne €-Zeichen rechts neben dem Foto
     // 12.11.2026 (Betreiber: „auf dem 6 x 6 ist kein Foto“): Fotos fuer 7 x 7 / 6 x 6 vorher auf 600 px verkleinern (JPEG) – das
-    // Original (1254 px, 2,4 MB) in einem 2-cm-Feld lassen manche Handy-Betrachter und Drucker weg. Ausserdem 6 x 6 per zoom statt transform.
+    // Original (1254 px, 2,4 MB) in einem 2-cm-Feld lassen manche Handy-Betrachter und Drucker weg. 6 x 6 in echten Massen (siehe m() beim Stil).
     if (KLEIN) {
       const kp = await (await b.newContext()).newPage();
       for (const a of artikel) {
         const f = path.join(W, 'pos', a.bild || '');
         if (!a.bild || !fs.existsSync(f)) continue;
-        a.bildKlein = await kp.evaluate(async (src) => { const img = new Image(); img.src = src; await img.decode();
-          const m = Math.min(1, 600 / Math.max(img.naturalWidth, img.naturalHeight)), c = document.createElement('canvas');
-          c.width = Math.round(img.naturalWidth * m); c.height = Math.round(img.naturalHeight * m);
-          const g = c.getContext('2d'); g.fillStyle = '#fff'; g.fillRect(0, 0, c.width, c.height); g.drawImage(img, 0, 0, c.width, c.height);
-          return c.toDataURL('image/jpeg', 0.88); }, b64(f));
+        // 12.11.2026 (Bild Betreiber: nur graues Fotofeld): Ausschnitt (Kachelbilder _version_3: nur der Fototeil) und runde Ecken
+        // werden HIER fest ins Bild gerechnet – im PDF steht dann ein schlichtes quadratisches Bild ohne Zuschnitt/Maske
+        a.bildKlein = await kp.evaluate(async ([src, v3]) => { const img = new Image(); img.src = src; await img.decode();
+          const W = img.naturalWidth, H = img.naturalHeight;
+          const [sx, sy, sw, sh] = v3 ? [W * 0.1695, 0, W * 0.823, H * 0.823] : (() => { const k = Math.min(W, H); return [(W - k) / 2, (H - k) / 2, k, k]; })();
+          const N = 600, R = N * 0.12, c = document.createElement('canvas'); c.width = c.height = N;
+          const g = c.getContext('2d'); g.fillStyle = '#fff'; g.fillRect(0, 0, N, N);
+          g.beginPath(); g.moveTo(R, 0); g.arcTo(N, 0, N, N, R); g.arcTo(N, N, 0, N, R); g.arcTo(0, N, 0, 0, R); g.arcTo(0, 0, N, 0, R); g.closePath(); g.clip();
+          g.drawImage(img, sx, sy, sw, sh, 0, 0, N, N);
+          return c.toDataURL('image/jpeg', 0.88); }, [b64(f), /_version_3\.png$/.test(a.bild)]);
       }
       await kp.close();
     }
@@ -109,7 +114,7 @@ const b64 = (f) => `data:${f.endsWith('.png') ? 'image/png' : f.endsWith('.webp'
       return `<div class="etikett k7" style="--farbe:${esc(a.farbe)}">
         <h1>${esc(a.name)}</h1>
         <div class="k7-oben">
-          <div class="foto">${bild ? `<img src="${bild}" alt=""${/_version_3\.png$/.test(a.bild) ? ' class="v3"' : ''}>` : fehlt('Foto fehlt')}</div>
+          <div class="foto">${bild ? `<img src="${bild}" alt=""${!a.bildKlein && /_version_3\.png$/.test(a.bild) ? ' class="v3"' : ''}>` : fehlt('Foto fehlt')}</div>
           <div class="k7-preis"><div class="betrag">${zahl(gesamt)}</div>${pfandSumme > 0 ? `<div class="inkl">inkl. ${zahl(pfandSumme)} Pfand</div>` : ''}</div>
         </div>
         <div class="k7-unten">
@@ -122,6 +127,8 @@ const b64 = (f) => `data:${f.endsWith('.png') ? 'image/png' : f.endsWith('.webp'
         </div>
       </div>`;
     };
+    // 7 x 7 in mm; 6 x 6 = dieselben Masse mal 60/70 – als echte Masse ausgerechnet (kein zoom/transform, 12.11.2026)
+    const m = (x) => (x * (SECHS ? 60 / 70 : 1)).toFixed(3) + 'mm';
     const stil = `
       @page { size: A4; margin: 0; }
       * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -155,23 +162,22 @@ const b64 = (f) => `data:${f.endsWith('.png') ? 'image/png' : f.endsWith('.webp'
       .hinweis { position: absolute; left: 15mm; right: 15mm; font-size: 3.4mm; color: #333; line-height: 1.4; }
       .mass { position: absolute; height: 2mm; border: 0.25mm solid #000; border-top: 0; }
       .mass span { position: absolute; top: 2.4mm; left: 0; right: 0; text-align: center; font-size: 2.8mm; }
-      .zelle.k7z, .etikett.k7 { width: 70mm; height: 70mm; }
-      .zelle.k6z { width: 60mm; height: 60mm; overflow: hidden; } .zelle.k6z > .etikett { zoom: ${60 / 70}; }
-      .etikett.k7 { padding: 2mm 2.6mm 1.8mm; border-width: 0.8mm; border-radius: 5mm; }
+      .zelle.k7z, .etikett.k7 { width: ${m(70)}; height: ${m(70)}; }
+      .etikett.k7 { padding: ${m(2)} ${m(2.6)} ${m(1.8)}; border-width: ${m(0.8)}; border-radius: ${m(5)}; }
       .k7 > * { flex-shrink: 0; }
-      .k7 h1 { font-size: 4.8mm; line-height: 1.05; margin: 0 0 0.8mm; }
-      .k7-oben { display: flex; gap: 2.5mm; align-items: center; height: 21mm; }
-      .k7 .foto { width: 21mm; height: 21mm; border-radius: 2.5mm; }
+      .k7 h1 { font-size: ${m(4.8)}; line-height: 1.05; margin: 0 0 ${m(0.8)}; }
+      .k7-oben { display: flex; gap: ${m(2.5)}; align-items: center; height: ${m(21)}; }
+      .k7 .foto { width: ${m(21)}; height: ${m(21)}; border-radius: 0; overflow: visible; background: none; }
+      .k7 .foto img { position: static; width: 100%; height: 100%; display: block; }
       .k7-preis { flex: 1 1 auto; text-align: center; }
-      .k7 .betrag { font-size: 12mm; }
-      .k7 .inkl { font-size: 3.2mm; margin-top: 0.6mm; }
-      .k7-unten { display: flex; gap: 2mm; margin-top: auto; align-items: flex-end; }
-      .k7 .angaben { font-size: 2.55mm; line-height: 1.25; align-self: stretch; display: flex; flex-direction: column; }
-      .k7 .angaben p + p { margin-top: 0.7mm; }
-      .k7 .k7-verein { margin-top: auto; display: flex; align-items: center; gap: 1mm; font-size: 2.4mm; font-weight: 700; color: #173765; }
-      .k7 .k7-verein img { height: 3.2mm; }
-      .k7 .qr .code { width: 34mm; height: 34mm; }
-      .k7 .qr small { font-size: 2.5mm; margin-top: 0; }`;
+      .k7 .betrag { font-size: ${m(12)}; }
+      .k7 .inkl { font-size: ${m(3.2)}; margin-top: ${m(0.6)}; }
+      .k7-unten { display: flex; gap: ${m(2)}; margin-top: auto; align-items: flex-end; }
+      .k7 .angaben { font-size: ${m(2.55)}; line-height: 1.25; align-self: stretch; display: flex; flex-direction: column; }
+      .k7 .angaben p + p { margin-top: ${m(0.7)}; }
+      .k7 .fehlt { border-width: ${m(0.3)}; padding: 0 ${m(0.6)}; }
+      .k7 .qr .code { width: ${m(34)}; height: ${m(34)}; }
+      .k7 .qr small { font-size: ${m(2.5)}; margin-top: 0; }`;
     // Schnittmarken: nur aussen, damit nichts davon auf einem Etikett landet (Etiketten stossen bei 0 mm Abstand aneinander)
     const marken = (x, y, w, h) => {
       const L = 6, A = 2, D = 0.25, m = [];
@@ -182,7 +188,7 @@ const b64 = (f) => `data:${f.endsWith('.png') ? 'image/png' : f.endsWith('.webp'
     let seiten = '';
     if (PROBE) {
       const x = (210 - K) / 2, y = 40;
-      seiten = `<div class="blatt"><div class="zelle${SECHS ? ' k6z' : KLEIN ? ' k7z' : ''}" style="left:${x}mm;top:${y}mm">${(KLEIN ? etikettKlein : etikett)(artikel[0])}</div>${marken(x, y, K, K)}
+      seiten = `<div class="blatt"><div class="zelle${KLEIN ? ' k7z' : ''}" style="left:${x}mm;top:${y}mm">${(KLEIN ? etikettKlein : etikett)(artikel[0])}</div>${marken(x, y, K, K)}
         <div class="mass" style="left:80mm;top:140mm;width:50mm"><span>Messbalken: muss genau 5 cm lang sein</span></div>
         <div class="hinweis" style="top:155mm"><b>Probe-Etikett ${esc(artikel[0].name)} – ${K / 10} × ${K / 10} cm</b><br>
         Drucken mit <b>Originalgröße / 100 %</b> (nicht „an Seite anpassen“). Messbalken nachmessen: 5,0 cm.<br>
@@ -196,7 +202,7 @@ const b64 = (f) => `data:${f.endsWith('.png') ? 'image/png' : f.endsWith('.webp'
       const x0 = (210 - SP * K - ABSTAND) / 2, y0 = (297 - ZE * K - (ZE - 1) * ABSTAND) / 2;
       for (let i = 0; i < artikel.length; i += JE) {
         let zellen = '';
-        artikel.slice(i, i + JE).forEach((a, k) => { const x = x0 + (k % SP) * (K + ABSTAND), y = y0 + Math.floor(k / SP) * (K + ABSTAND); zellen += `<div class="zelle${SECHS ? ' k6z' : KLEIN ? ' k7z' : ''}" style="left:${x}mm;top:${y}mm">${(KLEIN ? etikettKlein : etikett)(a)}</div>`; });
+        artikel.slice(i, i + JE).forEach((a, k) => { const x = x0 + (k % SP) * (K + ABSTAND), y = y0 + Math.floor(k / SP) * (K + ABSTAND); zellen += `<div class="zelle${KLEIN ? ' k7z' : ''}" style="left:${x}mm;top:${y}mm">${(KLEIN ? etikettKlein : etikett)(a)}</div>`; });
         seiten += `<div class="blatt">${zellen}${marken(x0, y0, SP * K + ABSTAND, ZE * K + (ZE - 1) * ABSTAND)}</div>`;
       }
     }
@@ -214,7 +220,7 @@ const b64 = (f) => `data:${f.endsWith('.png') ? 'image/png' : f.endsWith('.webp'
     exaktA4(path.join(ZIEL, name + '.pdf'));
     // Vorschau des ersten Etiketts in hoher Aufloesung
     await seite.setViewportSize({width: 900, height: 1300});
-    const e = await seite.$(SECHS ? '.zelle' : '.etikett'); await e.screenshot({path: path.join(ZIEL, name + '_Vorschau.png'), scale: 'device'});
+    const e = await seite.$('.etikett'); await e.screenshot({path: path.join(ZIEL, name + '_Vorschau.png'), scale: 'device'});
     const fehlend = artikel.filter((a) => !a.zusatz || !a.allergene).map((a) => `${a.nummer} ${a.name}: ${[!a.allergene && 'Allergene', !a.zusatz && 'Zusatzstoffe'].filter(Boolean).join(', ')}`);
     console.log(`fertig: ${artikel.length} Etikett(en) -> ${path.join(ZIEL, name + '.pdf')}`);
     if (fehlend.length) console.log('Fehlende Angaben im Artikelstamm:\n  ' + fehlend.join('\n  '));
