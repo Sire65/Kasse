@@ -113,17 +113,19 @@ const b64 = (f) => `data:${f.endsWith('.png') ? 'image/png' : f.endsWith('.webp'
       const fehlt = (t) => `<span class="fehlt">⚠ ${t}</span>`;
       return `<div class="etikett k7" style="--farbe:${esc(a.farbe)}">
         <h1>${esc(a.name)}</h1>
-        <div class="k7-oben">
-          <div class="foto">${bild ? `<img src="${bild}" alt=""${!a.bildKlein && /_version_3\.png$/.test(a.bild) ? ' class="v3"' : ''}>` : fehlt('Foto fehlt')}</div>
-          <div class="k7-preis"><div class="betrag">${zahl(gesamt)}</div>${pfandSumme > 0 ? `<div class="inkl">inkl. ${zahl(pfandSumme)} Pfand</div>` : ''}</div>
-        </div>
-        <div class="k7-unten">
-          <div class="angaben">
-            <p><b>Allergene:</b> ${a.allergene ? esc(a.allergene) : fehlt('nicht erfasst')}</p>
-            <p><b>Zusatzstoffe:</b> ${a.zusatz ? esc(a.zusatz) : fehlt('nicht erfasst')}</p>
-            ${a.alkohol ? '<p class="alk">Enthält Alkohol</p>' : ''}
+        <div class="k7-spalten">
+          <div class="k7-links">
+            <div class="foto">${bild ? `<img src="${bild}" alt=""${!a.bildKlein && /_version_3\.png$/.test(a.bild) ? ' class="v3"' : ''}>` : fehlt('Foto fehlt')}</div>
+            <div class="angaben">
+              <p><b>Allergene:</b> ${a.allergene ? esc(a.allergene) : fehlt('nicht erfasst')}</p>
+              <p><b>Zusatzstoffe:</b> ${a.zusatz ? esc(a.zusatz) : fehlt('nicht erfasst')}</p>
+              ${a.alkohol ? '<p class="alk">Enthält Alkohol</p>' : ''}
+            </div>
           </div>
-          <div class="qr"><div class="code" data-qr="${esc(a.nummer)}"></div><small>${esc(a.nummer)}</small></div>
+          <div class="k7-rechts">
+            <div class="k7-preis"><div class="betrag">${zahl(gesamt)}</div>${pfandSumme > 0 ? `<div class="inkl">inkl. ${zahl(pfandSumme)} Pfand</div>` : ''}</div>
+            <div class="qr"><div class="code" data-qr="${esc(a.nummer)}"></div><small>${esc(a.nummer)}</small></div>
+          </div>
         </div>
       </div>`;
     };
@@ -166,15 +168,19 @@ const b64 = (f) => `data:${f.endsWith('.png') ? 'image/png' : f.endsWith('.webp'
       .etikett.k7 { padding: ${m(2)} ${m(2.6)} ${m(1.8)}; border-width: ${m(0.8)}; border-radius: ${m(5)}; }
       .k7 > * { flex-shrink: 0; }
       .k7 h1 { font-size: ${m(4.8)}; line-height: 1.05; margin: 0 0 ${m(0.8)}; }
-      .k7-oben { display: flex; gap: ${m(2.5)}; align-items: center; height: ${m(21)}; }
-      .k7 .foto { width: ${m(21)}; height: ${m(21)}; border-radius: 0; overflow: visible; background: none; }
+      /* 12.11.2026 (Betreiber: „Platz besser ausnutzen – Foto größer, darunter die Schrift auch“): zwei Spalten statt Zeilen –
+         links Foto über die ganze Spaltenbreite (27 mm), darunter Allergene/Zusatzstoffe in 3 mm Schrift (wird nur bei Platzmangel kleiner);
+         rechts Preis und QR-Code (34 mm) */
+      .k7-spalten { display: flex; gap: ${m(2)}; flex: 1 1 auto; min-height: 0; }
+      .k7-links { width: ${m(27)}; flex: 0 0 auto; display: flex; flex-direction: column; gap: ${m(1.4)}; min-height: 0; }
+      .k7 .foto { width: ${m(27)}; height: ${m(27)}; border-radius: 0; overflow: visible; background: none; flex: 0 0 auto; }
       .k7 .foto img { position: static; width: 100%; height: 100%; display: block; }
-      .k7-preis { flex: 1 1 auto; text-align: center; }
+      .k7-rechts { flex: 1 1 auto; display: flex; flex-direction: column; align-items: center; justify-content: space-between; }
+      .k7-preis { text-align: center; }
       .k7 .betrag { font-size: ${m(12)}; }
       .k7 .inkl { font-size: ${m(3.2)}; margin-top: ${m(0.6)}; }
-      .k7-unten { display: flex; gap: ${m(2)}; margin-top: auto; align-items: flex-end; }
-      .k7 .angaben { font-size: ${m(2.55)}; line-height: 1.25; align-self: stretch; display: flex; flex-direction: column; }
-      .k7 .angaben p + p { margin-top: ${m(0.7)}; }
+      .k7 .angaben { font-size: ${m(3)}; line-height: 1.22; flex: 1 1 auto; min-height: 0; overflow: hidden; }
+      .k7 .angaben p + p { margin-top: ${m(0.8)}; }
       .k7 .fehlt { border-width: ${m(0.3)}; padding: 0 ${m(0.6)}; }
       .k7 .qr .code { width: ${m(34)}; height: ${m(34)}; }
       .k7 .qr small { font-size: ${m(2.5)}; margin-top: 0; }`;
@@ -209,7 +215,10 @@ const b64 = (f) => `data:${f.endsWith('.png') ? 'image/png' : f.endsWith('.webp'
     const html = `<!doctype html><html lang="de"><head><meta charset="utf-8"><style>${stil}</style><script>${qrQuelle}</script></head><body>${seiten}
       <script>document.querySelectorAll('[data-qr]').forEach((n) => { const q = qrcode(0, 'M'); q.addData(n.dataset.qr); q.make(); const c = q.getModuleCount(), r = 4, g = c + 2 * r;
         let d = ''; for (let y = 0; y < c; y++) for (let x = 0; x < c; x++) if (q.isDark(y, x)) d += 'M' + (x + r) + ' ' + (y + r) + 'h1v1h-1z';
-        n.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ' + g + ' ' + g + '" shape-rendering="crispEdges"><rect width="' + g + '" height="' + g + '" fill="#fff"/><path d="' + d + '" fill="#000"/></svg>'; });</script></body></html>`;
+        n.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ' + g + ' ' + g + '" shape-rendering="crispEdges"><rect width="' + g + '" height="' + g + '" fill="#fff"/><path d="' + d + '" fill="#000"/></svg>'; });
+      // 7 x 7 / 6 x 6: langer Allergen-Text → Schrift in kleinen Schritten verkleinern, bis alles hineinpasst (nie abschneiden)
+      document.querySelectorAll('.k7 .angaben').forEach((n) => { let f = parseFloat(getComputedStyle(n).fontSize);
+        while (n.scrollHeight > n.clientHeight + 1 && f > 6) { f -= 0.25; n.style.fontSize = f + 'px'; } });</script></body></html>`;
     const name = (PROBE ? `Kesselschild_Probe_${artikel[0].id}` : 'Kesselschilder_A4') + (SECHS ? '_6x6' : KLEIN ? '_7x7' : '');
     // Zwischenstand (HTML mit eingebettetem QR-Baustein) nur im Temp-Ordner - nicht im Projekt
     const zwischen = path.join(require('os').tmpdir(), 'kc-kesselschild'); fs.mkdirSync(zwischen, {recursive: true});
