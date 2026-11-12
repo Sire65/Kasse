@@ -13,7 +13,8 @@ const T = {'.html': 'text/html', '.js': 'text/javascript', '.css': 'text/css', '
   const b = await pw.chromium.launch();
   try {
     const artikel = (await artikelstammLesen(b, s.address().port)).map((a) => ({...a, bild: a.bild && fs.existsSync(path.join(W, 'pos', a.bild)) ? 'pos/' + a.bild : null,
-      bildAusschnitt: /_version_3\.png$/.test(a.bild || '') ? [0.1695, 0, 0.823, 0.823] : null})) // Kachelbilder: nur der Fototeil (x, y, b, h als Anteil)
+      // Kachelbilder (_version_3): volle Breite, Namensbalken unten (ab 83 %) weg; i-Symbol oben links (Mitte/Radius als Anteil der Breite) uebermalen
+      bildAusschnitt: /_version_3\.png$/.test(a.bild || '') ? [0, 0, 1, 0.83] : null, bildSymbol: /_version_3\.png$/.test(a.bild || '') ? [0.093, 0.093, 0.082] : null}))
       .sort((x, y) => x.kategorie.localeCompare(y.kategorie, 'de') || x.sortierung - y.sortierung || x.name.localeCompare(y.name, 'de'));
     const daten = {stand: new Date().toISOString(), quelle: 'Kasse pos/app.js (PRODUCTS)', artikel};
     fs.writeFileSync(path.join(ZIEL, 'artikel.json'), JSON.stringify(daten, null, 1) + '\n');

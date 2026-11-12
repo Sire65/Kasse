@@ -1,5 +1,5 @@
 {
- "stand": "2026-11-12T13:10:23.164Z",
+ "stand": "2026-11-12T13:11:53.465Z",
  "quelle": "Kasse pos/app.js (PRODUCTS)",
  "artikel": [
   {
@@ -22,10 +22,15 @@
    "zusatz": null,
    "alkohol": true,
    "bildAusschnitt": [
-    0.1695,
     0,
-    0.823,
-    0.823
+    0,
+    1,
+    0.83
+   ],
+   "bildSymbol": [
+    0.093,
+    0.093,
+    0.082
    ]
   },
   {
@@ -48,10 +53,15 @@
    "zusatz": null,
    "alkohol": true,
    "bildAusschnitt": [
-    0.1695,
     0,
-    0.823,
-    0.823
+    0,
+    1,
+    0.83
+   ],
+   "bildSymbol": [
+    0.093,
+    0.093,
+    0.082
    ]
   },
   {
@@ -74,10 +84,15 @@
    "zusatz": null,
    "alkohol": true,
    "bildAusschnitt": [
-    0.1695,
     0,
-    0.823,
-    0.823
+    0,
+    1,
+    0.83
+   ],
+   "bildSymbol": [
+    0.093,
+    0.093,
+    0.082
    ]
   },
   {
@@ -104,10 +119,15 @@
    "zusatz": null,
    "alkohol": true,
    "bildAusschnitt": [
-    0.1695,
     0,
-    0.823,
-    0.823
+    0,
+    1,
+    0.83
+   ],
+   "bildSymbol": [
+    0.093,
+    0.093,
+    0.082
    ]
   },
   {
@@ -130,10 +150,15 @@
    "zusatz": null,
    "alkohol": false,
    "bildAusschnitt": [
-    0.1695,
     0,
-    0.823,
-    0.823
+    0,
+    1,
+    0.83
+   ],
+   "bildSymbol": [
+    0.093,
+    0.093,
+    0.082
    ]
   },
   {
@@ -156,10 +181,15 @@
    "zusatz": null,
    "alkohol": false,
    "bildAusschnitt": [
-    0.1695,
     0,
-    0.823,
-    0.823
+    0,
+    1,
+    0.83
+   ],
+   "bildSymbol": [
+    0.093,
+    0.093,
+    0.082
    ]
   },
   {
@@ -177,10 +207,15 @@
    "zusatz": null,
    "alkohol": false,
    "bildAusschnitt": [
-    0.1695,
     0,
-    0.823,
-    0.823
+    0,
+    1,
+    0.83
+   ],
+   "bildSymbol": [
+    0.093,
+    0.093,
+    0.082
    ]
   },
   {
@@ -198,10 +233,15 @@
    "zusatz": null,
    "alkohol": false,
    "bildAusschnitt": [
-    0.1695,
     0,
-    0.823,
-    0.823
+    0,
+    1,
+    0.83
+   ],
+   "bildSymbol": [
+    0.093,
+    0.093,
+    0.082
    ]
   },
   {
@@ -219,10 +259,15 @@
    "zusatz": null,
    "alkohol": false,
    "bildAusschnitt": [
-    0.1695,
     0,
-    0.823,
-    0.823
+    0,
+    1,
+    0.83
+   ],
+   "bildSymbol": [
+    0.093,
+    0.093,
+    0.082
    ]
   },
   {
@@ -240,10 +285,15 @@
    "zusatz": null,
    "alkohol": false,
    "bildAusschnitt": [
-    0.1695,
     0,
-    0.823,
-    0.823
+    0,
+    1,
+    0.83
+   ],
+   "bildSymbol": [
+    0.093,
+    0.093,
+    0.082
    ]
   },
   {
@@ -261,10 +311,15 @@
    "zusatz": null,
    "alkohol": false,
    "bildAusschnitt": [
-    0.1695,
     0,
-    0.823,
-    0.823
+    0,
+    1,
+    0.83
+   ],
+   "bildSymbol": [
+    0.093,
+    0.093,
+    0.082
    ]
   },
   {
@@ -282,10 +337,15 @@
    "zusatz": null,
    "alkohol": false,
    "bildAusschnitt": [
-    0.1695,
     0,
-    0.823,
-    0.823
+    0,
+    1,
+    0.83
+   ],
+   "bildSymbol": [
+    0.093,
+    0.093,
+    0.082
    ]
   },
   {
@@ -303,10 +363,15 @@
    "zusatz": null,
    "alkohol": false,
    "bildAusschnitt": [
-    0.1695,
     0,
-    0.823,
-    0.823
+    0,
+    1,
+    0.83
+   ],
+   "bildSymbol": [
+    0.093,
+    0.093,
+    0.082
    ]
   },
   {
@@ -324,10 +389,15 @@
    "zusatz": null,
    "alkohol": false,
    "bildAusschnitt": [
-    0.1695,
     0,
-    0.823,
-    0.823
+    0,
+    1,
+    0.83
+   ],
+   "bildSymbol": [
+    0.093,
+    0.093,
+    0.082
    ]
   },
   {
@@ -345,10 +415,15 @@
    "zusatz": null,
    "alkohol": false,
    "bildAusschnitt": [
-    0.1695,
     0,
-    0.823,
-    0.823
+    0,
+    1,
+    0.83
+   ],
+   "bildSymbol": [
+    0.093,
+    0.093,
+    0.082
    ]
   }
  ]

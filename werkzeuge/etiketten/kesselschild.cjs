@@ -81,11 +81,20 @@ const b64 = (f) => `data:${f.endsWith('.png') ? 'image/png' : f.endsWith('.webp'
         // werden HIER fest ins Bild gerechnet – im PDF steht dann ein schlichtes quadratisches Bild ohne Zuschnitt/Maske
         a.bildKlein = await kp.evaluate(async ([src, v3]) => { const img = new Image(); img.src = src; await img.decode();
           const W = img.naturalWidth, H = img.naturalHeight;
-          const [sx, sy, sw, sh] = v3 ? [W * 0.1695, 0, W * 0.823, H * 0.823] : (() => { const k = Math.min(W, H); return [(W - k) / 2, (H - k) / 2, k, k]; })();
-          const N = 600, R = N * 0.12, c = document.createElement('canvas'); c.width = c.height = N;
-          const g = c.getContext('2d'); g.fillStyle = '#fff'; g.fillRect(0, 0, N, N);
-          g.beginPath(); g.moveTo(R, 0); g.arcTo(N, 0, N, N, R); g.arcTo(N, N, 0, N, R); g.arcTo(0, N, 0, 0, R); g.arcTo(0, 0, N, 0, R); g.closePath(); g.clip();
-          g.drawImage(img, sx, sy, sw, sh, 0, 0, N, N);
+          // 12.11.2026 (Betreiber: „Bild wird abgeschnitten“): Kachelbilder (_version_3) in voller Breite, nur der Namensbalken unten
+          // (ab 83 %) faellt weg; das i-Symbol oben links wird mit der Hintergrundfarbe drumherum uebermalt. Andere Bilder: quadratisch mittig.
+          const [sx, sy, sw, sh] = v3 ? [0, 0, W, H * 0.83] : (() => { const k = Math.min(W, H); return [(W - k) / 2, (H - k) / 2, k, k]; })();
+          const N = 600, NH = Math.round(N * sh / sw), R = N * 0.1, c = document.createElement('canvas'); c.width = N; c.height = NH;
+          const g = c.getContext('2d'); g.fillStyle = '#fff'; g.fillRect(0, 0, N, NH);
+          g.beginPath(); g.moveTo(R, 0); g.arcTo(N, 0, N, NH, R); g.arcTo(N, NH, 0, NH, R); g.arcTo(0, NH, 0, 0, R); g.arcTo(0, 0, N, 0, R); g.closePath(); g.clip();
+          g.drawImage(img, sx, sy, sw, sh, 0, 0, N, NH);
+          if (v3) { // i-Symbol (Mitte ca. 9,3 % / 9,3 %, Radius ca. 7 %): Farbe aus einem Ring knapp ausserhalb (Median), dann uebermalen
+            const cx = N * 0.093, cy = N * 0.093, ri = N * 0.082, px = g.getImageData(0, 0, N, NH).data, f = [[], [], []];
+            for (let w = 0; w < 360; w += 6) { const x = Math.round(cx + Math.cos(w * Math.PI / 180) * N * 0.1), y = Math.round(cy + Math.sin(w * Math.PI / 180) * N * 0.1);
+              if (x < 0 || y < 0 || x >= N || y >= NH) continue; const o = (y * N + x) * 4; for (let k = 0; k < 3; k++) f[k].push(px[o + k]); }
+            const med = (a) => a.sort((u, v) => u - v)[a.length >> 1];
+            g.fillStyle = `rgb(${med(f[0])},${med(f[1])},${med(f[2])})`; g.beginPath(); g.arc(cx, cy, ri, 0, 7); g.fill();
+          }
           return c.toDataURL('image/jpeg', 0.88); }, [b64(f), /_version_3\.png$/.test(a.bild)]);
       }
       await kp.close();
@@ -150,16 +159,16 @@ const b64 = (f) => `data:${f.endsWith('.png') ? 'image/png' : f.endsWith('.webp'
       .mass { position: absolute; height: 2mm; border: 0.25mm solid #000; border-top: 0; }
       .mass span { position: absolute; top: 2.4mm; left: 0; right: 0; text-align: center; font-size: 2.8mm; }
       .zelle.k7z, .etikett.k7 { width: ${m(70)}; height: ${m(70)}; }
-      .etikett.k7 { padding: ${m(2)} ${m(2.6)} ${m(1.8)}; border-width: ${m(0.8)}; border-radius: ${m(5)}; }
+      .etikett.k7 { padding: ${m(2)} ${m(3.2)} ${m(1.8)} ${m(3.6)}; border-width: ${m(0.8)}; border-radius: ${m(5)}; } /* 12.11.2026: links etwas mehr Abstand zum Rand */
       .k7 > * { flex-shrink: 0; }
       .k7 h1 { font-size: ${m(4.8)}; line-height: 1.05; margin: 0 0 ${m(0.8)}; }
       /* 12.11.2026 (Betreiber: „Platz besser ausnutzen – Foto größer, darunter die Schrift auch“): zwei Spalten statt Zeilen –
          links Foto über die ganze Spaltenbreite (27 mm), darunter Allergene/Zusatzstoffe in 3 mm Schrift (wird nur bei Platzmangel kleiner);
          rechts Preis und QR-Code (34 mm) */
       .k7-spalten { display: flex; gap: ${m(2)}; flex: 1 1 auto; min-height: 0; }
-      .k7-links { width: ${m(27)}; flex: 0 0 auto; display: flex; flex-direction: column; gap: ${m(1.4)}; min-height: 0; }
-      .k7 .foto { width: ${m(27)}; height: ${m(27)}; border-radius: 0; overflow: visible; background: none; flex: 0 0 auto; }
-      .k7 .foto img { position: static; width: 100%; height: 100%; display: block; }
+      .k7-links { width: ${m(26.5)}; flex: 0 0 auto; display: flex; flex-direction: column; gap: ${m(1.4)}; min-height: 0; }
+      .k7 .foto { width: ${m(26.5)}; height: auto; border-radius: 0; overflow: visible; background: none; flex: 0 0 auto; }
+      .k7 .foto img { position: static; width: 100%; height: auto; display: block; }
       .k7-rechts { flex: 1 1 auto; display: flex; flex-direction: column; align-items: center; justify-content: space-between; }
       .k7-preis { text-align: center; }
       .k7 .betrag { font-size: ${m(12)}; }
