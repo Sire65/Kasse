@@ -33,6 +33,8 @@
         return {
           id: x.id, name: x.name, nummer: String(x.barcode), preis: Number(x.price),
           pfand: pfandVon(x),
+          // 12.11.2026: Farbe der Warengruppe, wie im Manager eingestellt (Etiketten: farbiges Kopfband)
+          warengruppeFarbe: (Array.isArray(global.groups) ? global.groups : []).find((g) => g && (g.name === x.category || g.shortName === x.category))?.color || null,
           kategorie: x.category || '', sortierung: Number.isFinite(Number(x.sortOrder)) ? Number(x.sortOrder) : 999, farbe: x.color || '#173765',
           allergene: alsText(info.allergens) || String(info.legacyAllergens || '').trim() || null, allergeneGeprueft: info.status === 'approved',
           zusatz: /^(keine angaben?|unbekannt|-)?$/i.test(zusatz) ? null : zusatz,

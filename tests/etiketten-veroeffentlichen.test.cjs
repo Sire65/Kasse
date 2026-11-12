@@ -28,6 +28,7 @@ let f = 0; const pr = (n, b, z = '') => { console.log(`${b ? '  OK  ' : 'FEHLER'
         pr(`${seite}: Preis aus dem Manager (4,80), Warengruppe, Foto-Pfad`, e?.preis === 4.8 && e.kategorie === 'Getränke' && /^pos\/assets\//.test(e.bild || ''), JSON.stringify(e).slice(0, 160));
         pr(`${seite}: Pfand wie im Manager (Feuerzangenbowle: Glas + Feuerzange)`, fz?.pfand?.length === 2 && fz.pfand.every((k) => k.betrag === 2), JSON.stringify(fz?.pfand));
         pr(`${seite}: alle Artikel mit Artikelnummer und Preis ≠ 0 (auch Pfand 03…, Sonstiges 04…)`, a.p_artikel.length > 5 && a.p_artikel.every((x) => /^\d{5}$/.test(x.nummer) && x.preis !== 0) && a.p_artikel.some((x) => /^03/.test(x.nummer)) && a.p_artikel.some((x) => /^04/.test(x.nummer)), a.p_artikel.map((x) => x.nummer).join(' '));
+        pr(`${seite}: Warengruppen-Farbe mitgeschickt (Getränke/Speisen/Pfand verschieden)`, new Set(['01', '02', '03'].map((v) => a.p_artikel.find((x) => x.nummer.startsWith(v))?.warengruppeFarbe)).size === 3 && a.p_artikel.every((x) => /^#[0-9a-f]{6}$/i.test(x.warengruppeFarbe || '')), [...new Set(a.p_artikel.map((x) => x.kategorie + ' ' + x.warengruppeFarbe))].join(', '));
         pr(`${seite}: Alkoholfrei ist kein Alkohol`, a.p_artikel.find((x) => x.nummer === '01004')?.alkohol === false && e.alkohol === true);
         pr(`${seite}: Knopf vorhanden`, r.knopf && !r.knopfAus);
       } else {

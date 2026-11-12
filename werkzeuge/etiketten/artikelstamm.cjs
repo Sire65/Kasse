@@ -13,6 +13,8 @@ async function artikelstammLesen(b, port, ids = [], {nur01und02 = false} = {}) {
       const info = x.info || {};
       const zusatz = String(info.additives || '').trim();
       return {id: x.id, name: x.name, preis: Number(x.price), pfand, nummer: String(x.barcode), bild: x.image, farbe: x.color || '#173765',
+        // 12.11.2026 (Wunsch Betreiber: „Warengruppen-Farben der Kasse auch auf den Etiketten“): Farbe der Warengruppe aus GROUPS (wie an der Kasse)
+        warengruppeFarbe: (typeof GROUPS !== 'undefined' && GROUPS.find((g) => g && (g.name === x.category || g.shortName === x.category))?.color) || null,
         kategorie: x.category || '', sortierung: Number.isFinite(Number(x.sortOrder)) ? Number(x.sortOrder) : 999,
         allergene: window.KCAllergene.alsText(info.allergens) || String(info.legacyAllergens || '').trim(),
         allergeneGeprueft: info.status === 'approved',
