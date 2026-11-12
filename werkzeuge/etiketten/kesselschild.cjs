@@ -85,11 +85,26 @@ const b64 = (f) => `data:${f.endsWith('.png') ? 'image/png' : f.endsWith('.webp'
       </div>`;
     };
     // 7 x 7 cm: QR-Code so gross wie moeglich (rechts unten, ca. 36 mm), Foto oben links 26 mm, Preis ohne €-Zeichen rechts neben dem Foto
+    // 12.11.2026 (Betreiber: „auf dem 6 x 6 ist kein Foto“): Fotos fuer 7 x 7 / 6 x 6 vorher auf 600 px verkleinern (JPEG) – das
+    // Original (1254 px, 2,4 MB) in einem 2-cm-Feld lassen manche Handy-Betrachter und Drucker weg. Ausserdem 6 x 6 per zoom statt transform.
+    if (KLEIN) {
+      const kp = await (await b.newContext()).newPage();
+      for (const a of artikel) {
+        const f = path.join(W, 'pos', a.bild || '');
+        if (!a.bild || !fs.existsSync(f)) continue;
+        a.bildKlein = await kp.evaluate(async (src) => { const img = new Image(); img.src = src; await img.decode();
+          const m = Math.min(1, 600 / Math.max(img.naturalWidth, img.naturalHeight)), c = document.createElement('canvas');
+          c.width = Math.round(img.naturalWidth * m); c.height = Math.round(img.naturalHeight * m);
+          const g = c.getContext('2d'); g.fillStyle = '#fff'; g.fillRect(0, 0, c.width, c.height); g.drawImage(img, 0, 0, c.width, c.height);
+          return c.toDataURL('image/jpeg', 0.88); }, b64(f));
+      }
+      await kp.close();
+    }
     const etikettKlein = (a) => {
       const pfandSumme = a.pfand.reduce((s, k) => s + k.betrag, 0), gesamt = a.preis + pfandSumme;
       const zahl = (b) => (Math.round(b * 100) / 100).toFixed(2).replace('.', ',');
       const bildDatei = path.join(W, 'pos', a.bild || '');
-      const bild = a.bild && fs.existsSync(bildDatei) ? b64(bildDatei) : '';
+      const bild = a.bildKlein || (a.bild && fs.existsSync(bildDatei) ? b64(bildDatei) : '');
       const fehlt = (t) => `<span class="fehlt">⚠ ${t}</span>`;
       return `<div class="etikett k7" style="--farbe:${esc(a.farbe)}">
         <h1>${esc(a.name)}</h1>
@@ -141,7 +156,7 @@ const b64 = (f) => `data:${f.endsWith('.png') ? 'image/png' : f.endsWith('.webp'
       .mass { position: absolute; height: 2mm; border: 0.25mm solid #000; border-top: 0; }
       .mass span { position: absolute; top: 2.4mm; left: 0; right: 0; text-align: center; font-size: 2.8mm; }
       .zelle.k7z, .etikett.k7 { width: 70mm; height: 70mm; }
-      .zelle.k6z { width: 60mm; height: 60mm; overflow: hidden; } .zelle.k6z > .etikett { transform: scale(${60 / 70}); transform-origin: 0 0; }
+      .zelle.k6z { width: 60mm; height: 60mm; overflow: hidden; } .zelle.k6z > .etikett { zoom: ${60 / 70}; }
       .etikett.k7 { padding: 2mm 2.6mm 1.8mm; border-width: 0.8mm; border-radius: 5mm; }
       .k7 > * { flex-shrink: 0; }
       .k7 h1 { font-size: 4.8mm; line-height: 1.05; margin: 0 0 0.8mm; }
