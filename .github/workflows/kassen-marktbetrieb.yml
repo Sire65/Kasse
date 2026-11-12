@@ -1,0 +1,36 @@
+name: Kassen-Marktbetrieb
+on:
+  pull_request:
+    paths: ['money-butler/**', 'pc-manager/**', 'schulung/money-butler/**', 'schulung/pc-manager/**', 'tests/kassen-programmverbund.test.cjs', 'pos/**', 'schulung/pos/**', 'tests/marktbetrieb.test.cjs', 'tests/verkaufskurve-prognose.test.cjs', 'tests/haendlerausweis.test.cjs', '.github/workflows/kassen-marktbetrieb.yml']
+  push:
+    branches: [main]
+    paths: ['money-butler/**', 'pc-manager/**', 'schulung/money-butler/**', 'schulung/pc-manager/**', 'tests/kassen-programmverbund.test.cjs', 'pos/**', 'schulung/pos/**', 'tests/marktbetrieb.test.cjs', 'tests/verkaufskurve-prognose.test.cjs', '.github/workflows/kassen-marktbetrieb.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  betrieb:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm install --no-save playwright@1.62.1
+      - run: npx playwright install --with-deps chromium
+      - name: Marktbetrieb und Händlerausweise in beiden Kassen
+        run: |
+          node tests/marktbetrieb.test.cjs
+          node tests/haendlerausweis.test.cjs
+          node tests/verkaufskurve-prognose.test.cjs
+      - name: Geldwege und ruhige Abschlussmeldungen
+        run: |
+          node tests/kassen-programmverbund.test.cjs
+          node tests/money-butler-finance-retry.test.cjs
+          node tests/money-butler-finance-spaeter.test.cjs
+          node tests/money-butler-complete-paths.test.cjs
+          node tests/tagesabschluss-system.test.cjs
+          node tests/kasse-pruefung-08-10.test.cjs
+          node tests/gutschein-teilzahlung.test.cjs
+          node tests/meldung-schliesst-selbst.test.cjs

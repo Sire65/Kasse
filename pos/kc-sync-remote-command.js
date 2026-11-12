@@ -64,14 +64,21 @@
     localStorage.setItem(SPERR_SCHLUESSEL, '1');
   }
 
+  let stammdatenNeustartOffen = false;
+  const kasseBeschaeftigt = () => {
+    try { return typeof state !== 'undefined' && (state.cart.length > 0 || state.saleInProgress || state.master.rushMode || !!state.discount?.haendlerausweis)
+      || !!document.querySelector('dialog[open],#kcPinLockOverlay,#kcStartkarteOverlay'); } catch (e) { return true; }
+  };
   async function pruefeAufBefehl() {
+    if (stammdatenNeustartOffen && !kasseBeschaeftigt()) { location.reload(); return; }
     try {
       const antwort = await fetch(URL_BEFEHL, { signal: AbortSignal.timeout(2000) });
       if (!antwort.ok) return;
       const daten = await antwort.json();
       if (daten.befehl === 'reload_stammdaten') {
-        console.log('Kasse wird aufgefrischt …');
-        location.reload();
+        // Ein normaler Stammdaten-Neustart darf keinen offenen Bon verwerfen.
+        if (kasseBeschaeftigt()) stammdatenNeustartOffen = true;
+        else location.reload();
       } else if (daten.befehl === 'sperren') {
         localStorage.setItem(SPERR_SCHLUESSEL, '1');
         zeigeSperrmeldung();

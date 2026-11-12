@@ -244,7 +244,9 @@
     if (optionen?.loeschen) loeschenOffen.set(storeName, true);   // geht beim Zusammenfassen nicht verloren
     const previous = writeQueues.get(storeName) || Promise.resolve();
     const next = previous.catch(() => {}).then(() => {
-      if (neuesterAuftrag.get(storeName) !== nummer) return undefined;
+      // Ein Verkaufsabschluss darf erst bestätigt werden, wenn genau sein Bon geschrieben ist.
+      // Hintergrund-Snapshots dürfen weiterhin zusammengefasst werden.
+      if (neuesterAuftrag.get(storeName) !== nummer && optionen?.verbindlich !== true) return undefined;
       const loeschen = !!loeschenOffen.get(storeName); loeschenOffen.delete(storeName);
       return performReplaceAll(storeName, rows, loeschen);
     });

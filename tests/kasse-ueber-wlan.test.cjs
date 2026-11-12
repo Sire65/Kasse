@@ -80,19 +80,12 @@ async function bisZurPinSperre(pg, sekunden=25){
      `${nachher.meldung} · gespeichert: ${nachher.gespeichert}`);
    p('und die PIN ist gespeichert', nachher.gespeichert===true);
 
-   // Neustart: dieselbe PIN muss aufschliessen
-   await pg.reload(); await pg.waitForTimeout(6000);
-   const wieder=await bisZurPinSperre(pg);
-   p('nach einem Neustart wird wieder gefragt', wieder===true);
-   if(wieder){
-     for(const z of ['1','2','3','4']) await pg.click(`[data-pin-taste="${z}"]`);
-     await pg.click('#kcPinSubmit'); await pg.waitForTimeout(1500);
-     p('dieselbe PIN schliesst ueber die WLAN-Adresse auf',
-       await pg.evaluate(()=>!document.getElementById('kcPinLockOverlay')),
-       await pg.evaluate(()=>document.getElementById('kcPinError')?.textContent||'(zu)'));
-   }
+   // Ein Neuladen desselben Tabs am selben Tag übernimmt die Freigabe.
+   await pg.reload(); await pg.waitForTimeout(6500);
+   await pg.evaluate(()=>{const g=document.getElementById('fullscreenGate');if(g)g.hidden=true;});
+   p('Neuladen über WLAN braucht keine zweite PIN',await pg.evaluate(()=>KCPinLock.isUnlocked()&&!document.getElementById('kcPinLockOverlay')));
    // Eine falsche PIN muss auch sichtbar abgelehnt werden
-   await pg.evaluate(()=>{const o=document.getElementById('kcPinLockOverlay');if(o)o.remove()});
+   await pg.evaluate(()=>{sessionStorage.removeItem('kc_pin_markttag_v1');const o=document.getElementById('kcPinLockOverlay');if(o)o.remove()});
    await pg.reload(); await pg.waitForTimeout(6000);
    if(await bisZurPinSperre(pg)){
      for(const z of ['9','9','9','9']) await pg.click(`[data-pin-taste="${z}"]`);
@@ -105,6 +98,7 @@ async function bisZurPinSperre(pg, sekunden=25){
  }
 
  // ---- Kassieren ueber die WLAN-Adresse: das ist die Freitagsfrage ----
+ await pg.evaluate(()=>{document.querySelectorAll('dialog[open]').forEach(d=>d.close());document.activeElement?.blur();});
  await pg.evaluate(()=>{["fullscreenGate","kcStartupSummary"].forEach(id=>{const e=document.getElementById(id);if(e)e.style.display="none"});
    document.querySelectorAll("[data-kc-sperrend]").forEach(e=>e.style.display="none")});
  await pg.evaluate(()=>{state.cart=[];renderCart()});

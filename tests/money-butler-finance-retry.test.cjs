@@ -60,7 +60,7 @@ function assert(v,msg){if(!v)throw new Error(msg);}
   };
 
   const context={
-    window,localStorage,fetch,
+    window,localStorage,fetch,localBusinessDate:()=>"2026-09-20",
     document:{getElementById:()=>null},
     console,
     setInterval:()=>0,

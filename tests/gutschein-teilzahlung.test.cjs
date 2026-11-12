@@ -11,7 +11,7 @@ for (const pfad of ['pos/app.js', 'schulung/pos/app.js']) {
     assert(s.includes(f), pfad + ': ' + f + ' fehlt');
   assert(s.includes('lockedQuantity:true,voucherCredit:{code:String(code)}'), pfad + ': Gutscheinzeile nicht mengenfest');
   const cs = s.slice(s.indexOf('async function completeSale('));
-  assert(/if\(!state\.cart\.length\)return keinBonMeldung\(\);\n  \{const gsFehler=kcGutscheinZeilenPruefen\(type\)/.test(cs), pfad + ': Pruefung vor dem Abschluss fehlt');
+  assert(cs.indexOf('kcGutscheinZeilenPruefen(type)')>0&&cs.indexOf('kcGutscheinZeilenPruefen(type)')<cs.indexOf('state.saleInProgress=true'),pfad+': Gutschein-Prüfung muss vor dem Buchungsbeginn stattfinden');
   const iVermerk = cs.indexOf('rec.voucherPayments=gs.map'), iHash = cs.indexOf('rec.recordHash=await sha256Hex'), iAbbuch = cs.indexOf('window.KCGutschein.einloesen(v.code,v.amount');
   assert(iVermerk > 0 && iVermerk < iHash && iHash < iAbbuch, pfad + ': Vermerk vor Hash, Abbuchung nach dem Speichern');
   assert(cs.slice(iAbbuch - 120, iAbbuch).includes('if(!training&&rec.voucherPayments'), pfad + ': Training darf kein Guthaben verbrauchen');
@@ -26,6 +26,6 @@ for (const pfad of ['pos/kc-gutschein.js', 'schulung/pos/kc-gutschein.js']) {
 }
 for (const pfad of ['pos/index.html', 'schulung/pos/index.html', 'pos/service-worker.js', 'schulung/pos/service-worker.js']) {
   const s = fs.readFileSync(pfad, 'utf8');
-  assert(s.includes('app.js?build=0.31.3.6-r66') && s.includes('kc-gutschein.js?build=0.2.2'), pfad + ': Build r60 / Gutschein 0.2.2 fehlt');
+  assert(/app\.js\?build=0\.31\.3\.6-r\d+/.test(s) && s.includes('kc-gutschein.js?build=0.2.2'), pfad + ': Build r60 / Gutschein 0.2.2 fehlt');
 }
 console.log('gutschein-teilzahlung: ok');

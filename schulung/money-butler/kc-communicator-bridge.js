@@ -28,7 +28,7 @@
       if(!payload.countId)throw new Error('Zählungs-ID fehlt.');
       if(!payload.registerId)throw new Error('Kasse der Zählung fehlt.');
       if(!payload.effectiveDate)throw new Error('Geschäftstag der Zählung fehlt.');
-      if(!Number.isFinite(Number(payload.total))||Number(payload.total)<=0)throw new Error('Ungültiger Zählbetrag.');
+      if(!Number.isFinite(Number(payload.total))||Number(payload.total)<0)throw new Error('Ungültiger Zählbetrag.');
       return {text,payload,kind:'count'};
     }
     throw new Error('Der erzeugte Datensatz ist weder Bargeldübergabe noch Zählung.');
@@ -38,7 +38,7 @@
     const typ=payload.format==='KC_CASH_COUNT'?(payload.countKind==='late'?'nachzaehlung':'zaehlung'):(payload.type||'transfer');
     return `${ziel}_${typ}_${payload.effectiveDate||'datum'}.kccash`;
   }
-  async function senden(){
+  async function ausfuehren(){
     const status=el('commSendStatus');
     try{
       const token=tokenLesen();
@@ -104,6 +104,13 @@
       status.textContent='Nicht gesendet: '+(err?.message||String(err));
       return null;
     }
+  }
+
+  let sendPromise=null;
+  function senden(){
+    if(sendPromise)return sendPromise;
+    const button=el('commSend');if(button)button.disabled=true;
+    sendPromise=ausfuehren().finally(()=>{sendPromise=null;if(button)button.disabled=false;});return sendPromise;
   }
 
   function init(){

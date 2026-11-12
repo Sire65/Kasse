@@ -24,18 +24,19 @@
       try {
         ergebnis = applyCashPayload(codeText, 'manager-direct');
       } catch (e) {
-        // Bereits bekannt (Duplikat) oder ungültig - trotzdem bestätigen, damit der Eintrag
-        // beim Companion nicht endlos erneut ausgeliefert wird.
-        await fetch(window.KCSyncConnection.buildUrl('/kc-sync-cash-transfer-ack'), {
-          method: 'POST', headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ transferId }),
-        }).catch(() => {});
+        // Nur eine bereits lokal verbuchte Übergabe quittieren. Falsches Datum, falsche
+        // Kasse oder beschädigte Pakete sind KEINE erfolgreiche Lieferung.
+        const key=payload.scope==='split'?`${payload.transferId}#${typeof state!=='undefined'?state.master.registerId:payload.registerId}`:payload.transferId;
+        const moves=JSON.parse(localStorage.getItem('kc_cash_movements')||'[]');
+        if(e.code==='KC_CASH_DUPLICATE'&&moves.some(m=>m.transferId===key))await fetch(window.KCSyncConnection.buildUrl('/kc-sync-cash-transfer-ack'), {
+          method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({transferId}),signal:kcZeitlimit(4000)
+        }).catch(()=>{});
         return;
       }
 
       await fetch(window.KCSyncConnection.buildUrl('/kc-sync-cash-transfer-ack'), {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ transferId }),
+        body: JSON.stringify({ transferId }),signal:kcZeitlimit(4000),
       }).catch(() => {});
 
       if (typeof setSystemHint === 'function') {
