@@ -2147,6 +2147,9 @@ document.getElementById('masterDataPushBtn')?.addEventListener('click', () => re
     statusFeld.textContent = `Gesendet - Stand Nr. ${daten.revision}: Warengruppen, Artikel, Konten und Darstellung. `
       + 'Jede Kasse übernimmt es beim nächsten Abgleich. Die am Stand gewählte Ansicht bleibt unangetastet.'
       + (haendlerStand?.ok ? ` Händlerausweise: ${haendlerStand.anzahl}.` : ' Händlerausweisliste nicht aktualisiert; bitte Anmeldung und Datenbankfreigabe prüfen.');
+    // KC-CLUB-PREISETIKETTEN (12.11.2026): dieselben Preise auch für die Preisetiketten der Club-App (nur wenn bei Supabase angemeldet)
+    const etiketten = await window.KCEtikettenStand?.veroeffentlichen?.();
+    if (etiketten?.ok) statusFeld.textContent += ` Preisetiketten (Club-App): ${etiketten.anzahl} Artikel veröffentlicht.`;
   } catch (e) {
     statusFeld.textContent = 'Konnte nicht gesendet werden - läuft der Manager-Companion? (Marktag-Start.js)';
   }
