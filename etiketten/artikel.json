@@ -1,0 +1,355 @@
+{
+ "stand": "2026-11-12T13:10:23.164Z",
+ "quelle": "Kasse pos/app.js (PRODUCTS)",
+ "artikel": [
+  {
+   "id": "eier",
+   "name": "Eierlikörpunsch",
+   "preis": 4.5,
+   "pfand": [
+    {
+     "name": "Glaspfand",
+     "betrag": 2
+    }
+   ],
+   "nummer": "01006",
+   "bild": "pos/assets/eierpunsch_version_3.png",
+   "farbe": "#173765",
+   "kategorie": "Getränke",
+   "sortierung": 1,
+   "allergene": "Eier, Schwefeldioxid / Sulfite, Milch",
+   "allergeneGeprueft": false,
+   "zusatz": null,
+   "alkohol": true,
+   "bildAusschnitt": [
+    0.1695,
+    0,
+    0.823,
+    0.823
+   ]
+  },
+  {
+   "id": "grot",
+   "name": "Glühwein rot",
+   "preis": 3.5,
+   "pfand": [
+    {
+     "name": "Glaspfand",
+     "betrag": 2
+    }
+   ],
+   "nummer": "01001",
+   "bild": "pos/assets/gluehwein_version_3.png",
+   "farbe": "#8b1e24",
+   "kategorie": "Getränke",
+   "sortierung": 2,
+   "allergene": "Schwefeldioxid / Sulfite",
+   "allergeneGeprueft": true,
+   "zusatz": null,
+   "alkohol": true,
+   "bildAusschnitt": [
+    0.1695,
+    0,
+    0.823,
+    0.823
+   ]
+  },
+  {
+   "id": "gweiss",
+   "name": "Glühwein weiß",
+   "preis": 3.5,
+   "pfand": [
+    {
+     "name": "Glaspfand",
+     "betrag": 2
+    }
+   ],
+   "nummer": "01002",
+   "bild": "pos/assets/gluehwein_weiss_version_3.png",
+   "farbe": "#a36a20",
+   "kategorie": "Getränke",
+   "sortierung": 3,
+   "allergene": "Schwefeldioxid / Sulfite",
+   "allergeneGeprueft": true,
+   "zusatz": null,
+   "alkohol": true,
+   "bildAusschnitt": [
+    0.1695,
+    0,
+    0.823,
+    0.823
+   ]
+  },
+  {
+   "id": "feuer",
+   "name": "Feuerzangenbowle",
+   "preis": 5,
+   "pfand": [
+    {
+     "name": "Glaspfand",
+     "betrag": 2
+    },
+    {
+     "name": "Feuerzangenpfand",
+     "betrag": 2
+    }
+   ],
+   "nummer": "01003",
+   "bild": "pos/assets/feuerzangenbowle_version_3.png",
+   "farbe": "#a43f18",
+   "kategorie": "Getränke",
+   "sortierung": 4,
+   "allergene": "Enthält Sulfite",
+   "allergeneGeprueft": false,
+   "zusatz": null,
+   "alkohol": true,
+   "bildAusschnitt": [
+    0.1695,
+    0,
+    0.823,
+    0.823
+   ]
+  },
+  {
+   "id": "roterfeger",
+   "name": "Roter Feger",
+   "preis": 2.5,
+   "pfand": [
+    {
+     "name": "Glaspfand",
+     "betrag": 2
+    }
+   ],
+   "nummer": "01005",
+   "bild": "pos/assets/roter_feger_version_3.png",
+   "farbe": "#b3202a",
+   "kategorie": "Getränke",
+   "sortierung": 5,
+   "allergene": "Schwefeldioxid / Sulfite",
+   "allergeneGeprueft": true,
+   "zusatz": null,
+   "alkohol": false,
+   "bildAusschnitt": [
+    0.1695,
+    0,
+    0.823,
+    0.823
+   ]
+  },
+  {
+   "id": "apfel",
+   "name": "Apfelpunsch",
+   "preis": 2.5,
+   "pfand": [
+    {
+     "name": "Glaspfand",
+     "betrag": 2
+    }
+   ],
+   "nummer": "01004",
+   "bild": "pos/assets/apfelpunsch_version_3.png",
+   "farbe": "#173765",
+   "kategorie": "Getränke",
+   "sortierung": 6,
+   "allergene": "Schwefeldioxid / Sulfite",
+   "allergeneGeprueft": false,
+   "zusatz": null,
+   "alkohol": false,
+   "bildAusschnitt": [
+    0.1695,
+    0,
+    0.823,
+    0.823
+   ]
+  },
+  {
+   "id": "schussrum",
+   "name": "Schuss Rum",
+   "preis": 1,
+   "pfand": [],
+   "nummer": "01007",
+   "bild": "pos/assets/rum_version_3.png",
+   "farbe": "#173765",
+   "kategorie": "Getränke",
+   "sortierung": 9000,
+   "allergene": "",
+   "allergeneGeprueft": false,
+   "zusatz": null,
+   "alkohol": false,
+   "bildAusschnitt": [
+    0.1695,
+    0,
+    0.823,
+    0.823
+   ]
+  },
+  {
+   "id": "schussamaretto",
+   "name": "Schuss Amaretto",
+   "preis": 1,
+   "pfand": [],
+   "nummer": "01008",
+   "bild": "pos/assets/amaretto_version_3.png",
+   "farbe": "#173765",
+   "kategorie": "Getränke",
+   "sortierung": 9001,
+   "allergene": "",
+   "allergeneGeprueft": false,
+   "zusatz": null,
+   "alkohol": false,
+   "bildAusschnitt": [
+    0.1695,
+    0,
+    0.823,
+    0.823
+   ]
+  },
+  {
+   "id": "gruenkohlmett",
+   "name": "Grünkohl + Mettwurst",
+   "preis": 7,
+   "pfand": [],
+   "nummer": "02004",
+   "bild": "pos/assets/gruenkohl_wurst_version_3.png",
+   "farbe": "#365d36",
+   "kategorie": "Speisen",
+   "sortierung": 1,
+   "allergene": "Kann Senf, Sellerie und Spuren von Gluten enthalten",
+   "allergeneGeprueft": false,
+   "zusatz": null,
+   "alkohol": false,
+   "bildAusschnitt": [
+    0.1695,
+    0,
+    0.823,
+    0.823
+   ]
+  },
+  {
+   "id": "gruenkohl",
+   "name": "Grünkohl",
+   "preis": 5.5,
+   "pfand": [],
+   "nummer": "02003",
+   "bild": "pos/assets/gruenkohl_version_3.png",
+   "farbe": "#315e35",
+   "kategorie": "Speisen",
+   "sortierung": 2,
+   "allergene": "Kann Senf und Sellerie enthalten",
+   "allergeneGeprueft": false,
+   "zusatz": null,
+   "alkohol": false,
+   "bildAusschnitt": [
+    0.1695,
+    0,
+    0.823,
+    0.823
+   ]
+  },
+  {
+   "id": "sauerkrautmett",
+   "name": "Sauerkrauteintopf + Mettwurst",
+   "preis": 7,
+   "pfand": [],
+   "nummer": "02002",
+   "bild": "pos/assets/sauerkraut_wurst_version_3.png",
+   "farbe": "#785332",
+   "kategorie": "Speisen",
+   "sortierung": 3,
+   "allergene": "Kann Sellerie, Senf und Spuren von Gluten enthalten",
+   "allergeneGeprueft": false,
+   "zusatz": null,
+   "alkohol": false,
+   "bildAusschnitt": [
+    0.1695,
+    0,
+    0.823,
+    0.823
+   ]
+  },
+  {
+   "id": "sauerkraut",
+   "name": "Sauerkrauteintopf",
+   "preis": 5.5,
+   "pfand": [],
+   "nummer": "02001",
+   "bild": "pos/assets/sauerkraut_version_3.png",
+   "farbe": "#77643d",
+   "kategorie": "Speisen",
+   "sortierung": 4,
+   "allergene": "Kann Sellerie und Senf enthalten",
+   "allergeneGeprueft": false,
+   "zusatz": null,
+   "alkohol": false,
+   "bildAusschnitt": [
+    0.1695,
+    0,
+    0.823,
+    0.823
+   ]
+  },
+  {
+   "id": "hering",
+   "name": "Kartoffel mit Hering",
+   "preis": 4.5,
+   "pfand": [],
+   "nummer": "02006",
+   "bild": "pos/assets/hering_kartoffeln_version_3.png",
+   "farbe": "#173765",
+   "kategorie": "Speisen",
+   "sortierung": 5,
+   "allergene": "",
+   "allergeneGeprueft": false,
+   "zusatz": null,
+   "alkohol": false,
+   "bildAusschnitt": [
+    0.1695,
+    0,
+    0.823,
+    0.823
+   ]
+  },
+  {
+   "id": "knirpsecreme",
+   "name": "Kartoffel mit Kartoffelcreme",
+   "preis": 3.5,
+   "pfand": [],
+   "nummer": "02007",
+   "bild": "pos/assets/creme_kartoffeln_version_3.png",
+   "farbe": "#a66e24",
+   "kategorie": "Speisen",
+   "sortierung": 6,
+   "allergene": "Creme kann Milch und Milchprodukte enthalten",
+   "allergeneGeprueft": false,
+   "zusatz": null,
+   "alkohol": false,
+   "bildAusschnitt": [
+    0.1695,
+    0,
+    0.823,
+    0.823
+   ]
+  },
+  {
+   "id": "mettwurst",
+   "name": "Mettwurst",
+   "preis": 1.5,
+   "pfand": [],
+   "nummer": "02005",
+   "bild": "pos/assets/mettwurst_version_3.png",
+   "farbe": "#173765",
+   "kategorie": "Speisen",
+   "sortierung": 7,
+   "allergene": "",
+   "allergeneGeprueft": false,
+   "zusatz": null,
+   "alkohol": false,
+   "bildAusschnitt": [
+    0.1695,
+    0,
+    0.823,
+    0.823
+   ]
+  }
+ ]
+}

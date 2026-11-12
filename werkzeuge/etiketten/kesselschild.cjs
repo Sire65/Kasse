@@ -13,7 +13,7 @@
 // --probe: ein Etikett in Originalgroesse auf A4 mit Schnittmarken und 5-cm-Messbalken (zum Pruefen der Druckgroesse).
 // ohne --probe: Bogen A4 mit 2 x 3 Etiketten (8 x 8 cm passt nur zweimal nebeneinander) und Schnittmarken.
 const fs = require('fs'), path = require('path'), http = require('http'); const pw = require('playwright');
-const exaktA4 = require('../uebungsliste/a4.cjs'); // 29.10.2026: Chromium-A4 ist etwas zu gross -> exakt A4 (sonst ggf. kein Duplex/Fehlermeldung am Drucker)
+const exaktA4 = require('../uebungsliste/a4.cjs'); const {artikelstammLesen} = require('./artikelstamm.cjs'); // 29.10.2026: Chromium-A4 ist etwas zu gross -> exakt A4 (sonst ggf. kein Duplex/Fehlermeldung am Drucker)
 const W = path.join(__dirname, '..', '..');
 const ZIEL = path.join(__dirname, 'ausgabe'); fs.mkdirSync(ZIEL, {recursive: true});
 const args = process.argv.slice(2); const PROBE = args.includes('--probe');
@@ -34,23 +34,8 @@ const b64 = (f) => `data:${f.endsWith('.png') ? 'image/png' : f.endsWith('.webp'
   await new Promise((r) => s.listen(0, r)); const PORT = s.address().port;
   const b = await pw.chromium.launch();
   try {
-    // 1. Artikelstamm aus der Kasse lesen (wie er am Stand gilt)
-    const ctx = await b.newContext({serviceWorkers: 'block'}); const p = await ctx.newPage();
-    await p.addInitScript(() => localStorage.setItem('kc_master_v040', JSON.stringify({registerId: 'ETIKETT', pinLockEnabled: false})));
-    await p.goto(`http://127.0.0.1:${PORT}/pos/index.html`); await p.waitForFunction(() => typeof PRODUCTS !== 'undefined' && PRODUCTS.length && window.KCAllergene, null, {timeout: 20000});
-    const artikel = await p.evaluate((ids) => PRODUCTS.filter((x) => x.active !== false && Number(x.price) > 0 && /^0[12]/.test(String(x.barcode || '')) && (!ids.length || ids.includes(x.id)))
-      .map((x) => {
-        const pfand = (x.depositComponents || []).filter((k) => Number(k?.price) > 0).map((k) => ({name: k.name || 'Pfand', betrag: Number(k.price)}));
-        const info = x.info || {};
-        const zusatz = String(info.additives || '').trim();
-        return {id: x.id, name: x.name, preis: Number(x.price), pfand, nummer: String(x.barcode), bild: x.image, farbe: x.color || '#173765',
-          allergene: window.KCAllergene.alsText(info.allergens) || String(info.legacyAllergens || '').trim(),
-          allergeneGeprueft: info.status === 'approved',
-          zusatz: /^(keine angaben?|unbekannt|-)?$/i.test(zusatz) ? null : zusatz,
-          // 29.10.2026: „Alkoholfrei (0 % vol)“ / „Alkoholfreier …“ ist KEIN Alkohol (vorher stand beim Apfelpunsch „Enthält Alkohol“)
-          alkohol: /alkohol(?!fre)/i.test(String(info.important || '') + ' ' + String(info.shortDescription || ''))};
-      }), IDS);
-    await ctx.close();
+    // 1. Artikelstamm aus der Kasse lesen (wie er am Stand gilt) – gemeinsamer Kern mit artikel-export.cjs (Club-App-Preisetiketten)
+    const artikel = await artikelstammLesen(b, PORT, IDS);
     if (IDS.length) artikel.sort((x, y) => IDS.indexOf(x.id) - IDS.indexOf(y.id)); // 29.10.2026: Reihenfolge wie angegeben
     if (!artikel.length) throw new Error('Keine passenden Artikel gefunden: ' + IDS.join(', '));
     const qrQuelle = fs.readFileSync(path.join(W, 'pc-manager', 'vendor', 'qrcode-generator.js'), 'utf8');
