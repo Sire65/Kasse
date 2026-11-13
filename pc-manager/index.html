@@ -1162,6 +1162,8 @@
 <div><button id="authConfirm" value="ok" class="primary">Entsperren</button></div>
 </form></dialog>
 
+<!-- KS-04: muss als ERSTES Skript laden - verlängert den Kanal zum Manager-Dienst zu Hause über Supabase -->
+<script src="kc-fernmodus.js?build=1.0.0"></script>
 <script src="vendor/qrcode-generator.js"></script>
 <!-- Ein QR-Zeichner fuer die ganze Suite (siehe shared/kc-qr.js). -->
 <script src="../shared/kc-qr.js?build=0.1.0"></script>
@@ -1219,6 +1221,7 @@
 <script src="kc-money-butler-cloud-intake.js?build=1.1.1"></script>
 <script src="kc-live-monitor.js"></script>
 <script src="kc-verbindungsdiagnose.js"></script>
+<script src="kc-stand-bruecke-manager.js?build=1.0.0"></script>
 <script src="kc-fernverkehr-dashboard.js"></script>
 <script src="kc-admin-center.js"></script>
 <script src="kc-manager-supabase-status.js?v=2026-10-14"></script>

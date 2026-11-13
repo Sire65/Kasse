@@ -1,7 +1,12 @@
 KC MARKTKASSE – START HIER
 Stand: 13.11.2026
 
-NORMALER START
+WELCHE STARTDATEI?
+- Am Stand (Mini-PC mit Tablets und Fernseher): KC_Manager_Start.cmd
+- Zu Hause (nur mitlesen/steuern ueber Supabase):  KC_Zuhause_Start.cmd
+  Ausfuehrlich: KONZEPT_STAND_ZUHAUSE.md
+
+NORMALER START (Stand)
 1. ZIP vollständig entpacken.
 2. KC_Manager_Start.cmd doppelklicken.
 3. Beim allerersten Start Internetverbindung zulassen.

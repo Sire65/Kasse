@@ -9,6 +9,7 @@ const { KiccRuntimeTelemetry } = require('./kicc-runtime-telemetry');
 const { TabletKassenStart, leseKassenKonfig, standardDatenOrdner, zettelWebserverPort } = require('./kassen-start');
 const { meldung, erklaere, druckeKasten, SCHRITTE_FENSTER_NEU } = require('./fehlerhilfe');
 const { sicherePortFrei, belegtFehler, programmName } = require('./port-freigabe');
+const { StandBruecke } = require('./stand-bruecke');
 
 // Start abbrechen - immer mit Kasten (Was / Ursache / Loesung), nie mit rohem Stacktrace.
 function startAbbrechen(m) {
@@ -26,6 +27,7 @@ function parseArgs(argv) {
     else if (argv[i] === '--frontend-root') out.frontendRoot = argv[++i];
     else if (argv[i] === '--kein-webserver') out.keinWebserver = true;
     else if (argv[i] === '--open-manager') out.openManager = true;
+    else if (argv[i] === '--zuhause') out.zuhause = true;
   }
   return out;
 }
@@ -96,8 +98,41 @@ function browserOeffnen(url) {
   }
 }
 
+// KS-04: ZU HAUSE nur den PC-Manager bereitstellen - kein Manager-Dienst, keine Kassen. Der
+// PC-Manager liest dann den Stand über Supabase (Fernmodus, pc-manager/kc-fernmodus.js).
+async function zuhauseStarten(args, frontendRoot) {
+  console.log('==============================================================');
+  console.log(' KC MARKTKASSE - PC-MANAGER ZU HAUSE (liest den Stand über Supabase)');
+  console.log('==============================================================');
+  const wunschPort = args.webserverPort || 8090;
+  const frei = await sicherePortFrei(wunschPort, { log: console.log, wofuer: 'Webserver' });
+  const port = frei.frei ? wunschPort : await findeFreienPort(wunschPort);
+  const web = spawn(process.execPath, ['serve-frontend.js', '--port', String(port), '--root', frontendRoot],
+    { cwd: __dirname, stdio: ['ignore', 'pipe', 'pipe'], env: { ...process.env, KC_MODUS: 'zuhause' } });
+  web.stdout.on('data', (d) => process.stdout.write(`[Webserver] ${d}`));
+  web.stderr.on('data', (d) => process.stderr.write(`[Webserver] ${d}`));
+  const url = `http://127.0.0.1:${port}/pc-manager/index.html`;
+  try { await warteAufHttp(url); }
+  catch (e) {
+    startAbbrechen(meldung('webserver', 'PC-Manager-Webseite startet nicht', `Der Webserver auf Port ${port} antwortet nicht.`,
+      [...SCHRITTE_FENSTER_NEU.slice(0, 3), 'Bleibt der Fehler: Foto von diesem Fenster an den Betreuer schicken.'], e.message));
+  }
+  console.log('');
+  console.log(`PC-Manager: ${url}`);
+  console.log('Fernmodus: Live-Monitor, Kassen, Ausverkauft, Abschlüsse … kommen vom Stand über Supabase.');
+  console.log('Unten rechts im PC-Manager steht, wie aktuell die Daten sind.');
+  console.log('[Zuhause-Start] BEREIT. Dieses Fenster offen lassen, solange der PC-Manager benutzt wird.');
+  if (args.openManager) browserOeffnen(url);
+  const ende = () => { try { web.kill('SIGTERM'); } catch (e) { /* */ } process.exit(0); };
+  process.on('SIGINT', ende); process.on('SIGTERM', ende);
+}
+
 async function main() {
   const args = parseArgs(process.argv.slice(2));
+  if (args.zuhause) {
+    const paketRoot0 = path.resolve(__dirname, '..', '..');
+    return zuhauseStarten(args, path.resolve(args.frontendRoot || process.env.KC_FRONTEND_ROOT || paketRoot0));
+  }
   const paketRoot = path.resolve(__dirname, '..', '..');
   const frontendRoot = path.resolve(args.frontendRoot || process.env.KC_FRONTEND_ROOT || paketRoot);
   const dbPath = args.dbPath || process.env.KC_SYNC_MANAGER_DB_PATH || path.join(__dirname, 'kc-sync-manager.sqlite');
@@ -153,6 +188,8 @@ async function main() {
 
   let webserverProzess = null;
   let kassenStart = null;
+  // Stand-Brücke (KS-04): Buchungen/Übersichten nach Hause (Supabase), Aufträge von zu Hause an die Kassen.
+  const standBruecke = new StandBruecke({ manager: mgr, datenOrdner, version: process.env.KC_PC_MANAGER_VERSION || null });
   const startWarnungen = []; // Meldungen {titel, ursache, loesung[]}
   if (mgr.liveMonitorFehler) {
     const m = erklaere(livePort.frei ? new Error(mgr.liveMonitorFehler) : belegtFehler(47392, livePort), { was: 'Live-Kanal starten', port: 47392 });
@@ -182,10 +219,13 @@ async function main() {
       if (!nachricht || nachricht.art !== 'kassen-start') return;
       const antworte = (inhalt) => { try { webserverProzess.send({ art: 'kassen-start-antwort', anfrageId: nachricht.anfrageId, ...inhalt }); } catch (e) { /* Webserver weg */ } };
       try {
-        if (!kassenStart) return antworte({ status: 503, daten: { fehler: 'kassen_start_noch_nicht_bereit' } });
+        if (!kassenStart && !/^stand-/.test(nachricht.aktion)) return antworte({ status: 503, daten: { fehler: 'kassen_start_noch_nicht_bereit' } });
         if (nachricht.aktion === 'status') return antworte({ status: 200, daten: kassenStart.status() });
         if (nachricht.aktion === 'gedruckt') return antworte({ status: 200, daten: kassenStart.zettelGedruckt(nachricht.ids) });
         if (nachricht.aktion === 'neuer-schluessel') return antworte({ status: 200, daten: await kassenStart.neuerSchluessel(nachricht.id) });
+        if (nachricht.aktion === 'stand-status') return antworte({ status: 200, daten: standBruecke.status() });
+        if (nachricht.aktion === 'stand-einrichten') return antworte({ status: 200, daten: standBruecke.einrichten(nachricht.daten || {}) });
+        if (nachricht.aktion === 'stand-abmelden') return antworte({ status: 200, daten: standBruecke.abmelden() });
         return antworte({ status: 404, daten: { fehler: 'aktion_unbekannt' } });
       } catch (e) {
         return antworte({ status: 400, daten: { fehler: String(e && e.message || e) } });
@@ -240,6 +280,11 @@ async function main() {
       }
       console.log(`QR-Zettel drucken: http://127.0.0.1:${webserverPort}/pc-manager/kassen-zettel.html`);
     }
+    standBruecke.start();
+    const sb = standBruecke.status();
+    console.log(sb.eingerichtet
+      ? `Verbindung nach Hause (Supabase): eingerichtet für Stand „${sb.standName}“ – Buchungen gehen laufend nach Hause.`
+      : 'Verbindung nach Hause (Supabase): nicht eingerichtet (nur nötig, wenn der PC-Manager zu Hause mitlesen soll).');
     console.log('--------------------------------------------------------------');
     if (startWarnungen.length) {
       druckeKasten(console.log, startWarnungen, 'ACHTUNG');
@@ -266,6 +311,7 @@ async function main() {
     telemetry.update({ status: 'OFFLINE', message: `Beendet: ${signal}` });
     await telemetry.send().catch(()=>{});
     telemetry.stop();
+    try { standBruecke.stop(); } catch {}
     try { await kassenStart?.stop(); } catch {}
     try { mgr.server?.close(); } catch {}
     try { webserverProzess?.kill('SIGTERM'); } catch {}

@@ -51,7 +51,7 @@ echo  gemeinsam gestartet. Dieses Fenster OFFEN lassen.
 echo ==============================================================
 echo.
 
-"%KC_NODE%" run-manager-service.js --open-manager
+"%KC_NODE%" run-manager-service.js --open-manager %*
 set "KC_RC=%ERRORLEVEL%"
 
 echo.

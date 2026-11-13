@@ -144,6 +144,14 @@ nötig.
 
 ---
 
+## E2. Zu Hause mitlesen und steuern
+
+Der PC zu Hause muss **nicht** laufen. Wer zu Hause nachsehen will: `KC_Zuhause_Start.cmd`
+starten, im PC-Manager bei Supabase anmelden – Live-Monitor, Kassen, Ausverkauft, Abschlüsse
+kommen vom Stand; „an alle Kassen senden“ und „Ausverkauft setzen“ wirken am Stand.
+Einmalig vorher am Mini-PC: „Verbindung prüfen“ → „Diesen PC als Stand anmelden“.
+Alles Weitere: `KONZEPT_STAND_ZUHAUSE.md`.
+
 ## F. Technik (für Betreuer)
 
 * **Kassenliste:** `markt-kasse-suite/backend-source/markttag-kassen.json` – drei Kassen. Eine
