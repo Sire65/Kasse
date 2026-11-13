@@ -228,9 +228,49 @@ class TabletKassenStart {
     }
     this.aktiv = true;
     this._pruefeZettel();
+    this._meldeGesperrte();
     this._speichereZustand();
     this._schreibeVerbindungsdatei();
+    this._sperrWaechter = setInterval(() => { this._pruefeSperren().catch((e) => this.fehlerLog(`[Kassen-Start] Sperr-Prüfung: ${e.message}`)); }, 5000);
+    if (this._sperrWaechter.unref) this._sperrWaechter.unref();
     return this.status();
+  }
+
+  _meldeGesperrte() {
+    for (const k of this.kassen) {
+      if (!k.gesperrtGemeldet) continue;
+      const text = `${k.id} wurde als VERLOREN gesperrt: der alte QR-Zettel gilt nicht mehr. Im PC-Manager den neuen Zettel für ${k.id} drucken und das Ersatz-Tablet damit koppeln.`;
+      if (!this.warnungen.includes(text)) this.warnungen.push(text);
+      this.fehlerLog(`[Kassen-Start] ${text}`);
+    }
+  }
+
+  // Waehrend des Betriebs: wurde eine Kasse im Admin-Center als verloren gemeldet, wird ihr
+  // Tablet-Schluessel SOFORT ersetzt (nicht erst beim naechsten Start) und die Kasse neu gekoppelt.
+  async _pruefeSperren() {
+    if (this._stoppen || this._sperrPruefungLaeuft) return;
+    this._sperrPruefungLaeuft = true;
+    try {
+      for (const k of this.kassen) {
+        if (!k.credentialId || k._absichtlich) continue;
+        const zeile = this.manager.db.prepare('SELECT revoked FROM credentials WHERE credential_id = ?').get(k.credentialId);
+        if (!zeile || !zeile.revoked) continue;
+        k._absichtlich = true;
+        // Der Kassen-Dienst loescht nach dem Widerruf evtl. selbst seine Kopplung - deshalb hier
+        // ausdruecklich vermerken, dass der Tablet-Schluessel zu ersetzen ist.
+        k._schluesselErsetzen = true;
+        this.log(`[Kassen-Start] ${k.id}: Kopplung wurde widerrufen (Gerät verloren) – neuer Tablet-Schlüssel wird vergeben.`);
+        try {
+          await this._stoppeDienst(k);
+          k.kopplung = await this._kopplungSicherstellen(k);
+          await this._starteDienst(k);
+        } finally { k._absichtlich = false; }
+        this._meldeGesperrte();
+        this._pruefeZettel();
+        this._speichereZustand();
+        this._schreibeVerbindungsdatei();
+      }
+    } finally { this._sperrPruefungLaeuft = false; }
   }
 
   async _kopplungSicherstellen(k) {
@@ -258,8 +298,17 @@ class TabletKassenStart {
           try { m._writeAuditLog('revoke', dev.deviceInstanceId, 'kassen-start', 'ersetzt_durch_neue_kopplung'); } catch (e) { /* Protokoll ist Zusatz */ }
         }
       }
+      // Im Admin-Center als VERLOREN gesperrt (Kopplung widerrufen): dann darf auch der
+      // Tablet-Schluessel nicht weiter gelten - sonst kassierte das verlorene Tablet weiter.
+      if (grund === 'Kopplung war zurückgezogen' || k._schluesselErsetzen) {
+        dev.db.prepare('UPDATE device_identity SET kasse_access_token = NULL WHERE id = 1').run();
+        k.zettel = null;
+        k._schluesselErsetzen = false;
+        k.gesperrtGemeldet = true;
+      }
       k.token = dev.kasseAccessToken; // einmal erzeugt, danach dauerhaft gleich
       k.geraet = dev.deviceInstanceId;
+      k.credentialId = String(dev.pinned.credentialId).split('.')[0];
       return { neu: !!grund, grund: grund || null };
     } finally {
       try { dev.stopLocalStatusServer(); } catch (e) { /* nie gestartet */ }
@@ -357,6 +406,10 @@ class TabletKassenStart {
       const url = this.qrAdresse(k);
       if (!url) continue;
       k.zettel = { hash: sha256(url), adresse: this.lanAdresse, webserverPort: this.webserverPort, gedrucktAm: jetzt };
+      if (k.gesperrtGemeldet) {
+        k.gesperrtGemeldet = false;
+        this.warnungen = this.warnungen.filter((w) => !w.startsWith(`${k.id} wurde als VERLOREN gesperrt`));
+      }
     }
     this.warnungen = this.warnungen.filter((w) => !w.startsWith('QR-Zettel passen nicht mehr'));
     this._pruefeZettel();
@@ -429,6 +482,7 @@ class TabletKassenStart {
 
   async stop() {
     this._stoppen = true;
+    if (this._sperrWaechter) clearInterval(this._sperrWaechter);
     await Promise.all(this.kassen.map((k) => this._stoppeDienst(k)));
   }
 }
