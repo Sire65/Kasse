@@ -90,6 +90,7 @@ Am Ende des Tages: schwarzes Fenster schließen (oder PC herunterfahren).
 | Warnung „PC-ADRESSE HAT SICH GEÄNDERT“ | Router-Einstellung aus A.1 fehlt. Entweder im Router die alte Adresse wieder zuweisen **oder** Zettel neu drucken und alle Tablets neu scannen. |
 | Warnung „Port 8090 ist belegt“ | Ein altes Fenster läuft noch. Alle schwarzen Fenster schließen (ggf. Task-Manager → „node.exe“ beenden), **ein** Fenster neu starten. |
 | Ein Tablet ist kaputt | Anderes Tablet nehmen, Zettel **KASSE-03** scannen, weiter kassieren. |
+| Tablet verloren oder gestohlen | PC-Manager → Admin-Center → **„Gerät verloren“**. Innerhalb weniger Sekunden bekommt diese Kasse einen neuen Schlüssel – das verlorene Tablet ist ausgesperrt. Neuen Zettel drucken, Ersatz-Tablet damit koppeln. Die anderen Kassen merken davon nichts. |
 | Zettel verloren oder fremd fotografiert | PC-Manager → QR-Zettel → bei der Kasse **„Schlüssel erneuern…“**. Der alte Zettel ist sofort ungültig; neuen drucken, nur dieses eine Tablet neu scannen. |
 | Beide Tablets zeigen dieselbe Kassennummer | Beide haben denselben Zettel gescannt. Eins mit dem richtigen Zettel neu scannen. |
 
@@ -128,6 +129,6 @@ nötig.
 * **Sicherheit:** `pc-manager/kassen-verbindungen.json` (enthält die Schlüssel) und die
   Zettel-Aktionen sind nur vom PC selbst erreichbar, nicht über das WLAN; die Datei liegt nicht
   mehr im Repository.
-* **Tests:** `tests/kassen-start-dauerhaft.test.cjs` (Ende-zu-Ende: drei Starts mit Tablet,
+* **Tests:** `tests/kassen-start-datenwege.test.cjs` (Stammdaten, Dienstplan, Geld-Übergabe, Ausverkauft, Verkauf/Live-Monitor, „Gerät verloren“ über den echten Start mit drei Tablets), `tests/kassen-start-dauerhaft.test.cjs` (Ende-zu-Ende: drei Starts mit Tablet,
   QR vom Ausdruck zurückgelesen, Ablauf der Kopplung, neuer Manager, Absturz, Schlüssel
   erneuern, Port belegt, Adresse geändert) und `tests/kassen-start-einheit.test.cjs`.
