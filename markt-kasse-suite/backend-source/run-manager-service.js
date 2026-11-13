@@ -6,6 +6,7 @@ const http = require('http');
 const { spawn } = require('child_process');
 const { ManagerCompanion } = require('./manager-companion');
 const { KiccRuntimeTelemetry } = require('./kicc-runtime-telemetry');
+const { TabletKassenStart, leseKassenKonfig, standardDatenOrdner, zettelWebserverPort } = require('./kassen-start');
 
 function parseArgs(argv) {
   const out = {};
@@ -27,6 +28,17 @@ function portIstFrei(port) {
     test.once('listening', () => { test.close(() => resolve(true)); });
     test.listen(port, '0.0.0.0');
   });
+}
+
+// Tablet-Kassen: der Webserver-Port steht in jedem gedruckten QR-Zettel. Ist er kurz belegt
+// (z. B. ein gerade schliessendes altes Fenster), wird bis zu 15 s auf ihn gewartet, bevor -
+// mit unuebersehbarer Warnung - auf einen anderen Port ausgewichen wird.
+async function warteAufPort(port, sekunden = 15) {
+  for (let i = 0; i < sekunden; i++) {
+    if (await portIstFrei(port)) return true;
+    await new Promise((r) => setTimeout(r, 1000));
+  }
+  return false;
 }
 
 async function findeFreienPort(wunschPort) {
@@ -117,15 +129,46 @@ async function main() {
     process.exit(1);
   }
 
+  // Tablet-Kassen (KS-01): Kassenliste vorab lesen - ein Fehler darin darf den Manager nicht
+  // aufhalten, wird aber unuebersehbar gemeldet.
+  const datenOrdner = standardDatenOrdner();
+  let kassenKonfigFehler = null;
+  let tabletKassenVorhanden = false;
+  try { tabletKassenVorhanden = leseKassenKonfig(path.join(__dirname, 'markttag-kassen.json')).kassen.length > 0; }
+  catch (e) { kassenKonfigFehler = e.message; }
+
   let webserverProzess = null;
+  let kassenStart = null;
+  const startWarnungen = [];
   if (!args.keinWebserver) {
-    const wunschPort = args.webserverPort || Number(process.env.KC_SYNC_WEBSERVER_PORT) || 8090;
-    const webserverPort = await findeFreienPort(wunschPort);
+    const wunschPort = args.webserverPort || Number(process.env.KC_SYNC_WEBSERVER_PORT) || zettelWebserverPort(datenOrdner) || 8090;
+    let webserverPort;
+    if (tabletKassenVorhanden && await warteAufPort(wunschPort)) webserverPort = wunschPort;
+    else webserverPort = await findeFreienPort(wunschPort);
+    if (tabletKassenVorhanden && webserverPort !== wunschPort) {
+      startWarnungen.push(`Port ${wunschPort} ist belegt - der Webserver laeuft auf ${webserverPort}. Die QR-Zettel der Tablets zeigen auf ${wunschPort} und funktionieren so NICHT. `
+        + 'Alle schwarzen Fenster schliessen (ggf. im Task-Manager alle "node.exe" beenden) und EIN Fenster neu starten.');
+    }
     webserverProzess = spawn(
       process.execPath,
       ['serve-frontend.js', '--port', String(webserverPort), '--root', frontendRoot],
-      { cwd: __dirname, stdio: ['ignore', 'pipe', 'pipe'] }
+      { cwd: __dirname, stdio: ['ignore', 'pipe', 'pipe', 'ipc'] }
     );
+    // Aktionen aus dem PC-Manager (QR-Zettel gedruckt, neuer Schluessel) kommen ueber den
+    // Webserver (nur vom PC selbst) per IPC hier an.
+    webserverProzess.on('message', async (nachricht) => {
+      if (!nachricht || nachricht.art !== 'kassen-start') return;
+      const antworte = (inhalt) => { try { webserverProzess.send({ art: 'kassen-start-antwort', anfrageId: nachricht.anfrageId, ...inhalt }); } catch (e) { /* Webserver weg */ } };
+      try {
+        if (!kassenStart) return antworte({ status: 503, daten: { fehler: 'kassen_start_noch_nicht_bereit' } });
+        if (nachricht.aktion === 'status') return antworte({ status: 200, daten: kassenStart.status() });
+        if (nachricht.aktion === 'gedruckt') return antworte({ status: 200, daten: kassenStart.zettelGedruckt(nachricht.ids) });
+        if (nachricht.aktion === 'neuer-schluessel') return antworte({ status: 200, daten: await kassenStart.neuerSchluessel(nachricht.id) });
+        return antworte({ status: 404, daten: { fehler: 'aktion_unbekannt' } });
+      } catch (e) {
+        return antworte({ status: 400, daten: { fehler: String(e && e.message || e) } });
+      }
+    });
     webserverProzess.stdout.on('data', (d) => process.stdout.write(`[Webserver] ${d}`));
     webserverProzess.stderr.on('data', (d) => {
       telemetry.update({ status: 'DEGRADED', errorCount: Number(telemetry.state.errorCount || 0) + 1, message: 'PC-Manager-Webserver meldet Fehler' });
@@ -139,12 +182,47 @@ async function main() {
     await warteAufHttp(managerUrl);
     telemetry.update({ status: 'ONLINE', message: `Manager + PC-Manager-Webserver aktiv · ${webserverPort}` });
 
+    // Tablet-Kassen starten: feste Ports, dauerhafte Schluessel, Kopplung nur wenn noetig.
+    let kassenStatus = null;
+    if (kassenKonfigFehler) {
+      startWarnungen.push(`Tablet-Kassen NICHT gestartet: ${kassenKonfigFehler}`);
+    } else {
+      try {
+        const ks = new TabletKassenStart({ manager: mgr, backendDir: __dirname, frontendRoot, datenOrdner });
+        kassenStatus = await ks.start({ webserverPort });
+        kassenStart = ks;
+        startWarnungen.push(...kassenStatus.warnungen);
+      } catch (e) {
+        startWarnungen.push(`Tablet-Kassen NICHT gestartet: ${e.message}`);
+        telemetry.update({ status: 'DEGRADED', errorCount: Number(telemetry.state.errorCount || 0) + 1, message: `Tablet-Kassen: ${e.message}` });
+      }
+    }
+
     console.log('');
     console.log('-------------------- START BEREIT ----------------------------');
     console.log(`PC-Manager:   ${managerUrl}`);
     console.log(`Kasse lokal:  http://127.0.0.1:${webserverPort}/pos/index.html`);
     console.log(`Money Butler: http://127.0.0.1:${webserverPort}/money-butler/index.html`);
     console.log('--------------------------------------------------------------');
+    if (kassenStatus && kassenStatus.aktiv) {
+      console.log(`Tablet-Kassen (PC-Adresse ${kassenStatus.lanAdresse || 'UNBEKANNT'}, ${kassenStatus.adressGrund || ''}):`);
+      for (const k of kassenStatus.kassen) {
+        const zettel = { gueltig: 'QR-Zettel gueltig', veraltet: 'QR-ZETTEL VERALTET - neu drucken', nicht_gedruckt: 'QR-Zettel noch nicht gedruckt' }[k.zettel] || k.zettel;
+        console.log(`  ${k.id.padEnd(10)} Port ${k.port}  Dienst: ${k.dienst === 'laeuft' ? 'laeuft' : 'STEHT'}  ${zettel}`);
+      }
+      console.log(`QR-Zettel drucken: http://127.0.0.1:${webserverPort}/pc-manager/kassen-zettel.html`);
+    }
+    console.log('--------------------------------------------------------------');
+    if (startWarnungen.length) {
+      console.log('');
+      console.log('!!!!!!!!!!!!!!!!!!!!!!!!!!!! ACHTUNG !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!');
+      for (const w of startWarnungen) console.log(`!! ${w}`);
+      console.log('!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!');
+      console.log('');
+      console.log('[Marktag-Start] BEREIT MIT WARNUNGEN (siehe oben)');
+    } else {
+      console.log('[Marktag-Start] ALLES BEREIT');
+    }
     console.log('Dieses Fenster während des Betriebs geöffnet lassen.');
     console.log('Beenden mit Strg+C.');
     console.log('');
@@ -164,6 +242,7 @@ async function main() {
     telemetry.update({ status: 'OFFLINE', message: `Beendet: ${signal}` });
     await telemetry.send().catch(()=>{});
     telemetry.stop();
+    try { await kassenStart?.stop(); } catch {}
     try { mgr.server?.close(); } catch {}
     try { webserverProzess?.kill('SIGTERM'); } catch {}
     console.log('[KC Sync Manager] Beendet.');

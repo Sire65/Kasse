@@ -7,7 +7,7 @@ Dieser Bereich gehört zur KC MarktKasse Suite. Der vorhandene produktive Kassen
 ## Enthaltene Quell-/Konfigurationsdateien
 
 - `convert-kng-members.js`
-- `markttag-start.js`
+- `markttag-start.js` (nur im Originalpaket, nie im Repository; seit 13.11.2026 ersetzt durch `kassen-start.js`, eingebunden in `run-manager-service.js` – siehe TABLET_UND_MANAGER_KOPPELN.md)
 - `KC_Markttag_Start.cmd`
 - `markttag-kassen.json`
 - `backup.js`

@@ -121,8 +121,8 @@
     await adressenZeigen();
   }
 
-  // Die Adressen kommen aus der Datei, die der Markttag-Start erzeugt - dadurch stimmen Port
-  // und Zugangsschlüssel immer, auch nach einem Neustart (bei dem beides neu vergeben wird).
+  // Die Adressen kommen aus der Datei, die der Kassen-Start (kassen-start.js) erzeugt. Port und
+  // Zugangsschlüssel bleiben seit KS-01 über Neustarts gleich.
   async function adressenZeigen() {
     const ziel = el('vpAdressen');
     if (!ziel) return;
@@ -133,11 +133,15 @@
     } catch (e) { /* Datei liegt nicht vor - dann bleibt der Hinweis unten */ }
     if (!daten) {
       ziel.innerHTML = `<p class="vp-text">Die Adressliste liegt nicht vor. Sie steht in der Übersichtsseite,
-        die der Markttag-Start erzeugt: <code>kc-sync-installation-und-backend\\markttag-daten\\markttag-uebersicht.html</code></p>`;
+        die der Kassen-Start erzeugt: <a href="kassen-zettel.html" target="_blank">Tablet-QR-Zettel</a>. Läuft das schwarze Fenster?</p>`;
       return;
     }
     const port = location.port || 8090;
-    ziel.innerHTML = Object.entries(daten).map(([id, eintrag]) => {
+    // Zwei Formate: neu { kassen:[{id, port, token, host}] }, alt { "KASSE-01": {port, token, host} }.
+    const eintraege = Array.isArray(daten.kassen)
+      ? daten.kassen.filter((k) => k && k.id && k.token).map((k) => [k.id, k])
+      : Object.entries(daten).filter(([, e]) => e && typeof e === 'object' && e.token);
+    ziel.innerHTML = eintraege.map(([id, eintrag]) => {
       const anhang = `?kcPort=${eintrag.port}&kcToken=${eintrag.token}&kcRegisterId=${id}`;
       const lokal = `http://127.0.0.1:${port}/pos/index.html${anhang}`;
       const wlan = eintrag.host ? `http://${eintrag.host}:${port}/pos/index.html${anhang}` : null;

@@ -1,0 +1,234 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tablet-Kassen · QR-Zettel</title>
+<!--
+  KS-01 „Einmal koppeln, dauerhaft gültig“ (November 2026)
+  Druckt je Tablet-Kasse einen QR-Zettel. Der Zettel bleibt gültig, solange
+  - der PC im Router dieselbe Adresse bekommt (DHCP-Reservierung) und
+  - der Schlüssel dieser Kasse nicht über „Schlüssel erneuern“ ersetzt wird.
+  Die Daten kommen ausschließlich vom PC selbst (/kc-kassen-start/status, nur über 127.0.0.1).
+-->
+<style>
+  :root{--grund:#f4f6f8;--karte:#fff;--text:#101828;--leise:#5b6574;--ok:#167447;--okhell:#e7f6ee;--warn:#9a3412;--warnhell:#fff4e5;--rot:#b42318;--rothell:#fdecea;--blau:#173765;--rand:#d6dbe1}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--grund);color:var(--text);font-family:system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif}
+  main{max-width:980px;margin:0 auto;padding:16px}
+  h1{font-size:1.45rem;margin:4px 0 4px;color:var(--blau)}
+  .leise{color:var(--leise)}
+  .karte{background:var(--karte);border:1px solid var(--rand);border-radius:12px;padding:16px;margin:0 0 14px}
+  .warnung{background:var(--rothell);border:1px solid #f4b4ae;color:var(--rot);border-radius:10px;padding:12px 14px;margin:0 0 10px;font-weight:600;line-height:1.4}
+  .hinweis{background:var(--warnhell);border:1px solid #f5c98b;color:var(--warn);border-radius:10px;padding:12px 14px;margin:0 0 10px;line-height:1.4}
+  .gut{background:var(--okhell);border:1px solid #a6dcbc;color:var(--ok);border-radius:10px;padding:12px 14px;margin:0 0 10px;font-weight:600}
+  .raster{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px}
+  .kasse h2{margin:0 0 2px;font-size:1.2rem}
+  .zeile{display:flex;justify-content:space-between;gap:8px;padding:5px 0;border-bottom:1px dashed #e4e7ec;font-size:.95rem}
+  .zeile:last-of-type{border-bottom:0}
+  .marke{font-weight:700;border-radius:999px;padding:1px 10px;font-size:.85rem;white-space:nowrap}
+  .marke.gut{padding:1px 10px;margin:0}
+  .marke.gelb{background:var(--warnhell);color:var(--warn)}
+  .marke.rot{background:var(--rothell);color:var(--rot)}
+  .marke.gruen{background:var(--okhell);color:var(--ok)}
+  button{font:inherit;font-weight:700;border:0;border-radius:10px;min-height:44px;padding:8px 14px;cursor:pointer}
+  .knoepfe{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+  .haupt{background:var(--blau);color:#fff}
+  .zweit{background:#e7ebef;color:var(--text)}
+  .gefahr{background:#fff;color:var(--rot);border:1px solid #f4b4ae}
+  dl{display:grid;grid-template-columns:max-content 1fr;gap:4px 12px;margin:0}
+  dt{color:var(--leise)} dd{margin:0;word-break:break-word}
+  ol{margin:6px 0 0 20px;padding:0;line-height:1.5}
+  .bogen{display:none}
+  @media print{
+    @page{size:A4 portrait;margin:14mm}
+    body{background:#fff}
+    main{display:none}
+    .bogen{display:none;page-break-after:always;break-after:page;font-family:Arial,Helvetica,sans-serif;color:#000}
+    .bogen.drucken{display:block}
+    .bogen:last-of-type{page-break-after:auto;break-after:auto}
+  }
+  .bogen h1{font-size:34pt;margin:0;color:#000;text-align:center;letter-spacing:.02em}
+  .bogen .unter{text-align:center;font-size:15pt;margin:2mm 0 6mm}
+  .bogen .qr{display:block;width:100mm;height:100mm;margin:0 auto}
+  .bogen .schritte{font-size:13pt;margin:8mm 6mm 0;line-height:1.5}
+  .bogen .schritte ol{margin-left:7mm}
+  .bogen .achtung{border:2px solid #000;border-radius:3mm;padding:3mm 4mm;margin:7mm 6mm 0;font-size:12pt;font-weight:700}
+  .bogen .fuss{margin:6mm 6mm 0;font-size:9.5pt;color:#333;line-height:1.4}
+</style>
+</head>
+<body>
+<main>
+  <h1>Tablet-Kassen · QR-Zettel</h1>
+  <p class="leise">Jedes Tablet wird <strong>einmal</strong> mit dem Zettel seiner Kasse gekoppelt. Danach startet die Kasse am Tablet
+     jeden Markttag über ihr Symbol auf dem Home-Bildschirm – ohne neues Scannen.</p>
+
+  <div id="meldungen"></div>
+
+  <section class="karte">
+    <dl id="eckdaten"></dl>
+    <div class="knoepfe">
+      <button type="button" class="haupt" id="alleDrucken">🖨 Alle Zettel drucken</button>
+      <button type="button" class="zweit" id="neuLaden">↻ Aktualisieren</button>
+    </div>
+  </section>
+
+  <section class="raster" id="kassen"></section>
+
+  <section class="karte">
+    <h2 style="margin-top:0;font-size:1.1rem">Damit die Zettel gültig bleiben</h2>
+    <ol>
+      <li><strong>Im Router dem PC immer dieselbe Adresse geben</strong> (FRITZ!Box: Heimnetz → Netzwerk → PC → „Diesem Netzwerkgerät immer die gleiche IPv4-Adresse zuweisen“).</li>
+      <li>Zettel <strong>nicht aushängen</strong>, sondern in der Kassenkassette aufbewahren – wer ihn fotografiert, kommt im Stand-WLAN an die Kasse.</li>
+      <li>Zettel verloren? Bei der Kasse <strong>„Schlüssel erneuern“</strong> – der alte Zettel ist sofort ungültig, nur dieses eine Tablet wird neu gescannt.</li>
+    </ol>
+  </section>
+</main>
+
+<div id="boegen"></div>
+
+<script src="vendor/qrcode-generator.js"></script>
+<script>
+(function () {
+  'use strict';
+  var zustand = null;
+  var el = function (id) { return document.getElementById(id); };
+  var esc = function (t) { return String(t == null ? '' : t).replace(/[&<>"']/g, function (c) { return ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]; }); };
+  var datum = function (iso) { try { return iso ? new Date(iso).toLocaleString('de-DE', { dateStyle: 'medium', timeStyle: 'short' }) : '–'; } catch (e) { return iso; } };
+
+  function qrSvg(text) {
+    var qr = window.qrcode(0, 'M');
+    qr.addData(text);
+    qr.make();
+    var n = qr.getModuleCount(), rand = 4, groesse = n + 2 * rand, pfad = '';
+    for (var y = 0; y < n; y++) for (var x = 0; x < n; x++) if (qr.isDark(y, x)) pfad += 'M' + (x + rand) + ' ' + (y + rand) + 'h1v1h-1z';
+    return '<svg class="qr" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ' + groesse + ' ' + groesse + '" shape-rendering="crispEdges">'
+      + '<rect width="100%" height="100%" fill="#fff"/><path d="' + pfad + '" fill="#000"/></svg>';
+  }
+
+  function holeJson(url, optionen) {
+    return fetch(url, Object.assign({ cache: 'no-store' }, optionen || {})).then(function (a) {
+      return a.json().catch(function () { return {}; }).then(function (d) { return { ok: a.ok, status: a.status, daten: d }; });
+    });
+  }
+
+  function aktion(pfad, koerper) {
+    return holeJson('/kc-kassen-start/' + pfad, {
+      method: 'POST', headers: { 'Content-Type': 'application/json', 'X-KC-Aktion': '1' }, body: JSON.stringify(koerper || {})
+    });
+  }
+
+  function zettelMarke(k) {
+    if (k.zettel === 'gueltig') return '<span class="marke gruen">gültig</span>';
+    if (k.zettel === 'veraltet') return '<span class="marke rot">VERALTET – neu drucken</span>';
+    return '<span class="marke gelb">noch nicht gedruckt</span>';
+  }
+
+  function zeichne() {
+    var z = zustand;
+    var m = [];
+    if (!z) { el('meldungen').innerHTML = ''; return; }
+    (z.warnungen || []).forEach(function (w) { m.push('<div class="warnung">⚠ ' + esc(w) + '</div>'); });
+    var kassen = z.kassen || [];
+    if (!z.aktiv || !kassen.length) {
+      m.push('<div class="hinweis">Es sind keine Tablet-Kassen eingetragen. Die Kassenliste steht in '
+        + '<code>markt-kasse-suite\\backend-source\\markttag-kassen.json</code>, z. B. <code>["KASSE-01", "KASSE-02"]</code>. '
+        + 'Danach das schwarze Fenster neu starten.</div>');
+    } else if (!(z.warnungen || []).length && kassen.every(function (k) { return k.zettel === 'gueltig' && k.dienst === 'laeuft'; })) {
+      m.push('<div class="gut">✔ Alles in Ordnung: alle Kassen-Dienste laufen, alle gedruckten Zettel sind gültig.</div>');
+    }
+    el('meldungen').innerHTML = m.join('');
+    el('eckdaten').innerHTML =
+      '<dt>PC-Adresse für Tablets</dt><dd><strong>' + esc(z.lanAdresse || 'UNBEKANNT') + '</strong>' + (z.adressGrund ? ' <span class="leise">(' + esc(z.adressGrund) + ')</span>' : '') + '</dd>'
+      + '<dt>Webserver-Port</dt><dd>' + esc(z.webserverPort || '–') + '</dd>'
+      + ((z.alleAdressen || []).length > 1 ? '<dt>Weitere Adressen</dt><dd>' + esc(z.alleAdressen.join(', ')) + '</dd>' : '')
+      + '<dt>Gestartet</dt><dd>' + esc(datum(z.gestartetUm)) + '</dd>'
+      + '<dt>Datenordner</dt><dd class="leise">' + esc(z.datenOrdner || '–') + '</dd>';
+
+    el('kassen').innerHTML = kassen.map(function (k) {
+      return '<article class="karte kasse" data-id="' + esc(k.id) + '">'
+        + '<h2>' + esc(k.id) + (k.name && k.name !== k.id ? ' <span class="leise" style="font-weight:400">· ' + esc(k.name) + '</span>' : '') + '</h2>'
+        + '<div class="zeile"><span>Kassen-Dienst</span>' + (k.dienst === 'laeuft' ? '<span class="marke gruen">läuft</span>' : '<span class="marke rot">steht</span>') + '</div>'
+        + '<div class="zeile"><span>Port</span><span>' + esc(k.port) + '</span></div>'
+        + '<div class="zeile"><span>QR-Zettel</span>' + zettelMarke(k) + '</div>'
+        + '<div class="zeile"><span>Gedruckt</span><span>' + esc(k.zettelGedrucktAm ? datum(k.zettelGedrucktAm) : '–') + '</span></div>'
+        + '<div class="knoepfe">'
+        + '<button type="button" class="haupt" data-drucke="' + esc(k.id) + '"' + (k.qrAdresse ? '' : ' disabled') + '>🖨 Zettel drucken</button>'
+        + '<button type="button" class="gefahr" data-erneuere="' + esc(k.id) + '">Schlüssel erneuern…</button>'
+        + '</div></article>';
+    }).join('');
+
+    el('boegen').innerHTML = kassen.filter(function (k) { return k.qrAdresse; }).map(function (k) {
+      return '<section class="bogen" data-bogen="' + esc(k.id) + '">'
+        + '<h1>' + esc(k.id) + '</h1>'
+        + '<div class="unter">' + esc(k.name && k.name !== k.id ? k.name : 'Tablet-Kasse') + '</div>'
+        + qrSvg(k.qrAdresse)
+        + '<div class="schritte"><strong>Nur einmal pro Tablet nötig</strong> (neues oder zurückgesetztes Tablet):'
+        + '<ol><li>Tablet mit dem <strong>Stand-WLAN</strong> verbinden. PC und Kassen-Fenster müssen laufen.</li>'
+        + '<li><strong>Kamera</strong> öffnen, diesen Code scannen, Link antippen – die Kasse öffnet sich.</li>'
+        + '<li><strong>Teilen → „Zum Home-Bildschirm“</strong> (Android: ⋮ → „Zum Startbildschirm“).</li>'
+        + '<li>Ab jetzt jeden Markttag nur noch das <strong>Kassen-Symbol</strong> antippen. LED oben rechts grün = fertig.</li></ol></div>'
+        + '<div class="achtung">Nicht aushängen! Dieser Zettel ist der Schlüssel zu ' + esc(k.id) + '. In der Kassenkassette aufbewahren.</div>'
+        + '<div class="fuss">PC-Adresse ' + esc(z.lanAdresse) + ' · Port ' + esc(k.port) + ' · gedruckt am ' + esc(new Date().toLocaleDateString('de-DE'))
+        + '<br>Gilt, bis im PC-Manager „Schlüssel erneuern“ gewählt wird oder der PC eine andere Adresse bekommt.</div>'
+        + '</section>';
+    }).join('');
+  }
+
+  function drucke(ids) {
+    var boegen = document.querySelectorAll('.bogen');
+    var anzahl = 0;
+    for (var i = 0; i < boegen.length; i++) {
+      var an = ids.indexOf(boegen[i].getAttribute('data-bogen')) >= 0;
+      boegen[i].classList.toggle('drucken', an);
+      if (an) anzahl++;
+    }
+    if (!anzahl) { alert('Für diese Kasse gibt es noch keine QR-Adresse – siehe Warnungen oben.'); return; }
+    window.print();
+    // Erst nach Bestätigung merken: ein abgebrochener Druck darf nicht als „gültiger Zettel“ gelten.
+    setTimeout(function () {
+      if (window.confirm('Sind die Zettel für ' + ids.join(', ') + ' gut lesbar ausgedruckt?')) {
+        aktion('gedruckt', { ids: ids }).then(function (a) { if (a.ok) { zustand = a.daten; zeichne(); } else alert('Konnte nicht gespeichert werden: ' + (a.daten.fehler || a.status)); });
+      }
+    }, 300);
+  }
+
+  function erneuere(id) {
+    if (!window.confirm('Neuen Schlüssel für ' + id + ' erzeugen?\n\nDer bisherige QR-Zettel von ' + id
+      + ' wird SOFORT ungültig. Das Tablet dieser Kasse muss danach mit dem neuen Zettel neu gescannt werden.\n\nNur nötig, wenn der Zettel verloren ging oder fremd fotografiert wurde.')) return;
+    aktion('neuer-schluessel', { id: id }).then(function (a) {
+      if (!a.ok) { alert('Fehlgeschlagen: ' + (a.daten.fehler || a.status)); return; }
+      zustand = a.daten; zeichne();
+      if (window.confirm('Neuer Schlüssel für ' + id + ' ist aktiv. Jetzt den neuen Zettel drucken?')) drucke([id]);
+    });
+  }
+
+  function lade() {
+    if (['127.0.0.1', 'localhost'].indexOf(location.hostname) < 0) {
+      el('meldungen').innerHTML = '<div class="warnung">Diese Seite funktioniert nur am PC selbst: '
+        + '<a href="http://127.0.0.1:' + esc(location.port || 8090) + '/pc-manager/kassen-zettel.html">http://127.0.0.1:' + esc(location.port || 8090) + '/pc-manager/kassen-zettel.html</a></div>';
+      return;
+    }
+    holeJson('/kc-kassen-start/status').then(function (a) {
+      if (a.ok) { zustand = a.daten; zeichne(); return; }
+      el('meldungen').innerHTML = '<div class="warnung">Der Kassen-Start antwortet nicht (' + esc(a.daten.fehler || a.status) + '). '
+        + 'Läuft das schwarze Fenster? Es muss über <code>KC_Manager_Start.cmd</code> gestartet sein und „ALLES BEREIT“ oder „BEREIT MIT WARNUNGEN“ zeigen.</div>';
+    }).catch(function (e) {
+      el('meldungen').innerHTML = '<div class="warnung">Keine Verbindung zum PC-Dienst (' + esc(e.message) + '). Läuft das schwarze Fenster?</div>';
+    });
+  }
+
+  document.addEventListener('click', function (ev) {
+    var t = ev.target.closest ? ev.target.closest('button') : null;
+    if (!t) return;
+    if (t.id === 'alleDrucken') drucke((zustand && zustand.kassen || []).map(function (k) { return k.id; }));
+    else if (t.id === 'neuLaden') lade();
+    else if (t.getAttribute('data-drucke')) drucke([t.getAttribute('data-drucke')]);
+    else if (t.getAttribute('data-erneuere')) erneuere(t.getAttribute('data-erneuere'));
+  });
+  lade();
+  window.KCKassenZettel = { lade: lade, zustand: function () { return zustand; } };
+})();
+</script>
+</body>
+</html>

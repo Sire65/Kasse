@@ -490,7 +490,10 @@
       const register = (global.registers || [])[index];
       if (!register) return;
       const alt = card.querySelector('.kc-tablet-adresse');
-      const eintrag = kassenVerbindungen[register.id];
+      // Zwei Formate: neu (Kassen-Start KS-01) { kassen:[{id, qrAdresse, ...}] }, alt { "KASSE-01": {url} }.
+      const ausListe = Array.isArray(kassenVerbindungen.kassen)
+        ? kassenVerbindungen.kassen.find((k) => String(k.id) === String(register.id)) : null;
+      const eintrag = ausListe ? (ausListe.qrAdresse ? { url: ausListe.qrAdresse } : null) : kassenVerbindungen[register.id];
       if (alt && alt.dataset.fuerId === register.id) return; // schon korrekt angezeigt, nichts zu tun
       if (alt) alt.remove(); // Kassen-ID der Karte hat sich geändert (z.B. umbenannt) - neu aufbauen
 
@@ -500,7 +503,7 @@
       block.style.cssText = 'margin-top:8px;padding:8px;border-radius:6px;font-size:.82rem;';
       if (eintrag) {
         block.style.background = '#f0f7ff';
-        block.innerHTML = `<div style="font-weight:700;margin-bottom:4px;">Tablet-Adresse für ${escLabel(register.id)} (einmalig auf dem Tablet öffnen):</div><div style="word-break:break-all;font-family:monospace;">${eintrag.url}</div><button type="button" style="margin-top:6px;padding:4px 10px;">In Zwischenablage kopieren</button>`;
+        block.innerHTML = `<div style="font-weight:700;margin-bottom:4px;">Tablet-Adresse für ${escLabel(register.id)} (einmalig auf dem Tablet öffnen – bequemer: <a href="kassen-zettel.html" target="_blank">QR-Zettel drucken</a>):</div><div style="word-break:break-all;font-family:monospace;">${escLabel(eintrag.url)}</div><button type="button" style="margin-top:6px;padding:4px 10px;">In Zwischenablage kopieren</button>`;
         block.querySelector('button').onclick = (ev) => {
           ev.stopPropagation();
           navigator.clipboard?.writeText(eintrag.url).then(() => { block.querySelector('button').textContent = 'Kopiert!'; setTimeout(() => { const b = block.querySelector('button'); if (b) b.textContent = 'In Zwischenablage kopieren'; }, 2000); });
