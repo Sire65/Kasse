@@ -9,3 +9,5 @@ schulung/pc-manager/kassen-verbindungen.json
 markt-kasse-suite/backend-source/*.sqlite
 markt-kasse-suite/backend-source/*.sqlite-*
 markt-kasse-suite/backend-source/*.admin-token.txt
+# Testbilder, die tests/haendlerausweis*.test.cjs ins Hauptverzeichnis schreibt
+/haendler-*.png
