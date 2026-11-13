@@ -55,7 +55,7 @@ echo.
 set "KC_RC=%ERRORLEVEL%"
 
 echo.
-if not "%KC_RC%"=="0" echo Start wurde mit Fehlercode %KC_RC% beendet.
+if not "%KC_RC%"=="0" echo Start wurde mit Fehlercode %KC_RC% beendet. Ursache und Loesung stehen oben im Kasten mit den Ausrufezeichen.
 echo Zum Schliessen Taste druecken.
 pause >nul
 exit /b %KC_RC%

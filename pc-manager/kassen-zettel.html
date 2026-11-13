@@ -19,6 +19,9 @@
   h1{font-size:1.45rem;margin:4px 0 4px;color:var(--blau)}
   .leise{color:var(--leise)}
   .karte{background:var(--karte);border:1px solid var(--rand);border-radius:12px;padding:16px;margin:0 0 14px}
+  .warnung ol{margin:6px 0 0 20px;font-weight:400;color:var(--text)}
+  .warnung .ursache{font-weight:400;color:var(--text);margin-top:4px}
+  .warnung .technik{font-weight:400;font-size:.8rem;color:var(--leise);margin-top:6px}
   .warnung{background:var(--rothell);border:1px solid #f4b4ae;color:var(--rot);border-radius:10px;padding:12px 14px;margin:0 0 10px;font-weight:600;line-height:1.4}
   .hinweis{background:var(--warnhell);border:1px solid #f5c98b;color:var(--warn);border-radius:10px;padding:12px 14px;margin:0 0 10px;line-height:1.4}
   .gut{background:var(--okhell);border:1px solid #a6dcbc;color:var(--ok);border-radius:10px;padding:12px 14px;margin:0 0 10px;font-weight:600}
@@ -118,6 +121,27 @@
     });
   }
 
+  // Fehlercodes der Aktionen -> verständlicher Satz mit Lösung
+  var FEHLERTEXTE = {
+    kasse_unbekannt: 'Diese Kasse ist im laufenden Kassen-Start nicht eingetragen. Lösung: Seite mit „Aktualisieren“ neu laden; steht die Kasse dann noch da, das schwarze Fenster neu starten.',
+    kassen_start_noch_nicht_bereit: 'Das schwarze Fenster startet gerade noch. Lösung: warten, bis dort „ALLES BEREIT“ steht, dann „Aktualisieren“.',
+    kassen_start_nicht_verbunden: 'Die Seite erreicht das schwarze Fenster nicht. Lösung: Läuft das Fenster? Sonst KC_Manager_Start.cmd starten, warten bis „ALLES BEREIT“, dann „Aktualisieren“.',
+    zeitueberschreitung: 'Das schwarze Fenster hat nicht rechtzeitig geantwortet. Lösung: eine Minute warten und noch einmal versuchen; sonst Fenster neu starten.',
+    nur_am_pc_selbst: 'Diese Seite funktioniert nur am PC selbst. Lösung: am PC http://127.0.0.1:8090/pc-manager/kassen-zettel.html öffnen.',
+    herkunft_abgelehnt: 'Die Aktion wurde aus Sicherheitsgründen abgelehnt. Lösung: Seite am PC über http://127.0.0.1:8090/pc-manager/kassen-zettel.html öffnen, nicht über einen Link aus einer anderen Seite.'
+  };
+  function fehlerText(a) {
+    var code = a && a.daten && a.daten.fehler;
+    return FEHLERTEXTE[code] || ('Unerwarteter Fehler (' + (code || ('HTTP ' + (a && a.status))) + '). Lösung: Seite neu laden; bleibt es, das schwarze Fenster neu starten und ein Foto davon an den Betreuer schicken.');
+  }
+  function meldungHtml(m) {
+    return '<div class="warnung">⚠ ' + esc(m.titel)
+      + '<div class="ursache"><strong>Ursache:</strong> ' + esc(m.ursache) + '</div>'
+      + '<div class="ursache"><strong>Lösung:</strong><ol>' + (m.loesung || []).map(function (x) { return '<li>' + esc(x) + '</li>'; }).join('') + '</ol></div>'
+      + (m.technisch ? '<div class="technik">Technik für den Betreuer: ' + esc(m.technisch) + '</div>' : '')
+      + '</div>';
+  }
+
   function zettelMarke(k) {
     if (k.zettel === 'gueltig') return '<span class="marke gruen">gültig</span>';
     if (k.zettel === 'veraltet') return '<span class="marke rot">VERALTET – neu drucken</span>';
@@ -128,7 +152,8 @@
     var z = zustand;
     var m = [];
     if (!z) { el('meldungen').innerHTML = ''; return; }
-    (z.warnungen || []).forEach(function (w) { m.push('<div class="warnung">⚠ ' + esc(w) + '</div>'); });
+    if ((z.meldungen || []).length) z.meldungen.forEach(function (x) { m.push(meldungHtml(x)); });
+    else (z.warnungen || []).forEach(function (w) { m.push('<div class="warnung">⚠ ' + esc(w) + '</div>'); });
     var kassen = z.kassen || [];
     if (!z.aktiv || !kassen.length) {
       m.push('<div class="hinweis">Es sind keine Tablet-Kassen eingetragen. Die Kassenliste steht in '
@@ -188,7 +213,8 @@
     // Erst nach Bestätigung merken: ein abgebrochener Druck darf nicht als „gültiger Zettel“ gelten.
     setTimeout(function () {
       if (window.confirm('Sind die Zettel für ' + ids.join(', ') + ' gut lesbar ausgedruckt?')) {
-        aktion('gedruckt', { ids: ids }).then(function (a) { if (a.ok) { zustand = a.daten; zeichne(); } else alert('Konnte nicht gespeichert werden: ' + (a.daten.fehler || a.status)); });
+        aktion('gedruckt', { ids: ids }).then(function (a) { if (a.ok) { zustand = a.daten; zeichne(); } else alert('Der Druck konnte nicht vermerkt werden.\n\n' + fehlerText(a)); })
+          .catch(function () { alert('Der Druck konnte nicht vermerkt werden.\n\n' + FEHLERTEXTE.kassen_start_nicht_verbunden); });
       }
     }, 300);
   }
@@ -197,10 +223,10 @@
     if (!window.confirm('Neuen Schlüssel für ' + id + ' erzeugen?\n\nDer bisherige QR-Zettel von ' + id
       + ' wird SOFORT ungültig. Das Tablet dieser Kasse muss danach mit dem neuen Zettel neu gescannt werden.\n\nNur nötig, wenn der Zettel verloren ging oder fremd fotografiert wurde.')) return;
     aktion('neuer-schluessel', { id: id }).then(function (a) {
-      if (!a.ok) { alert('Fehlgeschlagen: ' + (a.daten.fehler || a.status)); return; }
+      if (!a.ok) { alert('Neuer Schlüssel für ' + id + ' konnte NICHT erzeugt werden – der alte Zettel gilt weiter.\n\n' + fehlerText(a)); return; }
       zustand = a.daten; zeichne();
       if (window.confirm('Neuer Schlüssel für ' + id + ' ist aktiv. Jetzt den neuen Zettel drucken?')) drucke([id]);
-    });
+    }).catch(function () { alert('Neuer Schlüssel für ' + id + ': keine Antwort.\n\n' + FEHLERTEXTE.kassen_start_nicht_verbunden + '\nDanach hier „Aktualisieren“ – dort steht, ob der neue Schlüssel aktiv ist.'); });
   }
 
   function lade() {
@@ -211,10 +237,12 @@
     }
     holeJson('/kc-kassen-start/status').then(function (a) {
       if (a.ok) { zustand = a.daten; zeichne(); return; }
-      el('meldungen').innerHTML = '<div class="warnung">Der Kassen-Start antwortet nicht (' + esc(a.daten.fehler || a.status) + '). '
-        + 'Läuft das schwarze Fenster? Es muss über <code>KC_Manager_Start.cmd</code> gestartet sein und „ALLES BEREIT“ oder „BEREIT MIT WARNUNGEN“ zeigen.</div>';
+      el('meldungen').innerHTML = meldungHtml({ titel: 'Die Tablet-Kassen sind nicht erreichbar', ursache: fehlerText(a).split(' Lösung:')[0],
+        loesung: ['Prüfen, ob das schwarze Fenster läuft und „ALLES BEREIT“ oder „BEREIT MIT WARNUNGEN“ zeigt.', 'Läuft es nicht: KC_Manager_Start.cmd doppelklicken und warten.', 'Dann hier „Aktualisieren“ drücken.'],
+        technisch: (a.daten && a.daten.fehler) || ('HTTP ' + a.status) });
     }).catch(function (e) {
-      el('meldungen').innerHTML = '<div class="warnung">Keine Verbindung zum PC-Dienst (' + esc(e.message) + '). Läuft das schwarze Fenster?</div>';
+      el('meldungen').innerHTML = meldungHtml({ titel: 'Keine Verbindung zum Kassen-Start auf diesem PC', ursache: 'Das schwarze Fenster läuft nicht oder wurde geschlossen.',
+        loesung: ['KC_Manager_Start.cmd doppelklicken.', 'Warten, bis „ALLES BEREIT“ dasteht.', 'Dann diese Seite über „Aktualisieren“ neu laden.'], technisch: e.message });
     });
   }
 

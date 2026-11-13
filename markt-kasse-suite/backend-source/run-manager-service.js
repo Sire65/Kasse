@@ -7,6 +7,14 @@ const { spawn } = require('child_process');
 const { ManagerCompanion } = require('./manager-companion');
 const { KiccRuntimeTelemetry } = require('./kicc-runtime-telemetry');
 const { TabletKassenStart, leseKassenKonfig, standardDatenOrdner, zettelWebserverPort } = require('./kassen-start');
+const { meldung, erklaere, druckeKasten, SCHRITTE_FENSTER_NEU } = require('./fehlerhilfe');
+
+// Start abbrechen - immer mit Kasten (Was / Ursache / Loesung), nie mit rohem Stacktrace.
+function startAbbrechen(m) {
+  druckeKasten(console.error, [m], 'START ABGEBROCHEN');
+  console.error('[Marktag-Start] START ABGEBROCHEN - Ursache und Lösung stehen im Kasten oben.');
+  process.exit(1);
+}
 
 function parseArgs(argv) {
   const out = {};
@@ -113,8 +121,7 @@ async function main() {
   } catch (err) {
     telemetry.update({ status: 'OFFLINE', errorCount: 1, message: `Startfehler: ${err.message}` });
     await telemetry.send().catch(()=>{});
-    console.error(`[KC Sync Manager] Datenbank konnte nicht geöffnet werden, Start abgebrochen: ${err.message}`);
-    process.exit(1);
+    startAbbrechen(erklaere(err, { was: 'Manager-Datenbank öffnen', pfad: dbPath }));
   }
 
   try {
@@ -125,8 +132,7 @@ async function main() {
   } catch (err) {
     telemetry.update({ status: 'OFFLINE', errorCount: 1, message: `Manager-Start: ${err.message}` });
     await telemetry.send().catch(()=>{});
-    console.error(`[KC Sync Manager] Start fehlgeschlagen: ${err.message}`);
-    process.exit(1);
+    startAbbrechen(erklaere(err, { was: 'Manager-Dienst starten', port }));
   }
 
   // Tablet-Kassen (KS-01): Kassenliste vorab lesen - ein Fehler darin darf den Manager nicht
@@ -134,20 +140,26 @@ async function main() {
   const datenOrdner = standardDatenOrdner();
   let kassenKonfigFehler = null;
   let tabletKassenVorhanden = false;
-  try { tabletKassenVorhanden = leseKassenKonfig(path.join(__dirname, 'markttag-kassen.json')).kassen.length > 0; }
-  catch (e) { kassenKonfigFehler = e.message; }
+  const kassenListe = process.env.KC_KASSEN_LISTE ? path.resolve(process.env.KC_KASSEN_LISTE) : path.join(__dirname, 'markttag-kassen.json');
+  try { tabletKassenVorhanden = leseKassenKonfig(kassenListe).kassen.length > 0; }
+  catch (e) { kassenKonfigFehler = e.kcMeldung || erklaere(e, { was: 'Kassenliste lesen' }); }
 
   let webserverProzess = null;
   let kassenStart = null;
-  const startWarnungen = [];
+  const startWarnungen = []; // Meldungen {titel, ursache, loesung[]}
+  if (mgr.liveMonitorFehler) {
+    const m = erklaere(new Error(mgr.liveMonitorFehler), { was: 'Live-Kanal starten', port: 47392 });
+    startWarnungen.push({ ...m, titel: `${m.titel} – im PC-Manager bleiben Kassen-LEDs und Live-Verkäufe leer (Kassieren geht trotzdem)` });
+  }
   if (!args.keinWebserver) {
     const wunschPort = args.webserverPort || Number(process.env.KC_SYNC_WEBSERVER_PORT) || zettelWebserverPort(datenOrdner) || 8090;
     let webserverPort;
     if (tabletKassenVorhanden && await warteAufPort(wunschPort)) webserverPort = wunschPort;
     else webserverPort = await findeFreienPort(wunschPort);
     if (tabletKassenVorhanden && webserverPort !== wunschPort) {
-      startWarnungen.push(`Port ${wunschPort} ist belegt - der Webserver laeuft auf ${webserverPort}. Die QR-Zettel der Tablets zeigen auf ${wunschPort} und funktionieren so NICHT. `
-        + 'Alle schwarzen Fenster schliessen (ggf. im Task-Manager alle "node.exe" beenden) und EIN Fenster neu starten.');
+      startWarnungen.push(meldung('webport', `Port ${wunschPort} ist belegt – die QR-Zettel der Tablets funktionieren so NICHT`,
+        `Ein anderes Programm (fast immer ein zweites schwarzes Fenster) benutzt Port ${wunschPort}. Der Webserver läuft deshalb auf ${webserverPort}, die Zettel zeigen aber auf ${wunschPort}.`,
+        SCHRITTE_FENSTER_NEU));
     }
     webserverProzess = spawn(
       process.execPath,
@@ -179,21 +191,27 @@ async function main() {
     });
 
     const managerUrl = `http://127.0.0.1:${webserverPort}/pc-manager/index.html`;
-    await warteAufHttp(managerUrl);
+    try { await warteAufHttp(managerUrl); }
+    catch (e) {
+      startAbbrechen(meldung('webserver', 'PC-Manager-Webseite startet nicht',
+        `Der Webserver auf Port ${webserverPort} antwortet nicht – meist blockiert ein Virenscanner „node.exe“ oder der Port ist belegt.`,
+        [...SCHRITTE_FENSTER_NEU.slice(0, 3), 'Meldet der Virenscanner etwas: „node.exe“ zulassen.', 'Bleibt der Fehler: Foto von diesem Fenster an den Betreuer schicken.'], e.message));
+    }
     telemetry.update({ status: 'ONLINE', message: `Manager + PC-Manager-Webserver aktiv · ${webserverPort}` });
 
     // Tablet-Kassen starten: feste Ports, dauerhafte Schluessel, Kopplung nur wenn noetig.
     let kassenStatus = null;
     if (kassenKonfigFehler) {
-      startWarnungen.push(`Tablet-Kassen NICHT gestartet: ${kassenKonfigFehler}`);
+      startWarnungen.push(kassenKonfigFehler);
     } else {
       try {
-        const ks = new TabletKassenStart({ manager: mgr, backendDir: __dirname, frontendRoot, datenOrdner });
+        const ks = new TabletKassenStart({ manager: mgr, backendDir: __dirname, frontendRoot, datenOrdner, konfigDatei: kassenListe });
         kassenStatus = await ks.start({ webserverPort });
         kassenStart = ks;
-        startWarnungen.push(...kassenStatus.warnungen);
+        startWarnungen.push(...ks.meldungen);
       } catch (e) {
-        startWarnungen.push(`Tablet-Kassen NICHT gestartet: ${e.message}`);
+        const m = e.kcMeldung || erklaere(e, { was: 'Tablet-Kassen starten' });
+        startWarnungen.push({ ...m, titel: `Tablet-Kassen NICHT gestartet – ${m.titel}` });
         telemetry.update({ status: 'DEGRADED', errorCount: Number(telemetry.state.errorCount || 0) + 1, message: `Tablet-Kassen: ${e.message}` });
       }
     }
@@ -214,12 +232,8 @@ async function main() {
     }
     console.log('--------------------------------------------------------------');
     if (startWarnungen.length) {
-      console.log('');
-      console.log('!!!!!!!!!!!!!!!!!!!!!!!!!!!! ACHTUNG !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!');
-      for (const w of startWarnungen) console.log(`!! ${w}`);
-      console.log('!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!');
-      console.log('');
-      console.log('[Marktag-Start] BEREIT MIT WARNUNGEN (siehe oben)');
+      druckeKasten(console.log, startWarnungen, 'ACHTUNG');
+      console.log(`[Marktag-Start] BEREIT MIT WARNUNGEN (${startWarnungen.length}) - Ursache und Lösung stehen im Kasten oben.`);
     } else {
       console.log('[Marktag-Start] ALLES BEREIT');
     }
@@ -253,11 +267,12 @@ async function main() {
   process.on('uncaughtException', async (err) => {
     telemetry.update({ status: 'OFFLINE', errorCount: Number(telemetry.state.errorCount || 0) + 1, message: `Uncaught: ${err.message}` });
     await telemetry.send().catch(()=>{});
-    console.error('[KC Sync Manager] Unerwarteter Fehler, Prozess wird beendet:', err);
+    druckeKasten(console.error, [erklaere(err, { was: 'Laufender Betrieb' })], 'PROGRAMM BEENDET');
+    console.error('[KC Sync Manager] Das Programm wurde beendet. Tablets kassieren offline weiter; nach dem Neustart werden die Bons nachgereicht.');
     process.exit(1);
   });
 
   console.log('[KC Sync Manager] Läuft.');
 }
 
-main();
+main().catch((e) => startAbbrechen(erklaere(e, { was: 'Start' })));

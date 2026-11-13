@@ -82,6 +82,29 @@ Am Ende des Tages: schwarzes Fenster schließen (oder PC herunterfahren).
 
 ## C. Wenn etwas nicht stimmt
 
+**Jede Störung meldet sich im schwarzen Fenster in einem Kasten mit Ausrufezeichen** – immer
+gleich aufgebaut:
+
+```
+!! PROBLEM: KASSE-02: Port 47501 ist belegt – Kassen-Dienst starten nicht möglich
+!!   Ursache: Ein anderes Programm benutzt diesen Anschluss. Fast immer ist es ein noch
+!!            offenes zweites schwarzes Fenster oder die alte Kassenversion.
+!!   Lösung: 1) Alle schwarzen Fenster schließen.
+!!           2) Task-Manager öffnen (Strg + Umschalt + Esc) → „Details“ → alle „node.exe“ … beenden.
+!!           3) Dann EIN Fenster neu starten: KC_Manager_Start.cmd doppelklicken.
+!!   (Technik für den Betreuer: …)
+```
+
+Einfach die **Lösung** Schritt für Schritt abarbeiten. Dieselben Meldungen stehen im PC-Manager
+auf der Seite „Tablet-QR-Zettel“. Was weiterlaufen kann, läuft weiter: Hat nur eine Kasse ein
+Problem, arbeiten die anderen normal. Wird die Ursache behoben (z. B. altes Fenster geschlossen),
+startet die betroffene Kasse **von selbst** innerhalb von 30 Sekunden nach – die Meldung
+verschwindet dann.
+
+Endet der Start mit **„START ABGEBROCHEN“**, steht die Ursache im Kasten darüber; das Fenster
+bleibt offen, bis eine Taste gedrückt wird.
+
+
 | Was man sieht | Bedeutung / was tun |
 |---|---|
 | Tablet: „PC nicht erreichbar – sind PC und schwarzes Fenster an …“ | PC aus, Fenster zu oder Tablet nicht im Stand-WLAN. **Kassieren geht trotzdem**, die Bons werden nachgereicht. |
@@ -129,6 +152,7 @@ nötig.
 * **Sicherheit:** `pc-manager/kassen-verbindungen.json` (enthält die Schlüssel) und die
   Zettel-Aktionen sind nur vom PC selbst erreichbar, nicht über das WLAN; die Datei liegt nicht
   mehr im Repository.
+* **Fehlermeldungen:** zentral in `markt-kasse-suite/backend-source/fehlerhilfe.js` (Was / Ursache / Lösung). Test: `tests/kassen-start-fehlermeldungen.test.cjs`.
 * **Tests:** `tests/kassen-start-datenwege.test.cjs` (Stammdaten, Dienstplan, Geld-Übergabe, Ausverkauft, Verkauf/Live-Monitor, „Gerät verloren“ über den echten Start mit drei Tablets), `tests/kassen-start-dauerhaft.test.cjs` (Ende-zu-Ende: drei Starts mit Tablet,
   QR vom Ausdruck zurückgelesen, Ablauf der Kopplung, neuer Manager, Absturz, Schlüssel
   erneuern, Port belegt, Adresse geändert) und `tests/kassen-start-einheit.test.cjs`.

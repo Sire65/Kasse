@@ -28,7 +28,7 @@
       // KS-01: 403 heisst hier "Schluessel passt nicht" - z. B. nach "Schluessel erneuern" im
       // PC-Manager. Das muss das Tablet klar sagen, sonst sucht man den Fehler im WLAN.
       if (res.status === 403) return { ok: false, text: 'Zugang ungültig – QR-Zettel dieser Kasse neu scannen (Kasse arbeitet normal weiter)' };
-      if (!res.ok) return { ok: false, text: 'Datensicherung antwortet nicht' };
+      if (!res.ok) return { ok: false, text: 'Datensicherung antwortet nicht – schwarzes Fenster am PC schließen und neu starten (Kasse arbeitet normal weiter)' };
       const data = await res.json();
       const farbe = data.connection?.color;
       if (farbe === 'gruen') return { ok: true, text: 'Verbunden' };

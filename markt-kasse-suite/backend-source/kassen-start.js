@@ -34,6 +34,7 @@ const http = require('http');
 const crypto = require('crypto');
 const { spawn } = require('child_process');
 const { DeviceCompanion } = require('./device-companion');
+const { meldung, erklaere, alsEinzeiler, druckeKasten, SCHRITT_BETREUER } = require('./fehlerhilfe');
 
 const ERSTER_KASSEN_PORT = 47500;
 const ERNEUERN_WENN_RESTTAGE_UNTER = 7;
@@ -53,25 +54,33 @@ function standardDatenOrdner() {
 //   ["KASSE-01", "KASSE-02"]
 //   [{"id":"KASSE-01","name":"Kasse 1"}, ...]
 //   {"kassen": [...], "pcAdresse": "192.168.178.20"}   (pcAdresse optional, erzwingt die Adresse)
+function konfigFehler(text) {
+  const e = new Error(text);
+  e.kcMeldung = meldung('konfig', 'Kassenliste markttag-kassen.json ist fehlerhaft – Tablet-Kassen starten nicht', text,
+    ['Die Datei markt-kasse-suite\\backend-source\\markttag-kassen.json mit dem Editor öffnen und korrigieren. Richtig ist z. B.: ["KASSE-01", "KASSE-02", "KASSE-03"]',
+      'Oder die Datei aus der Original-ZIP zurückkopieren.', 'Dann das Fenster schließen und neu starten.']);
+  return e;
+}
+
 function leseKassenKonfig(datei) {
   if (!fs.existsSync(datei)) return { kassen: [], pcAdresse: null, quelle: null };
   let roh;
   try { roh = JSON.parse(fs.readFileSync(datei, 'utf8').replace(/^﻿/, '')); }
-  catch (e) { throw new Error(`${path.basename(datei)} ist kein gültiges JSON (${e.message}). Beispiel: ["KASSE-01", "KASSE-02"]`); }
+  catch (e) { throw konfigFehler(`${path.basename(datei)} ist kein gültiges JSON (${e.message}). Beispiel: ["KASSE-01", "KASSE-02"]`); }
   const liste = Array.isArray(roh) ? roh : (roh && Array.isArray(roh.kassen) ? roh.kassen : null);
-  if (!liste) throw new Error(`${path.basename(datei)}: erwartet wird eine Liste, z. B. ["KASSE-01", "KASSE-02"]`);
+  if (!liste) throw konfigFehler(`${path.basename(datei)}: erwartet wird eine Liste, z. B. ["KASSE-01", "KASSE-02"]`);
   const gesehen = new Set();
   const kassen = liste.map((eintrag, i) => {
     const id = String(typeof eintrag === 'string' ? eintrag : eintrag && eintrag.id || '').trim();
-    if (!ID_MUSTER.test(id)) throw new Error(`${path.basename(datei)}, Eintrag ${i + 1}: „${id}“ ist keine gültige Kassen-ID (erlaubt: Buchstaben, Ziffern, - und _, höchstens 32 Zeichen).`);
+    if (!ID_MUSTER.test(id)) throw konfigFehler(`${path.basename(datei)}, Eintrag ${i + 1}: „${id}“ ist keine gültige Kassen-ID (erlaubt: Buchstaben, Ziffern, - und _, höchstens 32 Zeichen).`);
     const schluessel = id.toUpperCase();
-    if (gesehen.has(schluessel)) throw new Error(`${path.basename(datei)}: Kasse „${id}“ steht doppelt in der Liste.`);
+    if (gesehen.has(schluessel)) throw konfigFehler(`${path.basename(datei)}: Kasse „${id}“ steht doppelt in der Liste.`);
     gesehen.add(schluessel);
     const name = typeof eintrag === 'object' && eintrag && eintrag.name ? String(eintrag.name).slice(0, 60) : null;
     return { id, name };
   });
   const pcAdresse = !Array.isArray(roh) && roh && roh.pcAdresse ? String(roh.pcAdresse).trim() : null;
-  if (pcAdresse && !/^\d{1,3}(\.\d{1,3}){3}$/.test(pcAdresse)) throw new Error(`${path.basename(datei)}: pcAdresse „${pcAdresse}“ ist keine IPv4-Adresse.`);
+  if (pcAdresse && !/^\d{1,3}(\.\d{1,3}){3}$/.test(pcAdresse)) throw konfigFehler(`${path.basename(datei)}: pcAdresse „${pcAdresse}“ ist keine IPv4-Adresse.`);
   return { kassen, pcAdresse, quelle: datei };
 }
 
@@ -97,18 +106,27 @@ function lanAdressen(netze = os.networkInterfaces()) {
 function waehleLanAdresse({ fest = null, zettelAdresse = null, netze } = {}) {
   const alle = lanAdressen(netze);
   const vorhanden = (a) => alle.some((x) => x.adresse === a);
+  const mit = (m) => ({ meldung: m, warnung: m ? alsEinzeiler(m) : null });
   if (fest) {
-    return { adresse: fest, grund: 'fest eingestellt (markttag-kassen.json)', alle,
-      warnung: vorhanden(fest) ? null : `Die fest eingestellte PC-Adresse ${fest} gehört zu keiner Netzwerkkarte dieses PCs. Tablets erreichen den PC so nicht.` };
+    return { adresse: fest, grund: 'fest eingestellt (markttag-kassen.json)', alle, ...mit(vorhanden(fest) ? null : meldung('adresse-fest',
+      `Die fest eingestellte PC-Adresse ${fest} gehört zu keiner Netzwerkkarte dieses PCs – Tablets erreichen den PC so nicht`,
+      `In markttag-kassen.json steht „pcAdresse“: ${fest}. Der PC hat aber ${alle.map((a) => a.adresse).join(', ') || 'gar keine Netzwerkadresse'}.`,
+      [`Im Router dem PC die Adresse ${fest} fest zuweisen (DHCP-Reservierung), dann Fenster neu starten.`,
+        'Oder in markttag-kassen.json die Angabe „pcAdresse“ korrigieren bzw. entfernen, dann Fenster neu starten.'])) };
   }
-  if (zettelAdresse && vorhanden(zettelAdresse)) return { adresse: zettelAdresse, grund: 'Adresse der gedruckten QR-Zettel', alle, warnung: null };
+  if (zettelAdresse && vorhanden(zettelAdresse)) return { adresse: zettelAdresse, grund: 'Adresse der gedruckten QR-Zettel', alle, ...mit(null) };
   const rang = (x) => (x.privat ? 2 : 0) + (x.virtuell ? 0 : 1);
   const beste = [...alle].sort((x, y) => rang(y) - rang(x))[0] || null;
-  let warnung = null;
-  if (!beste) warnung = 'Keine WLAN-/Netzwerkadresse gefunden. Ist der PC mit dem Stand-WLAN verbunden? Tablets können so nicht verbinden.';
-  else if (zettelAdresse) warnung = `PC-ADRESSE HAT SICH GEÄNDERT: die gedruckten QR-Zettel zeigen auf ${zettelAdresse}, der PC hat jetzt ${beste.adresse}. `
-    + 'Im Router dem PC wieder die alte Adresse geben (DHCP-Reservierung) ODER im PC-Manager unter „Verbindung prüfen“ die QR-Zettel neu drucken und neu scannen.';
-  return { adresse: beste ? beste.adresse : null, grund: beste ? `Netzwerkkarte „${beste.name}“` : 'keine', alle, warnung };
+  let m = null;
+  if (!beste) m = meldung('adresse-keine', 'Keine WLAN-/Netzwerkadresse gefunden – Tablets können nicht verbinden',
+    'Der PC ist mit keinem Netzwerk verbunden (WLAN aus, Router aus oder Kabel ab).',
+    ['PC mit dem Stand-WLAN verbinden (oder per Kabel mit dem Router) und prüfen, dass der Router läuft.', 'Dann das Fenster schließen und neu starten.']);
+  else if (zettelAdresse) m = meldung('adresse-geaendert',
+    `PC-ADRESSE HAT SICH GEÄNDERT: die gedruckten QR-Zettel zeigen auf ${zettelAdresse}, der PC hat jetzt ${beste.adresse}`,
+    'Der Router hat dem PC nach dem Einschalten eine andere Adresse gegeben. Die Tablets finden den PC so nicht.',
+    [`Am besten: im Router dem PC wieder die Adresse ${zettelAdresse} geben und „immer die gleiche IPv4-Adresse zuweisen“ anhaken (DHCP-Reservierung). Dann Fenster neu starten – die Zettel gelten wieder.`,
+      'Oder: im PC-Manager → Verbindung prüfen → „QR-Zettel drucken / prüfen“ alle Zettel neu drucken und alle Tablets einmal neu scannen.']);
+  return { adresse: beste ? beste.adresse : null, grund: beste ? `Netzwerkkarte „${beste.name}“` : 'keine', alle, ...mit(m) };
 }
 
 function sha256(text) { return crypto.createHash('sha256').update(String(text)).digest('hex'); }
@@ -133,6 +151,14 @@ function holeStatus(port, timeoutMs = 1500) {
 
 function warte(ms) { return new Promise((r) => setTimeout(r, ms)); }
 
+function portFrei(port) {
+  return new Promise((resolve) => {
+    const s = require('net').createServer();
+    s.once('error', () => resolve(false));
+    s.listen(port, '0.0.0.0', () => s.close(() => resolve(true)));
+  });
+}
+
 class TabletKassenStart {
   constructor({ manager, backendDir = __dirname, frontendRoot, nodeExe = process.execPath, datenOrdner = standardDatenOrdner(),
     konfigDatei = path.join(__dirname, 'markttag-kassen.json'), log = console.log, fehlerLog = console.error,
@@ -149,12 +175,20 @@ class TabletKassenStart {
     this.netze = netze;
     this.dienstSkript = dienstSkript || path.join(backendDir, 'run-device-companion.js');
     this.kassen = [];
-    this.warnungen = [];
+    this.meldungen = [];
     this.aktiv = false;
     this._stoppen = false;
     this.zustandsDatei = path.join(datenOrdner, 'kassen-start.json');
     this.verbindungsDatei = frontendRoot ? path.join(frontendRoot, 'pc-manager', 'kassen-verbindungen.json') : null;
   }
+
+  get warnungen() { return this.meldungen.map(alsEinzeiler); }
+  _melde(m, { drucken = false } = {}) {
+    this.meldungen = this.meldungen.filter((x) => x.schluessel !== m.schluessel);
+    this.meldungen.push(m);
+    if (drucken) druckeKasten(this.fehlerLog, [m]);
+  }
+  _entferne(schluessel) { this.meldungen = this.meldungen.filter((x) => x.schluessel !== schluessel); }
 
   _ladeZustand() {
     try {
@@ -182,7 +216,8 @@ class TabletKassenStart {
       this._schreibeVerbindungsdatei();
       return this.status();
     }
-    fs.mkdirSync(this.datenOrdner, { recursive: true });
+    try { fs.mkdirSync(this.datenOrdner, { recursive: true }); fs.accessSync(this.datenOrdner, fs.constants.W_OK); }
+    catch (e) { e.kcMeldung = erklaere(e, { was: 'Datenordner der Tablet-Kassen anlegen', pfad: this.datenOrdner }); throw e; }
     // Endet der Hauptprozess unerwartet, duerfen keine verwaisten Kassen-Dienste die festen
     // Ports blockieren - sonst scheitert der naechste Start mit "Port belegt".
     process.once('exit', () => { for (const k of this.kassen) { try { k.prozess && k.prozess.kill(); } catch (e) { /* schon weg */ } } });
@@ -206,32 +241,39 @@ class TabletKassenStart {
     });
 
     for (const k of this.kassen) {
-      const ergebnis = await this._kopplungSicherstellen(k);
-      k.kopplung = ergebnis;
-      this.log(`[Kassen-Start] ${k.id}: ${ergebnis.neu ? `neu gekoppelt (${ergebnis.grund})` : 'bereits gekoppelt'} · Port ${k.port}`);
+      // Jede Kasse fuer sich: scheitert eine, starten die anderen trotzdem.
+      try {
+        const ergebnis = await this._kopplungSicherstellen(k);
+        k.kopplung = ergebnis;
+        this.log(`[Kassen-Start] ${k.id}: ${ergebnis.neu ? `neu gekoppelt (${ergebnis.grund})` : 'bereits gekoppelt'} · Port ${k.port}`);
+      } catch (e) {
+        k.kopplung = { neu: false, grund: 'FEHLGESCHLAGEN' };
+        this._melde(erklaere(e, { kasse: k.id, was: 'Kopplung mit dem Manager' }));
+        this.fehlerLog(`[Kassen-Start] ${k.id}: Kopplung FEHLGESCHLAGEN – Details im Kasten unten.`);
+      }
     }
 
     const zettelAdressen = [...new Set(this.kassen.map((k) => k.zettel && k.zettel.adresse).filter(Boolean))];
     const wahl = waehleLanAdresse({ fest: konfig.pcAdresse, zettelAdresse: zettelAdressen[0] || null, netze: this.netze });
     this.adressWahl = wahl;
     this.lanAdresse = wahl.adresse;
-    this.warnungen = [];
-    if (wahl.warnung) this.warnungen.push(wahl.warnung);
+    if (wahl.meldung) this._melde(wahl.meldung);
 
     for (const k of this.kassen) {
+      if (!k.token) continue; // Datenbank der Kasse nicht lesbar - Meldung steht schon da
       try {
         await this._starteDienst(k);
       } catch (e) {
-        this.warnungen.push(`${k.id}: Kassen-Dienst startet nicht – ${e.message}`);
-        this.fehlerLog(`[Kassen-Start] ${k.id}: Kassen-Dienst startet nicht – ${e.message}`);
+        this._dienstGescheitert(k, e);
+        this.fehlerLog(`[Kassen-Start] ${k.id}: Kassen-Dienst startet nicht – Details im Kasten unten. Neuer Versuch alle 30 s.`);
       }
     }
+    this._meldeGesperrte();
     this.aktiv = true;
     this._pruefeZettel();
-    this._meldeGesperrte();
     this._speichereZustand();
     this._schreibeVerbindungsdatei();
-    this._sperrWaechter = setInterval(() => { this._pruefeSperren().catch((e) => this.fehlerLog(`[Kassen-Start] Sperr-Prüfung: ${e.message}`)); }, 5000);
+    this._sperrWaechter = setInterval(() => { this._pruefeSperren().catch((e) => this._melde(erklaere(e, { was: 'Prüfung „Gerät verloren“' }), { drucken: true })); }, 5000);
     if (this._sperrWaechter.unref) this._sperrWaechter.unref();
     return this.status();
   }
@@ -239,9 +281,10 @@ class TabletKassenStart {
   _meldeGesperrte() {
     for (const k of this.kassen) {
       if (!k.gesperrtGemeldet) continue;
-      const text = `${k.id} wurde als VERLOREN gesperrt: der alte QR-Zettel gilt nicht mehr. Im PC-Manager den neuen Zettel für ${k.id} drucken und das Ersatz-Tablet damit koppeln.`;
-      if (!this.warnungen.includes(text)) this.warnungen.push(text);
-      this.fehlerLog(`[Kassen-Start] ${text}`);
+      this._melde(meldung(`verloren-${k.id}`, `${k.id} wurde als VERLOREN gesperrt – der alte QR-Zettel gilt nicht mehr`,
+        'Im Admin-Center wurde „Gerät verloren“ gewählt. Das verlorene Tablet ist ausgesperrt; die anderen Kassen arbeiten normal weiter.',
+        [`PC-Manager → Verbindung prüfen → „QR-Zettel drucken / prüfen“: den Zettel für ${k.id} drucken.`,
+          'Ein Ersatz-Tablet damit einmal scannen (Kamera, Link öffnen, „Zum Home-Bildschirm“).']), { drucken: this.aktiv });
     }
   }
 
@@ -287,6 +330,16 @@ class TabletKassenStart {
         else if (zeile.revoked) grund = 'Kopplung war zurückgezogen';
         else if (new Date(zeile.expires_at).getTime() - Date.now() < ERNEUERN_WENN_RESTTAGE_UNTER * 86400000) grund = 'Kopplung lief bald ab – erneuert';
       }
+      // Zuerst den Tablet-Schluessel sichern - auch wenn die Kopplung gleich scheitert, soll das
+      // Tablet seine Kasse erreichen und offline weiter kassieren koennen.
+      if (grund === 'Kopplung war zurückgezogen' || k._schluesselErsetzen) {
+        dev.db.prepare('UPDATE device_identity SET kasse_access_token = NULL WHERE id = 1').run();
+        k.zettel = null;
+        k._schluesselErsetzen = false;
+        k.gesperrtGemeldet = true;
+      }
+      k.token = dev.kasseAccessToken;
+      k.geraet = dev.deviceInstanceId;
       if (grund) {
         await dev.pair({ pairingToken: m.issuePairingToken(), expectedFingerprint: m.identity.fingerprint,
           host: '127.0.0.1', port: m.port, registerLabel: k.id });
@@ -298,16 +351,8 @@ class TabletKassenStart {
           try { m._writeAuditLog('revoke', dev.deviceInstanceId, 'kassen-start', 'ersetzt_durch_neue_kopplung'); } catch (e) { /* Protokoll ist Zusatz */ }
         }
       }
-      // Im Admin-Center als VERLOREN gesperrt (Kopplung widerrufen): dann darf auch der
-      // Tablet-Schluessel nicht weiter gelten - sonst kassierte das verlorene Tablet weiter.
-      if (grund === 'Kopplung war zurückgezogen' || k._schluesselErsetzen) {
-        dev.db.prepare('UPDATE device_identity SET kasse_access_token = NULL WHERE id = 1').run();
-        k.zettel = null;
-        k._schluesselErsetzen = false;
-        k.gesperrtGemeldet = true;
-      }
-      k.token = dev.kasseAccessToken; // einmal erzeugt, danach dauerhaft gleich
-      k.geraet = dev.deviceInstanceId;
+      // (Tablet-Schluessel: oben gesichert, einmal erzeugt, danach dauerhaft gleich.
+      //  Im Admin-Center als VERLOREN gesperrt -> oben ersetzt, sonst kassierte das verlorene Tablet weiter.)
       k.credentialId = String(dev.pinned.credentialId).split('.')[0];
       return { neu: !!grund, grund: grund || null };
     } finally {
@@ -316,7 +361,17 @@ class TabletKassenStart {
     }
   }
 
-  _starteDienst(k) {
+  // Startet den Kassen-Dienst einer Kasse. Fehler kommen als eindeutige Ursache zurück
+  // (Port belegt / beendet / antwortet nicht) - nie als blosses "Zeitüberschreitung".
+  async _starteDienst(k) {
+    // Port vorher pruefen: ein gerade schliessendes altes Fenster bekommt 5 s Zeit.
+    let frei = false;
+    for (let i = 0; i < 10 && !(frei = await portFrei(k.port)); i++) await warte(500);
+    if (!frei) throw Object.assign(new Error(`Port ${k.port} ist bereits belegt`), { code: 'EADDRINUSE', port: k.port });
+    return this._spawneDienst(k);
+  }
+
+  _spawneDienst(k) {
     return new Promise((resolve, reject) => {
       let ausgabe = '';
       let fertig = false;
@@ -326,6 +381,13 @@ class TabletKassenStart {
       });
       k.prozess = kind;
       k.dienst = 'startet';
+      const scheitern = (fehler) => {
+        if (fertig) return;
+        fertig = true;
+        kind._keinNeustart = true; // gescheiterter Start: kein Waechter-Neustart, sondern geplanter Neuversuch
+        try { kind.kill(); } catch (e) { /* schon weg */ }
+        reject(fehler);
+      };
       const zeilen = (strom, ziel) => {
         let rest = '';
         strom.on('data', (d) => {
@@ -334,38 +396,67 @@ class TabletKassenStart {
           rest = teile.pop();
           for (const z of teile) {
             if (!z.trim()) continue;
-            if (!fertig) ausgabe = (ausgabe + '\n' + z).slice(-800);
+            ausgabe = (ausgabe + '\n' + z).slice(-800);
             ziel(`[${k.id}] ${z}`);
+            // Der Dienst meldet selbst, dass sein Port belegt ist -> sofort mit genau dieser Ursache.
+            if (/kc_sync_status_port_in_use/.test(z)) scheitern(Object.assign(new Error(`Port ${k.port} ist bereits belegt`), { code: 'EADDRINUSE', port: k.port }));
           }
         });
       };
       zeilen(kind.stdout, this.log);
       zeilen(kind.stderr, this.fehlerLog);
+      kind.on('error', (e) => scheitern(e)); // z. B. node.exe nicht ausführbar
       kind.on('exit', (code, signal) => {
         if (k.prozess === kind) { k.prozess = null; k.dienst = 'gestoppt'; }
-        if (!fertig) { fertig = true; reject(new Error(`beendet (Code ${code}${signal ? ', ' + signal : ''}). ${ausgabe.trim().split('\n').pop() || ''}`.trim())); return; }
-        if (this._stoppen || k._absichtlich) return;
+        if (!fertig) { scheitern(new Error(`Kassen-Dienst hat sich beim Start beendet (Code ${code}${signal ? ', ' + signal : ''}). ${ausgabe.trim().split('\n').pop() || ''}`.trim())); return; }
+        if (this._stoppen || k._absichtlich || kind._keinNeustart) return;
         // Wächter: unerwarteter Absturz -> nach kurzer Pause selbst wieder starten.
         k.neustarts += 1;
         const pause = Math.min(30000, 2000 * k.neustarts);
-        this.fehlerLog(`[Kassen-Start] ${k.id}: Kassen-Dienst unerwartet beendet (Code ${code}). Neustart in ${Math.round(pause / 1000)} s.`);
+        this.fehlerLog(`[Kassen-Start] ${k.id}: Kassen-Dienst unerwartet beendet (Code ${code}). Wird in ${Math.round(pause / 1000)} s automatisch neu gestartet.`);
+        if (k.neustarts >= 3) {
+          this._melde(meldung(`absturz-${k.id}`, `${k.id}: Kassen-Dienst stürzt wiederholt ab (${k.neustarts}×)`,
+            'Der Dienst wird jedes Mal automatisch neu gestartet, beendet sich aber immer wieder. Das Tablet kassiert solange offline weiter; die Bons werden nachgereicht, sobald der Dienst läuft.',
+            ['Das schwarze Fenster schließen und neu starten.', 'Meldet der Virenscanner etwas: „node.exe“ zulassen.', SCHRITT_BETREUER],
+            `letzte Ausgabe: ${ausgabe.trim().split('\n').pop() || '–'}`), { drucken: true });
+          this._schreibeVerbindungsdatei();
+        }
         setTimeout(() => {
           if (this._stoppen || k._absichtlich || k.prozess) return;
-          this._starteDienst(k).then(() => this._schreibeVerbindungsdatei()).catch((e) => this.fehlerLog(`[Kassen-Start] ${k.id}: Neustart fehlgeschlagen – ${e.message}`));
+          this._starteDienst(k).then(() => this._schreibeVerbindungsdatei())
+            .catch((e) => this._dienstGescheitert(k, e, 'Kassen-Dienst neu starten'));
         }, pause).unref?.();
       });
       // Bereit, sobald der Status-Endpunkt antwortet.
       const ende = Date.now() + 20000;
       const pruefe = async () => {
         if (fertig) return;
-        if (await holeStatus(k.port)) {
-          fertig = true; k.dienst = 'laeuft'; resolve(); return;
-        }
-        if (Date.now() > ende) { fertig = true; try { kind.kill(); } catch (e) { /* schon weg */ } reject(new Error('antwortet nach 20 s nicht')); return; }
+        if (await holeStatus(k.port)) { fertig = true; k.dienst = 'laeuft'; resolve(); return; }
+        if (Date.now() > ende) { scheitern(new Error('Kassen-Dienst antwortet nach 20 s nicht')); return; }
         setTimeout(pruefe, 250);
       };
       setTimeout(pruefe, 200);
     });
+  }
+
+  // Start eines Kassen-Dienstes gescheitert: Meldung mit Lösung - und alle 30 s ein stiller
+  // Neuversuch. Wird z. B. das alte Fenster geschlossen, läuft die Kasse von selbst an und die
+  // Meldung verschwindet wieder.
+  _dienstGescheitert(k, fehler, was = 'Kassen-Dienst starten') {
+    this._melde({ ...erklaere(fehler, { kasse: k.id, was, port: k.port }), schluessel: `dienst-${k.id}` }, { drucken: this.aktiv });
+    this._schreibeVerbindungsdatei();
+    if (k._neuversuch || this._stoppen) return;
+    k._neuversuch = setTimeout(async () => {
+      k._neuversuch = null;
+      if (this._stoppen || k.prozess || k._absichtlich) return;
+      try {
+        await this._starteDienst(k);
+        this._entferne(`dienst-${k.id}`);
+        this.log(`[Kassen-Start] ${k.id}: Kassen-Dienst läuft jetzt – das Problem hat sich erledigt.`);
+        this._schreibeVerbindungsdatei();
+      } catch (e) { this._dienstGescheitert(k, e, was); }
+    }, 30000);
+    if (k._neuversuch.unref) k._neuversuch.unref();
   }
 
   _stoppeDienst(k) {
@@ -392,8 +483,12 @@ class TabletKassenStart {
         && Number(k.zettel.webserverPort) === Number(this.webserverPort) ? 'gueltig' : 'veraltet';
     }
     const veraltet = this.kassen.filter((k) => k.zettelStatus === 'veraltet').map((k) => k.id);
-    if (veraltet.length && !this.warnungen.some((w) => w.startsWith('PC-ADRESSE'))) {
-      this.warnungen.push(`QR-Zettel passen nicht mehr zu: ${veraltet.join(', ')}. Im PC-Manager unter „Verbindung prüfen“ neu drucken und neu scannen.`);
+    this._entferne('zettel-veraltet');
+    if (veraltet.length && !this.meldungen.some((m) => m.schluessel === 'adresse-geaendert')) {
+      this._melde(meldung('zettel-veraltet', `QR-Zettel passen nicht mehr zu: ${veraltet.join(', ')}`,
+        'Seit dem Druck hat sich die PC-Adresse, der Webserver-Port oder der Schlüssel dieser Kasse geändert.',
+        ['PC-Manager → Verbindung prüfen → „QR-Zettel drucken / prüfen“: die betroffenen Zettel neu drucken.',
+          'Die Tablets dieser Kassen mit dem neuen Zettel einmal neu scannen.']));
     }
   }
 
@@ -408,10 +503,9 @@ class TabletKassenStart {
       k.zettel = { hash: sha256(url), adresse: this.lanAdresse, webserverPort: this.webserverPort, gedrucktAm: jetzt };
       if (k.gesperrtGemeldet) {
         k.gesperrtGemeldet = false;
-        this.warnungen = this.warnungen.filter((w) => !w.startsWith(`${k.id} wurde als VERLOREN gesperrt`));
+        this._entferne(`verloren-${k.id}`);
       }
     }
-    this.warnungen = this.warnungen.filter((w) => !w.startsWith('QR-Zettel passen nicht mehr'));
     this._pruefeZettel();
     this._speichereZustand();
     this._schreibeVerbindungsdatei();
@@ -431,7 +525,10 @@ class TabletKassenStart {
         k.token = dev.kasseAccessToken;
       } finally { dev.db.close(); }
       k.zettel = null;
-      await this._starteDienst(k);
+      // Ab hier gilt der neue Schluessel. Startet der Dienst nicht, wird das gemeldet - aber nicht
+      // als "fehlgeschlagen" zurueckgegeben, sonst glaubte man, der alte Zettel gelte noch.
+      try { await this._starteDienst(k); this._entferne(`dienst-${k.id}`); }
+      catch (e) { this._dienstGescheitert(k, e, 'Kassen-Dienst nach neuem Schlüssel starten'); }
     } finally { k._absichtlich = false; }
     this.log(`[Kassen-Start] ${k.id}: neuer Zugangsschlüssel – alter QR-Zettel ist ab sofort ungültig.`);
     this._pruefeZettel();
@@ -451,7 +548,8 @@ class TabletKassenStart {
       adressGrund: this.adressWahl ? this.adressWahl.grund : null,
       alleAdressen: this.adressWahl ? this.adressWahl.alle.map((a) => `${a.adresse} (${a.name})`) : [],
       datenOrdner: this.datenOrdner,
-      warnungen: [...this.warnungen],
+      warnungen: this.warnungen,
+      meldungen: this.meldungen.map((m) => ({ ...m, loesung: [...m.loesung] })),
       liveKanal: { laeuft: !this.manager.liveMonitorFehler, fehler: this.manager.liveMonitorFehler || null, gestartetUm: this.gestartetUm || null },
       kassen: this.kassen.map((k) => ({
         id: k.id,
@@ -476,13 +574,15 @@ class TabletKassenStart {
       // Kompatibel zu allen bisherigen Lesern: { erzeugtAm, webserverPort, lanAdresse, liveKanal, kassen:[{id,name,port,token,host}] }
       schreibeAtomar(this.verbindungsDatei, JSON.stringify(s, null, 2));
     } catch (e) {
-      this.fehlerLog(`[Kassen-Start] Verbindungsdatei konnte nicht geschrieben werden: ${e.message}`);
+      this._melde(erklaere(e, { was: 'Verbindungsdatei für den PC-Manager schreiben', pfad: this.verbindungsDatei }), { drucken: !this._dateiFehlerGemeldet });
+      this._dateiFehlerGemeldet = true;
     }
   }
 
   async stop() {
     this._stoppen = true;
     if (this._sperrWaechter) clearInterval(this._sperrWaechter);
+    for (const k of this.kassen) if (k._neuversuch) clearTimeout(k._neuversuch);
     await Promise.all(this.kassen.map((k) => this._stoppeDienst(k)));
   }
 }
