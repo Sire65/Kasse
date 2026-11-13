@@ -13,6 +13,8 @@
 const fs = require('fs');
 const path = require('path');
 
+let currentDeviceId='';
+function setDeviceId(id){currentDeviceId=String(id||'')}
 const KONFIG_DATEI = path.join(__dirname, '..', 'zentral-zugang.json');
 
 function ladeKonfig() {
@@ -32,7 +34,7 @@ async function vorgang(name, zusatz = {}) {
   if (!k) throw new Error('Zentrale Datenhaltung ist nicht eingerichtet (zentral-zugang.json fehlt).');
   const antwort = await fetch(`${k.url}/functions/v1/kc-zentrale`, {
     method: 'POST',
-    headers: {'Content-Type': 'application/json', 'x-kc-zugang': k.zugangswort},
+    headers: {'Content-Type': 'application/json', 'x-kc-zugang': k.zugangswort, 'x-kc-device-id': currentDeviceId||k.deviceId||''},
     body: JSON.stringify({vorgang: name, orgId: k.orgId || 'KC_WERNE', ...zusatz}),
     signal: AbortSignal.timeout(15000),
   });
@@ -70,4 +72,5 @@ async function zustand(orgId) {
   return {eingerichtet: true, url: k.url, personen: z.personen, zeiten: z.zeiten};
 }
 
-module.exports = { ladeKonfig, personenHolen, zeitenMelden, pseudonymeSchreiben, zustand, KONFIG_DATEI };
+async function migrationsstand(orgId){return vorgang('migration_status',{orgId})}
+module.exports = { setDeviceId, migrationsstand, ladeKonfig, personenHolen, zeitenMelden, pseudonymeSchreiben, zustand, KONFIG_DATEI };

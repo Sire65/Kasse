@@ -52,6 +52,7 @@ class ManagerCompanion {
   async start(port = 0) {
     this._startedAt = Date.now();
     this.identity = await loadOrCreateIdentity(this.db, this.dbPath);
+    require('./zentral-sync').setDeviceId(this.identity.managerId);
     // Befund D-04: fail-closed statt fail-open. Konnte der Dateischutz nicht nachweislich
     // greifen (weder beim Erzeugen noch - Befund T-03 - bei einem bereits vorhandenen Schlüssel
     // nach einem Neustart), darf der Manager nicht stillschweigend ungeschützt weiterlaufen.
@@ -767,6 +768,9 @@ class ManagerCompanion {
         const orgId = (konfig && konfig.orgId) || 'KC_WERNE';
         const antworte = (code, daten) => { res.writeHead(code, {'Content-Type':'application/json'}); res.end(JSON.stringify(daten)); };
 
+        if (req.method === 'GET' && url.pathname === '/zentral/migrationsstand') {
+          zentral.migrationsstand(orgId).then((z)=>antworte(200,z)).catch(()=>antworte(503,{ok:false,fehler:'Umstellungsstand unbekannt'}));return;
+        }
         if (req.method === 'GET' && url.pathname === '/zentral/zustand') {
           zentral.zustand(orgId).then((z) => antworte(200, z))
             .catch((e) => antworte(200, {eingerichtet: !!konfig, fehler: e.message}));
