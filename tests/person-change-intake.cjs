@@ -1,0 +1,15 @@
+const assert=require('node:assert/strict'),fs=require('node:fs'),vm=require('node:vm');
+const storage=new Map(),calls=[];let response={ok:true,status:'uebernommen'},fail=false;
+const ctx={window:{},document:{readyState:'loading',addEventListener(){}},sessionStorage:{getItem:k=>storage.get(k),setItem:(k,v)=>storage.set(k,v)},crypto:require('node:crypto').webcrypto,atob,setInterval,console};
+ctx.window.KCSupabase={holeZugriffsToken:()=>'.'+Buffer.from(JSON.stringify({sub:'operator'})).toString('base64url')+'.',istAngemeldet:()=>true,rufeTabelleAuf:async()=>[{email:null}],rufeFunktionAuf:async(name,args)=>{calls.push({name,args});if(fail)throw Error('offline');return response}};
+vm.runInNewContext(fs.readFileSync('pc-manager/kc-person-change-intake.js','utf8'),ctx);
+(async()=>{const api=ctx.window.KCPersonChangeIntake,item={id:'message-1',person_id:'person-1',erwartet_schluessel:{kern:['email'],manager:[]}},expected=await api.current(item);
+assert.equal(expected.kern.email,null);assert.deepEqual(Object.keys(expected.kern),['email']);
+fail=true;await assert.rejects(api.submit(item,'uebernehmen',expected),/offline/);const first=calls.at(-1).args;
+await assert.rejects(api.submit(item,'ablehnen',expected,'Grund'),/denselben Vorgang/);
+fail=false;const result=await api.submit(item,'uebernehmen',expected);assert.equal(result.ok,true);assert.equal(calls.at(-1).args.p_vorgang,first.p_vorgang);assert.equal(first.p_programm,'KC_MANAGER');assert.equal(first.p_erwartet.kern.email,null);
+response={ok:false,grund:'bereits_erledigt'};assert.equal((await api.submit(item,'uebernehmen',expected)).ok,false);assert.notEqual(calls.at(-1).args.p_vorgang,first.p_vorgang);
+await assert.rejects(api.current({...item,erwartet_schluessel:{kern:[],manager:['phone']}}),/gesperrter/);
+response={ok:true,status:'unexpected'};await assert.rejects(api.submit(item,'uebernehmen',expected),/Ergebnisstatus/);
+console.log('PASS: exact null comparison, same UUID after network failure, different decision blocked, foreign completion not success, landline blocked, malformed result retained.');
+})().catch(e=>{console.error(e);process.exitCode=1});
