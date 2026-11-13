@@ -101,6 +101,15 @@ Problem, arbeiten die anderen normal. Wird die Ursache behoben (z. B. altes Fens
 startet die betroffene Kasse **von selbst** innerhalb von 30 Sekunden nach – die Meldung
 verschwindet dann.
 
+**Belegte Ports räumt das Fenster selbst frei – ohne Adminrechte:** Läuft noch ein altes
+schwarzes Fenster (oder ein übrig gebliebener Kassen-Dienst), wird es automatisch beendet und
+der Start geht weiter („Altes Kassenfenster … beendet – Port … ist frei, Start geht weiter“).
+Belegt ein **fremdes** Programm den Port, wird es bewusst **nicht** beendet; die Meldung nennt
+dann den Programmnamen und die Prozessnummer, damit man genau dieses Programm im Task-Manager
+schließen kann. Hinweis: Wer während des Betriebs versehentlich ein zweites Fenster startet,
+löst damit eine Übergabe aus – die Tablets sind dabei wenige Sekunden offline, es geht nichts
+verloren.
+
 Endet der Start mit **„START ABGEBROCHEN“**, steht die Ursache im Kasten darüber; das Fenster
 bleibt offen, bis eine Taste gedrückt wird.
 
@@ -111,7 +120,7 @@ bleibt offen, bis eine Taste gedrückt wird.
 | Tablet: „Zugang ungültig – QR-Zettel dieser Kasse neu scannen“ | Der Schlüssel dieser Kasse wurde erneuert. Neuen Zettel scannen. |
 | Schwarzes Fenster: „BEREIT MIT WARNUNGEN“ | Die Warnung darüber lesen – sie sagt genau, was los ist. |
 | Warnung „PC-ADRESSE HAT SICH GEÄNDERT“ | Router-Einstellung aus A.1 fehlt. Entweder im Router die alte Adresse wieder zuweisen **oder** Zettel neu drucken und alle Tablets neu scannen. |
-| Warnung „Port 8090 ist belegt“ | Ein altes Fenster läuft noch. Alle schwarzen Fenster schließen (ggf. Task-Manager → „node.exe“ beenden), **ein** Fenster neu starten. |
+| Warnung „Port … ist belegt von „Programmname““ | Ein fremdes Programm belegt den Port. Genau dieses Programm im Task-Manager beenden (Name und Prozessnummer stehen in der Meldung), dann Fenster neu starten. Alte Kassenfenster räumt das Programm selbst ab. |
 | Ein Tablet ist kaputt | Anderes Tablet nehmen, Zettel **KASSE-03** scannen, weiter kassieren. |
 | Tablet verloren oder gestohlen | PC-Manager → Admin-Center → **„Gerät verloren“**. Innerhalb weniger Sekunden bekommt diese Kasse einen neuen Schlüssel – das verlorene Tablet ist ausgesperrt. Neuen Zettel drucken, Ersatz-Tablet damit koppeln. Die anderen Kassen merken davon nichts. |
 | Zettel verloren oder fremd fotografiert | PC-Manager → QR-Zettel → bei der Kasse **„Schlüssel erneuern…“**. Der alte Zettel ist sofort ungültig; neuen drucken, nur dieses eine Tablet neu scannen. |
@@ -152,6 +161,7 @@ nötig.
 * **Sicherheit:** `pc-manager/kassen-verbindungen.json` (enthält die Schlüssel) und die
   Zettel-Aktionen sind nur vom PC selbst erreichbar, nicht über das WLAN; die Datei liegt nicht
   mehr im Repository.
+* **Port-Freigabe:** `markt-kasse-suite/backend-source/port-freigabe.js` – erkennt den Besitzer eines Ports (Windows: PowerShell `Get-NetTCPConnection`/`Get-CimInstance`, Rückfall `netstat`/`tasklist`), beendet nur Prozesse mit `run-manager-service.js`, `run-device-companion.js`, `serve-frontend.js` oder `markttag-start.js` in der Befehlszeile (Windows: `taskkill /T /F`), nie den eigenen Prozess oder fremde Programme. Test: `tests/kassen-start-portfreigabe.test.cjs`.
 * **Fehlermeldungen:** zentral in `markt-kasse-suite/backend-source/fehlerhilfe.js` (Was / Ursache / Lösung). Test: `tests/kassen-start-fehlermeldungen.test.cjs`.
 * **Tests:** `tests/kassen-start-datenwege.test.cjs` (Stammdaten, Dienstplan, Geld-Übergabe, Ausverkauft, Verkauf/Live-Monitor, „Gerät verloren“ über den echten Start mit drei Tablets), `tests/kassen-start-dauerhaft.test.cjs` (Ende-zu-Ende: drei Starts mit Tablet,
   QR vom Ausdruck zurückgelesen, Ablauf der Kopplung, neuer Manager, Absturz, Schlüssel

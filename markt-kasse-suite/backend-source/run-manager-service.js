@@ -8,6 +8,7 @@ const { ManagerCompanion } = require('./manager-companion');
 const { KiccRuntimeTelemetry } = require('./kicc-runtime-telemetry');
 const { TabletKassenStart, leseKassenKonfig, standardDatenOrdner, zettelWebserverPort } = require('./kassen-start');
 const { meldung, erklaere, druckeKasten, SCHRITTE_FENSTER_NEU } = require('./fehlerhilfe');
+const { sicherePortFrei, belegtFehler, programmName } = require('./port-freigabe');
 
 // Start abbrechen - immer mit Kasten (Was / Ursache / Loesung), nie mit rohem Stacktrace.
 function startAbbrechen(m) {
@@ -113,6 +114,12 @@ async function main() {
   console.log('==============================================================');
   console.log(`[KC Start] Paket: ${paketRoot}`);
   console.log(`[KC Start] Web-Wurzel: ${frontendRoot}`);
+  // KS-03: belegte Ports freiraeumen - alte Kassenfenster werden beendet (ohne Adminrechte),
+  // fremde Programme nur benannt. Erst danach die Datenbank oeffnen, damit kein altes Fenster
+  // gleichzeitig hineinschreibt.
+  const managerPort = await sicherePortFrei(port, { log: console.log, wofuer: 'Manager-Dienst' });
+  if (!managerPort.frei) startAbbrechen(erklaere(belegtFehler(port, managerPort), { was: 'Manager-Dienst starten', port }));
+  const livePort = await sicherePortFrei(47392, { log: console.log, wofuer: 'Live-Kanal' });
   console.log(`[KC Sync Manager] Öffne Datenbank: ${dbPath}`);
 
   let mgr;
@@ -148,18 +155,21 @@ async function main() {
   let kassenStart = null;
   const startWarnungen = []; // Meldungen {titel, ursache, loesung[]}
   if (mgr.liveMonitorFehler) {
-    const m = erklaere(new Error(mgr.liveMonitorFehler), { was: 'Live-Kanal starten', port: 47392 });
+    const m = erklaere(livePort.frei ? new Error(mgr.liveMonitorFehler) : belegtFehler(47392, livePort), { was: 'Live-Kanal starten', port: 47392 });
     startWarnungen.push({ ...m, titel: `${m.titel} – im PC-Manager bleiben Kassen-LEDs und Live-Verkäufe leer (Kassieren geht trotzdem)` });
   }
   if (!args.keinWebserver) {
     const wunschPort = args.webserverPort || Number(process.env.KC_SYNC_WEBSERVER_PORT) || zettelWebserverPort(datenOrdner) || 8090;
     let webserverPort;
-    if (tabletKassenVorhanden && await warteAufPort(wunschPort)) webserverPort = wunschPort;
+    const webPort = await sicherePortFrei(wunschPort, { log: console.log, wofuer: 'Webserver' });
+    if (webPort.frei || (tabletKassenVorhanden && await warteAufPort(wunschPort))) webserverPort = wunschPort;
     else webserverPort = await findeFreienPort(wunschPort);
     if (tabletKassenVorhanden && webserverPort !== wunschPort) {
+      const von = webPort.besitzer;
+      const fremd = von && webPort.grund === 'fremd';
       startWarnungen.push(meldung('webport', `Port ${wunschPort} ist belegt – die QR-Zettel der Tablets funktionieren so NICHT`,
-        `Ein anderes Programm (fast immer ein zweites schwarzes Fenster) benutzt Port ${wunschPort}. Der Webserver läuft deshalb auf ${webserverPort}, die Zettel zeigen aber auf ${wunschPort}.`,
-        SCHRITTE_FENSTER_NEU));
+        `${fremd ? `Das Programm „${programmName(von)}“ (Prozess ${von.pid}) benutzt Port ${wunschPort}; es gehört nicht zum Kassensystem und wird deshalb nicht automatisch beendet.` : `Ein anderes Programm benutzt Port ${wunschPort}.`} Der Webserver läuft deshalb auf ${webserverPort}, die Zettel zeigen aber auf ${wunschPort}.`,
+        fremd ? [`„${programmName(von)}“ beenden: Task-Manager (Strg + Umschalt + Esc) → „Details“ → „${programmName(von)}“ (PID ${von.pid}) → „Task beenden“.`, 'Dann das schwarze Fenster schließen und neu starten.'] : SCHRITTE_FENSTER_NEU));
     }
     webserverProzess = spawn(
       process.execPath,

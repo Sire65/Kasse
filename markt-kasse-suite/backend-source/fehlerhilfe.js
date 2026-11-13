@@ -34,6 +34,19 @@ function erklaere(err, kontext = {}) {
 
   if (code === 'EADDRINUSE' || /port_in_use|ist bereits belegt|EADDRINUSE/i.test(text)) {
     const port = kontext.port || (text.match(/Port (\d+)/i) || text.match(/:(\d{4,5})\b/) || [])[1] || '?';
+    const von = err && err.belegtVon;
+    if (von && von.grund === 'fremd') {
+      return meldung(`port-${port}`, `${wer}Port ${port} ist belegt von „${von.programm}“ (Prozess ${von.pid}) – ${was} nicht möglich`,
+        `„${von.programm}“ gehört nicht zum Kassensystem. Fremde Programme werden bewusst NICHT automatisch beendet – es könnte etwas Wichtiges sein.`,
+        [`„${von.programm}“ beenden: Task-Manager (Strg + Umschalt + Esc) → „Details“ → „${von.programm}“ (PID ${von.pid}) → „Task beenden“.`,
+          'Dann das schwarze Fenster schließen und neu starten.',
+          `Wird „${von.programm}“ am Stand gebraucht: Betreuer anrufen – dann muss der Port des Kassensystems geändert werden.`], technisch);
+    }
+    if (von && von.grund === 'laesst_sich_nicht_beenden') {
+      return meldung(`port-${port}`, `${wer}Port ${port}: altes Kassenfenster (Prozess ${von.pid}) lässt sich nicht beenden – ${was} nicht möglich`,
+        'Ein älteres schwarzes Fenster belegt den Port und reagiert nicht auf das Beenden.',
+        ['Task-Manager (Strg + Umschalt + Esc) → „Details“ → alle „node.exe“ markieren → „Task beenden“.', 'Dann EIN Fenster neu starten: KC_Manager_Start.cmd doppelklicken.', 'Hilft das nicht: PC neu starten.'], technisch);
+    }
     return meldung(`port-${port}`, `${wer}Port ${port} ist belegt – ${was} nicht möglich`,
       'Ein anderes Programm benutzt diesen Anschluss. Fast immer ist es ein noch offenes zweites schwarzes Fenster oder die alte Kassenversion.',
       SCHRITTE_FENSTER_NEU, technisch);

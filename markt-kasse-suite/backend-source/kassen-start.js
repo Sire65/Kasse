@@ -35,6 +35,7 @@ const crypto = require('crypto');
 const { spawn } = require('child_process');
 const { DeviceCompanion } = require('./device-companion');
 const { meldung, erklaere, alsEinzeiler, druckeKasten, SCHRITT_BETREUER } = require('./fehlerhilfe');
+const { sicherePortFrei, belegtFehler } = require('./port-freigabe');
 
 const ERSTER_KASSEN_PORT = 47500;
 const ERNEUERN_WENN_RESTTAGE_UNTER = 7;
@@ -364,10 +365,10 @@ class TabletKassenStart {
   // Startet den Kassen-Dienst einer Kasse. Fehler kommen als eindeutige Ursache zurück
   // (Port belegt / beendet / antwortet nicht) - nie als blosses "Zeitüberschreitung".
   async _starteDienst(k) {
-    // Port vorher pruefen: ein gerade schliessendes altes Fenster bekommt 5 s Zeit.
-    let frei = false;
-    for (let i = 0; i < 10 && !(frei = await portFrei(k.port)); i++) await warte(500);
-    if (!frei) throw Object.assign(new Error(`Port ${k.port} ist bereits belegt`), { code: 'EADDRINUSE', port: k.port });
+    // Port vorher pruefen: belegt ihn ein altes Kassenfenster, wird es beendet; ein fremdes
+    // Programm wird nur benannt (nie beendet).
+    const pf = await sicherePortFrei(k.port, { log: this.log, wofuer: k.id });
+    if (!pf.frei) throw belegtFehler(k.port, pf);
     return this._spawneDienst(k);
   }
 
