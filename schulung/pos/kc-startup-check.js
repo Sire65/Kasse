@@ -25,13 +25,18 @@
       const timer = setTimeout(() => ctrl.abort(), 2500);
       const res = await fetch(statusUrl, { signal: ctrl.signal });
       clearTimeout(timer);
-      if (!res.ok) return { ok: false, text: 'Datensicherung antwortet nicht' };
+      // KS-01: 403 heisst hier "Schluessel passt nicht" - z. B. nach "Schluessel erneuern" im
+      // PC-Manager. Das muss das Tablet klar sagen, sonst sucht man den Fehler im WLAN.
+      if (res.status === 403) return { ok: false, text: 'Zugang ungültig – QR-Zettel dieser Kasse neu scannen (Kasse arbeitet normal weiter)' };
+      if (!res.ok) return { ok: false, text: 'Datensicherung antwortet nicht – schwarzes Fenster am PC schließen und neu starten (Kasse arbeitet normal weiter)' };
       const data = await res.json();
       const farbe = data.connection?.color;
       if (farbe === 'gruen') return { ok: true, text: 'Verbunden' };
       if (farbe === 'gelb') return { ok: true, text: 'Verbunden, wartet auf Abgleich', warn: true };
       return { ok: false, text: 'Datensicherung nicht erreichbar (Kasse arbeitet normal weiter)' };
     } catch (e) {
+      // Tablet-Kasse (per QR-Zettel gekoppelt): der Dienst laeuft auf dem PC - dann konkret sagen, wo man nachsieht.
+      if (global.KCSyncConnection?.config?.token) return { ok: false, text: 'PC nicht erreichbar – sind PC und schwarzes Fenster an, ist das Tablet im Stand-WLAN? (Kasse arbeitet normal weiter)' };
       return { ok: false, text: 'Datensicherung nicht erreichbar (Kasse arbeitet normal weiter)' };
     }
   }

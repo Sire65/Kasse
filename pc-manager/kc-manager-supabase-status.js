@@ -397,7 +397,9 @@
     setInterval(() => { if (document.hidden && Date.now() - letzteProbe < 120000) return; letzteProbe = Date.now(); pruefeVerbindungLeise(); }, 30000);
   }
 
-  global.KCSupabase = { rufeFunktionAuf, rufeEdgeFunktionAuf, rufeTabelleAuf, listeTabellen, istAngemeldet: () => !!accessToken(), holeZugriffsToken: () => accessToken() };
+  global.KCSupabase = { rufeFunktionAuf, rufeEdgeFunktionAuf, rufeTabelleAuf, listeTabellen, istAngemeldet: () => !!accessToken(), holeZugriffsToken: () => accessToken(),
+    // KS-04: öffentliche Projektangaben (kein Geheimnis) - für die Stand-Anmeldung des Mini-PCs
+    konfig: { url: SUPABASE_URL, publishableKey: SUPABASE_ANON_KEY } };
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
   else init();

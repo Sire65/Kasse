@@ -1,146 +1,214 @@
-# Tablet und PC-Manager zusammenschalten
+# Tablets und PC-Manager koppeln – einmal, dann nie wieder
 
-Es gibt dafür einen fertigen Ein-Klick-Weg. Er startet den Manager, die Kassen **und** den
-Webserver zusammen und zeigt am Ende eine Seite mit einem QR-Code pro Kasse.
+**Stand: 13.11.2026 · KS-01 „Einmal koppeln, dauerhaft gültig“**
 
-*Am 01.09.2026 hier einmal komplett durchlaufen lassen und geprüft — Manager läuft, beide
-Kassen gekoppelt, Webserver läuft, Übersichtsseite mit QR-Codes erzeugt, Kasse über die
-Adresse geöffnet und LED auf „Online und synchronisiert".*
+Jedes Tablet wird **ein einziges Mal** mit einem **gedruckten QR-Zettel** gekoppelt.
+Danach wird morgens nichts mehr gescannt – auch nicht nach einer Nacht ohne Strom,
+nicht nach einem Neustart des PCs und nicht nach einem Programm-Update.
 
----
+Es gibt **drei Kassen**: KASSE-01, KASSE-02 und KASSE-03. Die dritte ist für den Ersatzfall:
+fällt ein Tablet aus, nimmt man ein anderes, scannt den Zettel KASSE-03 und kassiert weiter.
 
-## Einmalig auf dem PC
-
-**Node.js installieren** von https://nodejs.org — die Version **LTS**. Danach den Rechner
-einmal neu starten.
-
-Dann die ZIP auf den PC kopieren und **entpacken** (nicht im ZIP arbeiten).
+> Früher (bis November 2026) wurden bei jedem Start neue Schlüssel vergeben – deshalb musste
+> jeden Morgen jedes Tablet vom Monitor neu scannen. Das ist vorbei.
 
 ---
 
-## Jedes Mal: ein Doppelklick
+## A. Einmalige Einrichtung (Betreuer, ca. 30 Minuten)
 
-Im Ordner `kc-sync-installation-und-backend`:
+### 1. Router: dem PC immer dieselbe Adresse geben – das Wichtigste
 
-**`KC_Markttag_Start.cmd` doppelklicken.**
+Der QR-Code enthält die Adresse des PCs im Stand-WLAN. Bekommt der PC nach einer Nacht ohne
+Strom eine andere Adresse, passen die Zettel nicht mehr.
 
-Ein schwarzes Fenster geht auf. **Das bleibt offen** — es ist kein Ladefenster, das ist der
-laufende Betrieb. Zumachen beendet alles.
+**FRITZ!Box:** Heimnetz → Netzwerk → beim Stand-PC auf den Stift → Haken bei
+**„Diesem Netzwerkgerät immer die gleiche IPv4-Adresse zuweisen“** → Übernehmen.
+Andere Router: das heißt meist „DHCP-Reservierung“ oder „statische Zuweisung“.
 
-Nach ein paar Sekunden steht dort:
+Passt die Adresse trotzdem einmal nicht, steht das **unübersehbar** im schwarzen Fenster
+(„PC-ADRESSE HAT SICH GEÄNDERT …“) und im PC-Manager – man sucht den Fehler nicht am Tablet.
+
+### 2. PC: Programm einrichten
+
+1. ZIP vollständig entpacken (nicht im ZIP arbeiten).
+2. `KC_Manager_Start.cmd` doppelklicken. Beim allerersten Start wird die Laufzeit einmalig
+   eingerichtet (Internet nötig).
+3. **Windows-Firewall-Frage: „Zulassen“ – für private Netzwerke.** Wird das weggeklickt,
+   kommen die Tablets nicht an den PC heran.
+
+### 3. Automatisch starten, wenn der PC angeht (empfohlen)
+
+1. `Windows-Taste + R`, eintippen: `shell:startup`, Enter – ein Ordner öffnet sich.
+2. Mit der **rechten Maustaste** `KC_Manager_Start.cmd` in diesen Ordner ziehen →
+   **„Verknüpfungen hier erstellen“**.
+
+Ab dann startet alles von selbst, sobald der PC hochgefahren ist.
+
+### 4. QR-Zettel drucken
+
+PC-Manager → **Verbindung prüfen** → **„QR-Zettel drucken / prüfen“**
+(oder Kassen → **„🖨 Tablet-QR-Zettel“**, oder direkt
+`http://127.0.0.1:8090/pc-manager/kassen-zettel.html` – **nur am PC selbst**).
+
+**„Alle Zettel drucken“** → drei Seiten, eine pro Kasse. Danach fragt die Seite, ob die Zettel
+gut lesbar gedruckt sind – mit **OK** bestätigen. Erst dann gelten sie als „gültig“.
+
+### 5. Jedes Tablet einmal koppeln
+
+1. Tablet ins **Stand-WLAN**.
+2. **Kamera** öffnen, Zettel der Kasse scannen (KASSE-01 für Tablet 1 usw.), Link antippen.
+3. **Teilen → „Zum Home-Bildschirm“** (Android: ⋮ → „Zum Startbildschirm“).
+4. Tablet beschriften („KASSE-01“).
+
+### 6. Zettel aufbewahren – nicht aushängen
+
+Der Zettel ist der **Schlüssel** zur Kasse. Wer ihn im Stand-WLAN fotografiert, kommt an die
+Kasse. In die Kassenkassette oder einen Ordner am Stand.
+
+---
+
+## B. Jeden Markttag (Mitglieder)
+
+1. Router und PC einschalten. Das schwarze Fenster startet von selbst und zeigt
+   **„[Marktag-Start] ALLES BEREIT“**. Fenster offen lassen.
+2. Am Tablet das **Kassen-Symbol** auf dem Home-Bildschirm antippen.
+3. LED oben rechts **grün** = fertig.
+
+**Kein Scannen.**
+
+Am Ende des Tages: schwarzes Fenster schließen (oder PC herunterfahren).
+
+---
+
+## C. Wenn etwas nicht stimmt
+
+**Jede Störung meldet sich im schwarzen Fenster in einem Kasten mit Ausrufezeichen** – immer
+gleich aufgebaut:
 
 ```
-[Marktag-Start] Manager läuft (https://127.0.0.1:8543).
-[Marktag-Start] KASSE-01: gekoppelt.
-[Marktag-Start] KASSE-02: gekoppelt.
-[Webserver] KC Sync Webserver läuft auf Port 8090
-[Marktag-Start] ALLES BEREIT
+!! PROBLEM: KASSE-02: Port 47501 ist belegt – Kassen-Dienst starten nicht möglich
+!!   Ursache: Ein anderes Programm benutzt diesen Anschluss. Fast immer ist es ein noch
+!!            offenes zweites schwarzes Fenster oder die alte Kassenversion.
+!!   Lösung: 1) Alle schwarzen Fenster schließen.
+!!           2) Task-Manager öffnen (Strg + Umschalt + Esc) → „Details“ → alle „node.exe“ … beenden.
+!!           3) Dann EIN Fenster neu starten: KC_Manager_Start.cmd doppelklicken.
+!!   (Technik für den Betreuer: …)
 ```
 
-und es öffnet sich von selbst eine Seite **„Alles bereit für den Markttag"** mit einem
-QR-Code je Kasse.
+Einfach die **Lösung** Schritt für Schritt abarbeiten. Dieselben Meldungen stehen im PC-Manager
+auf der Seite „Tablet-QR-Zettel“. Was weiterlaufen kann, läuft weiter: Hat nur eine Kasse ein
+Problem, arbeiten die anderen normal. Wird die Ursache behoben (z. B. altes Fenster geschlossen),
+startet die betroffene Kasse **von selbst** innerhalb von 30 Sekunden nach – die Meldung
+verschwindet dann.
 
-> **Beim allerersten Start fragt die Windows-Firewall**, ob Node.js ins Netzwerk darf.
-> **Zulassen** — und zwar für **private Netzwerke**. Wird das weggeklickt, kommt das Tablet
-> nicht an den PC heran, und man sucht den Fehler an der völlig falschen Stelle.
+**Belegte Ports räumt das Fenster selbst frei – ohne Adminrechte:** Läuft noch ein altes
+schwarzes Fenster (oder ein übrig gebliebener Kassen-Dienst), wird es automatisch beendet und
+der Start geht weiter („Altes Kassenfenster … beendet – Port … ist frei, Start geht weiter“).
+Belegt ein **fremdes** Programm den Port, wird es bewusst **nicht** beendet; die Meldung nennt
+dann den Programmnamen und die Prozessnummer, damit man genau dieses Programm im Task-Manager
+schließen kann. Hinweis: Wer während des Betriebs versehentlich ein zweites Fenster startet,
+löst damit eine Übergabe aus – die Tablets sind dabei wenige Sekunden offline, es geht nichts
+verloren.
 
----
+Endet der Start mit **„START ABGEBROCHEN“**, steht die Ursache im Kasten darüber; das Fenster
+bleibt offen, bis eine Taste gedrückt wird.
 
-## Auf dem iPad
 
-**Den QR-Code „KASSE-01" mit der Kamera-App scannen.** Safari öffnet die Kasse — fertig
-verbunden, fertig gekoppelt. Kein Tippen, keine Adresse eingeben.
-
-Was in dem QR-Code steckt, ist die Adresse des PCs plus Kassennummer, Port und ein
-Zugangsschlüssel:
-
-```
-http://192.168.x.x:8090/pos/index.html?kcPort=47500&kcToken=…&kcRegisterId=KASSE-01
-```
-
-Das Tablet **merkt sich das**. Beim nächsten Mal reicht das Lesezeichen, der QR-Code wird nur
-beim ersten Mal gebraucht.
-
-**iPad und PC müssen im selben WLAN sein.** Sonst geht es nicht — die Adresse ist eine
-Adresse im Heimnetz, kein Internetlink.
-
-**Tipp:** in Safari über *Teilen → Zum Home-Bildschirm* ablegen. Dann startet die Kasse als
-eigenes Symbol im Vollbild, ohne Safari-Leiste — sieht Freitag deutlich besser aus.
-
----
-
-## Den PC-Manager öffnen
-
-Der Link steht auf derselben Übersichtsseite:
-
-```
-http://127.0.0.1:8090/pc-manager/index.html
-```
-
-**Den Manager nur auf dem PC selbst öffnen, über `127.0.0.1`** — nicht über die WLAN-Adresse.
-Die Seite sagt das selbst: sonst bleiben die Kassen-Anzeigen im Manager leer.
-
----
-
-## Der eigentliche Abgleich: „an alle Kassen senden"
-
-Verbunden heißt noch nicht abgeglichen. Die Stammdaten schickt der Manager auf Knopfdruck:
-
-**PC-Manager → Artikel →** oben der Knopf
-**„📤 Artikel, Warengruppen und Darstellung an alle Kassen senden"**
-
-Damit gehen an jedes Tablet:
-
-* Warengruppen und Artikel mit Preisen, Bildern, Pfand, Allergenen
-* die **Artikelnummern** (01001, 02003 …) — ohne diesen Schritt kennt das Tablet sie nicht,
-  und der Scanner findet nichts
-* die **½-Portions-Freigaben**
-* die Kombinationen
-* Darstellung: Knopfgrößen, Farben, Vereinsname, Bedienerliste
-
-**Was ausdrücklich NICHT mitgeht** (und das ist Absicht): die Kassennummer und der
-Kassenname — sonst meldete sich das Tablet plötzlich als eine andere Kasse. Und die
-Layout-Wahl des Bedieners, denn die gilt für seine Schicht.
-
-Die Zeiterfassungs-Personen gehen einen eigenen Weg: **PC-Manager → Zeiterfassung →**
-einschalten, Personen anlegen, an die Kassen senden. Ohne das ist der Uhrknopf an der Kasse
-gar nicht erst da.
-
----
-
-## Die Reihenfolge für Freitag
-
-1. `KC_Markttag_Start.cmd` doppelklicken, Fenster offen lassen.
-2. Am PC den **PC-Manager** über den Link auf der Übersichtsseite öffnen, Master-PIN eingeben.
-3. Im Manager: **½-Portionen freigeben**, dann **„an alle Kassen senden"**.
-4. Am iPad den **QR-Code KASSE-01** scannen.
-5. Am iPad prüfen: oben rechts muss die LED **grün** sein („Online und synchronisiert").
-6. Scanner-Test mit `werkzeuge/Scanner-Testblatt.pdf`.
-
----
-
-## Mehr als eine Kasse
-
-In `markttag-kassen.json` steht einfach:
-
-```json
-["KASSE-01", "KASSE-02"]
-```
-
-Für eine dritte `"KASSE-03"` ergänzen und neu starten. Jede bekommt ihren eigenen QR-Code und
-ihren eigenen Zugangsschlüssel.
-
----
-
-## Wenn etwas nicht geht
-
-| Symptom | Ursache |
+| Was man sieht | Bedeutung / was tun |
 |---|---|
-| Tablet lädt die Adresse nicht | Nicht im selben WLAN, oder die Firewall-Frage wurde weggeklickt |
-| Kasse öffnet, aber LED bleibt rot | Das schwarze Fenster wurde geschlossen |
-| Kasse zeigt alte Artikel | „An alle Kassen senden" fehlt |
-| Manager zeigt keine Kassen | Manager über die WLAN-Adresse statt über 127.0.0.1 geöffnet |
-| „Node.js wurde nicht gefunden" | Node.js fehlt, siehe oben |
-| Beide Tablets zeigen dieselbe Kassennummer | Beide haben denselben QR-Code gescannt |
+| Tablet: „PC nicht erreichbar – sind PC und schwarzes Fenster an …“ | PC aus, Fenster zu oder Tablet nicht im Stand-WLAN. **Kassieren geht trotzdem**, die Bons werden nachgereicht. |
+| Tablet: „Zugang ungültig – QR-Zettel dieser Kasse neu scannen“ | Der Schlüssel dieser Kasse wurde erneuert. Neuen Zettel scannen. |
+| Schwarzes Fenster: „BEREIT MIT WARNUNGEN“ | Die Warnung darüber lesen – sie sagt genau, was los ist. |
+| Warnung „PC-ADRESSE HAT SICH GEÄNDERT“ | Router-Einstellung aus A.1 fehlt. Entweder im Router die alte Adresse wieder zuweisen **oder** Zettel neu drucken und alle Tablets neu scannen. |
+| Warnung „Port … ist belegt von „Programmname““ | Ein fremdes Programm belegt den Port. Genau dieses Programm im Task-Manager beenden (Name und Prozessnummer stehen in der Meldung), dann Fenster neu starten. Alte Kassenfenster räumt das Programm selbst ab. |
+| Ein Tablet ist kaputt | Anderes Tablet nehmen, Zettel **KASSE-03** scannen, weiter kassieren. |
+| Tablet verloren oder gestohlen | PC-Manager → Admin-Center → **„Gerät verloren“**. Innerhalb weniger Sekunden bekommt diese Kasse einen neuen Schlüssel – das verlorene Tablet ist ausgesperrt. Neuen Zettel drucken, Ersatz-Tablet damit koppeln. Die anderen Kassen merken davon nichts. |
+| Zettel verloren oder fremd fotografiert | PC-Manager → QR-Zettel → bei der Kasse **„Schlüssel erneuern…“**. Der alte Zettel ist sofort ungültig; neuen drucken, nur dieses eine Tablet neu scannen. |
+| Beide Tablets zeigen dieselbe Kassennummer | Beide haben denselben Zettel gescannt. Eins mit dem richtigen Zettel neu scannen. |
 
-Am Ende des Tages: **das schwarze Fenster schließen.** Das beendet alles sauber zusammen.
+---
+
+## D. Den PC-Manager öffnen
+
+Nur **am PC selbst** über `http://127.0.0.1:8090/pc-manager/index.html`
+(öffnet sich beim Start automatisch). Nicht über die WLAN-Adresse und nicht am Tablet.
+
+## E. Stammdaten an die Kassen senden
+
+Unverändert: **PC-Manager → Artikel → „📤 Artikel, Warengruppen und Darstellung an alle Kassen
+senden“**. Verbunden heißt noch nicht abgeglichen.
+
+Damit KASSE-03 im PC-Manager unter **Kassen** mit LED erscheint: dort einmal **„＋ Neue Kasse“**
+(legt automatisch KASSE-03 an) und **Speichern**. Für den Zettel und das Kassieren ist das nicht
+nötig.
+
+---
+
+## E1. Fernseher am Stand (Präsentation)
+
+**Aufbau:** Fernseher an **HDMI** des Mini-PCs. Empfohlen zusätzlich ein Monitor an **VGA**:
+dann zeigt der Fernseher nur die Präsentation, der Monitor das schwarze Fenster und den
+PC-Manager – Störungsmeldungen bleiben sichtbar.
+
+**Einmalig am Mini-PC:**
+1. `KC_MiniPC_Einrichten.cmd` doppelklicken (Bildschirm/Standby nie aus, keine
+   Benachrichtigungen, kein Bildschirmschoner – ohne Adminrechte).
+2. Mit zweitem Monitor: `Windows-Taste + P` → **„Erweitern“**; Einstellungen → System →
+   Bildschirm → den **Monitor** als **Hauptanzeige** festlegen. Dann läuft die Präsentation
+   automatisch auf dem Fernseher.
+
+**Jeden Tag:** nichts. Beim Start öffnet sich die Präsentation von selbst im Vollbild (ohne
+Maus, ohne Klick). Mit nur einem Bildschirm springt der PC-Manager nicht davor; Störungen
+erscheinen dann zusätzlich als Hinweis unten auf den Tablets („Am PC: … – antippen für die
+Lösung“).
+
+**Präsentation auf den Fernseher bringen:** im TV-Designer (PC-Manager → TV → „Präsentation
+bearbeiten“) auf **„📺 An den Fernseher senden“** – oder im PC-Manager auf der TV-Seite. Am Stand
+geht es direkt, **zu Hause über Supabase** (Fernmodus). Der Fernseher übernimmt sie spätestens
+nach 30 Sekunden, ohne Neustart. Solange noch nichts gesendet wurde, zeigt er die eingebaute
+Weihnachtsmarkt-Präsentation – nie „Paket bitte einlesen“.
+
+**Bühnenprogramm:** PC-Manager → Menü **„📅 Programm“ → „Prospektimport“** → das PDF der Stadt
+hineinziehen. Tage, Uhrzeiten, Programmpunkte, Beschreibungen und Orte werden erkannt und in einer
+Tabelle angezeigt – prüfen, korrigieren, **„✔ Ausgewählte übernehmen“** (oder „Programm dieses
+Jahres ersetzen“). Danach im TV-Designer „📺 An den Fernseher senden“. Eingescannte PDFs ohne Text
+kann der Import nicht lesen – dann kommt eine klare Meldung; Termine lassen sich auch von Hand
+unter „📅 Programm → Tagesprogramm“ ergänzen.
+
+**Fernsehbild versehentlich geschlossen?** Schwarzes Fenster neu starten oder erneut „📺 An den
+Fernseher senden“. Stürzt der Browser ab, startet er nach 10 s von selbst neu.
+
+Einstellungen: `markt-kasse-suite/backend-source/stand-einstellungen.json`
+(`"fernseher": { "aktiv": true, "bildschirm": "auto" }`; `"bildschirm": 2` erzwingt Anzeige 2,
+`"aktiv": false` schaltet den Fernseher-Start ab).
+
+## E2. Zu Hause mitlesen und steuern
+
+Der PC zu Hause muss **nicht** laufen. Wer zu Hause nachsehen will: `KC_Zuhause_Start.cmd`
+starten, im PC-Manager bei Supabase anmelden – Live-Monitor, Kassen, Ausverkauft, Abschlüsse
+kommen vom Stand; „an alle Kassen senden“ und „Ausverkauft setzen“ wirken am Stand.
+Einmalig vorher am Mini-PC: „Verbindung prüfen“ → „Diesen PC als Stand anmelden“.
+Alles Weitere: `KONZEPT_STAND_ZUHAUSE.md`.
+
+## F. Technik (für Betreuer)
+
+* **Kassenliste:** `markt-kasse-suite/backend-source/markttag-kassen.json` – drei Kassen. Eine
+  vierte: Eintrag ergänzen, Fenster neu starten, Zettel drucken. Optional
+  `{"kassen":[…], "pcAdresse":"192.168.178.20"}` erzwingt die PC-Adresse.
+* **Feste Ports:** KASSE-01 = 47500, KASSE-02 = 47501, KASSE-03 = 47502. Einmal vergeben,
+  bleiben sie – auch wenn die Liste umsortiert wird. Webserver 8090, Manager 8543.
+* **Datenordner der Tablet-Kassen:** `%LOCALAPPDATA%\KC-MarktKasse\tablet-kassen` – außerhalb
+  des Programmordners. Darum überleben Schlüssel und Zettel auch das Entpacken einer neuen ZIP.
+  **Diesen Ordner nicht löschen** – sonst müssen alle Tablets neu gescannt werden.
+* **Kopplung Kasse ↔ Manager** läuft nach 30 Tagen ab. Der Start erneuert sie automatisch, wenn
+  weniger als 7 Tage übrig sind, und koppelt neu, wenn der Manager neu installiert wurde. Der
+  Schlüssel des Tablets ist davon unabhängig – **kein Neuscannen**.
+* **Wächter:** Stürzt ein Kassen-Dienst ab, startet das Fenster ihn nach wenigen Sekunden neu.
+* **Sicherheit:** `pc-manager/kassen-verbindungen.json` (enthält die Schlüssel) und die
+  Zettel-Aktionen sind nur vom PC selbst erreichbar, nicht über das WLAN; die Datei liegt nicht
+  mehr im Repository.
+* **Port-Freigabe:** `markt-kasse-suite/backend-source/port-freigabe.js` – erkennt den Besitzer eines Ports (Windows: PowerShell `Get-NetTCPConnection`/`Get-CimInstance`, Rückfall `netstat`/`tasklist`), beendet nur Prozesse mit `run-manager-service.js`, `run-device-companion.js`, `serve-frontend.js` oder `markttag-start.js` in der Befehlszeile (Windows: `taskkill /T /F`), nie den eigenen Prozess oder fremde Programme. Test: `tests/kassen-start-portfreigabe.test.cjs`.
+* **Fehlermeldungen:** zentral in `markt-kasse-suite/backend-source/fehlerhilfe.js` (Was / Ursache / Lösung). Test: `tests/kassen-start-fehlermeldungen.test.cjs`.
+* **Tests:** `tests/kassen-start-datenwege.test.cjs` (Stammdaten, Dienstplan, Geld-Übergabe, Ausverkauft, Verkauf/Live-Monitor, „Gerät verloren“ über den echten Start mit drei Tablets), `tests/kassen-start-dauerhaft.test.cjs` (Ende-zu-Ende: drei Starts mit Tablet,
+  QR vom Ausdruck zurückgelesen, Ablauf der Kopplung, neuer Manager, Absturz, Schlüssel
+  erneuern, Port belegt, Adresse geändert) und `tests/kassen-start-einheit.test.cjs`.

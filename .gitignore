@@ -1,3 +1,13 @@
 
 dist/
 node_modules/
+
+# KS-01: enthaelt Zugangsschluessel der Tablet-Kassen - nie einchecken
+pc-manager/kassen-verbindungen.json
+schulung/pc-manager/kassen-verbindungen.json
+# Laufzeit-Datenbanken des Manager-Dienstes
+markt-kasse-suite/backend-source/*.sqlite
+markt-kasse-suite/backend-source/*.sqlite-*
+markt-kasse-suite/backend-source/*.admin-token.txt
+# Testbilder, die tests/haendlerausweis*.test.cjs ins Hauptverzeichnis schreibt
+/haendler-*.png

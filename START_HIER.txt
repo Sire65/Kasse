@@ -1,7 +1,14 @@
 KC MARKTKASSE – START HIER
-Stand: 25.09.2026
+Stand: 13.11.2026
 
-NORMALER START
+WELCHE STARTDATEI?
+- Am Stand (Mini-PC mit Tablets und Fernseher): KC_Manager_Start.cmd
+- Zu Hause (nur mitlesen/steuern ueber Supabase):  KC_Zuhause_Start.cmd
+  Ausfuehrlich: KONZEPT_STAND_ZUHAUSE.md
+- Mini-PC am Stand einmalig vorbereiten: KC_MiniPC_Einrichten.cmd
+  (Fernseher/Praesentation: TABLET_UND_MANAGER_KOPPELN.md, Abschnitt E1)
+
+NORMALER START (Stand)
 1. ZIP vollständig entpacken.
 2. KC_Manager_Start.cmd doppelklicken.
 3. Beim allerersten Start Internetverbindung zulassen.
@@ -20,15 +27,20 @@ Nach erfolgreichem ersten Start kann diese Installation im selben entpackten Ord
 
 GESTARTET WERDEN
 - Manager-/Kassen-Dienst auf HTTPS-Port 8543,
-- lokaler Webserver ab Port 8090,
+- lokaler Webserver auf Port 8090,
+- drei Tablet-Kassen KASSE-01/02/03 auf den festen Ports 47500/47501/47502,
 - PC-Manager im Browser.
 
-Im Startfenster werden die aktuellen Adressen für PC-Manager, Kasse und Money Butler angezeigt. Für Tablets im gleichen WLAN die dort angezeigte WLAN-IP verwenden.
+TABLETS (seit 13.11.2026): jedes Tablet wird EINMAL mit einem gedruckten QR-Zettel gekoppelt,
+danach nie wieder gescannt. Zettel drucken: PC-Manager -> Verbindung pruefen -> QR-Zettel.
+Ausfuehrlich: TABLET_UND_MANAGER_KOPPELN.md
+Am Ende des Starts steht "[Marktag-Start] ALLES BEREIT" - oder "BEREIT MIT WARNUNGEN" mit der
+genauen Ursache darueber.
 
 WICHTIG
 - Nicht direkt pc-manager\index.html per Doppelklick öffnen.
 - Nicht das schwarze Startfenster schließen, solange PC-Manager/Kassen arbeiten.
-- Bei belegtem Port 8090 wird automatisch der nächste freie Port verwendet.
+- Bei belegtem Port 8090 wird 15 s gewartet und dann auf den nächsten freien Port ausgewichen - mit Warnung, weil die Tablet-Zettel auf 8090 zeigen.
 - Browserdateien werden mit No-Cache ausgeliefert, damit keine alte JS-Version hängen bleibt.
 
 Beenden: Strg+C im schwarzen Startfenster.

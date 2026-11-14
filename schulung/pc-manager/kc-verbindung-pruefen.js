@@ -110,7 +110,7 @@
   }
 
   // Die Kassenadressen stammen aus der Markttag-Einrichtung. Sie werden hier angezeigt, damit
-  // niemand eine alte, gemerkte Adresse verwendet - Schluessel und Ports wechseln bei jedem Start.
+  // niemand eine falsch abgeschriebene Adresse verwendet. Seit KS-01 bleiben Schluessel und Ports ueber Neustarts gleich.
   async function zeigeAdressen() {
     const ziel = el('vbAdressen');
     if (!ziel) return;

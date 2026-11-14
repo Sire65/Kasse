@@ -323,7 +323,7 @@
 
     // Adressen der Kassen, falls der Markttag-Start sie hinterlegt hat. Aufbau der Datei:
     // { erzeugtAm, webserverPort, lanAdresse, kassen:[{id, name, port, token}] }
-    // Ports und Schluessel wechseln bei JEDEM Start - deshalb wird die Datei bei jeder Messung
+    // Seit KS-01 bleiben Ports und Schluessel gleich; die Datei wird trotzdem bei jeder Messung
     // frisch gelesen und nichts davon gemerkt.
     let kassenDatei = null;
     try {
