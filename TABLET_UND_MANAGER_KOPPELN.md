@@ -168,9 +168,12 @@ geht es direkt, **zu Hause über Supabase** (Fernmodus). Der Fernseher übernimm
 nach 30 Sekunden, ohne Neustart. Solange noch nichts gesendet wurde, zeigt er die eingebaute
 Weihnachtsmarkt-Präsentation – nie „Paket bitte einlesen“.
 
-**Bühnenprogramm:** Der Designer übernimmt beim Öffnen das Veranstaltungsprogramm aus den
-PC-Manager-Daten (`settings.eventProgram`). Das Programm der Stadt wird dort eingetragen, sobald
-es vorliegt.
+**Bühnenprogramm:** PC-Manager → Menü **„📅 Programm“ → „Prospektimport“** → das PDF der Stadt
+hineinziehen. Tage, Uhrzeiten, Programmpunkte, Beschreibungen und Orte werden erkannt und in einer
+Tabelle angezeigt – prüfen, korrigieren, **„✔ Ausgewählte übernehmen“** (oder „Programm dieses
+Jahres ersetzen“). Danach im TV-Designer „📺 An den Fernseher senden“. Eingescannte PDFs ohne Text
+kann der Import nicht lesen – dann kommt eine klare Meldung; Termine lassen sich auch von Hand
+unter „📅 Programm → Tagesprogramm“ ergänzen.
 
 **Fernsehbild versehentlich geschlossen?** Schwarzes Fenster neu starten oder erneut „📺 An den
 Fernseher senden“. Stürzt der Browser ab, startet er nach 10 s von selbst neu.
