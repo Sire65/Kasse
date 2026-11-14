@@ -10,6 +10,8 @@ const { TabletKassenStart, leseKassenKonfig, standardDatenOrdner, zettelWebserve
 const { meldung, erklaere, druckeKasten, SCHRITTE_FENSTER_NEU } = require('./fehlerhilfe');
 const { sicherePortFrei, belegtFehler, programmName } = require('./port-freigabe');
 const { StandBruecke } = require('./stand-bruecke');
+const { Fernseher } = require('./fernseher');
+const fs = require('fs');
 
 // Start abbrechen - immer mit Kasten (Was / Ursache / Loesung), nie mit rohem Stacktrace.
 function startAbbrechen(m) {
@@ -188,6 +190,7 @@ async function main() {
 
   let webserverProzess = null;
   let kassenStart = null;
+  let fernseher = null;
   // Stand-Brücke (KS-04): Buchungen/Übersichten nach Hause (Supabase), Aufträge von zu Hause an die Kassen.
   const standBruecke = new StandBruecke({ manager: mgr, datenOrdner, version: process.env.KC_PC_MANAGER_VERSION || null });
   const startWarnungen = []; // Meldungen {titel, ursache, loesung[]}
@@ -211,7 +214,9 @@ async function main() {
     webserverProzess = spawn(
       process.execPath,
       ['serve-frontend.js', '--port', String(webserverPort), '--root', frontendRoot],
-      { cwd: __dirname, stdio: ['ignore', 'pipe', 'pipe', 'ipc'] }
+      { cwd: __dirname, stdio: ['ignore', 'pipe', 'pipe', 'ipc'],
+        // KS-05: Ort des TV-Pakets und der Stand-Meldungen für die Tablets (Datenordner, nicht Programmordner)
+        env: { ...process.env, KC_TV_PAKET_DATEI: path.join(datenOrdner, 'tv-paket.kctv'), KC_STAND_MELDUNGEN_DATEI: path.join(datenOrdner, 'stand-meldungen.json'), KC_TV_PROGRAMM_DATEI: path.join(datenOrdner, 'tv-programm.html') } }
     );
     // Aktionen aus dem PC-Manager (QR-Zettel gedruckt, neuer Schluessel) kommen ueber den
     // Webserver (nur vom PC selbst) per IPC hier an.
@@ -224,6 +229,7 @@ async function main() {
         if (nachricht.aktion === 'gedruckt') return antworte({ status: 200, daten: kassenStart.zettelGedruckt(nachricht.ids) });
         if (nachricht.aktion === 'neuer-schluessel') return antworte({ status: 200, daten: await kassenStart.neuerSchluessel(nachricht.id) });
         if (nachricht.aktion === 'stand-status') return antworte({ status: 200, daten: standBruecke.status() });
+        if (nachricht.aktion === 'fernseher-sicherstellen') return antworte({ status: 200, daten: { geoeffnet: fernseher ? fernseher.sicherstellen() : false } });
         if (nachricht.aktion === 'stand-einrichten') return antworte({ status: 200, daten: standBruecke.einrichten(nachricht.daten || {}) });
         if (nachricht.aktion === 'stand-abmelden') return antworte({ status: 200, daten: standBruecke.abmelden() });
         return antworte({ status: 404, daten: { fehler: 'aktion_unbekannt' } });
@@ -258,7 +264,7 @@ async function main() {
         const ks = new TabletKassenStart({ manager: mgr, backendDir: __dirname, frontendRoot, datenOrdner, konfigDatei: kassenListe });
         kassenStatus = await ks.start({ webserverPort });
         kassenStart = ks;
-        startWarnungen.push(...ks.meldungen);
+        // (Meldungen der Kassen kommen live dazu - siehe Stand-Meldungen unten)
       } catch (e) {
         const m = e.kcMeldung || erklaere(e, { was: 'Tablet-Kassen starten' });
         startWarnungen.push({ ...m, titel: `Tablet-Kassen NICHT gestartet – ${m.titel}` });
@@ -280,15 +286,42 @@ async function main() {
       }
       console.log(`QR-Zettel drucken: http://127.0.0.1:${webserverPort}/pc-manager/kassen-zettel.html`);
     }
+    // KS-05: Fernseher - Präsentation im Vollbild (Edge-Kiosk), PC-Manager nicht davor, wenn nur ein Bildschirm
+    fernseher = new Fernseher({ einstellungsDatei: process.env.KC_STAND_EINSTELLUNGEN || path.join(__dirname, 'stand-einstellungen.json'), datenOrdner, webserverPort });
+    const tv = fernseher.start();
+    if (tv.meldung) startWarnungen.push(tv.meldung);
+    if (fernseher.einstellungen.aktiv) console.log(`Fernseher-Präsentation: ${fernseher.url}`);
+
     standBruecke.start();
     const sb = standBruecke.status();
     console.log(sb.eingerichtet
       ? `Verbindung nach Hause (Supabase): eingerichtet für Stand „${sb.standName}“ – Buchungen gehen laufend nach Hause.`
       : 'Verbindung nach Hause (Supabase): nicht eingerichtet (nur nötig, wenn der PC-Manager zu Hause mitlesen soll).');
     console.log('--------------------------------------------------------------');
-    if (startWarnungen.length) {
-      druckeKasten(console.log, startWarnungen, 'ACHTUNG');
-      console.log(`[Marktag-Start] BEREIT MIT WARNUNGEN (${startWarnungen.length}) - Ursache und Lösung stehen im Kasten oben.`);
+    // Alle aktuellen Meldungen: feste vom Start + laufende der Kassen und der Verbindung nach Hause.
+    const alleMeldungen = () => {
+      const liste = [...startWarnungen, ...(kassenStart ? kassenStart.meldungen : [])];
+      const sbm = standBruecke.status().meldung; if (sbm) liste.push(sbm);
+      const gesehen = new Set();
+      return liste.filter((m) => { const k = m.schluessel || m.titel; if (gesehen.has(k)) return false; gesehen.add(k); return true; });
+    };
+    // Für die Tablets (falls nur der Fernseher als Bildschirm dient): alle 10 s aktualisiert.
+    const meldungenDatei = path.join(datenOrdner, 'stand-meldungen.json');
+    const meldungenSchreiben = () => {
+      try {
+        const m = alleMeldungen().map((x) => ({ titel: x.titel, ursache: x.ursache, loesung: x.loesung }));
+        fs.mkdirSync(datenOrdner, { recursive: true });
+        fs.writeFileSync(`${meldungenDatei}.tmp`, JSON.stringify({ stand: new Date().toISOString(), meldungen: m }));
+        fs.renameSync(`${meldungenDatei}.tmp`, meldungenDatei);
+      } catch (e) { /* Anzeige auf den Tablets ist Zusatz */ }
+    };
+    meldungenSchreiben();
+    const meldungenTakt = setInterval(meldungenSchreiben, 10000); if (meldungenTakt.unref) meldungenTakt.unref();
+
+    const startMeldungen = alleMeldungen();
+    if (startMeldungen.length) {
+      druckeKasten(console.log, startMeldungen, 'ACHTUNG');
+      console.log(`[Marktag-Start] BEREIT MIT WARNUNGEN (${startMeldungen.length}) - Ursache und Lösung stehen im Kasten oben.`);
     } else {
       console.log('[Marktag-Start] ALLES BEREIT');
     }
@@ -296,7 +329,9 @@ async function main() {
     console.log('Beenden mit Strg+C.');
     console.log('');
 
-    if (args.openManager) {
+    if (args.openManager && tv.gestartet && tv.einBildschirm) {
+      console.log('[KC Start] PC-Manager wird NICHT automatisch geöffnet (nur ein Bildschirm, dort läuft die Präsentation). Von Hand: ' + managerUrl);
+    } else if (args.openManager) {
       const ok = browserOeffnen(managerUrl);
       console.log(ok ? '[KC Start] PC-Manager wird im Standardbrowser geöffnet.' : '[KC Start] Browser konnte nicht automatisch geöffnet werden.');
     }
@@ -312,6 +347,7 @@ async function main() {
     await telemetry.send().catch(()=>{});
     telemetry.stop();
     try { standBruecke.stop(); } catch {}
+    try { fernseher?.stop(); } catch {}
     try { await kassenStart?.stop(); } catch {}
     try { mgr.server?.close(); } catch {}
     try { webserverProzess?.kill('SIGTERM'); } catch {}

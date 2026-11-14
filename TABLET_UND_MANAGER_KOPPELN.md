@@ -144,6 +144,41 @@ nötig.
 
 ---
 
+## E1. Fernseher am Stand (Präsentation)
+
+**Aufbau:** Fernseher an **HDMI** des Mini-PCs. Empfohlen zusätzlich ein Monitor an **VGA**:
+dann zeigt der Fernseher nur die Präsentation, der Monitor das schwarze Fenster und den
+PC-Manager – Störungsmeldungen bleiben sichtbar.
+
+**Einmalig am Mini-PC:**
+1. `KC_MiniPC_Einrichten.cmd` doppelklicken (Bildschirm/Standby nie aus, keine
+   Benachrichtigungen, kein Bildschirmschoner – ohne Adminrechte).
+2. Mit zweitem Monitor: `Windows-Taste + P` → **„Erweitern“**; Einstellungen → System →
+   Bildschirm → den **Monitor** als **Hauptanzeige** festlegen. Dann läuft die Präsentation
+   automatisch auf dem Fernseher.
+
+**Jeden Tag:** nichts. Beim Start öffnet sich die Präsentation von selbst im Vollbild (ohne
+Maus, ohne Klick). Mit nur einem Bildschirm springt der PC-Manager nicht davor; Störungen
+erscheinen dann zusätzlich als Hinweis unten auf den Tablets („Am PC: … – antippen für die
+Lösung“).
+
+**Präsentation auf den Fernseher bringen:** im TV-Designer (PC-Manager → TV → „Präsentation
+bearbeiten“) auf **„📺 An den Fernseher senden“** – oder im PC-Manager auf der TV-Seite. Am Stand
+geht es direkt, **zu Hause über Supabase** (Fernmodus). Der Fernseher übernimmt sie spätestens
+nach 30 Sekunden, ohne Neustart. Solange noch nichts gesendet wurde, zeigt er die eingebaute
+Weihnachtsmarkt-Präsentation – nie „Paket bitte einlesen“.
+
+**Bühnenprogramm:** Der Designer übernimmt beim Öffnen das Veranstaltungsprogramm aus den
+PC-Manager-Daten (`settings.eventProgram`). Das Programm der Stadt wird dort eingetragen, sobald
+es vorliegt.
+
+**Fernsehbild versehentlich geschlossen?** Schwarzes Fenster neu starten oder erneut „📺 An den
+Fernseher senden“. Stürzt der Browser ab, startet er nach 10 s von selbst neu.
+
+Einstellungen: `markt-kasse-suite/backend-source/stand-einstellungen.json`
+(`"fernseher": { "aktiv": true, "bildschirm": "auto" }`; `"bildschirm": 2` erzwingt Anzeige 2,
+`"aktiv": false` schaltet den Fernseher-Start ab).
+
 ## E2. Zu Hause mitlesen und steuern
 
 Der PC zu Hause muss **nicht** laufen. Wer zu Hause nachsehen will: `KC_Zuhause_Start.cmd`

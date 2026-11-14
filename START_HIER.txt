@@ -5,6 +5,8 @@ WELCHE STARTDATEI?
 - Am Stand (Mini-PC mit Tablets und Fernseher): KC_Manager_Start.cmd
 - Zu Hause (nur mitlesen/steuern ueber Supabase):  KC_Zuhause_Start.cmd
   Ausfuehrlich: KONZEPT_STAND_ZUHAUSE.md
+- Mini-PC am Stand einmalig vorbereiten: KC_MiniPC_Einrichten.cmd
+  (Fernseher/Praesentation: TABLET_UND_MANAGER_KOPPELN.md, Abschnitt E1)
 
 NORMALER START (Stand)
 1. ZIP vollständig entpacken.

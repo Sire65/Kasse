@@ -112,10 +112,13 @@
 
   // ---------- senden: Auftrag ----------
   async function auftragSenden(pfad, koerper) {
-    const stand = gewaehlterStand();
     let daten = {};
     try { daten = koerper ? JSON.parse(typeof koerper === 'string' ? koerper : await new Response(koerper).text()) : {}; }
     catch (e) { return jsonAntwort(400, { error: 'payload_invalid' }); }
+    return auftragMitDaten(pfad, daten);
+  }
+  async function auftragMitDaten(pfad, daten) {
+    const stand = gewaehlterStand();
     const { auftragId } = await rpc('kc_stand_auftrag_anlegen', { p_stand: stand.standId, p_pfad: pfad, p_koerper: daten });
     for (let i = 0; i < 15; i++) {
       await new Promise((r) => setTimeout(r, 1000));
@@ -132,7 +135,7 @@
   function beschreibe(pfad) {
     return ({ '/master-data/push': 'Stammdaten an alle Kassen', '/dienstplan/push': 'Dienstplan an die Kassen', '/sold-out-status/setzen': 'Ausverkauft',
       '/remote-command/queue': 'Befehl an eine Kasse', '/kassen/kopplung-widerrufen': 'Gerät verloren / Kopplung widerrufen',
-      '/api/v1/cash-transfer/queue': 'Geld-Übergabe', '/api/v1/finance-transfer/queue': 'Geld-Übergabe', '/bargeld/uebergabe': 'Bargeld-Übergabe', '/bargeld/protokoll': 'Bargeld-Protokoll' })[pfad] || pfad;
+      '/api/v1/cash-transfer/queue': 'Geld-Übergabe', '/fernseher/tv-paket': 'Präsentation an den Fernseher', '/api/v1/finance-transfer/queue': 'Geld-Übergabe', '/bargeld/uebergabe': 'Bargeld-Übergabe', '/bargeld/protokoll': 'Bargeld-Protokoll' })[pfad] || pfad;
   }
   function meldeHinweis(art, text) { try { global.KCManagerMessages && global.KCManagerMessages[art] && global.KCManagerMessages[art](text); } catch (e) { /* */ } }
 
@@ -264,6 +267,8 @@
   }
   function dauer(sek) { return sek < 120 ? `${sek} s` : sek < 7200 ? `${Math.round(sek / 60)} min` : `${Math.round(sek / 3600)} h`; }
 
-  global.KCFernmodus = { modus: () => modus, bestimmeModus, gewaehlterStand, waehleStand, standInfo: () => standInfo };
+  global.KCFernmodus = { modus: () => modus, bestimmeModus, gewaehlterStand, waehleStand, standInfo: () => standInfo,
+    // Auftrag an den Stand ohne Umweg über fetch (z. B. Präsentation an den Fernseher)
+    auftrag: (pfad, daten) => auftragMitDaten(pfad, daten) };
   bestimmeModus();
 })(window);

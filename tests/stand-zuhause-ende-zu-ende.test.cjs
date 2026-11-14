@@ -155,6 +155,13 @@ const verkauf = (seite, kennung, kasse) => tablet(seite, '/kc-sync-live-event', 
     for (let i = 0; i < 60; i++) { const s = await tablet(t1, '/kc-sync-master-data'); preis = s.json && (s.json.articles || []).find((a) => a.id === 'grot'); if (preis && Number(preis.price) === 4.2) break; await warte(1000); }
     p('5: Preis zu Hause geändert + „an alle Kassen senden“ -> Tablet hat 4,20 €', preis && Number(preis.price) === 4.2, preis && preis.price);
 
+    // ---- 5b. Präsentation von zu Hause auf den Fernseher am Stand ----
+    const programm = '<!doctype html><html lang="de"><head><meta charset="utf-8"><title>ZUHAUSE-PRAESENTATION</title></head><body><div id="page">Weihnachtsmarkt – von zu Hause gesendet</div>' + ' '.repeat(200) + '</body></html>';
+    const tvErg = await hausPc.evaluate((h) => window.KCFernseherManager.sendeProgramm(h), programm);
+    p('5b: Zu Hause „An den Fernseher senden“ -> am Stand angekommen', tvErg.ok && /spätestens in 30 Sekunden/.test(tvErg.text), tvErg.text);
+    const tvDatei = path.join(ARBEIT, 'tablet-kassen', 'tv-programm.html');
+    p('5b: Präsentation liegt am Stand für den Fernseher bereit', fs.existsSync(tvDatei) && /ZUHAUSE-PRAESENTATION/.test(fs.readFileSync(tvDatei, 'utf8')));
+
     // ---- 6. Kein Internet am Stand ----
     sb.setzeStandOffline(true);
     const kennungen = [1, 2, 3].map((i) => `KS04-OFFLINE-${i}-${Date.now()}`);

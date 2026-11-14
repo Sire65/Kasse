@@ -81,7 +81,7 @@ create or replace function public.kc_stand__auftrag_pfade() returns text[]
 language sql immutable set search_path = '' as $$
   select array['/master-data/push', '/dienstplan/push', '/sold-out-status/setzen', '/remote-command/queue',
     '/kassen/kopplung-widerrufen', '/api/v1/cash-transfer/queue', '/api/v1/finance-transfer/queue',
-    '/bargeld/uebergabe', '/bargeld/protokoll']
+    '/bargeld/uebergabe', '/bargeld/protokoll', '/fernseher/tv-paket', '/fernseher/tv-programm']
 $$;
 
 -- Verein des angemeldeten Admins (oder null)

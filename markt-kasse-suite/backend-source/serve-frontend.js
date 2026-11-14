@@ -69,9 +69,83 @@ function json(res, status, daten) {
   res.writeHead(status, { 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'no-store' });
   res.end(JSON.stringify(daten));
 }
+// KS-05: TV-Paket (Präsentation) - nur am PC selbst; es kann Mitgliederfotos enthalten.
+const TV_PAKET_DATEI = process.env.KC_TV_PAKET_DATEI || null;
+const STAND_MELDUNGEN_DATEI = process.env.KC_STAND_MELDUNGEN_DATEI || null;
+const TV_PROGRAMM_DATEI = process.env.KC_TV_PROGRAMM_DATEI || null;
+// KS-05: Präsentation aus dem TV-Designer als eigenständiges HTML-Programm - nur am PC selbst.
+function behandleTvProgramm(req, res) {
+  if (!TV_PROGRAMM_DATEI) { json(res, 404, { fehler: 'kein_tv_paket_ort' }); return; }
+  if (req.method === 'GET') {
+    let st = null; try { st = fs.statSync(TV_PROGRAMM_DATEI); } catch (e) { /* noch keins */ }
+    if (!st) { json(res, 404, { fehler: 'noch_kein_tv_programm' }); return; }
+    if (/[?&]nurStand=1/.test(req.url)) { json(res, 200, { stand: st.mtimeMs, groesse: st.size }); return; }
+    res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'no-store' });
+    fs.createReadStream(TV_PROGRAMM_DATEI).pipe(res);
+    return;
+  }
+  if (req.method !== 'POST') { json(res, 405, { fehler: 'methode' }); return; }
+  const herkunft = req.headers.origin;
+  if (req.headers['x-kc-aktion'] !== '1' || (herkunft && !/^http:\/\/(127\.0\.0\.1|localhost)(:\d+)?$/i.test(herkunft))) { json(res, 403, { fehler: 'herkunft_abgelehnt' }); return; }
+  const teile = []; let groesse = 0, zuGross = false;
+  req.on('data', (c) => { groesse += c.length; if (groesse > 64 * 1024 * 1024) { zuGross = true; req.destroy(); } else teile.push(c); });
+  req.on('end', () => {
+    if (zuGross) return;
+    const html = Buffer.concat(teile).toString('utf8');
+    if (!/<html[\s>]/i.test(html) || html.length < 200) { json(res, 400, { fehler: 'kein_gueltiges_tv_programm' }); return; }
+    try {
+      fs.mkdirSync(path.dirname(TV_PROGRAMM_DATEI), { recursive: true });
+      const tmp = `${TV_PROGRAMM_DATEI}.${process.pid}.tmp`;
+      fs.writeFileSync(tmp, html); fs.renameSync(tmp, TV_PROGRAMM_DATEI);
+    } catch (e) { json(res, 500, { fehler: 'speichern_fehlgeschlagen', technik: e.message }); return; }
+    if (process.send && process.connected) { try { process.send({ art: 'kassen-start', anfrageId: 0, aktion: 'fernseher-sicherstellen' }); } catch (e) { /* */ } }
+    json(res, 200, { gespeichert: true, groesse: html.length });
+  });
+}
+function behandleTvPaket(req, res) {
+  if (!TV_PAKET_DATEI) { json(res, 404, { fehler: 'kein_tv_paket_ort' }); return; }
+  if (req.method === 'GET') {
+    let st = null; try { st = fs.statSync(TV_PAKET_DATEI); } catch (e) { /* noch keins */ }
+    if (!st) { json(res, 404, { fehler: 'noch_kein_tv_paket' }); return; }
+    if (/[?&]nurStand=1/.test(req.url)) { json(res, 200, { stand: st.mtimeMs, groesse: st.size }); return; }
+    res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'no-store', 'X-KC-Stand': String(st.mtimeMs) });
+    fs.createReadStream(TV_PAKET_DATEI).pipe(res);
+    return;
+  }
+  if (req.method !== 'POST') { json(res, 405, { fehler: 'methode' }); return; }
+  const herkunft = req.headers.origin;
+  if (req.headers['x-kc-aktion'] !== '1' || (herkunft && !/^http:\/\/(127\.0\.0\.1|localhost)(:\d+)?$/i.test(herkunft))) { json(res, 403, { fehler: 'herkunft_abgelehnt' }); return; }
+  const teile = []; let groesse = 0, zuGross = false;
+  req.on('data', (c) => { groesse += c.length; if (groesse > 64 * 1024 * 1024) { zuGross = true; req.destroy(); } else teile.push(c); });
+  req.on('end', () => {
+    if (zuGross) return;
+    let paket;
+    try { paket = JSON.parse(Buffer.concat(teile).toString('utf8')); } catch (e) { json(res, 400, { fehler: 'kein_gueltiges_tv_paket' }); return; }
+    if (!paket || !['KC-TV-1', 'kcm-tv-package-v2'].includes(paket.schema) || !Array.isArray(paket.slides)) { json(res, 400, { fehler: 'kein_gueltiges_tv_paket' }); return; }
+    try {
+      fs.mkdirSync(path.dirname(TV_PAKET_DATEI), { recursive: true });
+      const tmp = `${TV_PAKET_DATEI}.${process.pid}.tmp`;
+      fs.writeFileSync(tmp, JSON.stringify(paket));
+      fs.renameSync(tmp, TV_PAKET_DATEI);
+    } catch (e) { json(res, 500, { fehler: 'speichern_fehlgeschlagen', technik: e.message }); return; }
+    if (process.send && process.connected) { try { process.send({ art: 'kassen-start', anfrageId: 0, aktion: 'fernseher-sicherstellen' }); } catch (e) { /* */ } }
+    json(res, 200, { gespeichert: true, folien: paket.slides.length });
+  });
+}
+
 function behandleKassenStart(req, res, urlPath) {
+  const aktion0 = urlPath.slice('/kc-kassen-start/'.length);
+  // Meldungen des Stands für die Tablets (nur Titel/Ursache/Lösung, keine Geheimnisse) - auch übers WLAN.
+  if (req.method === 'GET' && aktion0 === 'stand-meldungen') {
+    let daten = { meldungen: [], stand: null };
+    try { if (STAND_MELDUNGEN_DATEI) daten = JSON.parse(fs.readFileSync(STAND_MELDUNGEN_DATEI, 'utf8')); } catch (e) { /* noch keine */ }
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    json(res, 200, daten); return;
+  }
   if (!nurLokal(req)) { json(res, 403, { fehler: 'nur_am_pc_selbst' }); return; }
-  const aktion = urlPath.slice('/kc-kassen-start/'.length);
+  const aktion = aktion0;
+  if (aktion === 'tv-paket') { behandleTvPaket(req, res); return; }
+  if (aktion === 'tv-programm') { behandleTvProgramm(req, res); return; }
   // KS-04: Läuft dieser Webserver am Stand (mit Manager-Dienst) oder zu Hause (nur PC-Manager, Fernmodus)?
   if (req.method === 'GET' && aktion === 'modus') { json(res, 200, { modus: process.env.KC_MODUS || (process.send ? 'stand' : 'unbekannt') }); return; }
   if (req.method === 'GET' && aktion === 'status') {

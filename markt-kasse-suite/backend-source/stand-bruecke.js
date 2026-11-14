@@ -30,7 +30,8 @@ const SPIEGEL = [
   ['/live-event-log', '/live-event-log?limit=200'],
 ];
 const AUFTRAG_PFADE = new Set(['/master-data/push', '/dienstplan/push', '/sold-out-status/setzen', '/remote-command/queue',
-  '/kassen/kopplung-widerrufen', '/api/v1/cash-transfer/queue', '/api/v1/finance-transfer/queue', '/bargeld/uebergabe', '/bargeld/protokoll']);
+  '/kassen/kopplung-widerrufen', '/api/v1/cash-transfer/queue', '/api/v1/finance-transfer/queue', '/bargeld/uebergabe', '/bargeld/protokoll',
+  '/fernseher/tv-paket', '/fernseher/tv-programm']);
 const MAX_SPIEGEL_BYTES = 2 * 1024 * 1024;
 
 function schreibeAtomar(datei, inhalt) {
@@ -239,7 +240,19 @@ class StandBruecke {
       let ergebnis = merk.erledigt[a.auftragId];
       if (!ergebnis) {
         if (!AUFTRAG_PFADE.has(a.pfad)) ergebnis = { status: 400, antwort: { error: 'pfad_nicht_erlaubt' } };
-        else {
+        else if (a.pfad === '/fernseher/tv-paket') {
+          // KS-05: Präsentation von zu Hause auf den Fernseher am Stand (der TV-Player holt sie binnen 30 s)
+          const p = a.koerper || {};
+          if (!['KC-TV-1', 'kcm-tv-package-v2'].includes(p.schema) || !Array.isArray(p.slides)) ergebnis = { status: 400, antwort: { error: 'kein_gueltiges_tv_paket' } };
+          else { schreibeAtomar(path.join(this.datenOrdner, 'tv-paket.kctv'), JSON.stringify(p)); ergebnis = { status: 200, antwort: { gespeichert: true, folien: p.slides.length } }; }
+          this.log(`[Stand-Brücke] Auftrag von zu Hause ausgeführt: ${a.pfad} → ${ergebnis.status}`);
+        } else if (a.pfad === '/fernseher/tv-programm') {
+          // KS-05: HTML-Programm aus dem TV-Designer (von zu Hause) auf den Fernseher am Stand
+          const html = a.koerper && typeof a.koerper.html === 'string' ? a.koerper.html : '';
+          if (!/<html[\s>]/i.test(html)) ergebnis = { status: 400, antwort: { error: 'kein_gueltiges_tv_programm' } };
+          else { schreibeAtomar(path.join(this.datenOrdner, 'tv-programm.html'), html); ergebnis = { status: 200, antwort: { gespeichert: true, groesse: html.length } }; }
+          this.log(`[Stand-Brücke] Auftrag von zu Hause ausgeführt: ${a.pfad} → ${ergebnis.status}`);
+        } else {
           const r = await lokal(this.livePort, 'POST', a.pfad, a.koerper || {});
           ergebnis = { status: r.status || 503, antwort: r.json || (r.fehler ? { error: r.fehler } : { text: (r.text || '').slice(0, 500) }) };
           this.log(`[Stand-Brücke] Auftrag von zu Hause ausgeführt: ${a.pfad} → ${ergebnis.status}`);
