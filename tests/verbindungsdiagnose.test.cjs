@@ -200,7 +200,12 @@ async function lies(pg) {
   // "niemand da" nicht von "abgewiesen" unterscheiden. Das schwarze Fenster kann es und
   // schreibt es beim Start in kassen-verbindungen.json.
   const datei = path.join(WURZEL, 'pc-manager', 'kassen-verbindungen.json');
-  const sicherung = fs.readFileSync(datei, 'utf-8');
+  // Seit KS-01 liegt die Datei nicht mehr im Repository (sie enthaelt Zugangsschluessel) - sie
+  // entsteht erst beim Start. Fehlt sie, wird fuer diesen Test eine Beispieldatei angelegt.
+  const warDa = fs.existsSync(datei);
+  const sicherung = warDa ? fs.readFileSync(datei, 'utf-8')
+    : JSON.stringify({ format: 2, erzeugtAm: '2026-09-04T15:30:00.000Z', webserverPort: 8090, lanAdresse: '192.0.2.2',
+        kassen: [{ id: 'KASSE-01', name: 'KASSE-01', port: 47500, token: 'beispiel-01' }, { id: 'KASSE-02', name: 'KASSE-02', port: 47501, token: 'beispiel-02' }] }, null, 2);
   const inhalt = JSON.parse(sicherung);
   inhalt.liveKanal = { laeuft: false, gestartetUm: '2026-09-04T15:30:00.000Z',
     fehler: 'kc_sync_live_monitor_port_in_use: Port 47392 ist bereits belegt. Start abgebrochen, kein automatischer Portwechsel.' };
@@ -218,7 +223,7 @@ async function lies(pg) {
       !!mitBefund && mitBefund.zusatz.some((t) => /zuletzt gestartet/i.test(t)),
       (mitBefund?.zusatz || []).join(' | '));
   } finally {
-    fs.writeFileSync(datei, sicherung);
+    if (warDa) fs.writeFileSync(datei, sicherung); else fs.rmSync(datei, { force: true });
   }
 
   // ---- Die haeufigste Falle: der Manager wurde vom Tablet / ueber die WLAN-Adresse geoeffnet ----

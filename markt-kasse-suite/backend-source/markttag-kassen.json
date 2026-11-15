@@ -1,1 +1,5 @@
-["KASSE-01", "KASSE-02"]
+[
+  { "id": "KASSE-01", "name": "Kasse 1" },
+  { "id": "KASSE-02", "name": "Kasse 2" },
+  { "id": "KASSE-03", "name": "Kasse 3" }
+]

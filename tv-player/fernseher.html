@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>KC Fernseher</title>
+<!--
+  KS-05 – Das zeigt der Fernseher am Stand (der Kassen-Start öffnet diese Seite im Edge-Kiosk).
+  1. Präsentation aus dem TV-Designer („📺 An den Fernseher senden“) – eigenständiges HTML-Programm
+  2. sonst ein gesendetes TV-Paket bzw. die eingebaute Weihnachtsmarkt-Präsentation (TV-Player)
+  Neu gesendete Programme werden binnen 30 s übernommen, ohne Neustart. Kein Mauszeiger, keine
+  Bedienleiste, Bildschirm bleibt wach. Nie „Paket bitte einlesen“ vor den Kunden.
+-->
+<style>
+  html,body{margin:0;height:100%;background:#000;overflow:hidden;cursor:none}
+  iframe{position:fixed;inset:0;width:100%;height:100%;border:0;background:#000;opacity:0;transition:opacity .8s}
+  iframe.sichtbar{opacity:1}
+</style>
+</head>
+<body>
+<iframe id="a" title="Präsentation" allow="autoplay; fullscreen"></iframe>
+<iframe id="b" title="Präsentation" allow="autoplay; fullscreen"></iframe>
+<script>
+(function () {
+  'use strict';
+  var q = new URLSearchParams(location.search);
+  var PRUEFEN_MS = Math.max(2, Number(q.get('pruefen')) || 30) * 1000;
+  var rahmen = [document.getElementById('a'), document.getElementById('b')];
+  var aktiv = 0, stand = null, herkunft = null;
+
+  // In der eingebetteten Präsentation: Mauszeiger und Bedienleiste (‹ Pause ›) ausblenden.
+  function aufraeumen(f) {
+    try {
+      var d = f.contentDocument; if (!d || !d.head) return;
+      var s = d.createElement('style');
+      s.textContent = '*{cursor:none!important}.controls,#control{display:none!important}';
+      d.head.appendChild(s);
+    } catch (e) { /* fremde Herkunft - nichts zu tun */ }
+  }
+
+  function zeige(url, neueHerkunft) {
+    var naechster = rahmen[1 - aktiv], alter = rahmen[aktiv];
+    naechster.onload = function () {
+      aufraeumen(naechster);
+      naechster.classList.add('sichtbar'); alter.classList.remove('sichtbar');
+      setTimeout(function () { alter.removeAttribute('src'); }, 1200);
+      aktiv = 1 - aktiv; herkunft = neueHerkunft;
+      document.documentElement.dataset.herkunft = neueHerkunft;
+    };
+    naechster.src = url;
+  }
+
+  function pruefen() {
+    fetch('/kc-kassen-start/tv-programm?nurStand=1', { cache: 'no-store' })
+      .then(function (a) { return a.ok ? a.json() : null; })
+      .then(function (d) {
+        if (d && d.stand) {
+          if (String(d.stand) !== stand) { stand = String(d.stand); zeige('/kc-kassen-start/tv-programm?v=' + encodeURIComponent(stand), 'designer'); }
+        } else if (herkunft !== 'player') {
+          stand = null; zeige('index.html?fernseher=1' + (q.get('pruefen') ? '&pruefen=' + q.get('pruefen') : ''), 'player');
+        }
+      })
+      .catch(function () { if (!herkunft) zeige('index.html?fernseher=1', 'player'); });
+  }
+
+  var wach = null;
+  function wachHalten() { try { if (navigator.wakeLock && document.visibilityState === 'visible') navigator.wakeLock.request('screen').then(function (w) { wach = w; }).catch(function () {}); } catch (e) { /* */ } }
+  document.addEventListener('visibilitychange', function () { if (document.visibilityState === 'visible') wachHalten(); });
+
+  window.KCFernsehAnzeige = { herkunft: function () { return herkunft; }, pruefen: pruefen, rahmen: function () { return rahmen[aktiv]; } };
+  pruefen(); wachHalten();
+  setInterval(pruefen, PRUEFEN_MS);
+})();
+</script>
+</body>
+</html>

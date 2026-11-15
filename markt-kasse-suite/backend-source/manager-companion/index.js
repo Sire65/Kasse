@@ -70,7 +70,14 @@ class ManagerCompanion {
     this.server.headersTimeout = 8000;
     this.server.keepAliveTimeout = 5000;
     this._pairAttempts = new Map(); // einfacher Ratenschutz für den sensibelsten unauthentifizierten Endpunkt
-    await new Promise(resolve => this.server.listen(port, '0.0.0.0', resolve));
+    // KS-02: ein belegter Port (zweites Fenster) loeste bisher ein unbehandeltes 'error'-Ereignis
+    // aus - der Prozess stuerzte mit rohem Node-Absturz ab, statt den Fehler zu melden. Jetzt wird
+    // er als Fehler zurueckgegeben, der Start meldet ihn mit Ursache und Loesung.
+    await new Promise((resolve, reject) => {
+      const fehler = (err) => reject(err);
+      this.server.once('error', fehler);
+      this.server.listen(port, '0.0.0.0', () => { this.server.off('error', fehler); resolve(); });
+    });
     this.port = this.server.address().port;
     // BEFUND 01.09.2026 beim Verein: der Live-Kanal kam nicht hoch, der Fehler wurde hier
     // verschluckt, und der Start meldete trotzdem "ALLES BEREIT". Im PC-Manager blieben die

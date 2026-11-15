@@ -1,0 +1,367 @@
+{
+ "quelle": "251120-Weihnachtsmarkt-Programm-2025-online.pdf",
+ "offizielleSeite": "https://www.werne.de/de/erlebnis/stadt-kultur-erleben/maerkte/weihnachtsmarkt.php",
+ "hinweis": "Original-Programmprospekt Werne 2025 (aus dem früheren Programmarchiv übernommen) - nur Archiv/Vorlage",
+ "programm": [
+  {
+   "date": "2025-12-05",
+   "time": "15:15",
+   "endTime": "17:15",
+   "title": "Bläsercorps Werne",
+   "description": "Weihnachtliche Blasmusik",
+   "place": "Sparkassenbühne",
+   "children": false
+  },
+  {
+   "date": "2025-12-05",
+   "time": "16:30",
+   "endTime": "16:45",
+   "title": "Offizielle Weihnachtsmarkteröffnung",
+   "description": "",
+   "place": "Sparkassenbühne",
+   "children": false
+  },
+  {
+   "date": "2025-12-05",
+   "time": "18:00",
+   "endTime": "18:15",
+   "title": "Theater für Alle",
+   "description": "Frau Holle",
+   "place": "Lichterwald",
+   "children": true
+  },
+  {
+   "date": "2025-12-05",
+   "time": "19:00",
+   "endTime": "22:30",
+   "title": "Burning Hearts",
+   "description": "Christmas Rock",
+   "place": "Sparkassenbühne",
+   "children": false
+  },
+  {
+   "date": "2025-12-06",
+   "time": "12:30",
+   "endTime": "13:30",
+   "title": "Trompetenkinder",
+   "description": "Leitung Matthias Beckmann",
+   "place": "Sparkassenbühne",
+   "children": false
+  },
+  {
+   "date": "2025-12-06",
+   "time": "15:00",
+   "endTime": "16:00",
+   "title": "Maxim Wartenberg und sein Trommelfloh",
+   "description": "Mütze auf, es schneit vielleicht!",
+   "place": "Bühne",
+   "children": true
+  },
+  {
+   "date": "2025-12-06",
+   "time": "17:00",
+   "endTime": "18:00",
+   "title": "GOLDEN TUCAN",
+   "description": "The Power of Love",
+   "place": "Sparkassenbühne",
+   "children": false
+  },
+  {
+   "date": "2025-12-06",
+   "time": "18:00",
+   "endTime": "18:15",
+   "title": "Theater für Alle",
+   "description": "Nikolaus mit Knecht Ruprecht",
+   "place": "Lichterwald",
+   "children": true
+  },
+  {
+   "date": "2025-12-06",
+   "time": "19:00",
+   "endTime": "22:30",
+   "title": "Undercover",
+   "description": "Echt.Gut.Feiern…",
+   "place": "Sparkassenbühne",
+   "children": false
+  },
+  {
+   "date": "2025-12-07",
+   "time": "12:30",
+   "endTime": "14:00",
+   "title": "GUMMI-Bänd Lünen",
+   "description": "Musik zwischen Marsch und Beat",
+   "place": "Sparkassenbühne",
+   "children": false
+  },
+  {
+   "date": "2025-12-07",
+   "time": "15:00",
+   "endTime": "16:00",
+   "title": "Das Zappeltier von Frank & seine Freunde",
+   "description": "Zappeltiershow",
+   "place": "Bühne",
+   "children": true
+  },
+  {
+   "date": "2025-12-07",
+   "time": "17:00",
+   "endTime": "18:00",
+   "title": "Szenische Lesung mit Clemens Schlüter und Gregor A. Zumholz",
+   "description": "Hanns Dieter Hüsch über Gott und die Welt",
+   "place": "Kirche",
+   "children": false
+  },
+  {
+   "date": "2025-12-07",
+   "time": "18:00",
+   "endTime": "18:15",
+   "title": "Theater für Alle",
+   "description": "Räuber Hotzenplotz",
+   "place": "Lichterwald",
+   "children": true
+  },
+  {
+   "date": "2025-12-08",
+   "time": "16:00",
+   "endTime": "16:45",
+   "title": "KidsKulturSpass",
+   "description": "Detlefs Weihnachtszauber",
+   "place": "Bühne",
+   "children": true
+  },
+  {
+   "date": "2025-12-08",
+   "time": "17:30",
+   "endTime": "18:15",
+   "title": "KidsKulturSpass",
+   "description": "Weihnachts-Mitmach-Konzert",
+   "place": "Bühne",
+   "children": true
+  },
+  {
+   "date": "2025-12-08",
+   "time": "18:00",
+   "endTime": "18:15",
+   "title": "Theater für Alle",
+   "description": "Die zwei Weihnachtsbäume",
+   "place": "Lichterwald",
+   "children": true
+  },
+  {
+   "date": "2025-12-08",
+   "time": "19:30",
+   "endTime": "21:00",
+   "title": "GoodVibes",
+   "description": "Pop & Rock zur Weihnachtszeit",
+   "place": "Sparkassenbühne",
+   "children": false
+  },
+  {
+   "date": "2025-12-09",
+   "time": "16:00",
+   "endTime": "",
+   "title": "MS Musik",
+   "description": "1, 2 oder 3",
+   "place": "Bühne",
+   "children": true
+  },
+  {
+   "date": "2025-12-09",
+   "time": "17:00",
+   "endTime": "",
+   "title": "MS Musik",
+   "description": "1, 2 oder 3",
+   "place": "Bühne",
+   "children": true
+  },
+  {
+   "date": "2025-12-09",
+   "time": "18:00",
+   "endTime": "18:15",
+   "title": "Theater für Alle",
+   "description": "Die vier Weihnachtskugeln",
+   "place": "Lichterwald",
+   "children": true
+  },
+  {
+   "date": "2025-12-09",
+   "time": "19:00",
+   "endTime": "21:00",
+   "title": "Mucky Feet",
+   "description": "Weihnachtliches Mitsing-Rock’n’Roll",
+   "place": "Sparkassenbühne",
+   "children": false
+  },
+  {
+   "date": "2025-12-10",
+   "time": "18:00",
+   "endTime": "18:15",
+   "title": "Theater für Alle",
+   "description": "Der oberste Lebkuchenmann",
+   "place": "Lichterwald",
+   "children": true
+  },
+  {
+   "date": "2025-12-10",
+   "time": "19:00",
+   "endTime": "21:00",
+   "title": "The Kogs",
+   "description": "Britisch-deutsche Songpoesie mit Herz und Wucht",
+   "place": "Sparkassenbühne",
+   "children": false
+  },
+  {
+   "date": "2025-12-11",
+   "time": "16:30",
+   "endTime": "18:00",
+   "title": "Smooth Invaders",
+   "description": "Weihnachtszauber",
+   "place": "Sparkassenbühne",
+   "children": false
+  },
+  {
+   "date": "2025-12-11",
+   "time": "18:00",
+   "endTime": "18:15",
+   "title": "Theater für Alle",
+   "description": "Sterntaler",
+   "place": "Lichterwald",
+   "children": true
+  },
+  {
+   "date": "2025-12-11",
+   "time": "19:00",
+   "endTime": "21:00",
+   "title": "Fragile Matt",
+   "description": "Irish Smiles",
+   "place": "Sparkassenbühne",
+   "children": false
+  },
+  {
+   "date": "2025-12-12",
+   "time": "16:30",
+   "endTime": "17:15",
+   "title": "herrH",
+   "description": "WinterMitmachKonzert für die ganze Familie",
+   "place": "Bühne",
+   "children": true
+  },
+  {
+   "date": "2025-12-12",
+   "time": "18:00",
+   "endTime": "18:15",
+   "title": "Theater für Alle",
+   "description": "Die Weihnachtssterne",
+   "place": "Lichterwald",
+   "children": true
+  },
+  {
+   "date": "2025-12-12",
+   "time": "19:00",
+   "endTime": "21:00",
+   "title": "Jo Marie Dominiak",
+   "description": "Weihnachten im Revier",
+   "place": "Sparkassenbühne",
+   "children": false
+  },
+  {
+   "date": "2025-12-13",
+   "time": "13:00",
+   "endTime": "13:45",
+   "title": "Der Minze",
+   "description": "",
+   "place": "Bühne",
+   "children": true
+  },
+  {
+   "date": "2025-12-13",
+   "time": "15:00",
+   "endTime": "16:30",
+   "title": "Nilsen",
+   "description": "Kinder-Mitmach-Konzert",
+   "place": "Bühne",
+   "children": true
+  },
+  {
+   "date": "2025-12-13",
+   "time": "17:00",
+   "endTime": "18:00",
+   "title": "Rotstiftpause",
+   "description": "Weihnachtspop",
+   "place": "Sparkassenbühne",
+   "children": false
+  },
+  {
+   "date": "2025-12-13",
+   "time": "18:00",
+   "endTime": "18:15",
+   "title": "Theater für Alle",
+   "description": "Santa Lucia",
+   "place": "Lichterwald",
+   "children": true
+  },
+  {
+   "date": "2025-12-13",
+   "time": "19:00",
+   "endTime": "22:30",
+   "title": "Björn van Andel & Svenja Kröger",
+   "description": "",
+   "place": "Sparkassenbühne",
+   "children": false
+  },
+  {
+   "date": "2025-12-14",
+   "time": "13:00",
+   "endTime": "14:30",
+   "title": "Tim König & Friends",
+   "description": "Weihnachtsklassiker und Pop-Hits",
+   "place": "Sparkassenbühne",
+   "children": false
+  },
+  {
+   "date": "2025-12-14",
+   "time": "15:00",
+   "endTime": "17:00",
+   "title": "Felice",
+   "description": "Whispers of Winter",
+   "place": "Sparkassenbühne",
+   "children": false
+  },
+  {
+   "date": "2025-12-14",
+   "time": "17:00",
+   "endTime": "18:30",
+   "title": "Querwind",
+   "description": "Traditionelle Advents- und Weihnachtslieder",
+   "place": "Kirche",
+   "children": false
+  },
+  {
+   "date": "2025-12-14",
+   "time": "18:00",
+   "endTime": "18:15",
+   "title": "Theater für Alle",
+   "description": "Die kleine Hexe",
+   "place": "Lichterwald",
+   "children": true
+  },
+  {
+   "date": "2025-12-14",
+   "time": "18:45",
+   "endTime": "19:15",
+   "title": "Förderverein Stadtbücherei Werne e.V.",
+   "description": "Last Quizzer - das Weihnachtsquiz",
+   "place": "Sparkassenbühne",
+   "children": false
+  },
+  {
+   "date": "2025-12-14",
+   "time": "19:15",
+   "endTime": "19:30",
+   "title": "Das leuchtende Finale",
+   "description": "Wunderkerzen mit Bürgermeister Lars Hübchen",
+   "place": "Sparkassenbühne",
+   "children": false
+  }
+ ]
+}

@@ -313,7 +313,7 @@
 
 <section class="view" data-view-panel="registers">
   <div class="page-head"><div><h1>Kassenverwaltung</h1><p>Jede Kasse erhält eine eindeutige ID und ein eigenes Profil.</p></div></div>
-  <div class="toolbar"><button id="newRegister">＋ Neue Kasse</button><button id="saveRegisters">💾 Speichern</button><button id="deleteRegister" class="danger" data-confirm-handler="register" title="Die markierte Kasse löschen">🗑 Kasse löschen</button></div>
+  <div class="toolbar"><button id="newRegister">＋ Neue Kasse</button><button id="saveRegisters">💾 Speichern</button><button id="deleteRegister" class="danger" data-confirm-handler="register" title="Die markierte Kasse löschen">🗑 Kasse löschen</button><button type="button" id="kassenZettelOeffnen" onclick="window.open('kassen-zettel.html','_blank')" title="QR-Zettel zum einmaligen Koppeln der Tablets drucken">🖨 Tablet-QR-Zettel</button></div>
   <div id="registerCards" class="register-grid"></div>
 </section>
 
@@ -865,9 +865,16 @@
   </article>
 
   <article class="secure-card">
+    <h3>Tablet-Kassen koppeln: QR-Zettel</h3>
+    <p class="vb-hinweis">Jedes Tablet wird <strong>einmal</strong> mit dem gedruckten Zettel seiner Kasse gekoppelt.
+       Schlüssel und Ports bleiben über Neustarts und Programm-Updates gleich – morgens wird nichts neu gescannt.</p>
+    <p><button type="button" class="primary" id="vbKassenZettel" onclick="window.open('kassen-zettel.html','_blank')">🖨 QR-Zettel drucken / prüfen</button></p>
+  </article>
+
+  <article class="secure-card">
     <h3>Adressen zum Öffnen der Kassen</h3>
-    <p class="vb-hinweis">Diese Adressen stammen aus der laufenden Markttag-Einrichtung. Beim Neustart
-       ändern sich Schlüssel und Ports – dann hier neu abholen statt eine gemerkte Adresse zu verwenden.</p>
+    <p class="vb-hinweis">Diese Adressen stammen aus dem laufenden Kassen-Start. Sie bleiben gleich, solange der PC im
+       Router dieselbe Adresse bekommt und der Schlüssel einer Kasse nicht erneuert wird.</p>
     <div id="vbAdressen" class="vb-adressen"></div>
   </article>
 </section>
@@ -1155,6 +1162,8 @@
 <div><button id="authConfirm" value="ok" class="primary">Entsperren</button></div>
 </form></dialog>
 
+<!-- KS-04: muss als ERSTES Skript laden - verlängert den Kanal zum Manager-Dienst zu Hause über Supabase -->
+<script src="kc-fernmodus.js?build=1.0.0"></script>
 <script src="vendor/qrcode-generator.js"></script>
 <!-- Ein QR-Zeichner fuer die ganze Suite (siehe shared/kc-qr.js). -->
 <script src="../shared/kc-qr.js?build=0.1.0"></script>
@@ -1212,6 +1221,10 @@
 <script src="kc-money-butler-cloud-intake.js?build=1.1.1"></script>
 <script src="kc-live-monitor.js"></script>
 <script src="kc-verbindungsdiagnose.js"></script>
+<script src="kc-stand-bruecke-manager.js?build=1.0.0"></script>
+<script src="kc-fernseher-manager.js?build=1.0.0"></script>
+<script src="vendor/pdfjs/pdf.min.js"></script>
+<script src="kc-tagesprogramm.js?build=1.0.0"></script>
 <script src="kc-fernverkehr-dashboard.js"></script>
 <script src="kc-admin-center.js"></script>
 <script src="kc-manager-supabase-status.js?v=2026-10-14"></script>
