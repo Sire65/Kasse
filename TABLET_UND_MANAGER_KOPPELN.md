@@ -23,7 +23,19 @@ Strom eine andere Adresse, passen die Zettel nicht mehr.
 
 **FRITZ!Box:** Heimnetz → Netzwerk → beim Stand-PC auf den Stift → Haken bei
 **„Diesem Netzwerkgerät immer die gleiche IPv4-Adresse zuweisen“** → Übernehmen.
+**TP-Link Archer MR200 (Stand-Router):** im Browser `http://192.168.1.1` (oder `tplinkmodem.net`)
+öffnen → anmelden → **Erweitert → Netzwerk → DHCP-Server** → unten bei **Adressreservierung**
+auf **Hinzufügen** → beim Mini-PC die MAC-Adresse auswählen (steht in der Liste der verbundenen
+Geräte), IP z. B. `192.168.1.20` eintragen → **Speichern**. Danach Mini-PC einmal neu starten.
+Den Mini-PC per **LAN-Kabel** an einen LAN-Anschluss des Routers stecken, die Tablets ins WLAN
+des Routers.
 Andere Router: das heißt meist „DHCP-Reservierung“ oder „statische Zuweisung“.
+
+> Hinweis zum Mobilfunk: Das Internet am Stand kommt über eine SIM-Karte. Mobilfunkanschlüsse
+> sind von außen nicht erreichbar – deshalb läuft „Zuhause mitschauen“ über Supabase
+> (der Mini-PC meldet sich selbst dort), nicht über Portfreigaben. Die Kassen selbst
+> brauchen kein Internet: Fällt das Netz aus, kassieren die Tablets weiter über den Mini-PC,
+> und der Mini-PC holt das Hochladen nach, sobald das Netz zurück ist.
 
 Passt die Adresse trotzdem einmal nicht, steht das **unübersehbar** im schwarzen Fenster
 („PC-ADRESSE HAT SICH GEÄNDERT …“) und im PC-Manager – man sucht den Fehler nicht am Tablet.
