@@ -45,7 +45,8 @@ let f = 0; const pr = (n, b, z = '') => { console.log(`${b ? '  OK  ' : 'FEHLER'
     execFileSync(process.execPath, [path.join(W, 'werkzeuge', 'etiketten', 'kesselschild.cjs'), 'eier', '--probe'], {stdio: 'pipe', env: process.env});
     const eh = fs.readFileSync(path.join(require('os').tmpdir(), 'kc-kesselschild', 'Kesselschild_Probe_eier.html'), 'utf8');
     pr('Kesselschild Eierlikörpunsch: Allergene Eier, Milch und Sulfite, 6,50 € inkl. Pfand', (() => { const z = (eh.match(/Allergene:<\/b> ([^<]*)/) || [])[1] || ''; return /Eier/.test(z) && /Milch/.test(z) && /Sulfite/.test(z); })() && eh.includes('6,50\u00a0€'));
-    pr('Kesselschild Apfelpunsch: Sulfite als Allergen, Zusatzstoffe rot "nicht erfasst"', /Allergene:<\/b> Schwefeldioxid \/ Sulfite/.test(html) && /Zusatzstoffe:<\/b> <span class="fehlt">/.test(html));
+    // 16.11.2026 (Betreiber: "Etikett stimmt"): Kaub's Weihnachtsapfel laut Etikett ohne Allergene und ohne Farb-/Konservierungsstoffe.
+    pr('Kesselschild Apfelpunsch: laut Etikett keine Allergene, ohne Farb- und Konservierungsstoffe', /Allergene:<\/b> Keine deklarationspflichtigen Allergene laut Etikett/.test(html) && !/Allergene:<\/b> Schwefeldioxid/.test(html) && /Zusatzstoffe:<\/b> Ohne Farb- und Konservierungsstoffe/.test(html));
   } finally { await b.close(); s.close(); }
   console.log(f ? `\n${f} FEHLER` : '\nAlles OK'); process.exit(f ? 1 : 0);
 })().catch((e) => { console.error(e); process.exit(1); });
