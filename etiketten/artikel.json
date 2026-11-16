@@ -1,5 +1,5 @@
 {
- "stand": "2026-11-16T18:17:07.889Z",
+ "stand": "2026-11-16T18:43:38.935Z",
  "quelle": "Kasse pos/app.js (PRODUCTS)",
  "artikel": [
   {
@@ -409,7 +409,7 @@
    "sortierung": 1,
    "allergene": "Glutenhaltiges Getreide, Senf, Sellerie (Spuren möglich)",
    "allergeneGeprueft": false,
-   "zusatz": null,
+   "zusatz": "Konservierungsstoff (Natriumnitrit/Nitritpökelsalz), Antioxidationsmittel (Ascorbat) – übliche Angaben für geräucherte Mettenden, am Etikett prüfen",
    "alkohol": false,
    "bildAusschnitt": [
     0,
@@ -463,7 +463,7 @@
    "sortierung": 3,
    "allergene": "Senf, Sellerie (Spuren möglich), Glutenhaltiges Getreide (Spuren möglich)",
    "allergeneGeprueft": false,
-   "zusatz": null,
+   "zusatz": "Konservierungsstoff (Natriumnitrit/Nitritpökelsalz), Antioxidationsmittel (Ascorbat) – übliche Angaben für geräucherte Mettenden, am Etikett prüfen",
    "alkohol": false,
    "bildAusschnitt": [
     0,
@@ -571,7 +571,7 @@
    "sortierung": 7,
    "allergene": "Senf, Sellerie (Spuren möglich)",
    "allergeneGeprueft": false,
-   "zusatz": null,
+   "zusatz": "Konservierungsstoff (Natriumnitrit/Nitritpökelsalz), Antioxidationsmittel (Ascorbat) – übliche Angaben für geräucherte Mettenden, am Etikett prüfen",
    "alkohol": false,
    "bildAusschnitt": [
     0,

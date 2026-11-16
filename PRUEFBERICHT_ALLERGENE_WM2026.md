@@ -33,7 +33,7 @@ Reihenfolge im PC-Manager: nach den Blöcken `kcm_kaub_angaben_v1` und `kcm_eier
 Gerät die Etikettangabe (keine Sulfite) nicht von der älteren Händlerangabe überschrieben wird.
 Kasse: Verdorbene Daten (`[object Object]`) werden vorher wie in `sanitizeProduct` aus der Grundausstattung wiederhergestellt.
 
-Build: Kasse `app.js?build=0.31.3.7-r68-allergene` (index.html und service-worker.js gleich → neuer Cache, kein Mischstand),
+Build: Kasse `app.js?build=0.31.3.6-r68-allergene` (index.html und service-worker.js gleich → neuer Cache, kein Mischstand),
 PC-Manager `app.js?build=bilder-v12-allergene`. `etiketten/artikel.json` neu erzeugt (`werkzeuge/etiketten/artikel-export.cjs`).
 
 ## Tests

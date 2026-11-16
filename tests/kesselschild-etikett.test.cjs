@@ -11,7 +11,12 @@ pr('Preis inkl. Pfand 5,50 €', html.includes('<div class="betrag">5,50 €</d
 pr('Pfand aufgeschlüsselt (3,50 € + 2,00 € Glaspfand)', html.includes('inkl. 2,00 € Pfand') && html.includes('+ 2,00 € Glaspfand'));
 pr('Allergene aus dem Artikelstamm', /Allergene:<\/b> Schwefeldioxid \/ Sulfite/.test(html));
 pr('QR enthält genau die Artikelnummer', /data-qr="01001"/.test(html));
-pr('fehlende Zusatzstoffe rot markiert, nicht als "keine"', /Zusatzstoffe:<\/b> <span class="fehlt">/.test(html) && !/Zusatzstoffe:<\/b> keine/i.test(html));
+// 16.11.2026 (Betreiber): Gluehwein rot hat jetzt die Zusatzstoffe laut Etikett - die Rot-Markierung fuer FEHLENDE
+// Angaben wird am Eierlikoerpunsch geprueft (dort sind Zusatzstoffe weiterhin nicht erfasst).
+pr('Glühwein rot: Zusatzstoffe laut Etikett (Kaliumsorbat)', /Zusatzstoffe:<\/b>[^<]*Kaliumsorbat/.test(html));
+execFileSync(process.execPath, [path.join(W, 'werkzeuge', 'etiketten', 'kesselschild.cjs'), 'eier', '--probe'], {stdio: 'pipe', env: process.env});
+const eh = fs.readFileSync(path.join(require('os').tmpdir(), 'kc-kesselschild', 'Kesselschild_Probe_eier.html'), 'utf8');
+pr('fehlende Zusatzstoffe rot markiert, nicht als "keine" (Eierlikörpunsch)', /Zusatzstoffe:<\/b> <span class="fehlt">/.test(eh) && !/Zusatzstoffe:<\/b> keine/i.test(eh));
 pr('Etikett 80 x 80 mm, abgerundeter Rahmen', /\.etikett \{ width: 80mm; height: 80mm;[^}]*border-radius: 6mm/.test(html));
 pr('Schnittmarken und Messbalken auf der Probe', (html.match(/class="marke"/g) || []).length === 8 && html.includes('Messbalken'));
 pr('PDF erzeugt', fs.statSync(path.join(A, 'Kesselschild_Probe_grot.pdf')).size > 20000);

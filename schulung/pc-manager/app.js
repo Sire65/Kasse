@@ -136,12 +136,12 @@ const managerArtikelGespeichert=!!localStorage.getItem("kcm_articles"),managerGr
   eier:{allergens:{eggs:"contained",milk:"contained",sulphites:"contained"},legacyAllergens:"Enthält Ei, Milch und Sulfite."},
   feuer:{allergens:{sulphites:"contained"},legacyAllergens:"Enthält Sulfite."},
   gruenkohl:{allergens:{gluten:"contained",mustard:"traces",celery:"traces"},legacyAllergens:"Enthält Gluten (Haferflocken). Kann Senf und Sellerie enthalten.",ingredients:"Grünkohl, Kartoffeln, Zwiebeln, Haferflocken, Gewürze"},
-  gruenkohlmett:{allergens:{gluten:"contained",mustard:"contained",celery:"traces"},legacyAllergens:"Enthält Gluten (Haferflocken) und Senf (Mettendchen). Kann Sellerie enthalten.",ingredients:"Grünkohleintopf (Grünkohl, Kartoffeln, Zwiebeln, Haferflocken, Gewürze) mit geräuchertem Mettendchen"},
+  gruenkohlmett:{allergens:{gluten:"contained",mustard:"contained",celery:"traces"},legacyAllergens:"Enthält Gluten (Haferflocken) und Senf (Mettendchen). Kann Sellerie enthalten.",ingredients:"Grünkohleintopf (Grünkohl, Kartoffeln, Zwiebeln, Haferflocken, Gewürze) mit geräuchertem Mettendchen",additives:"Konservierungsstoff (Natriumnitrit/Nitritpökelsalz), Antioxidationsmittel (Ascorbat) – übliche Angaben für geräucherte Mettenden, am Etikett prüfen"},
   sauerkraut:{allergens:{mustard:"traces",celery:"traces"},legacyAllergens:"Kann Senf und Sellerie enthalten."},
-  sauerkrautmett:{allergens:{mustard:"contained",celery:"traces",gluten:"traces"},legacyAllergens:"Enthält Senf (Mettendchen). Kann Sellerie und Spuren von Gluten enthalten.",ingredients:"Sauerkrauteintopf (Sauerkraut, Kartoffeln, Speck, Gewürze) mit geräuchertem Mettendchen"},
+  sauerkrautmett:{allergens:{mustard:"contained",celery:"traces",gluten:"traces"},legacyAllergens:"Enthält Senf (Mettendchen). Kann Sellerie und Spuren von Gluten enthalten.",ingredients:"Sauerkrauteintopf (Sauerkraut, Kartoffeln, Speck, Gewürze) mit geräuchertem Mettendchen",additives:"Konservierungsstoff (Natriumnitrit/Nitritpökelsalz), Antioxidationsmittel (Ascorbat) – übliche Angaben für geräucherte Mettenden, am Etikett prüfen"},
   knirpsecreme:{allergens:{milk:"traces"},legacyAllergens:"Creme kann Milch und Milchprodukte enthalten."},
   hering:{allergens:{fish:"contained",eggs:"contained",milk:"contained",mustard:"contained"},legacyAllergens:"Enthält Fisch, Ei, Milch und Senf.",ingredients:"Kartoffeln, Heringsstip"},
-  mettwurst:{allergens:{mustard:"contained",celery:"traces"},legacyAllergens:"Enthält Senf. Kann Sellerie enthalten.",ingredients:"Geräucherte Mettendchen"}
+  mettwurst:{allergens:{mustard:"contained",celery:"traces"},legacyAllergens:"Enthält Senf. Kann Sellerie enthalten.",ingredients:"Geräucherte Mettendchen",additives:"Konservierungsstoff (Natriumnitrit/Nitritpökelsalz), Antioxidationsmittel (Ascorbat) – übliche Angaben für geräucherte Mettenden, am Etikett prüfen"}
 };let neu=false;
  for(const a of articles){const n=NACHTRAG[a.id];if(!n)continue;const alt=(a.info&&typeof a.info==="object")?a.info:{};
   const al=(alt.allergens&&typeof alt.allergens==="object"&&!Array.isArray(alt.allergens))?{...alt.allergens}:{};

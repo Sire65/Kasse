@@ -29,6 +29,7 @@ const pruefe = (n, a) => {
   if (gm) pr(`${n}: Grünkohl + Mettwurst Gluten und Senf enthalten`, gm.gluten === 'contained' && gm.mustard === 'contained' && gm.celery === 'traces');
   pr(`${n}: Heringsstip Fisch, Ei, Milch, Senf`, h.fish === 'contained' && h.eggs === 'contained' && h.milk === 'contained' && h.mustard === 'contained', JSON.stringify(h));
   pr(`${n}: Mettendchen Senf enthalten, Sellerie Spuren`, m.mustard === 'contained' && m.celery === 'traces', JSON.stringify(m));
+  pr(`${n}: Mettendchen mit Konservierungsstoff und Antioxidationsmittel`, /Konservierungsstoff/.test(g('mettwurst').additives || '') && /Antioxidationsmittel/.test(g('mettwurst').additives || ''));
 };
 (async () => {
   const PORT = Number(process.env.P || 8991); await new Promise((r) => s.listen(PORT, r)); const b = await pw.chromium.launch();
