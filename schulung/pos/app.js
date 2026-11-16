@@ -277,6 +277,34 @@ let changed=false;for(const product of PRODUCTS){const patch=patches[product.id]
  // muss noch ein Pluszeichen wegen Amaretto und Rum dazu") nur setzen, wenn die Angabe GANZ fehlt (alter
  // Stand). "Keine" aus dem PC-Manager (leerer Wert) bleibt bestehen.
  for(const id of ["roterfeger","apfel"]){const p=PRODUCTS.find(x=>x.id===id);if(p&&p.optionGroup===undefined){p.optionGroup="shot";changed=true}}}
+// 16.11.2026 (Betreiber: "trage auch alles in die Kasse ein und in PC Manager ... damit schon mal alles stimmt"):
+// Allergene/Zutaten Weihnachtsmarkt 2026 EINMALIG je Geraet nachtragen. Quellen: Etiketten Kaub (Roter Feger,
+// Weihnachtsapfel: keine Allergene, KEINE Sulfite), Luana/Weihnachtsmarkt-Gluehwein (Sulfite, Kaliumsorbat),
+// Betreiberangaben (Gruenkohl mit Haferflocken = Gluten, Heringsstip = Fisch/Ei/Milch/Senf, Mettendchen = Senf,
+// Sellerie moeglich). Nur die genannten Allergene werden gesetzt; alle anderen Angaben des Artikels bleiben.
+// Danach gilt wieder, was im PC-Manager gepflegt wird.
+{const MERK="kc_artikelinfo_wm2026_v1";if(!localStorage.getItem(MERK)){const NACHTRAG={
+  roterfeger:{allergens:{gluten:"not-contained",crustaceans:"not-contained",eggs:"not-contained",fish:"not-contained",peanuts:"not-contained",soy:"not-contained",milk:"not-contained",nuts:"not-contained",celery:"not-contained",mustard:"not-contained",sesame:"not-contained",sulphites:"not-contained",lupin:"not-contained",molluscs:"not-contained"},legacyAllergens:"Keine deklarationspflichtigen Allergene laut Etikett (Kaub „Roter Feger“).",additives:"Säuerungsmittel Citronensäure (laut Etikett)"},
+  apfel:{allergens:{gluten:"not-contained",crustaceans:"not-contained",eggs:"not-contained",fish:"not-contained",peanuts:"not-contained",soy:"not-contained",milk:"not-contained",nuts:"not-contained",celery:"not-contained",mustard:"not-contained",sesame:"not-contained",sulphites:"not-contained",lupin:"not-contained",molluscs:"not-contained"},legacyAllergens:"Keine deklarationspflichtigen Allergene laut Etikett (Kaub’s Weihnachtsapfel).",additives:"Ohne Farb- und Konservierungsstoffe (laut Etikett)"},
+  grot:{allergens:{...{gluten:"not-contained",crustaceans:"not-contained",eggs:"not-contained",fish:"not-contained",peanuts:"not-contained",soy:"not-contained",milk:"not-contained",nuts:"not-contained",celery:"not-contained",mustard:"not-contained",sesame:"not-contained",sulphites:"not-contained",lupin:"not-contained",molluscs:"not-contained"},sulphites:"contained"},legacyAllergens:"Enthält Sulfite.",additives:"Konservierungsstoff und Antioxidationsmittel: Sulfite; Konservierungsstoff: Kaliumsorbat (laut Etikett Luana Glühwein)"},
+  gweiss:{allergens:{...{gluten:"not-contained",crustaceans:"not-contained",eggs:"not-contained",fish:"not-contained",peanuts:"not-contained",soy:"not-contained",milk:"not-contained",nuts:"not-contained",celery:"not-contained",mustard:"not-contained",sesame:"not-contained",sulphites:"not-contained",lupin:"not-contained",molluscs:"not-contained"},sulphites:"contained"},legacyAllergens:"Enthält Sulfite.",additives:"Konservierungsstoff und Antioxidationsmittel: Sulfite; Konservierungsstoff: Kaliumsorbat (laut Etikett Weihnachtsmarkt Glühwein Weiß)"},
+  eier:{allergens:{eggs:"contained",milk:"contained",sulphites:"contained"},legacyAllergens:"Enthält Ei, Milch und Sulfite."},
+  feuer:{allergens:{sulphites:"contained"},legacyAllergens:"Enthält Sulfite."},
+  gruenkohl:{allergens:{gluten:"contained",mustard:"traces",celery:"traces"},legacyAllergens:"Enthält Gluten (Haferflocken). Kann Senf und Sellerie enthalten.",ingredients:"Grünkohl, Kartoffeln, Zwiebeln, Haferflocken, Gewürze"},
+  gruenkohlmett:{allergens:{gluten:"contained",mustard:"contained",celery:"traces"},legacyAllergens:"Enthält Gluten (Haferflocken) und Senf (Mettendchen). Kann Sellerie enthalten.",ingredients:"Grünkohleintopf (Grünkohl, Kartoffeln, Zwiebeln, Haferflocken, Gewürze) mit geräuchertem Mettendchen",additives:"Konservierungsstoff (Natriumnitrit/Nitritpökelsalz), Antioxidationsmittel (Ascorbat) – übliche Angaben für geräucherte Mettenden, am Etikett prüfen"},
+  sauerkraut:{allergens:{mustard:"traces",celery:"traces"},legacyAllergens:"Kann Senf und Sellerie enthalten."},
+  sauerkrautmett:{allergens:{mustard:"contained",celery:"traces",gluten:"traces"},legacyAllergens:"Enthält Senf (Mettendchen). Kann Sellerie und Spuren von Gluten enthalten.",ingredients:"Sauerkrauteintopf (Sauerkraut, Kartoffeln, Speck, Gewürze) mit geräuchertem Mettendchen",additives:"Konservierungsstoff (Natriumnitrit/Nitritpökelsalz), Antioxidationsmittel (Ascorbat) – übliche Angaben für geräucherte Mettenden, am Etikett prüfen"},
+  knirpsecreme:{allergens:{milk:"traces"},legacyAllergens:"Creme kann Milch und Milchprodukte enthalten."},
+  hering:{allergens:{fish:"contained",eggs:"contained",milk:"contained",mustard:"contained"},legacyAllergens:"Enthält Fisch, Ei, Milch und Senf.",ingredients:"Kartoffeln, Heringsstip"},
+  mettwurst:{allergens:{mustard:"contained",celery:"traces"},legacyAllergens:"Enthält Senf. Kann Sellerie enthalten.",ingredients:"Geräucherte Mettendchen",additives:"Konservierungsstoff (Natriumnitrit/Nitritpökelsalz), Antioxidationsmittel (Ascorbat) – übliche Angaben für geräucherte Mettenden, am Etikett prüfen"}
+};let neu=false;
+ for(const a of PRODUCTS){const n=NACHTRAG[a.id];if(!n)continue;let alt=(a.info&&typeof a.info==="object")?a.info:{};
+  // Verdorbene Daten ("[object Object]") wie in sanitizeProduct zuerst aus der Grundausstattung wiederherstellen,
+  // sonst gingen Freigabestatus, Kurzbeschreibung und Naehrwerte verloren.
+  if(alt.allergens==="[object Object]"){const std=DEFAULT_PRODUCTS.find(x=>x.id===a.id);if(std&&std.info&&typeof std.info==="object")alt={...std.info}}
+  const al=(alt.allergens&&typeof alt.allergens==="object"&&!Array.isArray(alt.allergens))?{...alt.allergens}:{};
+  a.info={...alt,...n,allergens:{...al,...n.allergens},contents:n.additives||alt.contents||alt.additives||"",source:[alt.source,"Allergen-Nachtrag 16.11.2026 (Etiketten/Betreiber)"].filter(Boolean).join("; ")};neu=true}
+ if(neu)localStorage.setItem("kc_products_v050",JSON.stringify(PRODUCTS));localStorage.setItem(MERK,"1")}}
 // Aus dem Sortiment genommen (Betreiber 03.09.2026). Eine Kasse, die sie schon gespeichert
 // hat, behielte sie sonst - der Artikel waere nur auf einem frischen Geraet verschwunden.
 for(const weg of ["knirpse","knirpseher"]){const n=PRODUCTS.findIndex(p=>p.id===weg);if(n>=0){PRODUCTS.splice(n,1);changed=true}}

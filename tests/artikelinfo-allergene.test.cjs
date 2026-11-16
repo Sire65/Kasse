@@ -24,7 +24,8 @@ for(const seite of ['pos','schulung/pos'])for(const verdorben of [false,true]){
  const g=await info('grot');
  pr(`${n}: Glühwein zeigt „Schwefeldioxid / Sulfite: Enthalten“`,/Schwefeldioxid \/ Sulfite: Enthalten/.test(g)&&!/object Object/.test(g)&&/Heißer roter Glühwein/.test(g)&&!/nicht vollständig geprüft/.test(g),g.slice(0,200));
  const k=await info('gruenkohl');
- pr(`${n}: Grünkohl zeigt den Allergen-Text`,/Kann Senf und Sellerie enthalten/.test(k)&&!/object Object/.test(k),k.slice(0,160));
+ // 16.11.2026 (Betreiber): Gruenkohl enthaelt Haferflocken -> Gluten "Enthalten", Senf/Sellerie "Spuren moeglich" (strukturiert statt Text).
+ pr(`${n}: Grünkohl zeigt Gluten und Senf/Sellerie-Spuren`,/Glutenhaltiges Getreide: Enthalten/.test(k)&&/Senf: Spuren möglich/.test(k)&&/Sellerie: Spuren möglich/.test(k)&&!/object Object/.test(k),k.slice(0,160));
  const d=await p.evaluate(()=>{document.querySelectorAll('dialog[open]').forEach(d=>d.close());openProductInfo('grot');document.getElementById('productInfoDetailsBtn').click();const e=document.getElementById('productDetailsContent');return e?e.innerText.replace(/\s+/g,' '):''});
  pr(`${n}: Datenblatt mit Sulfite „Enthalten“ und Nährwerten`,/Sulfite\s*Enthalten/.test(d)&&/85/.test(d),d.slice(0,160));
  pr(`${n}: keine JS-Fehler`,!js.filter(x=>!/access control|kc-sync|Load failed|Failed to fetch/.test(x)).length,js.join('|').slice(0,200));

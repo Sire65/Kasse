@@ -25,7 +25,8 @@ let f = 0; const pr = (n, b, z = '') => { console.log(`${b ? '  OK  ' : 'FEHLER'
       const k = await kc.newPage(); await k.addInitScript(() => localStorage.setItem('kc_master_v040', JSON.stringify({registerId: 'KASSE-01', pinLockEnabled: false})));
       await k.goto(`http://127.0.0.1:${PORT}/${seite}/index.html`); await k.waitForTimeout(4500);
       const r = await k.evaluate(() => Object.fromEntries(['grot', 'gweiss', 'roterfeger', 'apfel', 'eier', 'feuer', 'gruenkohlmett'].map((id) => { const i = PRODUCTS.find((x) => x.id === id)?.info || {}; return [id, {z: i.ingredients || '', a: window.KCAllergene.alsText(i.allergens) || i.legacyAllergens || ''}]; })));
-      pr(`${seite}: Kaub-Getränke mit Zutaten und Sulfiten`, ['grot', 'gweiss', 'roterfeger', 'apfel'].every((id) => r[id].z && /Sulfite/.test(r[id].a)), JSON.stringify(r.apfel));
+      // 16.11.2026 (Betreiber: "Etikett stimmt"): Roter Feger und Weihnachtsapfel laut Kaub-Etikett OHNE Sulfite; Gluehwein mit Sulfiten.
+      pr(`${seite}: Kaub-Getränke mit Zutaten; Glühwein mit Sulfiten, Roter Feger/Apfelpunsch ohne`, ['grot', 'gweiss', 'roterfeger', 'apfel'].every((id) => r[id].z) && ['grot', 'gweiss'].every((id) => /Sulfite/.test(r[id].a)) && ['roterfeger', 'apfel'].every((id) => !/Sulfite: Enthalten|Enthält Sulfite/.test(r[id].a)), JSON.stringify(r.apfel));
       pr(`${seite}: Eierlikörpunsch mit Eier, Milch, Sulfite`, /Eier/.test(r.eier.a) && /Milch/.test(r.eier.a) && /Sulfite/.test(r.eier.a) && /Advocaat/.test(r.eier.z));
       pr(`${seite}: Manager ohne Angabe -> Kasse behält ihre Angaben (Feuerzangenbowle, Grünkohl)`, /Sulfite/.test(r.feuer.a) && /Senf/.test(r.gruenkohlmett.a), JSON.stringify([r.feuer, r.gruenkohlmett]).slice(0, 160));
       await kc.close();
