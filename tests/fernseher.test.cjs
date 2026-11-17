@@ -77,6 +77,29 @@ function nachbauStarter() {
     p('A: „aktiv“: false -> kein Fernseher-Start', !f.start().gestartet && s.aufrufe.length === 0);
   }
 
+  // ===== A2: eingebaute Präsentation „Version A“ (Umfragesieger Weihnachtsmarkt 2026) =====
+  {
+    const anzeige = fs.readFileSync(path.join(WURZEL, 'tv-player', 'fernseher.html'), 'utf8');
+    const datei = path.join(WURZEL, 'tv-player', 'weihnachtsmarkt-2026-version-a.html');
+    p('A2: Fernseher nimmt Version A als eingebaute Präsentation', anzeige.includes("'weihnachtsmarkt-2026-version-a.html'") && anzeige.includes("zeige(VERSION_A + '?fernseher=1', 'version-a')"));
+    p('A2: Fernseher blendet Bedienleiste, Umfrage-Knopf und Build-Hinweis aus', /#tvControls,#tvBigDone,#kcBuildLabel\{display:none!important\}/.test(anzeige));
+    p('A2: Version-A-Datei liegt im TV-Player', fs.existsSync(datei));
+    if (fs.existsSync(datei)) {
+      const a = fs.readFileSync(datei, 'utf8');
+      p('A2: Version A hält am Fernseher auf der Schlussfolie nicht an', !a.includes('if(isLast&&playing)tvTogglePause();'));
+      p('A2: Version A kennt den Fernsehmodus (?fernseher=1)', a.includes('window.KC_FERNSEHMODUS=/[?&]fernseher=1(&|$)/.test(location.search)') && a.includes('id="kcBuildLabel"'));
+      p('A2: am Fernseher keine gespeicherte Designer-Präsentation statt Version A', a.indexOf("k==='fs3.kcTvPresentation'?null") > -1 && a.indexOf("k==='fs3.kcTvPresentation'?null") < a.indexOf("localStorage.getItem('fs3.kcTvPresentation')"));
+      p('A2: Endversion: Preislisten mit Allergenen und Pfandregel, kein Umfrage-Knopf mehr', a.includes('Allergene und Zusatzstoffe') && a.includes('Pfand: 2,00 € je Glas') && !a.includes('abstimmung.html?seen=A') && a.includes('Endversion · '));
+      const projekt = JSON.parse(a.slice(a.indexOf('window.KC_DESIGNER_MARKET_PRESENTATION=') + 39, a.indexOf('};', a.indexOf('window.KC_DESIGNER_MARKET_PRESENTATION=')) + 1).replace(/\bB\[(\d+)\]/g, '0'));
+      const mitglieder = projekt.slides.filter((s) => s.memberMeta);
+      const sichtbar = mitglieder.filter((s) => s.rotation && s.rotation.enabled !== false).map((s) => s.memberMeta.name);
+      p('A2: Endversion: nur Mitglieder mit Zustimmung sichtbar (Klaus Zander, Steven Linley nicht)', sichtbar.length === 9 && !sichtbar.includes('Klaus Zander') && !sichtbar.includes('Steven Linley'), sichtbar.join(', '));
+      const { uebernehmen } = require(path.join(WURZEL, 'tools', 'tv-version-a-uebernehmen.cjs'));
+      let doppelt = false; try { uebernehmen(a); } catch (e) { doppelt = /bereits angepasst/.test(e.message); }
+      p('A2: Werkzeug lehnt bereits angepasste Datei ab (keine Doppel-Anpassung)', doppelt);
+    }
+  }
+
   // ================= B: echter Start =================
   console.log('\n-- B: echter Start --');
   let chromium; try { ({ chromium } = require('playwright')); } catch (e) { console.log('  (B übersprungen: Playwright fehlt)'); }
@@ -101,7 +124,7 @@ function nachbauStarter() {
       browser = await chromium.launch();
       const tv = await (await browser.newContext({ viewport: { width: 1920, height: 1080 } })).newPage();
       const tvFehler = []; tv.on('pageerror', (e) => tvFehler.push(e.message));
-      await tv.goto(`http://127.0.0.1:${WEB}/tv-player/fernseher.html?pruefen=2`);
+      await tv.goto(`http://127.0.0.1:${WEB}/tv-player/fernseher.html?pruefen=2&eingebaut=player`);
       await tv.waitForFunction(() => window.KCFernsehAnzeige && window.KCFernsehAnzeige.herkunft(), null, { timeout: 15000 });
       await tv.waitForFunction(() => { const f = window.KCFernsehAnzeige.rahmen(); return f && f.contentWindow && f.contentWindow.KCFernseher && f.contentWindow.KCFernseher.herkunft; }, null, { timeout: 15000 }).catch(() => {});
       const ohne = await tv.evaluate(() => { const f = window.KCFernsehAnzeige.rahmen(); return { h: window.KCFernsehAnzeige.herkunft(), innen: f.contentWindow.KCFernseher && f.contentWindow.KCFernseher.herkunft, text: f.contentDocument.getElementById('screen').innerText, leiste: getComputedStyle(f.contentDocument.getElementById('control')).display }; });
