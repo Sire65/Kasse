@@ -67,6 +67,16 @@ const HINWEISE = {
   ],
 };
 
+// ---- Wetterfolien: Platzhalter der eingebauten Wetterabfrage (siehe CODE_ERSETZUNGEN) ----
+const tag = (t) => `{{weather.${t}.day}}\n{{weather.${t}.symbol}}\n{{weather.${t}.minmax}}\n{{weather.${t}.text}}\n☔ {{weather.${t}.rain}}`;
+const WETTER = {
+  'Wetter heute und morgen': {
+    'weather-today': 'HEUTE\n{{weather.today.symbol}} {{weather.today.temp}}\n{{weather.today.text}}\n{{weather.today.minmax}} · ☔ {{weather.today.rain}}',
+    'weather-tomorrow': 'MORGEN\n{{weather.tomorrow.symbol}} {{weather.tomorrow.minmax}}\n{{weather.tomorrow.text}}\n☔ {{weather.tomorrow.rain}}',
+  },
+  'Wetteraussichten': { 'forecast-1': tag('day2'), 'forecast-2': tag('day3'), 'forecast-3': tag('day4') },
+};
+
 // ---- einheitliches Raster (Folie 1280×720) ----
 const TITEL = { x: 80, y: 25, w: 1120, h: 120, font: 66 };
 const ZIER = { 'Grafik 12': { x: 1155, y: 0, w: 71, h: 71 }, 'Grafik 14': { x: 1168, y: 90, w: 46, h: 46 } };
@@ -83,6 +93,17 @@ function bearbeite(projekt, log) {
     for (const item of folie.items) {
       if (item.originalRole === 'title' && folie.id !== projekt.slides[0].id) setze(item, { ...TITEL, fontFamily: 'Cinzel Decorative', align: 'center' });
       if (ZIER[item.name]) setze(item, ZIER[item.name]);
+    }
+
+    // Wetterfolien: an die eingebaute Wetterabfrage (Open-Meteo, Werne) anschließen statt Platzhaltertext
+    if (WETTER[folie.name]) {
+      for (const item of folie.items) {
+        if (WETTER[folie.name][item.name]) item.text = WETTER[folie.name][item.name];
+        if (item.name === 'weather-placeholder-note') item.text = 'Wetter für Werne · wird alle 30 Minuten aktualisiert · Daten: Open-Meteo.com';
+      }
+      // feste Sonne/fester Regen passt nicht immer – die eingebaute Wetterszene folgt dem echten Wetter
+      if (folie.effectLayer) folie.effectLayer = { ...folie.effectLayer, type: 'none' };
+      log.push(`„${folie.name}“: zeigt jetzt das aktuelle Wetter`);
     }
 
     // Spenden-Folien: Inhalt saß 80 px rechts der Mitte, Projektliste linksbündig
@@ -150,6 +171,19 @@ const CODE_ERSETZUNGEN = [
   { name: 'Schlussfolie hält nicht mehr an', alt: 'if(isLast&&playing)tvTogglePause();', neu: '' },
   { name: 'kein Umfrage-Knopf', alt: "bigDone.onclick=()=>{location.href='https://sire65.github.io/WM-Pr-sentation/abstimmung.html?seen=A'}", neu: "bigDone.remove()" },
   { name: 'Versionshinweis', alt: '>Rathaus · Build 2026-09-22 19:29</div>', neu: `>${VERSION}</div>` },
+  // Wetter: Regenwahrscheinlichkeit dazu, alle 30 Minuten neu laden, kurzer Ausfall löscht gute Daten nicht
+  { name: 'Wetter: Regenwahrscheinlichkeit abfragen',
+    alt: 'daily=weather_code,temperature_2m_max,temperature_2m_min&timezone',
+    neu: 'daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max&timezone' },
+  { name: 'Wetter: Regenwahrscheinlichkeit je Tag',
+    alt: "°C`};weather[n===0?'today'",
+    neu: "°C`,rain:`${Math.round(data.daily.precipitation_probability_max?.[n]??0)} %`};weather[n===0?'today'" },
+  { name: 'Wetter: Ausfall behält letzte Daten',
+    alt: "}catch{weather.today={symbol:'🌡️',text:'Wetterdaten derzeit nicht erreichbar'",
+    neu: "}catch{if(weather.today&&weather.today.rain)return;weather.today={symbol:'🌡️',text:'Wetterdaten derzeit nicht erreichbar'" },
+  { name: 'Wetter: alle 30 Minuten neu laden',
+    alt: 'loadCycle(1);show();loadWeather();',
+    neu: 'loadCycle(1);show();loadWeather();setInterval(loadWeather,1800000);' },
   { name: 'Seitentitel', alt: '<title>KC Weihnachtsmarkt 2026 · Vorführung (eine Datei)</title>', neu: '<title>KC Weihnachtsmarkt 2026 · TV-Präsentation</title>' },
 ];
 

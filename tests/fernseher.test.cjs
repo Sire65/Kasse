@@ -90,6 +90,8 @@ function nachbauStarter() {
       p('A2: Version A kennt den Fernsehmodus (?fernseher=1)', a.includes('window.KC_FERNSEHMODUS=/[?&]fernseher=1(&|$)/.test(location.search)') && a.includes('id="kcBuildLabel"'));
       p('A2: am Fernseher keine gespeicherte Designer-Präsentation statt Version A', a.indexOf("k==='fs3.kcTvPresentation'?null") > -1 && a.indexOf("k==='fs3.kcTvPresentation'?null") < a.indexOf("localStorage.getItem('fs3.kcTvPresentation')"));
       p('A2: Endversion: Preislisten mit Allergenen und Pfandregel, kein Umfrage-Knopf mehr', a.includes('Allergene und Zusatzstoffe') && a.includes('Pfand: 2,00 € je Glas') && !a.includes('abstimmung.html?seen=A') && a.includes('Endversion · '));
+      p('A2: Wetter: Regenwahrscheinlichkeit, alle 30 Minuten neu, Ausfall behält letzte Daten', a.includes('precipitation_probability_max&timezone') && a.includes('loadWeather();setInterval(loadWeather,1800000);') && a.includes('if(weather.today&&weather.today.rain)return;'));
+      p('A2: Wetterfolien zeigen echte Werte statt Platzhalter', a.includes('{{weather.today.temp}}') && a.includes('{{weather.day4.minmax}}') && !a.includes('Wetterlage wird aktualisiert') && a.includes('Daten: Open-Meteo.com'));
       const projekt = JSON.parse(a.slice(a.indexOf('window.KC_DESIGNER_MARKET_PRESENTATION=') + 39, a.indexOf('};', a.indexOf('window.KC_DESIGNER_MARKET_PRESENTATION=')) + 1).replace(/\bB\[(\d+)\]/g, '0'));
       const mitglieder = projekt.slides.filter((s) => s.memberMeta);
       const sichtbar = mitglieder.filter((s) => s.rotation && s.rotation.enabled !== false).map((s) => s.memberMeta.name);
