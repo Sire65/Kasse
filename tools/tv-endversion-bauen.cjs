@@ -85,7 +85,7 @@ const UNTEN = 655; // Oberkante Laufschrift (665) minus Abstand
 
 function setze(item, werte) { Object.assign(item, werte); }
 
-function bearbeite(projekt, log) {
+function bearbeite(projekt, log, extras = {}) {
   projekt.name = `Köcheclub Werne · Weihnachtsmarkt 2026 · ${VERSION}`;
   for (const folie of projekt.slides) {
     // Hintergrund: neues Rathaus-Bild, Seitenverhältnis bleibt (nicht verzerrt)
@@ -93,6 +93,20 @@ function bearbeite(projekt, log) {
     for (const item of folie.items) {
       if (item.originalRole === 'title' && folie.id !== projekt.slides[0].id) setze(item, { ...TITEL, fontFamily: 'Cinzel Decorative', align: 'center' });
       if (ZIER[item.name]) setze(item, ZIER[item.name]);
+    }
+
+    // Rezeptfolie: Foto vom Eierlikörpunsch aus der Kasse (pos/assets/eierpunsch_version_3.png, zugeschnitten
+    // auf media/eierlikoerpunsch-tv.jpg), Rezept rechts daneben
+    if (folie.name === 'Rezept vom Köcheclub' && extras.eierpunschFoto) {
+      const titel = folie.items.find((i) => i.originalRole === 'title');
+      const name = folie.items.find((i) => i.name === 'Rezeptname');
+      const rezept = folie.items.find((i) => i.name === 'Zubereitung');
+      setze(name, { x: 560, y: 175, w: 620, h: 70, text: 'Eierlikörpunsch' });
+      setze(rezept, { x: 560, y: 265, w: 620, h: 340 });
+      folie.items.splice(folie.items.indexOf(titel) + 1, 0, { ...rezept, id: folie.id + '-foto', name: 'Foto Eierlikörpunsch',
+        type: 'image', originalRole: 'image', text: '', src: extras.eierpunschFoto, fit: 'cover', x: 100, y: 165, w: 420, h: 440,
+        radius: 18, bg: 'transparent', stroke: '#d8b25a', strokeWidth: 3, strokeStyle: 'solid' });
+      log.push('Rezeptfolie: Foto vom Eierlikörpunsch aus der Kasse');
     }
 
     // Wetterfolien: an die eingebaute Wetterabfrage (Open-Meteo, Werne) anschließen statt Platzhaltertext
@@ -187,7 +201,7 @@ const CODE_ERSETZUNGEN = [
   { name: 'Seitentitel', alt: '<title>KC Weihnachtsmarkt 2026 · Vorführung (eine Datei)</title>', neu: '<title>KC Weihnachtsmarkt 2026 · TV-Präsentation</title>' },
 ];
 
-function bauen(html, bildDatenUrl) {
+function bauen(html, bildDatenUrl, extras = {}) {
   const log = [];
   // Projekt finden
   const anfang = 'window.KC_DESIGNER_MARKET_PRESENTATION=';
@@ -196,7 +210,7 @@ function bauen(html, bildDatenUrl) {
   if (a < 0 || e < 0 || html.indexOf(anfang, a + 1) > -1) throw new Error('Projektdaten nicht eindeutig gefunden.');
   const roh = html.slice(a + anfang.length, e + 1);
   const projekt = JSON.parse(roh.replace(/\bB\[(\d+)\]/g, '"@@B$1@@"'));
-  bearbeite(projekt, log);
+  bearbeite(projekt, log, extras);
   const neu = JSON.stringify(projekt).replace(/"@@B(\d+)@@"/g, 'B[$1]');
   html = html.slice(0, a + anfang.length) + neu + html.slice(e + 1);
 
@@ -221,7 +235,9 @@ if (require.main === module) {
   if (!quelle || !bild || !ziel) { console.error('Aufruf: node tools/tv-endversion-bauen.cjs <index.html> <bild.jpg> <ziel.html>'); process.exit(1); }
   const typ = /\.png$/i.test(bild) ? 'image/png' : /\.webp$/i.test(bild) ? 'image/webp' : 'image/jpeg';
   const daten = `data:${typ};base64,${fs.readFileSync(bild).toString('base64')}`;
-  const { html, log } = bauen(fs.readFileSync(quelle, 'utf8'), daten);
+  const foto = path.join(__dirname, '..', 'media', 'eierlikoerpunsch-tv.jpg');
+  const extras = fs.existsSync(foto) ? { eierpunschFoto: `data:image/jpeg;base64,${fs.readFileSync(foto).toString('base64')}` } : {};
+  const { html, log } = bauen(fs.readFileSync(quelle, 'utf8'), daten, extras);
   fs.writeFileSync(ziel, html);
   log.forEach((z) => console.log('  ' + z));
   console.log(`Endversion geschrieben: ${path.resolve(ziel)} (${(html.length / 1048576).toFixed(1)} MB)`);
