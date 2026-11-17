@@ -7,7 +7,8 @@
 <!--
   KS-05 – Das zeigt der Fernseher am Stand (der Kassen-Start öffnet diese Seite im Edge-Kiosk).
   1. Präsentation aus dem TV-Designer („📺 An den Fernseher senden“) – eigenständiges HTML-Programm
-  2. sonst ein gesendetes TV-Paket bzw. die eingebaute Weihnachtsmarkt-Präsentation (TV-Player)
+  2. sonst die eingebaute Weihnachtsmarkt-Präsentation 2026 „Version A“ (weihnachtsmarkt-2026-version-a.html)
+  3. fehlt diese: ein gesendetes TV-Paket bzw. die Weihnachtsmarkt-Präsentation des TV-Players
   Neu gesendete Programme werden binnen 30 s übernommen, ohne Neustart. Kein Mauszeiger, keine
   Bedienleiste, Bildschirm bleibt wach. Nie „Paket bitte einlesen“ vor den Kunden.
 -->
@@ -33,7 +34,7 @@
     try {
       var d = f.contentDocument; if (!d || !d.head) return;
       var s = d.createElement('style');
-      s.textContent = '*{cursor:none!important}.controls,#control{display:none!important}';
+      s.textContent = '*{cursor:none!important}.controls,#control,#tvControls,#tvBigDone,#kcBuildLabel{display:none!important}';
       d.head.appendChild(s);
     } catch (e) { /* fremde Herkunft - nichts zu tun */ }
   }
@@ -50,17 +51,31 @@
     naechster.src = url;
   }
 
+  // Eingebaute Präsentation, solange nichts gesendet wurde: Weihnachtsmarkt 2026 „Version A“
+  // (Sieger der Mitglieder-Umfrage). Fehlt die Datei oder wird ?eingebaut=player verlangt,
+  // läuft wie bisher der TV-Player.
+  var VERSION_A = 'weihnachtsmarkt-2026-version-a.html';
+  var eingebaut = null;
+  function eingebauteZeigen() {
+    var player = function () { eingebaut = 'player'; zeige('index.html?fernseher=1' + (q.get('pruefen') ? '&pruefen=' + q.get('pruefen') : ''), 'player'); };
+    if (eingebaut === 'version-a') { zeige(VERSION_A + '?fernseher=1', 'version-a'); return; }
+    if (eingebaut === 'player' || q.get('eingebaut') === 'player') { player(); return; }
+    fetch(VERSION_A, { method: 'HEAD', cache: 'no-store' })
+      .then(function (a) { if (a.ok) { eingebaut = 'version-a'; zeige(VERSION_A + '?fernseher=1', 'version-a'); } else player(); })
+      .catch(player);
+  }
+
   function pruefen() {
     fetch('/kc-kassen-start/tv-programm?nurStand=1', { cache: 'no-store' })
       .then(function (a) { return a.ok ? a.json() : null; })
       .then(function (d) {
         if (d && d.stand) {
           if (String(d.stand) !== stand) { stand = String(d.stand); zeige('/kc-kassen-start/tv-programm?v=' + encodeURIComponent(stand), 'designer'); }
-        } else if (herkunft !== 'player') {
-          stand = null; zeige('index.html?fernseher=1' + (q.get('pruefen') ? '&pruefen=' + q.get('pruefen') : ''), 'player');
+        } else if (herkunft !== 'player' && herkunft !== 'version-a') {
+          stand = null; eingebauteZeigen();
         }
       })
-      .catch(function () { if (!herkunft) zeige('index.html?fernseher=1', 'player'); });
+      .catch(function () { if (!herkunft) eingebauteZeigen(); });
   }
 
   var wach = null;
