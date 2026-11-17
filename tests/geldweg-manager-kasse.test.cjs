@@ -16,12 +16,16 @@ function kasse(port,methode,pfad,body,credential){return new Promise(r=>{const q
 (async()=>{
   const dir=fs.mkdtempSync(path.join(os.tmpdir(),'kc-geldweg-'));
   const mgr=new ManagerCompanion({dbPath:path.join(dir,'manager.sqlite')});
+  const startLocal=mgr._setupLiveMonitor.bind(mgr); mgr._setupLiveMonitor=()=>startLocal(47393);
   const HTTPS_PORT=8561;await mgr.start(HTTPS_PORT);
+  pruefe('Lokaler Manager-Kanal startet',!mgr.liveMonitorFehler,mgr.liveMonitorFehler||'bereit');
   await new Promise(r=>web.listen(8897,r));
   const b=await chromium.launch();
   try{
     const p=await (await b.newContext({serviceWorkers:'block'})).newPage();
+    await p.route('http://127.0.0.1:47392/**',r=>r.continue({url:r.request().url().replace(':47392/',':47393/')}));
     p.on('pageerror',e=>{});
+    p.on('requestfailed',r=>{if(r.url().includes('47392'))console.log('  Netzwerk:',r.failure()?.errorText)});
     await p.goto('http://127.0.0.1:8897/pc-manager/index.html');
     await p.waitForFunction(()=>typeof queueCashTransferPayload==='function',null,{timeout:20000});
     // 1. Normale Geldbefuellung und 2. eine mit Bestaetigung - ueber die echte Manager-Funktion
@@ -35,7 +39,7 @@ function kasse(port,methode,pfad,body,credential){return new Promise(r=>{const q
     // 4. Fremde Geraete duerfen nicht ablegen: die Route bleibt nur lokal
     const quellen=Object.values(os.networkInterfaces()).flat().filter(x=>x&&x.family==='IPv4'&&!x.internal).map(x=>x.address);
     if(quellen.length){
-      const fremd=await new Promise(r=>{const q=http.request({hostname:quellen[0],port:47392,path:'/api/v1/cash-transfer/queue',method:'POST',localAddress:quellen[0],headers:{'Content-Type':'application/json'}},res=>{res.resume();r(res.statusCode)});q.on('error',e=>r('nicht erreichbar'));q.end(JSON.stringify({transferId:'X',registerLabel:'kasse-01',payload:{}}))});
+      const fremd=await new Promise(r=>{const q=http.request({hostname:quellen[0],port:47393,path:'/api/v1/cash-transfer/queue',method:'POST',localAddress:quellen[0],headers:{'Content-Type':'application/json'}},res=>{res.resume();r(res.statusCode)});q.on('error',e=>r('nicht erreichbar'));q.end(JSON.stringify({transferId:'X',registerLabel:'kasse-01',payload:{}}))});
       pruefe('Von einer Netzwerkadresse aus abgelehnt (nur lokal)',fremd===403||fremd==='nicht erreichbar',String(fremd));
     }
     // 5. Eine echt gekoppelte Kasse holt beide Wege ab

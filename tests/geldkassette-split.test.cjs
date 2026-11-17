@@ -70,14 +70,14 @@ function pruefe(name,bedingung,zusatz=''){
 
   const zeilen=await mb.locator('.kckass-zeile').count();
   pruefe('Aufteilungsliste zeigt alle 6 Sorten',zeilen===6,`${zeilen} Zeilen`);
-  await mb.screenshot({path:'/tmp/kc-kassette-bild-1-aufteilung-vorschlag.png',fullPage:true});
+  await mb.screenshot({path:path.join(require('os').tmpdir(),'kc-kassette-bild-1-aufteilung-vorschlag.png'),fullPage:true});
 
   // Bewusst ungleich aufteilen: die 50er komplett an Kasse 1
   await mb.fill('.kckass-zeile[data-wert="50"] input','2');
   await mb.waitForTimeout(150);
   const anteil1=await mb.textContent('[data-kckass-summe="1"]'),anteil2=await mb.textContent('[data-kckass-summe="2"]');
   console.log(`      Anteil Kasse 1: ${anteil1}   Anteil Kasse 2: ${anteil2}`);
-  await mb.screenshot({path:'/tmp/kc-kassette-bild-2-aufteilung-ungleich.png',fullPage:true});
+  await mb.screenshot({path:path.join(require('os').tmpdir(),'kc-kassette-bild-2-aufteilung-ungleich.png'),fullPage:true});
 
   await mb.click('#generate');
   await mb.waitForTimeout(300);
@@ -87,7 +87,7 @@ function pruefe(name,bedingung,zusatz=''){
   pruefe('Code wurde erzeugt',code.startsWith('KCASH1:'));
   pruefe('Zwei Kurzcodes (je Kasse einer)',/Kasse 1:.*Kasse 2:/.test(kurzcode),kurzcode);
   console.log(`      Ziel-Anzeige: ${ziel}`);
-  await mb.screenshot({path:'/tmp/kc-kassette-bild-3-uebergabe.png',fullPage:true});
+  await mb.screenshot({path:path.join(require('os').tmpdir(),'kc-kassette-bild-3-uebergabe.png'),fullPage:true});
 
   const nutzlast=JSON.parse(Buffer.from(code.slice(7),'base64').toString('utf8'));
   pruefe('Payload trägt scope "split"',nutzlast.scope==='split');
@@ -100,7 +100,7 @@ function pruefe(name,bedingung,zusatz=''){
   pruefe('Angezeigte Anteile ergeben den Kassettenbetrag',Math.abs(s1+s2-nutzlast.total)<0.005,`${s1} + ${s2} = ${nutzlast.total}`);
 
   // --- 2. Echte Kassenseite, beide Kassen lesen DENSELBEN Code -------------------------
-  async function kasseLiest(registerId){
+  async function kasseLiest(registerId,importCode=code){
     const seite=await browser.newPage({viewport:{width:1280,height:900}});
     await seite.addInitScript(id=>{
       localStorage.setItem('kc_master_v040',JSON.stringify({registerId:id,pinLockEnabled:false}));
@@ -117,7 +117,7 @@ function pruefe(name,bedingung,zusatz=''){
       raus.bewegungen=JSON.parse(localStorage.getItem('kc_cash_movements')||'[]')
         .map(m=>({registerId:m.registerId,total:m.total,scope:m.scope,poolId:m.poolId}));
       return raus;
-    },code);
+    },importCode);
     await seite.close();
     return ergebnis;
   }
@@ -197,7 +197,7 @@ function pruefe(name,bedingung,zusatz=''){
   const einzelCode=await mb.inputValue('#payload');
   const einzel=JSON.parse(Buffer.from(einzelCode.slice(7),'base64').toString('utf8'));
   pruefe('Einzelübergabe hat KEIN split',einzel.scope===undefined&&einzel.registerId==='KASSE-02');
-  const einzelK2=await kasseLiest('KASSE-02');
+  const einzelK2=await kasseLiest('KASSE-02',einzelCode);
   pruefe('Einzelübergabe wird von Kasse 2 angenommen',einzelK2.ok===true,einzelK2.fehler||'');
 
   // --- 4. Abendzählung sperrt das Kassetten-Ziel ---------------------------------------
@@ -206,6 +206,10 @@ function pruefe(name,bedingung,zusatz=''){
   const gesperrt=await mb.evaluate(()=>document.querySelector('#register option[value="KASSETTE"]').disabled);
   pruefe('Kassetten-Ziel ist bei der Abendzählung gesperrt',gesperrt);
 
+  await mb.evaluate(()=>document.querySelectorAll('[data-value],[data-roll-value]').forEach(e=>{e.value='0';e.dispatchEvent(new Event('input',{bubbles:true}))}));
+  await mb.click('#generate');
+  const zero=await mb.inputValue('#payload');
+  pruefe('Echte Money-Butler-Oberfläche erzeugt Nullzählung',zero.startsWith('KCOUNT1:')&&JSON.parse(Buffer.from(zero.slice(8),'base64').toString('utf8')).total===0);
   await mb.close();
   await browser.close();
   server.close();

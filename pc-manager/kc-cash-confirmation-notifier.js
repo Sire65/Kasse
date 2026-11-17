@@ -23,7 +23,7 @@
 
   async function sendePush(b){
     const cfg=syncSettings();
-    const token=String(global.KC_COMMUNICATION_ACCESS_TOKEN||cfg.token||'').trim();
+    const token=String(global.KCSupabase?.holeZugriffsToken?.()||global.KC_COMMUNICATION_ACCESS_TOKEN||cfg.token||'').trim();
     if(!token)throw new Error('KC-Communicator Zugriffstoken im PC-Manager fehlt');
     if(typeof global.KCCommunicationClient!=='function')throw new Error('KC Communication Client fehlt');
 

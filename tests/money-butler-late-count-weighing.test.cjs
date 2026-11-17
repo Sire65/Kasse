@@ -24,7 +24,7 @@ ok(bridge.includes("action:'cash_count_create'"),'KC Communicator sendet Nachzä
 ok(bridge.includes('attachmentIds:[uploaded.id]'),'Zähl-Anhang wird nicht getrennt vom Prüfsummen-Payload gespeichert');
 ok(!bridge.includes('payload:{...payload,attachmentId'),'Prüfsummen-Payload wird durch Anhangsdaten verändert');
 ok(intake.includes("action:'cash_count_list'"),'PC Manager holt Cloud-Zählungen nicht ab');
-ok(intake.includes("ingestCashCountPayload?.(payload,'communicator-cloud')"),'PC Manager übernimmt Cloud-Zählung nicht in den Abschluss');
+ok(intake.includes("ingestCashCountPayload(payload,'communicator-cloud')"),'PC Manager übernimmt Cloud-Zählung nicht in den Abschluss');
 ok(intake.includes("action:'cash_count_mark'"),'Cloud-Zählung wird nach Übernahme nicht bestätigt');
 ok(manager.includes('r.count.countKind==="late"?"Nachzählung · ":""'),'PC Manager kennzeichnet Nachzählung nicht');
 

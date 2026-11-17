@@ -52,3 +52,7 @@
   .kc-kurve-pfeil { flex-basis: 44px; height: 44px; font-size: 26px; }
   #salesTimeDialog.kc-kurve-modus .dialog-actions button { min-height: 44px; }
 }
+
+.kc-info-verkauf{padding:12px;border:1px solid #cbd5e1;border-radius:12px;background:#fff;margin-bottom:12px;color:#172338}.kc-info-verkauf h3{margin:0 0 8px}.kc-info-kennzahlen{display:flex;flex-wrap:wrap;gap:8px 20px;font-size:20px}.kc-info-verkauf small,.kc-prognose small{display:block;line-height:1.4;color:#475569}.kc-prognose{display:flex;flex-direction:column;gap:4px;background:#eff6ff;border-radius:10px;padding:10px;margin:10px 0}.kc-prognose b{font-size:22px}.kc-info-verkauf svg{display:block;width:100%;height:auto;max-height:210px}.kc-info-verkauf .treffer{display:none}#productInfoDialog .product-info-card{max-height:calc(100dvh - 20px);overflow:auto}
+
+#productInfoDialog .product-info-image{width:64px;height:64px;object-fit:contain;margin:0 10px 0 auto;flex-shrink:0}#productInfoDialog .product-info-card{max-height:calc(100vh - 20px);max-height:calc(100dvh - 20px)}
