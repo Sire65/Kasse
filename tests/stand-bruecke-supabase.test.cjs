@@ -1,7 +1,8 @@
 /* KS-04 – Supabase-Seite der Stand-Brücke (supabase/migrations/20261113_kc_stand_bruecke.sql), echt in PostgreSQL.
  * Läuft nur mit Datenbank: KC_TEST_PG (siehe tests/supabase-nachbau/postgrest-nachbau.cjs) und npm-Paket "pg".
  * Geprüft: Rechte (Admin / fremder Verein / anonym / Stand), Stand-Geheimnis, erlaubte Pfade, doppelte Ereignisse,
- * Aufträge abholen/quittieren, Abmelden.
+ * Aufträge abholen/quittieren, Abmelden; dazu 20261118_kc_stand_sparsam.sql (Lebenszeichen gedrosselt,
+ * Aufträge nicht bei jeder Meldung erneut, Aufräumen als Zeitplan) – beide Migrationen müssen eingespielt sein.
  */
 'use strict';
 const path = require('path');
@@ -63,14 +64,37 @@ const p = (n, b, z = '') => { b ? ok++ : rot++; console.log(`${b ? '  OK  ' : 'F
     const m3 = await rpc('kc_stand_melden', { p_stand: standId, p_geheimnis: geheimnis });
     p('Stand bekommt den Auftrag beim nächsten Melden', m3.json.auftraege.length === 1 && m3.json.auftraege[0].koerper.articles[0].price === 3.7);
     p('Auftrag steht danach auf „abgeholt“', (await rpc('kc_stand_auftrag', { p_auftrag: au.json.auftragId }, `test-admin:${ADMIN}`)).json.status === 'abgeholt');
+    const m4a = await rpc('kc_stand_melden', { p_stand: standId, p_geheimnis: geheimnis });
+    p('Sparsam (20261118): abgeholter Auftrag kommt NICHT bei jeder Meldung erneut', m4a.json.auftraege.length === 0);
+    await sb.sql("update public.kc_stand_auftrag set abgeholt_am = now() - interval '61 seconds' where id = $1", [au.json.auftragId]);
     const m4 = await rpc('kc_stand_melden', { p_stand: standId, p_geheimnis: geheimnis });
-    p('Noch nicht quittierter Auftrag kommt erneut (geht bei Absturz nicht verloren)', m4.json.auftraege.length === 1);
+    p('Noch nicht quittierter Auftrag kommt nach 60 s erneut (geht bei Absturz nicht verloren)', m4.json.auftraege.length === 1);
     p('Quittieren mit falschem Geheimnis abgewiesen', (await rpc('kc_stand_auftrag_erledigt', { p_stand: standId, p_geheimnis: 'x', p_auftrag: au.json.auftragId, p_status: 200, p_antwort: {} })).status === 401);
     const q = await rpc('kc_stand_auftrag_erledigt', { p_stand: standId, p_geheimnis: geheimnis, p_auftrag: au.json.auftragId, p_status: 200, p_antwort: { revision: 5 } });
     p('Stand quittiert den Auftrag', q.json.quittiert === true);
     const st = (await rpc('kc_stand_auftrag', { p_auftrag: au.json.auftragId }, `test-admin:${ADMIN}`)).json;
     p('Zuhause sieht „erledigt“ mit der Antwort des Stands', st.status === 'erledigt' && st.statusCode === 200 && st.antwort.revision === 5);
     p('Erledigter Auftrag kommt nicht noch einmal', (await rpc('kc_stand_melden', { p_stand: standId, p_geheimnis: geheimnis })).json.auftraege.length === 0);
+
+    // Sparsam (20261118): Lebenszeichen gedrosselt, Aufräumen als eigener Zeitplan
+    await sb.sql("update public.kc_stand set zuletzt_gemeldet = now() - interval '10 seconds' where id = $1", [standId]);
+    await rpc('kc_stand_melden', { p_stand: standId, p_geheimnis: geheimnis, p_info: { version: 'test', gemeldetUm: new Date().toISOString() } });
+    const z1 = (await sb.sql('select floor(extract(epoch from now() - zuletzt_gemeldet))::int s from public.kc_stand where id = $1', [standId]))[0].s;
+    p('Sparsam: Meldung nach 10 s ohne neue Info schreibt das Lebenszeichen nicht neu', z1 >= 9, `${z1} s`);
+    await rpc('kc_stand_melden', { p_stand: standId, p_geheimnis: geheimnis, p_info: { version: 'neu', gemeldetUm: new Date().toISOString() } });
+    const z2 = (await sb.sql('select floor(extract(epoch from now() - zuletzt_gemeldet))::int s, info->>\'version\' v from public.kc_stand where id = $1', [standId]))[0];
+    p('Sparsam: geänderte Info (Version) wird sofort geschrieben', z2.s <= 1 && z2.v === 'neu', JSON.stringify(z2));
+    await sb.sql("update public.kc_stand set zuletzt_gemeldet = now() - interval '25 seconds' where id = $1", [standId]);
+    await rpc('kc_stand_melden', { p_stand: standId, p_geheimnis: geheimnis });
+    p('Sparsam: nach mehr als 20 s wird das Lebenszeichen wieder geschrieben', (await sb.sql('select floor(extract(epoch from now() - zuletzt_gemeldet))::int s from public.kc_stand where id = $1', [standId]))[0].s <= 1);
+    await sb.sql("update public.kc_stand_ereignis set empfangen = now() - interval '61 days' where stand_id = $1 and quelle_id = 1", [standId]);
+    const vorAufr = (await sb.sql('select count(*)::int n from public.kc_stand_ereignis where stand_id = $1', [standId]))[0].n;
+    await rpc('kc_stand_melden', { p_stand: standId, p_geheimnis: geheimnis });
+    const nachMelden = (await sb.sql('select count(*)::int n from public.kc_stand_ereignis where stand_id = $1', [standId]))[0].n;
+    p('Sparsam: Melden räumt nicht mehr auf', nachMelden === vorAufr, `${vorAufr}/${nachMelden}`);
+    const aufr = (await sb.sql('select public.kc_stand__aufraeumen() r'))[0].r;
+    p('Sparsam: kc_stand__aufraeumen() löscht Ereignisse älter als 60 Tage', aufr.ereignisse === 1, JSON.stringify(aufr));
+    p('Sparsam: anon darf kc_stand__aufraeumen nicht aufrufen', (await rpc('kc_stand__aufraeumen', {})).status >= 400);
 
     // Abmelden
     p('Admin meldet den Stand ab', (await rpc('kc_stand_abmelden', { p_stand: standId }, `test-admin:${ADMIN}`)).json.abgemeldet === true);

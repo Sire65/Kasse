@@ -9,6 +9,13 @@
 // Grundsätze: Kassieren hängt nie hiervon ab. Nichts geht verloren (Merkstelle: bis wohin gesendet,
 // welche Aufträge erledigt). Nicht erreichbar -> nachreichen, mit klarer Meldung.
 // Zugang: Stand-ID + Stand-Geheimnis (Datei stand-zugang.json im Datenordner, nie im Repository).
+// KC-KASSE-SPARSAM (18.11.2026, Freigabe Hansi): Takt passt sich an - alle 5 s, solange in der letzten
+// Minute Ereignisse oder Aufträge kamen, sonst alle 30 s (Lebenszeichen bleibt < 60 s, Anzeige zu Hause
+// bleibt grün). Große, sich ständig ändernde Übersichten nur alle 5 Minuten spiegeln.
+// KC-STAND-LEITUNG (19.11.2026, Freigabe Hansi „so viel wie möglich über die direkte Leitung“): die Brücke hält über
+// shared/kc-direkte-leitung.js eine Leitung zum eigenen Stand-Kanal (Name kommt aus kc_stand_melden). Signal „auftrag“
+// → sofort melden und den Auftrag abholen. Steht die Leitung, ohne Neues nur alle 60 s melden; fällt sie aus, wieder
+// alle 30 s (Neuverbinden mit wachsender Pause übernimmt der Baustein). Ohne Leitung: Verhalten wie vorher.
 'use strict';
 const fs = require('fs');
 const path = require('path');
@@ -16,6 +23,8 @@ const crypto = require('crypto');
 const http = require('http');
 const { meldung, druckeKasten, SCHRITT_BETREUER } = require('./fehlerhilfe');
 
+// [Schlüssel, Pfad am Manager-Dienst, Mindestabstand in ms (ohne Angabe: bei jedem Spiegel-Takt)]
+const FUENF_MINUTEN = 5 * 60 * 1000;
 const SPIEGEL = [
   ['/kassen-verbindungen', '/kassen-verbindungen'],
   ['/sold-out-status-alle', '/sold-out-status-alle'],
@@ -25,9 +34,12 @@ const SPIEGEL = [
   ['/cash-transfer-confirmations', '/cash-transfer-confirmations'],
   ['/bargeld/uebergaben', '/bargeld/uebergaben'],
   ['/bargeld/protokolle', '/bargeld/protokolle'],
-  ['/verbindungsqualitaet', '/verbindungsqualitaet?limit=500'],
+  // Antwortzeiten: ändern sich mit jedem Herzschlag - nur die letzten 100, nur alle 5 Minuten
+  ['/verbindungsqualitaet', '/verbindungsqualitaet?limit=100', FUENF_MINUTEN],
   ['/kassen/startprotokoll', '/kassen/startprotokoll'],
-  ['/live-event-log', '/live-event-log?limit=200'],
+  // Verlauf: der PC-Manager zu Hause liest ihn seit 18.11.2026 aus den Ereignissen (kc_stand_ereignisse).
+  // Nur noch alle 5 Minuten als Rückfall für ältere PC-Manager-Stände.
+  ['/live-event-log', '/live-event-log?limit=200', FUENF_MINUTEN],
 ];
 const AUFTRAG_PFADE = new Set(['/master-data/push', '/dienstplan/push', '/sold-out-status/setzen', '/remote-command/queue',
   '/kassen/kopplung-widerrufen', '/api/v1/cash-transfer/queue', '/api/v1/finance-transfer/queue', '/bargeld/uebergabe', '/bargeld/protokoll',
@@ -41,7 +53,18 @@ function schreibeAtomar(datei, inhalt) {
   fs.renameSync(tmp, datei);
 }
 function lies(datei, ersatz) { try { return JSON.parse(fs.readFileSync(datei, 'utf8')); } catch (e) { return ersatz; } }
-const warte = (ms) => new Promise((r) => { const t = setTimeout(r, ms); if (t.unref) t.unref(); });
+
+// Baustein der direkten Leitung (derselbe wie im PC-Manager). Fehlt er (oder kein WebSocket), arbeitet die Brücke im Takt.
+function leitungsBaustein() {
+  try {
+    if (!globalThis.KCDirekteLeitung) require(path.join(__dirname, '..', '..', 'shared', 'kc-direkte-leitung.js'));
+    return globalThis.KCDirekteLeitung || null;
+  } catch (e) { return null; }
+}
+function webSocketKlasse() {
+  if (typeof globalThis.WebSocket === 'function') return globalThis.WebSocket;
+  try { return require('ws'); } catch (e) { return null; }
+}
 
 // Anfrage an den eigenen Manager-Dienst (Loopback) - derselbe Weg wie der PC-Manager vor Ort.
 function lokal(port, methode, pfad, koerper) {
@@ -60,13 +83,18 @@ function lokal(port, methode, pfad, koerper) {
 }
 
 class StandBruecke {
-  constructor({ manager, datenOrdner, log = console.log, fehlerLog = console.error, livePort = 47392, takt = 5000, spiegelTakt = 30000, version = null } = {}) {
+  constructor({ manager, datenOrdner, log = console.log, fehlerLog = console.error, livePort = 47392, takt = 5000, ruheTakt = 30000, leitungsRuheTakt = 60000,
+    spiegelTakt = 30000, version = null, mitLeitung = true } = {}) {
     this.manager = manager;
     this.datenOrdner = datenOrdner;
     this.log = log;
     this.fehlerLog = fehlerLog;
     this.livePort = livePort;
     this.takt = takt;
+    this.ruheTakt = Math.max(takt, ruheTakt);
+    this.leitungsRuheTakt = Math.max(this.ruheTakt, leitungsRuheTakt);
+    this.mitLeitung = mitLeitung;
+    this._leitung = null; this._kanal = null; this._wecker = null; this._weckFlag = false;
     this.spiegelTakt = spiegelTakt;
     this.version = version;
     this.zugangDatei = path.join(datenOrdner, 'stand-zugang.json');
@@ -74,6 +102,8 @@ class StandBruecke {
     this.zustand = { eingerichtet: false, verbunden: null, letzterErfolg: null, letzterVersuch: null, rueckstand: 0, meldung: null, auftraegeErledigt: 0 };
     this._spiegelHash = new Map();
     this._letzterSpiegel = 0;
+    this._spiegelZuletzt = new Map(); // Schlüssel -> Zeit des letzten erfolgreich gesendeten Spiegels
+    this._zuletztAktiv = 0;           // letzte Runde mit neuen Ereignissen oder Aufträgen
     this._stopp = false;
     this._laeuft = false;
   }
@@ -82,7 +112,8 @@ class StandBruecke {
 
   status() {
     const z = this.zugang;
-    return { ...this.zustand, eingerichtet: !!z, standName: z ? z.name : null, standId: z ? z.standId : null, supabase: z ? z.url : null };
+    return { ...this.zustand, eingerichtet: !!z, standName: z ? z.name : null, standId: z ? z.standId : null, supabase: z ? z.url : null,
+      leitung: this._leitung ? this._leitung.steht() : false, leitungSignale: this._leitung ? this._leitung.zustand().signale : 0 };
   }
 
   // Vom PC-Manager am Stand (nach „Diesen PC als Stand anmelden“) über die IPC-Strecke des Webservers.
@@ -93,7 +124,8 @@ class StandBruecke {
     schreibeAtomar(this.zugangDatei, JSON.stringify({ url, publishableKey, standId, geheimnis, name: String(name || 'Stand').slice(0, 80), eingerichtetAm: new Date().toISOString() }, null, 2));
     // Neuer Stand: alles noch einmal vollständig senden (die Cloud kennt ihn noch nicht).
     schreibeAtomar(this.merkDatei, JSON.stringify({ standId, gesendetBis: 0, erledigt: {} }));
-    this._spiegelHash.clear(); this._letzterSpiegel = 0;
+    this._spiegelHash.clear(); this._spiegelZuletzt.clear(); this._letzterSpiegel = 0; this._zuletztAktiv = Date.now();
+    this._leitungBeenden();
     this.log(`[Stand-Brücke] Eingerichtet: Stand „${name}“. Buchungen gehen ab jetzt auch nach Hause (Supabase).`);
     this.start();
     return this.status();
@@ -101,6 +133,7 @@ class StandBruecke {
 
   abmelden() {
     try { fs.rmSync(this.zugangDatei, { force: true }); } catch (e) { /* schon weg */ }
+    this._leitungBeenden(); this._wecken();
     this.zustand = { ...this.zustand, verbunden: null, meldung: null };
     this.log('[Stand-Brücke] Abgemeldet – es wird nichts mehr nach Hause gesendet.');
     return this.status();
@@ -114,7 +147,46 @@ class StandBruecke {
     this._schleife().finally(() => { this._laeuft = false; });
   }
 
-  stop() { this._stopp = true; }
+  stop() { this._stopp = true; this._leitungBeenden(); this._wecken(); }
+
+  // ---------- direkte Leitung zum Stand-Kanal ----------
+  _leitungPruefen(z, kanal) {
+    if (!this.mitLeitung || !kanal || typeof kanal !== 'string') return;
+    if (this._leitung && this._kanal === kanal) return;
+    this._leitungBeenden();
+    const baustein = leitungsBaustein(), WS = webSocketKlasse();
+    if (!baustein || !WS) return;
+    this._kanal = kanal;
+    let stand = null;
+    this._leitung = baustein.starte({
+      name: 'stand-bruecke', WebSocket: WS, startNachMs: 0,
+      url: `${String(z.url).replace(/^http/i, 'ws')}/realtime/v1/websocket`, schluessel: z.publishableKey,
+      kanalHolen: async () => this._kanal,
+      beiSignal: (art) => { if (art === 'auftrag') { this._zuletztAktiv = Date.now(); this._wecken(); } },
+      nachholen: () => this._wecken(), // nach (Wieder-)Verbinden einmal melden: Aufträge aus der Zwischenzeit holen
+      beiStatus: (zst) => {
+        if (zst.steht === stand) return;
+        stand = zst.steht;
+        this.log(zst.steht ? '[Stand-Brücke] Direkte Leitung steht – Aufträge von zu Hause kommen sofort an.'
+          : '[Stand-Brücke] Direkte Leitung unterbrochen – es wird wieder alle 30 s nachgefragt (Neuverbinden läuft).');
+      },
+    });
+  }
+  _leitungBeenden() {
+    if (this._leitung) { try { this._leitung.trennen(); } catch (e) { /* egal */ } }
+    this._leitung = null; this._kanal = null;
+  }
+  leitungSteht() { return !!(this._leitung && this._leitung.steht()); }
+
+  // Warten, das ein Signal („auftrag“) vorzeitig beenden kann
+  _warten(ms) {
+    if (this._weckFlag) { this._weckFlag = false; return Promise.resolve(); }
+    return new Promise((r) => {
+      const t = setTimeout(() => { this._wecker = null; r(); }, ms); if (t.unref) t.unref();
+      this._wecker = () => { clearTimeout(t); this._wecker = null; r(); };
+    });
+  }
+  _wecken() { if (this._wecker) this._wecker(); else this._weckFlag = true; }
 
   async _schleife() {
     let pause = this.takt;
@@ -127,15 +199,22 @@ class StandBruecke {
           this.log(`[Stand-Brücke] Verbindung nach Hause: OK (Stand „${this.zugang ? this.zugang.name : ''}“)${this.zustand.verbunden === false ? ' – alles Nachgereichte ist angekommen.' : ''}`);
         }
         this.zustand.verbunden = true; this.zustand.meldung = null;
-        pause = ergebnis.mehr ? 300 : this.takt;
+        pause = ergebnis.mehr ? 300 : this._naechsterTakt();
       } else {
         const m = this._erklaere(ergebnis.fehler);
         if (this.zustand.verbunden !== false || (this.zustand.meldung && this.zustand.meldung.schluessel !== m.schluessel)) druckeKasten(this.fehlerLog, [m]);
         this.zustand.verbunden = false; this.zustand.meldung = m;
         pause = Math.min(60000, pause < this.takt ? this.takt : pause * 2);
       }
-      await warte(pause);
+      await this._warten(pause);
     }
+  }
+
+  // 5 s, solange in der letzten Minute etwas los war (Verkäufe, Aufträge von zu Hause), sonst 30 s –
+  // steht die direkte Leitung (Aufträge wecken sofort), sonst 60 s.
+  _naechsterTakt() {
+    if (Date.now() - this._zuletztAktiv < 60000) return this.takt;
+    return this.leitungSteht() ? this.leitungsRuheTakt : this.ruheTakt;
   }
 
   _erklaere(e) {
@@ -179,7 +258,11 @@ class StandBruecke {
 
   async _spiegelSammeln() {
     const spiegel = {};
-    for (const [schluessel, pfad] of SPIEGEL) {
+    const jetzt = Date.now();
+    for (const [schluessel, pfad, abstand] of SPIEGEL) {
+      if (abstand && jetzt - (this._spiegelZuletzt.get(schluessel) || 0) < abstand) continue;
+      spiegel.__geprueft = spiegel.__geprueft || [];
+      spiegel.__geprueft.push(schluessel);
       const a = await lokal(this.livePort, 'GET', pfad);
       if (a.status !== 200 || !a.json) continue;
       this._nimmInSpiegel(spiegel, schluessel, a.json);
@@ -227,9 +310,11 @@ class StandBruecke {
       this._spiegelSofort = false;
     }
     const hashes = spiegel.__hashes || {}; delete spiegel.__hashes;
+    const geprueft = spiegel.__geprueft || []; delete spiegel.__geprueft;
     const antwort = await this._rpc(z, 'kc_stand_melden', { p_stand: z.standId, p_geheimnis: z.geheimnis, p_ereignisse: ereignisse, p_spiegel: spiegel, p_info: this._info() });
     if (Object.keys(hashes).length || Date.now() - this._letzterSpiegel >= this.spiegelTakt) this._letzterSpiegel = Date.now();
     for (const [k, h] of Object.entries(hashes)) this._spiegelHash.set(k, h);
+    for (const k of geprueft) this._spiegelZuletzt.set(k, Date.now());
     if (zeilen.length) {
       merk.gesendetBis = zeilen[zeilen.length - 1].id;
       this.zustand.rueckstand = Math.max(0, this.zustand.rueckstand - zeilen.length);
@@ -265,6 +350,8 @@ class StandBruecke {
       this.zustand.auftraegeErledigt++;
     }
     if (ausgefuehrt) this._spiegelSofort = true; // Änderungen (z. B. Ausverkauft) sofort zurückspiegeln
+    this._leitungPruefen(z, antwort && antwort.kanal);
+    if (zeilen.length || ((antwort && antwort.auftraege) || []).length) this._zuletztAktiv = Date.now();
     // Merkstelle kurz halten
     const ids = Object.keys(merk.erledigt).map(Number).sort((x, y) => x - y);
     for (const id of ids.slice(0, Math.max(0, ids.length - 300))) delete merk.erledigt[id];

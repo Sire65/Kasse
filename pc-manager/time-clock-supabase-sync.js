@@ -34,7 +34,27 @@
   } finally { busy=false;retry.disabled=false; }
  }
  document.addEventListener('click', e=>{if(e.target.closest('[data-view="timeclock"]'))setTimeout(refresh,100)});
- setInterval(refresh,30000);
- if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',refresh,{once:true});else refresh();
- window.KCTimeClockCloudStatus={refresh};
+ // KC-KASSE-SPARSAM (18.11.2026): der volle Abgleich (Supabase) nur, wenn die Zeiterfassung offen
+ // und das Fenster sichtbar ist oder Buchungen offen sind; sonst höchstens alle 5 Minuten
+ // (gemeinsamer Anmeldestand). Die Nachfrage „offen?“ geht nur an den Manager-Dienst auf diesem PC.
+ let zuletztVoll=0,zuletztOffen=0;
+ function sichtbar(){const p=document.querySelector('[data-view-panel="timeclock"]');return !!p&&!document.hidden&&(p.classList.contains('active')||(!p.hidden&&p.offsetParent!==null));}
+ // KC-STAND-LEITUNG (19.11.2026): steht die direkte Leitung, holt nur das Signal „stempel“ den gemeinsamen Anmeldestand
+ // (neue Buchung irgendwo im Verein); dann auch bei offener Seite kein 30-s-Abgleich mehr – Sicherheitsabfrage alle 5 Minuten.
+ const leitungSteht=()=>{try{return !!window.KCDirekteLeitungManager?.steht?.();}catch(_){return false;}};
+ function signal(){if(Date.now()-zuletztVoll<5000)return;zuletztVoll=Date.now();return refresh();}
+ async function takt(){
+  if((sichtbar()&&!leitungSteht())||Date.now()-zuletztVoll>=300000){zuletztVoll=Date.now();return refresh();}
+  try{
+   const r=await fetch('http://127.0.0.1:47392/zeiterfassung/cloud-status',{signal:AbortSignal.timeout(5000),cache:'no-store'});
+   const d=r.ok?await r.json():null;
+   // offene Buchungen: sofort senden, wenn neue dazukamen; bleiben sie hängen (z. B. Mitgliedsnummer fehlt), alle 2 Minuten
+   if(d&&Number.isInteger(d.pending)&&d.pending>0&&(d.pending!==zuletztOffen||Date.now()-zuletztVoll>=120000)){zuletztOffen=d.pending;zuletztVoll=Date.now();return refresh();}
+   if(d&&Number.isInteger(d.pending))zuletztOffen=d.pending;
+  }catch(_){/* Manager-Dienst nicht erreichbar: nächster Takt */}
+ }
+ setInterval(takt,30000);
+ const ersteRunde=()=>{zuletztVoll=Date.now();refresh();};
+ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',ersteRunde,{once:true});else ersteRunde();
+ window.KCTimeClockCloudStatus={refresh,signal};
 })();

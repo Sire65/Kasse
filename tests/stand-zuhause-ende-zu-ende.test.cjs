@@ -11,6 +11,11 @@
  *   6. Kein Internet am Stand: Kassieren geht weiter, Meldung „wird nachgereicht“, danach kommt alles an;
  *      Auftrag von zu Hause währenddessen: „unterwegs“, wird nachgeholt
  *   7. Zu Hause ohne Anmeldung: klare Meldung statt Daten
+ *   KC-STAND-LEITUNG (19.11.2026): direkte Leitung im Nachbau (WebSocket wie Supabase Realtime). Stand-Brücke und PC-Manager
+ *   zu Hause hören auf ihren Kanälen; Aufträge und Verkäufe kommen in wenigen Sekunden an (Zeiten werden ausgegeben).
+ * Netzsperre (KC-TESTS-OHNE-ECHTSERVER): Browser mit --host-resolver-rules + --no-proxy-server, jede Anfrage an das echte
+ * Supabase-Projekt (REST und Realtime) wird auf den Nachbau umgeleitet; Node-Kindprozesse mit netzsperre-node.cjs.
+ * Datenbank vorbereiten: tests/supabase-nachbau/einrichten.cjs.
  */
 'use strict';
 const path = require('path'), fs = require('fs'), os = require('os'), http = require('http'), net = require('net');
@@ -25,6 +30,8 @@ for (const m of ['ws', 'selfsigned', 'bonjour-service']) {
   try { require.resolve(m, { paths: [BACKEND] }); } catch (e) { console.log(`  ueberspringen: ${m} fehlt`); process.exit(0); }
 }
 let ok = 0, rot = 0;
+const OHNE_ECHTSERVER = '--host-resolver-rules=MAP *.supabase.co 0.0.0.0, MAP *.supabase.com 0.0.0.0, MAP *.workers.dev 0.0.0.0, MAP speed.cloudflare.com 0.0.0.0, MAP api.github.com 0.0.0.0';
+const NETZSPERRE_NODE = path.join(__dirname, 'supabase-nachbau', 'netzsperre-node.cjs');
 const p = (n, b, z = '') => { b ? ok++ : rot++; console.log(`${b ? '  OK  ' : 'FEHLER'}  ${n}${z !== '' ? '   [' + String(z).slice(0, 180) + ']' : ''}`); };
 const MGR = 8575, WEB_STAND = 8895, WEB_HAUS = 8896;
 const ARBEIT = fs.mkdtempSync(path.join(os.tmpdir(), 'kc-standhaus-'));
@@ -40,7 +47,8 @@ const holen = (url, opt = {}) => new Promise((r) => { const u = new URL(url); co
 
 async function starte(argumente, bis) {
   const kind = spawn(process.execPath, [path.join(BACKEND, 'run-manager-service.js'), ...argumente], {
-    cwd: BACKEND, env: { ...process.env, KC_KASSEN_DATEN: path.join(ARBEIT, 'tablet-kassen') }, stdio: ['ignore', 'pipe', 'pipe'] });
+    cwd: BACKEND, env: { ...process.env, KC_KASSEN_DATEN: path.join(ARBEIT, 'tablet-kassen'), NODE_OPTIONS: `${process.env.NODE_OPTIONS || ''} --require ${JSON.stringify(NETZSPERRE_NODE)}`.trim() },
+    stdio: ['ignore', 'pipe', 'pipe'] });
   let log = ''; kind.stdout.on('data', (d) => { log += d; }); kind.stderr.on('data', (d) => { log += d; });
   for (let i = 0; i < 320 && !bis.test(log) && kind.exitCode === null; i++) await warte(250);
   return { kind, log: () => log };
@@ -58,6 +66,20 @@ async function pcManagerKontext(browser, sb, { angemeldet = true, standEinrichte
       await route.fulfill({ status: a.status, headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' }, body: await a.text() });
     } catch (e) { await route.abort(); }
   });
+  // direkte Leitung (Supabase Realtime) des PC-Managers → WebSocket des Nachbaus (browser=1: gilt nicht als Stand)
+  await ctx.routeWebSocket(/\/realtime\/v1\/websocket/, (seite) => {
+    const { WebSocket: NodeWS } = require(require.resolve('ws', { paths: [BACKEND] }));
+    const ziel = new NodeWS(`${sb.url.replace('http', 'ws')}/realtime/v1/websocket?apikey=${encodeURIComponent(sb.publishableKey)}&vsn=1.0.0&browser=1`);
+    const warteschlange = [];
+    ziel.on('open', () => { while (warteschlange.length) ziel.send(warteschlange.shift()); });
+    ziel.on('message', (d) => { try { seite.send(String(d)); } catch (e) { /* zu */ } });
+    ziel.on('close', () => { try { seite.close(); } catch (e) { /* zu */ } });
+    ziel.on('error', () => { try { seite.close(); } catch (e) { /* zu */ } });
+    seite.onMessage((m) => { if (ziel.readyState === 1) ziel.send(String(m)); else warteschlange.push(String(m)); });
+    seite.onClose(() => { try { ziel.close(); } catch (e) { /* zu */ } });
+  });
+  // alles andere außerhalb dieses PCs gibt es im Test nicht
+  await ctx.route(/^https?:\/\/(?!127\.|localhost|10\.|192\.168\.|172\.(1[6-9]|2\d|3[01])\.)/, (route) => (route.request().url().startsWith(SB_URL) ? route.fallback() : route.abort()));
   if (standEinrichtenUmlenken) {
     // Im Test spricht die Stand-Brücke mit dem Nachbau statt mit dem echten Supabase-Projekt.
     await ctx.route('**/kc-kassen-start/stand-einrichten', async (route) => {
@@ -79,7 +101,7 @@ const verkauf = (seite, kennung, kasse) => tablet(seite, '/kc-sync-live-event', 
     sb = await starteNachbau({ publishableKey: SB_KEY });
     await sb.sql('delete from public.kc_stand; delete from public.kc_manager_memberships');
     await sb.sql("insert into public.kc_manager_memberships values ($1, 'KC_WERNE', 'admin', true)", [ADMIN]);
-    browser = await chromium.launch();
+    browser = await chromium.launch({ args: [OHNE_ECHTSERVER, '--no-proxy-server'] });
 
     // ---- Stand starten ----
     stand = await starte(['--db', path.join(ARBEIT, 'stand.sqlite'), '--port', String(MGR), '--webserver-port', String(WEB_STAND)], /\[Marktag-Start\]/);
@@ -120,15 +142,30 @@ const verkauf = (seite, kennung, kasse) => tablet(seite, '/kc-sync-live-event', 
     await hausPc.waitForFunction(() => /zuletzt gemeldet vor/.test((document.getElementById('kcFernmodusBanner') || {}).textContent || ''), null, { timeout: 25000 }).catch(() => {});
     p('Zuhause: Anzeige unten rechts „Stand … zuletzt gemeldet vor … s“', /Fernmodus · Stand „Weihnachtsmarkt Werne“ · zuletzt gemeldet vor \d+ s/.test(await hausPc.locator('#kcFernmodusBanner').innerText().catch(() => '')));
 
+    // ---- Direkte Leitung (KC-STAND-LEITUNG) ----
+    let leitungStand = null;
+    const L = sb.leitung; // KC_NACHBAU_OHNE_LEITUNG=1: Rückfall ohne Leitung (Verhalten wie Stufe A)
+    if (!L) console.log('  (Nachbau ohne Leitung: geprüft wird der Rückfall auf den Takt)');
+    for (let i = 0; i < (L ? 40 : 6); i++) { leitungStand = await holen(`http://127.0.0.1:${WEB_STAND}/kc-kassen-start/stand-status`); if (leitungStand && leitungStand.leitung) break; await warte(500); }
+    p(L ? 'Leitung: Stand-Brücke hört auf ihrem Stand-Kanal' : 'Ohne Leitung: Stand-Brücke arbeitet im Takt',
+      L ? !!(leitungStand && leitungStand.leitung) && /\[Stand-Brücke\] Direkte Leitung steht/.test(stand.log()) : !!leitungStand && leitungStand.leitung === false && leitungStand.verbunden === true);
+    if (L) await hausPc.waitForFunction(() => window.KCDirekteLeitungManager && window.KCDirekteLeitungManager.steht(), null, { timeout: 20000 }).catch(() => {});
+    p(L ? 'Leitung: PC-Manager zu Hause hört auf dem Manager-Kanal' : 'Ohne Leitung: PC-Manager zu Hause fragt im Takt',
+      (await hausPc.evaluate(() => !!(window.KCDirekteLeitungManager && window.KCDirekteLeitungManager.steht()))) === L);
+
     // ---- 2. Verkauf -> Live-Monitor zu Hause ----
     await hausPc.evaluate(() => { window.__live = []; const ws = new WebSocket('ws://127.0.0.1:47392/live-monitor'); ws.onmessage = (m) => window.__live.push(JSON.parse(m.data)); window.__ws = ws; });
     await warte(5000);
     const k1 = 'KS04-LIVE-' + Date.now();
+    const tVerkauf = Date.now();
     p('2: Tablet bucht einen Verkauf', (await verkauf(t1, k1, 'KASSE-01')).status === 202);
     let live = [];
-    for (let i = 0; i < 40; i++) { live = await hausPc.evaluate(() => window.__live); if (live.some((e) => e.payload && e.payload.transactionId === k1)) break; await warte(500); }
+    for (let i = 0; i < 160; i++) { live = await hausPc.evaluate(() => window.__live); if (live.some((e) => e.payload && e.payload.transactionId === k1)) break; await warte(250); }
     const ev = live.find((e) => e.payload && e.payload.transactionId === k1);
+    const dVerkauf = Date.now() - tVerkauf;
     p('2: Verkauf erscheint zu Hause im Live-Monitor (gleiches Format wie am Stand)', !!ev && ev.type === 'sale' && ev.payload.registerId === 'KASSE-01' && !!ev.receivedAt);
+    p(L ? '2: … mit Leitung in weniger als 8 s (Stand meldet alle 5 s, Signal „stand“ weckt den Live-Monitor)' : '2: … ohne Leitung in weniger als 40 s (Takt)',
+      !!ev && dVerkauf < (L ? 8000 : 40000), `${(dVerkauf / 1000).toFixed(1)} s`);
     for (let i = 0; i < 20 && !live.some((e) => e.type === 'heartbeat' && e.payload.registerId === 'KASSE-01'); i++) { await warte(500); live = await hausPc.evaluate(() => window.__live); }
     p('2: Kassen-Lebenszeichen (Herzschlag) kommen zu Hause an – für die LEDs', live.some((e) => e.type === 'heartbeat' && e.payload.registerId === 'KASSE-01'));
     let verlauf = null;
@@ -142,8 +179,14 @@ const verkauf = (seite, kennung, kasse) => tablet(seite, '/kc-sync-live-event', 
     p('3: Datenschlüssel der Kassen sind zu Hause NICHT abrufbar („nur am Stand“)', nurStand.s === 503 && nurStand.j.error === 'nur_am_stand');
 
     // ---- 4. Ausverkauft von zu Hause ----
+    const signaleVorher = (await holen(`http://127.0.0.1:${WEB_STAND}/kc-kassen-start/stand-status`)).leitungSignale || 0;
+    const tAuftrag = Date.now();
     const aus = await hausPc.evaluate(() => fetch('http://127.0.0.1:47392/sold-out-status/setzen', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ articleId: 'grot', soldOut: true }) }).then((a) => a.json().then((j) => ({ s: a.status, j }))));
+    const dAuftrag = Date.now() - tAuftrag;
     p('4: Zu Hause „Glühwein rot ausverkauft“ -> am Stand ausgeführt', aus.s === 200, JSON.stringify(aus));
+    const signaleNachher = (await holen(`http://127.0.0.1:${WEB_STAND}/kc-kassen-start/stand-status`)).leitungSignale || 0;
+    p(L ? '4: … über die Leitung (Signal „auftrag“ am Stand) und in weniger als 5 s bestätigt' : '4: … ohne Leitung im Takt (höchstens 39 s Wartezeit)',
+      L ? signaleNachher > signaleVorher && dAuftrag < 5000 : signaleNachher === 0 && dAuftrag < 40000, `${(dAuftrag / 1000).toFixed(1)} s, Signale ${signaleVorher}→${signaleNachher}`);
     let t2aus = null;
     for (let i = 0; i < 40; i++) { t2aus = await tablet(t2, '/kc-sync-sold-out-status'); if (t2aus.json && (t2aus.json.ausverkauft || []).includes('grot')) break; await warte(1000); }
     p('4: Tablet KASSE-02 zeigt „ausverkauft“', t2aus.json && (t2aus.json.ausverkauft || []).includes('grot'));

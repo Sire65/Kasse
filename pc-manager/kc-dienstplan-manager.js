@@ -11,8 +11,14 @@
   const PUSH_URL = 'http://127.0.0.1:47392/dienstplan/push';
   const AUTO_MINUTEN = 5;
   const EVENT_ID = 'KC-WM-2026';
+  // KC-KASSE-SPARSAM (18.11.2026): nur weitergeben, wenn sich der Plan geändert hat. Zu Hause wird
+  // jede Weitergabe ein Auftrag an den Stand (Supabase) - alle 5 Minuten derselbe Plan kostete
+  // jedes Mal Auftrag + Rückfragen. Spätestens nach 60 Minuten wird trotzdem einmal neu gesendet
+  // (falls der Manager-Dienst am Stand neu aufgesetzt wurde).
+  const ERNEUT_SENDEN_MS = 60 * 60000;
+  let zuletztGesendet = null; // { fingerabdruck, zeit }
 
-  async function holeUndVeroeffentliche() {
+  async function holeUndVeroeffentliche(optionen = {}) {
     if (!global.KCSupabase?.istAngemeldet?.()) return { ok: false, grund: 'nicht_angemeldet' };
     const [plan, aliase] = await Promise.all([
       global.KCSupabase.rufeTabelleAuf(
@@ -41,12 +47,19 @@
       .filter(Boolean)
       .sort()
       .at(-1) || null;
+    const koerper = JSON.stringify({ schichten, eventId: EVENT_ID, sourceUpdatedAt: serverStand });
+    if (!optionen.erzwingen && zuletztGesendet && zuletztGesendet.fingerabdruck === koerper
+        && Date.now() - zuletztGesendet.zeit < ERNEUT_SENDEN_MS) {
+      return { ok: true, anzahl: schichten.length, unveraendert: true };
+    }
     const antwort = await fetch(PUSH_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ schichten, eventId: EVENT_ID, sourceUpdatedAt: serverStand }),
+      body: koerper,
     });
     if (!antwort.ok) throw new Error(`Weitergabe an den Manager fehlgeschlagen (${antwort.status})`);
+    // 202 = zu Hause noch „unterwegs“ zum Stand: gilt als weitergegeben (der Stand holt den Auftrag nach)
+    zuletztGesendet = { fingerabdruck: koerper, zeit: Date.now() };
     return { ok: true, anzahl: schichten.length };
   }
 

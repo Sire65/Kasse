@@ -1,10 +1,10 @@
 name: Kassen-Marktbetrieb
 on:
   pull_request:
-    paths: ['tests/time-clock-cloud-queue.test.cjs', 'tests/time-clock-auth-relay.test.cjs', 'tests/time-clock-booking-browser.test.cjs', 'markt-kasse-suite/backend-source/manager-companion/**', 'money-butler/**', 'pc-manager/**', 'schulung/money-butler/**', 'schulung/pc-manager/**', 'tests/kassen-programmverbund.test.cjs', 'pos/**', 'schulung/pos/**', 'tests/marktbetrieb.test.cjs', 'tests/verkaufskurve-prognose.test.cjs', 'tests/haendlerausweis.test.cjs', '.github/workflows/kassen-marktbetrieb.yml']
+    paths: ['tests/time-clock-cloud-queue.test.cjs', 'tests/time-clock-auth-relay.test.cjs', 'tests/time-clock-booking-browser.test.cjs', 'markt-kasse-suite/backend-source/manager-companion/**', 'money-butler/**', 'pc-manager/**', 'schulung/money-butler/**', 'schulung/pc-manager/**', 'tests/kassen-programmverbund.test.cjs', 'pos/**', 'schulung/pos/**', 'tests/marktbetrieb.test.cjs', 'tests/verkaufskurve-prognose.test.cjs', 'tests/haendlerausweis.test.cjs', 'tests/kasse-sparsam.test.cjs', 'tests/kasse-leitung.test.cjs', 'shared/kc-direkte-leitung.js', 'markt-kasse-suite/backend-source/stand-bruecke.js', 'supabase/migrations/**', '.github/workflows/kassen-marktbetrieb.yml']
   push:
     branches: [main]
-    paths: ['tests/time-clock-cloud-queue.test.cjs', 'tests/time-clock-auth-relay.test.cjs', 'tests/time-clock-booking-browser.test.cjs', 'markt-kasse-suite/backend-source/manager-companion/**', 'money-butler/**', 'pc-manager/**', 'schulung/money-butler/**', 'schulung/pc-manager/**', 'tests/kassen-programmverbund.test.cjs', 'pos/**', 'schulung/pos/**', 'tests/marktbetrieb.test.cjs', 'tests/verkaufskurve-prognose.test.cjs', '.github/workflows/kassen-marktbetrieb.yml']
+    paths: ['tests/time-clock-cloud-queue.test.cjs', 'tests/time-clock-auth-relay.test.cjs', 'tests/time-clock-booking-browser.test.cjs', 'markt-kasse-suite/backend-source/manager-companion/**', 'money-butler/**', 'pc-manager/**', 'schulung/money-butler/**', 'schulung/pc-manager/**', 'tests/kassen-programmverbund.test.cjs', 'pos/**', 'schulung/pos/**', 'tests/marktbetrieb.test.cjs', 'tests/verkaufskurve-prognose.test.cjs', 'tests/kasse-sparsam.test.cjs', 'tests/kasse-leitung.test.cjs', 'shared/kc-direkte-leitung.js', 'markt-kasse-suite/backend-source/stand-bruecke.js', 'supabase/migrations/**', '.github/workflows/kassen-marktbetrieb.yml']
   workflow_dispatch:
 permissions:
   contents: read
@@ -26,6 +26,9 @@ jobs:
           node tests/feuerzange-ausgabeteil.test.cjs
           node tests/time-clock-auth-relay.test.cjs
           node tests/time-clock-cloud-queue.test.cjs
+          node tests/kasse-sparsam.test.cjs
+          node tests/kasse-leitung.test.cjs
+          node tests/direkte-leitung.test.cjs
           node tests/time-clock-booking-browser.test.cjs
           node tests/marktbetrieb.test.cjs
           node tests/haendlerausweis.test.cjs

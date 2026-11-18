@@ -394,7 +394,14 @@
     pruefeVerbindungLeise();
     // 14.10.2026: im Hintergrund nur noch jede 2. Minute prüfen (vorher immer alle 30 s)
     let letzteProbe = Date.now();
-    setInterval(() => { if (document.hidden && Date.now() - letzteProbe < 120000) return; letzteProbe = Date.now(); pruefeVerbindungLeise(); }, 30000);
+    // KC-KASSE-SPARSAM (18.11.2026): steht die direkte Leitung (shared/kc-direkte-leitung.js), ist Supabase
+    // nachweislich erreichbar - dann nur alle 10 Minuten eine Probe (Anmeldung noch gültig?), sonst wie bisher.
+    setInterval(() => {
+      const seit = Date.now() - letzteProbe;
+      if (document.hidden && seit < 120000) return;
+      if (letzterVerbindungsStatus === 'ok' && accessToken() && global.KCDirekteLeitungManager?.steht?.() && seit < 600000) return;
+      letzteProbe = Date.now(); pruefeVerbindungLeise();
+    }, 30000);
   }
 
   global.KCSupabase = { rufeFunktionAuf, rufeEdgeFunktionAuf, rufeTabelleAuf, listeTabellen, istAngemeldet: () => !!accessToken(), holeZugriffsToken: () => accessToken(),

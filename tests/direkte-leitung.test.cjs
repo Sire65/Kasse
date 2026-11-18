@@ -97,7 +97,7 @@ function baueUmgebung({ kanal = 'kc-rt-test', angemeldet = true } = {}) {
   // 6. Einbindung und Gleichstand
   for (const b of ['pc-manager', 'schulung/pc-manager']) {
     const h = lies(`${b}/index.html`);
-    pr(`${b}: Baustein und Anschluss eingebunden (nach der Supabase-Anmeldung)`, h.indexOf('kc-direkte-leitung.js?build=1.0.0') > h.indexOf('kc-manager-supabase-status.js') && h.includes('kc-direkte-leitung-manager.js?build=1.1.0'));
+    pr(`${b}: Baustein und Anschluss eingebunden (nach der Supabase-Anmeldung)`, h.indexOf('kc-direkte-leitung.js?build=1.0.0') > h.indexOf('kc-manager-supabase-status.js') && h.includes('kc-direkte-leitung-manager.js?build=1.2.0'));
   }
   pr('Manager und Schulungs-Manager gleich', lies('pc-manager/kc-direkte-leitung-manager.js') === lies('schulung/pc-manager/kc-direkte-leitung-manager.js') && lies('shared/kc-direkte-leitung.js') === lies('schulung/shared/kc-direkte-leitung.js') && lies('pc-manager/kc-money-butler-cloud-intake.js') === lies('schulung/pc-manager/kc-money-butler-cloud-intake.js'));
   const quelle = lies('shared/kc-direkte-leitung.js');

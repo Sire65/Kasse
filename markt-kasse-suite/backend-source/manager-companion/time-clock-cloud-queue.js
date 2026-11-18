@@ -39,13 +39,30 @@ class TimeClockCloudQueue {
   async drain(send, readState) {
     this.lastError = null;
     let acknowledged = 0;
+    const quittiere = row => this.db.prepare('INSERT INTO time_clock_cloud_receipts(event_id, fingerprint, acknowledged_at) VALUES (?, ?, ?) ON CONFLICT(event_id) DO UPDATE SET fingerprint=excluded.fingerprint, acknowledged_at=excluded.acknowledged_at')
+      .run(row.event.id, row.fingerprint, new Date().toISOString());
     try {
-      for (const row of this.pending().slice(0,100)) {
-        if(this.stopping)break;
-        if (!row.event.credential) {
-          this.lastError='Mitgliedsnummer fehlt. Bitte die Stechuhr-Zugänge im PC-Manager aktualisieren.';
-          continue;
+      const rows = this.pending().slice(0,100);
+      for (const row of rows) if (!row.event.credential) this.lastError='Mitgliedsnummer fehlt. Bitte die Stechuhr-Zugänge im PC-Manager aktualisieren.';
+      const sendbar = rows.filter(row => row.event.credential);
+      // KC-KASSE-SPARSAM (18.11.2026): mehrere Buchungen in EINEM Aufruf (kc_dp_stempel_kasse_melden nimmt
+      // bis zu 100 und schreibt alle oder keine). Lehnt die Zentrale eine davon ab, wie bisher einzeln senden,
+      // damit eine fehlerhafte Buchung die anderen nicht aufhält.
+      let einzeln = sendbar;
+      if (sendbar.length > 1 && !this.stopping) {
+        let response = null;
+        try { response = await send(sendbar.map(row => row.event)); }
+        catch (error) { if (!error.eventRejected) throw error; }
+        if (response) {
+          if (response.ok !== true || response.contract !== 'KC_DP_STEMPEL_KASSE_V1' || !Array.isArray(response.accepted)) {
+            throw new Error('Die zentrale Bestätigung fehlt. Die Buchung bleibt für den nächsten Versuch gespeichert.');
+          }
+          for (const row of sendbar) if (response.accepted.includes(row.event.id)) { quittiere(row); acknowledged++; }
+          einzeln = sendbar.filter(row => !response.accepted.includes(row.event.id));
         }
+      }
+      for (const row of einzeln) {
+        if(this.stopping)break;
         let response;
         try { response=await send([row.event]); }
         catch(error){
@@ -56,8 +73,7 @@ class TimeClockCloudQueue {
             !Array.isArray(response.accepted) || !response.accepted.includes(row.event.id)) {
           throw new Error('Die zentrale Bestätigung fehlt. Die Buchung bleibt für den nächsten Versuch gespeichert.');
         }
-        this.db.prepare('INSERT INTO time_clock_cloud_receipts(event_id, fingerprint, acknowledged_at) VALUES (?, ?, ?) ON CONFLICT(event_id) DO UPDATE SET fingerprint=excluded.fingerprint, acknowledged_at=excluded.acknowledged_at')
-          .run(row.event.id, row.fingerprint, new Date().toISOString());
+        quittiere(row);
         acknowledged++;
       }
       if (readState && !this.stopping) {
