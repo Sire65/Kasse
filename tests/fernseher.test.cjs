@@ -110,6 +110,9 @@ function nachbauStarter() {
       p('A2: Rückblick heißt 2025, leere Impressionen ausgeblendet', projekt.slides.filter((s) => /^Rückblick/.test(s.name)).every((s) => /2025/.test(s.name) && !s.items.some((i) => /2024/.test(i.text || ''))) && projekt.slides.filter((s) => /^Impressionen \d/.test(s.name)).every((s) => s.rotation.enabled === false));
       const laufschriften = projekt.slides.map((s) => s.items.find((i) => i.type === 'ticker')).filter(Boolean).map((i) => i.text);
       p('A2: Laufschrift langsamer, Themenblöcke mit Abstand, Preise je Gruppe und Allergen-Hinweis', a.includes('const TEMPO=30;') && a.includes('kcTickerPause') && laufschriften.some((t) => t.startsWith('Preise alkoholfreie Getränke:')) && laufschriften.some((t) => t.includes('wenden Sie sich gerne an die Standbesetzung')) && new Set(laufschriften).size > 5);
+      p('A2: durchgehendes Laufband über allen Folien (kein Flackern beim Folienwechsel)', a.includes('band.id="kcLaufband"') && a.includes('#tvStage .tvItem.ticker{visibility:hidden!important}') && a.includes('window.KC_LAUFSCHRIFT=') && a.includes('if(t===inhalt&&band.firstChild)return;'));
+      const qr = projekt.slides.flatMap((s) => s.items).filter((i) => i.name === 'official-qr-label' || i.name === 'join-copy').map((i) => i.text);
+      p('A2: QR-Folien: Gesamtprogramm im Internet, E-Mail an den Clubsprecher', qr.some((t) => /Gesamtprogramm\nim Internet/.test(t)) && qr.some((t) => /dem Clubsprecher\neine E-Mail senden/.test(t)) && !qr.some((t) => /Klaus Zander/.test(t)));
       const bilder = JSON.parse(a.slice(a.indexOf('const B=[') + 8, a.indexOf('];', a.indexOf('const B=[')) + 1));
       p('A2: entfernte Fotos stecken nicht mehr unsichtbar in der Datei', bilder.filter(Boolean).length <= 6, `${bilder.filter(Boolean).length} Bilder`);
       const { uebernehmen } = require(path.join(WURZEL, 'tools', 'tv-version-a-uebernehmen.cjs'));

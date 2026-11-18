@@ -173,6 +173,12 @@ function bearbeite(projekt, log, extras = {}) {
       }
     }
 
+    // QR-Folien: klarer sagen, wohin der Code führt (Betreiber 18.11.2026)
+    for (const item of folie.items) {
+      if (item.name === 'official-qr-label') item.text = 'QR-Code scannen\nfür das Gesamtprogramm\nim Internet';
+      if (item.name === 'join-copy') item.text = 'QR-Code scannen\nund dem Clubsprecher\neine E-Mail senden';
+    }
+
     // Rückblick: die Fotos sind vom Weihnachtsmarkt 2025
     if (/^Rückblick 2024/.test(folie.name)) {
       folie.name = folie.name.replace('2024', '2025');
@@ -282,6 +288,25 @@ const KACHEL_WETTER = '<style>'
   + 'if(alt&&alt.getAttribute("data-k")===k)return;if(alt)alt.remove();if(!k)return;var d=document.createElement("div");d.className="kcKw "+k;d.setAttribute("data-k",k);d.innerHTML=teile(k);el.appendChild(d)})}'
   + 'new MutationObserver(function(){setTimeout(fuellen,0)}).observe(stage,{childList:true});setInterval(fuellen,5000);fuellen()})();</script>';
 
+// Durchgehendes Laufband (Betreiber 18.11.2026: „wird immer kurz ausgeblendet, wenn eine neue Folie erscheint“).
+// Die Laufschrift der Folien wird bei jedem Wechsel neu aufgebaut und blendet ein – das flackert. Stattdessen
+// liegt EIN Laufband über allen Folien, läuft ohne Unterbrechung weiter und zeigt nacheinander alle Themen.
+// Es wird nur neu aufgebaut, wenn sich das Wetter ändert; auf Folien ohne Laufschrift (Schlussfolie) ist es aus.
+const LAUFBAND = '<style>#tvStage .tvItem.ticker{visibility:hidden!important}'
+  + '#kcLaufband{position:absolute;left:0;top:0;transform-origin:top left;pointer-events:none;z-index:50;overflow:hidden}'
+  + '#kcLaufband .tvItem.ticker{visibility:visible!important;font-size:24px!important}</style>'
+  + '<script>(function(){var stage=document.getElementById("tvStage");if(!stage)return;'
+  + 'var band=document.createElement("div");band.id="kcLaufband";stage.parentNode.appendChild(band);var inhalt="";'
+  + 'function text(){var W=window.KC_WETTER||{};return (window.KC_LAUFSCHRIFT||[]).map(function(b){return b.replace(/\\{\\{\\s*weather\\.(\\w+)\\.(\\w+)\\s*\\}\\}/g,function(_,d,k){return (W[d]&&W[d][k])||"…"})}).join(" • ")}'
+  + 'function bauen(el,t){var lauf=document.createElement("span");lauf.className="tvTickerLauf";var st=document.createElement("span");st.className="tvTickerStueck";'
+  + 't.split(/\\s*•\\s*/).forEach(function(b){var s=document.createElement("span");s.textContent=b;st.appendChild(s);var p=document.createElement("span");p.className="kcTickerPause";p.textContent="✦";st.appendChild(p)});'
+  + 'lauf.appendChild(st);el.textContent="";el.appendChild(lauf);var e=st.offsetWidth;if(!e)return;for(var n=0;n<Math.ceil(el.clientWidth/e)+1;n++)lauf.appendChild(st.cloneNode(true));'
+  + 'lauf.style.setProperty("--strecke",e+"px");lauf.style.setProperty("--dauer",(e/30).toFixed(2)+"s")}'
+  + 'function abgleich(){band.style.width=stage.style.width;band.style.height=stage.style.height;band.style.transform=stage.style.transform;'
+  + 'var vorlage=stage.querySelector(".tvItem.ticker");band.style.visibility=vorlage?"visible":"hidden";if(!vorlage)return;var t=text();if(t===inhalt&&band.firstChild)return;inhalt=t;'
+  + 'var el=document.createElement("div");el.className="tvItem ticker";el.setAttribute("style",vorlage.getAttribute("style")||"");el.setAttribute("data-tv-ticker-mounted","1");band.innerHTML="";band.appendChild(el);bauen(el,t)}'
+  + 'new MutationObserver(function(){setTimeout(abgleich,0)}).observe(stage,{childList:true,attributes:true,attributeFilter:["style"]});addEventListener("resize",function(){setTimeout(abgleich,0)});setInterval(abgleich,60000);abgleich()})();</script>';
+
 // Kein Umfrage-Ende mehr: Schlussfolie läuft weiter, kein „Fertig – zur Umfrage“-Knopf.
 const CODE_ERSETZUNGEN = [
   { name: 'Schlussfolie hält nicht mehr an', alt: 'if(isLast&&playing)tvTogglePause();', neu: '' },
@@ -315,7 +340,8 @@ const CODE_ERSETZUNGEN = [
   { name: 'Laufschrift: Abstand zwischen den Themenblöcken',
     alt: "stueck.textContent=text+'   ·   ';",
     neu: "text.split(/\\s*•\\s*/).forEach(b=>{const t=document.createElement('span');t.textContent=b;stueck.appendChild(t);const p=document.createElement('span');p.className='kcTickerPause';p.textContent='✦';stueck.appendChild(p)});" },
-  { name: 'Wetterkacheln mit eigenem Wetter je Tag', alt: '</body></html>', neu: KACHEL_WETTER + '</body></html>' },
+  { name: 'Wetterkacheln mit eigenem Wetter je Tag; durchgehendes Laufband', alt: '</body></html>',
+    neu: KACHEL_WETTER + '<script>window.KC_LAUFSCHRIFT=' + JSON.stringify(['Der Köcheclub Werne begrüßt Sie herzlich auf dem Weihnachtsmarkt 2026', ...LAUFSCHRIFT_THEMEN]).replace(/</g, '\\u003c') + ';</script>' + LAUFBAND + '</body></html>' },
   { name: 'Wetter: Ausfall behält letzte Daten',
     alt: "}catch{weather.today={symbol:'🌡️',text:'Wetterdaten derzeit nicht erreichbar'",
     neu: "}catch{if(weather.today&&weather.today.rain)return;weather.today={symbol:'🌡️',text:'Wetterdaten derzeit nicht erreichbar'" },
