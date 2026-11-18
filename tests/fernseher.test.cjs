@@ -97,6 +97,12 @@ function nachbauStarter() {
       const mitglieder = projekt.slides.filter((s) => s.memberMeta);
       const sichtbar = mitglieder.filter((s) => s.rotation && s.rotation.enabled !== false).map((s) => s.memberMeta.name);
       p('A2: Endversion: nur Mitglieder mit Zustimmung sichtbar (Klaus Zander, Steven Linley nicht)', sichtbar.length === 9 && !sichtbar.includes('Klaus Zander') && !sichtbar.includes('Steven Linley'), sichtbar.join(', '));
+      const namen = mitglieder.filter((s) => s.rotation && s.rotation.enabled !== false).map((s) => (s.items.find((i) => i.originalRole === 'memberName') || {}).text);
+      p('A2: ohne Fotos (18.11.2026): Mitglieder nur mit Vornamen, keine Fotos', namen.every((n) => n && !/\s/.test(n.replace('Hans-Joachim', 'X'))) && mitglieder.every((s) => !s.items.some((i) => i.originalRole === 'photo')), namen.join(', '));
+      const mannschaft = projekt.slides.find((s) => s.name === 'Unsere Mannschaft');
+      p('A2: Mannschaftsfolie nur Text „seit 1991 in Werne“, kein Gruppenbild', mannschaft && !mannschaft.items.some((i) => i.type === 'image' && i.originalRole === 'photo') && mannschaft.items.some((i) => i.text === 'seit 1991 in Werne'));
+      const bilder = JSON.parse(a.slice(a.indexOf('const B=[') + 8, a.indexOf('];', a.indexOf('const B=[')) + 1));
+      p('A2: entfernte Fotos stecken nicht mehr unsichtbar in der Datei', bilder.filter(Boolean).length <= 6, `${bilder.filter(Boolean).length} Bilder`);
       const { uebernehmen } = require(path.join(WURZEL, 'tools', 'tv-version-a-uebernehmen.cjs'));
       let doppelt = false; try { uebernehmen(a); } catch (e) { doppelt = /bereits angepasst/.test(e.message); }
       p('A2: Werkzeug lehnt bereits angepasste Datei ab (keine Doppel-Anpassung)', doppelt);
