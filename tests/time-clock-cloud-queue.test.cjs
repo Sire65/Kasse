@@ -34,6 +34,15 @@ const {TimeClockCloudQueue} = require('../markt-kasse-suite/backend-source/manag
  await queue.flush();
  assert.equal(queue.pending().length,1,'missing member must not block another member');
  db.prepare('DELETE FROM time_clock_events WHERE event_id=?').run('ZEIT-UNBEKANNT');
+ db.prepare('UPDATE time_clock_events SET shift_reason=?').run('erneut');
+ db.prepare('INSERT INTO time_clock_events VALUES (?,?,?,?,?,?,?,?,?,?)').run('ZEIT-ZENTRAL-UNBEKANNT','P-TEST','in','2026-12-02T08:00:00Z','2026-12-02T08:00:00Z','KASSE','WM-2026','','',null);
+ queue=new TimeClockCloudQueue({db,people:()=>persons,send:async events=>{
+  if(events[0].id==='ZEIT-ZENTRAL-UNBEKANNT'){const error=Error('Zuordnung prüfen');error.eventRejected=true;throw error;}
+  return send(events);
+ }});
+ assert.equal((await queue.flush()).ok,false);
+ assert.equal(queue.pending().length,1,'rejected central identity does not block another event');
+ db.prepare('DELETE FROM time_clock_events WHERE event_id=?').run('ZEIT-ZENTRAL-UNBEKANNT');
  db.exec('CREATE TABLE master_data(id INTEGER PRIMARY KEY,revision INTEGER)');
  db.prepare('INSERT INTO master_data VALUES(1,1)').run();
  const snapshot={ok:true,contract:'KC_DP_STEMPEL_KASSE_V1',events:[{member_no:'KC-TEST',art:'in'}]};

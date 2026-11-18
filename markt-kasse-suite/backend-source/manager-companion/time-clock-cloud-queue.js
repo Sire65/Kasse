@@ -45,7 +45,12 @@ class TimeClockCloudQueue {
           this.lastError='Mitgliedsnummer fehlt. Bitte die Stechuhr-Zugänge im PC-Manager aktualisieren.';
           continue;
         }
-        const response = await send([row.event]);
+        let response;
+        try { response=await send([row.event]); }
+        catch(error){
+          if(error.eventRejected){this.lastError=error.message;continue;}
+          throw error;
+        }
         if (response?.ok !== true || response.contract !== 'KC_DP_STEMPEL_KASSE_V1' ||
             !Array.isArray(response.accepted) || !response.accepted.includes(row.event.id)) {
           throw new Error('Die zentrale Bestätigung fehlt. Die Buchung bleibt für den nächsten Versuch gespeichert.');

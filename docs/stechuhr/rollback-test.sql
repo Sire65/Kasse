@@ -1,5 +1,6 @@
 begin;
 \ir ../../supabase/migrations/20261118080742_kc_dp_stempel_manager_session.sql
+\ir ../../supabase/migrations/20261118083053_kc_dp_stempel_event_pairing.sql
 do $test$
 declare member text; person text; user_id uuid; payload jsonb; result jsonb; n integer; rejected boolean;
 begin

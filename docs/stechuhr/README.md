@@ -22,7 +22,7 @@ Die Übernahme in den Istplan erfolgt nach Prüfung durch den Planer. Erst die b
 
 ## Bereitstellung
 
-1. Die beiden additiven Migrationen 20261118080204 und 20261118080742 liegen im Repository und sind in Supabase eingespielt. Sie verwenden die vorhandenen Tabellen. Die Rechte- und Zeitpaarproben liefen in einer vollständig zurückgerollten Transaktion.
+1. Die additiven Migrationen 20261118080204, 20261118080742 und 20261118083053 liegen im Repository und sind in Supabase eingespielt. Sie verwenden die vorhandenen Tabellen. Zeitpaare sind je Veranstaltung getrennt. Die Rechte- und Zeitpaarproben liefen in einer vollständig zurückgerollten Transaktion.
 2. Den geprüften Kassen-/Manager-Stand einschließlich Manager-Companion übernehmen und den Manager-Dienst neu starten. Der bisherige zentrale Kassenzugang wird für diesen neuen Weg nicht benötigt.
 3. DP2 Build 313 bereitstellen. Die eingebettete Twinkey-Kopie in der Club-App wird separat nach deren Übernahmeverfahren aktualisiert.
 4. Mit einem vorgesehenen Kassen-Tablet prüfen: QR, Geburtstag, offline erfassen, wiederverbinden und genau ein vollständiges Zeitpaar in Supabase sowie nach Prüfung in DP2. Testdaten vorab als Schulungsdaten behandeln.
