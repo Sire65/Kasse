@@ -117,10 +117,16 @@ const managerArtikelGespeichert=!!localStorage.getItem("kcm_articles"),managerGr
    i.allergens.eggs='contained';i.allergens.sulphites='contained';i.allergens.milk='contained';   // Sahnehaube (Betreiber 13.10.)
    if(!i.important)i.important='Alkoholhaltig.';
    if(!i.supplier)i.supplier='ALDI (Eierlikör „Advocaat“ 0,7 l, Wein „Rebenschoppen“)';
-   const REZ='Rezeptur je Ansatz (13.10.2026): 6 l Rebenschoppen halbtrocken + 3 × 0,7 l Advocaat + 3 EL Vanillezucker (≈ 8,1 l); serviert mit Sahnehaube und Backkakao. Zusatzstoffe und Nährwerte bitte von den Etiketten (Flasche/Karton) übernehmen.';
+   const REZ='Rezeptur je Ansatz (13.10.2026): 6 l Rebenschoppen halbtrocken + 3 × 0,7 l Advocaat + 150 g Vanillezucker (≈ 8,1 l); serviert mit Sahnehaube und Backkakao. Zusatzstoffe und Nährwerte bitte von den Etiketten (Flasche/Karton) übernehmen.';
    if(!String(i.notes||'').includes('Rezeptur je Ansatz'))i.notes=[i.notes,REZ].filter(Boolean).join(' ');
    if(!i.source)i.source='Rezeptur des Vereins; Allergene: Eierlikör (EU-VO 2019/787: Eigelb), Wein (Sulfite), Sahne (Milch)';
    localStorage.setItem('kcm_articles',JSON.stringify(articles));}
+  localStorage.setItem(MERK,'1');}}
+// 18.11.2026 (Betreiber: Vanillezucker „150 Gramm“, nicht 3 EL): Notiz auf Geräten mit altem Stand einmalig berichtigen
+{const MERK='kcm_eierpunsch_vanille_v1';
+ if(!localStorage.getItem(MERK)){
+  const a=articles.find(x=>x.id==='eier');
+  if(a&&a.info&&/3 EL Vanillezucker/.test(a.info.notes||'')){a.info.notes=a.info.notes.replace('3 EL Vanillezucker','150 g Vanillezucker');localStorage.setItem('kcm_articles',JSON.stringify(articles));}
   localStorage.setItem(MERK,'1');}}
 // 16.11.2026 (Betreiber: "trage auch alles in die Kasse ein und in PC Manager ... damit schon mal alles stimmt"):
 // Allergene/Zutaten Weihnachtsmarkt 2026 EINMALIG je Geraet nachtragen. Quellen: Etiketten Kaub (Roter Feger,

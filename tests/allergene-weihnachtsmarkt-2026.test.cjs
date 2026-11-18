@@ -20,7 +20,8 @@ const ALT = [
   {id: 'apfel', name: 'Apfelpunsch', price: 2.5, category: 'Getränke', info: {allergens: {sulphites: 'contained'}}},
   {id: 'gruenkohl', name: 'Grünkohl', price: 5.5, category: 'Speisen', info: {ingredients: 'Grünkohl, Kartoffeln, Zwiebeln, Gewürze', allergens: 'Kann Senf und Sellerie enthalten', important: 'Heiß ausgegeben.'}},
   {id: 'hering', name: 'Kartoffel mit Hering', price: 4.5, category: 'Speisen'},
-  {id: 'mettwurst', name: 'Mettwurst', price: 1.5, category: 'Speisen'}];
+  {id: 'mettwurst', name: 'Mettwurst', price: 1.5, category: 'Speisen'},
+  {id: 'eier', name: 'Eierlikörpunsch', price: 4.5, category: 'Getränke', info: {notes: 'Rezeptur je Ansatz (13.10.2026): 6 l Rebenschoppen halbtrocken + 3 × 0,7 l Advocaat + 3 EL Vanillezucker (≈ 8,1 l); serviert mit Sahnehaube und Backkakao.'}}];
 const pruefe = (n, a) => {
   const g = (id) => (a.find((x) => x.id === id) || {}).info || {};
   const rf = g('roterfeger').allergens || {}, ap = g('apfel').allergens || {}, gk = g('gruenkohl'), gm = (g('gruenkohlmett').allergens || null), h = g('hering').allergens || {}, m = g('mettwurst').allergens || {};
@@ -65,6 +66,9 @@ const pruefe = (n, a) => {
       const n = `${seite} ${alt ? 'alter Stand' : 'frisch'}`;
       pruefe(n, await p.evaluate(() => articles));
       const gespeichert = await p.evaluate(() => JSON.parse(localStorage.getItem('kcm_articles') || '[]').find((x) => x.id === 'hering')?.info?.allergens?.fish);
+      // 18.11.2026: Vanillezucker 150 g (nicht 3 EL) – frisch und auf Geräten mit altem Stand
+      const eierNotiz = await p.evaluate(() => (articles.find((x) => x.id === 'eier') || {}).info?.notes || '');
+      pr(`${n}: Eierlikörpunsch-Notiz mit 150 g Vanillezucker`, /150 g Vanillezucker/.test(eierNotiz) && !/3 EL Vanillezucker/.test(eierNotiz), eierNotiz.slice(0, 120));
       pr(`${n}: im Manager gespeichert (geht mit dem Stammdaten-Abgleich an die Kassen)`, gespeichert === 'contained', String(gespeichert));
       await p.evaluate(() => { const a = articles.find((x) => x.id === 'mettwurst'); a.info.allergens.celery = 'contained'; localStorage.setItem('kcm_articles', JSON.stringify(articles)); });
       await p.reload(); await p.waitForTimeout(3000);
