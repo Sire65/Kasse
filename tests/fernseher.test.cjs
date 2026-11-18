@@ -115,6 +115,11 @@ function nachbauStarter() {
         hinweise.length === 4 && hinweise.every((h) => h && h.font <= 15 && /\t/.test(h.text) && h.text.startsWith('Allergene und Zusatzstoffe')) && a.includes('.kcAh{display:grid')
         && a.includes('item.classList.add("kcEng")') && !projekt.slides.some((s) => (s.items.find((i) => i.type === 'table') || { tableData: [] }).tableData.some((r) => /^Aufpreis außer Haus|^\d+\.\d\d$/.test((r[0] && r[0].text) || '') || r.some((c) => /^\d+\.\d\d$/.test(c.text || ''))))
         && hinweise.filter((h) => /Außer Haus: Thermobecher/.test(h.text)).length === 2);
+      // 18.11.2026: Video-Fassung (?aufnahme=1) nennt den Stand der Wetterdaten; Laufband beginnt links (nicht mittig abgeschnitten)
+      p('A2: Video-Fassung: Wetter-Hinweis „nicht ganz aktuell“, kein Musik-Hinweis, Laufband linksbündig, Aufnahme-Werkzeug vorhanden',
+        a.includes('im Video nicht ganz aktuell') && a.includes('nicht ganz aktuell):') && a.includes('.kcAufnahme #kcMusikHinweis{display:none!important}')
+        && a.includes('#kcLaufband .tvItem.ticker{visibility:visible!important;font-size:24px!important;justify-content:flex-start!important}')
+        && fs.existsSync(path.join(WURZEL, 'tools', 'tv-mp4-aufnehmen.cjs')));
       const laufschriften = projekt.slides.map((s) => s.items.find((i) => i.type === 'ticker')).filter(Boolean).map((i) => i.text);
       p('A2: Laufschrift langsamer, Themenblöcke mit Abstand, Preise je Gruppe und Allergen-Hinweis', a.includes('const TEMPO=30;') && a.includes('kcTickerPause') && laufschriften.some((t) => t.startsWith('Preise alkoholfreie Getränke:')) && laufschriften.some((t) => t.includes('wenden Sie sich gerne an die Standbesetzung')) && new Set(laufschriften).size > 5);
       p('A2: durchgehendes Laufband über allen Folien (kein Flackern beim Folienwechsel)', a.includes('band.id="kcLaufband"') && a.includes('#tvStage .tvItem.ticker{visibility:hidden!important}') && a.includes('window.KC_LAUFSCHRIFT=') && a.includes('if(t===inhalt&&band.firstChild)return;'));

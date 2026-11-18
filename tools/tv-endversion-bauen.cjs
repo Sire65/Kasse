@@ -290,7 +290,7 @@ const KACHEL_WETTER = '<style>'
 // Es wird nur neu aufgebaut, wenn sich das Wetter ändert; auf Folien ohne Laufschrift (Schlussfolie) ist es aus.
 const LAUFBAND = '<style>#tvStage .tvItem.ticker{visibility:hidden!important}'
   + '#kcLaufband{position:absolute;left:0;top:0;transform-origin:top left;pointer-events:none;z-index:50;overflow:hidden}'
-  + '#kcLaufband .tvItem.ticker{visibility:visible!important;font-size:24px!important}</style>'
+  + '#kcLaufband .tvItem.ticker{visibility:visible!important;font-size:24px!important;justify-content:flex-start!important}</style>'
   + '<script>(function(){var stage=document.getElementById("tvStage");if(!stage)return;'
   + 'var band=document.createElement("div");band.id="kcLaufband";stage.parentNode.appendChild(band);var inhalt="";'
   + 'function text(){var W=window.KC_WETTER||{};return (window.KC_LAUFSCHRIFT||[]).map(function(b){return b.replace(/\\{\\{\\s*weather\\.(\\w+)\\.(\\w+)\\s*\\}\\}/g,function(_,d,k){return (W[d]&&W[d][k])||"…"})}).join(" • ")}'
@@ -321,6 +321,17 @@ const HINWEIS_RASTER = '<style>.tvItem[data-original-role=allergenHinweis]{displ
   + 'var tab=stage.querySelector(".tvItem.table table"),item=tab&&tab.parentNode;if(!item)return;var h=Math.max(el.offsetHeight,g.offsetHeight+18);'
   + 'if(item.offsetTop+tab.offsetHeight+16+h>' + UNTEN + ')item.classList.add("kcEng");var unten=item.offsetTop+tab.offsetHeight;'
   + 'el.style.height=h+"px";el.style.top=Math.min(unten+16,' + UNTEN + '-h)+"px"})}'
+  + 'new MutationObserver(setzen).observe(stage,{childList:true});setzen()})();</script>';
+
+// Video-Fassung (?aufnahme=1, tools/tv-mp4-aufnehmen.cjs; Betreiber 18.11.2026: „bei MP4 muss der Hinweis rein, dass die
+// Wetterdaten nicht ganz aktuell sind“): Wetterfolien und Wetter-Laufschrift nennen den Stand der Wetterdaten.
+const AUFNAHME = '<style>.kcAufnahmeWetter{color:#ffd76a!important;font-weight:700!important}.kcAufnahme #kcMusikHinweis{display:none!important}</style>'
+  + '<script>(function(){if(!/[?&]aufnahme=1(&|$)/.test(location.search))return;window.KC_AUFNAHME=true;document.documentElement.classList.add("kcAufnahme");'
+  + 'var d=new Date(),stand=d.toLocaleDateString("de-DE",{day:"2-digit",month:"2-digit",year:"numeric",timeZone:"Europe/Berlin"})+", "+d.toLocaleTimeString("de-DE",{hour:"2-digit",minute:"2-digit",timeZone:"Europe/Berlin"})+" Uhr";'
+  + 'window.KC_AUFNAHME_STAND=stand;'
+  + 'window.KC_LAUFSCHRIFT=(window.KC_LAUFSCHRIFT||[]).map(function(b){return b.indexOf("Wetter in Werne:")===0?b.replace("Wetter in Werne:","Wetter in Werne (Stand "+stand+", nicht ganz aktuell):"):b});'
+  + 'var stage=document.getElementById("tvStage");if(!stage)return;function setzen(){stage.querySelectorAll(".tvItem.text").forEach(function(el){if(el.textContent.indexOf("wird alle 30 Minuten aktualisiert")<0)return;'
+  + 'el.textContent="⚠ Wetterdaten vom "+stand+" – im Video nicht ganz aktuell · Daten: Open-Meteo.com";el.classList.add("kcAufnahmeWetter")})}'
   + 'new MutationObserver(setzen).observe(stage,{childList:true});setzen()})();</script>';
 
 // Kein Umfrage-Ende mehr: Schlussfolie läuft weiter, kein „Fertig – zur Umfrage“-Knopf.
@@ -357,7 +368,7 @@ const CODE_ERSETZUNGEN = [
     alt: "stueck.textContent=text+'   ·   ';",
     neu: "text.split(/\\s*•\\s*/).forEach(b=>{const t=document.createElement('span');t.textContent=b;stueck.appendChild(t);const p=document.createElement('span');p.className='kcTickerPause';p.textContent='✦';stueck.appendChild(p)});" },
   { name: 'Wetterkacheln mit eigenem Wetter je Tag; durchgehendes Laufband', alt: '</body></html>',
-    neu: KACHEL_WETTER + HINWEIS_RASTER + '<script>window.KC_LAUFSCHRIFT=' + JSON.stringify(['Der Köcheclub Werne begrüßt Sie herzlich auf dem Weihnachtsmarkt 2026', ...LAUFSCHRIFT_THEMEN]).replace(/</g, '\\u003c') + ';</script>' + LAUFBAND + '</body></html>' },
+    neu: KACHEL_WETTER + HINWEIS_RASTER + '<script>window.KC_LAUFSCHRIFT=' + JSON.stringify(['Der Köcheclub Werne begrüßt Sie herzlich auf dem Weihnachtsmarkt 2026', ...LAUFSCHRIFT_THEMEN]).replace(/</g, '\\u003c') + ';</script>' + AUFNAHME + LAUFBAND + '</body></html>' },
   { name: 'Wetter: Ausfall behält letzte Daten',
     alt: "}catch{weather.today={symbol:'🌡️',text:'Wetterdaten derzeit nicht erreichbar'",
     neu: "}catch{if(weather.today&&weather.today.rain)return;weather.today={symbol:'🌡️',text:'Wetterdaten derzeit nicht erreichbar'" },
