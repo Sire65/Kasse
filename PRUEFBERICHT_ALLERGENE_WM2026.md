@@ -67,3 +67,11 @@ Zutaten jetzt wie in den Supabase-Rezepten. Build: Kasse `0.31.3.6-r70-rezepte`,
 Tests: `allergene-weihnachtsmarkt-2026` erweitert (Gegenprobe: ohne Nachtrag rot), `artikelinfo-allergene` angepasst; Gesamtlauf wie zuvor –
 nur die bekannten, schon auf `main` roten Tests (gutschein-teilzahlung, kassen-start-einheit, reklamation-mehrere-artikel, schulungsvideos,
 tv-vorfuehrung-original, verbindungsdiagnose).
+
+## TV-Präsentation am Stand (18.11.2026)
+
+Die Allergen-Hinweise der TV-Präsentation („Version A“, `tools/tv-endversion-bauen.cjs` → `tv-player/weihnachtsmarkt-2026-version-a.html`)
+hatten noch den Stand vor dem zweiten Nachtrag. Jetzt wie Kasse/PC-Manager: Grünkohl Gluten (Hafer), Sellerie, Senf · Spuren Ei, Soja, Milch;
+Sauerkrauteintopf Gluten, Sellerie · Spuren Senf, Ei, Soja, Milch (mit Mettendchen zusätzlich Senf); Heringsstipp zusätzlich Spuren von Sulfiten;
+Konservierungsstoff/Antioxidationsmittel bei Grünkohl, Sauerkraut und Mettendchen. Auf Preisfolien und Laufschrift „Mettendchen“ statt „Mettwurst“.
+Test `fernseher`: 32/32.

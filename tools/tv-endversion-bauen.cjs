@@ -61,15 +61,15 @@ const HINWEISE = {
   ],
   'Preisliste Speisen · Teil 1': [
     'Allergene und Zusatzstoffe · bei Fragen wenden Sie sich gerne an die Standbesetzung',
-    'Grünkohl: Gluten (Hafer) · Spuren von Senf und Sellerie   |   mit Mettwurst: Gluten, Senf · Spuren von Sellerie',
-    'Sauerkrauteintopf: Spuren von Senf und Sellerie   |   mit Mettwurst: Senf · Spuren von Sellerie und Gluten',
+    'Grünkohl: Gluten (Hafer), Sellerie, Senf · Spuren von Ei, Soja, Milch   |   mit Mettendchen: ebenso',
+    'Sauerkrauteintopf: Gluten, Sellerie · Spuren von Senf, Ei, Soja, Milch   |   mit Mettendchen: zusätzlich Senf',
     'Mettendchen: Senf · Spuren von Sellerie',
-    'Mettwurst und Mettendchen: mit Konservierungsstoff und Antioxidationsmittel',
+    'Grünkohl, Sauerkrauteintopf und Mettendchen: mit Konservierungsstoff und Antioxidationsmittel',
   ],
   'Preisliste Speisen · Teil 2': [
     'Allergene und Zusatzstoffe · bei Fragen wenden Sie sich gerne an die Standbesetzung',
     'Kartoffeln mit Kartoffelcreme: Spuren von Milch',
-    'Kartoffeln mit Heringsstipp: Fisch, Ei, Milch, Senf',
+    'Kartoffeln mit Heringsstipp: Fisch, Ei, Milch, Senf · Spuren von Sulfiten',
   ],
 };
 
@@ -99,7 +99,7 @@ const KACHEL_ROLLE = { 'weather-today': 'wetter-today', 'weather-tomorrow': 'wet
 
 // ---- Laufschrift: Themenblöcke mit Überschrift, je Folie wechselnd ----
 const LAUFSCHRIFT_THEMEN = [
-  'Preise Speisen: Grünkohl 5,50 € · Grünkohl mit Mettwurst 7,00 € · Sauerkrauteintopf 5,50 € · Sauerkrauteintopf mit Mettwurst 7,00 € · Mettendchen 1,50 €',
+  'Preise Speisen: Grünkohl 5,50 € · Grünkohl mit Mettendchen 7,00 € · Sauerkrauteintopf 5,50 € · Sauerkrauteintopf mit Mettendchen 7,00 € · Mettendchen 1,50 €',
   'Wetter in Werne: {{weather.today.symbol}} {{weather.today.text}}, {{weather.today.temp}} · Morgen {{weather.tomorrow.symbol}} {{weather.tomorrow.minmax}}',
   'Preise Getränke: Winzerglühwein rot und weiß 3,50 € · Eierlikörpunsch 4,50 € · Feuerzangenbowle 5,00 € · Schuss Rum oder Amaretto 1,00 €',
   'Bei Fragen zu Allergenen und Zusatzstoffen wenden Sie sich gerne an die Standbesetzung',
@@ -363,6 +363,9 @@ function bauen(html, bildDatenUrl, extras = {}) {
     html = html.replace(r.alt, () => r.neu);
     log.push(r.name);
   }
+  // Betreiber 16.11.2026: auf allen Preislisten „Mettendchen“ statt „Mettwurst“ (Artikelnamen der Original-Folien)
+  for (const [alt, neu] of [['Grünkohl a la Köcheclub mit Mettwurst', 'Grünkohl a la Köcheclub mit Mettendchen'],
+    ['Sauerkrauteintopf mit Mettwurst', 'Sauerkrauteintopf mit Mettendchen'], ['Kasslerwürfel, Mettwurst"', 'Kasslerwürfel, Mettendchen"']]) html = html.split(alt).join(neu);
   return { html, log, projekt };
 }
 
