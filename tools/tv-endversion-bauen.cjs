@@ -45,7 +45,7 @@ const MITGLIEDER = {
 const PFAND_GETRAENKE = 'Pfand: 2,00 € je Glas · Feuerzangenbowle zusätzlich 2,00 € für die Feuerzange · Pfand zurück bei Rückgabe am Stand';
 const HINWEISE = {
   'Preisliste Getränke · alkoholisch': [
-    'Allergene und Zusatzstoffe',
+    'Allergene und Zusatzstoffe · bei Fragen wenden Sie sich gerne an die Standbesetzung',
     'Winzerglühwein rot und weiß: Sulfite · mit Konservierungsstoffen (Sulfite, Kaliumsorbat)',
     'Eierlikörpunsch: Ei, Milch, Sulfite · Feuerzangenbowle: Sulfite',
     'Apfelpunsch, Roter Feger: keine deklarationspflichtigen Allergene · Schuss Rum/Amaretto: Auskunft am Stand',
@@ -53,21 +53,21 @@ const HINWEISE = {
     PFAND_GETRAENKE,
   ],
   'Preisliste Getränke · alkoholfrei': [
-    'Allergene und Zusatzstoffe',
+    'Allergene und Zusatzstoffe · bei Fragen wenden Sie sich gerne an die Standbesetzung',
     'Roter Feger: keine deklarationspflichtigen Allergene · mit Säuerungsmittel Citronensäure',
     'Apfelpunsch: keine deklarationspflichtigen Allergene · ohne Farb- und Konservierungsstoffe',
     '',
     PFAND_GETRAENKE,
   ],
   'Preisliste Speisen · Teil 1': [
-    'Allergene und Zusatzstoffe',
+    'Allergene und Zusatzstoffe · bei Fragen wenden Sie sich gerne an die Standbesetzung',
     'Grünkohl: Gluten (Hafer) · Spuren von Senf und Sellerie   |   mit Mettwurst: Gluten, Senf · Spuren von Sellerie',
     'Sauerkrauteintopf: Spuren von Senf und Sellerie   |   mit Mettwurst: Senf · Spuren von Sellerie und Gluten',
     'Mettendchen: Senf · Spuren von Sellerie',
     'Mettwurst und Mettendchen: mit Konservierungsstoff und Antioxidationsmittel',
   ],
   'Preisliste Speisen · Teil 2': [
-    'Allergene und Zusatzstoffe',
+    'Allergene und Zusatzstoffe · bei Fragen wenden Sie sich gerne an die Standbesetzung',
     'Kartoffeln mit Kartoffelcreme: Spuren von Milch',
     'Kartoffeln mit Heringsstipp: Fisch, Ei, Milch, Senf',
   ],
@@ -89,9 +89,30 @@ const ZIER = { 'Grafik 12': { x: 1155, y: 0, w: 71, h: 71 }, 'Grafik 14': { x: 1
 const FOTO = { x: 105, y: 165, w: 450, h: 470 };
 const UNTEN = 655; // Oberkante Laufschrift (665) minus Abstand
 
+// ---- Wetter als Effekt (Betreiber 18.11.2026: „wenn es schneit, soll es auch in einigen Folien schneien“) ----
+const ECHTES_WETTER_FOLIEN = new Set(['Herzlich willkommen', 'Wetter heute und morgen', 'Wetteraussichten', 'Rezept vom Köcheclub',
+  'Unsere Mannschaft', 'Mitmachen · QR-Code', 'Rückblick 2024 - In der Küche']);
+const WETTER_EFFEKTE = new Set(['snow', 'heavy-snow', 'rain', 'storm', 'sun']);
+// Wetterkacheln: welcher Tag gehört zu welcher Kachel
+const KACHEL_ROLLE = { 'weather-today': 'wetter-today', 'weather-tomorrow': 'wetter-tomorrow',
+  'forecast-1': 'wetter-day2', 'forecast-2': 'wetter-day3', 'forecast-3': 'wetter-day4' };
+
+// ---- Laufschrift: Themenblöcke mit Überschrift, je Folie wechselnd ----
+const LAUFSCHRIFT_THEMEN = [
+  'Preise Speisen: Grünkohl 5,50 € · Grünkohl mit Mettwurst 7,00 € · Sauerkrauteintopf 5,50 € · Sauerkrauteintopf mit Mettwurst 7,00 € · Mettendchen 1,50 €',
+  'Wetter in Werne: {{weather.today.symbol}} {{weather.today.text}}, {{weather.today.temp}} · Morgen {{weather.tomorrow.symbol}} {{weather.tomorrow.minmax}}',
+  'Preise Getränke: Winzerglühwein rot und weiß 3,50 € · Eierlikörpunsch 4,50 € · Feuerzangenbowle 5,00 € · Schuss Rum oder Amaretto 1,00 €',
+  'Bei Fragen zu Allergenen und Zusatzstoffen wenden Sie sich gerne an die Standbesetzung',
+  'Preise alkoholfreie Getränke: Roter Feger 2,50 € · Apfelpunsch 2,50 €',
+  'Preise Kartoffelgerichte: Kartoffeln mit Kartoffelcreme 3,50 € · Kartoffeln mit Heringsstipp 4,50 €',
+  'Pfand: 2,00 € je Glas · Feuerzangenbowle zusätzlich 2,00 € für die Feuerzange · Rückgabe am Stand',
+];
+let laufschriftNr = 0;
+
 function setze(item, werte) { Object.assign(item, werte); }
 
 function bearbeite(projekt, log, extras = {}) {
+  laufschriftNr = 0;
   projekt.name = `Köcheclub Werne · Weihnachtsmarkt 2026 · ${VERSION}`;
   for (const folie of projekt.slides) {
     // Hintergrund: neues Rathaus-Bild, Seitenverhältnis bleibt (nicht verzerrt)
@@ -134,9 +155,44 @@ function bearbeite(projekt, log, extras = {}) {
         if (WETTER[folie.name][item.name]) item.text = WETTER[folie.name][item.name];
         if (item.name === 'weather-placeholder-note') item.text = 'Wetter für Werne · wird alle 30 Minuten aktualisiert · Daten: Open-Meteo.com';
       }
-      // feste Sonne/fester Regen passt nicht immer – die eingebaute Wetterszene folgt dem echten Wetter
-      if (folie.effectLayer) folie.effectLayer = { ...folie.effectLayer, type: 'none' };
+      // jede Kachel bekommt das Wetter ihres Tages als Bewegung (Regen, Schnee, Sonne …) – siehe KACHEL_WETTER
+      for (const item of folie.items) if (KACHEL_ROLLE[item.name]) item.originalRole = KACHEL_ROLLE[item.name];
       log.push(`„${folie.name}“: zeigt jetzt das aktuelle Wetter`);
+    }
+
+    // Wettereffekte: nur noch echtes Wetter. Auf einigen Folien folgt der Effekt dem aktuellen Wetter in Werne
+    // (Schnee, Regen, Gewitter; sonst festlicher Glitzer). Fest eingebaute Schnee-/Regen-/Sonnen-Effekte
+    // auf den übrigen Folien werden zu Glitzer – sonst schneit es am Fernseher, während draußen die Sonne scheint.
+    if (folie.effectLayer) {
+      const fx = folie.effectLayer;
+      if (ECHTES_WETTER_FOLIEN.has(folie.name)) {
+        folie.effectLayer = { ...fx, weatherAuto: true, type: 'white-glitter', type2: 'none', type3: 'none', opacity: 85 };
+      } else {
+        for (const k of ['type', 'type2', 'type3']) if (WETTER_EFFEKTE.has(fx[k])) fx[k] = 'white-glitter';
+        fx.weatherAuto = false;
+      }
+    }
+
+    // Rückblick: die Fotos sind vom Weihnachtsmarkt 2025
+    if (/^Rückblick 2024/.test(folie.name)) {
+      folie.name = folie.name.replace('2024', '2025');
+      for (const item of folie.items) if (item.text) item.text = item.text.replace(/2024/g, '2025');
+      log.push(`„${folie.name}“: Jahr 2025`);
+    }
+    // Impressionen ohne Foto vorerst ausblenden (nicht gelöscht)
+    if (/^Impressionen \d/.test(folie.name) && !folie.items.some((i) => i.type === 'image' && i.src && !ZIER[i.name])) {
+      folie.rotation = { ...(folie.rotation || {}), enabled: false };
+      log.push(`„${folie.name}“: ausgeblendet (noch kein Foto)`);
+    }
+
+    // Laufschrift: je Folie andere Themen, jedes mit Überschrift; Blöcke werden mit Abstand getrennt (CODE_ERSETZUNGEN)
+    const laufschrift = folie.items.find((i) => i.type === 'ticker');
+    if (laufschrift) {
+      const n = laufschriftNr++;
+      const bloecke = [0, 1, 2].map((k) => LAUFSCHRIFT_THEMEN[(n + k) % LAUFSCHRIFT_THEMEN.length]);
+      if (folie.id === projekt.slides[0].id) bloecke.unshift('Der Köcheclub Werne begrüßt Sie herzlich auf dem Weihnachtsmarkt 2026');
+      const text = bloecke.join(' • ');
+      setze(laufschrift, { text, tickerOwn: text, tickerWeather: false, tickerProgram: false });
     }
 
     // Spenden-Folien: Inhalt saß 80 px rechts der Mitte, Projektliste linksbündig
@@ -192,7 +248,7 @@ function bearbeite(projekt, log, extras = {}) {
         setze(spruch, { x: 625, y: 290, w: 540, h: 300, font: 34, align: 'center' });
       } else {
         folie.items = folie.items.filter((i) => i !== foto);
-        setze(nameItem, { x: 140, y: 200, w: 1000, h: 90, font: 48, align: 'center' });
+        setze(nameItem, { x: 190, y: 200, w: 900, h: 90, font: 48, align: 'center' }); // so breit wie der Spruch
         setze(spruch, { x: 190, y: 310, w: 900, h: 290, font: 40, align: 'center' });
       }
       folie.memberMeta = { ...folie.memberMeta, anzeige: m.name, mitFoto: !!(m.foto && foto) };
@@ -201,6 +257,30 @@ function bearbeite(projekt, log, extras = {}) {
   }
   return projekt;
 }
+
+// Wetterkacheln: Regen/Schnee/Sonne/Wolken/Gewitter des jeweiligen Tages als Bewegung hinter dem Text.
+// Abstand zwischen den Laufschrift-Blöcken (kcTickerPause).
+const KACHEL_WETTER = '<style>'
+  + '.kcTickerPause{display:inline-block;width:150px;text-align:center;color:#d8b25a}'
+  + '.tvFx.heavy-snow i,.tvFx.rain i,.tvFx.storm i{zoom:1.7}.tvFx.heavy-snow i{opacity:.95}' // echtes Wetter gut sichtbar
+  + '.tvItem[data-original-role^="wetter-"]{isolation:isolate}'
+  + '.kcKw{position:absolute;inset:0;z-index:-1;pointer-events:none;overflow:hidden;border-radius:inherit}'
+  + '.kcKw i{position:absolute;top:-20%;width:2px;height:30px;background:linear-gradient(transparent,#a8e0ff);opacity:.85;animation:kcRegen 1.1s linear infinite}'
+  + '@keyframes kcRegen{to{transform:translate(-30px,560px)}}'
+  + '.kcKw b{position:absolute;top:-12%;color:#fff;font-weight:400;opacity:.9;animation:kcSchnee 7s linear infinite}'
+  + '@keyframes kcSchnee{to{transform:translate(28px,560px) rotate(200deg)}}'
+  + '.kcKw.sun:before{content:"";position:absolute;right:-70px;top:-70px;width:240px;height:240px;border-radius:50%;background:radial-gradient(rgba(255,210,80,.8),rgba(255,210,80,0) 70%);animation:kcSonne 4s ease-in-out infinite alternate}'
+  + '@keyframes kcSonne{to{transform:scale(1.18)}}'
+  + '.kcKw.cloud:before,.kcKw.fog:before{content:"";position:absolute;left:-60%;top:6%;width:90%;height:45%;border-radius:50%;background:radial-gradient(rgba(225,232,242,.5),rgba(225,232,242,0) 70%);animation:kcWolke 14s linear infinite}'
+  + '@keyframes kcWolke{to{transform:translateX(180%)}}'
+  + '.kcKw.storm{background:rgba(10,15,30,.25)}.kcKw.storm:after{content:"";position:absolute;inset:0;background:#fff;opacity:0;animation:kcBlitz 5s infinite}'
+  + '@keyframes kcBlitz{0%,92%,100%{opacity:0}93%{opacity:.5}95%{opacity:0}96%{opacity:.35}}'
+  + '</style><script>(function(){var stage=document.getElementById("tvStage");if(!stage)return;'
+  + 'function teile(k){var h="",n;if(k==="rain"||k==="storm"){for(n=0;n<26;n++)h+=\'<i style="left:\'+(n*37%100)+\'%;animation-delay:\'+(-(n%9)*0.13)+\'s"></i>\'}'
+  + 'else if(k==="snow"){for(n=0;n<18;n++)h+=\'<b style="left:\'+(n*41%100)+\'%;font-size:\'+(14+n%4*5)+\'px;animation-delay:\'+(-(n%7))+\'s">❄</b>\'}return h}'
+  + 'function fuellen(){stage.querySelectorAll(\'.tvItem[data-original-role^="wetter-"]\').forEach(function(el){var tag=el.getAttribute("data-original-role").slice(7),w=window.KC_WETTER&&window.KC_WETTER[tag],k=(w&&w.kind)||"",alt=el.querySelector(".kcKw");'
+  + 'if(alt&&alt.getAttribute("data-k")===k)return;if(alt)alt.remove();if(!k)return;var d=document.createElement("div");d.className="kcKw "+k;d.setAttribute("data-k",k);d.innerHTML=teile(k);el.appendChild(d)})}'
+  + 'new MutationObserver(function(){setTimeout(fuellen,0)}).observe(stage,{childList:true});setInterval(fuellen,5000);fuellen()})();</script>';
 
 // Kein Umfrage-Ende mehr: Schlussfolie läuft weiter, kein „Fertig – zur Umfrage“-Knopf.
 const CODE_ERSETZUNGEN = [
@@ -211,9 +291,31 @@ const CODE_ERSETZUNGEN = [
   { name: 'Wetter: Regenwahrscheinlichkeit abfragen',
     alt: 'daily=weather_code,temperature_2m_max,temperature_2m_min&timezone',
     neu: 'daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max&timezone' },
-  { name: 'Wetter: Regenwahrscheinlichkeit je Tag',
+  { name: 'Wetter: Regenwahrscheinlichkeit und Wetterart je Tag',
     alt: "°C`};weather[n===0?'today'",
-    neu: "°C`,rain:`${Math.round(data.daily.precipitation_probability_max?.[n]??0)} %`};weather[n===0?'today'" },
+    neu: "°C`,rain:`${Math.round(data.daily.precipitation_probability_max?.[n]??0)} %`,kind:kcKachelArt(data.daily.weather_code[n])};weather[n===0?'today'" },
+  { name: 'Wetter: Wetterart für Effekte (mit ?wetter=schnee|regen|gewitter|sonne zum Ausprobieren)',
+    alt: "const weather={ticker:'Wetter für Werne wird geladen …'};",
+    neu: "const weather={ticker:'Wetter für Werne wird geladen …'};window.KC_WETTER=weather;"
+      + "const kcArt=c=>c==null?'':c>=95?'storm':(c>=71&&c<=77)||c===85||c===86?(c===75||c===86?'heavy-snow':'snow'):(c>=51&&c<=67)||(c>=80&&c<=82)?'rain':c<=1?'sun':c<=3?'cloud':'fog';"
+      + "const kcKachelArt=c=>{const a=kcArt(c);return a==='heavy-snow'?'snow':a};"
+      + "const kcTestWetter=({schnee:'snow',regen:'rain',gewitter:'storm',sonne:'sun',wolken:'cloud'})[new URLSearchParams(location.search).get('wetter')]||'';" },
+  { name: 'Wetter: aktuelle Wetterart setzen',
+    alt: 'weather.today.temp=`${Math.round(data.current.temperature_2m)} °C`;',
+    neu: 'weather.today.temp=`${Math.round(data.current.temperature_2m)} °C`;window.KC_WETTER_ART=kcArt(data.current.weather_code);'
+      + "if(kcTestWetter){window.KC_WETTER_ART=kcTestWetter;for(const k of ['today','tomorrow','day2','day3','day4','day5'])if(weather[k])weather[k].kind=kcTestWetter}" },
+  { name: 'Wettereffekt je Folie folgt dem echten Wetter',
+    alt: 'function effect(slide){const fx=slide.effectLayer||{},opacity=(fx.opacity??62)/100;return[fx.type,fx.type2,fx.type3]',
+    neu: "function kcWetterEffekt(){const a=window.KC_WETTER_ART||'';return a==='snow'?'heavy-snow':a==='rain'||a==='storm'||a==='heavy-snow'?a:'white-glitter'}"
+      + 'function effect(slide){const fx=slide.effectLayer||{},opacity=(fx.opacity??62)/100;return(fx.weatherAuto?[kcWetterEffekt()]:[fx.type,fx.type2,fx.type3])' },
+  { name: 'alter Wetterschleier auf allen Folien abgeschaltet',
+    alt: 'new MutationObserver(()=>setTimeout(mount,0)).observe(stage,{childList:true});update();setInterval(update,1800000);',
+    neu: '/* ersetzt durch den Wettereffekt je Folie (weatherAuto) */' },
+  { name: 'Laufschrift minimal langsamer', alt: 'const TEMPO=36;', neu: 'const TEMPO=30;' },
+  { name: 'Laufschrift: Abstand zwischen den Themenblöcken',
+    alt: "stueck.textContent=text+'   ·   ';",
+    neu: "text.split(/\\s*•\\s*/).forEach(b=>{const t=document.createElement('span');t.textContent=b;stueck.appendChild(t);const p=document.createElement('span');p.className='kcTickerPause';p.textContent='✦';stueck.appendChild(p)});" },
+  { name: 'Wetterkacheln mit eigenem Wetter je Tag', alt: '</body></html>', neu: KACHEL_WETTER + '</body></html>' },
   { name: 'Wetter: Ausfall behält letzte Daten',
     alt: "}catch{weather.today={symbol:'🌡️',text:'Wetterdaten derzeit nicht erreichbar'",
     neu: "}catch{if(weather.today&&weather.today.rain)return;weather.today={symbol:'🌡️',text:'Wetterdaten derzeit nicht erreichbar'" },
