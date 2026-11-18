@@ -222,6 +222,8 @@ function bearbeite(projekt, log, extras = {}) {
       const box = { name: 'Allergene und Pfand', type: 'text', text, x: tabelle.x, y, w: tabelle.w, h,
         font: 15, fontFamily: 'Arial', color: '#fff8e8', bg: 'rgba(10,5,4,.80)', align: 'left', bold: false, radius: 12,
         stroke: 'rgba(217,170,58,.55)', strokeWidth: 1, strokeStyle: 'solid', textScaleMode: 'fixed', originalRole: 'allergenHinweis' };
+      // Eierlikörpunsch wie in Kasse/PC-Manager (Betreiber 18.11.2026: Vanillezucker, Sprühsahne, Backkakao als Deko)
+      for (const zeile of zeilen) if (/^Eierlikörpunsch/.test((zeile[0] && zeile[0].text) || '') && zeile[1]) zeile[1].text = 'Weißwein, Eierlikör, Vanillezucker, Sahnehaube mit Kakao';
       // Preise einheitlich mit Komma (Original hatte „1.50“ beim Mettendchen)
       for (const zeile of zeilen) for (const zelle of zeile) if (/^\d+\.\d\d$/.test(zelle.text || '')) zelle.text = zelle.text.replace('.', ',');
       if (alt) setze(alt, box); else folie.items.push({ ...alt, id: `${folie.id}-allergene`, opacity: 100, rotation: 0, ...box });
