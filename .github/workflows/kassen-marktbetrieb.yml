@@ -21,6 +21,7 @@ jobs:
       - run: npx playwright install --with-deps chromium
       - name: Marktbetrieb und Händlerausweise in beiden Kassen
         run: |
+          node tests/dp2-program-publication.test.cjs
           node tests/time-clock-auth-relay.test.cjs
           node tests/time-clock-cloud-queue.test.cjs
           node tests/time-clock-booking-browser.test.cjs
