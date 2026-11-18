@@ -93,7 +93,14 @@
   }
 
   function syncConfig(){return readJson('kcm_sync',{})||{}}
+  // Rezepturen sind in Supabase nur für angemeldete Mitglieder lesbar (RLS kc_manager_memberships).
+  // 18.11.2026: zuerst die Supabase-Anmeldung oben rechts (KCSupabase) nehmen – der alte Teammodus (kcm_sync) schickte
+  // meist nur den öffentlichen Schlüssel mit, dann lieferte Supabase still eine leere Liste.
   function cloudConfig(){
+    const sb=global.KCSupabase;
+    if(sb&&typeof sb.istAngemeldet==='function'&&sb.istAngemeldet()&&sb.konfig?.url&&sb.konfig?.publishableKey){
+      return {url:String(sb.konfig.url).replace(/\/$/,''),key:sb.konfig.publishableKey,token:sb.holeZugriffsToken()};
+    }
     const s=syncConfig();
     if(s.mode!=='online'||s.provider!=='supabase'||!s.url||!s.publicKey)return null;
     return {url:String(s.url).replace(/\/$/,''),key:s.publicKey,token:s.token||s.publicKey};
@@ -145,13 +152,15 @@
     const heads=await cloudFetch(`/rest/v1/kc_manager_recipes?org_id=eq.${encodeURIComponent(ORG_ID)}&active=eq.true&select=*&order=product_code.asc`);
     const lines=await cloudFetch('/rest/v1/kc_manager_recipe_ingredients?select=*&order=recipe_id.asc,line_no.asc');
     if(!Array.isArray(heads))throw new Error('Ungültige Rezeptantwort von Supabase.');
+    // leere Antwort = fehlende Anmeldung/Berechtigung: lokalen Stand NICHT durch eine leere Liste ersetzen
+    if(!heads.length)throw new Error('Supabase hat keine Rezepturen geliefert – bitte oben rechts bei Supabase anmelden (Konto mit Berechtigung für den Köcheclub) und erneut laden. Der lokale Stand bleibt unverändert.');
     recipes=heads.map(row=>dbRecipeToLocal(row,Array.isArray(lines)?lines:[]));
     saveStore();cloudReady=true;
   }
   async function initializeCloud(){
     if(cloudLoading)return;cloudLoading=true;
     try{
-      if(!cloudConfig())return;
+      if(!cloudConfig()){status('Nicht mit Supabase verbunden: bitte oben rechts bei Supabase anmelden, dann „Aus Supabase laden“. Angezeigt wird der lokale Stand.',true);return}
       savePreCloudBackup();
       capturePendingFromLocal();
       const openPending=pendingIds().length;
