@@ -237,7 +237,7 @@ function bearbeite(projekt, log, extras = {}) {
       const alt = folie.items.find((i) => /Allergenen und Zusatzstoffen siehe Aushang/.test(i.text || ''));
       // direkt unter der Tabelle, gleiche Breite und linke Kante wie die Preisliste, unten bündig über der Laufschrift
       const h = hinweisHoehe(hinweis);
-      const y = Math.min(tabelle.y + tabelle.h + 16, UNTEN - h); // gleicher Abstand unter jeder Preisliste
+      const y = UNTEN - h; // unten direkt über der Laufschrift (Betreiber 18.11.2026), nicht direkt unter der Preistabelle
       const box = { name: 'Allergene und Pfand', type: 'text', text, x: tabelle.x, y, w: tabelle.w, h,
         font: 15, fontFamily: 'Arial', color: '#fff8e8', bg: 'rgba(10,5,4,.80)', align: 'left', bold: false, radius: 12,
         stroke: 'rgba(217,170,58,.55)', strokeWidth: 1, strokeStyle: 'solid', textScaleMode: 'fixed', originalRole: 'allergenHinweis' };
@@ -341,10 +341,10 @@ const HINWEIS_RASTER = '<style>.tvItem[data-original-role=allergenHinweis]{displ
   + 'el.textContent.split("\\n").forEach(function(z,n){z=z.trim();if(!z)return;var t=z.split("\\t");if(n===0){var k=document.createElement("div");k.className="k";k.appendChild(e(t[0]));if(t[1])k.appendChild(e(t[1]));g.appendChild(k)}'
   + 'else if(z.indexOf("» ")===0){var f=e(z.slice(2));f.className="f";g.appendChild(f)}else{var a=e(t[0]);a.className="n";g.appendChild(a);g.appendChild(e(t[1]||""))}});'
   + 'el.textContent="";el.appendChild(g);el.setAttribute("data-kc-ah","1");'
-  // an die tatsächliche Unterkante der Preistabelle setzen (gleicher Abstand auf allen Preisfolien), nie in die Laufschrift
+  // unten bündig direkt über der Laufschrift (Betreiber 18.11.2026); reicht der Platz nicht, wird die Preistabelle etwas enger
   + 'var tab=stage.querySelector(".tvItem.table table"),item=tab&&tab.parentNode;if(!item)return;var h=Math.max(el.offsetHeight,g.offsetHeight+18);'
-  + 'if(item.offsetTop+tab.offsetHeight+16+h>' + UNTEN + ')item.classList.add("kcEng");var unten=item.offsetTop+tab.offsetHeight;'
-  + 'el.style.height=h+"px";el.style.top=Math.min(unten+16,' + UNTEN + '-h)+"px"})}'
+  + 'if(item.offsetTop+tab.offsetHeight+16+h>' + UNTEN + ')item.classList.add("kcEng");'
+  + 'el.style.height=h+"px";el.style.top=(' + UNTEN + '-h)+"px"})}'
   + 'new MutationObserver(setzen).observe(stage,{childList:true});setzen()})();</script>';
 
 // Video-Fassung (?aufnahme=1, tools/tv-mp4-aufnehmen.cjs; Betreiber 18.11.2026: „bei MP4 muss der Hinweis rein, dass die
