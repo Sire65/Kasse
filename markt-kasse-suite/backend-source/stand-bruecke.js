@@ -9,6 +9,9 @@
 // Grundsätze: Kassieren hängt nie hiervon ab. Nichts geht verloren (Merkstelle: bis wohin gesendet,
 // welche Aufträge erledigt). Nicht erreichbar -> nachreichen, mit klarer Meldung.
 // Zugang: Stand-ID + Stand-Geheimnis (Datei stand-zugang.json im Datenordner, nie im Repository).
+// KC-KASSE-SPARSAM (18.11.2026, Freigabe Hansi): Takt passt sich an - alle 5 s, solange in der letzten
+// Minute Ereignisse oder Aufträge kamen, sonst alle 30 s (Lebenszeichen bleibt < 60 s, Anzeige zu Hause
+// bleibt grün). Große, sich ständig ändernde Übersichten nur alle 5 Minuten spiegeln.
 'use strict';
 const fs = require('fs');
 const path = require('path');
@@ -16,6 +19,8 @@ const crypto = require('crypto');
 const http = require('http');
 const { meldung, druckeKasten, SCHRITT_BETREUER } = require('./fehlerhilfe');
 
+// [Schlüssel, Pfad am Manager-Dienst, Mindestabstand in ms (ohne Angabe: bei jedem Spiegel-Takt)]
+const FUENF_MINUTEN = 5 * 60 * 1000;
 const SPIEGEL = [
   ['/kassen-verbindungen', '/kassen-verbindungen'],
   ['/sold-out-status-alle', '/sold-out-status-alle'],
@@ -25,9 +30,12 @@ const SPIEGEL = [
   ['/cash-transfer-confirmations', '/cash-transfer-confirmations'],
   ['/bargeld/uebergaben', '/bargeld/uebergaben'],
   ['/bargeld/protokolle', '/bargeld/protokolle'],
-  ['/verbindungsqualitaet', '/verbindungsqualitaet?limit=500'],
+  // Antwortzeiten: ändern sich mit jedem Herzschlag - nur die letzten 100, nur alle 5 Minuten
+  ['/verbindungsqualitaet', '/verbindungsqualitaet?limit=100', FUENF_MINUTEN],
   ['/kassen/startprotokoll', '/kassen/startprotokoll'],
-  ['/live-event-log', '/live-event-log?limit=200'],
+  // Verlauf: der PC-Manager zu Hause liest ihn seit 18.11.2026 aus den Ereignissen (kc_stand_ereignisse).
+  // Nur noch alle 5 Minuten als Rückfall für ältere PC-Manager-Stände.
+  ['/live-event-log', '/live-event-log?limit=200', FUENF_MINUTEN],
 ];
 const AUFTRAG_PFADE = new Set(['/master-data/push', '/dienstplan/push', '/sold-out-status/setzen', '/remote-command/queue',
   '/kassen/kopplung-widerrufen', '/api/v1/cash-transfer/queue', '/api/v1/finance-transfer/queue', '/bargeld/uebergabe', '/bargeld/protokoll',
@@ -60,13 +68,14 @@ function lokal(port, methode, pfad, koerper) {
 }
 
 class StandBruecke {
-  constructor({ manager, datenOrdner, log = console.log, fehlerLog = console.error, livePort = 47392, takt = 5000, spiegelTakt = 30000, version = null } = {}) {
+  constructor({ manager, datenOrdner, log = console.log, fehlerLog = console.error, livePort = 47392, takt = 5000, ruheTakt = 30000, spiegelTakt = 30000, version = null } = {}) {
     this.manager = manager;
     this.datenOrdner = datenOrdner;
     this.log = log;
     this.fehlerLog = fehlerLog;
     this.livePort = livePort;
     this.takt = takt;
+    this.ruheTakt = Math.max(takt, ruheTakt);
     this.spiegelTakt = spiegelTakt;
     this.version = version;
     this.zugangDatei = path.join(datenOrdner, 'stand-zugang.json');
@@ -74,6 +83,8 @@ class StandBruecke {
     this.zustand = { eingerichtet: false, verbunden: null, letzterErfolg: null, letzterVersuch: null, rueckstand: 0, meldung: null, auftraegeErledigt: 0 };
     this._spiegelHash = new Map();
     this._letzterSpiegel = 0;
+    this._spiegelZuletzt = new Map(); // Schlüssel -> Zeit des letzten erfolgreich gesendeten Spiegels
+    this._zuletztAktiv = 0;           // letzte Runde mit neuen Ereignissen oder Aufträgen
     this._stopp = false;
     this._laeuft = false;
   }
@@ -93,7 +104,7 @@ class StandBruecke {
     schreibeAtomar(this.zugangDatei, JSON.stringify({ url, publishableKey, standId, geheimnis, name: String(name || 'Stand').slice(0, 80), eingerichtetAm: new Date().toISOString() }, null, 2));
     // Neuer Stand: alles noch einmal vollständig senden (die Cloud kennt ihn noch nicht).
     schreibeAtomar(this.merkDatei, JSON.stringify({ standId, gesendetBis: 0, erledigt: {} }));
-    this._spiegelHash.clear(); this._letzterSpiegel = 0;
+    this._spiegelHash.clear(); this._spiegelZuletzt.clear(); this._letzterSpiegel = 0; this._zuletztAktiv = Date.now();
     this.log(`[Stand-Brücke] Eingerichtet: Stand „${name}“. Buchungen gehen ab jetzt auch nach Hause (Supabase).`);
     this.start();
     return this.status();
@@ -127,7 +138,7 @@ class StandBruecke {
           this.log(`[Stand-Brücke] Verbindung nach Hause: OK (Stand „${this.zugang ? this.zugang.name : ''}“)${this.zustand.verbunden === false ? ' – alles Nachgereichte ist angekommen.' : ''}`);
         }
         this.zustand.verbunden = true; this.zustand.meldung = null;
-        pause = ergebnis.mehr ? 300 : this.takt;
+        pause = ergebnis.mehr ? 300 : this._naechsterTakt();
       } else {
         const m = this._erklaere(ergebnis.fehler);
         if (this.zustand.verbunden !== false || (this.zustand.meldung && this.zustand.meldung.schluessel !== m.schluessel)) druckeKasten(this.fehlerLog, [m]);
@@ -137,6 +148,9 @@ class StandBruecke {
       await warte(pause);
     }
   }
+
+  // 5 s, solange in der letzten Minute etwas los war (Verkäufe, Aufträge von zu Hause), sonst 30 s.
+  _naechsterTakt() { return Date.now() - this._zuletztAktiv < 60000 ? this.takt : this.ruheTakt; }
 
   _erklaere(e) {
     const status = e && e.status;
@@ -179,7 +193,11 @@ class StandBruecke {
 
   async _spiegelSammeln() {
     const spiegel = {};
-    for (const [schluessel, pfad] of SPIEGEL) {
+    const jetzt = Date.now();
+    for (const [schluessel, pfad, abstand] of SPIEGEL) {
+      if (abstand && jetzt - (this._spiegelZuletzt.get(schluessel) || 0) < abstand) continue;
+      spiegel.__geprueft = spiegel.__geprueft || [];
+      spiegel.__geprueft.push(schluessel);
       const a = await lokal(this.livePort, 'GET', pfad);
       if (a.status !== 200 || !a.json) continue;
       this._nimmInSpiegel(spiegel, schluessel, a.json);
@@ -227,9 +245,11 @@ class StandBruecke {
       this._spiegelSofort = false;
     }
     const hashes = spiegel.__hashes || {}; delete spiegel.__hashes;
+    const geprueft = spiegel.__geprueft || []; delete spiegel.__geprueft;
     const antwort = await this._rpc(z, 'kc_stand_melden', { p_stand: z.standId, p_geheimnis: z.geheimnis, p_ereignisse: ereignisse, p_spiegel: spiegel, p_info: this._info() });
     if (Object.keys(hashes).length || Date.now() - this._letzterSpiegel >= this.spiegelTakt) this._letzterSpiegel = Date.now();
     for (const [k, h] of Object.entries(hashes)) this._spiegelHash.set(k, h);
+    for (const k of geprueft) this._spiegelZuletzt.set(k, Date.now());
     if (zeilen.length) {
       merk.gesendetBis = zeilen[zeilen.length - 1].id;
       this.zustand.rueckstand = Math.max(0, this.zustand.rueckstand - zeilen.length);
@@ -265,6 +285,7 @@ class StandBruecke {
       this.zustand.auftraegeErledigt++;
     }
     if (ausgefuehrt) this._spiegelSofort = true; // Änderungen (z. B. Ausverkauft) sofort zurückspiegeln
+    if (zeilen.length || ((antwort && antwort.auftraege) || []).length) this._zuletztAktiv = Date.now();
     // Merkstelle kurz halten
     const ids = Object.keys(merk.erledigt).map(Number).sort((x, y) => x - y);
     for (const id of ids.slice(0, Math.max(0, ids.length - 300))) delete merk.erledigt[id];

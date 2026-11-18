@@ -5,7 +5,10 @@
 // nicht - dann verlängert diese Datei genau diesen Kanal über Supabase:
 //   lesen   (GET)  -> „Spiegel“, den die Stand-Brücke am Mini-PC laufend hochlädt
 //   senden  (POST) -> „Auftrag“, den der Mini-PC abholt, ausführt und quittiert
-//   Live-Monitor   -> Ereignisse des Stands aus Supabase, alle 4 Sekunden
+//   Live-Monitor   -> Ereignisse des Stands aus Supabase, alle 10 s (Seite verborgen: 60 s)
+// KC-KASSE-SPARSAM (18.11.2026): Spiegel-Antworten je Pfad 25 s zwischengespeichert (gleichzeitige
+// gleiche Anfragen werden zusammengefasst), Standliste alle 60 s, Auftragsrückfrage mit wachsender
+// Pause, Verlauf (/live-event-log) aus den Ereignissen statt aus einem eigenen Spiegel.
 // Alle anderen Teile des PC-Managers bleiben unverändert - sie merken nicht, ob sie am Stand oder
 // zu Hause laufen. Wann der Fernmodus gilt:
 //   • gestartet über KC_Zuhause_Start.cmd (der Webserver meldet „zuhause“), oder
@@ -25,6 +28,10 @@
   const AUFTRAG = ['/master-data/push', '/dienstplan/push', '/sold-out-status/setzen', '/remote-command/queue', '/kassen/kopplung-widerrufen',
     '/api/v1/cash-transfer/queue', '/api/v1/finance-transfer/queue', '/bargeld/uebergabe', '/bargeld/protokoll'];
   const VERALTET_SEK = 120;
+  const SPIEGEL_PUFFER_MS = 25000;            // Spiegel erneuert der Stand höchstens alle 30 s
+  const SOCKET_TAKT_MS = 10000, SOCKET_TAKT_VERBORGEN_MS = 60000, SOCKET_TAKT_MAX_MS = 120000;
+  const STAND_LISTE_MS = 60000;
+  const AUFTRAG_PAUSEN_MS = [1000, 2000, 4000, 8000, 8000, 8000, 8000]; // zusammen 39 s, 7 Rückfragen (vorher 15)
   const echtFetch = global.fetch.bind(global);
   const EchtWebSocket = global.WebSocket;
 
@@ -78,17 +85,51 @@
   }
 
   // ---------- lesen: Spiegel ----------
+  // Zwischenspeicher je Stand+Pfad: { zeit, versprechen }. Der Stand erneuert den Spiegel höchstens
+  // alle 30 s - öfter nachzufragen bringt nichts Neues, kostet aber je Aufruf eine Supabase-Abfrage.
+  const spiegelPuffer = new Map();
+  function spiegelLeeren() { spiegelPuffer.clear(); }
+  async function spiegelHolen(stand, pfad) {
+    const schluessel = stand.standId + ' ' + pfad;
+    const vorhanden = spiegelPuffer.get(schluessel);
+    if (vorhanden && Date.now() - vorhanden.zeit < SPIEGEL_PUFFER_MS) {
+      const r = await vorhanden.versprechen;
+      return { r, zusatzSek: Math.floor((Date.now() - vorhanden.zeit) / 1000) };
+    }
+    const eintrag = { zeit: Date.now(), versprechen: null };
+    eintrag.versprechen = (pfad === '/live-event-log' ? verlaufAusEreignissen(stand) : rpc('kc_stand_spiegel', { p_stand: stand.standId, p_pfad: pfad }))
+      .catch((e) => { if (spiegelPuffer.get(schluessel) === eintrag) spiegelPuffer.delete(schluessel); throw e; });
+    spiegelPuffer.set(schluessel, eintrag);
+    return { r: await eintrag.versprechen, zusatzSek: 0 };
+  }
+  // Verlauf zu Hause: die Ereignisse liegen ohnehin schon in Supabase (kc_stand_ereignisse) - ein eigener
+  // Spiegel von /live-event-log (bis 200 Ereignisse, ändert sich ständig) wäre doppelt. Ältere Stand-Brücken
+  // spiegeln ihn noch: gibt es keine Ereignisse, wird wie bisher der Spiegel gelesen.
+  async function verlaufAusEreignissen(stand) {
+    const kopf = await rpc('kc_stand_ereignisse', { p_stand: stand.standId, p_nach_id: null });
+    const letzte = Number(kopf && kopf.letzteId) || 0;
+    if (letzte > 0) {
+      const r = await rpc('kc_stand_ereignisse', { p_stand: stand.standId, p_nach_id: Math.max(0, letzte - 500), p_limit: 500 });
+      const liste = (r && r.ereignisse) || [];
+      if (liste.length) {
+        const events = liste.slice().reverse().map((e) => ({ type: e.art, receivedAt: e.zeitpunkt, payload: e.payload || {} }));
+        return { vorhanden: true, inhalt: { events }, sekundenAlt: 0, sekundenSeitMeldung: r.sekundenSeitMeldung };
+      }
+    }
+    return rpc('kc_stand_spiegel', { p_stand: stand.standId, p_pfad: '/live-event-log' });
+  }
   async function spiegelLesen(pfad, query) {
     const stand = gewaehlterStand();
-    const r = await rpc('kc_stand_spiegel', { p_stand: stand.standId, p_pfad: pfad });
-    standInfo = { ...(standInfo || {}), sekundenSeitMeldung: r.sekundenSeitMeldung, name: stand.name };
+    const { r, zusatzSek } = await spiegelHolen(stand, pfad);
+    const seitMeldung = r.sekundenSeitMeldung === null || r.sekundenSeitMeldung === undefined ? r.sekundenSeitMeldung : r.sekundenSeitMeldung + zusatzSek;
+    standInfo = { ...(standInfo || {}), sekundenSeitMeldung: seitMeldung, name: stand.name };
     zeichneBanner();
     if (!r.vorhanden) return jsonAntwort(503, { error: 'stand_hat_noch_nichts_gemeldet', hinweis: 'Der Stand hat diese Übersicht noch nicht hochgeladen. Läuft der Mini-PC und ist er als Stand angemeldet?' });
     let inhalt = r.inhalt;
-    const alter = Number(r.sekundenAlt || 0);
+    const alter = Number(r.sekundenAlt || 0) + zusatzSek;
     const q = new URLSearchParams(query || '');
     if (pfad === '/kassen-verbindungen' && inhalt && Array.isArray(inhalt.kassen)) {
-      inhalt = { ...inhalt, fernmodus: { sekundenAlt: alter, sekundenSeitMeldung: r.sekundenSeitMeldung },
+      inhalt = { ...inhalt, fernmodus: { sekundenAlt: alter, sekundenSeitMeldung: seitMeldung },
         kassen: inhalt.kassen.map((k) => {
           const vorSek = k.zuletztGemeldetVorSek === null || k.zuletztGemeldetVorSek === undefined ? null : k.zuletztGemeldetVorSek + alter;
           return { ...k, zuletztGemeldetVorSek: vorSek, zustand: vorSek === null ? 'gekoppelt_ohne_meldung' : vorSek < 90 ? 'aktiv' : 'gekoppelt_still' };
@@ -120,11 +161,13 @@
   async function auftragMitDaten(pfad, daten) {
     const stand = gewaehlterStand();
     const { auftragId } = await rpc('kc_stand_auftrag_anlegen', { p_stand: stand.standId, p_pfad: pfad, p_koerper: daten });
-    for (let i = 0; i < 15; i++) {
-      await new Promise((r) => setTimeout(r, 1000));
+    // Wachsende Pause (1, 2, 4, 8 … s): der Stand meldet sich ohne Neues nur alle 30 s.
+    for (const pause of AUFTRAG_PAUSEN_MS) {
+      await new Promise((r) => setTimeout(r, pause));
       let st = null;
       try { st = await rpc('kc_stand_auftrag', { p_auftrag: auftragId }); } catch (e) { continue; }
       if (st && st.status === 'erledigt') {
+        spiegelLeeren(); // der Stand spiegelt Änderungen gleich danach - nicht 25 s alte Antworten zeigen
         meldeHinweis('success', `Am Stand ausgeführt (${beschreibe(pfad)}).`);
         return jsonAntwort(st.statusCode || 200, st.antwort || {});
       }
@@ -166,20 +209,28 @@
     constructor(url) {
       this.url = url; this.readyState = 0; this.onopen = null; this.onmessage = null; this.onclose = null; this.onerror = null;
       this._hoerer = { open: [], message: [], close: [], error: [] };
-      this._cursor = null; this._aktivitaet = {}; this._aus = false;
+      this._cursor = null; this._aktivitaet = {}; this._aus = false; this._fehler = 0;
       setTimeout(() => this._start(), 0);
     }
     addEventListener(t, f) { (this._hoerer[t] || (this._hoerer[t] = [])).push(f); }
     removeEventListener(t, f) { this._hoerer[t] = (this._hoerer[t] || []).filter((x) => x !== f); }
     _feuer(t, ev) { try { const h = this['on' + t]; if (h) h.call(this, ev); } catch (e) { /* */ } (this._hoerer[t] || []).forEach((f) => { try { f.call(this, ev); } catch (e) { /* */ } }); }
     send() { /* Live-Monitor sendet nichts */ }
-    close() { if (this._aus) return; this._aus = true; this.readyState = 3; clearTimeout(this._t); this._feuer('close', { code: 1000 }); }
+    close() {
+      if (this._aus) return; this._aus = true; this.readyState = 3; clearTimeout(this._t);
+      if (this._sichtbar && global.document && global.document.removeEventListener) global.document.removeEventListener('visibilitychange', this._sichtbar);
+      this._feuer('close', { code: 1000 });
+    }
     async _start() {
       const stand = gewaehlterStand();
       if (!stand || !angemeldet()) { this.readyState = 3; this._feuer('error', {}); this._feuer('close', { code: 1006 }); return; }
       try { this._cursor = (await rpc('kc_stand_ereignisse', { p_stand: stand.standId, p_nach_id: null })).letzteId; }
       catch (e) { this.readyState = 3; this._feuer('error', {}); this._feuer('close', { code: 1006 }); return; }
       this.readyState = 1; this._feuer('open', {});
+      if (global.document && global.document.addEventListener) {
+        this._sichtbar = () => { if (!global.document.hidden) this._sofort(); };
+        global.document.addEventListener('visibilitychange', this._sichtbar);
+      }
       this._takt();
     }
     async _takt() {
@@ -200,11 +251,16 @@
             this._feuer('message', { data: JSON.stringify({ type: 'heartbeat', payload: { registerId: kasse }, receivedAt: zeit }) });
           }
         }
-        letzterFehler = null;
-      } catch (e) { letzterFehler = e.message; }
+        letzterFehler = null; this._fehler = 0;
+      } catch (e) { letzterFehler = e.message; this._fehler++; }
       zeichneBanner();
-      this._t = setTimeout(() => this._takt(), 4000);
+      // Sichtbar alle 10 s, verborgen alle 60 s; bei Fehlern wachsende Pause (höchstens 2 min).
+      const grund = (global.document && global.document.hidden) ? SOCKET_TAKT_VERBORGEN_MS : SOCKET_TAKT_MS;
+      const pause = this._fehler ? Math.min(SOCKET_TAKT_MAX_MS, grund * Math.pow(2, Math.min(this._fehler, 4))) : grund;
+      this._t = setTimeout(() => this._takt(), pause);
     }
+    // Seite wird wieder sichtbar: nicht bis zu 60 s warten
+    _sofort() { if (this._aus || this.readyState !== 1) return; clearTimeout(this._t); this._t = setTimeout(() => this._takt(), 0); }
   }
   global.WebSocket = function (url, protokolle) {
     if (WS_LOKAL.test(String(url)) && modus === 'fern') return new FernSocket(url);
@@ -236,7 +292,7 @@
         } catch (e) { letzterFehler = e.message; }
       } else await standAuswaehlenFallsNoetig();
       zeichneBanner();
-      setTimeout(runde, 15000);
+      setTimeout(runde, STAND_LISTE_MS);
     };
     runde();
   }

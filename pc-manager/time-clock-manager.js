@@ -516,7 +516,7 @@
     if (abrufTakt) return;
     abrufTakt = setInterval(() => {
       const sichtbar = document.querySelector('[data-view-panel="timeclock"]')?.classList.contains('active');
-      if (sichtbar) holeGemeldeteZeiten(false);
+      if (sichtbar && !document.hidden) holeGemeldeteZeiten(false); // KC-KASSE-SPARSAM: nicht bei verborgenem Fenster
     }, 30000);
   }
 
