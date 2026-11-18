@@ -132,24 +132,29 @@ function bearbeite(projekt, log, extras = {}) {
       const foto = folie.items.find((i) => i.originalRole === 'photo');
       const zeile = folie.items.find((i) => i.name === 'group-caption');
       setze(titel, { text: 'Köcheclub Werne' });
-      setze(foto, { type: 'text', name: 'seit 1991', originalRole: 'memberQuote', src: '', text: 'seit 1991 in Werne',
-        x: 190, y: 220, w: 900, h: 230, font: 64, fontFamily: 'Cinzel Decorative', align: 'center', color: '#fff8e8',
+      // Text vom Betreiber (18.11.2026)
+      setze(foto, { type: 'text', name: 'seit 1991', originalRole: 'memberQuote', src: '', text: 'Seit 1991 in Werne\nseit 1995 auf dem Weihnachtsmarkt',
+        x: 190, y: 200, w: 900, h: 250, font: 50, fontFamily: 'Cinzel Decorative', align: 'center', color: '#fff8e8',
         bg: 'rgba(28,58,44,.74)', radius: 18, textScaleMode: 'fit' });
-      setze(zeile, { x: 190, y: 490, w: 900, h: 60, font: 32 });
+      setze(zeile, { x: 190, y: 480, w: 900, h: 70, font: 36, text: 'Gemeinsam kochen, gemeinsam helfen' });
       log.push('Mannschaftsfolie: Gruppenbild entfernt, Text „Köcheclub Werne – seit 1991 in Werne“');
     }
 
     // Rezeptfolie: Foto vom Eierlikörpunsch aus der Kasse (pos/assets/eierpunsch_version_3.png, zugeschnitten
-    // auf media/eierlikoerpunsch-tv.jpg), Rezept rechts daneben
+    // auf media/eierlikoerpunsch-tv.jpg), Rezept rechts daneben.
+    // Seit 18.11.2026 als Freisteller (media/eierlikoerpunsch-freisteller.png, Hintergrund transparent): ohne Rahmen,
+    // der Becher steht direkt vor dem Rathaus-Bild.
     if (folie.name === 'Rezept vom Köcheclub' && extras.eierpunschFoto) {
       const titel = folie.items.find((i) => i.originalRole === 'title');
       const name = folie.items.find((i) => i.name === 'Rezeptname');
       const rezept = folie.items.find((i) => i.name === 'Zubereitung');
       setze(name, { x: 560, y: 175, w: 620, h: 70, text: 'Eierlikörpunsch' });
       setze(rezept, { x: 560, y: 265, w: 620, h: 340 });
+      const frei = !!extras.eierpunschFreisteller;
       folie.items.splice(folie.items.indexOf(titel) + 1, 0, { ...rezept, id: folie.id + '-foto', name: 'Foto Eierlikörpunsch',
-        type: 'image', originalRole: 'image', text: '', src: extras.eierpunschFoto, fit: 'cover', x: 100, y: 165, w: 420, h: 440,
-        radius: 18, bg: 'transparent', stroke: '#d8b25a', strokeWidth: 3, strokeStyle: 'solid' });
+        type: 'image', originalRole: 'image', text: '', src: extras.eierpunschFoto, fit: frei ? 'contain' : 'cover',
+        x: frei ? 70 : 100, y: frei ? 150 : 165, w: frei ? 470 : 420, h: frei ? 480 : 440, bg: 'transparent', shadowEnabled: false,
+        ...(frei ? { radius: 0, stroke: 'transparent', strokeWidth: 0 } : { radius: 18, stroke: '#d8b25a', strokeWidth: 3, strokeStyle: 'solid' }) });
       log.push('Rezeptfolie: Foto vom Eierlikörpunsch aus der Kasse');
     }
 
@@ -440,8 +445,11 @@ if (require.main === module) {
   if (!quelle || !bild || !ziel) { console.error('Aufruf: node tools/tv-endversion-bauen.cjs <index.html> <bild.jpg> <ziel.html>'); process.exit(1); }
   const typ = /\.png$/i.test(bild) ? 'image/png' : /\.webp$/i.test(bild) ? 'image/webp' : 'image/jpeg';
   const daten = `data:${typ};base64,${fs.readFileSync(bild).toString('base64')}`;
+  const freisteller = path.join(__dirname, '..', 'media', 'eierlikoerpunsch-freisteller.png');
   const foto = path.join(__dirname, '..', 'media', 'eierlikoerpunsch-tv.jpg');
-  const extras = fs.existsSync(foto) ? { eierpunschFoto: `data:image/jpeg;base64,${fs.readFileSync(foto).toString('base64')}` } : {};
+  const extras = fs.existsSync(freisteller)
+    ? { eierpunschFoto: `data:image/png;base64,${fs.readFileSync(freisteller).toString('base64')}`, eierpunschFreisteller: true }
+    : fs.existsSync(foto) ? { eierpunschFoto: `data:image/jpeg;base64,${fs.readFileSync(foto).toString('base64')}` } : {};
   const { html, log } = bauen(fs.readFileSync(quelle, 'utf8'), daten, extras);
   fs.writeFileSync(ziel, html);
   log.forEach((z) => console.log('  ' + z));
