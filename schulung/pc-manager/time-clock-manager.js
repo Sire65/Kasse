@@ -1,6 +1,6 @@
 (function (global) {
   'use strict';
-  const VERSION = '0.4.1', CONFIG_KEY = 'kcm_time_clock_config_v1', PEOPLE_KEY = 'kcm_time_clock_people_v1', EVENTS_KEY = 'kcm_time_clock_events_v1';
+  const VERSION = '0.5.0', CONFIG_KEY = 'kcm_time_clock_config_v1', PEOPLE_KEY = 'kcm_time_clock_people_v1', EVENTS_KEY = 'kcm_time_clock_events_v1';
   // Teil B der Dienstzeiten: die Kassen melden ihre Buchungen laufend an den Manager-Dienst
   // (Loopback 47392, /zeiterfassung/melden). Bisher landeten sie dort in der Datenbank und
   // BLIEBEN LIEGEN - diese Seite kannte nur den Weg ueber eine von Hand ausgetauschte Datei.
@@ -486,7 +486,10 @@
       const antwort = await fetch(`http://127.0.0.1:${DIENST_PORT}/zeiterfassung/liste`,
         {signal: AbortSignal.timeout(4000), cache: 'no-store'});
       if (!antwort.ok) throw new Error(`Dienst antwortet mit ${antwort.status}`);
-      const gemeldet = (await antwort.json()).zeiten || [];
+      const gemeldet = ((await antwort.json()).zeiten || []).map(e=>{
+        const matches=people.filter(p=>p.credential&&String(p.credential).toUpperCase()===String(e.credential||'').toUpperCase());
+        return matches.length===1?{...e,sourcePersonId:e.personId,personId:matches[0].id}:e;
+      });
       const zusammen = core.mergeEvents(events, gemeldet);
       events = zusammen.events;
       letzterAbruf = new Date();

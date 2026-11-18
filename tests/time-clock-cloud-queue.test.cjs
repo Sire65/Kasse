@@ -5,7 +5,7 @@ const {TimeClockCloudQueue} = require('../markt-kasse-suite/backend-source/manag
 (async () => {
  const db = new DatabaseSync(':memory:');
  db.exec('CREATE TABLE time_clock_events (event_id TEXT PRIMARY KEY,person_id TEXT,kind TEXT,recorded_at TEXT,effective_at TEXT,register_id TEXT,event_name TEXT,correction_reason TEXT,shift_reason TEXT,voided_at TEXT)');
- db.prepare('INSERT INTO time_clock_events VALUES (?,?,?,?,?,?,?,?,?,?)').run('ZEIT-TEST','P-TEST','in','2026-12-02T09:00:00Z','2026-12-02T09:00:00Z','KASSE-TEST','WM-2026','','',null);
+ db.prepare('INSERT INTO time_clock_events(event_id,person_id,kind,recorded_at,effective_at,register_id,event_name,correction_reason,shift_reason,voided_at) VALUES (?,?,?,?,?,?,?,?,?,?)').run('ZEIT-TEST','P-TEST','in','2026-12-02T09:00:00Z','2026-12-02T09:00:00Z','KASSE-TEST','WM-2026','','',null);
  const persons = [{id:'P-TEST',credential:'KC-TEST'}];
  let fail = true, calls = 0;
  const send = async events => {calls++; await new Promise(r=>setTimeout(r,1));if(fail)throw Error('offline');return {ok:true,contract:'KC_DP_STEMPEL_KASSE_V1',accepted:events.map(e=>e.id)};};
@@ -29,13 +29,13 @@ const {TimeClockCloudQueue} = require('../markt-kasse-suite/backend-source/manag
  queue = new TimeClockCloudQueue({db,send,people:()=>[]});
  assert.equal((await queue.flush()).ok,false,'missing mapping retains booking');
  assert.equal(db.prepare('SELECT count(*) n FROM time_clock_events').get().n,1);
- db.prepare('INSERT INTO time_clock_events VALUES (?,?,?,?,?,?,?,?,?,?)').run('ZEIT-UNBEKANNT','unknown','in','2026-12-02T08:00:00Z','2026-12-02T08:00:00Z','KASSE','WM-2026','','',null);
+ db.prepare('INSERT INTO time_clock_events(event_id,person_id,kind,recorded_at,effective_at,register_id,event_name,correction_reason,shift_reason,voided_at) VALUES (?,?,?,?,?,?,?,?,?,?)').run('ZEIT-UNBEKANNT','unknown','in','2026-12-02T08:00:00Z','2026-12-02T08:00:00Z','KASSE','WM-2026','','',null);
  queue = new TimeClockCloudQueue({db,send,people:()=>persons});
  await queue.flush();
  assert.equal(queue.pending().length,1,'missing member must not block another member');
  db.prepare('DELETE FROM time_clock_events WHERE event_id=?').run('ZEIT-UNBEKANNT');
  db.prepare('UPDATE time_clock_events SET shift_reason=?').run('erneut');
- db.prepare('INSERT INTO time_clock_events VALUES (?,?,?,?,?,?,?,?,?,?)').run('ZEIT-ZENTRAL-UNBEKANNT','P-TEST','in','2026-12-02T08:00:00Z','2026-12-02T08:00:00Z','KASSE','WM-2026','','',null);
+ db.prepare('INSERT INTO time_clock_events(event_id,person_id,kind,recorded_at,effective_at,register_id,event_name,correction_reason,shift_reason,voided_at) VALUES (?,?,?,?,?,?,?,?,?,?)').run('ZEIT-ZENTRAL-UNBEKANNT','P-TEST','in','2026-12-02T08:00:00Z','2026-12-02T08:00:00Z','KASSE','WM-2026','','',null);
  queue=new TimeClockCloudQueue({db,people:()=>persons,send:async events=>{
   if(events[0].id==='ZEIT-ZENTRAL-UNBEKANNT'){const error=Error('Zuordnung prüfen');error.eventRejected=true;throw error;}
   return send(events);
@@ -49,5 +49,22 @@ const {TimeClockCloudQueue} = require('../markt-kasse-suite/backend-source/manag
  queue = new TimeClockCloudQueue({db,send,people:()=>persons,readState:async()=>snapshot});
  await queue.flush();assert.equal(db.prepare('SELECT revision FROM master_data').get().revision,2);
  await queue.flush();assert.equal(db.prepare('SELECT revision FROM master_data').get().revision,2,'unchanged state never forces a master-data refresh');
+ db.prepare('UPDATE time_clock_events SET person_id=?,member_no=?,shift_reason=?').run('old-tablet-id','KC-TEST','nochmal');
+ queue = new TimeClockCloudQueue({db,send,people:()=>persons});
+ assert.equal((await queue.flush()).ok,true,'stable membership number survives a different local person ID');
+ assert.equal(queue.pending().length,0);
+ const fs=require('node:fs');
+ const db2=new DatabaseSync(':memory:');
+ const schema=fs.readFileSync('markt-kasse-suite/backend-source/manager-companion/db.js','utf8').match(/CREATE TABLE IF NOT EXISTS time_clock_events[\s\S]*?\);/)[0];
+ db2.exec(schema);
+ new TimeClockCloudQueue({db:db2,send,people:()=>persons});
+ const source=fs.readFileSync('markt-kasse-suite/backend-source/manager-companion/index.js','utf8');
+ const statements=source.split(String.fromCharCode(96)).filter(s=>s.trim().startsWith('INSERT INTO time_clock_events'));
+ assert.equal(statements.length,2);
+ for(let i=0;i<statements.length;i++){
+  db2.prepare(statements[i]).run('SQL-'+i,'old-tablet','KC-TEST','member','in','2026-12-02T09:00:00Z','2026-12-02T09:00:00Z','KASSE','WM-2026','qr','','',null,'2026-12-02T09:00:00Z');
+ }
+ assert.equal(db2.prepare('SELECT count(*) n FROM time_clock_events WHERE member_no=?').get('KC-TEST').n,2);
+ db2.close();
  db.close();console.log('PASS SQLite-Outbox: offline/restart, concurrent send, exact receipt, void, old server, missing member mapping.');
 })().catch(e=>{console.error(e);process.exitCode=1});

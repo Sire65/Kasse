@@ -25,6 +25,7 @@ const fixture='<!doctype html><meta charset="utf-8"><meta name="viewport" conten
   assert((await page.locator('#tcPosCommit').boundingBox()).height>=44,'booking button must be reachable by finger');
   await page.click('#tcPosCommit');
   assert.equal(await page.evaluate(()=>KCTimeClockPOS.ereignisse().length),1);
+  assert.equal(await page.evaluate(()=>KCTimeClockPOS.ereignisse()[0].credential),'KC-9999');
   await page.reload();await page.click('#timeClockBtn');await page.fill('#tcPosCredential','KNG|TEST|KC-9999');await page.click('#tcPosIdentify');
   assert.match(await page.textContent('#tcPosRichtung'),/geht/);
   await page.click('#tcPosCommit');assert.equal(await page.evaluate(()=>KCTimeClockPOS.ereignisse().length),2);
