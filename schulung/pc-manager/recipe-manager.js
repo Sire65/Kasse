@@ -145,13 +145,15 @@
     const heads=await cloudFetch(`/rest/v1/kc_manager_recipes?org_id=eq.${encodeURIComponent(ORG_ID)}&active=eq.true&select=*&order=product_code.asc`);
     const lines=await cloudFetch('/rest/v1/kc_manager_recipe_ingredients?select=*&order=recipe_id.asc,line_no.asc');
     if(!Array.isArray(heads))throw new Error('Ungültige Rezeptantwort von Supabase.');
+    // leere Antwort = fehlende Anmeldung/Berechtigung: lokalen Stand NICHT durch eine leere Liste ersetzen
+    if(!heads.length)throw new Error('Supabase hat keine Rezepturen geliefert – bitte oben rechts bei Supabase anmelden (Konto mit Berechtigung für den Köcheclub) und erneut laden. Der lokale Stand bleibt unverändert.');
     recipes=heads.map(row=>dbRecipeToLocal(row,Array.isArray(lines)?lines:[]));
     saveStore();cloudReady=true;
   }
   async function initializeCloud(){
     if(cloudLoading)return;cloudLoading=true;
     try{
-      if(!cloudConfig())return;
+      if(!cloudConfig()){status('Nicht mit Supabase verbunden: bitte oben rechts bei Supabase anmelden, dann „Aus Supabase laden“. Angezeigt wird der lokale Stand.',true);return}
       savePreCloudBackup();
       capturePendingFromLocal();
       const openPending=pendingIds().length;

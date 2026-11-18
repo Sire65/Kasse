@@ -12,6 +12,9 @@
   const read=(key,fallback)=>{try{const v=JSON.parse(localStorage.getItem(key)||'null');return v??fallback}catch{return fallback}};
   const write=(key,value)=>localStorage.setItem(key,JSON.stringify(value));
   function config(){
+    const sb=global.KCSupabase; // 18.11.2026: Anmeldung oben rechts zuerst (wie recipe-manager.js)
+    if(sb&&typeof sb.istAngemeldet==='function'&&sb.istAngemeldet()&&sb.konfig?.url&&sb.konfig?.publishableKey)
+      return {url:String(sb.konfig.url).replace(/\/$/,''),key:sb.konfig.publishableKey,token:sb.holeZugriffsToken()};
     const s=read('kcm_sync',{})||{};
     if(s.mode!=='online'||s.provider!=='supabase'||!s.url||!s.publicKey)return null;
     return {url:String(s.url).replace(/\/$/,''),key:s.publicKey,token:s.token||s.publicKey};
