@@ -25,6 +25,36 @@ const http = require('http');
 const { spawn, execFileSync } = require('child_process');
 const os = require('os');
 
+// Ersatz-Wetterdaten: Deutscher Wetterdienst über Bright Sky (api.brightsky.dev), umgesetzt in das Open-Meteo-Format,
+// das die Präsentation liest (current.temperature_2m/weather_code, daily.time/weather_code/temperature_2m_max/min/
+// precipitation_probability_max). Grund: Open-Meteo sperrt Cloud-Adressen häufig mit HTTP 429.
+const WMO = { 'clear-day': 0, 'clear-night': 0, 'partly-cloudy-day': 2, 'partly-cloudy-night': 2, cloudy: 3, wind: 3, fog: 45,
+  rain: 63, sleet: 67, snow: 73, hail: 77, thunderstorm: 95 };
+const RANG = [0, 2, 3, 45, 63, 67, 73, 77, 95]; // was am Tag „gewinnt“
+function brightSkyAlsOpenMeteo(lat, lon, tage = 6, jetzt = new Date()) {
+  const tag = (d) => d.toLocaleDateString('sv-SE', { timeZone: 'Europe/Berlin' });
+  const bis = new Date(jetzt.getTime() + tage * 86400000);
+  const url = `https://api.brightsky.dev/weather?lat=${lat}&lon=${lon}&date=${tag(jetzt)}&last_date=${tag(bis)}&tz=Europe/Berlin`;
+  const daten = JSON.parse(execFileSync('curl', ['-sS', '-m', '30', '--fail', url], { encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] }));
+  const stunden = (daten.weather || []).map((w) => ({ t: new Date(w.timestamp), tag: tag(new Date(w.timestamp)), temp: w.temperature,
+    code: WMO[w.icon] ?? WMO[w.condition] ?? 3, regen: w.precipitation_probability }));
+  if (!stunden.length) throw new Error('Bright Sky lieferte keine Werte');
+  const naechste = stunden.reduce((a, b) => (Math.abs(b.t - jetzt) < Math.abs(a.t - jetzt) ? b : a));
+  const daily = { time: [], weather_code: [], temperature_2m_max: [], temperature_2m_min: [], precipitation_probability_max: [] };
+  for (let n = 0; n < tage; n++) {
+    const t = tag(new Date(jetzt.getTime() + n * 86400000)), h = stunden.filter((x) => x.tag === t);
+    if (!h.length) break;
+    const tags = h.filter((x) => { const s = Number(x.t.toLocaleString('de-DE', { hour: 'numeric', timeZone: 'Europe/Berlin' })); return s >= 8 && s <= 20; });
+    const quelle = tags.length ? tags : h;
+    daily.time.push(t);
+    daily.weather_code.push(quelle.map((x) => x.code).reduce((a, b) => (RANG.indexOf(b) > RANG.indexOf(a) ? b : a), 0));
+    daily.temperature_2m_max.push(Math.max(...h.map((x) => x.temp)));
+    daily.temperature_2m_min.push(Math.min(...h.map((x) => x.temp)));
+    daily.precipitation_probability_max.push(Math.max(0, ...h.map((x) => x.regen ?? 0)));
+  }
+  return { current: { time: naechste.t.toISOString(), temperature_2m: naechste.temp, weather_code: naechste.code }, daily };
+}
+
 // Musik der Präsentation (project.audio, als data:-Adresse in der Datei)
 function musik(html) {
   const anfang = 'window.KC_DESIGNER_MARKET_PRESENTATION=';
@@ -51,17 +81,26 @@ async function aufnehmen({ quelle, ziel, fps = 25, breite = 1920, hoehe = 1080, 
 
   const browser = await chromium.launch({ args: OHNE_NETZ });
   const seite = await browser.newPage({ viewport: { width: breite, height: hoehe } });
-  let wetterGeholt = 0;
+  let wetterGeholt = 0, quelleGenutzt = '';
+  // Ersatzdaten vorab holen (nicht während die Seite lädt)
+  let ersatz = null;
+  try { ersatz = brightSkyAlsOpenMeteo(51.6645, 7.6342); } catch (e) { melden('  Bright Sky nicht erreichbar: ' + String(e.stderr || e.message).trim().split('\n')[0]); }
+  // Quelle im Hinweis der Wetterfolien: Open-Meteo, wenn es antwortet, sonst DWD
+  let omOk = false;
+  try { execFileSync('curl', ['-sS', '-m', '10', '--fail', '-o', '/dev/null', 'https://api.open-meteo.com/v1/forecast?latitude=51.6645&longitude=7.6342&current=weather_code'], { stdio: 'ignore' }); omOk = true; } catch (e) { /* Ersatz */ }
+  await seite.addInitScript((q) => { window.KC_AUFNAHME_QUELLE = q; }, omOk || !ersatz ? 'Open-Meteo.com' : 'Deutscher Wetterdienst (Bright Sky)');
   await seite.route('**/*', async (r) => {
     const url = r.request().url();
     if (url.startsWith(adresse.split('/praesentation.html')[0] + '/')) return r.continue();
     if (url.startsWith('https://api.open-meteo.com/')) {
-      for (let versuch = 1; versuch <= 4; versuch++) {
-        try {
-          const antwort = execFileSync('curl', ['-sS', '-m', '20', '--fail', url], { encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] });
-          wetterGeholt++;
-          return r.fulfill({ status: 200, contentType: 'application/json', headers: { 'Access-Control-Allow-Origin': '*' }, body: antwort });
-        } catch (e) { if (versuch === 4) { melden('  Wetterdaten nicht erreichbar: ' + String(e.stderr || e.message).trim().split('\n')[0]); return r.abort(); } execFileSync('sleep', [String(versuch * 2)]); }
+      try {
+        const antwort = execFileSync('curl', ['-sS', '-m', '10', '--fail', url], { encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] });
+        wetterGeholt++; quelleGenutzt = quelleGenutzt || 'Open-Meteo.com';
+        return r.fulfill({ status: 200, contentType: 'application/json', headers: { 'Access-Control-Allow-Origin': '*' }, body: antwort });
+      } catch (e) {
+        if (!ersatz) { melden('  Open-Meteo nicht erreichbar (' + String(e.stderr || e.message).trim().split('\n')[0] + ') – Ersatz: Deutscher Wetterdienst (Bright Sky)'); return r.abort(); }
+        wetterGeholt++; quelleGenutzt = 'Deutscher Wetterdienst (Bright Sky)';
+        return r.fulfill({ status: 200, contentType: 'application/json', headers: { 'Access-Control-Allow-Origin': '*' }, body: JSON.stringify(ersatz) });
       }
     }
     return r.abort();
@@ -72,10 +111,10 @@ async function aufnehmen({ quelle, ziel, fps = 25, breite = 1920, hoehe = 1080, 
   await seite.clock.pauseAt(beginn + 10);
   await seite.goto(adresse);
   // auf die Wetterdaten warten (echte Zeit, die Seitenuhr steht)
-  for (let n = 0; n < 60 && !(await seite.evaluate(() => window.KC_WETTER_ART !== undefined)); n++) await new Promise((r) => setTimeout(r, 250));
+  for (let n = 0; n < 120 && !(await seite.evaluate(() => window.KC_WETTER_ART !== undefined)); n++) await new Promise((r) => setTimeout(r, 250));
   const wetter = await seite.evaluate(() => ({ art: window.KC_WETTER_ART, stand: window.KC_AUFNAHME_STAND }));
   if (!wetter.art && !process.env.KC_OHNE_WETTER) throw new Error('Keine Wetterdaten – Video nicht erzeugt (mit KC_OHNE_WETTER=1 trotzdem).');
-  melden(`Wetter: ${wetter.art || 'keine Daten'} · Stand ${wetter.stand} (${wetterGeholt} Abfragen)`);
+  melden(`Wetter: ${wetter.art || 'keine Daten'} · Stand ${wetter.stand} · Quelle ${quelleGenutzt || '–'} (${wetterGeholt} Abfragen)`);
   // erste Folie mit Wettereffekt neu zeigen (sie wurde vor dem Eintreffen der Wetterdaten aufgebaut)
   await seite.evaluate(() => { document.getElementById('tvNext').click(); document.getElementById('tvPrev').click(); });
   await seite.clock.runFor(50);
@@ -131,4 +170,4 @@ if (require.main === module) {
     .catch((e) => { console.error('Abbruch:', e.message); process.exit(1); });
 }
 
-module.exports = { aufnehmen, musik, OHNE_NETZ };
+module.exports = { aufnehmen, musik, brightSkyAlsOpenMeteo, OHNE_NETZ };

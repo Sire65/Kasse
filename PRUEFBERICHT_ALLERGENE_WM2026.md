@@ -82,3 +82,20 @@ Betreiber: „150 Gramm“ (vorher in der Notiz „3 EL“). PC-Manager und Schu
 auf Geräten mit altem Stand einmalig (Merkzeichen `kcm_eierpunsch_vanille_v1`); Build `bilder-v15-vanille`. Supabase-Rezept `eier`
 (150 g) war schon so angelegt. Test `allergene-weihnachtsmarkt-2026` um die Notiz erweitert: PASS (frisch und alter Stand, beide
 PC-Manager); die 4 Info-Fenster-Prüfungen der Kasse sind wie auf `main` rot (Start-PIN, siehe oben).
+
+## Dritter Nachtrag: Kartoffel mit Kartoffelcreme (18.11.2026)
+
+Betreiber schickt das Etikett „Kartoffelcreme frisch“ (FEINKOST Popp, 3-kg-Eimer, Art.-Nr. 392858) und nennt die Kartoffeln
+„Peka Garkartoffeln“. Bisher stand nur „Spuren von Milch“ – laut Etikett **enthalten**: Milch (Speisequark, Joghurterzeugnis),
+Ei (Eigelb), Senf (Senfsaaten); Konservierungsstoffe Kaliumsorbat, Natriumbenzoat; Säuerungsmittel, Verdickungsmittel Guarkernmehl.
+Peka Original Garkartoffeln laut Hersteller/Großhandelsdatenblatt: Kartoffeln, Wasser, Salz, Festigungsmittel Calciumchlorid
+(keine Allergene, kein Sulfit).
+
+Einmalig je Gerät (`kc_artikelinfo_wm2026_v3` / `kcm_artikelinfo_wm2026_v3`), Kasse, PC-Manager und beide Schulungsfassungen;
+Nährwerte der Kartoffelcreme je 100 g als Notiz (nicht als Nährwerte des Gerichts). Builds `0.31.3.6-r71-kartoffelcreme`,
+`bilder-v16-kartoffelcreme`; `etiketten/artikel.json` neu (Club-App: „Eier, Milch, Senf“, mit Konservierungsstoff).
+TV-Präsentation: Allergen-Box „Kartoffeln mit Kartoffelcreme: Milch, Ei, Senf · Konservierungsstoffe“.
+Supabase: Rezept `knirpsecreme` (Peka Garkartoffeln, Öl, Gewürze, Kartoffelcreme Popp), Serviette bei allen Speisen,
+Feuerzangenbowle (Glühwein 0,2 l, 3 Würfelzucker, 2 cl Rum 54 %), Schuss Rum/Amaretto 2 cl.
+Tests: `allergene-weihnachtsmarkt-2026` erweitert (Kartoffelcreme in allen vier Fassungen, frisch und alter Stand: PASS;
+die 4 Info-Fenster-Prüfungen wie auf `main` rot – Start-PIN), `fernseher` 36/36.

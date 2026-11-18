@@ -65,7 +65,7 @@ const HINWEISE = {
     ['Mettendchen', 'Senf · Spuren: Sellerie'],
   ], fuss: ['Grünkohl, Sauerkrauteintopf und Mettendchen: mit Konservierungsstoff und Antioxidationsmittel', AUSSER_HAUS] },
   'Preisliste Speisen · Teil 2': { zeilen: [
-    ['Kartoffeln mit Kartoffelcreme', 'Spuren: Milch'],
+    ['Kartoffeln mit Kartoffelcreme', 'Milch, Ei, Senf · Konservierungsstoffe: Kaliumsorbat, Natriumbenzoat'],
     ['Kartoffeln mit Heringsstipp', 'Fisch, Ei, Milch, Senf · Spuren: Sulfite'],
   ], fuss: [AUSSER_HAUS] },
 };
@@ -333,7 +333,7 @@ const AUFNAHME = '<style>.kcAufnahmeWetter{color:#ffd76a!important;font-weight:7
   + 'window.KC_AUFNAHME_STAND=stand;'
   + 'window.KC_LAUFSCHRIFT=(window.KC_LAUFSCHRIFT||[]).map(function(b){return b.indexOf("Wetter in Werne:")===0?b.replace("Wetter in Werne:","Wetter in Werne (Stand "+stand+", nicht ganz aktuell):"):b});'
   + 'var stage=document.getElementById("tvStage");if(!stage)return;function setzen(){stage.querySelectorAll(".tvItem.text").forEach(function(el){if(el.textContent.indexOf("wird alle 30 Minuten aktualisiert")<0)return;'
-  + 'el.textContent="⚠ Wetterdaten vom "+stand+" – im Video nicht ganz aktuell · Daten: Open-Meteo.com";el.classList.add("kcAufnahmeWetter")})}'
+  + 'el.textContent="⚠ Wetterdaten vom "+stand+" – im Video nicht ganz aktuell · Daten: "+(window.KC_AUFNAHME_QUELLE||"Open-Meteo.com");el.classList.add("kcAufnahmeWetter")})}'
   + 'new MutationObserver(setzen).observe(stage,{childList:true});setzen()})();</script>';
 
 // Kein Umfrage-Ende mehr: Schlussfolie läuft weiter, kein „Fertig – zur Umfrage“-Knopf.
