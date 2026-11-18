@@ -104,9 +104,15 @@ function programmLaufzeit(D) {
     tage.forEach(function (iso) {
       var z = el('div', 'kcPtagzeile' + (iso === hd && !AUF ? ' kcPjetzt' : '')), kz = kurz(iso), links = el('div', 'kcPtaglinks');
       links.appendChild(el('b', '', kz.wt)); links.appendChild(el('span', '', kz.dm)); z.appendChild(links);
-      var rechts = el('div', 'kcPtagrechts');
-      punkte(iso).forEach(function (p) { var s = el('span', 'kcPpunkt'); s.appendChild(el('i', '', p.von)); s.appendChild(document.createTextNode(' ' + p.titel)); rechts.appendChild(s); });
-      z.appendChild(rechts); t.appendChild(z);
+      // drei feste Spalten (Betreiber 18.11.2026: „ruhiger – Zeiten untereinander“): links der erste Programmpunkt,
+      // Mitte die weiteren am Tag, rechts das Abendprogramm (ab 18:00). Mehrere Punkte einer Spalte stehen untereinander.
+      var ps = punkte(iso), abend = ps.filter(function (p) { return min(p.von) >= 18 * 60; }), tags = ps.filter(function (p) { return min(p.von) < 18 * 60; });
+      [tags.slice(0, 1), tags.slice(1), abend].forEach(function (liste) {
+        var sp = el('div', 'kcPspalte');
+        liste.forEach(function (p) { var s = el('div', 'kcPpunkt'); s.appendChild(el('i', '', p.von)); s.appendChild(el('span', '', p.titel)); sp.appendChild(s); });
+        z.appendChild(sp);
+      });
+      t.appendChild(z);
     });
     return t;
   }
@@ -142,10 +148,11 @@ const STIL = '<style>'
   + '.kcPfuss{margin-top:8px;text-align:center;color:#f3e9dc;font-size:24px;font-style:italic}'
   + '.kcPleer{margin:auto;color:#fff8e8;font-size:40px;text-align:center}'
   + '.kcPgesamt{padding:16px 26px;gap:8px}'
-  + '.kcPtagzeile{flex:1;display:grid;grid-template-columns:150px 1fr;align-items:center;gap:20px;padding:6px 14px;border-radius:12px;background:rgba(255,248,232,.06)}'
-  + '.kcPtaglinks{display:flex;flex-direction:column;line-height:1.05}.kcPtaglinks b{color:#ffd76a;font-size:34px}.kcPtaglinks span{color:#f3e9dc;font-size:24px}'
-  + '.kcPtagrechts{display:flex;flex-wrap:wrap;column-gap:30px;row-gap:4px;color:#fff8e8;font-size:28px;font-weight:600;line-height:1.2}'
-  + '.kcPpunkt i{font-style:normal;color:#ffd76a;font-variant-numeric:tabular-nums;margin-right:4px}'
+  + '.kcPtagzeile{flex:1;display:grid;grid-template-columns:76px 1.05fr 1.2fr 1fr;align-items:center;column-gap:18px;padding:6px 14px;border-radius:12px;background:rgba(255,248,232,.06)}'
+  + '.kcPtaglinks{display:flex;flex-direction:column;line-height:1.05}.kcPtaglinks b{color:#ffd76a;font-size:32px}.kcPtaglinks span{color:#f3e9dc;font-size:22px}'
+  + '.kcPspalte{display:flex;flex-direction:column;justify-content:center;gap:4px;color:#fff8e8;font-size:24px;font-weight:600;line-height:1.15}'
+  + '.kcPpunkt{display:grid;grid-template-columns:70px 1fr;align-items:baseline}'
+  + '.kcPpunkt i{font-style:normal;color:#ffd76a;font-variant-numeric:tabular-nums}'
   + '</style>';
 
 function laufzeitHtml() {

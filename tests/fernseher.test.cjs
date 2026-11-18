@@ -100,7 +100,8 @@ function nachbauStarter() {
       const namen = mitglieder.filter((s) => s.rotation && s.rotation.enabled !== false).map((s) => (s.items.find((i) => i.originalRole === 'memberName') || {}).text);
       p('A2: ohne Fotos (18.11.2026): Mitglieder nur mit Vornamen, keine Fotos', namen.every((n) => n && !/\s/.test(n.replace('Hans-Joachim', 'X'))) && mitglieder.every((s) => !s.items.some((i) => i.originalRole === 'photo')), namen.join(', '));
       const mannschaft = projekt.slides.find((s) => s.name === 'Unsere Mannschaft');
-      p('A2: Mannschaftsfolie nur Text „seit 1991 in Werne“, kein Gruppenbild', mannschaft && !mannschaft.items.some((i) => i.type === 'image' && i.originalRole === 'photo') && mannschaft.items.some((i) => i.text === 'seit 1991 in Werne'));
+      p('A2: Mannschaftsfolie nur Text „seit 1991 in Werne“, kein Gruppenbild', mannschaft && !mannschaft.items.some((i) => i.type === 'image' && i.originalRole === 'photo') && mannschaft.items.some((i) => i.text === 'Seit 1991 in Werne\nseit 1995 auf dem Weihnachtsmarkt') && mannschaft.items.some((i) => i.text === 'Gemeinsam kochen, gemeinsam helfen'));
+      p('A2: Rezeptfolie: Eierlikörpunsch als Freisteller ohne Rahmen', a.includes('data:image/png;base64,') && (projekt.slides.find((s) => s.name === 'Rezept vom Köcheclub') || { items: [] }).items.some((i) => i.name === 'Foto Eierlikörpunsch' && i.fit === 'contain' && !i.strokeWidth));
       // 18.11.2026: auf allen Folien nur Schnee, Regen oder Sonne (echtes Wetter), keine anderen Effekte; Schlussfolie Feuerwerk
       const schluss = projekt.slides[projekt.slides.length - 1];
       // Wetterfolien mit Kacheln: Wetter nur in den Kacheln, kein Effekt über die ganze Folie
