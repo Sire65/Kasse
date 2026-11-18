@@ -36,6 +36,8 @@ pr('Daten: Ende nach Beginn, keine Überschneidung je Tag', D.PROGRAMM.every((p)
       const { c, p, js } = await seite(`http://127.0.0.1:${PORT}/${pfad}/index.html`, alt ? () => { if (sessionStorage.getItem('x')) return; sessionStorage.setItem('x', '1');
         localStorage.setItem('kcm_settings', JSON.stringify({ clubName: 'Köcheclub Werne', eventProgram: [{ id: 'alt-1', date: '2026-12-05', time: '15:00', title: 'Kindergarten „Kleine Löwen“', active: true }, { id: 'alt-2', date: '2025-12-05', time: '15:00', title: 'Archiv 2025', active: true }] })); } : null);
       const n = `${pfad} ${alt ? 'alter Stand' : 'frisch'}`;
+      // DP2-Übergabe wird als letztes Skript geladen – darauf warten statt feste Zeit
+      await p.waitForFunction(() => !!window.KCDP2ProgramPublication, null, { timeout: 15000 }).catch(() => {});
       const e = await p.evaluate(() => { const l = (settings.eventProgram || []); return { aktiv: l.filter((x) => x.active !== false && x.date >= '2026-12-04' && x.date <= '2026-12-13').length,
         alt1: (l.find((x) => x.id === 'alt-1') || {}).active, alt2: (l.find((x) => x.id === 'alt-2') || {}).active, oe: settings.marketOpeningHours,
         dp2: window.KCDP2ProgramPublication ? window.KCDP2ProgramPublication.normalize(l).length : -1 }; });

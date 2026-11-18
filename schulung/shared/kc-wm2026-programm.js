@@ -4,11 +4,12 @@
  *   - TV-Präsentation neu bauen (tools/tv-endversion-bauen.cjs, tools/tv-version-a-uebernehmen.cjs)
  *   - PC-Manager: Merkzeichen PROGRAMM_STAND erhöhen (dann übernimmt jeder PC-Manager den neuen Stand einmal)
  *   - DP2: im PC-Manager „Für DP2 freigeben“ (Programm → Tagesprogramm)
- * Unsicher abgelesen (kleine Schrift im Rohprogramm): „Querwind in der Kirche“ (13.12.).
+ * 13.12., 17:00–18:30 in der Kirche: Name im Rohprogramm nicht sicher lesbar (6.12. ist das Orgelkonzert) – vorerst neutral
+ *   „Konzert in der Kirche“, genauen Namen mit dem Flyer nachtragen.
  */
 (function (global) {
   'use strict';
-  const PROGRAMM_STAND = '2026-11-18-roh';
+  const PROGRAMM_STAND = '2026-11-18-roh2';
   const OEFFNUNG = [
     { tage: 'Montag – Donnerstag', kurz: 'Mo.–Do.', wochentage: [1, 2, 3, 4], von: '15:00', bis: '21:00' },
     { tage: 'Freitag', kurz: 'Fr.', wochentage: [5], von: '15:00', bis: '22:30' },
@@ -45,7 +46,7 @@
     ['2026-12-12', '20:00', '22:30', 'ReConnected', B],
     ['2026-12-13', '13:00', '14:30', 'Good Vibes', B],
     ['2026-12-13', '15:30', '17:00', 'Felice', B],
-    ['2026-12-13', '17:00', '18:30', 'Querwind in der Kirche', K],
+    ['2026-12-13', '17:00', '18:30', 'Konzert in der Kirche', K],
     ['2026-12-13', '18:30', '20:00', 'Weihnachtsquiz & Wunderkerzenabbrennen', B],
   ];
   const PROGRAMM = ROH.map(([datum, von, bis, titel, ort]) => ({ id: `wm2026-${datum.slice(5).replace('-', '')}-${von.replace(':', '')}`, datum, von, bis, titel, ort }));
