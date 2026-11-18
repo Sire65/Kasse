@@ -262,6 +262,17 @@ function managerDefaultCategoryOrder(){
 // damit sie beim naechsten "Stammdaten senden" an alle Kassen geht. Danach im Manager frei aenderbar.
 {const MERK='kcm_warengruppen_reihenfolge_v1';
  try{if(!localStorage.getItem(MERK)){settings.categoryOrder=managerDefaultCategoryOrder();localStorage.setItem('kcm_settings',JSON.stringify(settings));localStorage.setItem(MERK,'1')}}catch(e){}}
+// 18.11.2026 (Betreiber: Rohprogramm Weihnachtsmarkt 2026 – „Bühnenauftritte und Öffnungszeiten in DP2, Kasse, PC-Manager … eintragen“).
+// Quelle: shared/kc-wm2026-programm.js. Einmalig je Programmstand: Programmpunkte nach settings.eventProgram (Tagesprogramm, TV-Designer,
+// „Für DP2 freigeben“). Ältere aktive Punkte im Marktzeitraum werden NUR ausgeschaltet (nicht gelöscht, im Tagesprogramm wieder einschaltbar).
+{const P=window.KC_WM2026_PROGRAMM;try{if(P&&settings&&!localStorage.getItem('kcm_programm_wm2026_'+P.PROGRAMM_STAND)){
+  if(!Array.isArray(settings.eventProgram))settings.eventProgram=[];const ids=new Set(P.PROGRAMM.map(x=>x.id));
+  settings.eventProgram.forEach(x=>{if(x&&x.date>=P.ZEITRAUM.von&&x.date<=P.ZEITRAUM.bis&&!ids.has(x.id)&&x.active!==false){x.active=false;x.deactivatedBy='Rahmenprogramm '+P.PROGRAMM_STAND}});
+  P.PROGRAMM.forEach(p=>{const neu={id:p.id,date:p.datum,time:p.von,endTime:p.bis,title:p.titel,description:'',place:p.ort,active:true,source:P.quelle};
+    const alt=settings.eventProgram.find(x=>x&&x.id===p.id);if(alt)Object.assign(alt,neu);else settings.eventProgram.push(neu)});
+  settings.eventProgram.sort((a,b)=>String(a.date+a.time).localeCompare(String(b.date+b.time)));
+  settings.marketOpeningHours={period:{...P.ZEITRAUM},hours:P.OEFFNUNG.map(o=>({...o})),source:P.quelle};
+  localStorage.setItem('kcm_settings',JSON.stringify(settings));localStorage.setItem('kcm_programm_wm2026_'+P.PROGRAMM_STAND,'1')}}catch(e){console.warn('Rahmenprogramm 2026 konnte nicht übernommen werden',e)}}
 function managerCategoryOrder(){
   const available=managerDefaultCategoryOrder(),saved=Array.isArray(settings.categoryOrder)?settings.categoryOrder:[];
   return [...saved.filter(key=>available.includes(key)),...available.filter(key=>!saved.includes(key))];
