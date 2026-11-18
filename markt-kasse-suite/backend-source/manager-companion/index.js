@@ -47,6 +47,11 @@ class ManagerCompanion {
     this.bonjour = null;
     this.mdnsService = null;
     this.server = null;
+    const {TimeClockCloudQueue} = require('./time-clock-cloud-queue');
+    this.timeClockCloud = new TimeClockCloudQueue({db:this.db,
+      send:async() => {throw new Error('Bitte den PC-Manager bei Supabase anmelden, damit die Buchungen übertragen werden.');},
+      people:() => {const row=this.db.prepare('SELECT settings_json FROM master_data ORDER BY id LIMIT 1').get();
+        return JSON.parse(row?.settings_json || '{}').zeiterfassung?.people || [];}});
   }
 
   async start(port = 0) {
@@ -109,6 +114,9 @@ class ManagerCompanion {
     } catch (err) {
       console.error('[KC Sync] mDNS-Ankündigung fehlgeschlagen, Manager bleibt trotzdem erreichbar (statische Ausweichadresse nötig):', err.message);
     }
+    this._timeClockCloudTimer = setInterval(() => this.timeClockCloud.flush(), 30000);
+    this._timeClockCloudTimer.unref?.();
+    this.timeClockCloud.flush();
     this._verbindungsPruefTimer = setInterval(() => this._pruefeVerbindungen(), 5000);
     return { port: this.port, managerId: this.identity.managerId, fingerprint: this.identity.fingerprint };
   }
@@ -133,6 +141,8 @@ class ManagerCompanion {
   }
 
   async stop() {
+    clearInterval(this._timeClockCloudTimer);
+    await this.timeClockCloud.stop();
     if (this._verbindungsPruefTimer) clearInterval(this._verbindungsPruefTimer);
     if (this.mdnsService) this.mdnsService.stop();
     if (this.bonjour) this.bonjour.destroy();
@@ -1137,6 +1147,39 @@ class ManagerCompanion {
         })) }));
         return;
       }
+      if (url.pathname === '/zeiterfassung/cloud-senden' && ['POST','OPTIONS'].includes(req.method)) {
+        const local=['127.0.0.1','::1','::ffff:127.0.0.1'].includes(req.socket.remoteAddress || '');
+        const origin=req.headers.origin;
+        let allowedOrigin=!origin || origin==='null';
+        try {const parsed=new URL(origin);allowedOrigin=['http:','https:'].includes(parsed.protocol)&&['127.0.0.1','localhost','[::1]'].includes(parsed.hostname);}catch(_){}
+        if(!local||!allowedOrigin){res.writeHead(403);res.end();return;}
+        if(origin)res.setHeader('Access-Control-Allow-Origin',origin);
+        res.setHeader('Access-Control-Allow-Headers','Authorization, Content-Type');
+        res.setHeader('Access-Control-Allow-Methods','POST, OPTIONS');
+        if(req.method==='OPTIONS'){res.writeHead(204);res.end();return;}
+        const token=String(req.headers.authorization || '').replace(/^Bearer /,'');
+        if(!req.headers.authorization?.startsWith('Bearer ')||!token){res.writeHead(401);res.end();return;}
+        let body='';
+        req.on('data',chunk=>{body+=chunk;if(body.length>8192)req.destroy();});
+        req.on('end',async()=>{
+          try {
+            const input=JSON.parse(body);
+            const {authenticatedClockTransport}=require('./time-clock-auth-relay');
+            const transport=authenticatedClockTransport({token,publishableKey:input.publishableKey});
+            const result=await this.timeClockCloud.flush(transport);
+            res.writeHead(result.ok?200:503,{'Content-Type':'application/json'});
+            res.end(JSON.stringify({...result,...this.timeClockCloud.status()}));
+          }catch(_){res.writeHead(503,{'Content-Type':'application/json'});res.end(JSON.stringify({error:'Zentraler Abgleich derzeit nicht bestätigt.'}));}
+        });
+        return;
+      }
+      if (req.method === 'GET' && url.pathname === '/zeiterfassung/cloud-status') {
+        const addr=req.socket.remoteAddress || '';
+        if (!['127.0.0.1','::1','::ffff:127.0.0.1'].includes(addr)) {res.writeHead(403);res.end();return;}
+        if(req.headers.origin)res.setHeader('Access-Control-Allow-Origin',req.headers.origin);
+        res.writeHead(200, {'Content-Type':'application/json'});
+        res.end(JSON.stringify(this.timeClockCloud.status()));return;
+      }
       if (req.method === 'GET' && url.pathname === '/zeiterfassung/liste') {
         if (req.headers.origin) res.setHeader('Access-Control-Allow-Origin', req.headers.origin);
         const zeilen = this.db.prepare(`
@@ -1556,7 +1599,10 @@ class ManagerCompanion {
       articles: JSON.parse(zeile.articles_json),
       packages: JSON.parse(zeile.packages_json),
       accounts: (() => { try { return JSON.parse(zeile.accounts_json || '[]'); } catch (e) { return []; } })(),
-      settings: (() => { try { return JSON.parse(zeile.settings_json || '{}'); } catch (e) { return {}; } })(),
+      settings: (() => { try { const settings=JSON.parse(zeile.settings_json || '{}');
+        const shared=this.db.prepare('SELECT payload FROM time_clock_shared_state WHERE id=1').get();
+        if(settings.zeiterfassung&&shared)settings.zeiterfassung.sharedState=JSON.parse(shared.payload);
+        return settings; } catch (e) { return {}; } })(),
       revision: zeile.revision,
       updatedAt: zeile.updated_at,
     });

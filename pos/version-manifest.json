@@ -12,5 +12,7 @@
   "haendlerausweisBuildDate": "2026-10-29",
   "betriebsBuild": "0.31.3.6-r68-allergene-marktbetrieb",
   "betriebsBuildDatum": "2026-10-31",
-  "verkaufskurveVersion": "1.1.0"
+  "verkaufskurveVersion": "1.1.0",
+  "timeClockVersion": "stempel-v1",
+  "timeClockBuildDate": "2026-11-18"
 }
