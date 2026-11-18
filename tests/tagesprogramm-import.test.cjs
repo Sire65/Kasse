@@ -65,7 +65,9 @@ p('fehlendes Datum wird zum Prüfen markiert', f3[0] && f3[0].hinweis === 'Datum
       pdfs.scan = path.join(ARBEIT, 'scan.pdf'); await pdfSeite.pdf({ path: pdfs.scan, format: 'A4', printBackground: true });
 
       const ctx = await browser.newContext({ viewport: { width: 1400, height: 900 } });
-      await ctx.addInitScript(() => { localStorage.setItem('kcm_settings', JSON.stringify({ eventProgram: [{ id: 'alt-2024', date: '2024-12-01', time: '10:00', title: 'Programm 2024', active: true }] })); });
+      // Nur der Prospektimport wird geprüft: das eingebaute Rahmenprogramm 2026 (shared/kc-wm2026-programm.js) hier nicht einspielen
+      const stand = require(path.join(__dirname, '..', 'shared', 'kc-wm2026-programm.js')).PROGRAMM_STAND;
+      await ctx.addInitScript((stand) => { localStorage.setItem('kcm_programm_wm2026_' + stand, '1'); localStorage.setItem('kcm_settings', JSON.stringify({ eventProgram: [{ id: 'alt-2024', date: '2024-12-01', time: '10:00', title: 'Programm 2024', active: true }] })); }, stand);
       const pc = await ctx.newPage();
       const fehler = []; pc.on('pageerror', (e) => fehler.push(e.message));
       pc.on('dialog', (d) => d.accept());

@@ -14,13 +14,15 @@
  *   • Mannschaftsfolie nur Text („Köcheclub Werne – seit 1991 in Werne“), kein Gruppenbild
  *   • Mitgliederfolien nur Vorname und gewählter Spruch, kein Foto
  *   Die Fassung mit Fotos (17.11.2026) entsteht weiter mit KC_TV_MIT_FOTOS=1 (Tags mit-fotos-2026-11-17).
- * Öffnungszeiten und Gesamtprogramm bleiben vorerst unverändert (Angaben fehlen noch).
+ * Am 18.11.2026 (Rohprogramm): Öffnungszeiten, „Auf der Bühne“ (heute/morgen) und Bühnenprogramm 2026 (zwei Folien) aus
+ *   shared/kc-wm2026-programm.js – siehe tools/tv-programm-folien.cjs. „Musik vom Band“ wird nicht ausgewiesen.
  *
  * Aufruf: node tools/tv-endversion-bauen.cjs <index.html WM-Pr-s. (Original)> <Hintergrundbild .jpg> <Ziel.html>
  */
 'use strict';
 const fs = require('fs');
 const path = require('path');
+const PROGRAMM = require('./tv-programm-folien.cjs');
 
 const MIT_FOTOS = process.env.KC_TV_MIT_FOTOS === '1';
 const STAND = MIT_FOTOS ? '2026-11-17' : '2026-11-18';
@@ -104,6 +106,9 @@ const LAUFSCHRIFT_THEMEN = [
   'Preise alkoholfreie Getränke: Roter Feger 2,50 € · Apfelpunsch 2,50 €',
   'Preise Kartoffelgerichte: Kartoffeln mit Kartoffelcreme 3,50 € · Kartoffeln mit Heringsstipp 4,50 €',
   'Pfand: 2,00 € je Glas · Feuerzangenbowle zusätzlich 2,00 € für die Feuerzange · Rückgabe am Stand',
+  // 18.11.2026: Programm und Öffnungszeiten (shared/kc-wm2026-programm.js); {{programm.heute}} setzt die Präsentation täglich ein
+  '{{programm.heute}}',
+  'Öffnungszeiten: ' + PROGRAMM.DATEN.OEFFNUNG.map((o) => `${o.kurz} ${o.von}–${o.bis}`).join(' · ') + ' Uhr',
 ];
 let laufschriftNr = 0;
 
@@ -111,6 +116,7 @@ function setze(item, werte) { Object.assign(item, werte); }
 
 function bearbeite(projekt, log, extras = {}) {
   laufschriftNr = 0;
+  PROGRAMM.folienUmbauen(projekt, log);
   projekt.name = `Köcheclub Werne · Weihnachtsmarkt 2026 · ${VERSION}`;
   for (const folie of projekt.slides) {
     // Hintergrund: neues Rathaus-Bild, Seitenverhältnis bleibt (nicht verzerrt)
@@ -295,7 +301,7 @@ const LAUFBAND = '<style>#tvStage .tvItem.ticker{visibility:hidden!important}'
   + '#kcLaufband .tvItem.ticker{visibility:visible!important;font-size:24px!important;justify-content:flex-start!important}</style>'
   + '<script>(function(){var stage=document.getElementById("tvStage");if(!stage)return;'
   + 'var band=document.createElement("div");band.id="kcLaufband";stage.parentNode.appendChild(band);var inhalt="";'
-  + 'function text(){var W=window.KC_WETTER||{};return (window.KC_LAUFSCHRIFT||[]).map(function(b){return b.replace(/\\{\\{\\s*weather\\.(\\w+)\\.(\\w+)\\s*\\}\\}/g,function(_,d,k){return (W[d]&&W[d][k])||"…"})}).join(" • ")}'
+  + 'function text(){var W=window.KC_WETTER||{};return (window.KC_LAUFSCHRIFT||[]).map(function(b){if(b.indexOf("{{programm.heute}}")>=0)return window.KC_PROGRAMM_LAUFSCHRIFT?window.KC_PROGRAMM_LAUFSCHRIFT():"";return b.replace(/\\{\\{\\s*weather\\.(\\w+)\\.(\\w+)\\s*\\}\\}/g,function(_,d,k){return (W[d]&&W[d][k])||"…"})}).filter(Boolean).join(" • ")}'
   + 'function bauen(el,t){var lauf=document.createElement("span");lauf.className="tvTickerLauf";var st=document.createElement("span");st.className="tvTickerStueck";'
   + 't.split(/\\s*•\\s*/).forEach(function(b){var s=document.createElement("span");s.textContent=b;st.appendChild(s);var p=document.createElement("span");p.className="kcTickerPause";p.textContent="✦";st.appendChild(p)});'
   + 'lauf.appendChild(st);el.textContent="";el.appendChild(lauf);var e=st.offsetWidth;if(!e)return;for(var n=0;n<Math.ceil(el.clientWidth/e)+1;n++)lauf.appendChild(st.cloneNode(true));'
@@ -331,7 +337,7 @@ const AUFNAHME = '<style>.kcAufnahmeWetter{color:#ffd76a!important;font-weight:7
   + '<script>(function(){if(!/[?&]aufnahme=1(&|$)/.test(location.search))return;window.KC_AUFNAHME=true;document.documentElement.classList.add("kcAufnahme");'
   + 'var d=new Date(),stand=d.toLocaleDateString("de-DE",{day:"2-digit",month:"2-digit",year:"numeric",timeZone:"Europe/Berlin"})+", "+d.toLocaleTimeString("de-DE",{hour:"2-digit",minute:"2-digit",timeZone:"Europe/Berlin"})+" Uhr";'
   + 'window.KC_AUFNAHME_STAND=stand;'
-  + 'window.KC_LAUFSCHRIFT=(window.KC_LAUFSCHRIFT||[]).map(function(b){return b.indexOf("Wetter in Werne:")===0?b.replace("Wetter in Werne:","Wetter in Werne (Stand "+stand+", nicht ganz aktuell):"):b});'
+  + 'window.KC_LAUFSCHRIFT=(window.KC_LAUFSCHRIFT||[]).filter(function(b){return b.indexOf("{{programm.heute}}")<0}).map(function(b){return b.indexOf("Wetter in Werne:")===0?b.replace("Wetter in Werne:","Wetter in Werne (Stand "+stand+", nicht ganz aktuell):"):b});'
   + 'var stage=document.getElementById("tvStage");if(!stage)return;function setzen(){stage.querySelectorAll(".tvItem.text").forEach(function(el){if(el.textContent.indexOf("wird alle 30 Minuten aktualisiert")<0)return;'
   + 'el.textContent="⚠ Wetterdaten vom "+stand+" – im Video nicht ganz aktuell · Daten: "+(window.KC_AUFNAHME_QUELLE||"Open-Meteo.com");el.classList.add("kcAufnahmeWetter")})}'
   + 'new MutationObserver(setzen).observe(stage,{childList:true});setzen()})();</script>';
@@ -370,7 +376,7 @@ const CODE_ERSETZUNGEN = [
     alt: "stueck.textContent=text+'   ·   ';",
     neu: "text.split(/\\s*•\\s*/).forEach(b=>{const t=document.createElement('span');t.textContent=b;stueck.appendChild(t);const p=document.createElement('span');p.className='kcTickerPause';p.textContent='✦';stueck.appendChild(p)});" },
   { name: 'Wetterkacheln mit eigenem Wetter je Tag; durchgehendes Laufband', alt: '</body></html>',
-    neu: KACHEL_WETTER + HINWEIS_RASTER + '<script>window.KC_LAUFSCHRIFT=' + JSON.stringify(['Der Köcheclub Werne begrüßt Sie herzlich auf dem Weihnachtsmarkt 2026', ...LAUFSCHRIFT_THEMEN]).replace(/</g, '\\u003c') + ';</script>' + AUFNAHME + LAUFBAND + '</body></html>' },
+    neu: KACHEL_WETTER + HINWEIS_RASTER + '<script>window.KC_LAUFSCHRIFT=' + JSON.stringify(['Der Köcheclub Werne begrüßt Sie herzlich auf dem Weihnachtsmarkt 2026', ...LAUFSCHRIFT_THEMEN]).replace(/</g, '\\u003c') + ';</script>' + AUFNAHME + PROGRAMM.laufzeitHtml() + LAUFBAND + '</body></html>' },
   { name: 'Wetter: Ausfall behält letzte Daten',
     alt: "}catch{weather.today={symbol:'🌡️',text:'Wetterdaten derzeit nicht erreichbar'",
     neu: "}catch{if(weather.today&&weather.today.rain)return;weather.today={symbol:'🌡️',text:'Wetterdaten derzeit nicht erreichbar'" },
@@ -391,7 +397,7 @@ function bauen(html, bildDatenUrl, extras = {}) {
   const projekt = JSON.parse(roh.replace(/\bB\[(\d+)\]/g, '"@@B$1@@"'));
   bearbeite(projekt, log, extras);
   const neu = JSON.stringify(projekt).replace(/"@@B(\d+)@@"/g, 'B[$1]');
-  html = html.slice(0, a + anfang.length) + neu + html.slice(e + 1);
+  html = html.slice(0, a + anfang.length) + neu + PROGRAMM.NUR_LIVE_AUSBLENDEN + html.slice(e + 1);
 
   // Nicht mehr benutzte Bilder aus der Bildliste B leeren – sonst stecken entfernte Fotos unsichtbar in der Datei
   {
