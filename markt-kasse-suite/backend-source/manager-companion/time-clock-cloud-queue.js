@@ -5,6 +5,7 @@ const crypto = require('node:crypto');
 class TimeClockCloudQueue {
   constructor({db, send, people, readState = null, onStatus = () => {}}) {
     this.db = db;
+    if(!db.prepare('PRAGMA table_info(time_clock_events)').all().some(c=>c.name==='member_no'))db.exec('ALTER TABLE time_clock_events ADD COLUMN member_no TEXT');
     this.send = send;
     this.people = people;
     this.readState = readState;
@@ -19,7 +20,7 @@ class TimeClockCloudQueue {
     const receipts = new Map(this.db.prepare('SELECT event_id, fingerprint FROM time_clock_cloud_receipts').all().map(r => [r.event_id, r.fingerprint]));
     return this.db.prepare('SELECT * FROM time_clock_events ORDER BY effective_at, event_id').all().map(r => {
       const matches = persons.filter(p => p.id === r.person_id || String(p.credential).toUpperCase() === String(r.person_id).toUpperCase());
-      const credential = matches.length === 1 ? matches[0].credential : null;
+      const credential = r.member_no || (matches.length === 1 ? matches[0].credential : null);
       const event = {id:r.event_id, personId:r.person_id, credential, kind:r.kind, recordedAt:r.recorded_at,
         effectiveAt:r.effective_at, registerId:r.register_id, eventId:r.event_name,
         correctionReason:r.correction_reason, shiftReason:r.shift_reason, voidedAt:r.voided_at};

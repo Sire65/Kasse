@@ -19,7 +19,7 @@
 // unveraendert als recordedAt erhalten, die angepasste Zeit steht daneben als effectiveAt.
 (function (global) {
   'use strict';
-  const VERSION = '0.4.0', CONFIG_KEY = 'kc_time_clock_config_v1', PEOPLE_KEY = 'kc_time_clock_people_v1', EVENTS_KEY = 'kc_time_clock_events_v1';
+  const VERSION = '0.4.1', CONFIG_KEY = 'kc_time_clock_config_v1', PEOPLE_KEY = 'kc_time_clock_people_v1', EVENTS_KEY = 'kc_time_clock_events_v1';
   const core = global.KCTimeClockCore;
   if (!core) return;
   const read = (key, fallback) => { try { return JSON.parse(localStorage.getItem(key) || 'null') ?? fallback; } catch { return fallback; } };
@@ -430,6 +430,7 @@
         correctionReason: korrekturgrund(),
         shiftReason: schichtgrund,
       }, buchungsstand());
+      event.credential=selected.credential;
       const next=[...events,event];
       localStorage.setItem(EVENTS_KEY, JSON.stringify(next));
       events=next;
@@ -479,7 +480,7 @@
       // ueber den Kassen-Companion - der funktioniert auch vom Tablet aus -, ersatzweise der
       // alte, nur-lokale Weg.
       const ergebnisWeg = await global.KCMeldeweg.melde('time_clock', '/zeiterfassung/melden',
-        {registerId: registerId(), ereignisse: offen});
+        {registerId: registerId(), ereignisse: offen.map(e=>({...e,credential:e.credential || people.find(p=>p.id===e.personId)?.credential || ''}))});
       if (!ergebnisWeg.ok) { zeigeOffeneZeiten(); return {gemeldet: 0, offen: offen.length}; }
       // Ueber den Companion bestaetigt die Outbox die Uebernahme aller mitgegebenen Buchungen;
       // der alte Weg meldet einzeln zurueck, was angekommen ist.
