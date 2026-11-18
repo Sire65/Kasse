@@ -49,3 +49,21 @@ PC-Manager `app.js?build=bilder-v12-allergene`. `etiketten/artikel.json` neu erz
 ## Nach dem Einspielen
 
 Im PC-Manager einmal **„An Kassen senden“** (Stammdaten-Abgleich), damit alle Tablets den Stand sofort erhalten.
+
+## Zweiter Nachtrag (18.11.2026)
+
+Betreiber: „Alles muss soweit auf den neuesten Stand gebracht werden, wie Daten bekannt sind.“ Einmalig je Gerät
+(Merkzeichen `kcm_artikelinfo_wm2026_v2` / `kc_artikelinfo_wm2026_v2`), Kasse, PC-Manager und beide Schulungsfassungen.
+
+| Artikel | Allergene | Zusatzstoffe | Quelle |
+|---|---|---|---|
+| Grünkohl (+ Mettwurst) | Gluten, Sellerie, Senf enthalten; Ei, Soja, Milch Spuren | Konservierungsstoff, Antioxidationsmittel (Kassler/Speck, übliche Angabe) | Rezept Supabase, CHEF Gemüsefond, Betreiber („Senf definitiv drin“) |
+| Sauerkraut | Gluten, Sellerie enthalten; Ei, Soja, Milch, Senf Spuren | wie oben | Rezept Supabase, CHEF Gemüsefond |
+| Sauerkraut + Mettwurst | Gluten, Sellerie, Senf enthalten; Ei, Soja, Milch Spuren | wie oben + Mettendchen | wie oben |
+| Kartoffel mit Hering (Heringsstipp) | Fisch, Ei, Milch, Senf enthalten; Sulfite Spuren; Rest nicht enthalten | offen (Etiketten Hering/Mayonnaise/Gurken) | Betreiber-Rezept |
+
+Zutaten jetzt wie in den Supabase-Rezepten. Build: Kasse `0.31.3.6-r70-rezepte`, PC-Manager `bilder-v14-rezepte` (nach Zusammenführung mit dem parallelen Stand „-marktbetrieb“ von main).
+`etiketten/artikel.json` neu erzeugt (Club-App-Preisetiketten).
+Tests: `allergene-weihnachtsmarkt-2026` erweitert (Gegenprobe: ohne Nachtrag rot), `artikelinfo-allergene` angepasst; Gesamtlauf wie zuvor –
+nur die bekannten, schon auf `main` roten Tests (gutschein-teilzahlung, kassen-start-einheit, reklamation-mehrere-artikel, schulungsvideos,
+tv-vorfuehrung-original, verbindungsdiagnose).

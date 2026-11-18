@@ -25,9 +25,13 @@ const pruefe = (n, a) => {
   const g = (id) => (a.find((x) => x.id === id) || {}).info || {};
   const rf = g('roterfeger').allergens || {}, ap = g('apfel').allergens || {}, gk = g('gruenkohl'), gm = (g('gruenkohlmett').allergens || null), h = g('hering').allergens || {}, m = g('mettwurst').allergens || {};
   pr(`${n}: Roter Feger + Apfelpunsch ohne Sulfite (Etikett)`, rf.sulphites === 'not-contained' && ap.sulphites === 'not-contained' && rf.eggs === 'not-contained', JSON.stringify(rf).slice(0, 120));
-  pr(`${n}: Grünkohl Gluten enthalten, Senf/Sellerie Spuren, Haferflocken`, gk.allergens?.gluten === 'contained' && gk.allergens?.mustard === 'traces' && gk.allergens?.celery === 'traces' && /Haferflocken/.test(gk.ingredients || ''), JSON.stringify(gk.allergens).slice(0, 120));
-  if (gm) pr(`${n}: Grünkohl + Mettwurst Gluten und Senf enthalten`, gm.gluten === 'contained' && gm.mustard === 'contained' && gm.celery === 'traces');
+  // 18.11.2026 (zweiter Nachtrag, Rezept + CHEF Gemuesefond): Senf und Sellerie sind im Gruenkohl ENTHALTEN, Schmelzflocken = Hafer
+  pr(`${n}: Grünkohl Gluten, Senf, Sellerie enthalten, Schmelzflocken`, gk.allergens?.gluten === 'contained' && gk.allergens?.mustard === 'contained' && gk.allergens?.celery === 'contained' && /Schmelzflocken/.test(gk.ingredients || ''), JSON.stringify(gk.allergens).slice(0, 120));
+  if (gm) pr(`${n}: Grünkohl + Mettwurst Gluten und Senf enthalten`, gm.gluten === 'contained' && gm.mustard === 'contained' && gm.celery === 'contained');
   pr(`${n}: Heringsstip Fisch, Ei, Milch, Senf`, h.fish === 'contained' && h.eggs === 'contained' && h.milk === 'contained' && h.mustard === 'contained', JSON.stringify(h));
+  pr(`${n}: Heringsstipp-Rezept (Mayonnaise, saure Sahne) und Sulfite als Spur`, h.sulphites === 'traces' && h.gluten === 'not-contained' && /Mayonnaise/.test(g('hering').ingredients || ''));
+  const sk = g('sauerkraut');
+  if (a.some((x) => x.id === 'sauerkraut')) pr(`${n}: Sauerkraut mit Gluten und Sellerie (Gemüsefond), Kassler im Rezept, Zusatzstoffe`, sk.allergens?.gluten === 'contained' && sk.allergens?.celery === 'contained' && sk.allergens?.mustard === 'traces' && /Kassler/.test(sk.ingredients || '') && /Konservierungsstoff/.test(sk.additives || ''));
   pr(`${n}: Mettendchen Senf enthalten, Sellerie Spuren`, m.mustard === 'contained' && m.celery === 'traces', JSON.stringify(m));
   pr(`${n}: Mettendchen mit Konservierungsstoff und Antioxidationsmittel`, /Konservierungsstoff/.test(g('mettwurst').additives || '') && /Antioxidationsmittel/.test(g('mettwurst').additives || ''));
 };

@@ -1,5 +1,5 @@
 {
- "stand": "2026-11-16T18:43:38.935Z",
+ "stand": "2026-11-18T09:00:38.742Z",
  "quelle": "Kasse pos/app.js (PRODUCTS)",
  "artikel": [
   {
@@ -407,9 +407,9 @@
    "warengruppeFarbe": "#8b4a23",
    "kategorie": "Speisen",
    "sortierung": 1,
-   "allergene": "Glutenhaltiges Getreide, Senf, Sellerie (Spuren möglich)",
+   "allergene": "Glutenhaltiges Getreide, Eier (Spuren möglich), Soja (Spuren möglich), Milch (Spuren möglich), Sellerie, Senf",
    "allergeneGeprueft": false,
-   "zusatz": "Konservierungsstoff (Natriumnitrit/Nitritpökelsalz), Antioxidationsmittel (Ascorbat) – übliche Angaben für geräucherte Mettenden, am Etikett prüfen",
+   "zusatz": "Konservierungsstoff, Antioxidationsmittel (Kassler/Bauchspeck/Mettendchen – übliche Angabe, am Etikett prüfen)",
    "alkohol": false,
    "bildAusschnitt": [
     0,
@@ -434,9 +434,9 @@
    "warengruppeFarbe": "#8b4a23",
    "kategorie": "Speisen",
    "sortierung": 2,
-   "allergene": "Glutenhaltiges Getreide, Senf (Spuren möglich), Sellerie (Spuren möglich)",
+   "allergene": "Glutenhaltiges Getreide, Eier (Spuren möglich), Soja (Spuren möglich), Milch (Spuren möglich), Sellerie, Senf",
    "allergeneGeprueft": false,
-   "zusatz": null,
+   "zusatz": "Konservierungsstoff, Antioxidationsmittel (aus Kassler/Bauchspeck – übliche Angabe, am Etikett prüfen)",
    "alkohol": false,
    "bildAusschnitt": [
     0,
@@ -461,9 +461,9 @@
    "warengruppeFarbe": "#8b4a23",
    "kategorie": "Speisen",
    "sortierung": 3,
-   "allergene": "Senf, Sellerie (Spuren möglich), Glutenhaltiges Getreide (Spuren möglich)",
+   "allergene": "Glutenhaltiges Getreide, Eier (Spuren möglich), Soja (Spuren möglich), Milch (Spuren möglich), Sellerie, Senf",
    "allergeneGeprueft": false,
-   "zusatz": "Konservierungsstoff (Natriumnitrit/Nitritpökelsalz), Antioxidationsmittel (Ascorbat) – übliche Angaben für geräucherte Mettenden, am Etikett prüfen",
+   "zusatz": "Konservierungsstoff, Antioxidationsmittel (Kassler/Bauchspeck/Mettendchen – übliche Angabe, am Etikett prüfen)",
    "alkohol": false,
    "bildAusschnitt": [
     0,
@@ -488,9 +488,9 @@
    "warengruppeFarbe": "#8b4a23",
    "kategorie": "Speisen",
    "sortierung": 4,
-   "allergene": "Senf (Spuren möglich), Sellerie (Spuren möglich)",
+   "allergene": "Glutenhaltiges Getreide, Eier (Spuren möglich), Soja (Spuren möglich), Milch (Spuren möglich), Sellerie, Senf (Spuren möglich)",
    "allergeneGeprueft": false,
-   "zusatz": null,
+   "zusatz": "Konservierungsstoff, Antioxidationsmittel (aus Kassler/Bauchspeck – übliche Angabe, am Etikett prüfen)",
    "alkohol": false,
    "bildAusschnitt": [
     0,
@@ -515,7 +515,7 @@
    "warengruppeFarbe": "#8b4a23",
    "kategorie": "Speisen",
    "sortierung": 5,
-   "allergene": "Fisch, Eier, Milch, Senf",
+   "allergene": "Eier, Fisch, Milch, Senf, Schwefeldioxid / Sulfite (Spuren möglich)",
    "allergeneGeprueft": false,
    "zusatz": null,
    "alkohol": false,
