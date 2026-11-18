@@ -40,7 +40,7 @@
       unitCost:raw.unitCost === '' || raw.unitCost == null ? null : Math.max(0,number(raw.unitCost)),
       allergens:Array.isArray(raw.allergens) ? raw.allergens.map(x=>text(x,40)).filter(Boolean) : [],
       publicName:text(raw.publicName || raw.name,160), publicIngredient:raw.publicIngredient !== false,
-      notes:text(raw.notes,300)
+      notes:text(raw.notes,1000)
     };
   }
   function normalizeRecipe(raw={}) {
@@ -98,11 +98,14 @@
     const r=normalizeRecipe(recipe), errors=[],warnings=[];
     if(!r.productId)errors.push('Artikel-ID fehlt.');
     if(!r.name)errors.push('Rezeptname fehlt.');
-    if(!r.outputAmount||!r.portionAmount)errors.push('Fertigmenge und Portionsgröße sind Pflicht.');
+    // 18.11.2026: Ein ENTWURF darf mit offenen Mengen zentral gespeichert werden (Mengen folgen mit den Lieferscheinen) –
+    // sonst blieb jede kleine Änderung nur lokal vorgemerkt. Zur Prüfung/Freigabe bleiben die Mengen Pflicht.
+    const offen=r.status==='draft'?warnings:errors;
+    if(!r.outputAmount||!r.portionAmount)offen.push('Fertigmenge und Portionsgröße sind Pflicht.');
     if(unitFamily(r.outputUnit)==='unknown'||unitFamily(r.portionUnit)==='unknown')errors.push('Unbekannte Fertig- oder Portionseinheit.');
     if(unitFamily(r.outputUnit)!==unitFamily(r.portionUnit))errors.push('Fertigmenge und Portion sind nicht vergleichbar.');
     if(!r.ingredients.length)errors.push('Mindestens eine Zutat ist erforderlich.');
-    r.ingredients.forEach((i,index)=>{if(!i.name)errors.push(`Zutat ${index+1}: Name fehlt.`);if(!i.amount)errors.push(`Zutat ${index+1}: Menge fehlt.`);if(i.family==='unknown')errors.push(`Zutat ${index+1}: Einheit ist unbekannt.`);if(i.lossPercent>50)warnings.push(`${i.name||`Zutat ${index+1}`}: hoher Verlust von ${i.lossPercent} %.`)});
+    r.ingredients.forEach((i,index)=>{if(!i.name)errors.push(`Zutat ${index+1}: Name fehlt.`);if(!i.amount)offen.push(`Zutat ${index+1}: Menge fehlt.`);if(i.family==='unknown')errors.push(`Zutat ${index+1}: Einheit ist unbekannt.`);if(i.lossPercent>50)warnings.push(`${i.name||`Zutat ${index+1}`}: hoher Verlust von ${i.lossPercent} %.`)});
     if(r.status==='approved'&&(!r.source||!r.approvedBy||!r.approvedAt))errors.push('Freigegebene Rezepturen benötigen Quelle, Freigebenden und Datum.');
     return {ok:errors.length===0,errors,warnings,record:r};
   }
