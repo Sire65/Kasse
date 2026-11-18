@@ -109,6 +109,12 @@ function nachbauStarter() {
       const ohneFotoNamen = mitglieder.filter((s) => s.rotation && s.rotation.enabled !== false).map((s) => { const n = s.items.find((i) => i.originalRole === 'memberName'), q = s.items.find((i) => i.originalRole === 'memberQuote'); return n.x === q.x && n.w === q.w; });
       p('A2: Vornamen-Feld genau so breit wie der Spruch', ohneFotoNamen.every(Boolean));
       p('A2: Rückblick heißt 2025, leere Impressionen ausgeblendet', projekt.slides.filter((s) => /^Rückblick/.test(s.name)).every((s) => /2025/.test(s.name) && !s.items.some((i) => /2024/.test(i.text || ''))) && projekt.slides.filter((s) => /^Impressionen \d/.test(s.name)).every((s) => s.rotation.enabled === false));
+      // 18.11.2026: Allergene unter den Preislisten klein und ausgerichtet (Raster Artikel | Angabe), Außer-Haus-Zeile im Fuß
+      const hinweise = projekt.slides.filter((s) => /^Preisliste/.test(s.name)).map((s) => s.items.find((i) => i.originalRole === 'allergenHinweis'));
+      p('A2: Allergen-Hinweise als kleines Raster unter allen 4 Preislisten, keine Außer-Haus-Zeile mehr in den Tabellen, Preise mit Komma',
+        hinweise.length === 4 && hinweise.every((h) => h && h.font <= 15 && /\t/.test(h.text) && h.text.startsWith('Allergene und Zusatzstoffe')) && a.includes('.kcAh{display:grid')
+        && a.includes('item.classList.add("kcEng")') && !projekt.slides.some((s) => (s.items.find((i) => i.type === 'table') || { tableData: [] }).tableData.some((r) => /^Aufpreis außer Haus|^\d+\.\d\d$/.test((r[0] && r[0].text) || '') || r.some((c) => /^\d+\.\d\d$/.test(c.text || ''))))
+        && hinweise.filter((h) => /Außer Haus: Thermobecher/.test(h.text)).length === 2);
       const laufschriften = projekt.slides.map((s) => s.items.find((i) => i.type === 'ticker')).filter(Boolean).map((i) => i.text);
       p('A2: Laufschrift langsamer, Themenblöcke mit Abstand, Preise je Gruppe und Allergen-Hinweis', a.includes('const TEMPO=30;') && a.includes('kcTickerPause') && laufschriften.some((t) => t.startsWith('Preise alkoholfreie Getränke:')) && laufschriften.some((t) => t.includes('wenden Sie sich gerne an die Standbesetzung')) && new Set(laufschriften).size > 5);
       p('A2: durchgehendes Laufband über allen Folien (kein Flackern beim Folienwechsel)', a.includes('band.id="kcLaufband"') && a.includes('#tvStage .tvItem.ticker{visibility:hidden!important}') && a.includes('window.KC_LAUFSCHRIFT=') && a.includes('if(t===inhalt&&band.firstChild)return;'));

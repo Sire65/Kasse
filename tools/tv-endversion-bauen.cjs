@@ -42,36 +42,37 @@ const MITGLIEDER = {
 };
 
 // ---- Allergene und Zusatzstoffe laut Kasse (etiketten/artikel.json, Stand 16.11.2026) ----
+// Allergene/Zusatzstoffe unter den Preislisten (Betreiber 18.11.2026: „kleiner und besser ausgerichtet“):
+// je Zeile [Artikel, Angabe]; „fuss“ steht abgesetzt darunter. Darstellung als kleines Raster (HINWEIS_RASTER).
+const FRAGEN = 'Fragen? Gerne an die Standbesetzung';
 const PFAND_GETRAENKE = 'Pfand: 2,00 € je Glas · Feuerzangenbowle zusätzlich 2,00 € für die Feuerzange · Pfand zurück bei Rückgabe am Stand';
+const AUSSER_HAUS = 'Außer Haus: Thermobecher für Speisen zum Mitnehmen 1,00 €';
 const HINWEISE = {
-  'Preisliste Getränke · alkoholisch': [
-    'Allergene und Zusatzstoffe · bei Fragen wenden Sie sich gerne an die Standbesetzung',
-    'Winzerglühwein rot und weiß: Sulfite · mit Konservierungsstoffen (Sulfite, Kaliumsorbat)',
-    'Eierlikörpunsch: Ei, Milch, Sulfite · Feuerzangenbowle: Sulfite',
-    'Apfelpunsch, Roter Feger: keine deklarationspflichtigen Allergene · Schuss Rum/Amaretto: Auskunft am Stand',
-    '',
-    PFAND_GETRAENKE,
-  ],
-  'Preisliste Getränke · alkoholfrei': [
-    'Allergene und Zusatzstoffe · bei Fragen wenden Sie sich gerne an die Standbesetzung',
-    'Roter Feger: keine deklarationspflichtigen Allergene · mit Säuerungsmittel Citronensäure',
-    'Apfelpunsch: keine deklarationspflichtigen Allergene · ohne Farb- und Konservierungsstoffe',
-    '',
-    PFAND_GETRAENKE,
-  ],
-  'Preisliste Speisen · Teil 1': [
-    'Allergene und Zusatzstoffe · bei Fragen wenden Sie sich gerne an die Standbesetzung',
-    'Grünkohl: Gluten (Hafer), Sellerie, Senf · Spuren von Ei, Soja, Milch   |   mit Mettendchen: ebenso',
-    'Sauerkrauteintopf: Gluten, Sellerie · Spuren von Senf, Ei, Soja, Milch   |   mit Mettendchen: zusätzlich Senf',
-    'Mettendchen: Senf · Spuren von Sellerie',
-    'Grünkohl, Sauerkrauteintopf und Mettendchen: mit Konservierungsstoff und Antioxidationsmittel',
-  ],
-  'Preisliste Speisen · Teil 2': [
-    'Allergene und Zusatzstoffe · bei Fragen wenden Sie sich gerne an die Standbesetzung',
-    'Kartoffeln mit Kartoffelcreme: Spuren von Milch',
-    'Kartoffeln mit Heringsstipp: Fisch, Ei, Milch, Senf · Spuren von Sulfiten',
-  ],
+  'Preisliste Getränke · alkoholisch': { zeilen: [
+    ['Winzerglühwein rot und weiß', 'Sulfite · Konservierungsstoffe: Sulfite, Kaliumsorbat'],
+    ['Eierlikörpunsch', 'Ei, Milch, Sulfite'],
+    ['Feuerzangenbowle', 'Sulfite'],
+    ['Apfelpunsch, Roter Feger', 'keine deklarationspflichtigen Allergene'],
+    ['Schuss Rum oder Amaretto', 'Auskunft am Stand'],
+  ], fuss: [PFAND_GETRAENKE] },
+  'Preisliste Getränke · alkoholfrei': { zeilen: [
+    ['Roter Feger', 'keine deklarationspflichtigen Allergene · mit Säuerungsmittel Citronensäure'],
+    ['Apfelpunsch', 'keine deklarationspflichtigen Allergene · ohne Farb- und Konservierungsstoffe'],
+  ], fuss: [PFAND_GETRAENKE] },
+  'Preisliste Speisen · Teil 1': { zeilen: [
+    ['Grünkohl (auch mit Mettendchen)', 'Gluten (Hafer), Sellerie, Senf · Spuren: Ei, Soja, Milch'],
+    ['Sauerkrauteintopf', 'Gluten, Sellerie · Spuren: Senf, Ei, Soja, Milch · mit Mettendchen zusätzlich Senf'],
+    ['Mettendchen', 'Senf · Spuren: Sellerie'],
+  ], fuss: ['Grünkohl, Sauerkrauteintopf und Mettendchen: mit Konservierungsstoff und Antioxidationsmittel', AUSSER_HAUS] },
+  'Preisliste Speisen · Teil 2': { zeilen: [
+    ['Kartoffeln mit Kartoffelcreme', 'Spuren: Milch'],
+    ['Kartoffeln mit Heringsstipp', 'Fisch, Ei, Milch, Senf · Spuren: Sulfite'],
+  ], fuss: [AUSSER_HAUS] },
 };
+// Text der Hinweisbox: Kopfzeile, dann „Artikel⇥Angabe“, Fußzeilen mit „» “ – das Raster-Skript setzt daraus die Tabelle,
+// ohne Skript bleibt es lesbarer Text.
+const hinweisText = (h) => ['Allergene und Zusatzstoffe\t' + FRAGEN, ...h.zeilen.map((z) => z.join('\t')), ...h.fuss.map((z) => '» ' + z)].join('\n');
+const hinweisHoehe = (h) => 18 + 26 + h.zeilen.length * 21 + (h.fuss.length ? 8 + h.fuss.length * 18 : 0);
 
 // ---- Wetterfolien: Platzhalter der eingebauten Wetterabfrage (siehe CODE_ERSETZUNGEN) ----
 const tag = (t) => `{{weather.${t}.day}}\n{{weather.${t}.symbol}}\n{{weather.${t}.minmax}}\n{{weather.${t}.text}}\n☔ {{weather.${t}.rain}}`;
@@ -205,19 +206,24 @@ function bearbeite(projekt, log, extras = {}) {
     if (HINWEISE[folie.name]) {
       const tabelle = folie.items.find((i) => i.type === 'table');
       const zeilen = tabelle.tableData;
-      const pfandZeile = zeilen.findIndex((r) => /^Alle Preise zzgl\./.test(r[0] && r[0].text || ''));
-      if (pfandZeile > -1) { // steht jetzt vollständig in den Hinweisen
+      // Pfand- und Außer-Haus-Zeile stehen jetzt vollständig in den Hinweisen (Fußzeilen)
+      for (const muster of [/^Alle Preise zzgl\./, /^Aufpreis außer Haus/]) {
+        const z = zeilen.findIndex((r) => muster.test(r[0] && r[0].text || ''));
+        if (z < 0) continue;
         const proZeile = tabelle.h / zeilen.length;
-        zeilen.splice(pfandZeile, 1); tabelle.tableRows = zeilen.length; tabelle.h = Math.round(proZeile * zeilen.length);
+        zeilen.splice(z, 1); tabelle.tableRows = zeilen.length; tabelle.h = Math.round(proZeile * zeilen.length);
       }
-      const text = HINWEISE[folie.name].join('\n');
+      const hinweis = HINWEISE[folie.name];
+      const text = hinweisText(hinweis);
       const alt = folie.items.find((i) => /Allergenen und Zusatzstoffen siehe Aushang/.test(i.text || ''));
-      const zeilenAnzahl = HINWEISE[folie.name].length;
-      const h = Math.min(UNTEN - (tabelle.y + tabelle.h + 12), 20 + zeilenAnzahl * 25);
-      const y = UNTEN - h;
+      // direkt unter der Tabelle, gleiche Breite und linke Kante wie die Preisliste, unten bündig über der Laufschrift
+      const h = hinweisHoehe(hinweis);
+      const y = Math.min(tabelle.y + tabelle.h + 16, UNTEN - h); // gleicher Abstand unter jeder Preisliste
       const box = { name: 'Allergene und Pfand', type: 'text', text, x: tabelle.x, y, w: tabelle.w, h,
-        font: 18, fontFamily: 'Arial', color: '#fff8e8', bg: 'rgba(10,5,4,.78)', align: 'left', bold: false, radius: 14,
-        textScaleMode: 'fixed', originalRole: 'allergenHinweis' };
+        font: 15, fontFamily: 'Arial', color: '#fff8e8', bg: 'rgba(10,5,4,.80)', align: 'left', bold: false, radius: 12,
+        stroke: 'rgba(217,170,58,.55)', strokeWidth: 1, strokeStyle: 'solid', textScaleMode: 'fixed', originalRole: 'allergenHinweis' };
+      // Preise einheitlich mit Komma (Original hatte „1.50“ beim Mettendchen)
+      for (const zeile of zeilen) for (const zelle of zeile) if (/^\d+\.\d\d$/.test(zelle.text || '')) zelle.text = zelle.text.replace('.', ',');
       if (alt) setze(alt, box); else folie.items.push({ ...alt, id: `${folie.id}-allergene`, opacity: 100, rotation: 0, ...box });
       log.push(`Preisliste „${folie.name}“: Allergene/Pfand eingetragen`);
     }
@@ -297,6 +303,26 @@ const LAUFBAND = '<style>#tvStage .tvItem.ticker{visibility:hidden!important}'
   + 'var el=document.createElement("div");el.className="tvItem ticker";el.setAttribute("style",vorlage.getAttribute("style")||"");el.setAttribute("data-tv-ticker-mounted","1");band.innerHTML="";band.appendChild(el);bauen(el,t)}'
   + 'new MutationObserver(function(){setTimeout(abgleich,0)}).observe(stage,{childList:true,attributes:true,attributeFilter:["style"]});addEventListener("resize",function(){setTimeout(abgleich,0)});setInterval(abgleich,60000);abgleich()})();</script>';
 
+// Allergen-Hinweise als kleines, ausgerichtetes Raster (Artikel | Angabe), Fußzeilen abgesetzt
+const HINWEIS_RASTER = '<style>.tvItem[data-original-role=allergenHinweis]{display:block!important;padding:8px 14px!important;white-space:normal!important;line-height:1.3}'
+  + '.kcAh{display:grid;grid-template-columns:max-content 1fr;column-gap:22px;row-gap:2px;font-size:15px}'
+  + '.kcAh .k{grid-column:1/-1;display:flex;justify-content:space-between;color:#e9c46a;font-weight:700;font-size:13px;letter-spacing:.08em;text-transform:uppercase;border-bottom:1px solid rgba(217,170,58,.45);padding-bottom:3px;margin-bottom:4px}'
+  + '.kcAh .k span:last-child{text-transform:none;letter-spacing:0;font-weight:400;font-style:italic;color:#f3e9dc}'
+  + '.kcAh .n{color:#ffd76a;font-weight:700}.kcAh .f{grid-column:1/-1;font-size:13px;color:#f3e9dc;border-top:1px solid rgba(217,170,58,.3);margin-top:4px;padding-top:3px}'
+  + '.kcAh .f+.f{border-top:0;margin-top:0;padding-top:0}'
+  // passt die Box nicht unter die Preisliste, wird nur diese Tabelle etwas enger (Beschreibung kleiner, weniger Innenabstand)
+  + '.tvItem.kcEng th,.tvItem.kcEng td{padding:2px 12px!important}.tvItem.kcEng tr:not(:first-child)>td:nth-child(2):nth-last-child(2){font-size:16px!important;line-height:1.08}</style>'
+  + '<script>(function(){var stage=document.getElementById("tvStage");if(!stage)return;function e(t){var d=document.createElement("span");d.textContent=t;return d}'
+  + 'function setzen(){stage.querySelectorAll(\'.tvItem[data-original-role=allergenHinweis]:not([data-kc-ah])\').forEach(function(el){var g=document.createElement("div");g.className="kcAh";'
+  + 'el.textContent.split("\\n").forEach(function(z,n){z=z.trim();if(!z)return;var t=z.split("\\t");if(n===0){var k=document.createElement("div");k.className="k";k.appendChild(e(t[0]));if(t[1])k.appendChild(e(t[1]));g.appendChild(k)}'
+  + 'else if(z.indexOf("» ")===0){var f=e(z.slice(2));f.className="f";g.appendChild(f)}else{var a=e(t[0]);a.className="n";g.appendChild(a);g.appendChild(e(t[1]||""))}});'
+  + 'el.textContent="";el.appendChild(g);el.setAttribute("data-kc-ah","1");'
+  // an die tatsächliche Unterkante der Preistabelle setzen (gleicher Abstand auf allen Preisfolien), nie in die Laufschrift
+  + 'var tab=stage.querySelector(".tvItem.table table"),item=tab&&tab.parentNode;if(!item)return;var h=Math.max(el.offsetHeight,g.offsetHeight+18);'
+  + 'if(item.offsetTop+tab.offsetHeight+16+h>' + UNTEN + ')item.classList.add("kcEng");var unten=item.offsetTop+tab.offsetHeight;'
+  + 'el.style.height=h+"px";el.style.top=Math.min(unten+16,' + UNTEN + '-h)+"px"})}'
+  + 'new MutationObserver(setzen).observe(stage,{childList:true});setzen()})();</script>';
+
 // Kein Umfrage-Ende mehr: Schlussfolie läuft weiter, kein „Fertig – zur Umfrage“-Knopf.
 const CODE_ERSETZUNGEN = [
   { name: 'Schlussfolie hält nicht mehr an', alt: 'if(isLast&&playing)tvTogglePause();', neu: '' },
@@ -331,7 +357,7 @@ const CODE_ERSETZUNGEN = [
     alt: "stueck.textContent=text+'   ·   ';",
     neu: "text.split(/\\s*•\\s*/).forEach(b=>{const t=document.createElement('span');t.textContent=b;stueck.appendChild(t);const p=document.createElement('span');p.className='kcTickerPause';p.textContent='✦';stueck.appendChild(p)});" },
   { name: 'Wetterkacheln mit eigenem Wetter je Tag; durchgehendes Laufband', alt: '</body></html>',
-    neu: KACHEL_WETTER + '<script>window.KC_LAUFSCHRIFT=' + JSON.stringify(['Der Köcheclub Werne begrüßt Sie herzlich auf dem Weihnachtsmarkt 2026', ...LAUFSCHRIFT_THEMEN]).replace(/</g, '\\u003c') + ';</script>' + LAUFBAND + '</body></html>' },
+    neu: KACHEL_WETTER + HINWEIS_RASTER + '<script>window.KC_LAUFSCHRIFT=' + JSON.stringify(['Der Köcheclub Werne begrüßt Sie herzlich auf dem Weihnachtsmarkt 2026', ...LAUFSCHRIFT_THEMEN]).replace(/</g, '\\u003c') + ';</script>' + LAUFBAND + '</body></html>' },
   { name: 'Wetter: Ausfall behält letzte Daten',
     alt: "}catch{weather.today={symbol:'🌡️',text:'Wetterdaten derzeit nicht erreichbar'",
     neu: "}catch{if(weather.today&&weather.today.rain)return;weather.today={symbol:'🌡️',text:'Wetterdaten derzeit nicht erreichbar'" },
