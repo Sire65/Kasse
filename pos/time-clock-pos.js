@@ -19,7 +19,7 @@
 // unveraendert als recordedAt erhalten, die angepasste Zeit steht daneben als effectiveAt.
 (function (global) {
   'use strict';
-  const VERSION = '0.3.0', CONFIG_KEY = 'kc_time_clock_config_v1', PEOPLE_KEY = 'kc_time_clock_people_v1', EVENTS_KEY = 'kc_time_clock_events_v1';
+  const VERSION = '0.4.0', CONFIG_KEY = 'kc_time_clock_config_v1', PEOPLE_KEY = 'kc_time_clock_people_v1', EVENTS_KEY = 'kc_time_clock_events_v1';
   const core = global.KCTimeClockCore;
   if (!core) return;
   const read = (key, fallback) => { try { return JSON.parse(localStorage.getItem(key) || 'null') ?? fallback; } catch { return fallback; } };
@@ -375,7 +375,7 @@
     if (!result.ok) return message(kngMemberNo ? `Ausweis erkannt (${kngMemberNo}), aber keine passende Person hinterlegt.` : result.message, 'warn');
 
     selected = result.person;
-    const zustand = core.currentState(events, selected.id);
+    const zustand = core.currentState(buchungsstand(), selected.id);
     erfasstAm = new Date();
     /* BEFUND 31.08.2026: hier stand als Vorschlag die auf die volle halbe Stunde
        GERUNDETE Zeit. Wer um 10:50 gescannt hat, bekam "KOMMEN um 11:00 buchen"
@@ -411,6 +411,14 @@
     } catch (e) { return null; }
   }
 
+  function buchungsstand() {
+    const shared=config.sharedState || [];
+    const remote=shared.filter(e=>e.member_no===selected?.credential &&
+      String(e.event_id).replace(/^KC-/, '')===String(config.eventId).replace(/^KC-/, ''))
+      .map(e=>({id:'REMOTE-'+e.id,personId:selected.id,kind:e.art,effectiveAt:e.zeit,
+        recordedAt:e.erfasst_am,source:e.quelle}));
+    return [...remote,...events].sort((a,b)=>new Date(a.effectiveAt)-new Date(b.effectiveAt)||new Date(a.recordedAt)-new Date(b.recordedAt));
+  }
   function commit() {
     try {
       if (!selected) throw new Error('Bitte zuerst den Ausweis scannen.');
@@ -421,8 +429,10 @@
         registerId: registerId(), eventId: config.eventId, source,
         correctionReason: korrekturgrund(),
         shiftReason: schichtgrund,
-      }, events);
-      events.push(event); save();
+      }, buchungsstand());
+      const next=[...events,event];
+      localStorage.setItem(EVENTS_KEY, JSON.stringify(next));
+      events=next;
       zeigeOffeneZeiten();   // sofort auffrischen - auch wenn die Meldung gleich fehlschlaegt
       meldeZeiten();         // sofort melden; schlaegt es fehl, holt es der Zeittakt nach
       const pseudonym = anzeigenameFuer(selected);
@@ -512,7 +522,7 @@
       const alt = p.credential && people.find((x) => x.credential === p.credential);
       return alt ? Object.assign({}, p, {id: alt.id}) : p;
     });
-    config = Object.assign({}, config, paket.config || {});
+    config = Object.assign({}, config, paket.config || {}, {sharedState:paket.sharedState || []});
     people = neu;
     try {
       localStorage.setItem(CONFIG_KEY, JSON.stringify(config)); localStorage.setItem(PEOPLE_KEY, JSON.stringify(people));

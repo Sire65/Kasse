@@ -446,7 +446,7 @@ el("handoverStartButton")?.addEventListener("click",async()=>{
   }catch(err){status.textContent="Nicht gestartet: "+(err?.message||String(err));}
 });
 
-el("generate").onclick=()=>{const c=getData(),effectiveDate=el("effectiveDate").value,heute=localBusinessDate();if(!isBusinessDate(effectiveDate))return alert("Bitte das gültige Einsatzdatum im Kalender auswählen.");if(currentType!=="count"&&effectiveDate<heute)return alert("Anfangsbestand und Nachfüllung dürfen nicht in der Vergangenheit liegen.");if(currentType==="count"&&effectiveDate>heute)return alert("Eine Zählung kann keinem zukünftigen Tagesabschluss zugeordnet werden.");if(c.total<=0)return alert("Bitte mindestens eine Stückelung eingeben.");const countedAt=new Date().toISOString(),istNachzaehlung=currentType==="count"&&effectiveDate<heute;const payload={
+el("generate").onclick=()=>{const c=getData(),effectiveDate=el("effectiveDate").value,heute=localBusinessDate();if(!isBusinessDate(effectiveDate))return alert("Bitte das gültige Einsatzdatum im Kalender auswählen.");if(currentType!=="count"&&effectiveDate<heute)return alert("Anfangsbestand und Nachfüllung dürfen nicht in der Vergangenheit liegen.");if(currentType==="count"&&effectiveDate>heute)return alert("Eine Zählung kann keinem zukünftigen Tagesabschluss zugeordnet werden.");if(c.total<0||(currentType!=="count"&&c.total===0))return alert("Bitte mindestens eine Stückelung eingeben.");const countedAt=new Date().toISOString(),istNachzaehlung=currentType==="count"&&effectiveDate<heute;const payload={
   format:currentType==="count"?"KC_CASH_COUNT":"KC_CASH_TRANSFER",
   version:currentType==="count"?3:4,
   transferId:crypto.randomUUID(),

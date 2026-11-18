@@ -77,18 +77,19 @@ async function bisZurPinSperre(pg, sekunden=25){
  p('mit dem Knopf laesst sich die PIN festlegen - ganz ohne Tastatur',
    await pg.evaluate(()=>!document.getElementById('kcPinLockOverlay')));
 
- // Und beim naechsten Sperren muss dieselbe PIN wieder aufschliessen
- await pg.evaluate(()=>{localStorage.removeItem('kc_nichts');});
- await pg.reload(); await pg.waitForTimeout(6000);
- const wieder=await bisZurPinSperre(pg);
- p('nach einem Neustart wird wieder nach der PIN gefragt', wieder===true);
- if(wieder){
-   for(const z of ['2','6','0','9']) await pg.click(`[data-pin-taste="${z}"]`);
-   await pg.click('#kcPinSubmit'); await pg.waitForTimeout(1200);
-   p('dieselbe PIN schliesst wieder auf', await pg.evaluate(()=>!document.getElementById('kcPinLockOverlay')));
-   const text=await pg.evaluate(()=>document.getElementById('kcPinError')?.textContent||'(Fenster zu)');
-   p('keine Fehlermeldung dabei', /Fenster zu/.test(text)||text.trim()==='', text);
- }
+ // Neuladen innerhalb desselben Markttags übernimmt die Freigabe dieses Tabs.
+ await pg.reload(); await pg.waitForTimeout(6500);
+ await pg.evaluate(()=>{const g=document.getElementById('fullscreenGate');if(g)g.hidden=true;});
+ p('beim Neuladen am selben Tag wird keine zweite PIN verlangt',
+   await pg.evaluate(()=>window.KCPinLock.isUnlocked()&&!document.getElementById('kcPinLockOverlay')));
+ // Ein neuer Browser-Tab hat keine Tagesfreigabe und benötigt wieder die PIN.
+ const neu=await b.newContext({storageState:await ctx.storageState(),viewport:{width:1080,height:810}});
+ const start=await neu.newPage();await start.goto('http://127.0.0.1:8775/pos/index.html');await start.waitForTimeout(6500);
+ p('ein neuer Kassenstart benötigt die PIN',await bisZurPinSperre(start));
+ for(const z of ['2','6','0','9'])await start.click(`[data-pin-taste="${z}"]`);
+ await start.click('#kcPinSubmit');await start.waitForTimeout(500);
+ p('die eingerichtete PIN funktioniert beim nächsten Start',await start.evaluate(()=>window.KCPinLock.isUnlocked()));
+ await neu.close();
 
  p('keine Skriptfehler ueber den ganzen Lauf', fehler.length===0, fehler.slice(0,2).join(' | ')||'keine');
  await pg.screenshot({path:path.join(WURZEL,'tests','pin-sperre-tablet.png')});

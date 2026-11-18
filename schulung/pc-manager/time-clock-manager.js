@@ -564,10 +564,11 @@
   // Kassen): settings.zeiterfassung = Kassenpaket (nur Pseudonyme). Die Datei "Kassenpaket" bleibt
   // als Rueckfallweg bestehen.
   function zugaengeUebernehmen(liste) {
-    let neu = 0, ergaenzt = 0, mitCode = 0;
+    let neu = 0, ergaenzt = 0, mitCode = 0, gesamt = 0, ohneNummer = 0;
     (liste || []).forEach((e) => {
       const nummer = String(e?.mitgliedsnummer || '').trim();
-      if (!nummer) return;
+      if (!nummer) { ohneNummer++; return; }
+      gesamt++;
       const code = String(e.geburtstagscode || '').replace(/\D/g, '');
       if (code.length === 6) mitCode++;
       const pseudonym = String(e.pseudonym || '').trim();
@@ -587,7 +588,7 @@
         neu++;
       }
     });
-    return {neu, ergaenzt, mitCode, gesamt: (liste || []).length};
+    return {neu, ergaenzt, mitCode, gesamt, ohneNummer};
   }
   function anKassenSenden() {
     // Ins gemeinsame Einstellungs-Objekt - jeder Stammdaten-Abgleich nimmt es dann mit.
@@ -619,6 +620,7 @@
     const gesendet = await anKassenSenden();
     const ohne = r.gesamt - r.mitCode;
     stand(`${r.gesamt} Mitglieder: Ausweis für alle, Geburtstag für ${r.mitCode}${ohne ? ` (bei ${ohne} ist in der Mitgliederverwaltung kein Geburtstag hinterlegt – nur Ausweis)` : ''}. `
+      + (r.ohneNummer ? r.ohneNummer+' Datensatz ohne Ausweisnummer blieb zur Prüfung offen. ' : '')
       + (gesendet ? 'An die Kassen gesendet – jede Kasse übernimmt es beim nächsten Abgleich.' : 'Noch nicht an die Kassen gesendet (Manager-Dienst nicht erreichbar) – wird beim nächsten Stammdaten-Senden mitgenommen.'),
       gesendet ? 'gut' : 'warn');
     return true;

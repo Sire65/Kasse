@@ -18,7 +18,7 @@ ok(mb.includes('payload.confirmationRequested=true'),'Money Butler confirmation 
 ok(mgr.includes('payload.confirmationRequested===true'),'Manager confirmation routing missing');
 ok(mgr.includes('/api/v1/finance-transfer/queue'),'Manager Finance Bridge queue missing');
 ok(mgr.includes('/api/v1/cash-transfer/queue'),'Normal cash queue must remain');
-ok(posHtml.includes('kc-finance-transfer-kasse.js?build=1.0.1'),'Live POS Finance Bridge script missing');
+ok(posHtml.includes('kc-finance-transfer-kasse.js?build=1.1.0'),'Live POS Finance Bridge script missing');
 ok(live.includes('kcFinanceTransferUebernehmen'),'Live POS explicit confirmation button missing');
 ok(live.includes("'cash_transfer_confirmed'"),'Live POS confirmation event missing');
 ok(live.includes('confirmationRequested: payload.confirmationRequested === true'),'Live POS confirmation flag return missing');
@@ -38,7 +38,7 @@ ok(notifier.includes("cash-confirmed-"),'Push correlation id missing');
 ok(notifier.includes('SENT_KEY'),'Push duplicate protection missing');
 ok(notifier.includes('setInterval(pruefe,POLL_MS)'),'Confirmation retry polling missing');
 ok(posSw.includes('const CACHE="kc-bildrechner-"+kcAssetsPruefsumme(ASSETS);'),'Live POS cache must be asset-checksum based');
-ok(posSw.includes('./kc-finance-transfer-kasse.js?build=1.0.1'),'Live Finance Bridge not precached');
+ok(posSw.includes('./kc-finance-transfer-kasse.js?build=1.1.0'),'Live Finance Bridge not precached');
 ok(trSw.includes('const CACHE="kc-schulung-"+kcAssetsPruefsumme(ASSETS);'),'Training cache must be asset-checksum based');
 
 console.log('Money Butler confirmation + push route: 26/26 checks passed');

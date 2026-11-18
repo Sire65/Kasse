@@ -9,7 +9,7 @@ for (const pfad of ['pos/app.js', 'schulung/pos/app.js']) {
   assert(s.includes('if(gutscheinZeile(item)){if(!namen.includes(item.name))namen.push(item.name);return}'), pfad + ': Personal mit Gutschein nicht gesperrt');
   assert(s.includes('function internPfandZurueck(){') && (s.match(/\.then\(r=>\{if\(!r\)internPfandZurueck\(\)\}\)/g) || []).length === 2, pfad + ': Pfand wird bei Abbruch nicht zurueckgegeben');
   // Konto: Doppeltipp darf nicht abstuerzen
-  assert(/const rec=await completeSale\("account-charge",\{silent:true\}\);\n  if\(!rec\)return;/.test(s), pfad + ': Konto-Doppeltipp ungeschuetzt');
+  assert(/const rec=await completeSale\("account-charge",\{silent:true\}\);\r?\n  if\(!rec\)return;/.test(s), pfad + ': Konto-Doppeltipp ungeschuetzt');
   // Storno: Gutschein-Anteil gegenbuchen und Guthaben zurueck; Storno von Personal/Helfer senkt den Umsatz nicht
   assert(s.includes('rec.voucherPayments=original.voucherPayments.map(v=>({code:v.code,amount:-Math.abs(Number(v.amount||0))}))'), pfad + ': Storno ohne Gutschein-Gegenbuchung');
   assert(s.includes('window.KCGutschein.gutschreibenFuerBon(ob,{bon:rec.bon})'), pfad + ': Storno einer Gutschein-Vollzahlung gibt Guthaben nicht zurueck');
@@ -29,7 +29,7 @@ for (const pfad of ['pos/kc-transaction-store.js', 'schulung/pos/kc-transaction-
   assert(!f.includes('store.clear()'), pfad + ': Speichern loescht wieder den ganzen Bestand');
   assert(f.includes('if (loeschen)') && f.includes('!zu.has(k)'), pfad + ': Loeschen nur ausdruecklich und nie gesperrte Zeilen');
   assert(s.includes('if (roh?.transactionId) zu.add(roh.transactionId);'), pfad + ': unlesbare Zeile bricht das Laden ab');
-  assert(s.includes('if (neuesterAuftrag.get(storeName) !== nummer) return undefined;'), pfad + ': Rueckstau wird nicht zusammengefasst');
+  assert(s.includes('if (neuesterAuftrag.get(storeName) !== nummer && optionen?.verbindlich !== true) return undefined;'), pfad + ': Rueckstau wird nicht zusammengefasst');
 }
 for (const pfad of ['pos/kc-security-card-pos.js', 'schulung/pos/kc-security-card-pos.js']) {
   const s = fs.readFileSync(pfad, 'utf8');
@@ -40,7 +40,7 @@ for (const pfad of ['pos/app.js', 'schulung/pos/app.js']) {
   const s = fs.readFileSync(pfad, 'utf8');
   assert(s.includes('saveTransactions(pendingBackupImport.transactions||[],false,{loeschen:true});'), pfad + ': Backup ersetzt nicht mehr');
   assert(s.includes('let _autoFavMerker='), pfad + ': Auto-Favoriten werden wieder bei jedem Tipp neu gezaehlt');
-  for (const d of ['pos/index.html', 'pos/service-worker.js']) assert(fs.readFileSync(pfad.replace('app.js', d.split('/')[1]), 'utf8').includes('kc-transaction-store.js?build=0.2.0'), pfad + ': Build Speicher fehlt');
+  for (const d of ['pos/index.html', 'pos/service-worker.js']) assert(fs.readFileSync(pfad.replace('app.js', d.split('/')[1]), 'utf8').includes('kc-transaction-store.js?build=0.3.0'), pfad + ': Build Speicher fehlt');
 }
 console.log('kasse-pruefung-08-10 (Speicher): ok');
 // Zweite Runde (Betreiber: "nur Abstuerze, falsche Berechnungen, Fehlbedienung") - jeweils im Browser durchgespielt
