@@ -75,3 +75,10 @@ hatten noch den Stand vor dem zweiten Nachtrag. Jetzt wie Kasse/PC-Manager: Grü
 Sauerkrauteintopf Gluten, Sellerie · Spuren Senf, Ei, Soja, Milch (mit Mettendchen zusätzlich Senf); Heringsstipp zusätzlich Spuren von Sulfiten;
 Konservierungsstoff/Antioxidationsmittel bei Grünkohl, Sauerkraut und Mettendchen. Auf Preisfolien und Laufschrift „Mettendchen“ statt „Mettwurst“.
 Test `fernseher`: 32/32.
+
+## Eierlikörpunsch: Vanillezucker 150 g (18.11.2026)
+
+Betreiber: „150 Gramm“ (vorher in der Notiz „3 EL“). PC-Manager und Schulungs-PC-Manager: Notiz für neue Geräte berichtigt,
+auf Geräten mit altem Stand einmalig (Merkzeichen `kcm_eierpunsch_vanille_v1`); Build `bilder-v15-vanille`. Supabase-Rezept `eier`
+(150 g) war schon so angelegt. Test `allergene-weihnachtsmarkt-2026` um die Notiz erweitert: PASS (frisch und alter Stand, beide
+PC-Manager); die 4 Info-Fenster-Prüfungen der Kasse sind wie auf `main` rot (Start-PIN, siehe oben).
