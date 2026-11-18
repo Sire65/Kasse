@@ -101,6 +101,8 @@ function nachbauStarter() {
       p('A2: ohne Fotos (18.11.2026): Mitglieder nur mit Vornamen, keine Fotos', namen.every((n) => n && !/\s/.test(n.replace('Hans-Joachim', 'X'))) && mitglieder.every((s) => !s.items.some((i) => i.originalRole === 'photo')), namen.join(', '));
       const mannschaft = projekt.slides.find((s) => s.name === 'Unsere Mannschaft');
       p('A2: Mannschaftsfolie nur Text „seit 1991 in Werne“, kein Gruppenbild', mannschaft && !mannschaft.items.some((i) => i.type === 'image' && i.originalRole === 'photo') && mannschaft.items.some((i) => i.text === 'Seit 1991 in Werne\nseit 1995 auf dem Weihnachtsmarkt') && mannschaft.items.some((i) => i.text === 'Gemeinsam kochen, gemeinsam helfen'));
+      const logoOriginal = 'data:image/webp;base64,' + fs.readFileSync(path.join(WURZEL, 'media', 'kc-kochmuetze-weiss.webp')).toString('base64');
+      p('A2: Mannschaftsfolie zeigt die offizielle Kochmütze (Original-Datei, unverändert)', mannschaft.items.some((i) => i.name === 'KC-Logo Kochmütze' && i.src === logoOriginal));
       p('A2: Rezeptfolie: Eierlikörpunsch als Freisteller ohne Rahmen', a.includes('data:image/png;base64,') && (projekt.slides.find((s) => s.name === 'Rezept vom Köcheclub') || { items: [] }).items.some((i) => i.name === 'Foto Eierlikörpunsch' && i.fit === 'contain' && !i.strokeWidth));
       // 18.11.2026: auf allen Folien nur Schnee, Regen oder Sonne (echtes Wetter), keine anderen Effekte; Schlussfolie Feuerwerk
       const schluss = projekt.slides[projekt.slides.length - 1];
