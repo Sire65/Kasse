@@ -168,7 +168,9 @@ function bearbeite(projekt, log, extras = {}) {
     // mit Feuerwerk“): alle Folien zeigen nur das aktuelle Wetter in Werne (Schnee, Regen oder Sonne; bei Wolken/Nebel
     // nichts). Kein Glitzer, keine Sternschnuppen, kein Goldstaub. Nur die Schlussfolie behält Feuerwerk und Lasershow.
     const schluss = folie.id === projekt.slides[projekt.slides.length - 1].id;
-    if (!schluss) folie.effectLayer = { ...(folie.effectLayer || {}), weatherAuto: true, type: 'none', type2: 'none', type3: 'none', opacity: 85 };
+    // Wetterfolien (Kacheln): Wetter NUR in den Kacheln, nicht über die ganze Folie (Betreiber 18.11.2026 nachmittags)
+    const kachelFolie = !!WETTER[folie.name];
+    if (!schluss) folie.effectLayer = { ...(folie.effectLayer || {}), weatherAuto: !kachelFolie, type: 'none', type2: 'none', type3: 'none', opacity: 85 };
 
     // QR-Folien: klarer sagen, wohin der Code führt (Betreiber 18.11.2026)
     for (const item of folie.items) {
@@ -272,7 +274,10 @@ function bearbeite(projekt, log, extras = {}) {
 // Abstand zwischen den Laufschrift-Blöcken (kcTickerPause).
 const KACHEL_WETTER = '<style>'
   + '.kcTickerPause{display:inline-block;width:150px;text-align:center;color:#d8b25a}'
-  + '.tvFx.heavy-snow i,.tvFx.rain i,.tvFx.storm i{zoom:1.7}.tvFx.heavy-snow i{opacity:.95}' // echtes Wetter gut sichtbar
+  + '.tvFx.heavy-snow i,.tvFx.storm i{zoom:1.7}.tvFx.heavy-snow i{opacity:.95}' // Schnee gut sichtbar
+  // Regen dezent (Betreiber 18.11.2026: „es regnet zu doll“): nur jeder dritte Tropfen, schwach und fein
+  + '.tvFx.rain{opacity:.32!important}.tvFx.rain i:not(:nth-child(3n)){display:none}'
+  + '.kcKw i{opacity:.5!important}.kcKw i:nth-child(2n){display:none}'
   + '.tvItem[data-original-role^="wetter-"]{isolation:isolate}'
   + '.kcKw{position:absolute;inset:0;z-index:-1;pointer-events:none;overflow:hidden;border-radius:inherit}'
   + '.kcKw i{position:absolute;top:-20%;width:2px;height:30px;background:linear-gradient(transparent,#a8e0ff);opacity:.85;animation:kcRegen 1.1s linear infinite}'
