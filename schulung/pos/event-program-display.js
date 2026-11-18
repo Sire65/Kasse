@@ -40,7 +40,7 @@
   }
   function oeffnungHeute() {
     const P = window.KC_WM2026_PROGRAMM, h = heute(); if (!P || h < P.ZEITRAUM.von || h > P.ZEITRAUM.bis) return '';
-    const o = P.OEFFNUNG.find((x) => x.wochentage.includes(datum(h).getDay())); return o ? `Heute geöffnet ${o.von} – ${o.bis} Uhr` : '';
+    const o = P.OEFFNUNG.find((x) => x.wochentage.includes(datum(h).getDay())); return o ? `Weihnachtsmarkt heute offiziell ${o.von} – ${o.bis} Uhr (Stand-Zeiten: DP2)` : '';
   }
   function updateButton() {
     const b = $('kcProgramStatusBtn'); if (!b) return;

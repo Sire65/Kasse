@@ -271,7 +271,7 @@ function managerDefaultCategoryOrder(){
   P.PROGRAMM.forEach(p=>{const neu={id:p.id,date:p.datum,time:p.von,endTime:p.bis,title:p.titel,description:'',place:p.ort,active:true,source:P.quelle};
     const alt=settings.eventProgram.find(x=>x&&x.id===p.id);if(alt)Object.assign(alt,neu);else settings.eventProgram.push(neu)});
   settings.eventProgram.sort((a,b)=>String(a.date+a.time).localeCompare(String(b.date+b.time)));
-  settings.marketOpeningHours={period:{...P.ZEITRAUM},hours:P.OEFFNUNG.map(o=>({...o})),source:P.quelle};
+  settings.officialMarketHours={period:{...P.ZEITRAUM},hours:P.OEFFNUNG.map(o=>({...o})),source:P.quelle,hinweis:'Offizielle Marktzeiten (Prospekt) – Betriebszeiten des Clubstands siehe DP2 (Regelzeit)'};delete settings.marketOpeningHours;
   localStorage.setItem('kcm_settings',JSON.stringify(settings));localStorage.setItem('kcm_programm_wm2026_'+P.PROGRAMM_STAND,'1')}}catch(e){console.warn('Rahmenprogramm 2026 konnte nicht übernommen werden',e)}}
 function managerCategoryOrder(){
   const available=managerDefaultCategoryOrder(),saved=Array.isArray(settings.categoryOrder)?settings.categoryOrder:[];

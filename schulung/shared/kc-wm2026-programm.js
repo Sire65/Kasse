@@ -9,7 +9,10 @@
  */
 (function (global) {
   'use strict';
-  const PROGRAMM_STAND = '2026-11-18-roh2';
+  const PROGRAMM_STAND = '2026-11-18-roh3';
+  // OFFIZIELLE Öffnungszeiten des Weihnachtsmarkts (Prospekt/Stadt) – für Besucher (TV, Club-App-Kalender).
+  // NICHT die Betriebszeiten des Clubstands: die haben Vorlauf und abweichende Zeiten (z. B. erster Freitag 10–23 Uhr,
+  // Di/Fr Wochenmarkt ab 12 Uhr) und stehen in DP2 unter „Regelzeit“ – dort gilt DP2, hier nichts davon ableiten.
   const OEFFNUNG = [
     { tage: 'Montag – Donnerstag', kurz: 'Mo.–Do.', wochentage: [1, 2, 3, 4], von: '15:00', bis: '21:00' },
     { tage: 'Freitag', kurz: 'Fr.', wochentage: [5], von: '15:00', bis: '22:30' },

@@ -39,7 +39,7 @@ pr('Daten: Ende nach Beginn, keine Überschneidung je Tag', D.PROGRAMM.every((p)
       // DP2-Übergabe wird als letztes Skript geladen – darauf warten statt feste Zeit
       await p.waitForFunction(() => !!window.KCDP2ProgramPublication, null, { timeout: 15000 }).catch(() => {});
       const e = await p.evaluate(() => { const l = (settings.eventProgram || []); return { aktiv: l.filter((x) => x.active !== false && x.date >= '2026-12-04' && x.date <= '2026-12-13').length,
-        alt1: (l.find((x) => x.id === 'alt-1') || {}).active, alt2: (l.find((x) => x.id === 'alt-2') || {}).active, oe: settings.marketOpeningHours,
+        alt1: (l.find((x) => x.id === 'alt-1') || {}).active, alt2: (l.find((x) => x.id === 'alt-2') || {}).active, oe: settings.officialMarketHours,
         dp2: window.KCDP2ProgramPublication ? window.KCDP2ProgramPublication.normalize(l).length : -1 }; });
       pr(`${n}: 28 Programmpunkte im Tagesprogramm, Öffnungszeiten hinterlegt`, e.aktiv === 28 && e.oe && e.oe.hours.length === 4, `${e.aktiv}`);
       pr(`${n}: DP2-Übergabe nimmt alle 28 Punkte an`, e.dp2 === 28, String(e.dp2));
