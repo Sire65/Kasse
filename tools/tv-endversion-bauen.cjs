@@ -132,11 +132,17 @@ function bearbeite(projekt, log, extras = {}) {
       const foto = folie.items.find((i) => i.originalRole === 'photo');
       const zeile = folie.items.find((i) => i.name === 'group-caption');
       setze(titel, { text: 'Köcheclub Werne' });
-      // Text vom Betreiber (18.11.2026)
+      // Text vom Betreiber (18.11.2026); darüber die offizielle Kochmütze (KC-Logo\kc-kochmuetze-weiss.webp – Original, nie neu zeichnen)
+      const logo = !!extras.logoWeiss;
       setze(foto, { type: 'text', name: 'seit 1991', originalRole: 'memberQuote', src: '', text: 'Seit 1991 in Werne\nseit 1995 auf dem Weihnachtsmarkt',
-        x: 190, y: 200, w: 900, h: 250, font: 50, fontFamily: 'Cinzel Decorative', align: 'center', color: '#fff8e8',
+        x: 190, y: logo ? 280 : 200, w: 900, h: logo ? 210 : 250, font: 50, fontFamily: 'Cinzel Decorative', align: 'center', color: '#fff8e8',
         bg: 'rgba(28,58,44,.74)', radius: 18, textScaleMode: 'fit' });
-      setze(zeile, { x: 190, y: 480, w: 900, h: 70, font: 36, text: 'Gemeinsam kochen, gemeinsam helfen' });
+      setze(zeile, { x: 190, y: logo ? 510 : 480, w: 900, h: 70, font: 36, text: 'Gemeinsam kochen, gemeinsam helfen' });
+      if (logo) {
+        folie.items.splice(folie.items.indexOf(titel) + 1, 0, { ...zeile, id: folie.id + '-logo', name: 'KC-Logo Kochmütze', type: 'image',
+          originalRole: 'image', text: '', src: extras.logoWeiss, fit: 'contain', x: 550, y: 138, w: 180, h: 120, bg: 'transparent',
+          radius: 0, stroke: 'transparent', strokeWidth: 0, shadowEnabled: false });
+      }
       log.push('Mannschaftsfolie: Gruppenbild entfernt, Text „Köcheclub Werne – seit 1991 in Werne“');
     }
 
@@ -445,11 +451,13 @@ if (require.main === module) {
   if (!quelle || !bild || !ziel) { console.error('Aufruf: node tools/tv-endversion-bauen.cjs <index.html> <bild.jpg> <ziel.html>'); process.exit(1); }
   const typ = /\.png$/i.test(bild) ? 'image/png' : /\.webp$/i.test(bild) ? 'image/webp' : 'image/jpeg';
   const daten = `data:${typ};base64,${fs.readFileSync(bild).toString('base64')}`;
+  const logoDatei = path.join(__dirname, '..', 'media', 'kc-kochmuetze-weiss.webp');
   const freisteller = path.join(__dirname, '..', 'media', 'eierlikoerpunsch-freisteller.png');
   const foto = path.join(__dirname, '..', 'media', 'eierlikoerpunsch-tv.jpg');
   const extras = fs.existsSync(freisteller)
     ? { eierpunschFoto: `data:image/png;base64,${fs.readFileSync(freisteller).toString('base64')}`, eierpunschFreisteller: true }
     : fs.existsSync(foto) ? { eierpunschFoto: `data:image/jpeg;base64,${fs.readFileSync(foto).toString('base64')}` } : {};
+  if (fs.existsSync(logoDatei)) extras.logoWeiss = `data:image/webp;base64,${fs.readFileSync(logoDatei).toString('base64')}`;
   const { html, log } = bauen(fs.readFileSync(quelle, 'utf8'), daten, extras);
   fs.writeFileSync(ziel, html);
   log.forEach((z) => console.log('  ' + z));
