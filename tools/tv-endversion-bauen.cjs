@@ -10,6 +10,10 @@
  *     (Supabase kc_wm_spruch_zuordnung): Name, Spruch, mit/ohne Foto. Wer abgelehnt oder nicht
  *     geantwortet hat, wird ausgeblendet (nicht gelöscht – im Designer wieder einschaltbar).
  *   • keine Umfrage mehr: kein „Fertig – zur Umfrage“-Knopf, kein Anhalten auf der Schlussfolie
+ * Am 18.11.2026 (keine aktuellen Fotos bekommen): Standard ist jetzt OHNE Fotos –
+ *   • Mannschaftsfolie nur Text („Köcheclub Werne – seit 1991 in Werne“), kein Gruppenbild
+ *   • Mitgliederfolien nur Vorname und gewählter Spruch, kein Foto
+ *   Die Fassung mit Fotos (17.11.2026) entsteht weiter mit KC_TV_MIT_FOTOS=1 (Tags mit-fotos-2026-11-17).
  * Öffnungszeiten und Gesamtprogramm bleiben vorerst unverändert (Angaben fehlen noch).
  *
  * Aufruf: node tools/tv-endversion-bauen.cjs <index.html WM-Pr-s. (Original)> <Hintergrundbild .jpg> <Ziel.html>
@@ -18,21 +22,23 @@
 const fs = require('fs');
 const path = require('path');
 
-const STAND = '2026-11-17';
+const MIT_FOTOS = process.env.KC_TV_MIT_FOTOS === '1';
+const STAND = MIT_FOTOS ? '2026-11-17' : '2026-11-18';
 const VERSION = `Endversion · ${STAND}`;
 
 // ---- Mitglieder laut Spruch-Auswahl (Supabase kc_wm_spruch_zuordnung, Stand 25.09.2026) ----
-// foto: true = Foto zeigen. Nicht aufgeführt = ausblenden.
+// foto: true = Foto zeigen (nur in der Fassung mit Fotos). Nicht aufgeführt = ausblenden.
+// Ohne Fotos wird immer nur der Vorname gezeigt.
 const MITGLIEDER = {
-  'Hans-Joachim Koch': { name: 'Hans-Joachim Koch', foto: true, spruch: 'Zu unseren Treffen komme ich gerne, weil der Austausch unter Kollegen einfach wertvoll ist.' },
-  'Dieter Zander': { name: 'Dieter Zander', foto: true, spruch: 'Ich bringe mich gerne ein, weil mir Gemeinschaft und soziales Engagement wichtig sind.' },
-  'Manfred Schoppmann': { name: 'Manfred Schoppmann', foto: true, spruch: 'Ich helfe gerne mit, wenn wir gemeinsam etwas für andere Menschen erreichen können.' },
-  'Andrea Spahn': { name: 'Andrea', foto: true, spruch: 'Ich schätze besonders den Zusammenhalt und die vielen schönen gemeinsamen Erlebnisse.' },
-  'Anne Reinkober': { name: 'Anne', foto: true, spruch: 'Ich helfe gerne aus beim Köcheclub Werne, denn helfende Hände werden immer gebraucht.' },
-  'Thomas Hess': { name: 'Thomas Hess', foto: false, spruch: 'Ich bin gerne dabei, weil wir hier mit Herz und Hand für andere kochen.' },
-  'Christina Brösel': { name: 'Christina', foto: false, spruch: 'Ich engagiere mich gerne, weil unsere Arbeit nicht nur Freude macht, sondern auch einem guten Zweck dient.' },
-  'Leon Wördemann': { name: 'Leon', foto: false, spruch: 'Besonders der Weihnachtsmarkt zeigt, was wir als Mannschaft gemeinsam leisten können.' },
-  'Wilfried Wittwer': { name: 'Wilfried', foto: false, spruch: 'Für mich ist der Köcheclub ein Ort, an dem aus Berufskollegen echte Freunde geworden sind.' },
+  'Hans-Joachim Koch': { vorname: 'Hans-Joachim', name: 'Hans-Joachim Koch', foto: true, spruch: 'Zu unseren Treffen komme ich gerne, weil der Austausch unter Kollegen einfach wertvoll ist.' },
+  'Dieter Zander': { vorname: 'Dieter', name: 'Dieter Zander', foto: true, spruch: 'Ich bringe mich gerne ein, weil mir Gemeinschaft und soziales Engagement wichtig sind.' },
+  'Manfred Schoppmann': { vorname: 'Manfred', name: 'Manfred Schoppmann', foto: true, spruch: 'Ich helfe gerne mit, wenn wir gemeinsam etwas für andere Menschen erreichen können.' },
+  'Andrea Spahn': { vorname: 'Andrea', name: 'Andrea', foto: true, spruch: 'Ich schätze besonders den Zusammenhalt und die vielen schönen gemeinsamen Erlebnisse.' },
+  'Anne Reinkober': { vorname: 'Anne', name: 'Anne', foto: true, spruch: 'Ich helfe gerne aus beim Köcheclub Werne, denn helfende Hände werden immer gebraucht.' },
+  'Thomas Hess': { vorname: 'Thomas', name: 'Thomas Hess', foto: false, spruch: 'Ich bin gerne dabei, weil wir hier mit Herz und Hand für andere kochen.' },
+  'Christina Brösel': { vorname: 'Christina', name: 'Christina', foto: false, spruch: 'Ich engagiere mich gerne, weil unsere Arbeit nicht nur Freude macht, sondern auch einem guten Zweck dient.' },
+  'Leon Wördemann': { vorname: 'Leon', name: 'Leon', foto: false, spruch: 'Besonders der Weihnachtsmarkt zeigt, was wir als Mannschaft gemeinsam leisten können.' },
+  'Wilfried Wittwer': { vorname: 'Wilfried', name: 'Wilfried', foto: false, spruch: 'Für mich ist der Köcheclub ein Ort, an dem aus Berufskollegen echte Freunde geworden sind.' },
 };
 
 // ---- Allergene und Zusatzstoffe laut Kasse (etiketten/artikel.json, Stand 16.11.2026) ----
@@ -95,6 +101,19 @@ function bearbeite(projekt, log, extras = {}) {
       if (ZIER[item.name]) setze(item, ZIER[item.name]);
     }
 
+    // Mannschaftsfolie ohne Gruppenbild: nur Text
+    if (!MIT_FOTOS && folie.name === 'Unsere Mannschaft') {
+      const titel = folie.items.find((i) => i.originalRole === 'title');
+      const foto = folie.items.find((i) => i.originalRole === 'photo');
+      const zeile = folie.items.find((i) => i.name === 'group-caption');
+      setze(titel, { text: 'Köcheclub Werne' });
+      setze(foto, { type: 'text', name: 'seit 1991', originalRole: 'memberQuote', src: '', text: 'seit 1991 in Werne',
+        x: 190, y: 220, w: 900, h: 230, font: 64, fontFamily: 'Cinzel Decorative', align: 'center', color: '#fff8e8',
+        bg: 'rgba(28,58,44,.74)', radius: 18, textScaleMode: 'fit' });
+      setze(zeile, { x: 190, y: 490, w: 900, h: 60, font: 32 });
+      log.push('Mannschaftsfolie: Gruppenbild entfernt, Text „Köcheclub Werne – seit 1991 in Werne“');
+    }
+
     // Rezeptfolie: Foto vom Eierlikörpunsch aus der Kasse (pos/assets/eierpunsch_version_3.png, zugeschnitten
     // auf media/eierlikoerpunsch-tv.jpg), Rezept rechts daneben
     if (folie.name === 'Rezept vom Köcheclub' && extras.eierpunschFoto) {
@@ -154,8 +173,11 @@ function bearbeite(projekt, log, extras = {}) {
     // Mitgliederfolien
     if (folie.memberMeta) {
       const name = folie.memberMeta.name;
-      const m = MITGLIEDER[name];
+      const eintrag = MITGLIEDER[name];
+      const m = eintrag && (MIT_FOTOS ? eintrag : { ...eintrag, name: eintrag.vorname, foto: false });
       folie.rotation = { ...(folie.rotation || {}), enabled: !!m };
+      // ohne Fotos: Foto auch bei ausgeblendeten Mitgliedern entfernen (die Datei ist öffentlich)
+      if (!MIT_FOTOS) folie.items = folie.items.filter((i) => i.originalRole !== 'photo');
       if (!m) { log.push(`Mitglied ${name}: ausgeblendet (keine Zustimmung in der Spruch-Auswahl)`); continue; }
       // „Wer wann da ist“ fällt weg (Umfrage-Kommentar), Platzhalter-Hinweis ebenso
       folie.items = folie.items.filter((i) => i.originalRole !== 'nextshift' && i.name !== 'reserve-note');
@@ -213,6 +235,18 @@ function bauen(html, bildDatenUrl, extras = {}) {
   bearbeite(projekt, log, extras);
   const neu = JSON.stringify(projekt).replace(/"@@B(\d+)@@"/g, 'B[$1]');
   html = html.slice(0, a + anfang.length) + neu + html.slice(e + 1);
+
+  // Nicht mehr benutzte Bilder aus der Bildliste B leeren – sonst stecken entfernte Fotos unsichtbar in der Datei
+  {
+    const start = html.indexOf('const B=[');
+    const ende = html.indexOf('];', start);
+    const liste = JSON.parse(html.slice(start + 8, ende + 1));
+    const benutzt = new Set([0, ...[...neu.matchAll(/\bB\[(\d+)\]/g)].map((t) => Number(t[1]))]);
+    let geleert = 0;
+    const neuListe = liste.map((bild, n) => { if (benutzt.has(n) || !bild) return bild; geleert++; return ''; });
+    html = html.slice(0, start + 8) + JSON.stringify(neuListe) + html.slice(ende + 1);
+    if (geleert) log.push(`${geleert} nicht mehr benutzte Bilder aus der Datei entfernt`);
+  }
 
   // Hintergrund B[0] (alle Folien) durch das neue Rathaus-Bild ersetzen
   const bAnfang = html.indexOf('const B=["');
