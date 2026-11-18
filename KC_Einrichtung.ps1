@@ -25,7 +25,13 @@ if (-not (Test-Path -LiteralPath $Backend)) {
 }
 
 if (-not (Test-Path -LiteralPath $NodeExe)) {
-  $arch = if ($env:PROCESSOR_ARCHITECTURE -match 'ARM64') { 'win-arm64' } else { 'win-x64' }
+  # 64-Bit-Windows -> win-x64, ARM -> win-arm64, 32-Bit-Windows -> win-x86 (Node 22 gibt es noch fuer 32 Bit)
+  $echteArch = if ($env:PROCESSOR_ARCHITEW6432) { $env:PROCESSOR_ARCHITEW6432 } else { $env:PROCESSOR_ARCHITECTURE }
+  $arch = if ($echteArch -match 'ARM64') { 'win-arm64' } elseif ($echteArch -match 'AMD64|x64') { 'win-x64' } else { 'win-x86' }
+  if ($arch -eq 'win-x86') {
+    Write-Host 'Hinweis: 32-Bit-Windows erkannt. Die Kasse laeuft, aber Windows nutzt nur ca. 3,5 GB Arbeitsspeicher.' -ForegroundColor Yellow
+    Write-Host '         Besser (wenn der Prozessor x64 kann): Windows 10 als 64-Bit neu installieren.' -ForegroundColor Yellow
+  }
   $archiveName = "node-$NodeVersion-$arch.zip"
   $baseUrl = "https://nodejs.org/dist/$NodeVersion"
   $temp = Join-Path $env:TEMP ("kc-node-" + [guid]::NewGuid().ToString('N'))
