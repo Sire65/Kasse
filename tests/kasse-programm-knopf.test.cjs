@@ -1,7 +1,7 @@
 /* Kasse: Knopf „📅 Programm“ zeigt das Rahmenprogramm Weihnachtsmarkt 2026 (Betreiber 18.11.2026: „auf der Kasse gibt es oben
    einen Button Programm, dort müsste eigentlich das Programm abrufbar sein“). Kasse und Schulungskasse, ohne echten Server:
    - 09.12. 17:10: Knopf zeigt 16:30, Fenster „Aktuell und anschließend“ mit Simon Gerundt (markiert) und Smooth Invaders,
-     „Heute geöffnet 15:00 – 21:00 Uhr“, keine „mittel“-Bewertung
+     „Weihnachtsmarkt heute offiziell 15:00 – 21:00 Uhr“, keine „mittel“-Bewertung
    - 18.11.: „Nächster Programmtag: Freitag, 4. Dezember“ mit Eröffnung + Bläsercorps
    - „Ganzes Programm“: 10 Tage, 28 Punkte
    - alte Programmdatei (vor dem Rahmenprogramm) wird nicht genommen, eine neuere hat Vorrang */
@@ -38,7 +38,7 @@ let f = 0; const pr = (n, b, z = '') => { console.log(`${b ? '  OK  ' : 'FEHLER'
       let e = await lesen(p, false);
       pr(`${seite} 09.12. 17:10: Knopf zeigt 16:30, keine Bewertung`, /16:30/.test(e.knopf) && !/mittel/.test(e.knopf), e.knopf);
       pr(`${seite} 09.12. 17:10: aktuell Simon Gerundt, danach Smooth Invaders`, e.titel === 'Aktuell und anschließend' && e.aktiv === 'Simon Gerundt' && /Smooth Invaders/.test(e.text) && e.zeilen === 2, e.text.slice(0, 140));
-      pr(`${seite} 09.12.: Öffnungszeiten heute`, /Heute geöffnet 15:00 – 21:00 Uhr/.test(e.text) && /eingebaut/.test(e.quelle));
+      pr(`${seite} 09.12.: Öffnungszeiten heute`, /Weihnachtsmarkt heute offiziell 15:00 – 21:00 Uhr \(Stand-Zeiten: DP2\)/.test(e.text) && /eingebaut/.test(e.quelle));
       e = await lesen(p, 'alle');
       pr(`${seite}: Ganzes Programm mit 10 Tagen und 28 Punkten, heute markiert`, e.tage === 10 && e.zeilen === 28 && /Mittwoch, 9\. Dezember · heute/.test(e.text), `${e.tage} Tage, ${e.zeilen} Punkte`);
       pr(`${seite}: keine JS-Fehler`, !js.filter((x) => !/Failed to fetch|Load failed|access control|net::ERR|kc-sync/.test(x)).length, js.join('|').slice(0, 200));
