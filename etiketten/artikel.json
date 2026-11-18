@@ -1,5 +1,5 @@
 {
- "stand": "2026-11-18T09:00:38.742Z",
+ "stand": "2026-11-18T12:31:14.320Z",
  "quelle": "Kasse pos/app.js (PRODUCTS)",
  "artikel": [
   {
@@ -542,9 +542,9 @@
    "warengruppeFarbe": "#8b4a23",
    "kategorie": "Speisen",
    "sortierung": 6,
-   "allergene": "Milch (Spuren möglich)",
+   "allergene": "Eier, Milch, Senf",
    "allergeneGeprueft": false,
-   "zusatz": null,
+   "zusatz": "Mit Konservierungsstoff (Kaliumsorbat, Natriumbenzoat)",
    "alkohol": false,
    "bildAusschnitt": [
     0,

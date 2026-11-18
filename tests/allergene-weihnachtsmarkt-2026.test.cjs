@@ -21,6 +21,7 @@ const ALT = [
   {id: 'gruenkohl', name: 'Grünkohl', price: 5.5, category: 'Speisen', info: {ingredients: 'Grünkohl, Kartoffeln, Zwiebeln, Gewürze', allergens: 'Kann Senf und Sellerie enthalten', important: 'Heiß ausgegeben.'}},
   {id: 'hering', name: 'Kartoffel mit Hering', price: 4.5, category: 'Speisen'},
   {id: 'mettwurst', name: 'Mettwurst', price: 1.5, category: 'Speisen'},
+  {id: 'knirpsecreme', name: 'Kartoffel mit Kartoffelcreme', price: 3.5, category: 'Speisen', info: {allergens: {milk: 'traces'}, legacyAllergens: 'Creme kann Milch und Milchprodukte enthalten.'}},
   {id: 'eier', name: 'Eierlikörpunsch', price: 4.5, category: 'Getränke', info: {notes: 'Rezeptur je Ansatz (13.10.2026): 6 l Rebenschoppen halbtrocken + 3 × 0,7 l Advocaat + 3 EL Vanillezucker (≈ 8,1 l); serviert mit Sahnehaube und Backkakao.'}}];
 const pruefe = (n, a) => {
   const g = (id) => (a.find((x) => x.id === id) || {}).info || {};
@@ -33,6 +34,9 @@ const pruefe = (n, a) => {
   pr(`${n}: Heringsstipp-Rezept (Mayonnaise, saure Sahne) und Sulfite als Spur`, h.sulphites === 'traces' && h.gluten === 'not-contained' && /Mayonnaise/.test(g('hering').ingredients || ''));
   const sk = g('sauerkraut');
   if (a.some((x) => x.id === 'sauerkraut')) pr(`${n}: Sauerkraut mit Gluten und Sellerie (Gemüsefond), Kassler im Rezept, Zusatzstoffe`, sk.allergens?.gluten === 'contained' && sk.allergens?.celery === 'contained' && sk.allergens?.mustard === 'traces' && /Kassler/.test(sk.ingredients || '') && /Konservierungsstoff/.test(sk.additives || ''));
+  // 18.11.2026: Etikett Kartoffelcreme (FEINKOST Popp) – Milch, Ei, Senf ENTHALTEN, Konservierungsstoffe
+  const kc = g('knirpsecreme');
+  if (a.some((x) => x.id === 'knirpsecreme')) pr(`${n}: Kartoffelcreme: Milch, Ei, Senf enthalten, Konservierungsstoffe, Popp-Etikett`, kc.allergens?.milk === 'contained' && kc.allergens?.eggs === 'contained' && kc.allergens?.mustard === 'contained' && kc.allergens?.gluten === 'not-contained' && /Kaliumsorbat/.test(kc.additives || '') && /Popp/.test(kc.supplier || '') && /Speisequark/.test(kc.ingredients || ''), JSON.stringify(kc.allergens || {}).slice(0, 120));
   pr(`${n}: Mettendchen Senf enthalten, Sellerie Spuren`, m.mustard === 'contained' && m.celery === 'traces', JSON.stringify(m));
   pr(`${n}: Mettendchen mit Konservierungsstoff und Antioxidationsmittel`, /Konservierungsstoff/.test(g('mettwurst').additives || '') && /Antioxidationsmittel/.test(g('mettwurst').additives || ''));
 };
