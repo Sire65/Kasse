@@ -183,6 +183,13 @@ function bearbeite(projekt, log, extras = {}) {
     const kachelFolie = !!WETTER[folie.name];
     if (!schluss) folie.effectLayer = { ...(folie.effectLayer || {}), weatherAuto: !kachelFolie, type: 'none', type2: 'none', type3: 'none', opacity: 85 };
 
+    // Begrüßung besser lesbar (Betreiber 18.11.2026): Text fett, etwas größer, auf einer halbdurchsichtigen dunklen Tafel
+    if (folie.id === projekt.slides[0].id) {
+      const unter = folie.items.find((i) => i.name === 'Untertitel 2');
+      if (unter) setze(unter, { text: 'Der Köcheclub Werne begrüßt Sie\nauf dem Weihnachtsmarkt 2026', x: 160, y: 300, w: 960, h: 180, font: 48, bold: true, color: '#fff8e8', bg: 'rgba(10,5,4,.62)', radius: 20,
+        align: 'center', shadowEnabled: true, shadowColor: '#000000', shadowBlur: 10, shadowX: 0, shadowY: 3, shadowOpacity: 60 });
+    }
+
     // QR-Folien: klarer sagen, wohin der Code führt (Betreiber 18.11.2026)
     for (const item of folie.items) {
       if (item.name === 'official-qr-label') item.text = 'QR-Code scannen\nfür das Gesamtprogramm\nim Internet';
@@ -246,6 +253,16 @@ function bearbeite(projekt, log, extras = {}) {
       // Preise einheitlich mit Komma (Original hatte „1.50“ beim Mettendchen)
       for (const zeile of zeilen) for (const zelle of zeile) if (/^\d+\.\d\d$/.test(zelle.text || '')) zelle.text = zelle.text.replace('.', ',');
       if (alt) setze(alt, box); else folie.items.push({ ...alt, id: `${folie.id}-allergene`, opacity: 100, rotation: 0, ...box });
+      // Preistabelle nutzt den freien Platz nach rechts und unten (bis 12 px über dem Allergenkasten) und wird
+      // entsprechend größer – höchstens 35 % (Betreiber 18.11.2026: „etwas größer und besser lesbar“)
+      {
+        const frei = y - 12 - tabelle.y;
+        const faktor = Math.max(1, Math.min(1.35, frei / tabelle.h));
+        setze(tabelle, { x: 80, w: 1120, h: Math.round(tabelle.h * faktor) });
+        for (const zeile of zeilen) for (const zelle of zeile) if (zelle && zelle.fontSize) zelle.fontSize = Math.round(zelle.fontSize * Math.min(faktor, 1.25));
+        setze(box, {}); if (alt) setze(alt, { x: 80, w: 1120 }); else folie.items[folie.items.length - 1].x = 80, folie.items[folie.items.length - 1].w = 1120;
+        log.push(`Preisliste „${folie.name}“: Tabelle ${Math.round((faktor - 1) * 100)} % größer`);
+      }
       log.push(`Preisliste „${folie.name}“: Allergene/Pfand eingetragen`);
     }
 
