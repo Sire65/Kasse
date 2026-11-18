@@ -85,6 +85,9 @@
       let recipe=records.find(item=>item.productId===productId);
       if(!recipe){recipe=core.normalizeRecipe({productId,name:def.name,status:'draft',outputAmount:0,outputUnit:'kg',portionAmount:250,portionUnit:'g',ingredients:[]});records.push(recipe)}
       recipe.ingredients||=[];
+      // 18.11.2026: nur leere Rezepte mit der Vorlage füllen. Ein Rezept aus Supabase hat eigene Zeilen (z. B. „Bauchspeck,
+      // gewürfelt“) – sonst kämen bei jedem Start doppelte Zeilen „Speck“/„Zwiebeln“ dazu und würden beim Speichern mitgeschrieben.
+      if(recipe.ingredients.length>1)return;
       [def.base,...common,...def.extra].forEach(raw=>{if(!recipe.ingredients.some(item=>item.name.toLocaleLowerCase('de-DE')===raw.name.toLocaleLowerCase('de-DE')))recipe.ingredients.push(core.normalizeIngredient(raw))});
       recipe.publicImportant=recipe.publicImportant||'Speck-Zwiebel-Gemisch wird vollständig einschließlich ausgelassenem Fett und Bratensatz verwendet; kein Abtropfverlust. Genaue Einsatzmengen und Fertigausbeute sind noch zu erfassen.';
     });
@@ -235,8 +238,8 @@
     readRows();const old=existing()||{};
     return core.normalizeRecipe({...old,productId:articleId(),name:$('recipeName').value,version:$('recipeVersion').value,status:$('recipeApproval').value,
       outputAmount:$('recipeOutput').value,outputUnit:$('recipeOutputUnit').value,portionAmount:$('recipePortion').value,portionUnit:$('recipePortionUnit').value,
-      reservePercent:$('recipeReserve').value,ingredients:currentRows,publicIngredients:$('aIngredients')?.value||'',publicAdditives:$('aContents')?.value||'',
-      publicImportant:$('aImportant')?.value||'',allergens:readAllergens(),nutrition:readNutrition(),source:$('aInfoSource')?.value||'',
+      reservePercent:$('recipeReserve').value,ingredients:currentRows,publicIngredients:$('aIngredients')?.value||old.publicIngredients||'',publicAdditives:$('aContents')?.value||old.publicAdditives||'',
+      publicImportant:$('aImportant')?.value||old.publicImportant||'',allergens:readAllergens(),nutrition:readNutrition(),source:old.source||$('aInfoSource')?.value||'',
       approvedBy:$('aInfoApprovedBy')?.value||'',approvedAt:$('aInfoApprovedAt')?.value||''});
   }
   function readAllergens(){const out={};document.querySelectorAll('[data-big14]').forEach(x=>out[x.dataset.big14]=x.value);return out}

@@ -14,10 +14,12 @@ const s = http.createServer((q, r) => { const p = path.join(W, decodeURIComponen
 let f = 0; const pr = (n, b, z = '') => { console.log(`${b ? '  OK  ' : 'FEHLER'}  ${n}${z ? '  [' + z + ']' : ''}`); if (!b) f++; };
 
 const ZUTATEN = ['Grünkohl, tiefgekühlt', 'Kartoffelwürfel, gegart', 'Bauchspeck, gewürfelt', 'Zwiebeln, gewürfelt', 'Schmelzflocken', 'Zucker', 'Senf, 10-kg-Eimer',
-  'Salz', 'Pfeffer', 'CHEF Gemüsefond (Nestlé Professional)', 'Kassler, gewürfelt', 'Trinkwasser', 'Mettendchen, geräuchert (roh)'];
+  'Salz', 'Pfeffer', 'CHEF Gemüsefond (Nestlé Professional)', 'Kassler, gewürfelt', 'Mettendchen, geräuchert (roh)', 'Serviette'];
+const LANGE_NOTIZ = 'Allergene: Senf; Sellerie kann enthalten sein. '.repeat(9).trim(); // > 300 Zeichen
 const KOPF = [{ recipe_id: 'r-gm', org_id: 'KC_WERNE', product_code: 'gruenkohlmett', name: 'Grünkohl Eintopf mit Mettendchen', version: '1.0.0', status: 'draft',
-  output_amount: 0, output_unit: 'kg', portion_amount: 250, portion_unit: 'g', reserve_percent: 0, active: true }];
-const ZEILEN = ZUTATEN.map((name, n) => ({ ingredient_id: 'z' + n, recipe_id: 'r-gm', line_no: n + 1, name, amount: n ? 0 : 10, unit: 'kg', loss_percent: 0, public_ingredient: true }));
+  output_amount: 0, output_unit: 'kg', portion_amount: 250, portion_unit: 'g', reserve_percent: 0, active: true, source: 'Kopie Grünkohl + Mettendchen (Betreiber)' }];
+const ZEILEN = ZUTATEN.map((name, n) => ({ ingredient_id: 'z' + n, recipe_id: 'r-gm', line_no: n + 1, name, amount: n ? 0 : 10, unit: name === 'Serviette' ? 'stueck' : 'kg', loss_percent: 0,
+  public_ingredient: name !== 'Serviette', notes: /Mettendchen/.test(name) ? LANGE_NOTIZ : null }));
 
 (async () => {
   const PORT = Number(process.env.P || 8994); await new Promise((r) => s.listen(PORT, r));
@@ -25,10 +27,11 @@ const ZEILEN = ZUTATEN.map((name, n) => ({ ingredient_id: 'z' + n, recipe_id: 'r
   try {
     for (const fall of ['angemeldet', 'nicht angemeldet', 'leere Antwort']) {
       const c = await b.newContext({ serviceWorkers: 'block' }); const p = await c.newPage(); const js = []; p.on('pageerror', (e) => js.push(e.message));
-      const anfragen = [];
+      const anfragen = [], gespeichert = [];
       await c.route('**/*', (r) => {
         const url = r.request().url();
         if (url.startsWith(`http://127.0.0.1:${PORT}/`)) return r.continue();
+        if (/supabase\.co\/rest\/v1\/rpc\/kc_manager_save_recipe/.test(url)) { gespeichert.push(JSON.parse(r.request().postData() || '{}')); return r.fulfill({ status: 200, contentType: 'application/json', body: '"r-gm"' }); }
         if (/supabase\.co\/rest\/v1\/kc_manager_recipe/.test(url)) {
           anfragen.push({ url, auth: r.request().headers().authorization });
           const leer = fall === 'leere Antwort';
@@ -37,7 +40,9 @@ const ZEILEN = ZUTATEN.map((name, n) => ({ ingredient_id: 'z' + n, recipe_id: 'r
         return r.abort();
       });
       await c.routeWebSocket(/.*/, (ws) => ws.close());
-      await p.addInitScript(() => { if (sessionStorage.getItem('x')) return; sessionStorage.setItem('x', '1'); localStorage.setItem('kcm_articles', '[]'); });
+      await p.addInitScript((alt) => { if (sessionStorage.getItem('x')) return; sessionStorage.setItem('x', '1'); localStorage.setItem('kcm_articles', '[]');
+        if (alt) localStorage.setItem('kcm_recipes_v1', JSON.stringify([alt])); }, fall === 'angemeldet' ? { productId: 'gruenkohlmett', name: 'Grünkohl Eintopf mit Mettendchen', status: 'draft',
+        ingredients: ZUTATEN.map((name, n) => ({ id: 'z' + n, name, amount: 0, unit: 'kg' })) } : null);
       await p.goto(`http://127.0.0.1:${PORT}/pc-manager/index.html`); await p.waitForTimeout(2500);
       const vorher = await p.evaluate(() => (JSON.parse(localStorage.getItem('kcm_recipes_v1') || '[]').find((x) => x.productId === 'gruenkohlmett') || {}).ingredients?.length || 0);
       await p.evaluate((angemeldet) => {
@@ -54,6 +59,16 @@ const ZEILEN = ZUTATEN.map((name, n) => ({ ingredient_id: 'z' + n, recipe_id: 'r
         pr('angemeldet: Supabase mit Anmelde-Token gefragt (nicht nur öffentlicher Schlüssel)', anfragen.length >= 2 && anfragen.every((a) => a.auth === 'Bearer TEST_ANMELDUNG'), anfragen.map((a) => a.auth).join(','));
         pr('angemeldet: Grünkohl + Mettwurst zeigt alle 13 Zutaten aus Supabase, mit Mettendchen', e.zutaten.length === 13 && e.zutaten.includes('Mettendchen, geräuchert (roh)') && e.zutaten.includes('Schmelzflocken'), `${e.zutaten.length}: ${e.zutaten.slice(-3).join(', ')}`);
         pr('angemeldet: Meldung „Supabase zuerst geladen“', /Supabase zuerst geladen/.test(e.status), e.status.slice(0, 90));
+        pr('angemeldet: lokaler Stand vom Start ohne doppelte Vorlagen-Zeilen („Speck“, „Zwiebeln“)', vorher === 13, `vorher ${vorher} Zeilen`);
+        // Speichern nach dem Laden: Menge ändern, speichern, gesendete Daten prüfen
+        await p.evaluate(() => { const i = document.querySelector('#recipeRows tr[data-id] [data-k="amount"]'); i.value = '12'; document.getElementById('recipeSave').click(); });
+        await p.waitForTimeout(800);
+        const g = gespeichert[0] || {}, z = g.p_ingredients || [];
+        pr('Speichern: genau die 13 Zeilen aus Supabase (keine verlorenen, keine doppelten), geänderte Menge dabei', z.length === 13 && z[0].amount === 12 && new Set(z.map((x) => x.name)).size === 13, `${z.length} Zeilen`);
+        pr('Speichern: lange Notiz (> 300 Zeichen) bleibt vollständig', (z.find((x) => /Mettendchen/.test(x.name)) || {}).notes === LANGE_NOTIZ);
+        pr('Speichern: Serviette bleibt nicht öffentlich', (z.find((x) => x.name === 'Serviette') || {}).public_ingredient === false);
+        pr('Speichern: Quelle der Rezeptur bleibt erhalten', g.p_recipe?.source === 'Kopie Grünkohl + Mettendchen (Betreiber)', g.p_recipe?.source);
+        pr('Speichern: mit Anmelde-Token', anfragen.every((a) => a.auth === 'Bearer TEST_ANMELDUNG'));
       } else if (fall === 'nicht angemeldet') {
         pr('nicht angemeldet: klare Meldung statt Stille', /bitte oben rechts bei Supabase anmelden/.test(e.status), e.status.slice(0, 90));
         pr('nicht angemeldet: keine Anfrage an Supabase, lokaler Stand bleibt', anfragen.length === 0 && e.gespeichert === vorher && vorher > 0, `vorher ${vorher}, danach ${e.gespeichert}`);
