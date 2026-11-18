@@ -103,7 +103,11 @@ function nachbauStarter() {
       p('A2: Mannschaftsfolie nur Text „seit 1991 in Werne“, kein Gruppenbild', mannschaft && !mannschaft.items.some((i) => i.type === 'image' && i.originalRole === 'photo') && mannschaft.items.some((i) => i.text === 'seit 1991 in Werne'));
       // 18.11.2026: auf allen Folien nur Schnee, Regen oder Sonne (echtes Wetter), keine anderen Effekte; Schlussfolie Feuerwerk
       const schluss = projekt.slides[projekt.slides.length - 1];
-      const andere = projekt.slides.filter((s) => s !== schluss && !(s.effectLayer && s.effectLayer.weatherAuto && ['type', 'type2', 'type3'].every((k) => s.effectLayer[k] === 'none'))).map((s) => s.name);
+      // Wetterfolien mit Kacheln: Wetter nur in den Kacheln, kein Effekt über die ganze Folie
+      const kachelFolien = projekt.slides.filter((s) => s.items.some((i) => /^wetter-/.test(i.originalRole || '')));
+      p('A2: Wetterfolien: Regen/Schnee nur in den Kacheln, nicht über die ganze Folie', kachelFolien.length === 2 && kachelFolien.every((s) => !s.effectLayer.weatherAuto && ['type', 'type2', 'type3'].every((k) => s.effectLayer[k] === 'none')));
+      p('A2: Regen dezent (nur jeder dritte Tropfen, schwach)', a.includes('.tvFx.rain{opacity:.32!important}.tvFx.rain i:not(:nth-child(3n)){display:none}') && !a.includes('.tvFx.rain i,.tvFx.storm i{zoom:1.7}'));
+      const andere = projekt.slides.filter((s) => s !== schluss && !kachelFolien.includes(s) && !(s.effectLayer && s.effectLayer.weatherAuto && ['type', 'type2', 'type3'].every((k) => s.effectLayer[k] === 'none'))).map((s) => s.name);
       p('A2: Effekte nur Schnee, Regen, Sonne nach echtem Wetter (alle Folien außer Schluss), Schlussfolie Feuerwerk', andere.length === 0 && schluss.effectLayer.type === 'fireworks' && !schluss.effectLayer.weatherAuto && a.includes("fx.weatherAuto?[kcWetterEffekt()]") && a.includes("a==='sun'?'sun':'none'") && !/function kcWetterEffekt\(\)\{[^}]*glitter/.test(a), andere.join(', '));
       p('A2: Wetterkacheln zeigen das Wetter ihres Tages', a.includes('"originalRole":"wetter-tomorrow"') && a.includes('"originalRole":"wetter-day4"') && a.includes('kind:kcKachelArt(data.daily.weather_code[n])') && a.includes('.kcKw'));
       const ohneFotoNamen = mitglieder.filter((s) => s.rotation && s.rotation.enabled !== false).map((s) => { const n = s.items.find((i) => i.originalRole === 'memberName'), q = s.items.find((i) => i.originalRole === 'memberQuote'); return n.x === q.x && n.w === q.w; });
