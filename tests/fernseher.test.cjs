@@ -101,15 +101,19 @@ function nachbauStarter() {
       p('A2: ohne Fotos (18.11.2026): Mitglieder nur mit Vornamen, keine Fotos', namen.every((n) => n && !/\s/.test(n.replace('Hans-Joachim', 'X'))) && mitglieder.every((s) => !s.items.some((i) => i.originalRole === 'photo')), namen.join(', '));
       const mannschaft = projekt.slides.find((s) => s.name === 'Unsere Mannschaft');
       p('A2: Mannschaftsfolie nur Text „seit 1991 in Werne“, kein Gruppenbild', mannschaft && !mannschaft.items.some((i) => i.type === 'image' && i.originalRole === 'photo') && mannschaft.items.some((i) => i.text === 'seit 1991 in Werne'));
-      const echt = projekt.slides.filter((s) => s.effectLayer && s.effectLayer.weatherAuto).map((s) => s.name);
-      const festesWetter = projekt.slides.filter((s) => s.effectLayer && !s.effectLayer.weatherAuto && ['snow', 'heavy-snow', 'rain', 'storm', 'sun'].some((t) => [s.effectLayer.type, s.effectLayer.type2, s.effectLayer.type3].includes(t))).map((s) => s.name);
-      p('A2: Wettereffekt auf einigen Folien folgt dem echten Wetter, nirgends fester Schnee/Regen', echt.length >= 5 && festesWetter.length === 0 && a.includes('fx.weatherAuto?[kcWetterEffekt()]'), `${echt.length} Folien; fest: ${festesWetter.join(', ')}`);
+      // 18.11.2026: auf allen Folien nur Schnee, Regen oder Sonne (echtes Wetter), keine anderen Effekte; Schlussfolie Feuerwerk
+      const schluss = projekt.slides[projekt.slides.length - 1];
+      const andere = projekt.slides.filter((s) => s !== schluss && !(s.effectLayer && s.effectLayer.weatherAuto && ['type', 'type2', 'type3'].every((k) => s.effectLayer[k] === 'none'))).map((s) => s.name);
+      p('A2: Effekte nur Schnee, Regen, Sonne nach echtem Wetter (alle Folien außer Schluss), Schlussfolie Feuerwerk', andere.length === 0 && schluss.effectLayer.type === 'fireworks' && !schluss.effectLayer.weatherAuto && a.includes("fx.weatherAuto?[kcWetterEffekt()]") && a.includes("a==='sun'?'sun':'none'") && !/function kcWetterEffekt\(\)\{[^}]*glitter/.test(a), andere.join(', '));
       p('A2: Wetterkacheln zeigen das Wetter ihres Tages', a.includes('"originalRole":"wetter-tomorrow"') && a.includes('"originalRole":"wetter-day4"') && a.includes('kind:kcKachelArt(data.daily.weather_code[n])') && a.includes('.kcKw'));
       const ohneFotoNamen = mitglieder.filter((s) => s.rotation && s.rotation.enabled !== false).map((s) => { const n = s.items.find((i) => i.originalRole === 'memberName'), q = s.items.find((i) => i.originalRole === 'memberQuote'); return n.x === q.x && n.w === q.w; });
       p('A2: Vornamen-Feld genau so breit wie der Spruch', ohneFotoNamen.every(Boolean));
       p('A2: Rückblick heißt 2025, leere Impressionen ausgeblendet', projekt.slides.filter((s) => /^Rückblick/.test(s.name)).every((s) => /2025/.test(s.name) && !s.items.some((i) => /2024/.test(i.text || ''))) && projekt.slides.filter((s) => /^Impressionen \d/.test(s.name)).every((s) => s.rotation.enabled === false));
       const laufschriften = projekt.slides.map((s) => s.items.find((i) => i.type === 'ticker')).filter(Boolean).map((i) => i.text);
       p('A2: Laufschrift langsamer, Themenblöcke mit Abstand, Preise je Gruppe und Allergen-Hinweis', a.includes('const TEMPO=30;') && a.includes('kcTickerPause') && laufschriften.some((t) => t.startsWith('Preise alkoholfreie Getränke:')) && laufschriften.some((t) => t.includes('wenden Sie sich gerne an die Standbesetzung')) && new Set(laufschriften).size > 5);
+      p('A2: durchgehendes Laufband über allen Folien (kein Flackern beim Folienwechsel)', a.includes('band.id="kcLaufband"') && a.includes('#tvStage .tvItem.ticker{visibility:hidden!important}') && a.includes('window.KC_LAUFSCHRIFT=') && a.includes('if(t===inhalt&&band.firstChild)return;'));
+      const qr = projekt.slides.flatMap((s) => s.items).filter((i) => i.name === 'official-qr-label' || i.name === 'join-copy').map((i) => i.text);
+      p('A2: QR-Folien: Gesamtprogramm im Internet, E-Mail an den Clubsprecher', qr.some((t) => /Gesamtprogramm\nim Internet/.test(t)) && qr.some((t) => /dem Clubsprecher\neine E-Mail senden/.test(t)) && !qr.some((t) => /Klaus Zander/.test(t)));
       const bilder = JSON.parse(a.slice(a.indexOf('const B=[') + 8, a.indexOf('];', a.indexOf('const B=[')) + 1));
       p('A2: entfernte Fotos stecken nicht mehr unsichtbar in der Datei', bilder.filter(Boolean).length <= 6, `${bilder.filter(Boolean).length} Bilder`);
       const { uebernehmen } = require(path.join(WURZEL, 'tools', 'tv-version-a-uebernehmen.cjs'));
