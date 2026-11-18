@@ -68,7 +68,7 @@ const p = (name, b) => { assert.ok(b, name); ok++; console.log('  OK  ' + name);
     p('Fernmodus: nach erledigtem Auftrag wird der Spiegel frisch gelesen', aufrufe.filter((n) => n === 'kc_stand_spiegel').length === 1);
     p('Fernmodus: Rückfragen höchstens 7 (vorher 15), zusammen 39 s', /AUFTRAG_PAUSEN_MS = \[1000, 2000, 4000, 8000, 8000, 8000, 8000\]/.test(src));
     p('Fernmodus: FernSocket 10 s sichtbar / 60 s verborgen, Fehler-Backoff, Standliste 60 s',
-      /SOCKET_TAKT_MS = 10000, SOCKET_TAKT_VERBORGEN_MS = 60000/.test(src) && /Math\.pow\(2/.test(src) && /setTimeout\(runde, STAND_LISTE_MS\)/.test(src) && /STAND_LISTE_MS = 60000/.test(src));
+      /SOCKET_TAKT_MS = 10000, SOCKET_TAKT_VERBORGEN_MS = 60000/.test(src) && /Math\.pow\(2/.test(src) && /setTimeout\(runde, leitungSteht\(\) \? LEITUNG_STAND_LISTE_MS : STAND_LISTE_MS\)/.test(src) && /STAND_LISTE_MS = 60000/.test(src));
   }
 
   // ---------- Stand-Brücke ----------

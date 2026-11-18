@@ -9,6 +9,9 @@
 // KC-KASSE-SPARSAM (18.11.2026): Spiegel-Antworten je Pfad 25 s zwischengespeichert (gleichzeitige
 // gleiche Anfragen werden zusammengefasst), Standliste alle 60 s, Auftragsrückfrage mit wachsender
 // Pause, Verlauf (/live-event-log) aus den Ereignissen statt aus einem eigenen Spiegel.
+// KC-STAND-LEITUNG (19.11.2026): steht die direkte Leitung des PC-Managers (kc-direkte-leitung-manager.js), kommen die
+// Signale „stand“ (neue Ereignisse), „stand-spiegel“ (Übersichten geändert) und „auftrag-erledigt“ sofort an. Dann wird
+// nur auf Signal geladen, plus Sicherheitsabfrage alle 60 s (Seite verborgen: 5 min). Ohne Leitung: wie oben (Stufe A).
 // Alle anderen Teile des PC-Managers bleiben unverändert - sie merken nicht, ob sie am Stand oder
 // zu Hause laufen. Wann der Fernmodus gilt:
 //   • gestartet über KC_Zuhause_Start.cmd (der Webserver meldet „zuhause“), oder
@@ -32,6 +35,14 @@
   const SOCKET_TAKT_MS = 10000, SOCKET_TAKT_VERBORGEN_MS = 60000, SOCKET_TAKT_MAX_MS = 120000;
   const STAND_LISTE_MS = 60000;
   const AUFTRAG_PAUSEN_MS = [1000, 2000, 4000, 8000, 8000, 8000, 8000]; // zusammen 39 s, 7 Rückfragen (vorher 15)
+  const AUFTRAG_WARTEN_MS = 39000;
+  // mit direkter Leitung: Sicherheitsabfragen, sonst nur auf Signal
+  const LEITUNG_SPIEGEL_MS = 60000, LEITUNG_SPIEGEL_VERBORGEN_MS = 300000;
+  const LEITUNG_SOCKET_MS = 60000, LEITUNG_SOCKET_VERBORGEN_MS = 300000;
+  const LEITUNG_STAND_LISTE_MS = 300000;
+  const LEITUNG_AUFTRAG_PAUSEN_MS = [2000, 10000, 10000, 17000]; // Rückfrage sonst nur nach Signal „auftrag-erledigt“
+  const verborgen = () => !!(global.document && global.document.hidden);
+  const leitungSteht = () => { try { return !!(global.KCDirekteLeitungManager && global.KCDirekteLeitungManager.steht && global.KCDirekteLeitungManager.steht()); } catch (e) { return false; } };
   const echtFetch = global.fetch.bind(global);
   const EchtWebSocket = global.WebSocket;
 
@@ -92,7 +103,8 @@
   async function spiegelHolen(stand, pfad) {
     const schluessel = stand.standId + ' ' + pfad;
     const vorhanden = spiegelPuffer.get(schluessel);
-    if (vorhanden && Date.now() - vorhanden.zeit < SPIEGEL_PUFFER_MS) {
+    const puffer = leitungSteht() ? (verborgen() ? LEITUNG_SPIEGEL_VERBORGEN_MS : LEITUNG_SPIEGEL_MS) : SPIEGEL_PUFFER_MS;
+    if (vorhanden && Date.now() - vorhanden.zeit < puffer) {
       const r = await vorhanden.versprechen;
       return { r, zusatzSek: Math.floor((Date.now() - vorhanden.zeit) / 1000) };
     }
@@ -162,8 +174,13 @@
     const stand = gewaehlterStand();
     const { auftragId } = await rpc('kc_stand_auftrag_anlegen', { p_stand: stand.standId, p_pfad: pfad, p_koerper: daten });
     // Wachsende Pause (1, 2, 4, 8 … s): der Stand meldet sich ohne Neues nur alle 30 s.
-    for (const pause of AUFTRAG_PAUSEN_MS) {
-      await new Promise((r) => setTimeout(r, pause));
+    // Mit direkter Leitung: warten auf das Signal „auftrag-erledigt“ (Rückfrage dann sofort), sonst nur selten nachfragen.
+    const ende = Date.now() + AUFTRAG_WARTEN_MS;
+    for (let i = 0; Date.now() < ende; i++) {
+      const pausen = leitungSteht() ? LEITUNG_AUFTRAG_PAUSEN_MS : AUFTRAG_PAUSEN_MS;
+      const pause = Math.min(pausen[Math.min(i, pausen.length - 1)], Math.max(0, ende - Date.now()));
+      if (pause <= 0) break;
+      await warteAufErledigt(pause);
       let st = null;
       try { st = await rpc('kc_stand_auftrag', { p_auftrag: auftragId }); } catch (e) { continue; }
       if (st && st.status === 'erledigt') {
@@ -174,6 +191,15 @@
     }
     meldeHinweis('warning', `${beschreibe(pfad)}: an den Stand unterwegs. Der Stand meldet sich gerade nicht (kein Internet am Stand oder Mini-PC aus) – es wird ausgeführt, sobald er wieder online ist. Nichts doppelt senden.`);
     return jsonAntwort(202, { kcFernmodus: 'unterwegs', auftragId, hinweis: 'Wird am Stand ausgeführt, sobald der Mini-PC online ist.' });
+  }
+  // Wartende Aufträge: das Signal „auftrag-erledigt“ beendet die Pause sofort
+  const erledigtWarter = new Set();
+  function warteAufErledigt(ms) {
+    return new Promise((r) => {
+      const fertig = () => { clearTimeout(t); erledigtWarter.delete(fertig); r(); };
+      const t = setTimeout(fertig, ms);
+      erledigtWarter.add(fertig);
+    });
   }
   function beschreibe(pfad) {
     return ({ '/master-data/push': 'Stammdaten an alle Kassen', '/dienstplan/push': 'Dienstplan an die Kassen', '/sold-out-status/setzen': 'Ausverkauft',
@@ -205,6 +231,7 @@
   };
 
   // ---------- Live-Monitor: WebSocket umlenken ----------
+  const offeneSockets = new Set();
   class FernSocket {
     constructor(url) {
       this.url = url; this.readyState = 0; this.onopen = null; this.onmessage = null; this.onclose = null; this.onerror = null;
@@ -218,6 +245,7 @@
     send() { /* Live-Monitor sendet nichts */ }
     close() {
       if (this._aus) return; this._aus = true; this.readyState = 3; clearTimeout(this._t);
+      offeneSockets.delete(this);
       if (this._sichtbar && global.document && global.document.removeEventListener) global.document.removeEventListener('visibilitychange', this._sichtbar);
       this._feuer('close', { code: 1000 });
     }
@@ -227,6 +255,7 @@
       try { this._cursor = (await rpc('kc_stand_ereignisse', { p_stand: stand.standId, p_nach_id: null })).letzteId; }
       catch (e) { this.readyState = 3; this._feuer('error', {}); this._feuer('close', { code: 1006 }); return; }
       this.readyState = 1; this._feuer('open', {});
+      offeneSockets.add(this);
       if (global.document && global.document.addEventListener) {
         this._sichtbar = () => { if (!global.document.hidden) this._sofort(); };
         global.document.addEventListener('visibilitychange', this._sichtbar);
@@ -255,7 +284,8 @@
       } catch (e) { letzterFehler = e.message; this._fehler++; }
       zeichneBanner();
       // Sichtbar alle 10 s, verborgen alle 60 s; bei Fehlern wachsende Pause (höchstens 2 min).
-      const grund = (global.document && global.document.hidden) ? SOCKET_TAKT_VERBORGEN_MS : SOCKET_TAKT_MS;
+      const grund = leitungSteht() ? (verborgen() ? LEITUNG_SOCKET_VERBORGEN_MS : LEITUNG_SOCKET_MS)
+        : (verborgen() ? SOCKET_TAKT_VERBORGEN_MS : SOCKET_TAKT_MS);
       const pause = this._fehler ? Math.min(SOCKET_TAKT_MAX_MS, grund * Math.pow(2, Math.min(this._fehler, 4))) : grund;
       this._t = setTimeout(() => this._takt(), pause);
     }
@@ -292,7 +322,7 @@
         } catch (e) { letzterFehler = e.message; }
       } else await standAuswaehlenFallsNoetig();
       zeichneBanner();
-      setTimeout(runde, STAND_LISTE_MS);
+      setTimeout(runde, leitungSteht() ? LEITUNG_STAND_LISTE_MS : STAND_LISTE_MS);
     };
     runde();
   }
@@ -316,14 +346,33 @@
       const sek = standInfo && standInfo.sekundenSeitMeldung;
       if (sek === null || sek === undefined) { farbe = '#fdecea'; text = '#7f1d1d'; inhalt = `🌐 Fernmodus · Stand „${stand.name}“ hat sich noch NIE gemeldet – läuft der Mini-PC, ist er als Stand angemeldet?`; }
       else if (sek >= VERALTET_SEK) { farbe = '#fdecea'; text = '#7f1d1d'; inhalt = `🌐 Fernmodus · Stand „${stand.name}“ · VERALTET: zuletzt gemeldet vor ${dauer(sek)}. Kein Internet am Stand oder Mini-PC aus – am Stand wird trotzdem kassiert, die Daten kommen nach.`; }
-      else { if (sek >= 60) { farbe = '#fff4e5'; text = '#7c2d12'; } inhalt = `🌐 Fernmodus · Stand „${stand.name}“ · zuletzt gemeldet vor ${dauer(sek)}`; }
+      // gelb erst ab 90 s: mit direkter Leitung meldet sich ein ruhiger Stand nur jede Minute (Aufträge wecken ihn sofort)
+      else { if (sek >= 90) { farbe = '#fff4e5'; text = '#7c2d12'; } inhalt = `🌐 Fernmodus · Stand „${stand.name}“ · zuletzt gemeldet vor ${dauer(sek)}`; }
     }
     el.style.background = farbe; el.style.color = text; el.innerHTML = inhalt;
     el.querySelectorAll('[data-kc-stand]').forEach((b) => { b.onclick = () => waehleStand({ standId: b.dataset.kcStand, name: b.dataset.kcName }); });
   }
   function dauer(sek) { return sek < 120 ? `${sek} s` : sek < 7200 ? `${Math.round(sek / 60)} min` : `${Math.round(sek / 3600)} h`; }
 
-  global.KCFernmodus = { modus: () => modus, bestimmeModus, gewaehlterStand, waehleStand, standInfo: () => standInfo,
+  // ---------- Signale der direkten Leitung (kc-direkte-leitung-manager.js ruft das auf) ----------
+  // Sichtbare Seite: Live-Monitor höchstens alle 5 s auf Signal (ein voller Stand meldet alle 5 s). Verborgene Seite:
+  // Signale nur merken – geholt wird beim Sichtbarwerden (FernSocket holt dann ohnehin sofort) bzw. in der Sicherheitsabfrage.
+  const SIGNAL_ABSTAND_MS = 5000;
+  let socketWecker = null, letzterSignalAbruf = 0, spiegelVeraltet = false;
+  function signal(art) {
+    if (modus !== 'fern') return;
+    if ((art === 'stand' || art === 'nachholen') && !verborgen() && !socketWecker) {
+      const warteMs = Math.max(300, SIGNAL_ABSTAND_MS - (Date.now() - letzterSignalAbruf));
+      socketWecker = setTimeout(() => { socketWecker = null; letzterSignalAbruf = Date.now(); offeneSockets.forEach((s) => s._sofort()); }, warteMs);
+    }
+    if (art === 'stand-spiegel' || art === 'nachholen') { if (verborgen()) spiegelVeraltet = true; else spiegelLeeren(); }
+    if (art === 'auftrag-erledigt' || art === 'nachholen') [...erledigtWarter].forEach((f) => f());
+  }
+  if (global.document && global.document.addEventListener) {
+    global.document.addEventListener('visibilitychange', () => { if (!global.document.hidden && spiegelVeraltet) { spiegelVeraltet = false; spiegelLeeren(); } });
+  }
+
+  global.KCFernmodus = { modus: () => modus, bestimmeModus, gewaehlterStand, waehleStand, standInfo: () => standInfo, signal,
     // Auftrag an den Stand ohne Umweg über fetch (z. B. Präsentation an den Fernseher)
     auftrag: (pfad, daten) => auftragMitDaten(pfad, daten) };
   bestimmeModus();

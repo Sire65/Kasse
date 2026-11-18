@@ -39,8 +39,12 @@
  // (gemeinsamer Anmeldestand). Die Nachfrage „offen?“ geht nur an den Manager-Dienst auf diesem PC.
  let zuletztVoll=0,zuletztOffen=0;
  function sichtbar(){const p=document.querySelector('[data-view-panel="timeclock"]');return !!p&&!document.hidden&&(p.classList.contains('active')||(!p.hidden&&p.offsetParent!==null));}
+ // KC-STAND-LEITUNG (19.11.2026): steht die direkte Leitung, holt nur das Signal „stempel“ den gemeinsamen Anmeldestand
+ // (neue Buchung irgendwo im Verein); dann auch bei offener Seite kein 30-s-Abgleich mehr – Sicherheitsabfrage alle 5 Minuten.
+ const leitungSteht=()=>{try{return !!window.KCDirekteLeitungManager?.steht?.();}catch(_){return false;}};
+ function signal(){if(Date.now()-zuletztVoll<5000)return;zuletztVoll=Date.now();return refresh();}
  async function takt(){
-  if(sichtbar()||Date.now()-zuletztVoll>=300000){zuletztVoll=Date.now();return refresh();}
+  if((sichtbar()&&!leitungSteht())||Date.now()-zuletztVoll>=300000){zuletztVoll=Date.now();return refresh();}
   try{
    const r=await fetch('http://127.0.0.1:47392/zeiterfassung/cloud-status',{signal:AbortSignal.timeout(5000),cache:'no-store'});
    const d=r.ok?await r.json():null;
@@ -52,5 +56,5 @@
  setInterval(takt,30000);
  const ersteRunde=()=>{zuletztVoll=Date.now();refresh();};
  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',ersteRunde,{once:true});else ersteRunde();
- window.KCTimeClockCloudStatus={refresh};
+ window.KCTimeClockCloudStatus={refresh,signal};
 })();

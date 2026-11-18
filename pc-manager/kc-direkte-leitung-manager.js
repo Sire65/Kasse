@@ -1,10 +1,12 @@
-/* PC-Manager an der direkten Leitung (KC-RT-PROGRAMME, 11.10.2026)                     Build 1.1.0
+/* PC-Manager an der direkten Leitung (KC-RT-PROGRAMME, 11.10.2026)                     Build 1.2.0
  *
  * Signale (nur Art, nie Inhalt) und was der Manager daraufhin SOFORT tut – jeweils über den bisherigen Weg:
  *   geld, zaehlung  → Money-Butler-Übergaben/Zählungen aus der Cloud abholen (KCMoneyButlerCloudIntake.poll)
  *                     und die Eingangsliste im Bereich Money Butler neu laden (KCFinanceUebergaben.listeLaden)
  *   einstellungen   → gemeinsame Messwerte-Einstellungen holen (KCCashMeasureCentralSync.pull)
  *   dienstplan      → veröffentlichten Sollplan aus dp2 holen (KCDienstplanManager.holeUndVeroeffentliche)
+ *   stand, stand-spiegel, auftrag-erledigt → Fernmodus zu Hause (KCFernmodus.signal; KC-STAND-LEITUNG 19.11.2026)
+ *   stempel         → Stempel-Anmeldestand holen (KCTimeClockCloudStatus.signal)
  * Steht die Leitung, fragt die Geld-Abholung nur noch jede Minute zur Sicherheit nach statt alle 15 s
  * (siehe kc-money-butler-cloud-intake.js). Ohne Supabase-Anmeldung baut der Manager keine Leitung auf und
  * arbeitet wie bisher. Die Kassen sind davon nicht betroffen (sie sprechen nur mit dem Kassen-Dienst).
@@ -41,9 +43,11 @@
       if (art === 'geld' || art === 'zaehlung') einmal('geld', geldHolen);
       else if (art === 'einstellungen') einmal('einstellungen', einstellungenHolen);
       else if (art === 'dienstplan') einmal('dienstplan', dienstplanHolen, 1500);
+      else if (art === 'stand' || art === 'stand-spiegel' || art === 'auftrag-erledigt') global.KCFernmodus?.signal?.(art);
+      else if (art === 'stempel') einmal('stempel', () => global.KCTimeClockCloudStatus?.signal?.(), 1500);
     },
-    nachholen() { einmal('geld', geldHolen, 300); einmal('dienstplan', dienstplanHolen, 2000); },
+    nachholen() { einmal('geld', geldHolen, 300); einmal('dienstplan', dienstplanHolen, 2000); global.KCFernmodus?.signal?.('nachholen'); },
     beiStatus: zeigeStatus,
   });
-  global.KCDirekteLeitungManager = { version: '1.1.0', steht: leitung.steht, zustand: leitung.zustand, neuVerbinden: leitung.neuVerbinden };
+  global.KCDirekteLeitungManager = { version: '1.2.0', steht: leitung.steht, zustand: leitung.zustand, neuVerbinden: leitung.neuVerbinden };
 })(window);
