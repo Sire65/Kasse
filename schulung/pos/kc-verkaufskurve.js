@@ -16,56 +16,82 @@
   const tagVon = (iso) => { const d = new Date(iso); return isNaN(d) ? '' : `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`; };
   const SCHWELLE = 0.15;
 
-  function vorgaenge() { try { return (readTransactions() || []).filter((t) => !t.training); } catch (e) { return []; } }
-  /* Stueck dieses Artikels in einer Bonzeile - auch als Teil einer Kombi */
+  const zahl = n => Number(n||0).toLocaleString('de-DE',{maximumFractionDigits:1});
+  const training = () => { try { return !!state.master.trainingMode; } catch { return false; } };
+  function vorgaenge() {
+    try { return (training()?readTrainingTransactions():readTransactions()).filter(t=>
+      !['personal','helfer'].includes(t.type)&&!(t.type==='reversal'&&['personal','helfer'].includes(t.originalType))
+      &&(training()||!t.training)); } catch { return []; }
+  }
+  const zaehlt = item => !item.discountLine&&item.category!=='Pfand'&&!item.manualDeposit&&!item.voucherCredit
+    &&item.category!=='Gutschein'&&!/^VOUCHER|^GUTSCHEIN/i.test(item.id||'');
+  const faktor = item => Number(item.portionFactor)===0.5?0.5:1;
   function stueckIn(item, productId) {
-    const q = Number(item.qty || 0);
-    if (item.id === productId) return q;
-    if (item.isPackage && Array.isArray(item.components)) return item.components.filter((c) => c.id === productId).length * q;
+    if(!zaehlt(item))return 0;
+    const q=Number(item.qty||0)*faktor(item);
+    if(item.refund&&item.complaint?.sourceProductId===productId)return -q;
+    if(item.id===productId)return q;
+    if(item.isPackage&&Array.isArray(item.components))return item.components.filter(c=>c.id===productId).reduce((s,c)=>s+Number(c.qty??1),0)*q;
     return 0;
   }
-  const zaehltFuerAnteil = (item) => !item.discountLine && item.category !== 'Pfand';
-
+  function alleStueck(item){
+    if(!zaehlt(item))return 0;
+    const q=Number(item.qty||0)*faktor(item);
+    if(item.refund)return -q;
+    return item.isPackage&&Array.isArray(item.components)?item.components.reduce((s,c)=>s+Number(c.qty??1),0)*q:q;
+  }
+  // Bereits gespeicherte Halbpreise niemals noch einmal halbieren. Pfand und Bonrabatt sind separat.
+  function artikelWert(item,productId){
+    const wert=(Number(item.price||0)+Number(item.option?.price||0))*Number(item.qty||0);
+    if(item.id===productId||item.refund&&item.complaint?.sourceProductId===productId)return wert;
+    if(!item.isPackage||!Array.isArray(item.components))return 0;
+    const sum=item.components.reduce((s,c)=>s+Math.max(0,Number(c.price||0))*Number(c.qty??1),0);
+    const anteil=item.components.filter(c=>c.id===productId).reduce((s,c)=>s+Math.max(0,Number(c.price||0))*Number(c.qty??1),0);
+    return sum>0?wert*anteil/sum:0;
+  }
   function daten(productId) {
-    const alle = vorgaenge();
-    const heute = (() => { try { return localBusinessDate(); } catch (e) { return tagVon(new Date()); } })();
-    const jetzt = Date.now();
-    const jeStunde = {}, vergleich = {};
-    let stueck = 0, betrag = 0, tagesStueck = 0, letzte60 = 0, davor60 = 0;
-    const fruehereTage = new Set();
-    alle.forEach((t) => {
-      const zeit = t.time || t.endTime; const tag = tagVon(zeit);
-      if (tag && tag < heute) fruehereTage.add(tag);
-      if (tag !== heute) return;
-      const ms = new Date(zeit).getTime(), stunde = new Date(zeit).getHours();
-      (t.items || []).forEach((i) => {
-        if (zaehltFuerAnteil(i)) tagesStueck += Number(i.qty || 0);
-        const n = stueckIn(i, productId); if (!n) return;
-        stueck += n;
-        if (i.id === productId) betrag += (Number(i.price || 0) + Number(i.option?.price || 0)) * Number(i.portionFactor || 1) * Number(i.qty || 0);
-        jeStunde[stunde] = (jeStunde[stunde] || 0) + n;
-        if (ms > jetzt - 3600e3) letzte60 += n; else if (ms > jetzt - 7200e3) davor60 += n;
+    const alle=vorgaenge(),heute=tagVon(new Date()),jetzt=Date.now();
+    const jeStunde={},vergleich={},fruehereTage=new Set(),bons=new Set();
+    let stueck=0,betrag=0,tagesStueck=0,letzte60=0,davor60=0,ersteZeit=Infinity;
+    alle.forEach(t=>{
+      const zeit=t.time||t.endTime,ms=new Date(zeit).getTime(),tag=tagVon(zeit);
+      if(!Number.isFinite(ms)||ms>jetzt)return;
+      if(tag<heute&&(t.items||[]).some(i=>stueckIn(i,productId)!==0))fruehereTage.add(tag);
+      if(tag!==heute)return;
+      const stunde=new Date(zeit).getHours();
+      (t.items||[]).forEach(i=>{
+        tagesStueck+=alleStueck(i);
+        const n=stueckIn(i,productId);if(!n)return;
+        stueck+=n;betrag+=artikelWert(i,productId);jeStunde[stunde]=(jeStunde[stunde]||0)+n;
+        if(n>0){ersteZeit=Math.min(ersteZeit,ms);bons.add(t.transactionId||t);}
+        if(ms>jetzt-3600e3)letzte60+=n;else if(ms>jetzt-7200e3)davor60+=n;
       });
     });
-    const letzterTag = [...fruehereTage].sort().pop() || null;
-    if (letzterTag) alle.forEach((t) => {
-      const zeit = t.time || t.endTime; if (tagVon(zeit) !== letzterTag) return;
-      const stunde = new Date(zeit).getHours();
-      (t.items || []).forEach((i) => { const n = stueckIn(i, productId); if (n) vergleich[stunde] = (vergleich[stunde] || 0) + n; });
+    const letzterTag=[...fruehereTage].sort().pop()||null;
+    if(letzterTag)alle.forEach(t=>{
+      const zeit=t.time||t.endTime;if(tagVon(zeit)!==letzterTag)return;
+      const h=new Date(zeit).getHours();(t.items||[]).forEach(i=>{const n=stueckIn(i,productId);if(n)vergleich[h]=(vergleich[h]||0)+n;});
     });
-    let trend = 'gleich', prozent = 0;
-    if (davor60 > 0) { prozent = (letzte60 - davor60) / davor60; trend = prozent > SCHWELLE ? 'hoch' : prozent < -SCHWELLE ? 'runter' : 'gleich'; }
-    else if (letzte60 > 0) trend = 'neu';
-    return { heute, letzterTag, jeStunde, vergleich, stueck, betrag, tagesStueck, letzte60, davor60, trend, prozent,
-      anteil: tagesStueck > 0 ? Math.max(0, stueck) / tagesStueck : 0 };
+    let trend='gleich',prozent=0;
+    if(davor60>0){prozent=(letzte60-davor60)/davor60;trend=prozent>SCHWELLE?'hoch':prozent< -SCHWELLE?'runter':'gleich';}
+    else if(letzte60>0)trend='neu';
+    const minuten=Math.min(60,(jetzt-ersteZeit)/60000);
+    const prognose=bons.size>=3&&minuten>=15?Math.max(0,Math.round(letzte60/minuten*60)):null;
+    return {heute,letzterTag,jeStunde,vergleich,stueck,betrag,tagesStueck,letzte60,davor60,trend,prozent,prognose,
+      minuten,training:training(),anteil:tagesStueck>0?Math.min(1,Math.max(0,stueck)/tagesStueck):0};
+  }
+  function prognoseHtml(d){return `<div class="kc-prognose"><strong>Prognose nächste 60 Minuten</strong><b>${d.prognose===null?'Noch zu wenig Daten':`ca. ${zahl(d.prognose)} Portionen`}</b><small>${d.prognose===null?'Mindestens drei Verkaufsbons und 15 Minuten Beobachtung nötig.':`Hochrechnung aus den letzten ${Math.round(d.minuten)} Minuten. Keine feste Bedarfszusage.`}</small></div>`;}
+  function infoHtml(productId){
+    const d=daten(productId);
+    return `<section class="kc-info-verkauf"><h3>Verkäufe & Prognose${d.training?' · TRAINING':''}</h3><div class="kc-info-kennzahlen"><strong>${zahl(d.stueck)} Portionen heute</strong><span>${geld(d.betrag)} Artikelwert</span></div><small>Lokal gespeicherter Nettoabsatz inkl. Kombis, abzüglich Storno/Rückgabe. ½ zählt als 0,5. Artikelwert ohne Pfand, vor Rabatten.</small>${prognoseHtml(d)}${kurveSvg(d,600,190)}<small>Kurve: Portionen je Stunde. Laufende Stunde noch unvollständig. Rot: heute.${d.letzterTag?' Grau gestrichelt: letzter Verkaufstag dieses Artikels.':''}</small></section>`;
   }
 
   function trendHtml(d) {
     const p = Math.round(Math.abs(d.prozent) * 100);
-    const zeile = `${d.letzte60}× statt ${d.davor60}× in der Stunde davor`;
+    const zeile = `${zahl(d.letzte60)}× statt ${zahl(d.davor60)}× in der Stunde davor`;
     if (d.trend === 'hoch') return `<div class="kc-kurve-pfeil hoch">▲</div><div><strong class="hoch">+${p} %</strong><em>${zeile}</em></div>`;
     if (d.trend === 'runter') return `<div class="kc-kurve-pfeil runter">▼</div><div><strong class="runter">−${p} %</strong><em>${zeile}</em></div>`;
-    if (d.trend === 'neu') return `<div class="kc-kurve-pfeil hoch">▲</div><div><strong class="hoch">neu</strong><em>${d.letzte60}× in der letzten Stunde</em></div>`;
+    if (d.trend === 'neu') return `<div class="kc-kurve-pfeil hoch">▲</div><div><strong class="hoch">neu</strong><em>${zahl(d.letzte60)}× in der letzten Stunde</em></div>`;
     if (!d.letzte60 && !d.davor60) return `<div class="kc-kurve-pfeil gleich">►</div><div><strong>ruhig</strong><em>keine Verkäufe in den letzten 2 Stunden</em></div>`;
     return `<div class="kc-kurve-pfeil gleich">►</div><div><strong>gleich</strong><em>${zeile}</em></div>`;
   }
@@ -75,13 +101,13 @@
     const jetztStunde = new Date().getHours();
     const von = Math.min(10, ...stundenMit), bis = Math.max(von + 6, jetztStunde + 1, ...stundenMit.map((h) => h + 1));
     const werte = [...Object.values(d.jeStunde), ...Object.values(d.vergleich), 1];
-    const schritt = Math.max(1, Math.ceil(Math.max(...werte) / 4));
-    const max = schritt * 4;
+    const schritt = Math.max(1, Math.ceil((Math.max(...werte)-Math.min(0,...werte))/4));
+    const min=Math.floor(Math.min(0,...werte)/schritt)*schritt,max=Math.max(min+schritt,Math.ceil(Math.max(...werte)/schritt)*schritt);
     const L = 46, R = 34, T = 16, B = 38;
     const x = (h) => L + (h - von) / (bis - von) * (breite - L - R);
-    const y = (v) => T + (1 - v / max) * (hoehe - T - B);
+    const y = (v) => T + (1 - (v-min) / (max-min)) * (hoehe - T - B);
     let s = '';
-    for (let v = 0; v <= max; v += schritt) s += `<line x1="${L}" x2="${breite - R}" y1="${y(v)}" y2="${y(v)}" class="gitter"/><text x="${L - 10}" y="${y(v) + 6}" class="achse" text-anchor="end">${v}</text>`;
+    for (let v = min; v <= max; v += schritt) s += `<line x1="${L}" x2="${breite - R}" y1="${y(v)}" y2="${y(v)}" class="gitter"/><text x="${L - 10}" y="${y(v) + 6}" class="achse" text-anchor="end">${v}</text>`;
     const beschriftungAlle = (bis - von) > 12 ? 2 : 1;
     for (let h = von; h <= bis; h++) if ((h - von) % beschriftungAlle === 0) s += `<text x="${x(h)}" y="${hoehe - 10}" class="achse" text-anchor="middle">${h}:00</text>`;
     // Vergleich letzter Markttag (Punkte je Stundenbeginn, luecken = 0)
@@ -90,7 +116,7 @@
       s += `<polyline points="${pkt.join(' ')}" class="vergleich"/>`;
     }
     // heute bis zur aktuellen Stunde
-    const heuteBis = Math.min(bis - 1, jetztStunde);
+    const heuteBis = Math.min(bis - 1, jetztStunde-(new Date().getMinutes()===0&&!d.jeStunde[jetztStunde]?1:0));
     const pkt = [];
     for (let h = von; h <= heuteBis; h++) pkt.push([h, d.jeStunde[h] || 0]);
     if (pkt.length) {
@@ -113,20 +139,21 @@
     const d = daten(productId);
     dlg.classList.add('kc-kurve-modus');
     const kicker = dlg.querySelector('.info-kicker'); if (kicker) kicker.textContent = 'VERKÄUFE HEUTE';
-    $('salesTimeTitle').textContent = `★ ${p ? p.name : 'Artikel'}`;
+    $('salesTimeTitle').textContent = `📊 ${p ? p.name : 'Artikel'}${d.training?' · TRAINING':''}`;
     const stand = new Date();
     $('salesTimeSubtitle').textContent = `${stand.toLocaleDateString('de-DE', { weekday: 'long', day: '2-digit', month: '2-digit' })} · Stand ${stand.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })} Uhr`;
     const liste = $('salesTimeList');
     liste.className = 'kc-kurve';
     liste.innerHTML = `
       <div class="kc-kurve-kacheln">
-        <div class="kc-kurve-kachel"><span>Heute verkauft</span><div class="wert"><strong>${d.stueck}×</strong>${d.betrag > 0 ? `<em>${geld(d.betrag)}</em>` : ''}</div></div>
+        <div class="kc-kurve-kachel"><span>Heute netto verkauft</span><div class="wert"><strong>${zahl(d.stueck)} Portionen</strong>${d.betrag !== 0 ? `<em>${geld(d.betrag)}</em>` : ''}</div></div>
         <div class="kc-kurve-kachel"><span>Nachfrage letzte Stunde</span><div class="kc-kurve-trend">${trendHtml(d)}</div></div>
-        <div class="kc-kurve-kachel"><span>Anteil am Tagesverkauf</span><div class="wert"><strong>${Math.round(d.anteil * 100)} %</strong><em>von ${d.tagesStueck} Artikeln</em></div><div class="kc-kurve-balken"><i style="width:${Math.min(100, Math.round(d.anteil * 100))}%"></i></div></div>
+        <div class="kc-kurve-kachel"><span>Anteil am Tagesverkauf</span><div class="wert"><strong>${Math.round(d.anteil * 100)} %</strong><em>von ${zahl(d.tagesStueck)} Portionen</em></div><div class="kc-kurve-balken"><i style="width:${Math.min(100, Math.round(d.anteil * 100))}%"></i></div></div>
       </div>
+      ${prognoseHtml(d)}<small>½ = 0,5 Portionen. Artikelwert ohne Pfand, vor Rabatten.</small>
       <div class="kc-kurve-flaeche"><div class="kc-kurve-tip" hidden></div></div>
-      <div class="kc-kurve-legende"><span><b class="l-heute"></b>heute</span>${d.letzterTag ? `<span><b class="l-vergleich"></b>letzter Markttag (${esc(new Date(d.letzterTag + 'T12:00').toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit' }))}), gleiche Uhrzeit</span>` : ''}<span class="kc-kurve-hilfe">Punkt antippen = Stunde genau</span></div>`;
-    dlg.showModal();
+      <div class="kc-kurve-legende"><span><b class="l-heute"></b>heute</span>${d.letzterTag ? `<span><b class="l-vergleich"></b>letzter Markttag (${esc(new Date(d.letzterTag + 'T12:00').toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit' }))}), gleiche Uhrzeit</span>` : ''}<span class="kc-kurve-hilfe">Laufende Stunde noch unvollständig · Punkt antippen = Details</span></div>`;
+    $('productInfoDialog')?.close();if(!dlg.open)dlg.showModal();
     // Groesse erst nach dem Oeffnen messen - die Kurve bekommt echte Pixel, damit die Schrift auf
     // jedem Tablet gleich gross bleibt (kein Mitschrumpfen wie bei einer skalierten Grafik).
     const flaeche = liste.querySelector('.kc-kurve-flaeche');
@@ -142,7 +169,7 @@
     flaeche.onclick = (ev) => {
       const t = ev.target.closest('.treffer'); if (!t) { tip.hidden = true; return; }
       const h = Number(t.dataset.stunde), v = Number(t.dataset.menge), vg = Number(t.dataset.vergleich);
-      tip.innerHTML = `${String(h).padStart(2, '0')}:00–${String((h + 1) % 24).padStart(2, '0')}:00 · <b>${v}×</b>${d.letzterTag ? ` · letzter Markttag ${vg}×` : ''}`;
+      tip.innerHTML = `${String(h).padStart(2, '0')}:00–${String((h + 1) % 24).padStart(2, '0')}:00 · <b>${zahl(v)}×</b>${d.letzterTag ? ` · letzter Markttag ${zahl(vg)}×` : ''}`;
       tip.hidden = false;
       const r = flaeche.getBoundingClientRect(), c = t.getBoundingClientRect();
       /* Platz: ueber dem Punkt; ist oben kein Platz, seitlich daneben (links, sonst rechts) - der
@@ -154,5 +181,5 @@
     };
     return true;
   }
-  global.KCVerkaufskurve = { oeffnen, daten };
+  global.KCVerkaufskurve = { oeffnen, daten, infoHtml, stueckIn };
 })(window);

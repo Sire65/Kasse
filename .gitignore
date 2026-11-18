@@ -11,3 +11,6 @@ markt-kasse-suite/backend-source/*.sqlite-*
 markt-kasse-suite/backend-source/*.admin-token.txt
 # Testbilder, die tests/haendlerausweis*.test.cjs ins Hauptverzeichnis schreibt
 /haendler-*.png
+test-results/
+
+/supabase/.temp/

@@ -47,6 +47,11 @@ class ManagerCompanion {
     this.bonjour = null;
     this.mdnsService = null;
     this.server = null;
+    const {TimeClockCloudQueue} = require('./time-clock-cloud-queue');
+    this.timeClockCloud = new TimeClockCloudQueue({db:this.db,
+      send:async() => {throw new Error('Bitte den PC-Manager bei Supabase anmelden, damit die Buchungen übertragen werden.');},
+      people:() => {const row=this.db.prepare('SELECT settings_json FROM master_data ORDER BY id LIMIT 1').get();
+        return JSON.parse(row?.settings_json || '{}').zeiterfassung?.people || [];}});
   }
 
   async start(port = 0) {
@@ -109,6 +114,9 @@ class ManagerCompanion {
     } catch (err) {
       console.error('[KC Sync] mDNS-Ankündigung fehlgeschlagen, Manager bleibt trotzdem erreichbar (statische Ausweichadresse nötig):', err.message);
     }
+    this._timeClockCloudTimer = setInterval(() => this.timeClockCloud.flush(), 30000);
+    this._timeClockCloudTimer.unref?.();
+    this.timeClockCloud.flush();
     this._verbindungsPruefTimer = setInterval(() => this._pruefeVerbindungen(), 5000);
     return { port: this.port, managerId: this.identity.managerId, fingerprint: this.identity.fingerprint };
   }
@@ -133,6 +141,8 @@ class ManagerCompanion {
   }
 
   async stop() {
+    clearInterval(this._timeClockCloudTimer);
+    await this.timeClockCloud.stop();
     if (this._verbindungsPruefTimer) clearInterval(this._verbindungsPruefTimer);
     if (this.mdnsService) this.mdnsService.stop();
     if (this.bonjour) this.bonjour.destroy();
@@ -902,11 +912,11 @@ class ManagerCompanion {
             const jetzt = new Date().toISOString();
             const einfuegen = this.db.prepare(`
               INSERT INTO time_clock_events
-                (event_id, person_id, person_type, kind, recorded_at, effective_at,
+                (event_id, person_id, member_no, person_type, kind, recorded_at, effective_at,
                  register_id, event_name, source, correction_reason, shift_reason, voided_at, received_at)
-              VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+              VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
               ON CONFLICT(event_id) DO UPDATE SET
-                effective_at=excluded.effective_at, correction_reason=excluded.correction_reason,
+                member_no=COALESCE(excluded.member_no,time_clock_events.member_no), effective_at=excluded.effective_at, correction_reason=excluded.correction_reason,
                 shift_reason=excluded.shift_reason, voided_at=excluded.voided_at
             `);
             const angekommen = [];
@@ -914,7 +924,7 @@ class ManagerCompanion {
             try {
               for (const e of ereignisse) {
                 if (!e || !e.id || !e.personId || !e.kind || !e.effectiveAt) continue;
-                einfuegen.run(String(e.id), String(e.personId), e.personType || null, String(e.kind),
+                einfuegen.run(String(e.id), String(e.personId), e.credential || null, e.personType || null, String(e.kind),
                   String(e.recordedAt || e.effectiveAt), String(e.effectiveAt),
                   e.registerId || null, e.eventId || null, e.source || null,
                   e.correctionReason || null, e.shiftReason || null, e.voidedAt || null, jetzt);
@@ -1137,16 +1147,49 @@ class ManagerCompanion {
         })) }));
         return;
       }
+      if (url.pathname === '/zeiterfassung/cloud-senden' && ['POST','OPTIONS'].includes(req.method)) {
+        const local=['127.0.0.1','::1','::ffff:127.0.0.1'].includes(req.socket.remoteAddress || '');
+        const origin=req.headers.origin;
+        let allowedOrigin=!origin || origin==='null';
+        try {const parsed=new URL(origin);allowedOrigin=['http:','https:'].includes(parsed.protocol)&&['127.0.0.1','localhost','[::1]'].includes(parsed.hostname);}catch(_){}
+        if(!local||!allowedOrigin){res.writeHead(403);res.end();return;}
+        if(origin)res.setHeader('Access-Control-Allow-Origin',origin);
+        res.setHeader('Access-Control-Allow-Headers','Authorization, Content-Type');
+        res.setHeader('Access-Control-Allow-Methods','POST, OPTIONS');
+        if(req.method==='OPTIONS'){res.writeHead(204);res.end();return;}
+        const token=String(req.headers.authorization || '').replace(/^Bearer /,'');
+        if(!req.headers.authorization?.startsWith('Bearer ')||!token){res.writeHead(401);res.end();return;}
+        let body='';
+        req.on('data',chunk=>{body+=chunk;if(body.length>8192)req.destroy();});
+        req.on('end',async()=>{
+          try {
+            const input=JSON.parse(body);
+            const {authenticatedClockTransport}=require('./time-clock-auth-relay');
+            const transport=authenticatedClockTransport({token,publishableKey:input.publishableKey});
+            const result=await this.timeClockCloud.flush(transport);
+            res.writeHead(result.ok?200:503,{'Content-Type':'application/json'});
+            res.end(JSON.stringify({...result,...this.timeClockCloud.status()}));
+          }catch(_){res.writeHead(503,{'Content-Type':'application/json'});res.end(JSON.stringify({error:'Zentraler Abgleich derzeit nicht bestätigt.'}));}
+        });
+        return;
+      }
+      if (req.method === 'GET' && url.pathname === '/zeiterfassung/cloud-status') {
+        const addr=req.socket.remoteAddress || '';
+        if (!['127.0.0.1','::1','::ffff:127.0.0.1'].includes(addr)) {res.writeHead(403);res.end();return;}
+        if(req.headers.origin)res.setHeader('Access-Control-Allow-Origin',req.headers.origin);
+        res.writeHead(200, {'Content-Type':'application/json'});
+        res.end(JSON.stringify(this.timeClockCloud.status()));return;
+      }
       if (req.method === 'GET' && url.pathname === '/zeiterfassung/liste') {
         if (req.headers.origin) res.setHeader('Access-Control-Allow-Origin', req.headers.origin);
         const zeilen = this.db.prepare(`
-          SELECT event_id, person_id, person_type, kind, recorded_at, effective_at, register_id,
+          SELECT event_id, person_id, member_no, person_type, kind, recorded_at, effective_at, register_id,
                  event_name, source, correction_reason, shift_reason, voided_at, received_at
           FROM time_clock_events ORDER BY effective_at DESC LIMIT 2000
         `).all();
         res.writeHead(200, { 'Content-Type': 'application/json' });
         res.end(JSON.stringify({ zeiten: zeilen.map((z) => ({
-          id: z.event_id, personId: z.person_id, personType: z.person_type, kind: z.kind,
+          id: z.event_id, personId: z.person_id, credential: z.member_no, personType: z.person_type, kind: z.kind,
           recordedAt: z.recorded_at, effectiveAt: z.effective_at, registerId: z.register_id,
           eventId: z.event_name, source: z.source, correctionReason: z.correction_reason,
           shiftReason: z.shift_reason, voidedAt: z.voided_at, receivedAt: z.received_at,
@@ -1269,16 +1312,16 @@ class ManagerCompanion {
     if (ev.type === 'time_clock') {
       const einfuegen = this.db.prepare(`
         INSERT INTO time_clock_events
-          (event_id, person_id, person_type, kind, recorded_at, effective_at,
+          (event_id, person_id, member_no, person_type, kind, recorded_at, effective_at,
            register_id, event_name, source, correction_reason, shift_reason, voided_at, received_at)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         ON CONFLICT(event_id) DO UPDATE SET
-          effective_at=excluded.effective_at, correction_reason=excluded.correction_reason,
+          member_no=COALESCE(excluded.member_no,time_clock_events.member_no), effective_at=excluded.effective_at, correction_reason=excluded.correction_reason,
           shift_reason=excluded.shift_reason, voided_at=excluded.voided_at
       `);
       for (const e of (Array.isArray(p.ereignisse) ? p.ereignisse : [p])) {
         if (!e || !e.id || !e.personId || !e.kind || !e.effectiveAt) continue;
-        einfuegen.run(String(e.id), String(e.personId), e.personType || null, String(e.kind),
+        einfuegen.run(String(e.id), String(e.personId), e.credential || null, e.personType || null, String(e.kind),
           String(e.recordedAt || e.effectiveAt), String(e.effectiveAt), e.registerId || null,
           e.eventId || null, e.source || null, e.correctionReason || null,
           e.shiftReason || null, e.voidedAt || null, jetzt);
@@ -1556,7 +1599,10 @@ class ManagerCompanion {
       articles: JSON.parse(zeile.articles_json),
       packages: JSON.parse(zeile.packages_json),
       accounts: (() => { try { return JSON.parse(zeile.accounts_json || '[]'); } catch (e) { return []; } })(),
-      settings: (() => { try { return JSON.parse(zeile.settings_json || '{}'); } catch (e) { return {}; } })(),
+      settings: (() => { try { const settings=JSON.parse(zeile.settings_json || '{}');
+        const shared=this.db.prepare('SELECT payload FROM time_clock_shared_state WHERE id=1').get();
+        if(settings.zeiterfassung&&shared)settings.zeiterfassung.sharedState=JSON.parse(shared.payload);
+        return settings; } catch (e) { return {}; } })(),
       revision: zeile.revision,
       updatedAt: zeile.updated_at,
     });
@@ -1598,7 +1644,7 @@ class ManagerCompanion {
       FROM time_clock_events ORDER BY effective_at DESC LIMIT 2000
     `).all();
     this._json(res, 200, { ereignisse: zeilen.map((z) => ({
-      id: z.event_id, personId: z.person_id, personType: z.person_type,
+      id: z.event_id, personId: z.person_id, credential: z.member_no, personType: z.person_type,
       kind: z.kind, effectiveAt: z.effective_at, voidedAt: z.voided_at,
     })) });
   }

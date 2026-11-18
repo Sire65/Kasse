@@ -62,7 +62,7 @@ Betreiber: „Alles muss soweit auf den neuesten Stand gebracht werden, wie Date
 | Sauerkraut + Mettwurst | Gluten, Sellerie, Senf enthalten; Ei, Soja, Milch Spuren | wie oben + Mettendchen | wie oben |
 | Kartoffel mit Hering (Heringsstipp) | Fisch, Ei, Milch, Senf enthalten; Sulfite Spuren; Rest nicht enthalten | offen (Etiketten Hering/Mayonnaise/Gurken) | Betreiber-Rezept |
 
-Zutaten jetzt wie in den Supabase-Rezepten. Build: Kasse `0.31.3.6-r69-rezepte`, PC-Manager `bilder-v13-rezepte`.
+Zutaten jetzt wie in den Supabase-Rezepten. Build: Kasse `0.31.3.6-r70-rezepte`, PC-Manager `bilder-v14-rezepte` (nach Zusammenführung mit dem parallelen Stand „-marktbetrieb“ von main).
 `etiketten/artikel.json` neu erzeugt (Club-App-Preisetiketten).
 Tests: `allergene-weihnachtsmarkt-2026` erweitert (Gegenprobe: ohne Nachtrag rot), `artikelinfo-allergene` angepasst; Gesamtlauf wie zuvor –
 nur die bekannten, schon auf `main` roten Tests (gutschein-teilzahlung, kassen-start-einheit, reklamation-mehrere-artikel, schulungsvideos,

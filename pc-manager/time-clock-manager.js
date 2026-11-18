@@ -1,6 +1,6 @@
 (function (global) {
   'use strict';
-  const VERSION = '0.4.1', CONFIG_KEY = 'kcm_time_clock_config_v1', PEOPLE_KEY = 'kcm_time_clock_people_v1', EVENTS_KEY = 'kcm_time_clock_events_v1';
+  const VERSION = '0.5.0', CONFIG_KEY = 'kcm_time_clock_config_v1', PEOPLE_KEY = 'kcm_time_clock_people_v1', EVENTS_KEY = 'kcm_time_clock_events_v1';
   // Teil B der Dienstzeiten: die Kassen melden ihre Buchungen laufend an den Manager-Dienst
   // (Loopback 47392, /zeiterfassung/melden). Bisher landeten sie dort in der Datenbank und
   // BLIEBEN LIEGEN - diese Seite kannte nur den Weg ueber eine von Hand ausgetauschte Datei.
@@ -486,7 +486,10 @@
       const antwort = await fetch(`http://127.0.0.1:${DIENST_PORT}/zeiterfassung/liste`,
         {signal: AbortSignal.timeout(4000), cache: 'no-store'});
       if (!antwort.ok) throw new Error(`Dienst antwortet mit ${antwort.status}`);
-      const gemeldet = (await antwort.json()).zeiten || [];
+      const gemeldet = ((await antwort.json()).zeiten || []).map(e=>{
+        const matches=people.filter(p=>p.credential&&String(p.credential).toUpperCase()===String(e.credential||'').toUpperCase());
+        return matches.length===1?{...e,sourcePersonId:e.personId,personId:matches[0].id}:e;
+      });
       const zusammen = core.mergeEvents(events, gemeldet);
       events = zusammen.events;
       letzterAbruf = new Date();
@@ -564,10 +567,11 @@
   // Kassen): settings.zeiterfassung = Kassenpaket (nur Pseudonyme). Die Datei "Kassenpaket" bleibt
   // als Rueckfallweg bestehen.
   function zugaengeUebernehmen(liste) {
-    let neu = 0, ergaenzt = 0, mitCode = 0;
+    let neu = 0, ergaenzt = 0, mitCode = 0, gesamt = 0, ohneNummer = 0;
     (liste || []).forEach((e) => {
       const nummer = String(e?.mitgliedsnummer || '').trim();
-      if (!nummer) return;
+      if (!nummer) { ohneNummer++; return; }
+      gesamt++;
       const code = String(e.geburtstagscode || '').replace(/\D/g, '');
       if (code.length === 6) mitCode++;
       const pseudonym = String(e.pseudonym || '').trim();
@@ -587,7 +591,7 @@
         neu++;
       }
     });
-    return {neu, ergaenzt, mitCode, gesamt: (liste || []).length};
+    return {neu, ergaenzt, mitCode, gesamt, ohneNummer};
   }
   function anKassenSenden() {
     // Ins gemeinsame Einstellungs-Objekt - jeder Stammdaten-Abgleich nimmt es dann mit.
@@ -619,6 +623,7 @@
     const gesendet = await anKassenSenden();
     const ohne = r.gesamt - r.mitCode;
     stand(`${r.gesamt} Mitglieder: Ausweis für alle, Geburtstag für ${r.mitCode}${ohne ? ` (bei ${ohne} ist in der Mitgliederverwaltung kein Geburtstag hinterlegt – nur Ausweis)` : ''}. `
+      + (r.ohneNummer ? r.ohneNummer+' Datensatz ohne Ausweisnummer blieb zur Prüfung offen. ' : '')
       + (gesendet ? 'An die Kassen gesendet – jede Kasse übernimmt es beim nächsten Abgleich.' : 'Noch nicht an die Kassen gesendet (Manager-Dienst nicht erreichbar) – wird beim nächsten Stammdaten-Senden mitgenommen.'),
       gesendet ? 'gut' : 'warn');
     return true;
