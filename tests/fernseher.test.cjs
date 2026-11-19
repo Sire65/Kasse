@@ -89,7 +89,7 @@ function nachbauStarter() {
       p('A2: Version A hält am Fernseher auf der Schlussfolie nicht an', !a.includes('if(isLast&&playing)tvTogglePause();'));
       p('A2: Version A kennt den Fernsehmodus (?fernseher=1)', a.includes('window.KC_FERNSEHMODUS=/[?&]fernseher=1(&|$)/.test(location.search)') && a.includes('id="kcBuildLabel"'));
       p('A2: am Fernseher keine gespeicherte Designer-Präsentation statt Version A', a.indexOf("k==='fs3.kcTvPresentation'?null") > -1 && a.indexOf("k==='fs3.kcTvPresentation'?null") < a.indexOf("localStorage.getItem('fs3.kcTvPresentation')"));
-      p('A2: Endversion: Preislisten mit Allergenen und Pfandregel, kein Umfrage-Knopf mehr', a.includes('Allergene und Zusatzstoffe') && a.includes('Pfand: 2,00 € je Glas') && !a.includes('abstimmung.html?seen=A') && a.includes('Endversion · '));
+      p('A2: Endversion: Preislisten mit Allergenen und Pfandregel, kein Umfrage-Knopf mehr', a.includes('"originalRole":"kcPreise"') && a.includes('Pfand: 2,00 € je Glas') && !a.includes('abstimmung.html?seen=A') && a.includes('Endversion · '));
       p('A2: Wetter: Regenwahrscheinlichkeit, alle 30 Minuten neu, Ausfall behält letzte Daten', a.includes('precipitation_probability_max&timezone') && a.includes('loadWeather();setInterval(loadWeather,1800000);') && a.includes('if(weather.today&&weather.today.rain)return;'));
       p('A2: Wetterfolien zeigen echte Werte statt Platzhalter', a.includes('{{weather.today.temp}}') && a.includes('{{weather.day4.minmax}}') && !a.includes('Wetterlage wird aktualisiert') && a.includes('Daten: Open-Meteo.com'));
       p('A2: Rezeptfolie zeigt das Kassenfoto vom Eierlikörpunsch', a.includes('"name": "Foto Eierlikörpunsch"') || a.includes('"name":"Foto Eierlikörpunsch"'));
@@ -116,17 +116,18 @@ function nachbauStarter() {
       const ohneFotoNamen = mitglieder.filter((s) => s.rotation && s.rotation.enabled !== false).map((s) => { const n = s.items.find((i) => i.originalRole === 'memberName'), q = s.items.find((i) => i.originalRole === 'memberQuote'); return n.x === q.x && n.w === q.w; });
       p('A2: Vornamen-Feld genau so breit wie der Spruch', ohneFotoNamen.every(Boolean));
       p('A2: Rückblick heißt 2025, leere Impressionen ausgeblendet', projekt.slides.filter((s) => /^Rückblick/.test(s.name)).every((s) => /2025/.test(s.name) && !s.items.some((i) => /2024/.test(i.text || ''))) && projekt.slides.filter((s) => /^Impressionen \d/.test(s.name)).every((s) => s.rotation.enabled === false));
-      // 18.11.2026: Allergene unter den Preislisten klein und ausgerichtet (Raster Artikel | Angabe), Außer-Haus-Zeile im Fuß
-      const hinweise = projekt.slides.filter((s) => /^Preisliste/.test(s.name)).map((s) => s.items.find((i) => i.originalRole === 'allergenHinweis'));
-      p('A2: Allergen-Hinweise als kleines Raster unter allen 4 Preislisten, keine Außer-Haus-Zeile mehr in den Tabellen, Preise mit Komma',
-        hinweise.length === 4 && hinweise.every((h) => h && h.font <= 15 && /\t/.test(h.text) && h.text.startsWith('Allergene und Zusatzstoffe')) && a.includes('.kcAh{display:grid')
-        && a.includes('item.classList.add("kcEng")') && !projekt.slides.some((s) => (s.items.find((i) => i.type === 'table') || { tableData: [] }).tableData.some((r) => /^Aufpreis außer Haus|^\d+\.\d\d$/.test((r[0] && r[0].text) || '') || r.some((c) => /^\d+\.\d\d$/.test(c.text || ''))))
-        && hinweise.filter((h) => /Außer Haus: Thermobecher/.test(h.text)).length === 2);
-      // 18.11.2026: Video-Fassung (?aufnahme=1) nennt den Stand der Wetterdaten; Laufband beginnt links (nicht mittig abgeschnitten)
-      p('A2: Video-Fassung: Wetter-Hinweis „nicht ganz aktuell“, kein Musik-Hinweis, Laufband linksbündig, Aufnahme-Werkzeug vorhanden',
-        a.includes('im Video nicht ganz aktuell') && a.includes('nicht ganz aktuell):') && a.includes('.kcAufnahme #kcMusikHinweis{display:none!important}')
-        && a.includes('#kcLaufband .tvItem.ticker{visibility:visible!important;font-size:24px!important;justify-content:flex-start!important}')
-        && fs.existsSync(path.join(WURZEL, 'tools', 'tv-mp4-aufnehmen.cjs')));
+      // 19.11.2026 (Betreiber: „alles zu klein … Allergene in Klammern dahinter, kleine Legende, erste Spalte breiter, Pünktchen zum Preis“):
+      // Preisfolien als Speisekarten-Tafel – keine Tabelle/Allergenkasten mehr, Kennzeichen je Gericht, Legende nur der benutzten Zeichen
+      const preisFolien = projekt.slides.filter((s) => /^Preisliste/.test(s.name));
+      const tafeln = preisFolien.map((s) => { const t = s.items.find((i) => i.originalRole === 'kcPreise'); return t ? JSON.parse(t.text.slice(t.text.indexOf('@@PL@@') + 6)) : null; });
+      const allePosten = tafeln.filter(Boolean).flatMap((t) => t.posten);
+      const kz = (n) => (allePosten.find((x) => x.name === n) || {}).kz;
+      p('A2: Preisfolien als Speisekarte: Kennzeichen in Klammern, Legende, Preise mit Komma, keine Tabelle/Allergenkasten',
+        tafeln.length === 4 && tafeln.every(Boolean) && preisFolien.every((s) => !s.items.some((i) => i.type === 'table' || i.originalRole === 'allergenHinweis'))
+        && kz('Grünkohl a la Köcheclub mit Mettendchen') === 'A, I, J, 2, 3' && kz('Kartoffeln mit Kartoffelcreme') === 'C, G, J, 2' && kz('Eierlikörpunsch') === 'C, G, L'
+        && allePosten.every((x) => /^\d+,\d\d €$/.test(x.preis)) && !allePosten.some((x) => /Aufpreis außer Haus|Mettwurst/.test(x.name))
+        && tafeln[1].legende === 'A Gluten · I Sellerie · J Senf · 2 mit Konservierungsstoff · 3 mit Antioxidationsmittel'
+        && a.includes('.kcPlPunkte{'), JSON.stringify(tafeln.map((t) => t && t.posten.length)));
       const laufschriften = projekt.slides.map((s) => s.items.find((i) => i.type === 'ticker')).filter(Boolean).map((i) => i.text);
       p('A2: Laufschrift langsamer, Themenblöcke mit Abstand, Preise je Gruppe und Allergen-Hinweis', a.includes('const TEMPO=30;') && a.includes('kcTickerPause') && laufschriften.some((t) => t.startsWith('Preise alkoholfreie Getränke:')) && laufschriften.some((t) => t.includes('wenden Sie sich gerne an die Standbesetzung')) && new Set(laufschriften).size > 5);
       p('A2: durchgehendes Laufband über allen Folien (kein Flackern beim Folienwechsel)', a.includes('band.id="kcLaufband"') && a.includes('#tvStage .tvItem.ticker{visibility:hidden!important}') && a.includes('window.KC_LAUFSCHRIFT=') && a.includes('if(t===inhalt&&band.firstChild)return;'));
