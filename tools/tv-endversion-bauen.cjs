@@ -23,6 +23,7 @@
 const fs = require('fs');
 const path = require('path');
 const PROGRAMM = require('./tv-programm-folien.cjs');
+const PREISE = require('./tv-preisfolien.cjs');
 
 const MIT_FOTOS = process.env.KC_TV_MIT_FOTOS === '1';
 const STAND = MIT_FOTOS ? '2026-11-17' : '2026-11-18';
@@ -264,6 +265,9 @@ function bearbeite(projekt, log, extras = {}) {
         log.push(`Preisliste „${folie.name}“: Tabelle ${Math.round((faktor - 1) * 100)} % größer`);
       }
       log.push(`Preisliste „${folie.name}“: Allergene/Pfand eingetragen`);
+      // 19.11.2026 (Betreiber: „alles zu klein … Allergene in Klammern dahinter, kleine Legende, erste Spalte breiter, Pünktchen zum Preis“):
+      // Tabelle und Allergenkasten werden durch eine Speisekarten-Tafel ersetzt (tools/tv-preisfolien.cjs)
+      PREISE.folieUmbauen(folie, zeilen, log);
     }
 
     // Mitgliederfolien
@@ -409,7 +413,7 @@ const CODE_ERSETZUNGEN = [
     alt: "stueck.textContent=text+'   ·   ';",
     neu: "text.split(/\\s*•\\s*/).forEach(b=>{const t=document.createElement('span');t.textContent=b;stueck.appendChild(t);const p=document.createElement('span');p.className='kcTickerPause';p.textContent='✦';stueck.appendChild(p)});" },
   { name: 'Wetterkacheln mit eigenem Wetter je Tag; durchgehendes Laufband', alt: '</body></html>',
-    neu: KACHEL_WETTER + HINWEIS_RASTER + '<script>window.KC_LAUFSCHRIFT=' + JSON.stringify(['Der Köcheclub Werne begrüßt Sie herzlich auf dem Weihnachtsmarkt 2026', ...LAUFSCHRIFT_THEMEN]).replace(/</g, '\\u003c') + ';</script>' + AUFNAHME + PROGRAMM.laufzeitHtml() + LAUFBAND + '</body></html>' },
+    neu: KACHEL_WETTER + HINWEIS_RASTER + PREISE.laufzeitHtml() + '<script>window.KC_LAUFSCHRIFT=' + JSON.stringify(['Der Köcheclub Werne begrüßt Sie herzlich auf dem Weihnachtsmarkt 2026', ...LAUFSCHRIFT_THEMEN]).replace(/</g, '\\u003c') + ';</script>' + AUFNAHME + PROGRAMM.laufzeitHtml() + LAUFBAND + '</body></html>' },
   { name: 'Wetter: Ausfall behält letzte Daten',
     alt: "}catch{weather.today={symbol:'🌡️',text:'Wetterdaten derzeit nicht erreichbar'",
     neu: "}catch{if(weather.today&&weather.today.rain)return;weather.today={symbol:'🌡️',text:'Wetterdaten derzeit nicht erreichbar'" },
