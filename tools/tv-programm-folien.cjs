@@ -101,25 +101,33 @@ function programmLaufzeit(D) {
     var tage = teil === 1 ? MARKTTAGE.slice(0, haelfte) : MARKTTAGE.slice(haelfte);
     var hd = heute();
     t.classList.add('kcPgesamt');
+    // 19.11.2026 (Betreiber: „gelbe Schrift zu nah am Text, in 3 Abschnitte/Spalten mit Überschrift: Mittags, Nachmittags, Abend“):
+    // feste Spalten nach Beginn – Mittags bis 15 Uhr, Nachmittags 15–18 Uhr, Abends ab 18 Uhr – mit Überschriftzeile
+    var ZEITEN = [['Mittags', 0, 15 * 60], ['Nachmittags', 15 * 60, 18 * 60], ['Abends', 18 * 60, 24 * 60]];
+    var kopf = el('div', 'kcPgKopf'); kopf.appendChild(el('span', '', ''));
+    ZEITEN.forEach(function (zt) { kopf.appendChild(el('span', '', zt[0])); }); t.appendChild(kopf);
     tage.forEach(function (iso) {
       var z = el('div', 'kcPtagzeile' + (iso === hd && !AUF ? ' kcPjetzt' : '')), kz = kurz(iso), links = el('div', 'kcPtaglinks');
       links.appendChild(el('b', '', kz.wt)); links.appendChild(el('span', '', kz.dm)); z.appendChild(links);
-      // drei feste Spalten (Betreiber 18.11.2026: „ruhiger – Zeiten untereinander“): links der erste Programmpunkt,
-      // Mitte die weiteren am Tag, rechts das Abendprogramm (ab 18:00). Mehrere Punkte einer Spalte stehen untereinander.
-      var ps = punkte(iso), abend = ps.filter(function (p) { return min(p.von) >= 18 * 60; }), tags = ps.filter(function (p) { return min(p.von) < 18 * 60; });
-      [tags.slice(0, 1), tags.slice(1), abend].forEach(function (liste) {
+      var ps = punkte(iso);
+      ZEITEN.map(function (zt) { return ps.filter(function (p) { return min(p.von) >= zt[1] && min(p.von) < zt[2]; }); }).forEach(function (liste) {
         var sp = el('div', 'kcPspalte');
-        liste.forEach(function (p) { var s = el('div', 'kcPpunkt'); s.appendChild(el('i', '', p.von)); s.appendChild(el('span', '', p.titel)); sp.appendChild(s); });
+        liste.forEach(function (p) { var s = el('div', 'kcPpunkt'); s.appendChild(el('i', '', p.von)); s.appendChild(el('span', '', p.titel.replace(/ & /g, '\u00a0& '))); sp.appendChild(s); });
         z.appendChild(sp);
       });
       t.appendChild(z);
     });
     return t;
   }
+  // passt die Tafel nicht (lange Namen), wird die Schrift schrittweise kleiner
+  function einpassen(e, t) {
+    for (var s = 1; s > 0.7; s -= 0.04) { t.style.setProperty('--s', s.toFixed(2)); if (t.scrollHeight <= e.clientHeight + 1) return; }
+  }
   function setzen() {
     stage.querySelectorAll('.tvItem[data-original-role=kcProgramm]:not([data-kc-p])').forEach(function (e) {
       var m = /@@([a-z:0-9]+)@@/.exec(e.textContent || ''); if (!m) return;
-      e.textContent = ''; e.appendChild(tafel(m[1])); e.setAttribute('data-kc-p', m[1]);
+      e.textContent = ''; var t = tafel(m[1]); e.appendChild(t); e.setAttribute('data-kc-p', m[1]);
+      if (m[1].indexOf('gesamt') === 0) einpassen(e, t);
     });
   }
   // Laufschrift: „Heute auf der Bühne …“ (nur am Fernseher, nicht im Video)
@@ -147,12 +155,14 @@ const STIL = '<style>'
   + '.kcPmarke{background:#741521;color:#fff;font-size:24px;font-weight:700;text-transform:uppercase;letter-spacing:1px;padding:6px 14px;border-radius:999px}'
   + '.kcPfuss{margin-top:8px;text-align:center;color:#f3e9dc;font-size:24px;font-style:italic}'
   + '.kcPleer{margin:auto;color:#fff8e8;font-size:40px;text-align:center}'
-  + '.kcPgesamt{padding:16px 26px;gap:8px}'
-  + '.kcPtagzeile{flex:1;display:grid;grid-template-columns:76px 1.05fr 1.2fr 1fr;align-items:center;column-gap:18px;padding:6px 14px;border-radius:12px;background:rgba(255,248,232,.06)}'
-  + '.kcPtaglinks{display:flex;flex-direction:column;line-height:1.05}.kcPtaglinks b{color:#ffd76a;font-size:32px}.kcPtaglinks span{color:#f3e9dc;font-size:22px}'
-  + '.kcPspalte{display:flex;flex-direction:column;justify-content:center;gap:4px;color:#fff8e8;font-size:24px;font-weight:600;line-height:1.15}'
-  + '.kcPpunkt{display:grid;grid-template-columns:70px 1fr;align-items:baseline}'
-  + '.kcPpunkt i{font-style:normal;color:#ffd76a;font-variant-numeric:tabular-nums}'
+  + '.kcPgesamt{--s:1;padding:14px 26px 16px;gap:calc(8px*var(--s))}'
+  + '.kcPgKopf{display:grid;grid-template-columns:90px repeat(3,minmax(0,1fr));column-gap:26px;padding:0 14px 6px;border-bottom:2px solid rgba(217,170,58,.55);color:#ffd76a;font-size:calc(20px*var(--s));font-weight:700;letter-spacing:2px;text-transform:uppercase}'
+  + '.kcPtagzeile{flex:1;display:grid;grid-template-columns:90px repeat(3,minmax(0,1fr));align-items:center;column-gap:26px;padding:calc(6px*var(--s)) 14px;border-radius:12px;background:rgba(255,248,232,.06)}'
+  + '.kcPtaglinks{display:flex;flex-direction:column;line-height:1.05}.kcPtaglinks b{color:#ffd76a;font-size:calc(32px*var(--s))}.kcPtaglinks span{color:#f3e9dc;font-size:calc(21px*var(--s))}'
+  + '.kcPspalte{display:flex;flex-direction:column;justify-content:center;gap:calc(6px*var(--s));color:#fff8e8;font-size:calc(24px*var(--s));font-weight:600;line-height:1.15}'
+  + '.kcPpunkt{display:grid;grid-template-columns:calc(78px*var(--s)) 1fr;column-gap:calc(12px*var(--s));align-items:baseline}'
+  + '.kcPpunkt span{min-width:0;overflow-wrap:break-word;hyphens:auto}'
+  + '.kcPpunkt i{font-style:normal;color:#ffd76a;font-variant-numeric:tabular-nums;font-size:.92em;font-weight:700}'
   + '</style>';
 
 function laufzeitHtml() {
