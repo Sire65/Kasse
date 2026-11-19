@@ -40,6 +40,31 @@ let f = 0; const pr = (n, b, z = '') => { console.log(`${b ? '  OK  ' : 'FEHLER'
       await p.evaluate(() => { const sel = document.getElementById('servingMaterialSelect'); sel.value = 'SERVING-GLASS-020-WM'; sel.dispatchEvent(new Event('change', { bubbles: true })); });
       await p.waitForTimeout(200); e = await lesen();
       pr(`${n}: nach Gefäßwechsel bleibt die Feuerzange (2 Teile)`, e.teile.length === 2 && e.teile.includes('SERVING-FEUERZANGE-WM') && e.teile.includes('SERVING-GLASS-020-WM') && e.gefaess === 'SERVING-GLASS-020-WM', e.teile.join(', '));
+      // 19.11.2026 (Betreiber: „Feuerzange aus der Combo-Box ja, aber sie tauchte nicht als zweite Sache daneben auf“):
+      // Hauptauswahl bietet keine Feuerzange mehr an; „＋ Teil hinzufügen“ legt sie als zweites Teil dazu; „✕ entfernen“ nimmt sie weg
+      const angebot = await p.evaluate(() => [...document.querySelectorAll('#servingMaterialSelect option')].map((o) => o.value));
+      pr(`${n}: Ausgabegefäß-Auswahl ohne Feuerzange`, !angebot.includes('SERVING-FEUERZANGE-WM') && angebot.includes('SERVING-GLASS-020-WM'), angebot.join(', '));
+      await p.evaluate(() => { const id = document.getElementById('aId'); id.value = 'eier'; id.dispatchEvent(new Event('input', { bubbles: true })); id.dispatchEvent(new Event('change', { bubbles: true })); });
+      await p.waitForTimeout(500);
+      const eierVor = await p.evaluate(() => ({ gefaess: document.getElementById('servingMaterialSelect')?.value, add: !!document.getElementById('servingAddPart') }));
+      pr(`${n}: Eierlikörpunsch hat das Glas, „＋ Teil hinzufügen“ ist da`, eierVor.gefaess === 'SERVING-GLASS-020-WM' && eierVor.add, JSON.stringify(eierVor));
+      await p.evaluate(() => { document.getElementById('servingAddPartSelect').value = 'SERVING-FEUERZANGE-WM'; document.getElementById('servingAddPart').click(); });
+      await p.waitForTimeout(300);
+      const eierMit = await p.evaluate(() => ({ gefaess: document.getElementById('servingMaterialSelect')?.value, teile: [...document.querySelectorAll('.serving-zubehoer')].map((x) => x.dataset.material) }));
+      pr(`${n}: „＋ Teil hinzufügen“ zeigt die Feuerzange als zweites Teil, Glas bleibt`, eierMit.gefaess === 'SERVING-GLASS-020-WM' && eierMit.teile.join() === 'SERVING-FEUERZANGE-WM', JSON.stringify(eierMit));
+      await p.evaluate(() => document.querySelector('[data-remove-part="SERVING-FEUERZANGE-WM"]').click());
+      await p.waitForTimeout(300);
+      const eierOhne = await p.evaluate(() => (window.KCServingMaterials.assignments().eier || []).map((x) => x.materialId));
+      pr(`${n}: „✕ entfernen“ nimmt die Feuerzange wieder weg`, eierOhne.join() === 'SERVING-GLASS-020-WM', eierOhne.join());
+      if (seite === 'pc-manager' && fall === 'frisch') {
+        // Speichern löscht entfernte Teile auch in Supabase (nachgebildet, kein echter Server)
+        const anfragen = [];
+        await c.route(/supabase\.co\/rest\/v1\/kc_manager_(recipe_)?serving_materials/, (r) => { anfragen.push(r.request().method() + ' ' + decodeURIComponent(r.request().url().split('/rest/v1/')[1])); r.fulfill({ status: 204, body: '' }); });
+        await p.evaluate(async () => { window.KCSupabase = { istAngemeldet: () => true, holeZugriffsToken: () => 'TEST_ANMELDUNG', konfig: { url: 'https://ptblnpiroqftcvlsrhac.supabase.co', publishableKey: 'TEST_PUBLIC' } };
+          await window.KCServingMaterialsSupabase.push(); });
+        const del = anfragen.find((x) => x.startsWith('DELETE ') && /product_code=eq\.eier/.test(x));
+        pr(`${n}: Speichern löscht entfernte Teile in Supabase (Eierlikörpunsch: alles außer Glas)`, !!del && /material_id=not\.in\.\("SERVING-GLASS-020-WM"\)/.test(del), del || anfragen.join(' | ').slice(0, 200));
+      }
       pr(`${n}: keine JS-Fehler`, !js.filter((x) => !/Failed to fetch|Load failed|access control|net::ERR|4739/.test(x)).length, js.join('|').slice(0, 200));
       await c.close();
     }

@@ -71,6 +71,12 @@
     Object.entries(a).forEach(([productCode,rows])=>(Array.isArray(rows)?rows:[]).forEach(x=>links.push({org_id:ORG_ID,product_code:productCode,material_id:x.materialId,qty_per_portion:Number(x.qtyPerPortion||1),role:x.role||'Ausgabegefäß',active:true,updated_at:new Date().toISOString()})));
     if(mats.length)await request('/rest/v1/kc_manager_serving_materials?on_conflict=material_id',{method:'POST',headers:{Prefer:'resolution=merge-duplicates,return=minimal'},body:JSON.stringify(mats)});
     if(links.length)await request('/rest/v1/kc_manager_recipe_serving_materials?on_conflict=org_id,product_code,material_id',{method:'POST',headers:{Prefer:'resolution=merge-duplicates,return=minimal'},body:JSON.stringify(links)});
+    // 19.11.2026: entfernte Teile (z. B. versehentlich zugeordnete Feuerzange) auch in Supabase entfernen – sonst kämen sie beim
+    // nächsten Laden zurück. Nur für Artikel mit mindestens einem Teil (ein leerer lokaler Stand löscht nichts).
+    for(const [productCode,rows] of Object.entries(a)){
+      const ids=(Array.isArray(rows)?rows:[]).map(x=>x&&x.materialId).filter(Boolean);if(!ids.length)continue;
+      await request(`/rest/v1/kc_manager_recipe_serving_materials?org_id=eq.${encodeURIComponent(ORG_ID)}&product_code=eq.${encodeURIComponent(productCode)}&material_id=not.in.(${ids.map(x=>'"'+String(x).replace(/"/g,'')+'"').map(encodeURIComponent).join(',')})`,{method:'DELETE',headers:{Prefer:'return=minimal'}});
+    }
     lastSnapshot=snapshot();
     global.dispatchEvent(new CustomEvent('kc-serving-materials-synced',{detail:{direction:'push'}}));
   }
