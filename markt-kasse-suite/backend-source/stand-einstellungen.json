@@ -1,6 +1,7 @@
 {
   "fernseher": {
     "aktiv": true,
-    "bildschirm": "auto"
+    "bildschirm": "auto",
+    "rand": 0
   }
 }

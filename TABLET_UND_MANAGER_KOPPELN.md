@@ -194,6 +194,12 @@ Einstellungen: `markt-kasse-suite/backend-source/stand-einstellungen.json`
 (`"fernseher": { "aktiv": true, "bildschirm": "auto" }`; `"bildschirm": 2` erzwingt Anzeige 2,
 `"aktiv": false` schaltet den Fernseher-Start ab).
 
+**Laufschrift oder Ränder am Fernseher abgeschnitten?** Das ist „Overscan“: Viele Fernseher vergrößern
+das Bild leicht. Am besten im Fernseher-Menü abschalten (Bildformat/Bildgröße: „Just Scan“,
+„Original“, „Pixelgenau“, „Bildschirmanpassung“ oder „Screen Fit“). Geht das nicht: in
+`stand-einstellungen.json` z. B. `"rand": 3` eintragen (3 % Rand rundum, erlaubt 0–10) und das
+schwarze Fenster neu starten.
+
 ## E2. Zu Hause mitlesen und steuern
 
 Der PC zu Hause muss **nicht** laufen. Wer zu Hause nachsehen will: `KC_Zuhause_Start.cmd`
