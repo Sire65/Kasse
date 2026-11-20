@@ -164,7 +164,8 @@ PC-Manager – Störungsmeldungen bleiben sichtbar.
 
 **Einmalig am Mini-PC:**
 1. `KC_MiniPC_Einrichten.cmd` doppelklicken (Bildschirm/Standby nie aus, keine
-   Benachrichtigungen, kein Bildschirmschoner – ohne Adminrechte).
+   Benachrichtigungen, kein Bildschirmschoner, Windows-Hintergrund = Rathaus-Bild der
+   Präsentation statt Windows-Standardbild – ohne Adminrechte).
 2. Mit zweitem Monitor: `Windows-Taste + P` → **„Erweitern“**; Einstellungen → System →
    Bildschirm → den **Monitor** als **Hauptanzeige** festlegen. Dann läuft die Präsentation
    automatisch auf dem Fernseher.
