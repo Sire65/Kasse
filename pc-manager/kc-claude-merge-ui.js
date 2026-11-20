@@ -14,7 +14,7 @@ function inject(){
   // 2) Money-Butler: von zuhause eingegangene Uebergaben.
   const cash=document.querySelector('[data-view-panel="cashprep"]');
   if(cash&&!document.getElementById('ftKarte')){
-    const card=document.createElement('article');card.className='secure-card';card.id='ftKarte';card.innerHTML='<h3>Von zuhause eingegangene Geldübergaben</h3><p class="hint">Money Butler legt Übergaben zentral ab. Erst nach „Übernehmen“ und „An Kasse freigeben“ erreichen sie die Zielkasse.</p><div class="kcbs-filter"><button type="button" id="ftAktualisieren">Aktualisieren</button></div><p id="ftMeldung" class="tc-status"></p><div id="ftListe"></div>';
+    const card=document.createElement('article');card.className='secure-card';card.id='ftKarte';card.innerHTML='<h3>Von zuhause eingegangene Geldübergaben</h3><p class="hint">Der Money Butler legt Übergaben zentral ab. Der PC-Manager gibt sie automatisch an die Zielkasse weiter; dort wird der Eingang bestätigt. Hier sieht man den Stand.</p><div class="kcbs-filter"><button type="button" id="ftAktualisieren">Aktualisieren</button></div><p id="ftMeldung" class="tc-status"></p><div id="ftListe"></div>';
     const hint=cash.querySelector('#managerCashTestHint'); if(hint)hint.after(card); else cash.querySelector('.page-head')?.after(card);
   }
   // 3) Tagesabschluss-Versand.

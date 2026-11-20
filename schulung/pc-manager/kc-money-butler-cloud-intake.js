@@ -45,6 +45,32 @@
     if(Math.abs(Number(row.amount||0)-Number(p.total))>.009)throw new Error('Cloud-Betrag und Money-Butler-Datensatz stimmen nicht überein.');
     return p;
   }
+  // Gemeinsamer Merker mit kc-finance-uebergaben.js: welche Uebergaben schon an die Kasse gegeben wurden.
+  const FREIGEGEBEN_KEY='kcm_finance_transfers_freigegeben_v1';
+  function freigegebene(){try{return JSON.parse(localStorage.getItem(FREIGEGEBEN_KEY)||'{}')||{};}catch{return {};}}
+  function istFreigegeben(id){return !!freigegebene()[id];}
+  function merkeFreigegeben(id){const k=freigegebene();k[id]=new Date().toISOString();try{localStorage.setItem(FREIGEGEBEN_KEY,JSON.stringify(k));}catch{}}
+  // Die Kasse prueft die Pruefsumme ueber die Feldreihenfolge, in der das Paket bei ihr ankommt. Aus Supabase
+  // kommt es umsortiert (jsonb) - der PC-Manager hat es oben geprueft (Betrag Spalte = Datensatz) und versiegelt
+  // es fuer die Kasse neu, unveraendert im Inhalt.
+  function neuVersiegelt(payload){
+    const copy=JSON.parse(JSON.stringify(payload));delete copy.checksum;
+    if(typeof checksum!=='function')throw new Error('Pruefsummenfunktion fehlt.');
+    copy.checksum=checksum(JSON.stringify(copy));return copy;
+  }
+  async function anKasseGeben(row,payload){
+    const mehrere=Array.isArray(payload.registerIds)&&(payload.scope==='split'||payload.scope==='shared');
+    const ziele=mehrere?payload.registerIds:[row.register_id||payload.registerId];
+    for(const kasse of ziele){
+      const transferId=(row.correlation_id||`finance-${row.id}`)+(mehrere?`#${kasse}`:'');
+      const antwort=await fetch('http://127.0.0.1:47392/api/v1/finance-transfer/queue',{
+        method:'POST',headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({registerLabel:kasse,transferId,payload:neuVersiegelt(payload)})
+      });
+      if(antwort.status===401)throw new Error('Bitte im PC-Manager oben rechts bei Supabase anmelden (Fernmodus).');
+      if(!antwort.ok)throw new Error('Manager-Dienst antwortete mit Fehler '+antwort.status);
+    }
+  }
   async function mark(c,id,status){
     return c._request('kc-finance-bridge',{action:'cash_transfer_mark',id,status});
   }
@@ -95,8 +121,19 @@
         try{
           const payload=decodeRow(row);
           if(row.status==='pending_manager')await mark(c,row.id,'manager_received');
-          await queueCashTransferPayload(payload);
-          await mark(c,row.id,'handed_to_register');
+          if(payload.confirmationRequested===true){
+            // 20.11.2026 (Betreiber: "soll in der Praxis allein laufen, ohne im PC-Manager zu bestaetigen"):
+            // automatisch an die Zielkasse geben - genau wie der Knopf "An Kasse freigeben" (gleiche
+            // Uebergabe-ID = correlation_id, damit die Empfangsbestaetigung der Kasse zugeordnet wird),
+            // aber mit dem vollstaendigen Money-Butler-Paket (Stueckelung). "handed_to_register" setzt erst
+            // die Bestaetigung der Kasse (kc-finance-uebergaben.js), nicht dieser Schritt.
+            if(istFreigegeben(row.id))continue;
+            await anKasseGeben(row,payload);
+            merkeFreigegeben(row.id);
+          }else{
+            await queueCashTransferPayload(payload);
+            await mark(c,row.id,'handed_to_register');
+          }
           localStorage.removeItem(LAST_ERROR_KEY);
           const status=document.getElementById('communicatorCashResult');
           if(status)status.textContent=`KC Communicator automatisch übernommen: ${Number(payload.total).toLocaleString('de-DE',{style:'currency',currency:'EUR'})} → ${payload.scope==='split'||payload.scope==='shared'?(payload.registerIds||[]).join(' und '):payload.registerId}. An Kasse weitergegeben.`;

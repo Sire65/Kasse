@@ -12,8 +12,8 @@ const jsonbOrdnen = (o) => Array.isArray(o) ? o.map(jsonbOrdnen) : (o && typeof 
 let fehler = 0; const ok = (b, t) => { console.log((b ? 'OK    ' : 'FEHLER ') + t); if (!b) fehler++; };
 
 function lauf(cashPayload, amount) {
-  const marks = [], queued = [], store = {};
-  const items = [{ id: 'row-1', status: 'pending_manager', amount, payload: { cashPayload } }];
+  const marks = [], queued = [], store = {}, finanz = [];
+  const items = [{ id: 'row-1', status: 'pending_manager', amount, register_id: 'KASSE-01', correlation_id: 'money-butler-cash-'+cashPayload.transferId, payload: { cashPayload } }];
   class Client { constructor() {} async _request(fn, body) {
     if (body.action === 'cash_transfer_list') return { items };
     if (body.action === 'cash_transfer_mark') { marks.push(body.status); return { ok: true }; }
@@ -22,10 +22,11 @@ function lauf(cashPayload, amount) {
   } }
   const win = { KCSupabase: { holeZugriffsToken: () => 'tok' }, KCCommunicationClient: Client, document: { getElementById: () => null, addEventListener() {} } };
   const ctx = vm.createContext({ window: win, localStorage: { getItem: (k) => store[k] ?? null, setItem: (k, v) => { store[k] = String(v); }, removeItem: (k) => { delete store[k]; } },
-    checksum, isBusinessDate, queueCashTransferPayload: async (p) => { queued.push(p); }, console: { warn() {}, info() {}, log() {} },
+    checksum, isBusinessDate, queueCashTransferPayload: async (p) => { queued.push(p); },
+    fetch: async (url, o) => { finanz.push({ url, body: JSON.parse(o.body) }); return { ok: true, status: 200 }; }, console: { warn() {}, info() {}, log() {} },
     setInterval: () => 0, setTimeout: () => 0, Date, JSON, Math, Number, String, Array, Error, Object });
   vm.runInContext(quelle, ctx);
-  return win.KCMoneyButlerCloudIntake.poll().then(() => ({ marks, queued, fehler: store.kcm_money_butler_cloud_last_error_v1 }));
+  return win.KCMoneyButlerCloudIntake.poll().then(() => ({ marks, queued, finanz, store, fehler: store.kcm_money_butler_cloud_last_error_v1 }));
 }
 
 (async () => {
@@ -44,6 +45,17 @@ function lauf(cashPayload, amount) {
   ok(r3.queued.length === 0 && /fehlt/.test(r3.fehler || ''), 'Fehlende Prüfsumme wird weiterhin abgelehnt');
   const r4 = await lauf(JSON.parse(JSON.stringify(original)), '127.11');
   ok(r4.queued.length === 1, 'Originalreihenfolge funktioniert weiterhin');
+
+  // Mit Empfangsbestätigung (Pflicht seit 20.11.2026): automatisch an die Kasse, ohne Klick im PC-Manager
+  const mitBest = { ...original }; delete mitBest.checksum; mitBest.confirmationRequested = true; mitBest.checksum = checksum(JSON.stringify(mitBest));
+  const r5 = await lauf(jsonbOrdnen(JSON.parse(JSON.stringify(mitBest))), '127.11');
+  ok(r5.finanz.length === 1 && /finance-transfer\/queue$/.test(r5.finanz[0].url), 'Mit Bestätigung: automatisch an die Kasse (finance-transfer/queue)');
+  ok(r5.finanz[0]?.body.transferId === 'money-butler-cash-' + original.transferId, 'Übergabe-ID = correlation_id (Bestätigung wird zugeordnet)');
+  const gesendet = r5.finanz[0]?.body.payload || {}; const ohneCs = { ...gesendet }; delete ohneCs.checksum;
+  ok(gesendet.checksum === checksum(JSON.stringify(ohneCs)), 'Für die Kasse neu versiegelt: Prüfsumme stimmt in der gesendeten Reihenfolge');
+  ok(Number(gesendet.total) === 127.11 && gesendet.breakdown && !('financeTransferId' in gesendet), 'Inhalt unverändert (Stückelung dabei, keine Fremdfelder)');
+  ok(r5.marks.join(',') === 'manager_received', '„Bestätigt“ setzt erst die Kasse, nicht der PC-Manager');
+  ok(/row-1/.test(r5.store.kcm_finance_transfers_freigegeben_v1 || ''), 'Als „an Kasse gegeben“ gemerkt – kein Doppelversand');
   console.log(fehler ? `\n${fehler} FEHLER` : '\nMoney Butler Cloud (jsonb-Reihenfolge): alles bestanden');
   process.exit(fehler ? 1 : 0);
 })();
