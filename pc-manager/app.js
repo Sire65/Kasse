@@ -1745,15 +1745,18 @@ function closingRows(){
     const candidates=cashCounts.filter(x=>x.registerId===c.registerId&&closingBusinessDate(x)===tag);
     const count=candidates.sort((a,b)=>String(b.time||b.importedAt||"").localeCompare(String(a.time||a.importedAt||"")))[0]||null;
     const actual=count?Number(count.total||0):null;
-    const diff=actual===null?null:+(actual-Number(c.expectedCash||0)).toFixed(2);
-    return {closing:c,count,actual,diff,businessDate:tag};
+    // KC-KASSE-NUR-SCHEINE (20.11.2026): „Nur Scheine gezählt – Münzen und Rollen später“ → noch KEINE Differenz (sonst sähe es aus, als fehle das
+    // Münzgeld); die spätere vollständige Zählung (Money Butler, Nachzählung) ist neuer und ersetzt diese Zeile dann.
+    const nurScheine=!!(count&&count.coinsLater);
+    const diff=actual===null||nurScheine?null:+(actual-Number(c.expectedCash||0)).toFixed(2);
+    return {closing:c,count,actual,diff,businessDate:tag,nurScheine};
   });
 }
 window.KCClosingCore={ingestClosingPayload,ingestCashCountPayload,rows:closingRows,businessDate:closingBusinessDate};
 function renderClosings(){
   const rows=closingRows();
-  el("closingBody").innerHTML=rows.map(r=>{const methode=r.count?(r.count.inputMode==="weigh"?"Gewogen":"Gezählt"):"",countStatus=!r.count?"Zählung fehlt":`${r.count.countKind==="late"?"Nachzählung · ":""}${methode} · ${r.diff===0?"Stimmt":"Differenz"}`;return `<tr><td>${r.closing.registerName||r.closing.registerId}</td><td>${r.businessDate||String(r.closing.createdAt).slice(0,10)}</td><td>${money(r.closing.expectedCash)}</td><td>${r.actual===null?"—":money(r.actual)}</td><td class="${r.diff===0?"diff-ok":"diff-warn"}">${r.diff===null?"—":money(r.diff)}</td><td>${Number(r.closing.staffTotal||0)?`${money(r.closing.staffTotal)} (${r.closing.staffCount||0})`:"—"}</td><td>${countStatus}</td></tr>`}).join("");
-  el("closingPairs").innerHTML=rows.filter(r=>!r.count).map(r=>`<div class="closing-pair"><strong>${r.closing.registerName||r.closing.registerId}</strong><br>Soll ${money(r.closing.expectedCash)} · Zählcode fehlt</div>`).join("")||"<p>Keine offenen Abschlüsse.</p>";
+  el("closingBody").innerHTML=rows.map(r=>{const methode=r.count?(r.count.inputMode==="weigh"?"Gewogen":r.count.inputMode==="notes"?"Nur Scheine":"Gezählt"):"",countStatus=!r.count?"Zählung fehlt":r.nurScheine?"Nur Scheine gezählt · Münzen/Rollen offen":`${r.count.countKind==="late"?"Nachzählung · ":""}${methode} · ${r.diff===0?"Stimmt":"Differenz"}`;return `<tr><td>${r.closing.registerName||r.closing.registerId}</td><td>${r.businessDate||String(r.closing.createdAt).slice(0,10)}</td><td>${money(r.closing.expectedCash)}</td><td>${r.actual===null?"—":(r.nurScheine?"Scheine ":"")+money(r.actual)}</td><td class="${r.diff===0?"diff-ok":"diff-warn"}">${r.diff===null?"—":money(r.diff)}</td><td>${Number(r.closing.staffTotal||0)?`${money(r.closing.staffTotal)} (${r.closing.staffCount||0})`:"—"}</td><td>${countStatus}</td></tr>`}).join("");
+  el("closingPairs").innerHTML=rows.filter(r=>!r.count||r.nurScheine).map(r=>`<div class="closing-pair"><strong>${r.closing.registerName||r.closing.registerId}</strong><br>Soll ${money(r.closing.expectedCash)} · ${r.nurScheine?`Scheine ${money(r.actual)} gezählt – Münzen/Rollen noch zählen (Money Butler, Nachzählung)`:"Zählcode fehlt"}</div>`).join("")||"<p>Keine offenen Abschlüsse.</p>";
   renderCashMovementsOverview();
 }
 const CASH_REJECT_GRUND={

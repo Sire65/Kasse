@@ -1,7 +1,7 @@
 .closing-count-section{margin:14px 0;padding:14px;border:1px solid #d7dee7;border-radius:12px;background:#f8fafc}
 .closing-count-head{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;margin-bottom:10px}
 .closing-count-head h3{margin:0 0 3px}.closing-count-head p{margin:0;color:#667085;font-size:.86rem}
-.closing-count-mode{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin-bottom:12px}
+.closing-count-mode{display:grid;grid-template-columns:repeat(2,1fr);gap:7px;margin-bottom:12px}
 .closing-count-mode button{padding:10px;border:1px solid #c9d1da;border-radius:9px;background:#fff;font-weight:900}
 .closing-count-mode button.active{background:#173765;color:#fff}
 .closing-measure-hint{padding:9px 11px;background:#eef4f8;border-radius:8px;margin:0 0 10px}
@@ -13,3 +13,6 @@
 .closing-measure-total{display:flex;justify-content:space-between;align-items:center;margin-top:12px;padding:12px 14px;border-radius:9px;background:#173765;color:#fff;font-weight:900}
 .closing-measure-total strong{font-size:1.35rem}
 @media(max-width:700px){.closing-count-mode{grid-template-columns:1fr}.closing-measure-row{grid-template-columns:48px 1fr}.closing-measure-row label,.closing-measure-row>b{grid-column:2}}
+/* KC-KASSE-NUR-SCHEINE (20.11.2026): Kästchen „Münzen und Rollen werden später gezählt“ – groß und gut antippbar */
+.closing-coins-later{display:flex;align-items:center;gap:12px;margin:12px 0 4px;padding:12px 14px;border:2px solid #173765;border-radius:10px;background:#fff;font-weight:900;font-size:1.02rem;cursor:pointer}
+.closing-coins-later input{width:26px;height:26px;flex:none;accent-color:#173765}

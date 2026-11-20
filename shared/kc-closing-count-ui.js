@@ -2,6 +2,10 @@
   'use strict';
   const settings=()=>global.KCCashMeasureSettings?.read?.();
   let mode='defer';
+  // KC-KASSE-NUR-SCHEINE (20.11.2026, Wunsch Hansi: abends hat keiner Lust zu zählen, oft werden nur die Scheine gezählt – „Knopf nur Scheine zählen
+  // und ein Klickkästchen: Münzen und Rollen werden später gezählt“): Modus 'notes' = nur Scheine; Kästchen an (Standard) = Münzen/Rollen bleiben
+  // offen und werden später (Money Butler, Nachzählung) gezählt – dann gibt es KEINE falsche Differenz. Kästchen aus = Münzen und Rollen hier mitzählen.
+  let muenzenSpaeter=true;
   const $=id=>document.getElementById(id);
   const euro=v=>Number(v)>=1?Number(v)+' €':Math.round(Number(v)*100)+' ct';
   const money=n=>new Intl.NumberFormat('de-DE',{style:'currency',currency:'EUR'}).format(Number(n)||0);
@@ -44,18 +48,31 @@
     const s=settings(); if(!s){root.innerHTML='<p>Messvoreinstellungen nicht verfügbar.</p>';return;}
     root.innerHTML=mode==='defer'
       ?'<p class="closing-measure-hint"><strong>Später zählen.</strong> Der Soll-Abschluss wird jetzt gespeichert. Die Ist-Zählung kann anschließend im Money Butler nachgetragen werden.</p>'
+      :mode==='notes'
+      ?`<p class="closing-measure-hint"><strong>Nur Scheine zählen:</strong> Anzahl je Schein eintragen.${muenzenSpaeter?' Münzen und Rollen bleiben in der Kasse und werden später gezählt – deshalb wird heute noch keine Differenz berechnet.':''}</p>
+        <div class="closing-measure-group"><h4>Scheine</h4>${noteRows(s,mode)}</div>
+        <label class="closing-coins-later"><input type="checkbox" id="closingCoinsLater"${muenzenSpaeter?' checked':''}> <span>Münzen und Rollen werden später gezählt</span></label>
+        ${muenzenSpaeter?'':`<div class="closing-measure-group"><h4>Münzen</h4>${coinRows(s,mode)}</div><div class="closing-measure-group"><h4>Rollen</h4>${rollRows(s,mode)}</div>`}
+        <div class="closing-measure-total">${muenzenSpaeter?'Scheine':'Ist-Bestand'} <strong id="closingMeasureTotal">0,00 €</strong></div>`
       :`<p class="closing-measure-hint"><strong>${mode==='weigh'?'Wiegen':'Zählen'}:</strong> Der hier erfasste Ist-Bestand wird als separate Zählung zusammen mit dem Abschluss übertragen.</p>
         <div class="closing-measure-group"><h4>Scheine</h4>${noteRows(s,mode)}</div>
         <div class="closing-measure-group"><h4>Münzen</h4>${coinRows(s,mode)}</div>
         <div class="closing-measure-group"><h4>Rollen</h4>${rollRows(s,mode)}</div>
         <div class="closing-measure-total">Ist-Bestand <strong id="closingMeasureTotal">0,00 €</strong></div>`;
-    root.querySelectorAll('input').forEach(n=>n.addEventListener('input',recalc));
+    root.querySelectorAll('input[type="number"]').forEach(n=>n.addEventListener('input',recalc));
+    const spaeter=$('closingCoinsLater');
+    if(spaeter)spaeter.addEventListener('change',()=>{
+      // Eingetragene Scheine beim Umschalten behalten
+      const alt={};root.querySelectorAll('input[data-closing-count="note"]').forEach(n=>{alt[n.dataset.value]=n.value;});
+      muenzenSpaeter=spaeter.checked;render();
+      $('closingCountInputs')?.querySelectorAll('input[data-closing-count="note"]').forEach(n=>{if(alt[n.dataset.value])n.value=alt[n.dataset.value];});recalc();
+    });
     recalc();
   }
   function readLines(){
     const breakdown={},measurements=[],coinRolls={}; let total=0;
     const root=$('closingCountInputs'); if(!root||mode==='defer')return {total:0,breakdown,measurements,coinRolls};
-    root.querySelectorAll('input').forEach(n=>{
+    root.querySelectorAll('input[type="number"]').forEach(n=>{
       const value=Number(n.dataset.value),raw=Number(String(n.value||0).replace(',','.'))||0;
       if(raw<=0)return;
       if(n.dataset.closingCount){
@@ -83,7 +100,7 @@
   function recalc(){
     const data=readLines();const total=$('closingMeasureTotal');if(total)total.textContent=money(data.total);
     const root=$('closingCountInputs');if(!root)return;
-    root.querySelectorAll('input').forEach(n=>{
+    root.querySelectorAll('input[type="number"]').forEach(n=>{
       const value=Number(n.dataset.value),raw=Number(String(n.value||0).replace(',','.'))||0;let amount=0;
       if(n.dataset.closingCount)amount=Math.round(raw)*value;
       else if(n.dataset.closingRoll)amount=Math.round(raw)*(Number(n.dataset.coins)||0)*value;
@@ -91,24 +108,29 @@
         const units=Math.round(raw/Number(n.dataset.unitGrams));
         amount=n.dataset.closingWeight==='roll'?units*(Number(n.dataset.coins)||0)*value:units*value;
       }
-      const type=n.dataset.closingCount?'count':n.dataset.closingRoll?'roll':n.dataset.closingWeight;
+      // KC-KASSE-NUR-SCHEINE: Zeilenbetrag je Schein/Münze stand beim Zählen immer auf 0,00 € (gesucht wurde „count-…“, die Zeile heißt „note-…“/„coin-…“)
+      const type=n.dataset.closingCount||(n.dataset.closingRoll?'roll':n.dataset.closingWeight);
       const line=root.querySelector(`[data-closing-line="${mode}-${type}-${value}"]`);if(line)line.textContent=money(amount);
     });
   }
   function setMode(next){
-    mode=['defer','count','weigh'].includes(next)?next:'defer';
+    mode=['defer','notes','count','weigh'].includes(next)?next:'defer';
+    if(mode==='notes')muenzenSpaeter=true; // „Nur Scheine“ beginnt immer mit „Münzen und Rollen später“
     document.querySelectorAll('[data-closing-count-mode]').forEach(b=>b.classList.toggle('active',b.dataset.closingCountMode===mode));
     render();
   }
   function buildPayload({registerId,businessDate,closingId}={}){
     if(mode==='defer')return null;
-    const data=readLines();if(data.total<=0)throw new Error('Bitte den Ist-Bestand erfassen oder „Später im Money Butler“ wählen.');
+    const data=readLines();
+    const nurScheine=mode==='notes'&&muenzenSpaeter;
+    if(data.total<=0)throw new Error(nurScheine?'Bitte die Anzahl der Scheine eintragen oder „Später im Money Butler“ wählen.':'Bitte den Ist-Bestand erfassen oder „Später im Money Butler“ wählen.');
     const now=new Date().toISOString();
     return {
       format:'KC_CASH_COUNT',version:4,countId:crypto.randomUUID(),transferId:crypto.randomUUID(),
       registerId,businessDate,effectiveDate:businessDate,closingId:closingId||null,
-      type:'count',countKind:'same-day',countLabel:`Zählung zum Tagesabschluss vom ${businessDate}`,
-      time:now,countedAt:now,inputMode:mode,total:data.total,breakdown:data.breakdown,coinRolls:data.coinRolls,
+      type:'count',countKind:'same-day',countLabel:nurScheine?`Scheine zum Tagesabschluss vom ${businessDate} – Münzen und Rollen werden später gezählt`:`Zählung zum Tagesabschluss vom ${businessDate}`,
+      time:now,countedAt:now,inputMode:mode==='notes'?(nurScheine?'notes':'count'):mode,total:data.total,
+      ...(nurScheine?{scope:'notes',coinsLater:true,partial:true,notesTotal:data.total}:{}),breakdown:data.breakdown,coinRolls:data.coinRolls,
       measurements:data.measurements,measureSettingsVersion:settings()?.version||1,
       measureSettingsSnapshot:settings()
     };
@@ -118,5 +140,5 @@
     setMode('defer');
   }
   global.addEventListener?.('kc-cash-measure-settings-updated',()=>{if($('closingCountInputs'))render();});
-  global.KCClosingCountUI={init,setMode,buildPayload,read:readLines,get mode(){return mode}};
+  global.KCClosingCountUI={init,setMode,buildPayload,read:readLines,get mode(){return mode},get muenzenSpaeter(){return mode==='notes'&&muenzenSpaeter}};
 })(typeof window!=='undefined'?window:globalThis);
