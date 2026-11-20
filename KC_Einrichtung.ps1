@@ -1,5 +1,6 @@
 $ErrorActionPreference = 'Stop'
-$Root = Split-Path -LiteralPath $MyInvocation.MyCommand.Path -Parent
+# Windows PowerShell 5.1 (Windows 10) kennt -LiteralPath zusammen mit -Parent nicht -> $PSScriptRoot
+$Root = if ($PSScriptRoot) { $PSScriptRoot } else { Split-Path -Parent $MyInvocation.MyCommand.Path }
 $Root = [System.IO.Path]::GetFullPath($Root)
 $ProgressPreference = 'SilentlyContinue'
 [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
@@ -45,10 +46,10 @@ if (-not (Test-Path -LiteralPath $NodeExe)) {
     Invoke-WebRequest -UseBasicParsing -Uri "$baseUrl/SHASUMS256.txt" -OutFile $sums
 
     $line = (Select-String -Path $sums -Pattern ([regex]::Escape($archiveName) + '$') | Select-Object -First 1).Line
-    if (-not $line) { Fail 'SHA-256-Prüfsumme für Node-Paket nicht gefunden.' }
+    if (-not $line) { Fail 'SHA-256-Pruefsumme fuer Node-Paket nicht gefunden.' }
     $expected = ($line -split '\s+')[0].Trim().ToLowerInvariant()
     $actual = (Get-FileHash -Algorithm SHA256 -Path $zip).Hash.ToLowerInvariant()
-    if ($expected -ne $actual) { Fail 'SHA-256-Prüfung des Node-Pakets fehlgeschlagen.' }
+    if ($expected -ne $actual) { Fail 'SHA-256-Pruefung des Node-Pakets fehlgeschlagen.' }
 
     $extract = Join-Path $temp 'extract'
     Expand-Archive -Path $zip -DestinationPath $extract -Force
@@ -102,5 +103,5 @@ Zeit: $(Get-Date -Format 'yyyy-MM-dd HH:mm:ss')
 "@ | Set-Content -Encoding UTF8 (Join-Path $Root '.kc_setup_ok')
 
 Write-Host ''
-Write-Host 'Einrichtung vollständig. Die KC MarktKasse kann jetzt gestartet werden.' -ForegroundColor Green
+Write-Host 'Einrichtung vollstaendig. Die KC MarktKasse kann jetzt gestartet werden.' -ForegroundColor Green
 exit 0

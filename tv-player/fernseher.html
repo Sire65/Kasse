@@ -26,6 +26,13 @@
   'use strict';
   var q = new URLSearchParams(location.search);
   var PRUEFEN_MS = Math.max(2, Number(q.get('pruefen')) || 30) * 1000;
+  // Sicherheitsrand gegen Overscan (Fernseher schneidet Ränder ab): ?rand=3 = 3 % Rand rundum.
+  var RAND = Math.max(0, Math.min(10, Number(q.get('rand')) || 0));
+  if (RAND) {
+    var st = document.createElement('style');
+    st.textContent = 'iframe{top:' + RAND + 'vh!important;left:' + RAND + 'vw!important;width:' + (100 - 2 * RAND) + 'vw!important;height:' + (100 - 2 * RAND) + 'vh!important}';
+    document.head.appendChild(st);
+  }
   var rahmen = [document.getElementById('a'), document.getElementById('b')];
   var aktiv = 0, stand = null, herkunft = null;
 

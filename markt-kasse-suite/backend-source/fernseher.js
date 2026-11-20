@@ -73,7 +73,11 @@ class Fernseher {
     this._stopp = false;
   }
 
-  get url() { return `http://127.0.0.1:${this.webserverPort}/tv-player/fernseher.html`; }
+  // "rand": Sicherheitsrand in Prozent (0-10) gegen Overscan - viele Fernseher schneiden die Bildränder ab.
+  get url() {
+    const rand = Math.max(0, Math.min(10, Number(this.einstellungen.rand) || 0));
+    return `http://127.0.0.1:${this.webserverPort}/tv-player/fernseher.html${rand ? `?rand=${rand}` : ''}`;
+  }
 
   // Ergebnis: { gestartet, einBildschirm, meldung }
   start() {
