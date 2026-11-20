@@ -350,8 +350,18 @@
       else { if (sek >= 90) { farbe = '#fff4e5'; text = '#7c2d12'; } inhalt = `🌐 Fernmodus · Stand „${stand.name}“ · zuletzt gemeldet vor ${dauer(sek)}`; }
     }
     el.style.background = farbe; el.style.color = text; el.innerHTML = inhalt;
+    bannerPlatz();
     el.querySelectorAll('[data-kc-stand]').forEach((b) => { b.onclick = () => waehleStand({ standId: b.dataset.kcStand, name: b.dataset.kcName }); });
   }
+  // KC-FERNMODUS-PLATZ (Wunsch Hansi 20.11.2026): Liegt unten rechts schon der gelbe Entwicklungs-Hinweis
+  // (#devQuickAccessBadge), rückt die Fernmodus-Meldung darüber – sonst verdeckt der Hinweis sie.
+  function bannerPlatz() {
+    const el = document.getElementById('kcFernmodusBanner'); if (!el) return;
+    const hinweis = document.getElementById('devQuickAccessBadge');
+    const sichtbar = hinweis && !hinweis.hidden && hinweis.offsetHeight > 0;
+    el.style.bottom = sichtbar ? (hinweis.offsetHeight + 14 + 10) + 'px' : '12px';
+  }
+  if (global.document && global.document.addEventListener) global.document.addEventListener('kc-hinweis-unten-rechts', bannerPlatz);
   function dauer(sek) { return sek < 120 ? `${sek} s` : sek < 7200 ? `${Math.round(sek / 60)} min` : `${Math.round(sek / 3600)} h`; }
 
   // ---------- Signale der direkten Leitung (kc-direkte-leitung-manager.js ruft das auf) ----------

@@ -30,6 +30,7 @@ jobs:
           node tests/time-clock-cloud-queue.test.cjs
           node tests/kasse-sparsam.test.cjs
           node tests/kasse-leitung.test.cjs
+          node tests/fernmodus-platz.test.cjs
           node tests/direkte-leitung.test.cjs
           node tests/time-clock-booking-browser.test.cjs
           node tests/marktbetrieb.test.cjs
