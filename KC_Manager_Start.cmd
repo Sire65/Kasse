@@ -13,6 +13,13 @@ if not exist "%KC_BACKEND%\run-manager-service.js" (
   echo Erwartet: %KC_BACKEND%\run-manager-service.js
   echo Bitte die ZIP erneut vollstaendig entpacken.
   echo.
+  echo %~dp0 | findstr /i /c:"Startup" /c:"Autostart" >nul && (
+    echo HINWEIS: Diese Datei liegt im Autostart-Ordner als KOPIE. Dort muss eine VERKNUEPFUNG liegen.
+    echo Loesung: 1^) Windows-Taste + R, shell:startup, Enter - die Datei KC_Manager_Start.cmd dort loeschen.
+    echo          2^) Im KC-Ordner Rechtsklick auf KC_Manager_Start.cmd - Verknuepfung erstellen.
+    echo          3^) Die Verknuepfung ^(mit kleinem Pfeil^) in den Autostart-Ordner verschieben.
+  )
+  echo.
   pause
   exit /b 1
 )
