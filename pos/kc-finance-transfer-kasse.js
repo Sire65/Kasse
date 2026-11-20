@@ -101,7 +101,14 @@
         <p style="color:#475569;margin:0 0 4px;">${art}: <strong>${geld(betragFuerKasse(payload, global.state?.master?.registerId || payload.registerId))}</strong></p>
         <p style="color:#475569;margin:0 0 4px;">Für: <strong>${payload.registerId || aktuelleKasse(payload) || ''}</strong></p>
         <p style="color:#475569;margin:0 0 18px;">Datum: <strong>${datumFuerKasse(payload, heute) || ''}</strong></p>
-        <div style="display:flex;gap:10px;justify-content:center;">
+        <div id="kcFinanceTransferArbeitet" style="display:none;margin:0 0 4px;">
+          <div style="height:10px;border-radius:6px;background:#e2e8f0;overflow:hidden;position:relative;">
+            <div style="position:absolute;top:0;bottom:0;width:40%;border-radius:6px;background:#166534;animation:kcFtLauf 1.1s ease-in-out infinite;"></div>
+          </div>
+          <p id="kcFinanceTransferArbeitetText" style="margin:10px 0 0;color:#166534;font-weight:600;">Geld wird gebucht und dem Kassenwart bestätigt …</p>
+        </div>
+        <style>@keyframes kcFtLauf{0%{left:-40%}100%{left:100%}}</style>
+        <div id="kcFinanceTransferKnoepfe" style="display:flex;gap:10px;justify-content:center;">
           <button type="button" id="kcFinanceTransferSpaeter" style="padding:12px 18px;border-radius:8px;border:1px solid #cbd5e1;background:#fff;font-size:1rem;">Später</button>
           <button type="button" id="kcFinanceTransferUebernehmen" style="padding:12px 22px;border-radius:8px;border:0;background:#166534;color:#fff;font-weight:700;font-size:1rem;">Übernehmen</button>
         </div>
@@ -117,10 +124,18 @@
     document.getElementById('kcFinanceTransferUebernehmen').addEventListener('click', async () => {
       const knoepfe=overlay.querySelectorAll('button');
       knoepfe.forEach(b=>b.disabled=true);
+      // 20.11.2026 (Betreiber): nach dem Antippen "dauert es" - ein Laufbalken zeigt, dass gearbeitet wird.
+      const arbeitet=document.getElementById('kcFinanceTransferArbeitet'),leiste=document.getElementById('kcFinanceTransferKnoepfe');
+      if(arbeitet)arbeitet.style.display='block';if(leiste)leiste.style.display='none';
+      const zurueck=()=>{if(arbeitet)arbeitet.style.display='none';if(leiste)leiste.style.display='flex';};
       try{
         await uebernehmeUndBestaetige(transferId, payload, eroeffnungHeuteVorhanden);
-        overlay.remove();
+        const t=document.getElementById('kcFinanceTransferArbeitetText');
+        if(t)t.textContent='✓ Übernommen und bestätigt';
+        const balken=arbeitet?.firstElementChild?.firstElementChild;if(balken){balken.style.animation='none';balken.style.left='0';balken.style.width='100%';}
+        setTimeout(()=>overlay.remove(),1200);
       }catch(err){
+        zurueck();
         if(verarbeiteteIds().includes(transferId)||bewegung(transferId,payload)){
           overlay.remove();wartendeUebergabe=null;
           if(typeof setSystemHint==='function')setSystemHint('Geld ist gebucht. Die Empfangsbestätigung wird automatisch erneut versucht.','info');
