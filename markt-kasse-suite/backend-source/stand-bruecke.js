@@ -290,7 +290,8 @@ class StandBruecke {
   _info() {
     const aktivitaet = {};
     try { for (const [kasse, ms] of (this.manager._kassenLetzteAktivitaet || new Map())) aktivitaet[kasse] = new Date(ms).toISOString(); } catch (e) { /* */ }
-    return { version: this.version, letzteAktivitaet: aktivitaet, gemeldetUm: new Date().toISOString(), rueckstand: this.zustand.rueckstand };
+    let router = null; try { router = this.routerZaehler ? this.routerZaehler.kurz() : null; } catch (e) { router = null; }
+    return { version: this.version, letzteAktivitaet: aktivitaet, gemeldetUm: new Date().toISOString(), rueckstand: this.zustand.rueckstand, ...(router ? { router } : {}) };
   }
 
   async _runde() {

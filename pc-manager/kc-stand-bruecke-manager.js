@@ -19,16 +19,73 @@
     if (!ansicht || el('kcStandBrueckeKarte')) return el('kcStandBrueckeKarte');
     const k = document.createElement('article');
     k.className = 'secure-card'; k.id = 'kcStandBrueckeKarte';
-    k.innerHTML = '<h3>Verbindung nach Hause (Supabase)</h3><div id="kcSbInhalt" class="vb-hinweis">Wird geprüft …</div><div id="kcSbKnoepfe" style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap"></div>';
+    k.innerHTML = '<h3>Verbindung nach Hause (Supabase)</h3><div id="kcSbInhalt" class="vb-hinweis">Wird geprüft …</div><div id="kcSbRouter" style="margin-top:12px;padding-top:10px;border-top:1px solid #e2e8f0"></div><div id="kcSbKnoepfe" style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap"></div>';
     const nach = ansicht.querySelector('#vbKassenZettel')?.closest('article');
     if (nach && nach.nextSibling) ansicht.insertBefore(k, nach.nextSibling); else ansicht.appendChild(k);
     return k;
   }
 
+
+  // ---------- 4G-Datenverbrauch (Router am Stand) ----------
+  const GB = 1024 * 1024 * 1024;
+  const gbText = (b) => (b == null || !Number.isFinite(Number(b)) ? '–' : (Number(b) / GB).toLocaleString('de-DE', { maximumFractionDigits: 2, minimumFractionDigits: 2 }) + ' GB');
+  function verbrauchHtml(r) {
+    if (!r) return '';
+    const gesamt = Number(r.gesamtBytes), vol = Number(r.volumenGB) || (r.limitBytes ? Number(r.limitBytes) / GB : 0);
+    const anteil = vol && Number.isFinite(gesamt) ? Math.min(100, Math.round(gesamt / GB / vol * 100)) : null;
+    const farbe = anteil == null ? '#0b315d' : anteil >= 90 ? '#b42318' : anteil >= 80 ? '#b45309' : '#167447';
+    return `<div style="font-weight:700;color:${farbe};font-size:1.05rem">📶 4G-Verbrauch: ${gbText(r.gesamtBytes)}${vol ? ` von ${vol.toLocaleString('de-DE')} GB` : ''}${anteil != null ? ` (${anteil} %)` : ''}</div>`
+      + (anteil != null ? `<div style="height:8px;border-radius:5px;background:#e2e8f0;margin:6px 0;overflow:hidden"><div style="height:100%;width:${anteil}%;background:${farbe}"></div></div>` : '')
+      + `<div class="hint" style="font-size:.85rem">${r.zeit ? `Stand ${esc(new Date(r.zeit).toLocaleString('de-DE'))}` : 'noch nicht gelesen'}${r.anbieter ? ` · ${esc(r.anbieter)}` : ''}${anteil != null && anteil >= 80 ? ' · <strong>Volumen fast aufgebraucht – nachbuchen!</strong>' : ''}</div>`
+      + (r.fehler ? `<div style="color:#b42318;margin-top:4px">Router zuletzt nicht lesbar: ${esc(r.fehler)}</div>` : '');
+  }
+  async function zeichneRouter(modus) {
+    const ort = el('kcSbRouter'); if (!ort) return;
+    if (ort.contains(document.activeElement) && /INPUT/.test(document.activeElement.tagName)) return; // nicht beim Tippen neu zeichnen
+    if (modus === 'fern') {
+      const info = (global.KCFernmodus.standInfo() || {}).info || {};
+      ort.innerHTML = info.router ? verbrauchHtml(info.router) : '<div class="hint">📶 4G-Verbrauch: am Stand noch nicht eingerichtet (dort im PC-Manager unter „Verbindung prüfen“ das Router-Passwort eintragen).</div>';
+      return;
+    }
+    const s = await lokal('router-status').catch(() => ({ ok: false, daten: {} }));
+    if (!s.ok) { ort.innerHTML = ''; return; }
+    const d = s.daten;
+    if (!d.eingerichtet) {
+      ort.innerHTML = '<div style="font-weight:700">📶 4G-Verbrauch anzeigen (einmalig einrichten)</div>'
+        + '<div class="hint" style="margin:4px 0 8px">Der PC liest dann alle 15 Minuten den Zähler des TP-Link-Routers und zeigt ihn hier und zu Hause an. Das Passwort bleibt nur auf diesem PC.</div>'
+        + '<div style="display:flex;gap:8px;flex-wrap:wrap;align-items:flex-end">'
+        + '<label>Router-Admin-Passwort<br><input type="password" id="kcRtPass" autocomplete="off" style="min-width:200px"></label>'
+        + '<label>Datenvolumen (GB)<br><input type="number" id="kcRtVol" value="100" min="1" style="width:90px"></label>'
+        + '<label>Router-Adresse<br><input id="kcRtAdr" value="192.168.1.1" style="width:130px"></label>'
+        + '<button type="button" class="primary" id="kcRtSpeichern">Speichern und testen</button></div><div id="kcRtMeldung" style="margin-top:6px"></div>';
+      el('kcRtSpeichern').onclick = async () => {
+        const knopf = el('kcRtSpeichern'), m = el('kcRtMeldung');
+        knopf.disabled = true; m.style.color = '#0b315d'; m.textContent = '⏳ Melde mich am Router an und lese den Zähler … (bis 30 s)';
+        const a = await lokal('router-einrichten', 'POST', { passwort: el('kcRtPass').value, volumenGB: el('kcRtVol').value, adresse: el('kcRtAdr').value }).catch((e) => ({ ok: false, daten: { fehler: e.message } }));
+        knopf.disabled = false;
+        if (!a.ok) {
+          m.style.color = '#b42318';
+          const f = String(a.daten.fehler || a.status);
+          m.innerHTML = `<strong>Nicht geklappt:</strong> ${esc(f)}<br><span class="hint">Tipp: Ist die Router-Seite gerade im Browser geöffnet? Dort zuerst abmelden – der Router lässt nur eine Anmeldung zu. Bleibt der Fehler, diesen Text an Claude schicken.</span>`;
+          return;
+        }
+        el('kcRtPass').value = '';
+        global.KCManagerMessages?.success?.('4G-Verbrauch eingerichtet.');
+        zeichneRouter('lokal');
+      };
+      return;
+    }
+    ort.innerHTML = verbrauchHtml({ ...(d.letzter || {}), volumenGB: d.volumenGB, fehler: d.fehler ? d.fehler.text : null })
+      + '<div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap"><button type="button" id="kcRtJetzt">Jetzt aktualisieren</button><button type="button" id="kcRtVolAendern">Datenvolumen ändern</button><button type="button" id="kcRtNeu">Router-Passwort neu eintragen</button></div>';
+    el('kcRtJetzt').onclick = async () => { el('kcRtJetzt').disabled = true; el('kcRtJetzt').textContent = '⏳ wird gelesen …'; await lokal('router-jetzt', 'POST', {}); zeichneRouter('lokal'); };
+    el('kcRtVolAendern').onclick = async () => { const v = prompt('Datenvolumen des Tarifs in GB:', d.volumenGB || 100); if (v) { await lokal('router-volumen', 'POST', { volumenGB: v }); zeichneRouter('lokal'); } };
+    el('kcRtNeu').onclick = async () => { if (confirm('Gespeichertes Router-Passwort löschen und neu eintragen?')) { await lokal('router-entfernen', 'POST', {}); zeichneRouter('lokal'); } };
+  }
   async function zeichne() {
     if (!karte()) return;
     const inhalt = el('kcSbInhalt'), knoepfe = el('kcSbKnoepfe');
     const modus = global.KCFernmodus ? await global.KCFernmodus.bestimmeModus() : 'lokal';
+    zeichneRouter(modus).catch(() => {});
     if (modus === 'fern') {
       const st = global.KCFernmodus.gewaehlterStand(), info = global.KCFernmodus.standInfo() || {};
       inhalt.innerHTML = st
@@ -86,5 +143,5 @@
 
   function init() { zeichne(); setInterval(() => { if (document.querySelector('[data-view-panel="verbindung"]:not([hidden])')) zeichne(); }, 10000); }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init); else init();
-  global.KCStandBrueckeManager = { zeichne, anmelden };
+  global.KCStandBrueckeManager = { zeichne, anmelden, zeichneRouter, verbrauchHtml };
 })(window);

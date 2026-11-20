@@ -156,7 +156,11 @@ function behandleKassenStart(req, res, urlPath) {
     frageStartprozess({ aktion: 'stand-status' }).then((a) => json(res, a.status, a.daten));
     return;
   }
-  if (req.method !== 'POST' || !['gedruckt', 'neuer-schluessel', 'stand-einrichten', 'stand-abmelden'].includes(aktion)) { json(res, 404, { fehler: 'unbekannt' }); return; }
+  if (req.method === 'GET' && aktion === 'router-status') {
+    frageStartprozess({ aktion: 'router-status' }).then((a) => json(res, a.status, a.daten));
+    return;
+  }
+  if (req.method !== 'POST' || !['gedruckt', 'neuer-schluessel', 'stand-einrichten', 'stand-abmelden', 'router-einrichten', 'router-jetzt', 'router-volumen', 'router-entfernen'].includes(aktion)) { json(res, 404, { fehler: 'unbekannt' }); return; }
   // Schutz gegen fremde Webseiten: eigener Kopf (erzwingt eine CORS-Vorabfrage, die hier nie
   // beantwortet wird) und - falls vorhanden - Herkunft nur vom PC selbst.
   const herkunft = req.headers.origin;
@@ -168,7 +172,7 @@ function behandleKassenStart(req, res, urlPath) {
   req.on('end', () => {
     let daten = {};
     try { daten = JSON.parse(koerper || '{}'); } catch (e) { json(res, 400, { fehler: 'json_ungueltig' }); return; }
-    frageStartprozess({ aktion, id: daten.id, ids: daten.ids, daten: aktion === 'stand-einrichten' ? daten : undefined }).then((a) => json(res, a.status, a.daten));
+    frageStartprozess({ aktion, id: daten.id, ids: daten.ids, daten: (aktion === 'stand-einrichten' || /^router-/.test(aktion)) ? daten : undefined }).then((a) => json(res, a.status, a.daten));
   });
 }
 
