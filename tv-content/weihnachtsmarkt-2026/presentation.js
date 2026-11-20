@@ -27,7 +27,7 @@
     "Für mich ist der Köcheclub ein Ort, an dem aus Berufskollegen echte Freunde geworden sind.",
     "Ich engagiere mich gerne, weil unsere Arbeit nicht nur Freude macht, sondern auch einem guten Zweck dient.",
     "Im Köcheclub kann ich meine Erfahrungen weitergeben und gleichzeitig immer wieder Neues lernen.",
-    "Ich helfe gerne aus beim Köcheclub Werne, denn helfende Hände werden immer gebraucht."
+    "Ich bin gerne im Köcheclub, denn helfende Hände werden immer gebraucht."
   ];
 
   const MEMBER_PROFILES = [
