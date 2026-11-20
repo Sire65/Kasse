@@ -10,6 +10,7 @@ const { TabletKassenStart, leseKassenKonfig, standardDatenOrdner, zettelWebserve
 const { meldung, erklaere, druckeKasten, SCHRITTE_FENSTER_NEU } = require('./fehlerhilfe');
 const { sicherePortFrei, belegtFehler, programmName } = require('./port-freigabe');
 const { StandBruecke } = require('./stand-bruecke');
+const { RouterZaehler } = require('./router-zaehler');
 const { Fernseher } = require('./fernseher');
 const fs = require('fs');
 
@@ -193,6 +194,10 @@ async function main() {
   let fernseher = null;
   // Stand-Brücke (KS-04): Buchungen/Übersichten nach Hause (Supabase), Aufträge von zu Hause an die Kassen.
   const standBruecke = new StandBruecke({ manager: mgr, datenOrdner, version: process.env.KC_PC_MANAGER_VERSION || null });
+  // 4G-Datenverbrauch des Stand-Routers (nur wenn im PC-Manager eingerichtet) - geht mit der Stand-Brücke nach Hause.
+  const routerZaehler = new RouterZaehler({ datenOrdner });
+  standBruecke.routerZaehler = routerZaehler;
+  routerZaehler.start();
   const startWarnungen = []; // Meldungen {titel, ursache, loesung[]}
   if (mgr.liveMonitorFehler) {
     const m = erklaere(livePort.frei ? new Error(mgr.liveMonitorFehler) : belegtFehler(47392, livePort), { was: 'Live-Kanal starten', port: 47392 });
@@ -224,7 +229,7 @@ async function main() {
       if (!nachricht || nachricht.art !== 'kassen-start') return;
       const antworte = (inhalt) => { try { webserverProzess.send({ art: 'kassen-start-antwort', anfrageId: nachricht.anfrageId, ...inhalt }); } catch (e) { /* Webserver weg */ } };
       try {
-        if (!kassenStart && !/^stand-/.test(nachricht.aktion)) return antworte({ status: 503, daten: { fehler: 'kassen_start_noch_nicht_bereit' } });
+        if (!kassenStart && !/^(stand|router)-/.test(nachricht.aktion)) return antworte({ status: 503, daten: { fehler: 'kassen_start_noch_nicht_bereit' } });
         if (nachricht.aktion === 'status') return antworte({ status: 200, daten: kassenStart.status() });
         if (nachricht.aktion === 'gedruckt') return antworte({ status: 200, daten: kassenStart.zettelGedruckt(nachricht.ids) });
         if (nachricht.aktion === 'neuer-schluessel') return antworte({ status: 200, daten: await kassenStart.neuerSchluessel(nachricht.id) });
@@ -232,6 +237,11 @@ async function main() {
         if (nachricht.aktion === 'fernseher-sicherstellen') return antworte({ status: 200, daten: { geoeffnet: fernseher ? fernseher.sicherstellen() : false } });
         if (nachricht.aktion === 'stand-einrichten') return antworte({ status: 200, daten: standBruecke.einrichten(nachricht.daten || {}) });
         if (nachricht.aktion === 'stand-abmelden') return antworte({ status: 200, daten: standBruecke.abmelden() });
+        if (nachricht.aktion === 'router-status') return antworte({ status: 200, daten: routerZaehler.status() });
+        if (nachricht.aktion === 'router-jetzt') return antworte({ status: 200, daten: await routerZaehler.jetztLesen() });
+        if (nachricht.aktion === 'router-einrichten') return antworte({ status: 200, daten: await routerZaehler.einrichten(nachricht.daten || {}) });
+        if (nachricht.aktion === 'router-volumen') return antworte({ status: 200, daten: routerZaehler.volumenSetzen((nachricht.daten || {}).volumenGB) });
+        if (nachricht.aktion === 'router-entfernen') return antworte({ status: 200, daten: routerZaehler.entfernen() });
         return antworte({ status: 404, daten: { fehler: 'aktion_unbekannt' } });
       } catch (e) {
         return antworte({ status: 400, daten: { fehler: String(e && e.message || e) } });

@@ -348,6 +348,12 @@
       else if (sek >= VERALTET_SEK) { farbe = '#fdecea'; text = '#7f1d1d'; inhalt = `🌐 Fernmodus · Stand „${stand.name}“ · VERALTET: zuletzt gemeldet vor ${dauer(sek)}. Kein Internet am Stand oder Mini-PC aus – am Stand wird trotzdem kassiert, die Daten kommen nach.`; }
       // gelb erst ab 90 s: mit direkter Leitung meldet sich ein ruhiger Stand nur jede Minute (Aufträge wecken ihn sofort)
       else { if (sek >= 90) { farbe = '#fff4e5'; text = '#7c2d12'; } inhalt = `🌐 Fernmodus · Stand „${stand.name}“ · zuletzt gemeldet vor ${dauer(sek)}`; }
+      const rt = standInfo && standInfo.info && standInfo.info.router;
+      if (rt && Number.isFinite(Number(rt.gesamtBytes))) {
+        const g = Number(rt.gesamtBytes) / 1073741824, v = Number(rt.volumenGB) || 0, p = v ? Math.round(g / v * 100) : null;
+        inhalt += ` · 📶 4G ${g.toLocaleString('de-DE', { maximumFractionDigits: 1, minimumFractionDigits: 1 })}${v ? ` von ${v} GB` : ' GB'}`;
+        if (p != null && p >= 80) { farbe = '#fdecea'; text = '#7f1d1d'; inhalt += ` – ${p} %, bitte nachbuchen!`; }
+      }
     }
     el.style.background = farbe; el.style.color = text; el.innerHTML = inhalt;
     bannerPlatz();
