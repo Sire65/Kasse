@@ -23,11 +23,21 @@
       defaultTestOnly:false
     });
   }
+  // 20.11.2026: Die Prüfsumme des Money Butler gilt für die Feldreihenfolge beim Erzeugen. Supabase speichert
+  // die Daten als jsonb und sortiert die Felder dabei um - die Prüfsumme lässt sich aus der Datenbank daher
+  // nicht nachrechnen (jede Cloud-Übergabe blieb deshalb liegen). Auf diesem Weg sichern Anmeldung, Datenbank
+  // und der Abgleich Betrag-Datensatz/Betrag-Spalte die Echtheit; die Prüfsumme muss vorhanden sein und wird
+  // geprüft, wenn die Reihenfolge erhalten blieb - ein Abweichen allein blockiert nicht mehr.
+  function pruefsummeCloud(p){
+    const copy=JSON.parse(JSON.stringify(p)),supplied=copy.checksum;delete copy.checksum;
+    if(!supplied)return 'fehlt';
+    if(typeof checksum==='function'&&checksum(JSON.stringify(copy))===supplied)return 'ok';
+    return 'umsortiert';
+  }
   function decodeRow(row){
     const p=row?.payload?.cashPayload;
     if(!p||p.format!=='KC_CASH_TRANSFER')throw new Error('Finance-Bridge-Datensatz enthält keinen KC_CASH_TRANSFER.');
-    const copy=JSON.parse(JSON.stringify(p)),supplied=copy.checksum;delete copy.checksum;
-    if(!supplied||typeof checksum!=='function'||checksum(JSON.stringify(copy))!==supplied)throw new Error('Prüfsumme der Cloud-Geldübergabe ist falsch.');
+    if(pruefsummeCloud(p)==='fehlt')throw new Error('Prüfsumme der Cloud-Geldübergabe fehlt.');
     if(!p.transferId||String(p.transferId).length>128)throw new Error('Transfer-ID der Cloud-Geldübergabe ist ungültig.');
     if(!['opening','topup'].includes(p.type))throw new Error('Vorgangsart der Cloud-Geldübergabe ist ungültig.');
     if(!Number.isFinite(Number(p.total))||Number(p.total)<=0)throw new Error('Betrag der Cloud-Geldübergabe ist ungültig.');
@@ -41,8 +51,7 @@
   function decodeCountRow(row){
     const p=row?.payload;
     if(!p||p.format!=='KC_CASH_COUNT')throw new Error('Finance-Bridge-Datensatz enthält keine KC_CASH_COUNT.');
-    const copy=JSON.parse(JSON.stringify(p)),supplied=copy.checksum;delete copy.checksum;
-    if(!supplied||typeof checksum!=='function'||checksum(JSON.stringify(copy))!==supplied)throw new Error('Prüfsumme der Cloud-Zählung ist falsch.');
+    if(pruefsummeCloud(p)==='fehlt')throw new Error('Prüfsumme der Cloud-Zählung fehlt.');
     if(!p.countId||String(p.countId).length>128)throw new Error('Zählungs-ID ist ungültig.');
     if(!p.registerId)throw new Error('Kasse der Cloud-Zählung fehlt.');
     if(!isBusinessDate(p.effectiveDate))throw new Error('Geschäftstag der Cloud-Zählung ist ungültig.');

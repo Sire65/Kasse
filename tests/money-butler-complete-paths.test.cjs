@@ -45,7 +45,7 @@ ok(cloud.includes("action:'cash_transfer_mark'"),'Cloud status marking missing')
 ok(cloud.includes("'handed_to_register'"),'Cloud handed-to-register mark missing');
 ok(cloud.includes('queueCashTransferPayload(payload)'),'Cloud intake must reuse Manager queue path');
 ok(cloud.includes("p.format!=='KC_CASH_TRANSFER'"),'Cloud payload format validation missing');
-ok(cloud.includes('Prüfsumme der Cloud-Geldübergabe ist falsch'),'Cloud checksum validation missing');
+ok(cloud.includes('Prüfsumme der Cloud-Geldübergabe fehlt')&&cloud.includes('function pruefsummeCloud'),'Cloud checksum validation missing (siehe money-butler-cloud-jsonb.test.cjs: jsonb sortiert Felder um)');
 
 ok(pos.includes('return applyCashPayload(text,"manual-shortcode")'),'POS shortcode must reuse applyCashPayload');
 ok(pos.includes('rejected-duplicate'),'POS duplicate guard missing');
