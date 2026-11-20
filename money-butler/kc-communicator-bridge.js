@@ -29,7 +29,9 @@
   function dateiname(payload){
     const ziel=payload.scope==='split'?'KASSETTE':(payload.registerId||'KASSE');
     const typ=payload.format==='KC_CASH_COUNT'?(payload.countKind==='late'?'nachzaehlung':'zaehlung'):(payload.type||'transfer');
-    return `${ziel}_${typ}_${payload.effectiveDate||'datum'}.kccash`;
+    // Endung .txt: der Anhang-Dienst nimmt nur bekannte Dateitypen an (sonst ATTACHMENT_TYPE_NOT_ALLOWED).
+    // Der Inhalt bleibt der KCASH1-/KCOUNT1-Text; der PC-Manager liest die Uebergabe ohnehin aus den Daten, nicht aus dem Dateinamen.
+    return `${ziel}_${typ}_${payload.effectiveDate||'datum'}.kccash.txt`;
   }
   async function ausfuehren(){
     const status=el('commSendStatus');
