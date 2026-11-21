@@ -100,3 +100,15 @@
   color: #667085;
   text-align: center;
 }
+
+/* 0.3.0 (21.11.2026, Betreiber: Programm und Dienstplan "einheitlich und bedienerfreundlich"):
+   gemeinsame Tagesleiste fuer beide Fenster - ⏮ erster · ‹ voriger · Datum + Heute · naechster › · letzter ⏭.
+   Grosse Tasten fuer kalte Finger; am Anfang/Ende ausgegraut. Auch event-program-display.js nutzt sie. */
+.kc-tagnav { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; }
+.kc-tagnav > button { min-width: 52px; min-height: 52px; padding: 0 6px; border: 1px solid #c7ced6; border-radius: 10px;
+  background: linear-gradient(#fff, #e7ebef); color: #10243a; font-size: 1.4rem; font-weight: 900; cursor: pointer; }
+.kc-tagnav > button:disabled { opacity: .35; cursor: default; }
+.kc-tagnav-mitte { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px; text-align: center; min-width: 0; }
+.kc-tagnav-mitte b { font-size: 1.1rem; }
+.kc-tagnav-mitte button { min-height: 34px; padding: 2px 14px; border: 1px solid #c7ced6; border-radius: 8px; background: #fff; font-size: .85rem; font-weight: 700; }
+.kc-tagnav-mitte button:disabled { opacity: .4; }

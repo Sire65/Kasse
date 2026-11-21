@@ -97,6 +97,7 @@
     if (!listeEl) return;
 
     if (datumEl) datumEl.textContent = formatiereDatum(gewaehltesDatum);
+    knoepfeSetzen();
 
     const zeilenHeute = schichten
       .filter((s) => s.date === gewaehltesDatum)
@@ -129,6 +130,25 @@
     }
   }
 
+  // 21.11.2026 (Betreiber: "einheitlich und bedienerfreundlich", wie beim Programm): Blaettern ueber die
+  // Tage, an denen jemand eingeplant ist; dazu erster/letzter Tag. Ohne Plan wird kalendarisch geblaettert.
+  function eintragTage() { return [...new Set(schichten.map((s) => s.date).filter(Boolean))].sort(); }
+  function zielTag(art) {
+    const t = eintragTage(), g = gewaehltesDatum;
+    if (!t.length) return art === 'vor' ? verschiebeTag(g, -1) : art === 'nach' ? verschiebeTag(g, 1) : null;
+    if (art === 'erst') return t[0];
+    if (art === 'letzt') return t[t.length - 1];
+    if (art === 'vor') return [...t].reverse().find((d) => d < g) || null;
+    if (art === 'nach') return t.find((d) => d > g) || null;
+    return null;
+  }
+  function knoepfeSetzen() {
+    const setze = (id, art) => { const b = document.getElementById(id); if (!b) return; const z = zielTag(art); b.disabled = !z || z === gewaehltesDatum; };
+    setze('dienstplanErsterBtn', 'erst'); setze('dienstplanZurueckBtn', 'vor'); setze('dienstplanVorBtn', 'nach'); setze('dienstplanLetzterBtn', 'letzt');
+    const h = document.getElementById('dienstplanHeuteBtn'); if (h) h.disabled = gewaehltesDatum === heuteIso();
+  }
+  function springe(art) { const z = zielTag(art); if (z) { gewaehltesDatum = z; rendere(); } }
+
   function oeffne() {
     gewaehltesDatum = heuteIso();
     document.getElementById('dienstplanDialog')?.showModal();
@@ -138,10 +158,8 @@
   function verdrahte() {
     const btn = document.getElementById('dienstplanBtn');
     if (btn) btn.onclick = oeffne;
-    const zurueck = document.getElementById('dienstplanZurueckBtn');
-    if (zurueck) zurueck.onclick = () => { gewaehltesDatum = verschiebeTag(gewaehltesDatum, -1); rendere(); };
-    const vor = document.getElementById('dienstplanVorBtn');
-    if (vor) vor.onclick = () => { gewaehltesDatum = verschiebeTag(gewaehltesDatum, 1); rendere(); };
+    [['dienstplanErsterBtn', 'erst'], ['dienstplanZurueckBtn', 'vor'], ['dienstplanVorBtn', 'nach'], ['dienstplanLetzterBtn', 'letzt']]
+      .forEach(([id, art]) => { const b = document.getElementById(id); if (b) b.onclick = () => springe(art); });
     const heuteBtn = document.getElementById('dienstplanHeuteBtn');
     if (heuteBtn) heuteBtn.onclick = () => { gewaehltesDatum = heuteIso(); rendere(); };
   }
