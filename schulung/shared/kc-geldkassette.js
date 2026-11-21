@@ -29,9 +29,9 @@
     const gemerkt = {};   // schluessel -> Stückzahl für die erste Kasse
 
     container.innerHTML = `
-      <p class="kckass-hinweis">Eingetragen wird nur der Anteil für ${beteiligte[0]} – der Rest geht automatisch an ${beteiligte[1]}. Vorschlag ist jeweils die Hälfte.</p>
+      <p class="kckass-hinweis">Eingetragen wird nur der Anteil für ${beteiligte[0]} – der Rest geht automatisch an ${beteiligte[1]}. Vorschlag: beide Kassen bekommen möglichst den gleichen Betrag.</p>
       <div class="kckass-aktionen">
-        <button type="button" data-kckass="halb">Vorschlag: halbe/halbe</button>
+        <button type="button" data-kckass="halb">Vorschlag: gleich viel Geld</button>
         <button type="button" data-kckass="k1">Alles an ${beteiligte[0]}</button>
         <button type="button" data-kckass="k2">Alles an ${beteiligte[1]}</button>
       </div>
@@ -42,15 +42,34 @@
         <span>${beteiligte[1]} <b data-kckass-summe="2">${geld(0)}</b></span>
         <span>Kassette gesamt <strong data-kckass-summe="gesamt">${geld(0)}</strong></span>
       </div>
+      <p class="kckass-info" data-kckass-info style="margin:6px 0 0;padding:8px 10px;border-radius:8px;background:#fff6dc;color:#664400;font-weight:600" hidden></p>
       <p class="kckass-warnung" data-kckass-warnung></p>`;
 
     const liste = container.querySelector('.kckass-liste');
     const feld = (was) => container.querySelector(`[data-kckass-summe="${was}"]`);
     const warnung = container.querySelector('[data-kckass-warnung]');
+    const info = container.querySelector('[data-kckass-info]');
 
+    // 21.11.2026 (Betreiber: „Kassette – will trotzdem alles in Kasse 2 eintragen“): Der Vorschlag teilte
+    // jede Sorte einzeln nach STÜCKZAHL und rundete für die erste Kasse ab – lag eine Sorte nur einmal in der
+    // Kassette (1×100 €, 1×50 € …), bekam die erste Kasse davon nichts, im Extremfall ging ALLES an die
+    // zweite. Jetzt wird nach BETRAG ausgeglichen: Sorten vom größten Wert abwärts, je Sorte so viele Stück
+    // an die erste Kasse, dass beide Summen möglichst gleich groß werden.
+    const stueckWert = (sorte) => (sorte.art === 'lose' ? sorte.wert : sorte.wert * (sorte.coinsPerRoll || 0));
+    function vorschlag(sorten) {
+      const aus = {}; let s1 = 0, s2 = 0;
+      [...sorten].sort((a, b) => stueckWert(b) - stueckWert(a)).forEach((sorte) => {
+        const v = stueckWert(sorte), n = sorte.anzahl;
+        let k = v > 0 ? Math.round((n * v + (s2 - s1)) / (2 * v)) : Math.ceil(n / 2);
+        k = Math.min(Math.max(0, k), n);
+        aus[schluessel(sorte.art, sorte.wert)] = k;
+        s1 += k * v; s2 += (n - k) * v;
+      });
+      return aus;
+    }
     const anteilFuer = (sorte) => {
       const wert = gemerkt[schluessel(sorte.art, sorte.wert)];
-      if (!Number.isFinite(wert)) return Math.floor(sorte.anzahl / 2);
+      if (!Number.isFinite(wert)) return vorschlag(sortenLesen())[schluessel(sorte.art, sorte.wert)] || 0;
       return Math.min(Math.max(0, wert), sorte.anzahl);
     };
 
@@ -105,6 +124,19 @@
       const summe = +(teile[beteiligte[0]].total + teile[beteiligte[1]].total).toFixed(2);
       warnung.textContent = Math.abs(summe - gesamt) < 0.005 ? ''
         : `Achtung: die Anteile ergeben ${geld(summe)}, die Kassette enthält aber ${geld(gesamt)}.`;
+      // 21.11.2026 (Betreiber: „melden, dass z. B. ein 20 € nicht aufgeteilt werden kann“): Geld ist nicht
+      // teilbar - geht die Hälfte nicht genau auf, sagen welche Stücke es verhindern. Bewusst KEINE rechnerische
+      // Aufteilung: der Schein liegt real in einer Lade, sonst stimmt abends in beiden Kassen das Bargeld nicht.
+      const diff = +(teile[beteiligte[0]].total - teile[beteiligte[1]].total).toFixed(2);
+      if (Math.abs(diff) >= 0.01 && gesamt > 0) {
+        const einzeln = sortenLesen().filter((sorte) => sorte.anzahl % 2 === 1).sort((a, b) => stueckWert(b) - stueckWert(a))
+          .slice(0, 3).map((sorte) => `${sorte.anzahl === 1 ? 'ein' : 'ungerade Anzahl'} ${sorte.label}`);
+        const mehr = diff > 0 ? beteiligte[0] : beteiligte[1];
+        info.innerHTML = `ℹ️ Nicht genau hälftig teilbar: <b>${mehr}</b> bekommt <b>${geld(Math.abs(diff))}</b> mehr.`
+          + (einzeln.length ? ` Grund: ${einzeln.join(', ')} – Geld lässt sich nicht zerteilen.` : '')
+          + ' Ist das so in Ordnung, einfach weitermachen. Soll es genau gleich sein: den Schein vorher wechseln (z. B. 20 € in 2 × 10 €) oder oben die Stückzahlen ändern.';
+        info.hidden = false;
+      } else { info.hidden = true; info.textContent = ''; }
     }
 
     function zeichnen() {
@@ -112,7 +144,7 @@
       if (!sorten.length) {
         liste.innerHTML = '<p class="kckass-leer">Noch nichts eingetragen - bitte oben den Inhalt der Kassette erfassen.</p>';
         feld('1').textContent = geld(0); feld('2').textContent = geld(0); feld('gesamt').textContent = geld(0);
-        warnung.textContent = '';
+        warnung.textContent = ''; info.hidden = true;
         return;
       }
       liste.innerHTML = sorten.map((sorte) => {
@@ -143,8 +175,9 @@
     container.querySelectorAll('[data-kckass]').forEach((knopf) => {
       knopf.addEventListener('click', () => {
         const modus = knopf.dataset.kckass;
+        const v = vorschlag(sortenLesen());
         sortenLesen().forEach((sorte) => {
-          gemerkt[schluessel(sorte.art, sorte.wert)] = modus === 'k1' ? sorte.anzahl : modus === 'k2' ? 0 : Math.floor(sorte.anzahl / 2);
+          gemerkt[schluessel(sorte.art, sorte.wert)] = modus === 'k1' ? sorte.anzahl : modus === 'k2' ? 0 : v[schluessel(sorte.art, sorte.wert)];
         });
         zeichnen();
         if (beiAenderung) beiAenderung();
