@@ -29,9 +29,9 @@
     const gemerkt = {};   // schluessel -> Stückzahl für die erste Kasse
 
     container.innerHTML = `
-      <p class="kckass-hinweis">Eingetragen wird nur der Anteil für ${beteiligte[0]} – der Rest geht automatisch an ${beteiligte[1]}. Vorschlag ist jeweils die Hälfte.</p>
+      <p class="kckass-hinweis">Eingetragen wird nur der Anteil für ${beteiligte[0]} – der Rest geht automatisch an ${beteiligte[1]}. Vorschlag: beide Kassen bekommen möglichst den gleichen Betrag.</p>
       <div class="kckass-aktionen">
-        <button type="button" data-kckass="halb">Vorschlag: halbe/halbe</button>
+        <button type="button" data-kckass="halb">Vorschlag: gleich viel Geld</button>
         <button type="button" data-kckass="k1">Alles an ${beteiligte[0]}</button>
         <button type="button" data-kckass="k2">Alles an ${beteiligte[1]}</button>
       </div>
@@ -48,9 +48,26 @@
     const feld = (was) => container.querySelector(`[data-kckass-summe="${was}"]`);
     const warnung = container.querySelector('[data-kckass-warnung]');
 
+    // 21.11.2026 (Betreiber: „Kassette – will trotzdem alles in Kasse 2 eintragen“): Der Vorschlag teilte
+    // jede Sorte einzeln nach STÜCKZAHL und rundete für die erste Kasse ab – lag eine Sorte nur einmal in der
+    // Kassette (1×100 €, 1×50 € …), bekam die erste Kasse davon nichts, im Extremfall ging ALLES an die
+    // zweite. Jetzt wird nach BETRAG ausgeglichen: Sorten vom größten Wert abwärts, je Sorte so viele Stück
+    // an die erste Kasse, dass beide Summen möglichst gleich groß werden.
+    const stueckWert = (sorte) => (sorte.art === 'lose' ? sorte.wert : sorte.wert * (sorte.coinsPerRoll || 0));
+    function vorschlag(sorten) {
+      const aus = {}; let s1 = 0, s2 = 0;
+      [...sorten].sort((a, b) => stueckWert(b) - stueckWert(a)).forEach((sorte) => {
+        const v = stueckWert(sorte), n = sorte.anzahl;
+        let k = v > 0 ? Math.round((n * v + (s2 - s1)) / (2 * v)) : Math.ceil(n / 2);
+        k = Math.min(Math.max(0, k), n);
+        aus[schluessel(sorte.art, sorte.wert)] = k;
+        s1 += k * v; s2 += (n - k) * v;
+      });
+      return aus;
+    }
     const anteilFuer = (sorte) => {
       const wert = gemerkt[schluessel(sorte.art, sorte.wert)];
-      if (!Number.isFinite(wert)) return Math.floor(sorte.anzahl / 2);
+      if (!Number.isFinite(wert)) return vorschlag(sortenLesen())[schluessel(sorte.art, sorte.wert)] || 0;
       return Math.min(Math.max(0, wert), sorte.anzahl);
     };
 
@@ -143,8 +160,9 @@
     container.querySelectorAll('[data-kckass]').forEach((knopf) => {
       knopf.addEventListener('click', () => {
         const modus = knopf.dataset.kckass;
+        const v = vorschlag(sortenLesen());
         sortenLesen().forEach((sorte) => {
-          gemerkt[schluessel(sorte.art, sorte.wert)] = modus === 'k1' ? sorte.anzahl : modus === 'k2' ? 0 : Math.floor(sorte.anzahl / 2);
+          gemerkt[schluessel(sorte.art, sorte.wert)] = modus === 'k1' ? sorte.anzahl : modus === 'k2' ? 0 : v[schluessel(sorte.art, sorte.wert)];
         });
         zeichnen();
         if (beiAenderung) beiAenderung();
