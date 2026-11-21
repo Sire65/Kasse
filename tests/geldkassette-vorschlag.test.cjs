@@ -66,6 +66,13 @@ function pruefe(name,bedingung,zusatz=''){
   await fall('Je ein 100/50/20/10-€-Schein', {'100':1,'50':1,'20':1,'10':1}, 20);
   await fall('Ein 50er und zwei 20er', {'50':1,'20':2}, 10);
   await fall('Gemischt wie am Stand', {'50':2,'20':4,'10':6,'2':5}, 2);
+  await fall('Ein einzelner 20-€-Schein + 2 × 10 €', {'20':1,'10':2}, 0);
+  await mb.click('#reset'); await mb.selectOption('#register','KASSETTE'); await mb.fill('#effectiveDate',heute());
+  await mb.fill('[data-value="20"]','1'); await mb.fill('[data-value="10"]','1'); await mb.waitForTimeout(200);
+  const hinweis=await mb.$eval('[data-kckass-info]',e=>e.hidden?'':e.textContent);
+  pruefe('Hinweis, wenn sich ein Schein nicht teilen lässt (1×20 € + 1×10 €)', /nicht genau hälftig/i.test(hinweis)&&/20/.test(hinweis)&&/wechseln/.test(hinweis), hinweis.slice(0,140));
+  await mb.fill('[data-value="10"]','2'); await mb.waitForTimeout(200);
+  pruefe('Kein Hinweis, wenn es genau aufgeht (1×20 € + 2×10 €)', await mb.$eval('[data-kckass-info]',e=>e.hidden));
   await mb.click('[data-kckass="k1"]'); await mb.waitForTimeout(100);
   pruefe('„Alles an KASSE-01“ funktioniert weiter', geld(await mb.textContent('[data-kckass-summe="2"]'))===0);
   await mb.click('[data-kckass="halb"]'); await mb.waitForTimeout(100);

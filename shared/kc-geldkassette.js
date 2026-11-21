@@ -42,11 +42,13 @@
         <span>${beteiligte[1]} <b data-kckass-summe="2">${geld(0)}</b></span>
         <span>Kassette gesamt <strong data-kckass-summe="gesamt">${geld(0)}</strong></span>
       </div>
+      <p class="kckass-info" data-kckass-info style="margin:6px 0 0;padding:8px 10px;border-radius:8px;background:#fff6dc;color:#664400;font-weight:600" hidden></p>
       <p class="kckass-warnung" data-kckass-warnung></p>`;
 
     const liste = container.querySelector('.kckass-liste');
     const feld = (was) => container.querySelector(`[data-kckass-summe="${was}"]`);
     const warnung = container.querySelector('[data-kckass-warnung]');
+    const info = container.querySelector('[data-kckass-info]');
 
     // 21.11.2026 (Betreiber: „Kassette – will trotzdem alles in Kasse 2 eintragen“): Der Vorschlag teilte
     // jede Sorte einzeln nach STÜCKZAHL und rundete für die erste Kasse ab – lag eine Sorte nur einmal in der
@@ -122,6 +124,19 @@
       const summe = +(teile[beteiligte[0]].total + teile[beteiligte[1]].total).toFixed(2);
       warnung.textContent = Math.abs(summe - gesamt) < 0.005 ? ''
         : `Achtung: die Anteile ergeben ${geld(summe)}, die Kassette enthält aber ${geld(gesamt)}.`;
+      // 21.11.2026 (Betreiber: „melden, dass z. B. ein 20 € nicht aufgeteilt werden kann“): Geld ist nicht
+      // teilbar - geht die Hälfte nicht genau auf, sagen welche Stücke es verhindern. Bewusst KEINE rechnerische
+      // Aufteilung: der Schein liegt real in einer Lade, sonst stimmt abends in beiden Kassen das Bargeld nicht.
+      const diff = +(teile[beteiligte[0]].total - teile[beteiligte[1]].total).toFixed(2);
+      if (Math.abs(diff) >= 0.01 && gesamt > 0) {
+        const einzeln = sortenLesen().filter((sorte) => sorte.anzahl % 2 === 1).sort((a, b) => stueckWert(b) - stueckWert(a))
+          .slice(0, 3).map((sorte) => `${sorte.anzahl === 1 ? 'ein' : 'ungerade Anzahl'} ${sorte.label}`);
+        const mehr = diff > 0 ? beteiligte[0] : beteiligte[1];
+        info.innerHTML = `ℹ️ Nicht genau hälftig teilbar: <b>${mehr}</b> bekommt <b>${geld(Math.abs(diff))}</b> mehr.`
+          + (einzeln.length ? ` Grund: ${einzeln.join(', ')} – Geld lässt sich nicht zerteilen.` : '')
+          + ' Ist das so in Ordnung, einfach weitermachen. Soll es genau gleich sein: den Schein vorher wechseln (z. B. 20 € in 2 × 10 €) oder oben die Stückzahlen ändern.';
+        info.hidden = false;
+      } else { info.hidden = true; info.textContent = ''; }
     }
 
     function zeichnen() {
@@ -129,7 +144,7 @@
       if (!sorten.length) {
         liste.innerHTML = '<p class="kckass-leer">Noch nichts eingetragen - bitte oben den Inhalt der Kassette erfassen.</p>';
         feld('1').textContent = geld(0); feld('2').textContent = geld(0); feld('gesamt').textContent = geld(0);
-        warnung.textContent = '';
+        warnung.textContent = ''; info.hidden = true;
         return;
       }
       liste.innerHTML = sorten.map((sorte) => {
