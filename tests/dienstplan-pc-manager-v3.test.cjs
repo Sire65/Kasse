@@ -51,8 +51,8 @@ vm.runInContext(source, context);
     ['Live', liveIndex, liveSw],
     ['Schulung', trainingIndex, trainingSw],
   ]) {
-    assert.ok(html.includes('kc-dienstplan-kasse.js?build=0.2.0'), `${name}: Dienstplan 0.2.0 fehlt im HTML`);
-    assert.ok(sw.includes('./kc-dienstplan-kasse.js?build=0.2.0'), `${name}: Dienstplan 0.2.0 fehlt im Offline-Cache`);
+    assert.ok(html.includes('kc-dienstplan-kasse.js?build=0.3.0'), `${name}: Dienstplan 0.3.0 fehlt im HTML`);
+    assert.ok(sw.includes('./kc-dienstplan-kasse.js?build=0.3.0'), `${name}: Dienstplan 0.3.0 fehlt im Offline-Cache`);
   }
   console.log('dienstplan-pc-manager-v3: OK');
 })().catch((err) => { console.error(err); process.exit(1); });

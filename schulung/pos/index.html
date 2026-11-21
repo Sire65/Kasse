@@ -11,11 +11,11 @@
   <link rel="stylesheet" href="styles.css?build=training-ui6">
   <link rel="stylesheet" href="../../shared/kc-closing-count-ui.css?build=1.1.0">
   <link rel="stylesheet" href="pos-ui-profile-consumer.css">
-  <link rel="stylesheet" href="event-program-display.css?build=0.3.0">
+  <link rel="stylesheet" href="event-program-display.css?build=0.4.0">
   <link rel="stylesheet" href="time-clock-pos.css">
   <link rel="stylesheet" href="kc-sync-status-leds.css">
   <link rel="stylesheet" href="kc-team-praesenz.css">
-  <link rel="stylesheet" href="kc-dienstplan-kasse.css?build=0.2.1">
+  <link rel="stylesheet" href="kc-dienstplan-kasse.css?build=0.3.0">
 <link rel="stylesheet" href="kc-oberflaechen-anwenden.css?build=0.9.25">
 <link rel="stylesheet" href="kc-verkaufskurve.css?build=1.1.0">
 <link rel="stylesheet" href="kc-legacy-fallback.css?build=1.0.1">
@@ -1055,13 +1055,15 @@
 </dialog>
 <dialog id="dienstplanDialog">
   <form method="dialog" class="dialog-card dienstplan-card">
-    <header class="dienstplan-head">
-      <button type="button" id="dienstplanZurueckBtn" aria-label="Voriger Tag">‹</button>
-      <div class="dienstplan-datum">
+    <header class="dienstplan-head kc-tagnav">
+      <button type="button" id="dienstplanErsterBtn" aria-label="Erster Tag" title="Erster Tag">⏮</button>
+      <button type="button" id="dienstplanZurueckBtn" aria-label="Voriger Tag" title="Voriger Tag">‹</button>
+      <div class="dienstplan-datum kc-tagnav-mitte">
         <b id="dienstplanDatumText">Heute</b>
         <button type="button" id="dienstplanHeuteBtn">Heute</button>
       </div>
-      <button type="button" id="dienstplanVorBtn" aria-label="Nächster Tag">›</button>
+      <button type="button" id="dienstplanVorBtn" aria-label="Nächster Tag" title="Nächster Tag">›</button>
+      <button type="button" id="dienstplanLetzterBtn" aria-label="Letzter Tag" title="Letzter Tag">⏭</button>
     </header>
     <div id="dienstplanListe" class="dienstplan-liste"></div>
     <small id="dienstplanStand" class="dienstplan-stand"></small>
@@ -1599,13 +1601,13 @@
   });
 </script>
 <script src="pos-ui-profile-consumer.js?build=0.1.0"></script>
-<script src="event-program-display.js?build=0.3.0"></script>
+<script src="event-program-display.js?build=0.4.0"></script>
 <script src="time-clock-pos.js?build=stempel-v2"></script>
 <script src="kc-verkaufskurve.js?build=1.1.0"></script>
 <script src="kc-sync-status-leds.js?build=0.2.0"></script>
 <script src="kc-sync-live-event.js?build=0.1.1"></script>
 <script src="kc-team-praesenz.js?build=0.1.1"></script>
-<script src="kc-dienstplan-kasse.js?build=0.2.0"></script>
+<script src="kc-dienstplan-kasse.js?build=0.3.0"></script>
 <script src="training-demo-bridge.js?build=0.30.0"></script>
 
   <div id="screenSaver" class="screen-saver" hidden role="button" tabindex="0" aria-label="Bildschirm gesperrt. Zum Entsperren berühren.">
