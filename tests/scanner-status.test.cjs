@@ -36,6 +36,13 @@ const srv = http.createServer((q, r) => { const f = path.join(W, decodeURICompon
   await s.evaluate(() => { const i = document.createElement('input'); i.id = 'tf'; document.body.appendChild(i); i.focus(); });
   await s.waitForTimeout(100);
   p('offenes Eingabefeld: gelb „Feld aktiv“', await s.evaluate(() => document.getElementById('kcScanner').dataset.zustand) === 'feld');
+  await s.evaluate(() => document.getElementById('tf').blur());
+  for (const v of ['CMD-CHECKOUT', 'CMDCHECKOUT', 'cmd_checkout']) {
+    await tippen('01001', 0);
+    const vorher = await bon();
+    await tippen(v, 0);
+    p(`Bezahl-QR „${v}“ schließt den Verkauf ab`, vorher > 0 && (await bon()) === 0);
+  }
   p('keine JS-Fehler', jsf.length === 0, jsf.join(' | '));
   await b.close(); srv.close();
   console.log(fehler ? `Scanner-Anzeige: ${fehler} von ${n} FEHLGESCHLAGEN` : `Scanner-Anzeige: alle ${n} bestanden`);
