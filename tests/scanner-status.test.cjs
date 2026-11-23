@@ -15,9 +15,9 @@ const srv = http.createServer((q, r) => { const f = path.join(W, decodeURICompon
   await s.route('**/*', (r) => (r.request().url().startsWith(basis) ? r.continue() : r.abort()));
   await s.goto(`${basis}/pos/index.html`); await s.waitForTimeout(2500);
   await s.evaluate(() => { ['fullscreenGate', 'kcStartupSummary', 'kcPinLockOverlay'].forEach((id) => { const e = document.getElementById(id); if (e) e.style.display = 'none'; }); document.querySelectorAll('[data-kc-sperrend]').forEach((e) => { e.style.display = 'none'; }); document.querySelectorAll('dialog[open]').forEach((d) => d.close()); });
-  const lage = await s.evaluate(() => { const a = document.getElementById('kcScanner').getBoundingClientRect(), m = document.getElementById('clubLogo').getBoundingClientRect(); return { scan: a.right, logo: m.left, hoehe: a.height, zustand: KCScannerStatus.zustand() }; });
+  const lage = await s.evaluate(() => { const a = document.getElementById('kcScanner').getBoundingClientRect(), m = document.getElementById('clubLogo').getBoundingClientRect(); return { scan: a.right, logo: m.left, hoehe: a.height, zustand: KCScannerStatus.zustand(), deckkraft: getComputedStyle(document.getElementById('kcScanner')).opacity }; });
   p('Knopf steht links neben der Kochmütze', lage.scan <= lage.logo + 1 && lage.hoehe >= 36, JSON.stringify(lage));
-  p('ohne Scan: „Scanner testen“ (grau)', lage.zustand === 'unbekannt');
+  p('ohne Scan: blass (Scanner aus)', lage.zustand === 'unbekannt' && Number(lage.deckkraft) < 0.5, lage.deckkraft);
   const bon = () => s.evaluate(() => state.cart.reduce((a, x) => a + (Number(x.qty) || 0), 0));
   const tippen = async (text, pause) => { for (const c of text) { await s.keyboard.press(c); if (pause) await s.waitForTimeout(pause); } await s.keyboard.press('Enter'); await s.waitForTimeout(300); };
   await tippen('01001', 120);
@@ -28,7 +28,7 @@ const srv = http.createServer((q, r) => { const f = path.join(W, decodeURICompon
   await tippen('01001', 0);
   p('Test-Scan wird erkannt', /Scanner funktioniert/.test(await s.evaluate(() => document.getElementById('kstStatus').textContent)));
   p('Test-Scan kommt nicht in den Bon', await bon() === vor);
-  p('danach: Scanner bereit (grün)', await s.evaluate(() => document.getElementById('kcScanner').dataset.zustand) === 'bereit');
+  p('danach: Scanner bereit (grün, hell)', await s.evaluate(() => { const k = document.getElementById('kcScanner'); return k.dataset.zustand === 'bereit' && getComputedStyle(k).opacity === '1'; }));
   await s.waitForTimeout(2700);
   p('Test schließt von selbst', await s.evaluate(() => !document.getElementById('kcScannerTest')));
   await tippen('01001', 0);

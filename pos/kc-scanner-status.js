@@ -1,4 +1,4 @@
-/* KC Kasse – Scanner-Anzeige oben links neben der Kochmütze (Wunsch Betreiber 23.11.2026).       Build 1.0.0
+/* KC Kasse – Scanner-Anzeige oben links neben der Kochmütze (Wunsch Betreiber 23.11.2026).       Build 1.1.0
  *
  * Eine Webseite darf unter Android nicht abfragen, ob ein Bluetooth-Scanner gekoppelt ist. Darum erkennt die
  * Anzeige echte Scans an der Geschwindigkeit: ein Scanner „tippt“ den ganzen Code in wenigen Millisekunden und
@@ -7,7 +7,8 @@
  *   🟢 Scanner bereit        Scan in den letzten 30 Min. (so lange schläft der HW0010 nicht ein) und die Kasse nimmt Scans an
  *   🟡 Scanner: Feld aktiv   ein Eingabefeld ist offen – der Scan landet dort, nicht im Bon
  *   🟡 Kasse antippen        die Seite hat gerade keinen Fokus (z. B. anderes Fenster) – Scans kommen nicht an
- *   ⚪ Scanner testen        noch kein Scan erkannt bzw. Scanner schläft vermutlich
+ *   ⚪ blass                 seit 30 Min. kein Scan – Scanner aus oder eingeschlafen (Wunsch Betreiber: „blass, wenn aus;
+ *                           grün und hell leuchtend, wenn bereit“)
  * Antippen öffnet den Test: „Jetzt einen beliebigen Code scannen“. Der Test-Scan wird abgefangen – es landet
  * kein Artikel im Bon. Kassieren wird nie blockiert.
  */
@@ -27,8 +28,9 @@
 #kcScanner{display:inline-flex;align-items:center;justify-content:center;flex:0 0 auto;width:46px;height:46px;margin:0 8px 0 0;border-radius:12px;
   border:2px solid rgba(255,255,255,.35);background:rgba(255,255,255,.08);color:#fff;font-size:22px;line-height:1;position:relative;cursor:pointer;touch-action:manipulation}
 #kcScanner::after{content:"";position:absolute;right:-3px;top:-3px;width:14px;height:14px;border-radius:50%;border:2px solid #0c1726;background:#8a94a6}
-#kcScanner[data-zustand="bereit"]{border-color:#2fbf71;background:rgba(47,191,113,.18)}
-#kcScanner[data-zustand="bereit"]::after{background:#2fbf71;box-shadow:0 0 8px #2fbf71}
+#kcScanner[data-zustand="unbekannt"]{opacity:.35;filter:grayscale(1);border-style:dashed}
+#kcScanner[data-zustand="bereit"]{opacity:1;border-color:#3ee08a;background:#169c55;box-shadow:0 0 10px 2px rgba(62,224,138,.85),inset 0 0 6px rgba(255,255,255,.35)}
+#kcScanner[data-zustand="bereit"]::after{background:#7dffb6;box-shadow:0 0 10px #3ee08a}
 #kcScanner[data-zustand="feld"],#kcScanner[data-zustand="fokus"]{border-color:#f5b400;background:rgba(245,180,0,.16)}
 #kcScanner[data-zustand="feld"]::after,#kcScanner[data-zustand="fokus"]::after{background:#f5b400}
 #kcScanner.kc-scan-blitz{animation:kcScanBlitz .6s ease-out}
@@ -155,5 +157,5 @@
   global.addEventListener('focus', zeichnen); global.addEventListener('blur', zeichnen);
   document.addEventListener('focusin', zeichnen); document.addEventListener('focusout', () => setTimeout(zeichnen, 0));
   setInterval(zeichnen, 5000);
-  global.KCScannerStatus = { zustand, testOeffnen, testSchliessen, version: '1.0.0' };
+  global.KCScannerStatus = { zustand, testOeffnen, testSchliessen, version: '1.1.0' };
 })(window);
