@@ -58,6 +58,13 @@ function starterLauf(R, args, env = {}) {
     k.on('exit', (code) => ok({ code, aus }));
   });
 }
+function knoten(args, env = {}) {
+  return new Promise((ok) => {
+    const k = spawn(process.execPath, args, { env: { ...process.env, KC_KEINE_PAUSE: '1', ...env }, stdio: ['ignore', 'pipe', 'pipe'] });
+    let stdout = '', stderr = ''; k.stdout.on('data', (d) => { stdout += d; }); k.stderr.on('data', (d) => { stderr += d; });
+    k.on('exit', (status) => ok({ status, stdout, stderr }));
+  });
+}
 function starterKopieren(R) {
   for (const f of fs.readdirSync(path.join(WURZEL, 'starter'))) schreib(R, `starter/${f}`, fs.readFileSync(path.join(WURZEL, 'starter', f)));
 }
@@ -229,6 +236,27 @@ const BACKEND = 'markt-kasse-suite/backend-source';
   p('Installieren per Befehl: Ziel eingerichtet, Starter kopiert', l6.status === 0 && fs.existsSync(path.join(R7, 'starter/kc-starter.js')) && /^z-7/.test(K.lokaleListe(R7).version), (l6.stdout + l6.stderr).slice(-200));
   const l7 = spawnSync(process.execPath, [path.join(q7, 'starter/kc-starter.js'), 'installieren', '--quelle', path.join(tmp, 'gibtsnicht'), '--ziel', R7], { encoding: 'utf8', env: { ...process.env, KC_KEINE_PAUSE: '1' } });
   p('Installieren aus unvollständigem Ordner: klare Meldung', l7.status === 1 && /vollständig entpacken|ZIP vollständig/.test(l7.stdout));
+
+  // ---------- 7b. Kleine Installations-ZIP: Programm aus dem Netz ----------
+  datenLeeren();
+  const qn = path.join(tmp, 'netz'), R8 = path.join(tmp, 'netz-ziel');
+  paketBauen(qn, 'netz-1', { [`${BACKEND}/run-manager-service.js`]: programm('netz-1'), 'pos/x.js': 'X', 'KC_Manager_Start.cmd': '@echo off\n' });
+  const sn = await server(qn);
+  const klein = path.join(tmp, 'klein'); starterKopieren(klein); schreib(klein, 'KC_Manager_Start.cmd', 'x');
+  const l8 = await knoten([path.join(klein, 'starter/kc-starter.js'), 'installieren', '--quelle', klein, '--ziel', R8], { KC_UPDATE_QUELLE: sn.url });
+  p('Kleine ZIP: Programm aus dem Netz installiert', l8.status === 0 && K.lokaleListe(R8).version === 'netz-1' && lies(path.join(R8, 'programm/aktuell/pos/x.js')) === 'X', (l8.stdout + l8.stderr).slice(-600));
+  p('Kleine ZIP: Starter und Startdatei in der Wurzel', fs.existsSync(path.join(R8, 'starter/kc-starter.js')) && lies(path.join(R8, 'KC_Manager_Start.cmd')) === '@echo off\r\n');
+  sn.http.close();
+  const l9 = await knoten([path.join(klein, 'starter/kc-starter.js'), 'installieren', '--quelle', klein, '--ziel', path.join(tmp, 'netz-ziel2')], { KC_UPDATE_QUELLE: 'http://127.0.0.1:1/' });
+  p('Kleine ZIP ohne Internet: klare Meldung', l9.status === 1 && /Internetverbindung prüfen/.test(l9.stdout), l9.stdout.slice(-160));
+  let platzFehler = '';
+  try { K.platzPruefen(tmp, { dateien: { a: { g: 1e15 } } }); } catch (e) { platzFehler = e.message; }
+  p('Zu wenig Speicherplatz: klare Meldung vor dem Laden', /Zu wenig Speicherplatz/.test(platzFehler) && /Downloads/.test(platzFehler));
+  const iz = require('../tools/installer-zip');
+  const izGroesse = fs.statSync(iz.ZIEL).size;
+  const izListe = spawnSync('unzip', ['-l', iz.ZIEL], { encoding: 'utf8' }).stdout || '';
+  p('Installations-ZIP: klein und vollständig', izGroesse < 200 * 1024 && ['KC_Manager_Start.cmd', 'KC_Zuhause_Start.cmd', 'KC_Einrichtung.ps1', 'starter/kc-starter.js', 'starter/kc-paket.js', 'starter/kc-paket-regeln.js', 'LIES_MICH.txt'].every((f) => izListe.includes(f)), `${(izGroesse / 1024).toFixed(0)} KB`);
+  p('Installations-ZIP: passt zum aktuellen Starter (sonst: node tools/installer-zip.js)', iz.bauen().geaendert === false);
 
   // ---------- 8. Startdateien ----------
   const cmd = lies(path.join(WURZEL, 'KC_Manager_Start.cmd'));
