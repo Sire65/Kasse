@@ -19,7 +19,7 @@
     if (!ansicht || el('kcStandBrueckeKarte')) return el('kcStandBrueckeKarte');
     const k = document.createElement('article');
     k.className = 'secure-card'; k.id = 'kcStandBrueckeKarte';
-    k.innerHTML = '<h3>Verbindung nach Hause (Supabase)</h3><div id="kcSbInhalt" class="vb-hinweis">Wird geprüft …</div><div id="kcSbRouter" style="margin-top:12px;padding-top:10px;border-top:1px solid #e2e8f0"></div><div id="kcSbKnoepfe" style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap"></div>';
+    k.innerHTML = '<h3>Verbindung nach Hause (Supabase)</h3><div id="kcSbInhalt" class="vb-hinweis">Wird geprüft …</div><div id="kcSbRouter" style="margin-top:12px;padding-top:10px;border-top:1px solid #e2e8f0"></div><div id="kcSbUpdate" style="margin-top:12px;padding-top:10px;border-top:1px solid #e2e8f0"></div><div id="kcSbKnoepfe" style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap"></div>';
     const nach = ansicht.querySelector('#vbKassenZettel')?.closest('article');
     if (nach && nach.nextSibling) ansicht.insertBefore(k, nach.nextSibling); else ansicht.appendChild(k);
     return k;
@@ -86,6 +86,7 @@
     const inhalt = el('kcSbInhalt'), knoepfe = el('kcSbKnoepfe');
     const modus = global.KCFernmodus ? await global.KCFernmodus.bestimmeModus() : 'lokal';
     zeichneRouter(modus).catch(() => {});
+    zeichneUpdate(modus).catch(() => {});
     if (modus === 'fern') {
       const st = global.KCFernmodus.gewaehlterStand(), info = global.KCFernmodus.standInfo() || {};
       inhalt.innerHTML = st
@@ -113,6 +114,50 @@
       + (d.meldung ? `<div class="warnung" style="margin-top:8px;color:#b42318"><strong>${esc(d.meldung.titel)}</strong><br>Ursache: ${esc(d.meldung.ursache)}<ol style="margin:4px 0 0 18px">${(d.meldung.loesung || []).map((x) => `<li>${esc(x)}</li>`).join('')}</ol></div>` : '');
     knoepfe.innerHTML = '<button type="button" class="danger" id="kcSbAbmelden">Stand abmelden</button>';
     el('kcSbAbmelden').onclick = () => abmelden(d.standId);
+  }
+
+  // ---------- Programm-Version und Updates (Selbst-Update, Marktsperre) ----------
+  const datum = (iso) => (iso ? new Date(iso + 'T12:00:00').toLocaleDateString('de-DE') : '');
+  function updateHtml(u, wo) {
+    if (!u || !u.verwaltet) return `<div class="hint">🧩 Programm-Version ${wo}: ${esc((u && u.version) || 'unbekannt')} (ohne Selbst-Update gestartet).</div>`;
+    let t = `<div style="font-weight:700">🧩 Programm-Version ${wo}: ${esc(u.version || 'unbekannt')}</div>`;
+    if (u.neueVersion) {
+      t += `<div style="margin-top:4px;color:#7c2d12">Neue Version bereit: <strong>${esc(u.neueVersion)}</strong>`;
+      if (u.freigabeBis) t += ' – <strong>freigegeben</strong>: wird beim nächsten Start des Kassen-PCs installiert (schwarzes Fenster schließen und „KC Kasse starten“ doppelklicken, oder morgen früh von selbst).';
+      else if (u.sperre && u.sperre.aktiv) t += ` – <strong>Marktsperre</strong> bis ${datum(u.sperre.bis)}: wird erst nach Freigabe installiert.`;
+      t += '</div>';
+    } else if (u.hinweis && u.hinweis !== 'aktuell') t += `<div class="hint" style="margin-top:4px">${esc(u.hinweis)}</div>`;
+    else t += '<div class="hint" style="margin-top:4px">Aktuell.' + (u.sperre && u.sperre.aktiv ? ` Marktsperre bis ${datum(u.sperre.bis)}: neue Versionen nur nach Freigabe.` : '') + '</div>';
+    if (u.letzterRueckfall && u.letzterRueckfall.version) t += `<div style="margin-top:4px;color:#b42318">⚠ Version ${esc(u.letzterRueckfall.version)} startete nicht – es läuft automatisch die vorige Version.</div>`;
+    if (u.neueVersion && u.sperre && u.sperre.aktiv && !u.freigabeBis) t += '<button type="button" id="kcSbUpdateFrei" style="margin-top:8px">⬆️ Update für heute freigeben</button>';
+    return t;
+  }
+  async function zeichneUpdate(modus) {
+    const ort = el('kcSbUpdate'); if (!ort) return;
+    const hier = await lokal('update-status').catch(() => ({ ok: false, daten: {} }));
+    if (modus === 'fern') {
+      const info = (global.KCFernmodus.standInfo() || {}).info || {};
+      ort.innerHTML = (info.update ? updateHtml(info.update, 'am Stand') : '<div class="hint">🧩 Programm-Version am Stand: noch nicht gemeldet (alter Stand-PC ohne Selbst-Update).</div>')
+        + (hier.ok ? `<div class="hint" style="margin-top:6px">Dieser PC zu Hause: ${esc(hier.daten.version || 'unbekannt')}</div>` : '');
+      const b = el('kcSbUpdateFrei');
+      if (b) b.onclick = async () => {
+        if (!confirm('Update für den Kassen-PC am Stand freigeben?\n\nEs wird beim nächsten Start des Kassen-PCs installiert. Startet die neue Version nicht, läuft automatisch die vorige weiter.')) return;
+        b.disabled = true; b.textContent = '⏳ wird an den Stand gesendet …';
+        try { await global.KCFernmodus.auftrag('/update/freigeben', {}); } catch (e) { alert(`Nicht gesendet: ${e.message}`); }
+        zeichneUpdate(modus);
+      };
+      return;
+    }
+    if (!hier.ok) { ort.innerHTML = ''; return; }
+    ort.innerHTML = updateHtml(hier.daten, 'auf diesem PC');
+    const b = el('kcSbUpdateFrei');
+    if (b) b.onclick = async () => {
+      if (!confirm('Update für heute freigeben?\n\nEs wird beim nächsten Start dieses PCs installiert. Startet die neue Version nicht, läuft automatisch die vorige weiter.')) return;
+      const a = await lokal('update-freigeben', 'POST', {}).catch((e) => ({ ok: false, daten: { fehler: e.message } }));
+      if (!a.ok) alert(`Freigabe nicht möglich: ${a.daten.fehler || a.status}`);
+      else global.KCManagerMessages?.success?.('Update freigegeben – wird beim nächsten Start installiert.');
+      zeichneUpdate(modus);
+    };
   }
 
   async function anmelden() {
@@ -143,5 +188,5 @@
 
   function init() { zeichne(); setInterval(() => { if (document.querySelector('[data-view-panel="verbindung"]:not([hidden])')) zeichne(); }, 10000); }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init); else init();
-  global.KCStandBrueckeManager = { zeichne, anmelden, zeichneRouter, verbrauchHtml };
+  global.KCStandBrueckeManager = { zeichne, anmelden, zeichneRouter, verbrauchHtml, zeichneUpdate, updateHtml };
 })(window);

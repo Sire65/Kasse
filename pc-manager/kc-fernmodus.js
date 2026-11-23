@@ -29,7 +29,7 @@
     '/cash-transfer-confirmations', '/gelduebergaben-bestaetigungen-abholen', '/bargeld/uebergaben', '/bargeld/protokolle',
     '/verbindungsqualitaet', '/kassen/startprotokoll', '/live-event-log'];
   const AUFTRAG = ['/master-data/push', '/dienstplan/push', '/sold-out-status/setzen', '/remote-command/queue', '/kassen/kopplung-widerrufen',
-    '/api/v1/cash-transfer/queue', '/api/v1/finance-transfer/queue', '/bargeld/uebergabe', '/bargeld/protokoll'];
+    '/api/v1/cash-transfer/queue', '/api/v1/finance-transfer/queue', '/bargeld/uebergabe', '/bargeld/protokoll', '/update/freigeben'];
   const VERALTET_SEK = 120;
   const SPIEGEL_PUFFER_MS = 25000;            // Spiegel erneuert der Stand höchstens alle 30 s
   const SOCKET_TAKT_MS = 10000, SOCKET_TAKT_VERBORGEN_MS = 60000, SOCKET_TAKT_MAX_MS = 120000;
@@ -204,7 +204,7 @@
   function beschreibe(pfad) {
     return ({ '/master-data/push': 'Stammdaten an alle Kassen', '/dienstplan/push': 'Dienstplan an die Kassen', '/sold-out-status/setzen': 'Ausverkauft',
       '/remote-command/queue': 'Befehl an eine Kasse', '/kassen/kopplung-widerrufen': 'Gerät verloren / Kopplung widerrufen',
-      '/api/v1/cash-transfer/queue': 'Geld-Übergabe', '/fernseher/tv-paket': 'Präsentation an den Fernseher', '/api/v1/finance-transfer/queue': 'Geld-Übergabe', '/bargeld/uebergabe': 'Bargeld-Übergabe', '/bargeld/protokoll': 'Bargeld-Protokoll' })[pfad] || pfad;
+      '/api/v1/cash-transfer/queue': 'Geld-Übergabe', '/fernseher/tv-paket': 'Präsentation an den Fernseher', '/api/v1/finance-transfer/queue': 'Geld-Übergabe', '/bargeld/uebergabe': 'Bargeld-Übergabe', '/bargeld/protokoll': 'Bargeld-Protokoll', '/update/freigeben': 'Programm-Update freigeben' })[pfad] || pfad;
   }
   function meldeHinweis(art, text) { try { global.KCManagerMessages && global.KCManagerMessages[art] && global.KCManagerMessages[art](text); } catch (e) { /* */ } }
 

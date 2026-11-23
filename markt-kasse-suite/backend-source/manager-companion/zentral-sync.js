@@ -13,7 +13,8 @@
 const fs = require('fs');
 const path = require('path');
 
-const KONFIG_DATEI = path.join(__dirname, '..', 'zentral-zugang.json');
+// Ort per Umgebung änderbar: der Starter legt sie in den Datenordner (überlebt Programm-Updates).
+const KONFIG_DATEI = process.env.KC_ZENTRAL_ZUGANG ? path.resolve(process.env.KC_ZENTRAL_ZUGANG) : path.join(__dirname, '..', 'zentral-zugang.json');
 
 function ladeKonfig() {
   try {
