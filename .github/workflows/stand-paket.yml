@@ -25,21 +25,23 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - name: Paketliste erzeugen
-        run: node tools/stand-paket.js
+      - name: Paketliste und kleine Installations-ZIP erzeugen
+        run: |
+          node tools/stand-paket.js
+          node tools/installer-zip.js
       - name: Starter-Tests (Installation, Update, Rückfall) mit der neuen Liste
         run: node tests/kc-starter.test.cjs
       - name: Paketliste einchecken (nur wenn geändert)
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          if git diff --quiet -- stand-paket.json; then
+          if git diff --quiet -- stand-paket.json installation/; then
             echo "stand-paket.json ist aktuell."
             exit 0
           fi
           git config user.name "kc-stand-paket"
           git config user.email "kc-stand-paket@users.noreply.github.com"
-          git add stand-paket.json
+          git add stand-paket.json installation/
           git commit -m "Stand-Paket: Paketliste aktualisiert"
           git push origin HEAD:main
           # Commits mit dem Actions-Token lösen keinen neuen Pages-Lauf aus - deshalb ausdrücklich anstoßen.

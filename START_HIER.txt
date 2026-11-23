@@ -11,7 +11,9 @@ WELCHE STARTDATEI?
   (Fernseher/Praesentation: TABLET_UND_MANAGER_KOPPELN.md, Abschnitt E1)
 
 NORMALER START (Stand)
-1. ZIP vollstaendig entpacken (Rechtsklick - "Alle extrahieren...").
+1. Kleine Installations-ZIP laden (20 KB):
+   https://sire65.github.io/Kasse/installation/KC-Kasse-Installation.zip
+   und entpacken (Rechtsklick - "Alle extrahieren...").
 2. KC_Manager_Start.cmd doppelklicken.
    Beim ersten Mal installiert sich das Programm nach C:\KC-Kasse und legt die
    Verknuepfung "KC Kasse starten" auf den Desktop und in den Autostart.

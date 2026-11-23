@@ -87,9 +87,21 @@ async function fernListe(quelle = QUELLE_STANDARD) {
 }
 
 // ---------- Paket in einen Ordner bauen (aus vorhandenen Dateien + Download) ----------
+// Freier Platz: neue Version + Reserve. Lieber vorher klar melden als mitten im Laden abbrechen.
+function freieBytes(ordner) { try { const st = fs.statfsSync(ordner); return Number(st.bavail) * Number(st.bsize); } catch (e) { return null; } }
+function platzPruefen(ordner, liste) {
+  const brauche = Object.values(liste.dateien).reduce((a, d) => a + (d.g || 0), 0) + 100 * 1e6;
+  const frei = freieBytes(ordner);
+  if (frei != null && frei < brauche) {
+    throw new Error(`Zu wenig Speicherplatz: frei ${(frei / 1e6).toFixed(0)} MB, gebraucht ca. ${(brauche / 1e6).toFixed(0)} MB. `
+      + 'Lösung: ZIP-Dateien und entpackte Ordner in „Downloads“ löschen, Papierkorb leeren, Datenträgerbereinigung (Windows-Taste, „Datenträgerbereinigung“).');
+  }
+}
+
 async function baueNeu({ R, liste, holen, log = () => {} }) {
   const P = pfade(R);
   loeschen(P.neu); fs.mkdirSync(P.neu, { recursive: true });
+  platzPruefen(P.programm, liste);
   const offen = [];
   for (const [rel, d] of Object.entries(liste.dateien)) {
     const ziel = path.join(P.neu, rel);
@@ -267,6 +279,21 @@ function installiereAus({ quelle, R, log = () => {} }) {
   return liste;
 }
 
+// ---------- Installation direkt aus dem Netz (kleine Installations-ZIP enthält nur Starter + Startdateien) ----------
+async function installiereAusNetz({ R, quelle = process.env.KC_UPDATE_QUELLE || QUELLE_STANDARD, log = () => {}, holen } = {}) {
+  fs.mkdirSync(pfade(R).programm, { recursive: true });
+  log('Lade die Liste der Programmdateien …');
+  let liste;
+  try { liste = await fernListe(quelle); }
+  catch (e) { throw new Error(`Programm kann nicht geladen werden (${e.message}). Lösung: Internetverbindung prüfen und erneut starten.`); }
+  const lade = holen || ((rel) => laden(`${quelle}${rel.split('/').map(encodeURIComponent).join('/')}?v=${encodeURIComponent(liste.version)}`));
+  try { await baueNeu({ R, liste, holen: lade, log }); }
+  catch (e) { loeschen(pfade(R).neu); throw e; }
+  tausche(R, log);
+  log(`Installiert: Version ${liste.version} (${Object.keys(liste.dateien).length} Dateien).`);
+  return liste;
+}
+
 // ---------- Umzug: alte Anordnung (alles direkt in C:\KC-Kasse) → neue Ordner ----------
 // Daten (Manager-Datenbank samt Schlüssel, Zentral-Zugang, Fernseher-Einstellungen) wandern in den Datenordner,
 // Zusatzmodule nach R\node_modules, das alte Programm nach R\alt\... (nichts wird gelöscht).
@@ -370,6 +397,6 @@ function programmStarten({ R, modus, args = [], node = process.execPath, bereitZ
   return { kind, bereit: versprechen, ende };
 }
 
-module.exports = { umbenennen, QUELLE_STANDARD, datenWurzel, pfade, datenDatei, leseJson, schreibeJson, laden, fernListe, lokaleListe, pruefeListe,
+module.exports = { installiereAusNetz, platzPruefen, freieBytes, umbenennen, QUELLE_STANDARD, datenWurzel, pfade, datenDatei, leseJson, schreibeJson, laden, fernListe, lokaleListe, pruefeListe,
   baueNeu, tausche, zurueckfallen, updateErlaubt, updateRegeln, aktualisieren, installiereAus, alteAnordnungAufraeumen, datenUmziehen,
   verknuepfungenEinrichten, programmStarten, programmUmgebung, normiert, fuerPlatte, heuteIso, starterUndStartdateienErneuern };

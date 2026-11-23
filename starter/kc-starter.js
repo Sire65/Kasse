@@ -65,8 +65,17 @@ async function installieren(o) {
     // War der entpackte Ordner selbst schon in Betrieb (alte Anordnung mit Datenbank), dessen Daten übernehmen.
     K.datenUmziehen(path.join(quelle, 'markt-kasse-suite', 'backend-source'), log);
   }
-  const liste = K.installiereAus({ quelle, R: ziel, log });
+  const vollstaendig = fs.existsSync(path.join(quelle, 'markt-kasse-suite', 'backend-source', 'run-manager-service.js'));
+  // Kleine Installations-ZIP (nur Starter): Programm direkt aus dem Netz nach C:\KC-Kasse laden.
+  const liste = vollstaendig ? K.installiereAus({ quelle, R: ziel, log })
+    : fs.existsSync(path.join(quelle, 'starter', 'kc-starter.js')) ? await K.installiereAusNetz({ R: ziel, log })
+    : K.installiereAus({ quelle, R: ziel, log });   // meldet „nicht vollständig entpackt“
   if (gleich) K.alteAnordnungAufraeumen(ziel, log);               // ZIP direkt in C:\KC-Kasse entpackt
+  // Starter sicher im Ziel (falls das Paket ihn nicht enthielt): vom gerade laufenden Starter kopieren.
+  if (!fs.existsSync(path.join(ziel, 'starter', 'kc-starter.js'))) {
+    fs.mkdirSync(path.join(ziel, 'starter'), { recursive: true });
+    for (const f of fs.readdirSync(__dirname)) if (fs.statSync(path.join(__dirname, f)).isFile()) fs.copyFileSync(path.join(__dirname, f), path.join(ziel, 'starter', f));
+  }
   K.verknuepfungenEinrichten(ziel, o.modus, log);
   statusSchreiben({ installiert: new Date().toISOString(), programm: liste.version, installOrdner: ziel });
   log(`Fertig installiert (Version ${liste.version}). Ab jetzt immer über die Verknüpfung auf dem Desktop starten.`);

@@ -28,6 +28,8 @@ if exist "%KC_HIER%\programm\aktuell\markt-kasse-suite\backend-source\run-manage
 if exist "%KC_HIER%\programm\vorher\markt-kasse-suite\backend-source\run-manager-service.js" goto INSTALLIERT
 rem --- 4) Entpackte ZIP (oder alte Anordnung) -> installieren ----------------
 if exist "%KC_HIER%\markt-kasse-suite\backend-source\run-manager-service.js" goto AUS_QUELLE
+rem --- 5) Kleine Installations-ZIP (nur Starter) -> Programm aus dem Internet laden
+if exist "%KC_HIER%\starter\kc-starter.js" goto AUS_QUELLE
 goto UNVOLLSTAENDIG
 
 :INSTALLIERT
@@ -53,6 +55,7 @@ echo ==============================================================
 echo  KC MARKTKASSE - INSTALLATION
 echo ==============================================================
 echo  Das Programm wird nach %KC_ZIEL% installiert.
+echo  Dafuer wird Internet gebraucht (ca. 80 MB, nur beim ersten Mal).
 echo  Daten (Kassen, Buchungen, Einstellungen) bleiben erhalten.
 echo  Danach diesen entpackten Ordner nicht mehr benutzen - immer
 echo  ueber die Verknuepfung "KC Kasse starten" auf dem Desktop.

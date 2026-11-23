@@ -52,9 +52,7 @@ Die Einrichtung macht man **einmal**. Danach heißt es jeden Tag nur noch: einsc
 3. Die Karte wieder herausnehmen und als **Nano-SIM** herausbrechen.
 
 ### B2. Programm herunterladen
-1. Im Browser öffnen: **https://github.com/Sire65/Kasse**
-2. Grüner Knopf **„Code“** → **„Download ZIP“**.
-3. Die ZIP-Datei auf einen **USB-Stick** kopieren. Sie wird für den Mini-PC **und** für deinen PC zu Hause gebraucht.
+Nichts nötig: Mini-PC und PC zu Hause laden sich die kleine Installations-ZIP (20 KB) selbst, siehe **D3**.
 
 ---
 
@@ -99,16 +97,15 @@ Die QR-Zettel enthalten die Adresse des Mini-PCs.
    Dann startet Windows am Markttag nicht von selbst neu.
 
 ### D3. Programm aufspielen (installiert sich selbst nach `C:\KC-Kasse`)
-1. Die ZIP-Datei vom USB-Stick auf den Mini-PC kopieren (z. B. in „Downloads“).
+1. Am Mini-PC im Browser die **kleine Installations-ZIP** laden (nur 20 KB):
+   **https://sire65.github.io/Kasse/installation/KC-Kasse-Installation.zip**
+   (Nicht mehr die große GitHub-ZIP mit über 200 MB – die braucht unnötig Platz.)
 2. Rechtsklick auf die ZIP-Datei → **„Alle extrahieren…“** → **Extrahieren**.
    Bitte **nicht** direkt in der ZIP-Datei doppelklicken – das Programm merkt das und sagt es.
-3. Im entpackten Ordner (darin liegt die Datei `START_HIER.txt`) doppelklicken auf
-   **`KC_MiniPC_Einrichten.cmd`**.
-   Das stellt ein: Bildschirm und Standby nie aus, keine Benachrichtigungen, kein Bildschirmschoner.
-   Danach das Fenster schließen.
+3. Auf Laufwerk C: sollten ca. 250 MB frei sein.
 4. Doppelklicken auf **`KC_Manager_Start.cmd`**.
-   - Das Programm **installiert sich nach `C:\KC-Kasse`** und lädt beim ersten Mal einige Minuten lang
-     seine Laufzeit (Node.js). Dafür braucht es Internet.
+   - Das Programm **lädt sich nach `C:\KC-Kasse`** (ca. 80 MB Programm + 30 MB Node.js, nur beim
+     ersten Mal, einige Minuten). Dafür braucht es Internet. Ist zu wenig Platz frei, sagt es das vorher.
    - Es legt **selbst** die Verknüpfung **„KC Kasse starten“** auf den Desktop **und in den Autostart**.
      Alte Kopien der Startdatei im Autostart räumt es dabei weg.
    - Lag schon eine alte Version direkt in `C:\KC-Kasse`: Kassen-Daten, Schlüssel und Einstellungen
@@ -118,7 +115,9 @@ Die QR-Zettel enthalten die Adresse des Mini-PCs.
      Steht dort eine Meldung mit `!!`, die **Lösung** darin Schritt für Schritt befolgen.
 5. Der **PC-Manager** öffnet sich von selbst im Browser.
    **Das schwarze Fenster offen lassen.** Es ist das Kassenprogramm.
-6. Den entpackten Ordner und die ZIP-Datei braucht man danach nicht mehr.
+6. Die ZIP-Datei und den entpackten Ordner danach **löschen** – sie werden nicht mehr gebraucht.
+7. Einmal **`C:\KC-Kasse\KC_MiniPC_Einrichten.cmd`** doppelklicken: Bildschirm und Standby nie aus,
+   keine Benachrichtigungen, kein Bildschirmschoner, Rathaus-Bild als Hintergrund.
 
 ### D4. Updates – passieren von selbst
 - Bei **jedem Start** fragt der Mini-PC im Internet nach einer neuen Version und lädt **nur geänderte
@@ -195,7 +194,7 @@ am besten zu Hause. Es gilt immer, was zuletzt „an alle Kassen gesendet“ wur
    Die Verbindung nach Hause läuft mit einem eigenen Schlüssel weiter.
 
 ### G2. PC zu Hause einrichten (einmalig)
-1. Die ZIP-Datei auch zu Hause entpacken (Rechtsklick → „Alle extrahieren…“).
+1. Die kleine Installations-ZIP (Link in D3) auch zu Hause laden und entpacken (Rechtsklick → „Alle extrahieren…“).
 2. **`KC_Zuhause_Start.cmd`** doppelklicken. Es installiert sich nach `C:\KC-Kasse` und legt die
    Verknüpfung **„KC Manager zu Hause“** auf den Desktop. Ab dann nur noch diese benutzen – sie holt
    neue Versionen von selbst (zu Hause gilt keine Marktsperre).
