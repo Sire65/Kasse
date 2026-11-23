@@ -191,7 +191,7 @@ unter „📅 Programm → Tagesprogramm“ ergänzen.
 **Fernsehbild versehentlich geschlossen?** Schwarzes Fenster neu starten oder erneut „📺 An den
 Fernseher senden“. Stürzt der Browser ab, startet er nach 10 s von selbst neu.
 
-Einstellungen: `markt-kasse-suite/backend-source/stand-einstellungen.json`
+Einstellungen: `%LOCALAPPDATA%\KC-MarktKasse\stand-einstellungen.json` (seit 23.11.2026; beim ersten Start aus `markt-kasse-suite/backend-source/stand-einstellungen.json` übernommen – Updates ändern sie nicht)
 (`"fernseher": { "aktiv": true, "bildschirm": "auto" }`; `"bildschirm": 2` erzwingt Anzeige 2,
 `"aktiv": false` schaltet den Fernseher-Start ab).
 

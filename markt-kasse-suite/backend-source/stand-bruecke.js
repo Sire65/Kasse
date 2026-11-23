@@ -22,6 +22,7 @@ const path = require('path');
 const crypto = require('crypto');
 const http = require('http');
 const { meldung, druckeKasten, SCHRITT_BETREUER } = require('./fehlerhilfe');
+const updateInfo = require('./update-info');
 
 // [Schlüssel, Pfad am Manager-Dienst, Mindestabstand in ms (ohne Angabe: bei jedem Spiegel-Takt)]
 const FUENF_MINUTEN = 5 * 60 * 1000;
@@ -43,7 +44,7 @@ const SPIEGEL = [
 ];
 const AUFTRAG_PFADE = new Set(['/master-data/push', '/dienstplan/push', '/sold-out-status/setzen', '/remote-command/queue',
   '/kassen/kopplung-widerrufen', '/api/v1/cash-transfer/queue', '/api/v1/finance-transfer/queue', '/bargeld/uebergabe', '/bargeld/protokoll',
-  '/fernseher/tv-paket', '/fernseher/tv-programm']);
+  '/fernseher/tv-paket', '/fernseher/tv-programm', '/update/freigeben']);
 const MAX_SPIEGEL_BYTES = 2 * 1024 * 1024;
 
 function schreibeAtomar(datei, inhalt) {
@@ -291,7 +292,9 @@ class StandBruecke {
     const aktivitaet = {};
     try { for (const [kasse, ms] of (this.manager._kassenLetzteAktivitaet || new Map())) aktivitaet[kasse] = new Date(ms).toISOString(); } catch (e) { /* */ }
     let router = null; try { router = this.routerZaehler ? this.routerZaehler.kurz() : null; } catch (e) { router = null; }
-    return { version: this.version, letzteAktivitaet: aktivitaet, gemeldetUm: new Date().toISOString(), rueckstand: this.zustand.rueckstand, ...(router ? { router } : {}) };
+    let update = null; try { update = updateInfo.updateInfo(); if (!update.verwaltet) update = null; } catch (e) { update = null; }
+    return { version: this.version, letzteAktivitaet: aktivitaet, gemeldetUm: new Date().toISOString(), rueckstand: this.zustand.rueckstand,
+      ...(router ? { router } : {}), ...(update ? { update } : {}) };
   }
 
   async _runde() {
@@ -337,6 +340,11 @@ class StandBruecke {
           const html = a.koerper && typeof a.koerper.html === 'string' ? a.koerper.html : '';
           if (!/<html[\s>]/i.test(html)) ergebnis = { status: 400, antwort: { error: 'kein_gueltiges_tv_programm' } };
           else { schreibeAtomar(path.join(this.datenOrdner, 'tv-programm.html'), html); ergebnis = { status: 200, antwort: { gespeichert: true, groesse: html.length } }; }
+          this.log(`[Stand-Brücke] Auftrag von zu Hause ausgeführt: ${a.pfad} → ${ergebnis.status}`);
+        } else if (a.pfad === '/update/freigeben') {
+          // Marktsperre: Update von zu Hause freigeben - wird beim nächsten Start des Kassen-PCs installiert.
+          try { ergebnis = { status: 200, antwort: updateInfo.freigeben({ von: 'zu-hause' }) }; }
+          catch (e) { ergebnis = { status: 409, antwort: { error: e.message } }; }
           this.log(`[Stand-Brücke] Auftrag von zu Hause ausgeführt: ${a.pfad} → ${ergebnis.status}`);
         } else {
           const r = await lokal(this.livePort, 'POST', a.pfad, a.koerper || {});

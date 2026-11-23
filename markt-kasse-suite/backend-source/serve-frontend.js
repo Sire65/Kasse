@@ -2,6 +2,7 @@
 'use strict';
 const http = require('http');
 const fs = require('fs');
+const updateInfo = require('./update-info');
 const path = require('path');
 
 const args = process.argv.slice(2);
@@ -142,8 +143,20 @@ function behandleKassenStart(req, res, urlPath) {
     res.setHeader('Access-Control-Allow-Origin', '*');
     json(res, 200, daten); return;
   }
+  // Programm-Version für die Tablets: ändert sie sich (Update am Kassen-PC), laden sie in einer Ruhepause neu.
+  if (req.method === 'GET' && aktion0 === 'programm-version') {
+    res.setHeader('Access-Control-Allow-Origin', '*'); res.setHeader('Cache-Control', 'no-store');
+    json(res, 200, { version: updateInfo.programmVersion() }); return;
+  }
   if (!nurLokal(req)) { json(res, 403, { fehler: 'nur_am_pc_selbst' }); return; }
   const aktion = aktion0;
+  if (req.method === 'GET' && aktion === 'update-status') { json(res, 200, updateInfo.updateInfo()); return; }
+  if (req.method === 'POST' && aktion === 'update-freigeben') {
+    const herkunft0 = req.headers.origin;
+    if (req.headers['x-kc-aktion'] !== '1' || (herkunft0 && !/^http:\/\/(127\.0\.0\.1|localhost)(:\d+)?$/i.test(herkunft0))) { json(res, 403, { fehler: 'herkunft_abgelehnt' }); return; }
+    try { json(res, 200, updateInfo.freigeben({ von: 'pc-manager-lokal' })); } catch (e) { json(res, 409, { fehler: e.message }); }
+    return;
+  }
   if (aktion === 'tv-paket') { behandleTvPaket(req, res); return; }
   if (aktion === 'tv-programm') { behandleTvProgramm(req, res); return; }
   // KS-04: Läuft dieser Webserver am Stand (mit Manager-Dienst) oder zu Hause (nur PC-Manager, Fernmodus)?

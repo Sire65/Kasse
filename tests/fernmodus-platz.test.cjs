@@ -15,7 +15,7 @@ const html = lies('pc-manager/index.html');
 p('Fernmodus richtet sich nach jedem Zeichnen neu aus', /el\.innerHTML = inhalt;\n\s*bannerPlatz\(\);/.test(fern));
 p('Fernmodus hört auf das Hinweis-Signal', fern.includes("addEventListener('kc-hinweis-unten-rechts', bannerPlatz)"));
 p('Entwicklungs-Hinweis meldet sich beim Erscheinen', dev.includes("dispatchEvent(new CustomEvent('kc-hinweis-unten-rechts'))"));
-p('Build-Kennungen erhöht', html.includes('kc-fernmodus.js?build=1.0.1') && html.includes('dev-quick-access.js?build=0.29.20'));
+p('Build-Kennungen erhöht', html.includes('kc-fernmodus.js?build=1.0.2') && html.includes('dev-quick-access.js?build=0.29.20'));
 p('Schnellzugang bleibt nur per Doppelklick und ohne Speicherung', dev.includes("addEventListener('dblclick'") && !/localStorage|sessionStorage/.test(dev.split('/* Zusatzmodule')[0]));
 
 // bannerPlatz im Nachbau ausführen

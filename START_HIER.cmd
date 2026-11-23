@@ -1,2 +1,2 @@
 @echo off
-call "%~dp0KC_Manager_Start.cmd"
+call "%~dp0KC_Manager_Start.cmd" %* & exit /b

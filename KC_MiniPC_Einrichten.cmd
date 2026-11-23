@@ -18,7 +18,9 @@ reg add "HKCU\Software\Microsoft\Windows\CurrentVersion\PushNotifications" /v To
 echo [2/4] Windows-Benachrichtigungen: aus.
 reg add "HKCU\Control Panel\Desktop" /v ScreenSaveActive /t REG_SZ /d 0 /f >nul || set "KC_FEHLER=1"
 echo [3/4] Bildschirmschoner: aus.
-powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0tools\kc-tv-hintergrund.ps1" || set "KC_FEHLER=1"
+set "KC_HG=%~dp0programm\aktuell\tools\kc-tv-hintergrund.ps1"
+if not exist "%KC_HG%" set "KC_HG=%~dp0tools\kc-tv-hintergrund.ps1"
+powershell -NoProfile -ExecutionPolicy Bypass -File "%KC_HG%" || set "KC_FEHLER=1"
 echo [4/4] Windows-Hintergrund: Rathaus Werne im Weihnachtsmarkt-Licht (wie in der Praesentation).
 echo.
 if "%KC_FEHLER%"=="1" (
@@ -35,6 +37,6 @@ echo  - Windows-Taste + P: "Erweitern", wenn ein zweiter Monitor angeschlossen i
 echo  - Einstellungen - System - Bildschirm: den MONITOR als Hauptanzeige festlegen,
 echo    dann laeuft die Praesentation automatisch auf dem Fernseher.
 echo  - Einstellungen - Windows Update - Nutzungszeit: 8 bis 23 Uhr (kein Neustart am Markttag).
-echo  - KC_Manager_Start.cmd in den Autostart legen (Windows-Taste + R, shell:startup).
+echo  - Autostart: legt KC_Manager_Start.cmd beim ersten Start selbst an (Verknuepfung).
 echo.
 pause

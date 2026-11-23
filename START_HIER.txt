@@ -1,7 +1,7 @@
 KC MARKTKASSE – START HIER
 
 NEU EINRICHTEN? -> EINRICHTUNG_SCHRITT_FUER_SCHRITT.md (alles der Reihe nach)
-Stand: 13.11.2026
+Stand: 23.11.2026
 
 WELCHE STARTDATEI?
 - Am Stand (Mini-PC mit Tablets und Fernseher): KC_Manager_Start.cmd
@@ -11,21 +11,27 @@ WELCHE STARTDATEI?
   (Fernseher/Praesentation: TABLET_UND_MANAGER_KOPPELN.md, Abschnitt E1)
 
 NORMALER START (Stand)
-1. ZIP vollständig entpacken.
+1. ZIP vollstaendig entpacken (Rechtsklick - "Alle extrahieren...").
 2. KC_Manager_Start.cmd doppelklicken.
+   Beim ersten Mal installiert sich das Programm nach C:\KC-Kasse und legt die
+   Verknuepfung "KC Kasse starten" auf den Desktop und in den Autostart.
 3. Beim allerersten Start Internetverbindung zulassen.
-4. Das schwarze Startfenster während des Betriebs geöffnet lassen.
-5. Der PC-Manager öffnet sich automatisch im Standardbrowser.
+4. Das schwarze Startfenster waehrend des Betriebs geoeffnet lassen.
+5. Der PC-Manager oeffnet sich automatisch im Standardbrowser.
+Danach immer ueber "KC Kasse starten" (zu Hause: "KC Manager zu Hause").
 
-ERSTER START
-Falls die portable Laufzeit noch nicht im Ordner liegt, startet automatisch KC_Einrichtung.ps1.
-Die Einrichtung:
-- lädt Node.js 22.22.3 als portable Windows-Laufzeit,
-- prüft die offizielle SHA-256-Prüfsumme von nodejs.org,
-- installiert die benötigten Module ws, bonjour-service und selfsigned,
-- speichert alles innerhalb dieses KC-Ordners.
+ORDNER (seit 23.11.2026)
+C:\KC-Kasse\runtime         Node.js 22.22.3 (einmal geladen, SHA-256 geprueft)
+C:\KC-Kasse\node_modules    ws, bonjour-service, selfsigned (einmal geladen)
+C:\KC-Kasse\programm\aktuell laufende Version
+C:\KC-Kasse\programm\vorher  vorige Version (automatischer Rueckfall)
+%LOCALAPPDATA%\KC-MarktKasse Daten: Kassen, Manager-Datenbank, Schluessel, Einstellungen
 
-Nach erfolgreichem ersten Start kann diese Installation im selben entpackten Ordner weiterverwendet werden. Für den lokalen Start ist dann keine erneute Installation erforderlich.
+UPDATES
+Bei jedem Start werden nur geaenderte Dateien geladen (von GitHub Pages, jede Datei mit
+Pruefsumme). Startet die neue Version nicht, laeuft automatisch die vorige. Ohne Internet
+startet die vorhandene Version. Marktsperre 04.-14.12.: nur nach Freigabe im PC-Manager
+(Verbindung pruefen - "Update fuer heute freigeben").
 
 GESTARTET WERDEN
 - Manager-/Kassen-Dienst auf HTTPS-Port 8543,

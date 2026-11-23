@@ -98,26 +98,42 @@ Die QR-Zettel enthalten die Adresse des Mini-PCs.
 2. **Erweiterte Optionen → Nutzungszeit:** 8 bis 23 Uhr.
    Dann startet Windows am Markttag nicht von selbst neu.
 
-### D3. Programm aufspielen
-1. Die ZIP-Datei vom USB-Stick nach **`C:\KC-Kasse`** kopieren.
-2. Rechtsklick auf die ZIP-Datei → **„Alle extrahieren…“** → als Ziel `C:\KC-Kasse` eingeben → **Extrahieren**.
-   Bitte **nicht** direkt in der ZIP-Datei arbeiten.
+### D3. Programm aufspielen (installiert sich selbst nach `C:\KC-Kasse`)
+1. Die ZIP-Datei vom USB-Stick auf den Mini-PC kopieren (z. B. in „Downloads“).
+2. Rechtsklick auf die ZIP-Datei → **„Alle extrahieren…“** → **Extrahieren**.
+   Bitte **nicht** direkt in der ZIP-Datei doppelklicken – das Programm merkt das und sagt es.
 3. Im entpackten Ordner (darin liegt die Datei `START_HIER.txt`) doppelklicken auf
    **`KC_MiniPC_Einrichten.cmd`**.
    Das stellt ein: Bildschirm und Standby nie aus, keine Benachrichtigungen, kein Bildschirmschoner.
    Danach das Fenster schließen.
 4. Doppelklicken auf **`KC_Manager_Start.cmd`**.
-   - Beim ersten Mal lädt das Programm einige Minuten lang seine Laufzeit. Dafür braucht es Internet.
+   - Das Programm **installiert sich nach `C:\KC-Kasse`** und lädt beim ersten Mal einige Minuten lang
+     seine Laufzeit (Node.js). Dafür braucht es Internet.
+   - Es legt **selbst** die Verknüpfung **„KC Kasse starten“** auf den Desktop **und in den Autostart**.
+     Alte Kopien der Startdatei im Autostart räumt es dabei weg.
+   - Lag schon eine alte Version direkt in `C:\KC-Kasse`: Kassen-Daten, Schlüssel und Einstellungen
+     werden übernommen, das alte Programm landet in `C:\KC-Kasse\alt\` (nichts wird gelöscht).
    - **Fragt die Windows-Firewall: unbedingt „Zulassen“ klicken (private Netzwerke).**
    - Am Ende steht im schwarzen Fenster **„[Marktag-Start] ALLES BEREIT“**.
      Steht dort eine Meldung mit `!!`, die **Lösung** darin Schritt für Schritt befolgen.
 5. Der **PC-Manager** öffnet sich von selbst im Browser.
    **Das schwarze Fenster offen lassen.** Es ist das Kassenprogramm.
+6. Den entpackten Ordner und die ZIP-Datei braucht man danach nicht mehr.
 
-### D4. Automatisch starten, wenn der Mini-PC angeht
-1. **Windows-Taste + R** drücken, `shell:startup` eintippen, **Enter**. Ein Ordner öffnet sich.
-2. Die Datei **`KC_Manager_Start.cmd`** mit der **rechten** Maustaste in diesen Ordner ziehen,
-   loslassen und **„Verknüpfungen hier erstellen“** wählen.
+### D4. Updates – passieren von selbst
+- Bei **jedem Start** fragt der Mini-PC im Internet nach einer neuen Version und lädt **nur geänderte
+  Dateien** (Node.js und die Zusatzmodule bleiben liegen). Jede Datei wird mit einer Prüfsumme geprüft.
+- **Startet eine neue Version nicht**, startet automatisch die vorige wieder. Die kaputte Version wird
+  übersprungen, bis eine reparierte kommt.
+- **Kein Internet?** Dann startet einfach die vorhandene Version.
+- Die Tablets übernehmen die neue Version von selbst in einer Ruhepause (leerer Bon, 2 Minuten niemand dran).
+- **Marktsperre 04.–14.12.:** In dieser Zeit holt der Mini-PC **keine** Updates von selbst. Muss doch eine
+  Korrektur drauf: PC-Manager → **Verbindung prüfen** → Karte „Verbindung nach Hause“ →
+  **„⬆️ Update für heute freigeben“** (geht auch von zu Hause). Installiert wird beim nächsten Start
+  (schwarzes Fenster schließen, **„KC Kasse starten“** doppelklicken).
+- Die Programm-Version steht im PC-Manager unter **Verbindung prüfen**.
+- Daten liegen getrennt vom Programm in `%LOCALAPPDATA%\KC-MarktKasse` (Benutzer KC-Team) – ein Update
+  ändert daran nichts. Der Fernseher-Rand steht jetzt dort in `stand-einstellungen.json`.
 
 ### D5. Fernseher und Monitor
 - **Nur Fernseher (HDMI):** Es ist nichts zu tun. Die Präsentation startet bei jedem Start von selbst im Vollbild.
@@ -179,9 +195,11 @@ am besten zu Hause. Es gilt immer, was zuletzt „an alle Kassen gesendet“ wur
    Die Verbindung nach Hause läuft mit einem eigenen Schlüssel weiter.
 
 ### G2. PC zu Hause einrichten (einmalig)
-1. Die ZIP-Datei auch zu Hause entpacken, z. B. nach `C:\KC-Kasse`.
-2. **`KC_Zuhause_Start.cmd`** doppelklicken. **Zu Hause nie `KC_Manager_Start.cmd` benutzen**,
-   das würde zweite, leere Kassen starten.
+1. Die ZIP-Datei auch zu Hause entpacken (Rechtsklick → „Alle extrahieren…“).
+2. **`KC_Zuhause_Start.cmd`** doppelklicken. Es installiert sich nach `C:\KC-Kasse` und legt die
+   Verknüpfung **„KC Manager zu Hause“** auf den Desktop. Ab dann nur noch diese benutzen – sie holt
+   neue Versionen von selbst (zu Hause gilt keine Marktsperre).
+   **Zu Hause nie „KC Kasse starten“ / `KC_Manager_Start.cmd` benutzen**, das würde zweite, leere Kassen starten.
 3. Im PC-Manager bei **Supabase** mit dem Admin-Konto anmelden.
 4. Unten rechts steht **„Fernmodus · Stand … · zuletzt gemeldet vor … s“**.
 
@@ -234,6 +252,9 @@ Das kommt am Stand nach wenigen Sekunden an.
 | Tablet verloren | PC-Manager → Admin-Center → **„Gerät verloren“**. Neuen Zettel drucken. |
 | Zu Hause: „Stand zuletzt gemeldet vor … Minuten“ | Am Stand fehlt das Internet (SIM-Guthaben? Router an?). Die Kassen laufen trotzdem. |
 | Fernseher zeigt nichts | Mini-PC neu starten oder im PC-Manager „📺 An den Fernseher senden“. |
+| Schwarzes Fenster: „BITTE ZUERST ENTPACKEN“ | Es wurde direkt in der ZIP-Datei doppelgeklickt. Rechtsklick auf die ZIP → „Alle extrahieren…“, dann im entpackten Ordner starten. |
+| Schwarzes Fenster: „FALSCHE DATEI IM AUTOSTART“ | `shell:startup` öffnen, die Datei vom Typ „Windows-Befehlsskript“ löschen, einmal „KC Kasse starten“ doppelklicken. |
+| „NEUE VERSION STARTET NICHT“ | Nichts tun – die vorige Version läuft automatisch. Foto an den Betreuer. |
 
 Ausführlichere Erklärungen stehen in:
 - `TABLET_UND_MANAGER_KOPPELN.md` für Tablets, Fehlermeldungen und Fernseher,
