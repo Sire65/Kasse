@@ -210,15 +210,16 @@ function nachbauStarter() {
       await tab.goto(st.kassen[0].qrAdresse);
       await tab.waitForFunction(() => window.KCStandMeldungen, null, { timeout: 30000 });
       await tab.evaluate(() => window.KCStandMeldungen.pruefen());
-      await tab.waitForSelector('#kcStandMeldungen', { state: 'visible', timeout: 15000 }).catch(() => {});
-      const kurz = await tab.locator('#kcStandMeldungen').innerText().catch(() => '');
-      p('B: Tablet zeigt „Am PC: KASSE-03: Port 47502 ist belegt …“', /Am PC: KASSE-03: Port 47502 ist belegt/.test(kurz), kurz);
-      await tab.locator('#kcStandMeldungen').dispatchEvent('click'); // PIN-Sperre/Startfenster liegen im Test noch darüber
+      await tab.waitForFunction(() => /Am PC:/.test(document.getElementById('notificationBar')?.textContent || ''), null, { timeout: 40000 }).catch(() => {});
+      const kurz = await tab.locator('#notificationBar').innerText().catch(() => '');
+      p('B: Tablet zeigt oben in der Meldungszeile „Am PC: KASSE-03: Port 47502 ist belegt …“', /Am PC: KASSE-03: Port 47502 ist belegt/.test(kurz), kurz);
+      p('B: kein Streifen mehr unten (stört beim Kassieren)', await tab.evaluate(() => !document.getElementById('kcStandMeldungen')));
+      await tab.locator('#notificationBar').dispatchEvent('click'); // PIN-Sperre/Startfenster liegen im Test noch darüber
       const lang = await tab.locator('#kcStandMeldungen').innerText();
       p('B: Antippen zeigt Ursache und Lösungsschritte', /Ursache:/.test(lang) && /Task-Manager|beenden/.test(lang));
       fremd.kill(); fremd = null;
       let weg = false;
-      for (let i = 0; i < 60 && !weg; i++) { await warte(1000); await tab.evaluate(() => window.KCStandMeldungen.pruefen()); weg = !(await tab.locator('#kcStandMeldungen').isVisible()); }
+      for (let i = 0; i < 60 && !weg; i++) { await warte(1000); await tab.evaluate(() => window.KCStandMeldungen.pruefen()); weg = await tab.evaluate(() => !window.KCStandMeldungen.letzte.length && !document.getElementById('kcStandMeldungen') && /wieder alles in Ordnung/.test(document.getElementById('notificationBar').textContent)); }
       p('B: Störung behoben -> Hinweis verschwindet von selbst', weg);
       p('keine Skriptfehler (Fernseher, PC-Manager, Designer)', !tvFehler.length && !pcFehler.length && !dFehler.length, [...tvFehler, ...pcFehler, ...dFehler].slice(0, 2).join(' | ') || 'keine');
     } catch (e) { rot++; console.log('FEHLER  Abbruch: ' + (e && e.stack || e)); }

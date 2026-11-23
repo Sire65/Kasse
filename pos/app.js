@@ -4987,7 +4987,8 @@ document.addEventListener("keydown",async e=>{if(["INPUT","TEXTAREA","SELECT"].i
     };
     // Die Kasse arbeitet normal weiter und sagt EINMAL dazu, was am Scanner zu tun ist.
     const layoutHinweis=()=>{if(layoutRepariert)setSystemHint("Scanner steht auf amerikanischer Tastatur - Seite 12 im Heft, Code \u201eGerman Keyboard\u201c scannen. Die Kasse rechnet es bis dahin selbst zurueck.")};
-    if(ersterTreffer(c=>/^CMD-CHECKOUT$/i.test(c))){layoutHinweis();return checkoutSale("qr")}
+    // 23.11.2026: Bindestrich darf fehlen oder ein anderes Zeichen sein (Scanner-Tastatur) - „CMDCHECKOUT“, „CMD_CHECKOUT“ …
+    if(ersterTreffer(c=>/^CMD[^A-Z0-9]?CHECKOUT$/i.test(c.trim()))){layoutHinweis();return checkoutSale("qr")}
     // Ein Handscanner ist eine TASTATUR. Steht sein Tastaturlayout auf einer anderen Sprache
     // als das Tablet, kommen Ziffern zwar richtig an, Sonderzeichen aber nicht: aus "|" wird
     // je nach Layout ein anderes Zeichen, aus ":" ebenso. Manche Scanner koennen ausserdem
