@@ -19,7 +19,7 @@ p('Bild wird außerhalb des Kassen-Ordners abgelegt (überlebt neue ZIP)', ps.in
 p('Hintergrund wird dauerhaft gesetzt (SPI 20, Flags 3)', ps.includes('SystemParametersInfo(20, 0, $datei, 3)'));
 p('Ausfüllen statt Kacheln', ps.includes("WallpaperStyle -Value '10'") && ps.includes("TileWallpaper -Value '0'"));
 p('keine Adminrechte, nur aktueller Benutzer (HKCU)', !/HKLM|RunAs|Start-Process/.test(ps));
-p('Einrichtung ruft das Skript auf, Fehler werden gemeldet', cmd.includes('-File "%~dp0tools\\kc-tv-hintergrund.ps1" || set "KC_FEHLER=1"'));
+p('Einrichtung ruft das Skript auf, Fehler werden gemeldet', cmd.includes('tools\\kc-tv-hintergrund.ps1"') && cmd.includes('-File "%KC_HG%" || set "KC_FEHLER=1"'));
 p('Einrichtung zählt 4 Schritte', (cmd.match(/\[\d\/4\]/g) || []).length === 4 && !cmd.includes('/3]'));
 p('Einrichtung bleibt CRLF', /\r\n/.test(cmd) && !/[^\r]\n/.test(cmd));
 p('Skript-Here-String korrekt geschlossen', /@'\r?\n[\s\S]*\r?\n'@/.test(ps));
