@@ -365,8 +365,32 @@ class StandBruecke {
     const ids = Object.keys(merk.erledigt).map(Number).sort((x, y) => x - y);
     for (const id of ids.slice(0, Math.max(0, ids.length - 300))) delete merk.erledigt[id];
     schreibeAtomar(this.merkDatei, JSON.stringify(merk));
+    await this._kassenQrMelden(z);
     this.zustand.letzterErfolg = new Date().toISOString();
     return { ok: true, mehr: zeilen.length === 300 || ausgefuehrt > 0 };
+  }
+
+  // KC-STAND-KASSEN-QR (23.11.2026): QR-Codes der Tablet-Kassen für den Adminbereich der Club-App. Nur bei Änderung
+  // (neuer Schlüssel nach „Gerät verloren“, neue PC-Adresse) und einmal je Start. Lesen darf nur der Club-Server (Admin).
+  kassenQrListe() {
+    const ks = this.kassenStart;
+    if (!ks || !Array.isArray(ks.kassen)) return [];
+    return ks.kassen.map((k) => ({ kasse: String(k.id).toUpperCase(), url: ks.qrAdresse(k), port: k.port || null, zettel: k.zettelStatus || null }))
+      .filter((k) => k.url);
+  }
+  async _kassenQrMelden(z) {
+    const liste = this.kassenQrListe();
+    if (!liste.length) return;
+    const fingerabdruck = crypto.createHash('sha256').update(JSON.stringify(liste.map((k) => [k.kasse, k.url, k.port]))).digest('hex');
+    if (fingerabdruck === this._kassenQrStand) return;
+    try {
+      await this._rpc(z, 'kc_stand_kassen_qr_melden', { p_stand: z.standId, p_geheimnis: z.geheimnis, p_kassen: liste });
+      this._kassenQrStand = fingerabdruck;
+      this.log(`[Stand-Brücke] Kassen-QR-Codes für die Club-App gemeldet (${liste.length}).`);
+    } catch (e) {
+      // Fehlt die Funktion (Migration noch nicht eingespielt), nicht jede Minute erneut versuchen.
+      if (e && e.status === 404) this._kassenQrStand = fingerabdruck;
+    }
   }
 }
 

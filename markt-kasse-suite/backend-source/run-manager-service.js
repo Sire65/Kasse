@@ -274,6 +274,7 @@ async function main() {
         const ks = new TabletKassenStart({ manager: mgr, backendDir: __dirname, frontendRoot, datenOrdner, konfigDatei: kassenListe });
         kassenStatus = await ks.start({ webserverPort });
         kassenStart = ks;
+        standBruecke.kassenStart = ks; // KC-STAND-KASSEN-QR: Kassen-QR-Codes für den Adminbereich der Club-App
         // (Meldungen der Kassen kommen live dazu - siehe Stand-Meldungen unten)
       } catch (e) {
         const m = e.kcMeldung || erklaere(e, { was: 'Tablet-Kassen starten' });
