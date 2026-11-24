@@ -81,10 +81,24 @@ function pruefeListe(liste) {
   }
   return liste;
 }
-async function fernListe(quelle = QUELLE_STANDARD) {
-  const buf = await laden(`${quelle}stand-paket.json?t=${Date.now()}`, { zeitlimitMs: 10000 });
-  return pruefeListe(JSON.parse(buf.toString('utf8')));
+// 24.11.2026 (Befund Mini-PC: „Kein Internet“ beim Start, Sekunden später stand die Verbindung nach Hause):
+// direkt nach dem Hochfahren ist das Netz oft noch nicht bereit. Darum bis zu 4 Versuche (20 s Zeitlimit,
+// dazwischen 5/10/15 s Pause) - zusammen höchstens gut 2 Minuten, ohne Netz startet danach die vorhandene Version.
+async function fernListe(quelle = QUELLE_STANDARD, { versuche = Number(process.env.KC_UPDATE_VERSUCHE) || 4, pauseMs = Number(process.env.KC_UPDATE_PAUSE_MS) || 5000, log = () => {} } = {}) {
+  let letzter;
+  for (let i = 1; i <= versuche; i++) {
+    try {
+      const buf = await laden(`${quelle}stand-paket.json?t=${Date.now()}`, { zeitlimitMs: 20000 });
+      return pruefeListe(JSON.parse(buf.toString('utf8')));
+    } catch (e) {
+      letzter = e;
+      if (/ungültig|unzulässig|Prüfsumme|JSON/i.test(String(e && e.message))) throw e;   // Netz ok, Liste kaputt - nicht wiederholen
+      if (i < versuche) { log(`Update-Liste nicht erreichbar (${kurzerFehler(e)}) – neuer Versuch in ${(pauseMs * i) / 1000} s …`); await new Promise((r) => setTimeout(r, pauseMs * i)); }
+    }
+  }
+  throw letzter;
 }
+function kurzerFehler(e) { return String((e && (e.code || (e.cause && e.cause.code) || e.message)) || e).slice(0, 120); }
 
 // ---------- Paket in einen Ordner bauen (aus vorhandenen Dateien + Download) ----------
 // Freier Platz: neue Version + Reserve. Lieber vorher klar melden als mitten im Laden abbrechen.
@@ -213,7 +227,7 @@ async function aktualisieren({ R, modus = 'stand', quelle = process.env.KC_UPDAT
   const lokal = lokaleListe(R);
   const ergebnis = { geprueft: new Date().toISOString(), lokal: lokal && lokal.version, fern: null, aktualisiert: false, verfuegbar: false, hinweis: '' };
   try {
-    const fern = await fernListe(quelle);
+    const fern = await fernListe(quelle, { log });
     ergebnis.fern = fern.version;
     if (lokal && lokal.kennung === fern.kennung) { ergebnis.hinweis = 'aktuell'; }
     else if ((stand.defekteVersionen || []).includes(fern.version)) { ergebnis.hinweis = `Version ${fern.version} ist als defekt markiert und wird übersprungen.`; }
@@ -233,8 +247,8 @@ async function aktualisieren({ R, modus = 'stand', quelle = process.env.KC_UPDAT
   } catch (e) {
     loeschen(P.neu);
     ergebnis.fehler = String(e && e.message || e);
-    ergebnis.hinweis = /ENOTFOUND|EAI_AGAIN|ECONNREFUSED|ETIMEDOUT|Zeitüberschreitung|ENETUNREACH|socket hang up/i.test(ergebnis.fehler)
-      ? 'Kein Internet – es startet die vorhandene Version.' : `Update nicht möglich: ${ergebnis.fehler}`;
+    ergebnis.hinweis = /ENOTFOUND|EAI_AGAIN|ECONNREFUSED|ECONNRESET|ETIMEDOUT|Zeitüberschreitung|ENETUNREACH|socket hang up/i.test(ergebnis.fehler)
+      ? `Kein Internet (${ergebnis.fehler.slice(0, 80)}) – es startet die vorhandene Version. Nächster Versuch beim nächsten Start.` : `Update nicht möglich: ${ergebnis.fehler}`;
   }
   schreibeJson(datenDatei('update-stand.json'), { ...stand, ...ergebnis, programm: (lokaleListe(R) || {}).version || null });
   return ergebnis;
