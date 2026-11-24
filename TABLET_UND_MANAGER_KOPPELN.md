@@ -195,6 +195,11 @@ Einstellungen: `%LOCALAPPDATA%\KC-MarktKasse\stand-einstellungen.json` (seit 23.
 (`"fernseher": { "aktiv": true, "bildschirm": "auto" }`; `"bildschirm": 2` erzwingt Anzeige 2,
 `"aktiv": false` schaltet den Fernseher-Start ab).
 
+**Fernseher aus?** Die Präsentation startet **nur, wenn der Fernseher als zweiter Bildschirm da ist** – nie auf dem
+kleinen Monitor (24.11.2026). Der Mini-PC schaut alle 20 Sekunden nach: Fernseher an → Präsentation startet dort von
+selbst; Fernseher aus → Präsentation wird geschlossen und kommt wieder, sobald er an ist. Nur wer ausdrücklich ohne
+zweiten Bildschirm arbeiten will, trägt `"einBildschirm": true` ein.
+
 **Laufschrift oder Ränder am Fernseher abgeschnitten?** Das ist „Overscan“: Viele Fernseher vergrößern
 das Bild leicht. Am besten im Fernseher-Menü abschalten (Bildformat/Bildgröße: „Just Scan“,
 „Original“, „Pixelgenau“, „Bildschirmanpassung“ oder „Screen Fit“). Geht das nicht: in
