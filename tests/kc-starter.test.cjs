@@ -8,6 +8,7 @@ const { spawnSync, spawn } = require('child_process');
 const WURZEL = path.join(__dirname, '..');
 const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'kc-starter-'));
 process.env.KC_DATEN_WURZEL = path.join(tmp, 'daten');
+process.env.KC_UPDATE_PAUSE_MS = '50';
 const K = require('../starter/kc-paket');
 const Regeln = require('../starter/kc-paket-regeln');
 
@@ -163,6 +164,16 @@ const BACKEND = 'markt-kasse-suite/backend-source';
   s.falsch.clear();
   const e3 = await K.aktualisieren({ R: R3, quelle: 'http://127.0.0.1:1/' });
   p('Ohne Internet: vorhandene Version startet, klare Meldung', !e3.aktualisiert && /Kein Internet/.test(e3.hinweis) && K.lokaleListe(R3).version === 'v2', e3.hinweis);
+
+  // Netz beim Start noch nicht bereit: erste Abrufe scheitern, ein späterer klappt (Befund Mini-PC 24.11.)
+  const sWack = await server(q2); let fehlschlaege = 2;
+  const altHandler = sWack.http.listeners('request')[0];
+  sWack.http.removeAllListeners('request');
+  sWack.http.on('request', (req, res) => { if (fehlschlaege > 0 && req.url.startsWith('/stand-paket.json')) { fehlschlaege--; req.socket.destroy(); return; } altHandler(req, res); });
+  const meldungen = [];
+  const e4 = await K.aktualisieren({ R: R3, quelle: sWack.url, log: (t) => meldungen.push(t) });
+  p('Netz erst nach 2 Fehlversuchen da: Update klappt trotzdem', !e4.fehler && meldungen.filter((t) => /neuer Versuch/.test(t)).length === 2, e4.hinweis);
+  sWack.http.close();
 
   // ---------- 6. Marktsperre ----------
   schreib(R3, 'programm/aktuell/starter/update-standard.json', fs.readFileSync(path.join(WURZEL, 'starter/update-standard.json')));
