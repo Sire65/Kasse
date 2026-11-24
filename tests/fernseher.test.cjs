@@ -51,11 +51,36 @@ function nachbauStarter() {
     f.stop();
   }
   {
+    // 24.11.2026: Fernseher aus -> Präsentation NIE auf dem kleinen Monitor; startet von selbst, wenn der Fernseher kommt
+    const s = nachbauStarter(); const log = []; let schirme = [MONITOR];
+    const f = new Fernseher({ einstellungsDatei: einst({ aktiv: true }), datenOrdner: ARBEIT, webserverPort: 8090, plattform: 'win32', wachTakt: 100,
+      bildschirmeErmitteln: () => schirme, browserFinden: () => 'C:\\Edge\\msedge.exe', starter: s.starter, log: (x) => log.push(x), fehlerLog: (x) => log.push(x) });
+    const r = f.start();
+    p('A: Fernseher aus (nur kleiner Monitor): Präsentation startet NICHT', !r.gestartet && r.wartet && s.aufrufe.length === 0 && log.some((x) => /Fernseher nicht erkannt.*wartet/.test(x)));
+    schirme = [MONITOR, TV]; await warte(250);
+    p('A: Fernseher eingeschaltet: Präsentation startet von selbst auf dem Fernseher', s.aufrufe.length === 1 && s.aufrufe[0].args.includes('--window-position=1300,20') && log.some((x) => /Fernseher erkannt – Präsentation startet/.test(x)));
+    schirme = [MONITOR]; await warte(250);
+    p('A: Fernseher ausgeschaltet: Präsentation wird geschlossen (nicht auf den Monitor geschoben)', f.status().laeuft === false && log.some((x) => /Fernseher ist aus – Präsentation geschlossen/.test(x)));
+    await warte(250);
+    p('A: … und startet nicht als „Absturz“ neu', s.aufrufe.length === 1 && !log.some((x) => /unerwartet beendet/.test(x)));
+    schirme = [MONITOR, TV]; await warte(250);
+    p('A: Fernseher wieder an: Präsentation kommt zurück', s.aufrufe.length === 2 && f.status().laeuft === true);
+    f.stop();
+  }
+  {
     const s = nachbauStarter(); const log = [];
-    const f = new Fernseher({ einstellungsDatei: einst({ aktiv: true }), datenOrdner: ARBEIT, webserverPort: 8090, plattform: 'win32',
+    const f = new Fernseher({ einstellungsDatei: einst({ aktiv: true }), datenOrdner: ARBEIT, webserverPort: 8090, plattform: 'win32', wachTakt: 100,
+      bildschirmeErmitteln: () => { throw new Error('PowerShell weg'); }, browserFinden: () => 'C:\\Edge\\msedge.exe', starter: s.starter, log: (x) => log.push(x) });
+    const r = f.start(); await warte(250);
+    p('A: Bildschirme nicht erkennbar: Präsentation wartet (lieber gar nicht als auf dem Monitor)', !r.gestartet && s.aufrufe.length === 0);
+    f.stop();
+  }
+  {
+    const s = nachbauStarter(); const log = [];
+    const f = new Fernseher({ einstellungsDatei: einst({ aktiv: true, einBildschirm: true }), datenOrdner: ARBEIT, webserverPort: 8090, plattform: 'win32',
       bildschirmeErmitteln: () => [TV], browserFinden: () => 'C:\\Edge\\msedge.exe', starter: s.starter, log: (x) => log.push(x) });
     const r = f.start();
-    p('A: nur EIN Bildschirm: Präsentation im Vollbild, PC-Manager wird nicht davor geöffnet', r.gestartet && r.einBildschirm && log.some((x) => /PC-Manager wird nicht davor geöffnet/.test(x)));
+    p('A: „einBildschirm“: true -> Präsentation auf dem einzigen Bildschirm, PC-Manager nicht davor', r.gestartet && r.einBildschirm && log.some((x) => /PC-Manager wird nicht davor geöffnet/.test(x)));
     f.stop();
   }
   {
