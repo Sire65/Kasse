@@ -103,7 +103,7 @@ const WETTER = {
 };
 
 // ---- einheitliches Raster (Folie 1280×720) ----
-const TITEL = { x: 80, y: 25, w: 1120, h: 120, font: 66 };
+const TITEL = { x: 80, y: 25, w: 1120, h: 110, font: 66 }; // 25.11.2026: 110 statt 120 hoch, endet über den Tafeln (y=138)
 const ZIER = { 'Grafik 12': { x: 1155, y: 0, w: 71, h: 71 }, 'Grafik 14': { x: 1168, y: 90, w: 46, h: 46 } };
 const FOTO = { x: 105, y: 165, w: 450, h: 470 };
 // Laufschrift höher (Betreiber 25.11.2026: „nicht zu nah am unteren TV-Rand“): vorher y=665, 48 hoch (7 px Rand),
@@ -402,8 +402,7 @@ function durchgaengeFestlegen(projekt, log) {
 }
 
 // Laufschrift auf allen Folien höher setzen; was bis in ihren Bereich reicht, wird angepasst:
-// große Flächen (Tafeln, Bilder ab 200 px Höhe) werden unten gekürzt, kleine Felder bis zu einem Viertel niedriger
-// und der Rest nach oben gerückt.
+// große Flächen (Tafeln, Bilder ab 200 px Höhe) werden unten gekürzt, kleine Felder nach oben gerückt.
 function laufschriftHoeher(projekt, log) {
   let angepasst = 0;
   for (const folie of projekt.slides) {
@@ -411,8 +410,13 @@ function laufschriftHoeher(projekt, log) {
       if (item.type === 'ticker') { setze(item, LAUFSCHRIFT); continue; }
       const ueber = item.y + item.h - UNTEN;
       if (ueber <= 0 || item.y >= LAUFSCHRIFT.y) continue;
-      if (item.h >= 200) item.h -= ueber;
-      else { const kuerzer = Math.min(ueber, Math.floor(item.h / 4)); item.h -= kuerzer; item.y -= ueber - kuerzer; }
+      if (item.h >= 200) { item.h -= ueber; angepasst++; continue; }
+      // kleine Felder nach oben rücken (nicht kürzen, sonst läuft zweizeiliger Text über) – aber nur bis zum nächsten
+      // Textfeld darüber; reicht der Platz nicht, wird das Feld auf den freien Platz gekürzt
+      const darueber = folie.items.filter((o) => o !== item && o.type !== 'ticker' && o.type !== 'image' && o.originalRole !== 'title'
+        && o.x < item.x + item.w && item.x < o.x + o.w && o.y + o.h <= item.y + 2).map((o) => o.y + o.h);
+      const oben = Math.max(0, ...darueber) + 2;
+      item.y = Math.max(oben, item.y - ueber); item.h = Math.min(item.h, UNTEN - item.y);
       angepasst++;
     }
   }
@@ -535,7 +539,7 @@ const CODE_ERSETZUNGEN = [
     alt: "stueck.textContent=text+'   ·   ';",
     neu: "text.split(/\\s*•\\s*/).forEach(b=>{const t=document.createElement('span');t.textContent=b;stueck.appendChild(t);const p=document.createElement('span');p.className='kcTickerPause';p.textContent='✦';stueck.appendChild(p)});" },
   { name: 'Wetterkacheln mit eigenem Wetter je Tag; durchgehendes Laufband', alt: '</body></html>',
-    neu: KACHEL_WETTER + HINWEIS_RASTER + PREISE.laufzeitHtml() + '<script>window.KC_LAUFSCHRIFT=' + JSON.stringify(['Der Köcheclub Werne begrüßt Sie herzlich auf dem Weihnachtsmarkt 2026', ...LAUFSCHRIFT_THEMEN]).replace(/</g, '\\u003c') + ';</script>' + AUFNAHME + PROGRAMM.laufzeitHtml() + LAUFBAND + '</body></html>' },
+    neu: KACHEL_WETTER + HINWEIS_RASTER + PREISE.laufzeitHtml() + SPEISEN.STIL + '<script>window.KC_LAUFSCHRIFT=' + JSON.stringify(['Der Köcheclub Werne begrüßt Sie herzlich auf dem Weihnachtsmarkt 2026', ...LAUFSCHRIFT_THEMEN]).replace(/</g, '\\u003c') + ';</script>' + AUFNAHME + PROGRAMM.laufzeitHtml() + LAUFBAND + '</body></html>' },
   { name: 'Wetter: Ausfall behält letzte Daten',
     alt: "}catch{weather.today={symbol:'🌡️',text:'Wetterdaten derzeit nicht erreichbar'",
     neu: "}catch{if(weather.today&&weather.today.rain)return;weather.today={symbol:'🌡️',text:'Wetterdaten derzeit nicht erreichbar'" },
@@ -585,7 +589,8 @@ function bauen(html, bildDatenUrl, extras = {}) {
   }
   // Betreiber 16.11.2026: auf allen Preislisten „Mettendchen“ statt „Mettwurst“ (Artikelnamen der Original-Folien)
   for (const [alt, neu] of [['Grünkohl a la Köcheclub mit Mettwurst', 'Grünkohl a la Köcheclub mit Mettendchen'],
-    ['Sauerkrauteintopf mit Mettwurst', 'Sauerkrauteintopf mit Mettendchen'], ['Kasslerwürfel, Mettwurst"', 'Kasslerwürfel, Mettendchen"']]) html = html.split(alt).join(neu);
+    ['Sauerkrauteintopf mit Mettwurst', 'Sauerkrauteintopf mit Mettendchen'], ['Kasslerwürfel, Mettwurst"', 'Kasslerwürfel, Mettendchen"'],
+    ['Roter Feger mit Schuß', 'Roter Feger mit Schuss']]) html = html.split(alt).join(neu); // 25.11.2026: heutige Schreibweise wie in der Kasse
   return { html, log, projekt };
 }
 
