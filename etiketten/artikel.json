@@ -1,5 +1,5 @@
 {
- "stand": "2026-11-18T12:31:14.320Z",
+ "stand": "2026-11-25T09:44:18.868Z",
  "quelle": "Kasse pos/app.js (PRODUCTS)",
  "artikel": [
   {
@@ -120,7 +120,7 @@
    "sortierung": 4,
    "allergene": "Schwefeldioxid / Sulfite",
    "allergeneGeprueft": false,
-   "zusatz": null,
+   "zusatz": "Konservierungsstoff und Antioxidationsmittel: Sulfite; Konservierungsstoff: Kaliumsorbat (aus dem Glühwein rot, Etikett Luana Glühwein)",
    "alkohol": true,
    "bildAusschnitt": [
     0,
