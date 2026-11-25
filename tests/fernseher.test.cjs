@@ -149,7 +149,8 @@ function nachbauStarter() {
       {
         const qi = a.indexOf('function cycleQueue('), qj = a.indexOf('function loadCycle(');
         const cycleQueue = new Function('project', 'location', 'localStorage', 'return (' + a.slice(qi, qj) + ')')(projekt, { search: '' }, { getItem: () => null });
-        const N = projekt.playback.cycles, zaehl = {}; let ok = N > 0, wetterTakt = true;
+        const N = projekt.playback.cycles, zaehl = {}; let ok = N > 0, wetterTakt = true, rueckOk = true;
+        const rueckAlle = projekt.slides.filter((s) => /^Rückblick 2025/.test(s.name)), rueckZaehl = {};
         const speiseFolge = ['Lust auf Grünkohl?', 'Lust auf Sauerkraut?', 'Lust auf Kartoffeln?'];
         for (let n = 1; n <= N; n++) {
           const q = cycleQueue(n).map((k) => projekt.slides[k]);
@@ -157,11 +158,18 @@ function nachbauStarter() {
           if (sp.length !== 1 || sp[0] !== speiseFolge[(n - 1) % 3]) ok = false;
           if (q.some((x) => x.name === 'Wetteraussichten') !== (n % 2 === 1)) wetterTakt = false;
           const m = q.filter((x) => x.memberMeta); if (m.length !== 2) ok = false;
+          // 25.11.2026: je Durchgang 2 Rückblick-Fotos im Wechsel (Durchgang 1 Bild 1+2, Durchgang 2 Bild 3+4)
+          const r = q.filter((x) => /^Rückblick 2025/.test(x.name));
+          if (r.length !== 2 || r.some((x) => rueckAlle.indexOf(x) !== ((n - 1) % 2) * 2 + r.indexOf(x))) rueckOk = false;
+          r.forEach((x) => { rueckZaehl[x.name] = (rueckZaehl[x.name] || 0) + 1; });
           m.forEach((x) => { zaehl[x.memberMeta.name] = (zaehl[x.memberMeta.name] || 0) + 1; });
         }
         const werte = Object.values(zaehl);
         p('A2: Durchgänge: je genau eine Speisenfolie (Grünkohl, Sauerkraut, Kartoffeln im Wechsel) und 2 Mitglieder', ok && N % 6 === 0, `Umlauf ${N}`);
         p('A2: Durchgänge: Wetteraussichten nur in jedem zweiten Durchgang, auch über den Neustart hinweg', wetterTakt && N % 2 === 0);
+        p('A2: Rückblick: 4 Fotos (neu: Unser Team am Stand), je Durchgang 2 im Wechsel, alle gleich oft, Bildunterschrift „Bild n von 4“',
+          rueckAlle.length === 4 && rueckAlle[3].name === 'Rückblick 2025 - Unser Team am Stand' && rueckOk && Object.keys(rueckZaehl).length === 4 && new Set(Object.values(rueckZaehl)).size === 1
+          && rueckAlle.every((s, k) => s.items.some((i) => i.name === 'group-caption' && i.text === `Weihnachtsmarkt 2025 · Bild ${k + 1} von 4`)), JSON.stringify(rueckZaehl));
         p('A2: Durchgänge: alle sichtbaren Mitglieder im Umlauf gleich oft', werte.length === 13 && werte.every((w) => w === werte[0]), JSON.stringify(zaehl));
         // 25.11.2026: wechselnde Sprüche – erster Auftritt eigener Spruch, danach jedes Mal ein anderer, nie doppelt im Durchgang
         const plan = projekt.kcSpruchPlan || {}, je = {}; let planOk = !!projekt.kcSpruchPlan;

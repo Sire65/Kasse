@@ -322,9 +322,42 @@ function bearbeite(projekt, log, extras = {}) {
       log.push(`Mitglied ${name}: „${m.name}“, ${m.foto && foto ? 'mit' : 'ohne'} Foto, Spruch aus der Auswahl`);
     }
   }
+  rueckblickEinbauen(projekt, log, extras.rueckblick);
   laufschriftHoeher(projekt, log);
   durchgaengeFestlegen(projekt, log);
   return projekt;
+}
+
+// Rückblick (Betreiber 25.11.2026: „Foto noch als Rückblick des letzten Jahrs zu den anderen Fotos“): weitere Fotos vom
+// Weihnachtsmarkt 2025 aus media/rueckblick/. Jede neue Folie ist eine Kopie der ersten Rückblick-Folie (gleiches Raster,
+// Titel, Zierde), nur das Foto ist anders; sie steht hinter der letzten Rückblick-Folie. Die Bildunterschrift
+// „Bild n von N“ wird für alle Rückblick-Folien neu gezählt. Läuft auch auf einer schon gebauten Datei (nichts doppelt).
+const RUECKBLICK_NEU = [
+  { datei: '2025-stand-team.jpg', name: 'Rückblick 2025 - Unser Team am Stand' },
+];
+const IST_RUECKBLICK = (s) => /^Rückblick 2025\b/.test(s.name);
+function rueckblickEinbauen(projekt, log, fotos = {}) {
+  const vorlage = projekt.slides.find(IST_RUECKBLICK);
+  if (!vorlage) return;
+  for (const { datei, name } of RUECKBLICK_NEU) {
+    if (!fotos[datei] || projekt.slides.some((s) => s.name === name)) continue;
+    const folie = JSON.parse(JSON.stringify(vorlage));
+    const id = 'kc-rueckblick-' + datei.replace(/\.[a-z]+$/i, '').replace(/[^a-z0-9]+/gi, '-');
+    folie.id = id;
+    folie.name = name;
+    folie.items.forEach((i) => { i.id = `${id}-${i.id}`; });
+    const foto = folie.items.find((i) => i.name === 'Rückblickfoto');
+    if (!foto) throw new Error('Rückblick-Vorlage ohne „Rückblickfoto“.');
+    foto.src = fotos[datei];
+    const letzte = projekt.slides.reduce((n, s, k) => (IST_RUECKBLICK(s) ? k : n), -1);
+    projekt.slides.splice(letzte + 1, 0, folie);
+    log.push(`Rückblick: neue Folie „${name}“ (${datei})`);
+  }
+  const alle = projekt.slides.filter(IST_RUECKBLICK);
+  alle.forEach((s, n) => {
+    const unterschrift = s.items.find((i) => i.name === 'group-caption');
+    if (unterschrift) unterschrift.text = `Weihnachtsmarkt 2025 · Bild ${n + 1} von ${alle.length}`;
+  });
 }
 
 // Durchgänge (Betreiber 25.11.2026): je Durchgang genau eine Speisenfolie (1 Grünkohl, 2 Sauerkraut, 3 Kartoffeln, dann
@@ -333,6 +366,7 @@ function bearbeite(projekt, log, extras = {}) {
 // Wetteraussichten in Durchgang 9 und gleich wieder in 1), ist die Zahl der Durchgänge das kleinste gemeinsame
 // Vielfache aller Takte: Speisen 3, Wetter 2, Mitglieder (Anzahl ÷ ggT(Anzahl, 2)).
 const MITGLIEDER_JE_DURCHGANG = 2;
+const RUECKBLICK_JE_DURCHGANG = 2;
 
 // Wechselnde Sprüche (Betreiber 25.11.2026: „bei jedem Auftritt ein anderer Spruch, für alle Mitglieder“ – ausdrücklich
 // auch für die 9, die ihren Spruch im September selbst gewählt haben). Topf: alle 20 Sprüche der Spruch-Auswahl
@@ -392,13 +426,20 @@ function durchgaengeFestlegen(projekt, log) {
   const takt = (folie, jeX, ab) => { folie.rotation = { ...(folie.rotation || {}), everyX: jeX, skipCycles: jeX - 1, firstCycle: ab, exactCycles: '' }; };
   SPEISEN_TAKT.forEach((name, n) => { const f = projekt.slides.find((s) => s.name === name); if (f) takt(f, SPEISEN_TAKT.length, n + 1); });
   for (const name of JEDER_ZWEITE) { const f = projekt.slides.find((s) => s.name === name); if (f) takt(f, 2, 1); }
+  // Rückblick (Betreiber 25.11.2026: „immer abwechselnd in jedem Durchgang, damit es nicht zu viele auf einmal sind“):
+  // je Durchgang RUECKBLICK_JE_DURCHGANG Fotos, der Reihe nach (bei 4 Fotos: Durchgang 1 Bild 1+2, Durchgang 2 Bild 3+4).
+  // Zwei statt einem, weil 4 Gruppen den Umlauf auf 156 Durchgänge verdoppeln würden – dann reichen die 20 Sprüche
+  // nicht mehr, ohne dass sich ein Spruch bei derselben Person wiederholt.
+  const rueckblick = projekt.slides.filter((s) => IST_RUECKBLICK(s) && !(s.rotation && s.rotation.enabled === false));
+  const rueckGruppen = Math.ceil(rueckblick.length / RUECKBLICK_JE_DURCHGANG);
+  if (rueckGruppen > 1) rueckblick.forEach((f, n) => takt(f, rueckGruppen, Math.floor(n / RUECKBLICK_JE_DURCHGANG) + 1));
   projekt.rotationSettings = { ...(projekt.rotationSettings || {}), memberMode: 'rotation', memberBatchSize: MITGLIEDER_JE_DURCHGANG };
   const mitglieder = projekt.slides.filter((s) => (s.memberMeta || (s.rotation && s.rotation.member)) && !(s.rotation && s.rotation.enabled === false)).length;
   const takte = [SPEISEN_TAKT.length, 2, ...projekt.slides.map((s) => Number((s.rotation || {}).everyX) || 1)];
   if (mitglieder) takte.push(mitglieder / ggt(mitglieder, MITGLIEDER_JE_DURCHGANG));
   projekt.playback = { ...(projekt.playback || {}), cycles: takte.reduce(kgv, 1), loop: true };
   spruchPlan(projekt, log);
-  log.push(`Durchgänge: je eine Speisenfolie im Wechsel, Wetteraussichten jeder 2., ${MITGLIEDER_JE_DURCHGANG} von ${mitglieder} Mitgliedern je Durchgang, Umlauf ${projekt.playback.cycles} Durchgänge`);
+  log.push(`Durchgänge: je eine Speisenfolie im Wechsel, Wetteraussichten jeder 2., ${rueckGruppen > 1 ? `${RUECKBLICK_JE_DURCHGANG} von ${rueckblick.length} Rückblick-Fotos, ` : ''}${MITGLIEDER_JE_DURCHGANG} von ${mitglieder} Mitgliedern je Durchgang, Umlauf ${projekt.playback.cycles} Durchgänge`);
 }
 
 // Laufschrift auf allen Folien höher setzen; was bis in ihren Bereich reicht, wird angepasst:
@@ -600,6 +641,7 @@ if (require.main === module) {
   const extras = fs.existsSync(freisteller)
     ? { eierpunschFoto: `data:image/png;base64,${fs.readFileSync(freisteller).toString('base64')}`, eierpunschFreisteller: true }
     : fs.existsSync(foto) ? { eierpunschFoto: `data:image/jpeg;base64,${fs.readFileSync(foto).toString('base64')}` } : {};
+  extras.rueckblick = rueckblickFotos();
   if (fs.existsSync(logoDatei)) extras.logoWeiss = `data:image/webp;base64,${fs.readFileSync(logoDatei).toString('base64')}`;
   const { html, log } = bauen(fs.readFileSync(quelle, 'utf8'), daten, extras);
   fs.writeFileSync(ziel, html);
@@ -607,4 +649,14 @@ if (require.main === module) {
   console.log(`Endversion geschrieben: ${path.resolve(ziel)} (${(html.length / 1048576).toFixed(1)} MB)`);
 }
 
-module.exports = { bauen, MITGLIEDER, HINWEISE };
+function rueckblickFotos() {
+  const ordner = path.join(__dirname, '..', 'media', 'rueckblick');
+  const fotos = {};
+  for (const { datei } of RUECKBLICK_NEU) {
+    const p = path.join(ordner, datei);
+    if (fs.existsSync(p)) fotos[datei] = `data:image/jpeg;base64,${fs.readFileSync(p).toString('base64')}`;
+  }
+  return fotos;
+}
+
+module.exports = { bauen, MITGLIEDER, HINWEISE, rueckblickEinbauen, rueckblickFotos, durchgaengeFestlegen };

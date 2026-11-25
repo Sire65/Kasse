@@ -124,3 +124,24 @@ Der Rathaus-Hintergrund zeigt den Weihnachtsmarkt am Abend. Bei klarem Wetter er
 Wettereffekt; die gibt es jetzt nicht mehr. Über den Folien erscheinen nur noch Schnee oder Regen (nach dem echten Wetter
 in Werne), die Schlussfolie behält Feuerwerk. Die Wetterkacheln (heute, morgen, Aussichten) zeigen weiter die
 Tagesvorhersage, also auch eine Sonne.
+
+## Rückblick: viertes Foto, zwei je Durchgang (25.11.2026)
+
+Neues Foto vom Betreiber (Stand mit Team, Weihnachtsmarkt 2025) als vierte Rückblick-Folie „Rückblick 2025 - Unser Team am
+Stand“, hinter „Zu Besuch bei uns“. Das Original liegt unter `media/rueckblick/quelle/2025-stand-team.jpg`, eingebaut wird
+`media/rueckblick/2025-stand-team.jpg` (1200 px breit). Die Folie ist eine Kopie der ersten Rückblick-Folie, nur das Foto
+ist anders; alle Bildunterschriften lauten jetzt „Bild n von 4“.
+
+Bisher liefen alle Rückblick-Fotos in jedem Durchgang. Jetzt laufen je Durchgang 2 im Wechsel: Durchgang 1 Bild 1+2,
+Durchgang 2 Bild 3+4 (`RUECKBLICK_JE_DURCHGANG`). Mit nur einem Foto je Durchgang würde der Umlauf von 78 auf 156
+Durchgänge wachsen; dann reichen die 20 Sprüche nicht mehr, ohne dass sich bei einem Mitglied ein Spruch wiederholt.
+
+Weitere Fotos: Datei in `media/rueckblick/` ablegen, in `RUECKBLICK_NEU` (Bauwerkzeug) eintragen, dann
+`node tools/tv-rueckblick-nachtragen.cjs` (trägt in die fertige `tv-player/weihnachtsmarkt-2026-version-a.html` nach, ohne
+Neubau aus WM-Pr-s.; mehrfach aufrufen schadet nicht). Beim nächsten vollen Neubau macht das Bauwerkzeug es selbst.
+
+Noch offen: die GitHub-Pages-Fassung in Sire65/WM-Pr-s. (`index.html`) ist nicht nachgezogen, dort hatte ich keinen Zugriff.
+
+Prüfung: `tests/fernseher.test.cjs` 57/57 (neu: 4 Rückblick-Fotos, je Durchgang 2 im Wechsel, im Umlauf alle gleich oft,
+Bildunterschriften), `praesentation-schutz` 13/13. Im Browser durchgeklickt: Durchgang 1 zeigt Bild 1 und 2, Durchgang 2
+Bild 3 und 4; Screenshot der neuen Folie geprüft.
