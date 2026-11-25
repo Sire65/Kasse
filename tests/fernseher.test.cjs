@@ -178,8 +178,20 @@ function nachbauStarter() {
           m.forEach((x, i) => { (je[x.id] = je[x.id] || []).push(t[i]); });
         }
         const eigen = (id) => (projekt.slides.find((x) => x.id === id).items.find((i) => i.originalRole === 'memberQuote') || {}).text;
-        p('A2: Sprüche: je Auftritt laut Plan, im Durchgang nie doppelt, je Person im Umlauf nie wiederholt, erster Auftritt eigener Spruch',
-          planOk && Object.entries(je).every(([id, l]) => new Set(l).size === l.length && l[0] === eigen(id)) && Object.keys(je).length === 13);
+        // je Person: ein Spruch kommt erst wieder, wenn alle 20 einmal dran waren (je 20 Auftritte alle verschieden)
+        const reihum = (l) => { for (let i = 0; i < l.length; i += 20) { const t = l.slice(i, i + 20); if (new Set(t).size !== t.length) return false; } return true; };
+        p('A2: Sprüche: je Auftritt laut Plan, im Durchgang nie doppelt, je Person erst nach allen 20 wieder derselbe, erster Auftritt eigener Spruch',
+          planOk && Object.entries(je).every(([id, l]) => reihum(l) && l[0] === eigen(id)) && Object.keys(je).length === 13);
+        // 25.11.2026: Rückblick-Fotos – 5 Fotos, 2 je Durchgang im Wechsel, alle gleich oft, „Bild n von 5“
+        const fotos = projekt.slides.filter((x) => /^Rückblick 2025/.test(x.name));
+        const fz = {}; let fOk = fotos.length === 5;
+        for (let n = 1; n <= N; n++) {
+          const q = cycleQueue(n).map((k) => projekt.slides[k]).filter((x) => /^Rückblick 2025/.test(x.name));
+          if (q.length !== 2 || q[0] === q[1]) fOk = false; q.forEach((x) => { fz[x.id] = (fz[x.id] || 0) + 1; });
+        }
+        const fw = Object.values(fz);
+        p('A2: Rückblick 2025: 5 Fotos, je Durchgang 2 im Wechsel, alle gleich oft, Beschriftung „Bild n von 5“',
+          fOk && fw.length === 5 && fw.every((w) => w === fw[0]) && fotos.every((x, k) => x.items.some((i) => i.text === `Weihnachtsmarkt 2025 · Bild ${k + 1} von 5`)), JSON.stringify(fw));
         p('A2: Sprüche: Präsentation setzt den Spruch je Durchgang aus dem Plan', a.includes("if(project.kcSpruchPlan){const kp=project.kcSpruchPlan[cycle]"));
       }
       const links = (s) => s.items.filter((i) => i.type === 'image').sort((x, y) => x.x - y.x)[0].name;
