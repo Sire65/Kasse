@@ -34,6 +34,21 @@ const path = require('path');
 const PROGRAMM = require('./tv-programm-folien.cjs');
 const PREISE = require('./tv-preisfolien.cjs');
 const SPEISEN = require('./tv-speisenfolien.cjs');
+const QR = require('../pc-manager/vendor/qrcode-generator.js');
+
+// QR-Code „Lust, dabei zu sein?“ (Betreiber 25.11.2026): Mail an die Vereinsadresse statt der privaten Adresse des
+// Clubsprechers; die Adresse steht zusätzlich in Klarschrift unter dem Code.
+const CLUBSPRECHER_MAIL = 'Koecheclub-Werne@web.de';
+const CLUBSPRECHER_BETREFF = 'Interesse am Köcheclub Werne';
+function mailQr() {
+  const qr = QR(0, 'M');
+  qr.addData(`mailto:${CLUBSPRECHER_MAIL}?subject=${encodeURIComponent(CLUBSPRECHER_BETREFF)}`);
+  qr.make();
+  // feste Größe (nicht „scalable“): sonst hat das SVG keine Eigengröße und wird als Hintergrundbild verzerrt/abgeschnitten;
+  // 4 Module weißer Rand (Ruhezone), damit Handys den Code sicher erkennen
+  const svg = qr.createSvgTag(8, 32);
+  return 'data:image/svg+xml;base64,' + Buffer.from(svg).toString('base64');
+}
 
 const MIT_FOTOS = process.env.KC_TV_MIT_FOTOS === '1';
 const STAND = MIT_FOTOS ? '2026-11-17' : '2026-11-25';
@@ -218,6 +233,15 @@ function bearbeite(projekt, log, extras = {}) {
     for (const item of folie.items) {
       if (item.name === 'official-qr-label') item.text = 'QR-Code scannen\nfür das Gesamtprogramm\nim Internet';
       if (item.name === 'join-copy') item.text = 'QR-Code scannen\nund dem Clubsprecher\neine E-Mail senden';
+    }
+    if (folie.name === 'Mitmachen · QR-Code') {
+      const code = folie.items.find((i) => i.originalRole === 'photo');
+      // Code etwas kleiner, darunter die Adresse in Klarschrift (über der Fußzeile „Wir freuen uns …“ ab y=584)
+      setze(code, { src: mailQr(), fit: 'contain', x: 180, y: 160, w: 340, h: 340 });
+      folie.items.splice(folie.items.indexOf(code) + 1, 0, { ...folie.items.find((i) => i.name === 'join-copy'), id: `${folie.id}-mail`,
+        name: 'Clubsprecher-Mail', originalRole: 'text', text: CLUBSPRECHER_MAIL, x: 100, y: 508, w: 500, h: 52, font: 26, bold: true,
+        color: '#fff8e8', bg: 'rgba(10,5,4,.80)', fill: 'rgba(10,5,4,.80)', radius: 12, align: 'center', textScaleMode: 'fit' });
+      log.push(`„Lust, dabei zu sein?“: QR-Code an ${CLUBSPRECHER_MAIL}, Adresse in Klarschrift darunter`);
     }
 
     // Rückblick: die Fotos sind vom Weihnachtsmarkt 2025

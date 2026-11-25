@@ -38,6 +38,7 @@ function nachbauStarter() {
     const a = s.aufrufe[0] && s.aufrufe[0].args;
     p('A: Fernseher + Monitor: Edge startet im Kiosk-Vollbild mit der Präsentation', r.gestartet && a.includes('--kiosk') && a.includes('http://127.0.0.1:8090/tv-player/fernseher.html') && a.includes('--edge-kiosk-type=fullscreen'));
     p('A: … auf dem Fernseher (nicht Hauptanzeige), nicht auf dem Monitor', a.includes('--window-position=1300,20'), a.find((x) => x.startsWith('--window-position')));
+    p('A: … ohne Erststart-Dialoge (keine Suchmaschinen-Auswahl chrome://settings/search, kein Standardbrowser-Hinweis)', ['--no-first-run', '--no-default-browser-check', '--disable-search-engine-choice-screen'].every((x) => a.includes(x)));
     p('A: … mit eigenem Browser-Profil im Datenordner (Einstellungen greifen sicher)', a.some((x) => x === `--user-data-dir=${path.join(ARBEIT, 'fernseher-browser')}`));
     p('A: zwei Bildschirme -> PC-Manager darf normal geöffnet werden', r.einBildschirm === false && log.some((x) => /PC-Manager und dieses Fenster bleiben auf der Hauptanzeige/.test(x)));
     s.aufrufe[0].kind.emit('exit', 0);
@@ -59,8 +60,13 @@ function nachbauStarter() {
     p('A: Fernseher aus (nur kleiner Monitor): Präsentation startet NICHT', !r.gestartet && r.wartet && s.aufrufe.length === 0 && log.some((x) => /Fernseher nicht erkannt.*wartet/.test(x)));
     schirme = [MONITOR, TV]; await warte(250);
     p('A: Fernseher eingeschaltet: Präsentation startet von selbst auf dem Fernseher', s.aufrufe.length === 1 && s.aufrufe[0].args.includes('--window-position=1300,20') && log.some((x) => /Fernseher erkannt – Präsentation startet/.test(x)));
-    schirme = [MONITOR]; await warte(250);
-    p('A: Fernseher ausgeschaltet: Präsentation wird geschlossen (nicht auf den Monitor geschoben)', f.status().laeuft === false && log.some((x) => /Fernseher ist aus – Präsentation geschlossen/.test(x)));
+    // 25.11.2026: kurze Aussetzer und gescheiterte Abfragen schließen die Präsentation nicht (Protokoll am Stand: 20-s-Wechsel)
+    schirme = []; await warte(450);
+    p('A: Bildschirm-Abfrage gescheitert (0 Bildschirme): Präsentation läuft weiter', f.status().laeuft === true && s.aufrufe.length === 1);
+    schirme = [MONITOR]; await warte(150); schirme = [MONITOR, TV]; await warte(250);
+    p('A: kurzer Aussetzer (Fernseher 1× nicht gemeldet): Präsentation läuft weiter, kein Neustart', f.status().laeuft === true && s.aufrufe.length === 1 && !log.some((x) => /Fernseher ist aus/.test(x)));
+    schirme = [MONITOR]; await warte(450);
+    p('A: Fernseher ausgeschaltet (3× hintereinander nicht da): Präsentation wird geschlossen (nicht auf den Monitor geschoben)', f.status().laeuft === false && log.some((x) => /Fernseher ist aus \(Windows meldet 1 Bildschirm, 3× hintereinander\) – Präsentation geschlossen/.test(x)));
     await warte(250);
     p('A: … und startet nicht als „Absturz“ neu', s.aufrufe.length === 1 && !log.some((x) => /unerwartet beendet/.test(x)));
     schirme = [MONITOR, TV]; await warte(250);
@@ -212,6 +218,12 @@ function nachbauStarter() {
       const laufschriften = projekt.slides.map((s) => s.items.find((i) => i.type === 'ticker')).filter(Boolean).map((i) => i.text);
       p('A2: Laufschrift langsamer, Themenblöcke mit Abstand, Preise je Gruppe und Allergen-Hinweis', a.includes('const TEMPO=30;') && a.includes('kcTickerPause') && laufschriften.some((t) => t.startsWith('Preise alkoholfreie Getränke:')) && laufschriften.some((t) => t.includes('wenden Sie sich gerne an die Standbesetzung')) && new Set(laufschriften).size > 5);
       p('A2: durchgehendes Laufband über allen Folien (kein Flackern beim Folienwechsel)', a.includes('band.id="kcLaufband"') && a.includes('#tvStage .tvItem.ticker{visibility:hidden!important}') && a.includes('window.KC_LAUFSCHRIFT=') && a.includes('if(t===inhalt&&band.firstChild)return;'));
+      // 25.11.2026: Mitmachen-QR an die Vereinsadresse, Adresse in Klarschrift darunter, keine private Adresse mehr in der Datei
+      const mit = projekt.slides.find((s) => s.name === 'Mitmachen · QR-Code') || { items: [] };
+      const code = mit.items.find((i) => i.originalRole === 'photo') || {}, mail = mit.items.find((i) => i.name === 'Clubsprecher-Mail') || {};
+      const svg = /^data:image\/svg\+xml;base64,/.test(code.src || '') ? Buffer.from(code.src.split(',')[1], 'base64').toString() : '';
+      p('A2: Mitmachen-QR an Koecheclub-Werne@web.de, Adresse in Klarschrift unter dem Code, private Adresse entfernt',
+        /width="\d+px"/.test(svg) && mail.text === 'Koecheclub-Werne@web.de' && mail.y >= code.y + code.h && !/zander\.klaus@web\.de/i.test(a), mail.text);
       const qr = projekt.slides.flatMap((s) => s.items).filter((i) => i.name === 'official-qr-label' || i.name === 'join-copy').map((i) => i.text);
       p('A2: QR-Folien: Gesamtprogramm im Internet, E-Mail an den Clubsprecher', qr.some((t) => /Gesamtprogramm\nim Internet/.test(t)) && qr.some((t) => /dem Clubsprecher\neine E-Mail senden/.test(t)) && !qr.some((t) => /Klaus Zander/.test(t)));
       const bilder = JSON.parse(a.slice(a.indexOf('const B=[') + 8, a.indexOf('];', a.indexOf('const B=[')) + 1));
