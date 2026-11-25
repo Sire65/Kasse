@@ -21,7 +21,7 @@ Gebaut mit `tools/tv-endversion-bauen.cjs` → `tv-player/weihnachtsmarkt-2026-v
 
 - **Kartoffeln mit Heringsstipp:** neues Foto vom Betreiber (25.11.2026, dritte Fassung: Schüssel mit kleinen Kartoffeln), Heringsstipp
   über den Kartoffeln, kein ganzer Fisch. Das Original liegt unter `media/speisen/quelle/kartoffeln-heringsstipp.png`, freigestellt mit
-  `python3 tools/tv-speisenfotos-freistellen.py media/speisen/quelle/kartoffeln-heringsstipp.png media/speisen/kartoffeln-heringsstipp.webp --ohne-kassenrahmen --schale`
+  `python3 tools/tv-speisenfotos-freistellen.py media/speisen/quelle/kartoffeln-heringsstipp.png media/speisen/kartoffeln-heringsstipp.webp --ohne-kassenrahmen --schale --glatt`
   (`--schale` nimmt die graue Außenwand der Schüssel mit; `--teller` ist für flache Teller auf hellem Grund).
 - **Grünkohl und Sauerkraut mit Mettendchen:** Hier bleiben die Kassenfotos mit ganzer Mettwurst (Betreiber 25.11.2026).
 - Ein Foto tauschst du aus, indem du es unter dem gleichen Namen in `media/speisen/` ablegst (`.webp` oder `.png` mit
@@ -79,3 +79,6 @@ niedriger gesetzt und nach oben gerückt. Ein Test prüft, dass nichts mehr in d
   liest `tools/tv-speisenfolien.cjs` aus dem Dateikopf (WebP, PNG, JPEG).
 - Kartoffeln mit Kartoffelcreme neu freigestellt mit `--schale --glatt`. Die Schüssel hat jetzt einen vollständigen,
   runden Boden statt einer Ecke unten links. `--glatt` rundet die Ecken des Umrisses ab.
+- Kartoffeln mit Heringsstipp: Die Schüssel ragt im Original unten aus dem Bild. `--schale` ergänzt bei neu gelieferten
+  Fotos die fehlende Unterkante als Bogen durch die sichtbaren Kantenpunkte (Bild unten um 60 px fortgesetzt), `--glatt`
+  rundet den Umriss ab. Die Kassenfotos werden weiter unverändert erzeugt.

@@ -19,6 +19,8 @@ img = Image.open(src).convert('RGB')
 if kassenrahmen: img = img.crop((0, 0, 1254, 1010))   # Namensbalken (ab y=1014) weg
 if '--teller' in sys.argv:  # ragt der Teller aus dem Bild, Rand um 40 px fortsetzen, damit der Umriss rund schliesst
     img = Image.fromarray(np.pad(np.asarray(img), ((40, 40), (40, 40), (0, 0)), mode='edge'))
+elif '--schale' in sys.argv and not kassenrahmen:  # Schuessel darf unten aus dem Bild ragen: unten 60 px fortsetzen
+    img = Image.fromarray(np.pad(np.asarray(img), ((0, 60), (0, 0), (0, 0)), mode='edge'))
 a = np.asarray(img).astype(np.float64); H, W, _ = a.shape
 yy, xx = np.mgrid[0:H, 0:W]
 icon = ((xx - 107) ** 2 + (yy - 107) ** 2 <= 94 ** 2) if kassenrahmen else np.zeros((H, W), bool)
@@ -81,10 +83,26 @@ else:
   if '--schale' in sys.argv:
       Lb = np.asarray(img.convert('L').filter(ImageFilter.GaussianBlur(2))).astype(np.float64)
       spalten = np.where(kern.any(0))[0]
+      boden = {}
       for x in range(spalten.min(), spalten.max() + 1, 4):
           oben = np.argmax(kern[:, x]) if kern[:, x].any() else H
           for y in range(H - 20, oben, -1):
-              if Lb[y - 4, x] - Lb[y + 4, x] > 10: kern[oben:y, x] = True; break
+              if Lb[y - 4, x] - Lb[y + 4, x] > 10: boden[x] = y; break
+      # Neu gelieferte Fotos: Unterkante als Parabel durch die gefundenen Punkte; wo keine Kante zu sehen ist (Schuessel ragt aus dem Bild),
+      # ergaenzt die Parabel den Bogen. Ausreisser (Kanten im Gericht) werden schrittweise verworfen.
+      xs = np.array(list(boden)); ys = np.array([boden[x] for x in xs])
+      if len(xs) >= 8 and not kassenrahmen:   # Kassenfotos: Schuessel liegt ganz im Bild, dort reicht die Kante je Spalte
+          gut = np.ones(len(xs), bool)
+          for _ in range(4):
+              k = np.polyfit(xs[gut], ys[gut], 2); r = ys - np.polyval(k, xs)
+              gut = np.abs(r) < max(6, 2.5 * np.std(r[gut]))
+          for x in range(xs[gut].min(), xs[gut].max() + 1):   # nur zwischen den aeussersten echten Kantenpunkten
+              oben = np.argmax(kern[:, x]) if kern[:, x].any() else H
+              y = int(min(H - 1, np.polyval(k, x)))
+              if y > oben: kern[oben:y, x] = True
+      else:
+          for x, y in boden.items():
+              oben = np.argmax(kern[:, x]); kern[oben:y, x] = True
   # Schuessel und Teller sind von aussen konvex: Umriss = konvexe Huelle (schliesst graue Randstellen, die dem Hintergrund aehneln)
   from scipy.spatial import ConvexHull
   from PIL import ImageDraw
