@@ -111,7 +111,7 @@ const FOTO = { x: 105, y: 165, w: 450, h: 470 };
 const LAUFSCHRIFT = { y: 652, h: 40 };
 const UNTEN = LAUFSCHRIFT.y - 8; // Oberkante Laufschrift minus Abstand
 
-// ---- Wetter als Effekt: siehe bearbeite() (18.11.2026: auf allen Folien nur Schnee, Regen oder Sonne, Schlussfolie Feuerwerk) ----
+// ---- Wetter als Effekt: siehe bearbeite() (18.11.2026: auf allen Folien nur Schnee, Regen oder Sonne, Schlussfolie Feuerwerk; seit 25.11.2026 ohne Sonne) ----
 // Wetterkacheln: welcher Tag gehört zu welcher Kachel
 const KACHEL_ROLLE = { 'weather-today': 'wetter-today', 'weather-tomorrow': 'wetter-tomorrow',
   'forecast-1': 'wetter-day2', 'forecast-2': 'wetter-day3', 'forecast-3': 'wetter-day4' };
@@ -196,6 +196,9 @@ function bearbeite(projekt, log, extras = {}) {
       log.push(`„${folie.name}“: zeigt jetzt das aktuelle Wetter`);
     }
 
+    // 25.11.2026 (Betreiber: „Der Rathaus-Hintergrund ist abends, dann kann oben rechts keine Sonne scheinen“): bei klarem
+    // Wetter kein Sonnen-Effekt mehr über der Folie – nur noch Schnee oder Regen. Die Wetterkacheln behalten ihre Sonne
+    // (Tagesvorhersage).
     // Wettereffekte (Betreiber 18.11.2026: „keine verschiedenen Effekte, nur Schnee, Regen, Sonne – außer die letzte Folie
     // mit Feuerwerk“): alle Folien zeigen nur das aktuelle Wetter in Werne (Schnee, Regen oder Sonne; bei Wolken/Nebel
     // nichts). Kein Glitzer, keine Sternschnuppen, kein Goldstaub. Nur die Schlussfolie behält Feuerwerk und Lasershow.
@@ -517,7 +520,7 @@ const CODE_ERSETZUNGEN = [
       + "if(kcTestWetter){window.KC_WETTER_ART=kcTestWetter;for(const k of ['today','tomorrow','day2','day3','day4','day5'])if(weather[k])weather[k].kind=kcTestWetter}" },
   { name: 'Wettereffekt je Folie folgt dem echten Wetter',
     alt: 'function effect(slide){const fx=slide.effectLayer||{},opacity=(fx.opacity??62)/100;return[fx.type,fx.type2,fx.type3]',
-    neu: "function kcWetterEffekt(){const a=window.KC_WETTER_ART||'';return a==='snow'||a==='heavy-snow'?'heavy-snow':a==='rain'||a==='storm'?'rain':a==='sun'?'sun':'none'}"
+    neu: "function kcWetterEffekt(){const a=window.KC_WETTER_ART||'';return a==='snow'||a==='heavy-snow'?'heavy-snow':a==='rain'||a==='storm'?'rain':'none'}"
       + 'function effect(slide){const fx=slide.effectLayer||{},opacity=(fx.opacity??62)/100;return(fx.weatherAuto?[kcWetterEffekt()]:[fx.type,fx.type2,fx.type3])' },
   { name: 'alter Wetterschleier auf allen Folien abgeschaltet',
     alt: 'new MutationObserver(()=>setTimeout(mount,0)).observe(stage,{childList:true});update();setInterval(update,1800000);',

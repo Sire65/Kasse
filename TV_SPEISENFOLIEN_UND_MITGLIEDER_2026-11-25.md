@@ -117,3 +117,10 @@ Das Bauwerkzeug legt den Plan fest (`spruchPlan` → `kcSpruchPlan` in den Präs
 Spruch beim Laden eines Durchgangs ein, bevor die Folie gezeichnet wird; die Schriftgröße passt sich also wie gewohnt an.
 Tests prüfen den Plan über den ganzen Umlauf. Im Browser habe ich die Durchgänge 1–9 durchgeklickt: Alle angezeigten
 Sprüche entsprechen dem Plan.
+
+## Keine Sonne vor dem Abend-Rathaus (25.11.2026)
+
+Der Rathaus-Hintergrund zeigt den Weihnachtsmarkt am Abend. Bei klarem Wetter erschien bisher oben rechts eine Sonne als
+Wettereffekt; die gibt es jetzt nicht mehr. Über den Folien erscheinen nur noch Schnee oder Regen (nach dem echten Wetter
+in Werne), die Schlussfolie behält Feuerwerk. Die Wetterkacheln (heute, morgen, Aussichten) zeigen weiter die
+Tagesvorhersage, also auch eine Sonne.
