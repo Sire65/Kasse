@@ -48,6 +48,8 @@ function folienUmbauen(projekt, log) {
 // ---- Laufzeit in der Präsentation (wird als Text eingebaut) ----
 function programmLaufzeit(D) {
   var stage = document.getElementById('tvStage'); if (!stage) return;
+  // 25.11.2026 (Betreiber): unter jedem Bühnenprogramm dezent „Alle Angaben ohne Gewähr“ – in der Tafel, nichts verdeckt
+  var GEWAEHR = 'Alle Angaben ohne Gewähr';
   var AUF = /[?&]aufnahme=1(&|$)/.test(location.search);
   var MARKTTAGE = []; D.PROGRAMM.forEach(function (p) { if (MARKTTAGE.indexOf(p.datum) < 0) MARKTTAGE.push(p.datum); }); MARKTTAGE.sort();
   function heute() { return new Date().toLocaleDateString('sv-SE', { timeZone: 'Europe/Berlin' }); }
@@ -94,6 +96,7 @@ function programmLaufzeit(D) {
         if (laeuft) z.appendChild(el('span', 'kcPmarke', 'jetzt'));
         t.appendChild(z);
       });
+      t.appendChild(el('div', 'kcPgewaehr', GEWAEHR));
       return t;
     }
     // Gesamtprogramm, Teil 1 (erste Hälfte der Tage) / Teil 2
@@ -117,6 +120,7 @@ function programmLaufzeit(D) {
       });
       t.appendChild(z);
     });
+    t.appendChild(el('div', 'kcPgewaehr', GEWAEHR));
     return t;
   }
   // passt die Tafel nicht (lange Namen), wird die Schrift schrittweise kleiner
@@ -128,6 +132,8 @@ function programmLaufzeit(D) {
       var m = /@@([a-z:0-9]+)@@/.exec(e.textContent || ''); if (!m) return;
       e.textContent = ''; var t = tafel(m[1]); e.appendChild(t); e.setAttribute('data-kc-p', m[1]);
       if (m[1].indexOf('gesamt') === 0) einpassen(e, t);
+      // heute/morgen: passt die Tafel samt Hinweis nicht (z. B. 13.12., ein Titel zweizeilig), etwas enger setzen
+      else if (t.scrollHeight > e.clientHeight + 1 || t.offsetHeight > e.clientHeight + 1) { t.classList.add('kcPeng'); if (t.scrollHeight > e.clientHeight + 1) t.classList.add('kcPeng2'); }
     });
   }
   // Laufschrift: „Heute auf der Bühne …“ (nur am Fernseher, nicht im Video)
@@ -153,6 +159,9 @@ const STIL = '<style>'
   + '.kcPjetzt{background:rgba(217,170,58,.30);outline:3px solid #ffd76a}'
   + '.kcPvorbei{opacity:.42}'
   + '.kcPmarke{background:#741521;color:#fff;font-size:24px;font-weight:700;text-transform:uppercase;letter-spacing:1px;padding:6px 14px;border-radius:999px}'
+  + '.kcPeng{gap:8px;padding:16px 30px 16px}.kcPeng .kcPzeile{padding:10px 18px}.kcPeng .kcPkopf{margin-bottom:2px}'
+  + '.kcPeng2 .kcPzeit{font-size:34px}.kcPeng2 .kcPtag,.kcPeng2 .kcPname{font-size:36px}.kcPeng2 .kcPdatum{font-size:30px}'
+  + '.kcPgewaehr{text-align:right;color:#f3e9dc;opacity:.6;font-size:15px;font-style:italic;line-height:1.1;margin-top:2px}'
   + '.kcPfuss{margin-top:8px;text-align:center;color:#f3e9dc;font-size:24px;font-style:italic}'
   + '.kcPleer{margin:auto;color:#fff8e8;font-size:40px;text-align:center}'
   + '.kcPgesamt{--s:1;padding:14px 26px 16px;gap:calc(8px*var(--s))}'

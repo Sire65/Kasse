@@ -245,6 +245,9 @@ function nachbauStarter() {
       const svg = /^data:image\/svg\+xml;base64,/.test(code.src || '') ? Buffer.from(code.src.split(',')[1], 'base64').toString() : '';
       p('A2: Mitmachen-QR an Koecheclub-Werne@web.de, Adresse in Klarschrift unter dem Code, private Adresse entfernt',
         /width="\d+px"/.test(svg) && mail.text === 'Koecheclub-Werne@web.de' && mail.y >= code.y + code.h && !/zander\.klaus@web\.de/i.test(a), mail.text);
+      // 25.11.2026: Bühnenprogramm (heute/morgen, Gesamtprogramm) mit dezentem „Alle Angaben ohne Gewähr“ in der Tafel
+      p('A2: Bühnenprogramm: „Alle Angaben ohne Gewähr“ in jeder Bühnen-Tafel (heute, morgen, Gesamtprogramm), dezent',
+        a.includes("var GEWAEHR = 'Alle Angaben ohne Gewähr'") && (a.match(/t\.appendChild\(el\('div', 'kcPgewaehr', GEWAEHR\)\)/g) || []).length === 2 && /\.kcPgewaehr\{[^}]*opacity:\.6/.test(a));
       const qr = projekt.slides.flatMap((s) => s.items).filter((i) => i.name === 'official-qr-label' || i.name === 'join-copy').map((i) => i.text);
       p('A2: QR-Folien: Gesamtprogramm im Internet, E-Mail an den Clubsprecher', qr.some((t) => /Gesamtprogramm\nim Internet/.test(t)) && qr.some((t) => /dem Clubsprecher\neine E-Mail senden/.test(t)) && !qr.some((t) => /Klaus Zander/.test(t)));
       const bilder = JSON.parse(a.slice(a.indexOf('const B=[') + 8, a.indexOf('];', a.indexOf('const B=[')) + 1));
