@@ -17,18 +17,15 @@ Gebaut mit `tools/tv-endversion-bauen.cjs` → `tv-player/weihnachtsmarkt-2026-v
 - Die Fotos sind Freisteller aus den aktuellen Kassenfotos (`pos/assets/*_version_3.png`, Hintergrund durchsichtig, ohne
   Info-Symbol und Namensbalken), erzeugt mit `tools/tv-speisenfotos-freistellen.py` und abgelegt unter `media/speisen/`.
 
-### Noch offen: zwei neue Fotos
+### Fotos
 
-Der Betreiber wünscht Mettendchen **in Scheiben obendrauf** und Heringsstipp **über den Kartoffeln** (kein ganzer Fisch).
-Diese Fotos gibt es in der Kasse noch nicht. Bis sie kommen, zeigen die Folien die Kassenfotos mit ganzer Mettwurst
-bzw. Heringsfilets. Zum Austauschen:
-
-1. Neues Foto unter dem gleichen Namen in `media/speisen/` ablegen:
-   `gruenkohl-mettendchen`, `sauerkraut-mettendchen`, `kartoffeln-heringsstipp`, jeweils `.webp` oder `.png` mit durchsichtigem
-   Hintergrund. Ein `.jpg` geht auch, wird dann aber mit Goldrahmen gezeigt. Hat ein neues Foto einen grauen
-   Studiohintergrund wie die Kassenfotos, lässt es sich mit `tools/tv-speisenfotos-freistellen.py` freistellen.
-   Die alte `.webp` wird dabei ersetzt (das Werkzeug nimmt zuerst `.webp`, dann `.png`, dann `.jpg`).
-2. Präsentation neu bauen (siehe unten).
+- **Kartoffeln mit Heringsstipp:** neues Foto vom Betreiber (25.11.2026), Heringsstipp über den Kartoffeln, kein ganzer
+  Fisch. Das Original liegt unter `media/speisen/quelle/kartoffeln-heringsstipp.png`, freigestellt mit
+  `python3 tools/tv-speisenfotos-freistellen.py media/speisen/quelle/kartoffeln-heringsstipp.png media/speisen/kartoffeln-heringsstipp.webp --ohne-kassenrahmen --teller`.
+  Der Teller ragt im Original links aus dem Bild. Der Rand wird deshalb fortgesetzt und der Umriss als Ellipse angepasst.
+- **Grünkohl und Sauerkraut mit Mettendchen:** Hier bleiben die Kassenfotos mit ganzer Mettwurst (Betreiber 25.11.2026).
+- Ein Foto tauschst du aus, indem du es unter dem gleichen Namen in `media/speisen/` ablegst (`.webp` oder `.png` mit
+  durchsichtigem Hintergrund; ein `.jpg` wird mit Goldrahmen gezeigt) und die Präsentation neu baust.
 
 ## Mitglieder
 
