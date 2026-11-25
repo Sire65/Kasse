@@ -20,8 +20,12 @@ const srv = http.createServer((q, r) => { const f = path.join(W, decodeURICompon
   p('ohne Scan: blass (Scanner aus)', lage.zustand === 'unbekannt' && Number(lage.deckkraft) < 0.5, lage.deckkraft);
   const bon = () => s.evaluate(() => state.cart.reduce((a, x) => a + (Number(x.qty) || 0), 0));
   const tippen = async (text, pause) => { for (const c of text) { await s.keyboard.press(c); if (pause) await s.waitForTimeout(pause); } await s.keyboard.press('Enter'); await s.waitForTimeout(300); };
-  await tippen('01001', 120);
-  p('langsames Tippen zählt nicht als Scan', await s.evaluate(() => KCScannerStatus.zustand()) === 'unbekannt');
+  await tippen('01001', 160);
+  p('Tippen mit der Hand (160 ms je Zeichen) zählt nicht als Scan', await s.evaluate(() => KCScannerStatus.zustand()) === 'unbekannt');
+  // langsamer Bluetooth-Scanner (Eyoyo EY-038, ca. 60 ms je Zeichen) wird erkannt
+  await s.evaluate(() => localStorage.removeItem('kc_scanner_letzter_scan_v1'));
+  await tippen('01001', 60);
+  p('langsamerer Bluetooth-Scanner (60 ms je Zeichen) wird als Scanner erkannt', await s.evaluate(() => KCScannerStatus.zustand()) === 'bereit');
   const vor = await bon();
   await s.click('#kcScanner');
   p('Antippen öffnet den Test, Kochmütze (Service) nicht ausgelöst', await s.evaluate(() => !!document.getElementById('kcScannerTest') && !document.getElementById('secretTrigger').classList.contains('admin-hold-active')));

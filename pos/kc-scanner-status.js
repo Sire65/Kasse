@@ -1,4 +1,4 @@
-/* KC Kasse – Scanner-Anzeige oben links neben der Kochmütze (Wunsch Betreiber 23.11.2026).       Build 1.1.0
+/* KC Kasse – Scanner-Anzeige oben links neben der Kochmütze (Wunsch Betreiber 23.11.2026).       Build 1.2.0
  *
  * Eine Webseite darf unter Android nicht abfragen, ob ein Bluetooth-Scanner gekoppelt ist. Darum erkennt die
  * Anzeige echte Scans an der Geschwindigkeit: ein Scanner „tippt“ den ganzen Code in wenigen Millisekunden und
@@ -17,7 +17,9 @@
   if (global.KCScannerStatus) return;
   const MERK = 'kc_scanner_letzter_scan_v1';
   const SCHLAF_MS = 30 * 60 * 1000;     // Sleep Time laut SCANNER_EINRICHTUNG.md (30 min)
-  const MAX_ABSTAND_MS = 45;            // Abstand zwischen zwei Zeichen eines Scans
+  // 25.11.2026: Eyoyo EY-038 (Bluetooth) sendet langsamer als der HW0010 – Grenze von 45 auf 100 ms je Zeichen,
+  // Enter bis 300 ms nach dem letzten Zeichen (wie die Kasse selbst). Ein Mensch tippt deutlich langsamer (meist 150–300 ms).
+  const MAX_ABSTAND_MS = 100;           // Abstand zwischen zwei Zeichen eines Scans (Durchschnitt)
   const MIN_ZEICHEN = 4;
   let letzterScan = 0, test = null;
   try { letzterScan = Number(localStorage.getItem(MERK) || 0) || 0; } catch (e) { /* */ }
@@ -77,7 +79,7 @@
   document.addEventListener('keydown', (e) => {
     const t = e.timeStamp || performance.now();
     if (e.key === 'Enter') {
-      const schnell = puffer >= MIN_ZEICHEN && t - letzteTaste <= 120 && (t - erste) / Math.max(1, puffer - 1) <= MAX_ABSTAND_MS;
+      const schnell = puffer >= MIN_ZEICHEN && t - letzteTaste <= 300 && (t - erste) / Math.max(1, puffer - 1) <= MAX_ABSTAND_MS;
       if (schnell) {
         letzterScan = Date.now();
         try { localStorage.setItem(MERK, String(letzterScan)); } catch (x) { /* */ }
@@ -157,5 +159,5 @@
   global.addEventListener('focus', zeichnen); global.addEventListener('blur', zeichnen);
   document.addEventListener('focusin', zeichnen); document.addEventListener('focusout', () => setTimeout(zeichnen, 0));
   setInterval(zeichnen, 5000);
-  global.KCScannerStatus = { zustand, testOeffnen, testSchliessen, version: '1.1.0' };
+  global.KCScannerStatus = { zustand, testOeffnen, testSchliessen, version: '1.2.0' };
 })(window);
