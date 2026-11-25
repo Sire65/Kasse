@@ -11,8 +11,9 @@
 // Reihenfolge wie auf den gedruckten Preislisten: erst Allergene (Buchstaben), dann Zusatzstoffe (Ziffern)
 const LEGENDE = [['A', 'Gluten'], ['C', 'Ei'], ['D', 'Fisch'], ['G', 'Milch'], ['H', 'Schalenfrüchte'], ['I', 'Sellerie'], ['J', 'Senf'], ['L', 'Sulfite'],
   ['2', 'mit Konservierungsstoff'], ['3', 'mit Antioxidationsmittel']];
+// 25.11.2026: Feuerzangenbowle aus dem Glühwein rot – Kennzeichen wie dieser (L, 2, 3)
 const KENNZEICHEN = {
-  'Roter Winzerglühwein': 'L, 2, 3', 'Weißer Winzerglühwein': 'L, 2, 3', 'Eierlikörpunsch': 'C, G, L', 'Feuerzangenbowle': 'L',
+  'Roter Winzerglühwein': 'L, 2, 3', 'Weißer Winzerglühwein': 'L, 2, 3', 'Eierlikörpunsch': 'C, G, L', 'Feuerzangenbowle': 'L, 2, 3',
   'Grünkohl a la Köcheclub': 'A, I, J, 2, 3', 'Grünkohl a la Köcheclub mit Mettendchen': 'A, I, J, 2, 3',
   'Sauerkrauteintopf': 'A, I, 2, 3', 'Sauerkrauteintopf mit Mettendchen': 'A, I, J, 2, 3', 'Mettendchen': 'J, 2, 3',
   'Kartoffeln mit Kartoffelcreme': 'C, G, J, 2', 'Kartoffeln mit Heringsstipp': 'C, D, G, J',

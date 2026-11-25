@@ -99,3 +99,24 @@ Supabase: Rezept `knirpsecreme` (Peka Garkartoffeln, Öl, Gewürze, Kartoffelcre
 Feuerzangenbowle (Glühwein 0,2 l, 3 Würfelzucker, 2 cl Rum 54 %), Schuss Rum/Amaretto 2 cl.
 Tests: `allergene-weihnachtsmarkt-2026` erweitert (Kartoffelcreme in allen vier Fassungen, frisch und alter Stand: PASS;
 die 4 Info-Fenster-Prüfungen wie auf `main` rot – Start-PIN), `fernseher` 36/36.
+
+## Vierter Nachtrag: Feuerzangenbowle (25.11.2026)
+
+Betreiber: „Die Feuerzangenbowle besteht aus dem gleichen Glühwein.“ Sie wird aus dem Glühwein rot (Kaub „Luana Glühwein“)
+gemacht und trägt deshalb dieselben Zusatzstoffe: Konservierungsstoff und Antioxidationsmittel Sulfite, Konservierungsstoff
+Kaliumsorbat. Bisher stand bei ihr nur „Enthält Sulfite“.
+
+Der Nachtrag läuft einmalig je Gerät (`kc_artikelinfo_wm2026_v4` / `kcm_artikelinfo_wm2026_v4`) in Kasse, PC-Manager und beiden
+Schulungsfassungen. Builds: Kasse und Schulungskasse `0.31.3.6-r73-feuerzange` (index.html und service-worker.js gleich, also
+neuer Cache und kein Mischstand), PC-Manager `bilder-v18-feuerzange`. `etiketten/artikel.json` ist neu erzeugt.
+TV-Präsentation: Feuerzangenbowle (L, 2, 3).
+
+Eierlikörpunsch: Der Weißwein ist laut Betreiber ein Rebenschoppen von Aldi (stand schon in der Rezeptur-Notiz:
+„Rebenschoppen halbtrocken“). Die Sulfite sind bereits gekennzeichnet (L). Weitere Zusatzstoffe sind nicht belegt, deshalb
+keine Änderung.
+
+Heringsstipp: Der Betreiber prüft die Etiketten noch (Hering, Mayonnaise, Gurken).
+
+Tests: `allergene-weihnachtsmarkt-2026` um die Feuerzangenbowle erweitert. Sie besteht in allen vier Fassungen, frisch
+und mit altem Stand. Die 4 Info-Fenster-Prüfungen sind wie bisher rot. `tv-allergene-abgleich` 31/31, `fernseher` 56/56,
+`artikelinfo-kette` und `kaub-artikelinfo` OK.

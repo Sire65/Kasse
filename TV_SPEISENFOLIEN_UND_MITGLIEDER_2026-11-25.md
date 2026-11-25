@@ -147,9 +147,9 @@ Alles stimmt überein.
 Live-Wetter (Open-Meteo) mit Netz geprüft: echte Werte für Werne in Kacheln und Laufschrift, keine Sonne über den Folien.
 
 Offen, nur mit Etikett oder Betreiberangabe zu klären (in Kasse und TV gleich):
-- Feuerzangenbowle ist nur mit L (Sulfite) gekennzeichnet. Laut Rezept besteht sie aus Glühwein, und der Glühwein trägt
-  L, 2, 3 (Kaliumsorbat). Vermutlich fehlen 2 und 3.
-- Eierlikörpunsch mit Weißwein: Ist es derselbe Glühwein weiß (dann ebenfalls 2, 3)?
+- ~~Feuerzangenbowle nur L~~ → erledigt: Laut Betreiber besteht sie aus demselben Glühwein, jetzt L, 2, 3 (vierter Nachtrag,
+  siehe PRUEFBERICHT_ALLERGENE_WM2026.md).
+- ~~Eierlikörpunsch~~ → geklärt: Der Weißwein ist ein Rebenschoppen (Aldi), Sulfite (L) sind schon gekennzeichnet.
 - Schuss Rum / Amaretto: In der Kasse ohne Angaben. Rum und Amaretto enthalten oft Zuckerkulör, das wäre „1 mit Farbstoff“.
 - Heringsstipp: Zusatzstoffe noch offen (Etiketten Hering, Mayonnaise, Gurken).
 - Kassler, Speck und Mettendchen: Die Konservierungsstoffe sind in der Kasse als „übliche Angabe, am Etikett prüfen“ vermerkt.

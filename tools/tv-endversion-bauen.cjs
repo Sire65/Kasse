@@ -69,7 +69,7 @@ const HINWEISE = {
   'Preisliste Getränke · alkoholisch': { zeilen: [
     ['Winzerglühwein rot und weiß', 'Sulfite · Konservierungsstoffe: Sulfite, Kaliumsorbat'],
     ['Eierlikörpunsch', 'Ei, Milch, Sulfite'],
-    ['Feuerzangenbowle', 'Sulfite'],
+    ['Feuerzangenbowle', 'Sulfite · Konservierungsstoffe: Sulfite, Kaliumsorbat (aus dem Glühwein rot)'],
     ['Apfelpunsch, Roter Feger', 'keine deklarationspflichtigen Allergene'],
     ['Schuss Rum oder Amaretto', 'Auskunft am Stand'],
   ], fuss: [PFAND_GETRAENKE] },

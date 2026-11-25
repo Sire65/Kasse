@@ -22,6 +22,7 @@ const ALT = [
   {id: 'hering', name: 'Kartoffel mit Hering', price: 4.5, category: 'Speisen'},
   {id: 'mettwurst', name: 'Mettwurst', price: 1.5, category: 'Speisen'},
   {id: 'knirpsecreme', name: 'Kartoffel mit Kartoffelcreme', price: 3.5, category: 'Speisen', info: {allergens: {milk: 'traces'}, legacyAllergens: 'Creme kann Milch und Milchprodukte enthalten.'}},
+  {id: 'feuer', name: 'Feuerzangenbowle', price: 5, category: 'Getränke', info: {ingredients: 'Rotwein, Gewürze, Zuckerhut, Rum', allergens: 'Enthält Sulfite'}},
   {id: 'eier', name: 'Eierlikörpunsch', price: 4.5, category: 'Getränke', info: {notes: 'Rezeptur je Ansatz (13.10.2026): 6 l Rebenschoppen halbtrocken + 3 × 0,7 l Advocaat + 3 EL Vanillezucker (≈ 8,1 l); serviert mit Sahnehaube und Backkakao.'}}];
 const pruefe = (n, a) => {
   const g = (id) => (a.find((x) => x.id === id) || {}).info || {};
@@ -37,6 +38,10 @@ const pruefe = (n, a) => {
   // 18.11.2026: Etikett Kartoffelcreme (FEINKOST Popp) – Milch, Ei, Senf ENTHALTEN, Konservierungsstoffe
   const kc = g('knirpsecreme');
   if (a.some((x) => x.id === 'knirpsecreme')) pr(`${n}: Kartoffelcreme: Milch, Ei, Senf enthalten, Konservierungsstoffe, Popp-Etikett`, kc.allergens?.milk === 'contained' && kc.allergens?.eggs === 'contained' && kc.allergens?.mustard === 'contained' && kc.allergens?.gluten === 'not-contained' && /Kaliumsorbat/.test(kc.additives || '') && /Popp/.test(kc.supplier || '') && /Speisequark/.test(kc.ingredients || ''), JSON.stringify(kc.allergens || {}).slice(0, 120));
+  // 25.11.2026 (vierter Nachtrag): Feuerzangenbowle aus dem Glühwein rot – dieselben Zusatzstoffe (Sulfite, Kaliumsorbat)
+  const fz = g('feuer');
+  if (a.some((x) => x.id === 'feuer')) pr(`${n}: Feuerzangenbowle: Sulfite enthalten, Zusatzstoffe wie Glühwein rot (Kaliumsorbat)`, fz.allergens?.sulphites === 'contained'
+    && /Konservierungsstoff/.test(fz.additives || '') && /Antioxidationsmittel/.test(fz.additives || '') && /Kaliumsorbat/.test(fz.additives || ''), (fz.additives || '').slice(0, 90));
   pr(`${n}: Mettendchen Senf enthalten, Sellerie Spuren`, m.mustard === 'contained' && m.celery === 'traces', JSON.stringify(m));
   pr(`${n}: Mettendchen mit Konservierungsstoff und Antioxidationsmittel`, /Konservierungsstoff/.test(g('mettwurst').additives || '') && /Antioxidationsmittel/.test(g('mettwurst').additives || ''));
 };

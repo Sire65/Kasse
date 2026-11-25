@@ -278,6 +278,15 @@ let changed=false;for(const product of PRODUCTS){const patch=patches[product.id]
   a.info={...alt,...K,allergens:{...K.allergens},contents:K.additives,notes:String(alt.notes||"").includes("Nährwerte Kartoffelcreme")?alt.notes:[alt.notes,K.notes].filter(Boolean).join(" "),source:[alt.source,"Etikett Kartoffelcreme FEINKOST Popp (18.11.2026)"].filter(Boolean).join("; ")};
   localStorage.setItem("kc_products_v050",JSON.stringify(PRODUCTS))}
  localStorage.setItem(MERK,"1")}}
+// 25.11.2026 (Betreiber: „Feuerzangenbowle besteht aus dem gleichen Glühwein“): Vierter Nachtrag, EINMALIG je Geraet.
+// Die Feuerzangenbowle wird aus dem Glühwein rot (Kaub „Luana Glühwein“) gemacht und traegt daher dieselben
+// Zusatzstoffe wie dieser: Konservierungsstoff und Antioxidationsmittel Sulfite, Konservierungsstoff Kaliumsorbat.
+{const MERK="kc_artikelinfo_wm2026_v4";if(!localStorage.getItem(MERK)){const Z="Konservierungsstoff und Antioxidationsmittel: Sulfite; Konservierungsstoff: Kaliumsorbat (aus dem Glühwein rot, Etikett Luana Glühwein)";
+ for(const a of PRODUCTS){if(a.id!=="feuer")continue;const alt=(a.info&&typeof a.info==="object")?a.info:{};
+  const al=(alt.allergens&&typeof alt.allergens==="object"&&!Array.isArray(alt.allergens))?{...alt.allergens}:{};
+  a.info={...alt,allergens:{...al,sulphites:"contained"},additives:Z,contents:Z,source:[alt.source,"Allergen-Nachtrag 25.11.2026 (Betreiber: aus dem Glühwein rot)"].filter(Boolean).join("; ")};
+  localStorage.setItem("kc_products_v050",JSON.stringify(PRODUCTS))}
+ localStorage.setItem(MERK,"1")}}
 // Aus dem Sortiment genommen (Betreiber 03.09.2026). Eine Kasse, die sie schon gespeichert
 // hat, behielte sie sonst - der Artikel waere nur auf einem frischen Geraet verschwunden.
 for(const weg of ["knirpse","knirpseher"]){const n=PRODUCTS.findIndex(p=>p.id===weg);if(n>=0){PRODUCTS.splice(n,1);changed=true}}
