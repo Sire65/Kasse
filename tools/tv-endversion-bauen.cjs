@@ -17,6 +17,12 @@
  * Am 18.11.2026 (Rohprogramm): Öffnungszeiten, „Auf der Bühne“ (heute/morgen) und Bühnenprogramm 2026 (zwei Folien) aus
  *   shared/kc-wm2026-programm.js – siehe tools/tv-programm-folien.cjs. „Musik vom Band“ wird nicht ausgewiesen.
  *
+ * Am 20.11.2026: Laufschrift „Öffnungszeiten Weihnachtsmarkt“ und eigener Block „Öffnungszeiten Köcheclub“, Annes Spruch
+ *   (war zuerst nur in tv-player/weihnachtsmarkt-2026-version-a.html eingetragen, jetzt hier an der Quelle).
+ * Am 25.11.2026: Reinhilde, Klaus, Marianne und Karla mit Spruch (Klaus hat zugestimmt; Sprüche vom Betreiber zugeordnet,
+ *   je ein noch freier Spruch aus der Spruch-Auswahl). Neue Speisenfolien „Lust auf Grünkohl/Sauerkraut/Kartoffeln?“ –
+ *   siehe tools/tv-speisenfolien.cjs.
+ *
  * Aufruf: node tools/tv-endversion-bauen.cjs <index.html WM-Pr-s. (Original)> <Hintergrundbild .jpg> <Ziel.html>
  */
 'use strict';
@@ -24,12 +30,13 @@ const fs = require('fs');
 const path = require('path');
 const PROGRAMM = require('./tv-programm-folien.cjs');
 const PREISE = require('./tv-preisfolien.cjs');
+const SPEISEN = require('./tv-speisenfolien.cjs');
 
 const MIT_FOTOS = process.env.KC_TV_MIT_FOTOS === '1';
-const STAND = MIT_FOTOS ? '2026-11-17' : '2026-11-18';
+const STAND = MIT_FOTOS ? '2026-11-17' : '2026-11-25';
 const VERSION = `Endversion · ${STAND}`;
 
-// ---- Mitglieder laut Spruch-Auswahl (Supabase kc_wm_spruch_zuordnung, Stand 25.09.2026) ----
+// ---- Mitglieder laut Spruch-Auswahl (Supabase kc_wm_spruch_zuordnung, Stand 25.09.2026), Nachträge 20.11. und 25.11.2026 ----
 // foto: true = Foto zeigen (nur in der Fassung mit Fotos). Nicht aufgeführt = ausblenden.
 // Ohne Fotos wird immer nur der Vorname gezeigt.
 const MITGLIEDER = {
@@ -37,11 +44,16 @@ const MITGLIEDER = {
   'Dieter Zander': { vorname: 'Dieter', name: 'Dieter Zander', foto: true, spruch: 'Ich bringe mich gerne ein, weil mir Gemeinschaft und soziales Engagement wichtig sind.' },
   'Manfred Schoppmann': { vorname: 'Manfred', name: 'Manfred Schoppmann', foto: true, spruch: 'Ich helfe gerne mit, wenn wir gemeinsam etwas für andere Menschen erreichen können.' },
   'Andrea Spahn': { vorname: 'Andrea', name: 'Andrea', foto: true, spruch: 'Ich schätze besonders den Zusammenhalt und die vielen schönen gemeinsamen Erlebnisse.' },
-  'Anne Reinkober': { vorname: 'Anne', name: 'Anne', foto: true, spruch: 'Ich helfe gerne aus beim Köcheclub Werne, denn helfende Hände werden immer gebraucht.' },
+  'Anne Reinkober': { vorname: 'Anne', name: 'Anne', foto: true, spruch: 'Ich bin gerne im Köcheclub, denn helfende Hände werden immer gebraucht.' }, // Betreiber 20.11.2026
   'Thomas Hess': { vorname: 'Thomas', name: 'Thomas Hess', foto: false, spruch: 'Ich bin gerne dabei, weil wir hier mit Herz und Hand für andere kochen.' },
   'Christina Brösel': { vorname: 'Christina', name: 'Christina', foto: false, spruch: 'Ich engagiere mich gerne, weil unsere Arbeit nicht nur Freude macht, sondern auch einem guten Zweck dient.' },
   'Leon Wördemann': { vorname: 'Leon', name: 'Leon', foto: false, spruch: 'Besonders der Weihnachtsmarkt zeigt, was wir als Mannschaft gemeinsam leisten können.' },
   'Wilfried Wittwer': { vorname: 'Wilfried', name: 'Wilfried', foto: false, spruch: 'Für mich ist der Köcheclub ein Ort, an dem aus Berufskollegen echte Freunde geworden sind.' },
+  // Betreiber 25.11.2026: aufnehmen, Sprüche aus den noch freien der Spruch-Auswahl (Nr. 4, 6, 11, 13); Klaus hat zugestimmt
+  'Klaus Zander': { vorname: 'Klaus', name: 'Klaus', foto: false, spruch: 'Beim Köcheclub bin ich dabei, weil aus guten Ideen immer wieder tolle Aktionen entstehen.' },
+  'Reinhilde Eggenstein': { vorname: 'Reinhilde', name: 'Reinhilde', foto: false, spruch: 'Unsere Treffen sind für mich eine gute Mischung aus Fachgesprächen, Freundschaft und Geselligkeit.' },
+  'Marianne Bierkämper': { vorname: 'Marianne', name: 'Marianne', foto: false, spruch: 'Mir gefallen die freundschaftliche Atmosphäre und der offene Austausch innerhalb des Clubs.' },
+  'Karla Kazik': { vorname: 'Karla', name: 'Karla', foto: false, spruch: 'Gemeinsam planen, anpacken und anschließend zusammen feiern – genau das gefällt mir.' },
 };
 
 // ---- Allergene und Zusatzstoffe laut Kasse (etiketten/artikel.json, Stand 16.11.2026) ----
@@ -103,13 +115,14 @@ const LAUFSCHRIFT_THEMEN = [
   'Preise Speisen: Grünkohl 5,50 € · Grünkohl mit Mettendchen 7,00 € · Sauerkrauteintopf 5,50 € · Sauerkrauteintopf mit Mettendchen 7,00 € · Mettendchen 1,50 €',
   'Wetter in Werne: {{weather.today.symbol}} {{weather.today.text}}, {{weather.today.temp}} · Morgen {{weather.tomorrow.symbol}} {{weather.tomorrow.minmax}}',
   'Preise Getränke: Winzerglühwein rot und weiß 3,50 € · Eierlikörpunsch 4,50 € · Feuerzangenbowle 5,00 € · Schuss Rum oder Amaretto 1,00 €',
+  'Öffnungszeiten Köcheclub: Dienstag, Freitag, Samstag und Sonntag ab 12:00 Uhr', // Betreiber 20.11.2026
   'Bei Fragen zu Allergenen und Zusatzstoffen wenden Sie sich gerne an die Standbesetzung',
   'Preise alkoholfreie Getränke: Roter Feger 2,50 € · Apfelpunsch 2,50 €',
   'Preise Kartoffelgerichte: Kartoffeln mit Kartoffelcreme 3,50 € · Kartoffeln mit Heringsstipp 4,50 €',
   'Pfand: 2,00 € je Glas · Feuerzangenbowle zusätzlich 2,00 € für die Feuerzange · Rückgabe am Stand',
   // 18.11.2026: Programm und Öffnungszeiten (shared/kc-wm2026-programm.js); {{programm.heute}} setzt die Präsentation täglich ein
   '{{programm.heute}}',
-  'Öffnungszeiten: ' + PROGRAMM.DATEN.OEFFNUNG.map((o) => `${o.kurz} ${o.von}–${o.bis}`).join(' · ') + ' Uhr',
+  'Öffnungszeiten Weihnachtsmarkt: ' + PROGRAMM.DATEN.OEFFNUNG.map((o) => `${o.kurz} ${o.von}–${o.bis}`).join(' · ') + ' Uhr',
 ];
 let laufschriftNr = 0;
 
@@ -118,6 +131,7 @@ function setze(item, werte) { Object.assign(item, werte); }
 function bearbeite(projekt, log, extras = {}) {
   laufschriftNr = 0;
   PROGRAMM.folienUmbauen(projekt, log);
+  SPEISEN.folienEinbauen(projekt, log, extras.speisen);
   projekt.name = `Köcheclub Werne · Weihnachtsmarkt 2026 · ${VERSION}`;
   for (const folie of projekt.slides) {
     // Hintergrund: neues Rathaus-Bild, Seitenverhältnis bleibt (nicht verzerrt)
