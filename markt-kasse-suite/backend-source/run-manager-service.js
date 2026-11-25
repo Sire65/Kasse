@@ -11,7 +11,7 @@ const { meldung, erklaere, druckeKasten, SCHRITTE_FENSTER_NEU } = require('./feh
 const { sicherePortFrei, belegtFehler, programmName } = require('./port-freigabe');
 const { StandBruecke } = require('./stand-bruecke');
 const { RouterZaehler } = require('./router-zaehler');
-const { Fernseher } = require('./fernseher');
+const { Fernseher, findeBrowser } = require('./fernseher');
 const fs = require('fs');
 
 // Start abbrechen - immer mit Kasten (Was / Ursache / Loesung), nie mit rohem Stacktrace.
@@ -84,6 +84,16 @@ function browserOeffnen(url) {
   try {
     let command, args;
     if (process.platform === 'win32') {
+      // 25.11.2026 (Befund Mini-PC: „PC-Manager wird geöffnet“ – aber nichts ging auf): „start“ über cmd versagte still,
+      // wenn der Starter das Programm startet. Darum zuerst Edge/Chrome direkt, neues Fenster auf dem Hauptbildschirm
+      // (oben links = kleiner Monitor, nicht der Fernseher). Nur ohne Edge/Chrome der alte Weg.
+      const browser = findeBrowser();
+      if (browser) {
+        const kind = spawn(browser, ['--new-window', '--window-position=40,40', '--window-size=1280,900', url], { detached: true, stdio: 'ignore' });
+        kind.on('error', () => { try { spawn('cmd.exe', ['/d', '/c', 'start', '""', url], { detached: true, stdio: 'ignore', windowsVerbatimArguments: true }).unref(); } catch (e) { /* */ } });
+        kind.unref();
+        return true;
+      }
       command = 'cmd.exe';
       args = ['/d', '/s', '/c', 'start', '', url];
     } else if (process.platform === 'darwin') {

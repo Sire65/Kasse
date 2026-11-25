@@ -288,6 +288,11 @@ const BACKEND = 'markt-kasse-suite/backend-source';
   p('Einrichtung: Modulversionen wie im Backend', (() => { const pk = JSON.parse(lies(path.join(WURZEL, BACKEND, 'package.json'))).dependencies; return Object.entries(pk).every(([n, v]) => ps1.includes(`'${n}' = '${v}'`)); })());
   p('Zuhause-Start ruft den Manager-Start mit --zuhause', /KC_Manager_Start\.cmd" --zuhause %\* & exit \/b/.test(lies(path.join(WURZEL, 'KC_Zuhause_Start.cmd'))));
 
+  // PC-Manager öffnet sich sicher (25.11.2026): Edge/Chrome direkt auf dem Hauptbildschirm, dazu Desktop-Verknüpfung
+  const rms = lies(path.join(WURZEL, BACKEND, 'run-manager-service.js'));
+  p('PC-Manager: wird mit Edge/Chrome direkt geöffnet (neues Fenster, Hauptbildschirm), „start“ nur als Rückfall', /const browser = findeBrowser\(\);[\s\S]{0,200}'--new-window', '--window-position=40,40'/.test(rms));
+  p('PC-Manager: Desktop-Verknüpfung „KC PC-Manager“ wird bei jedem Start angelegt, falls sie fehlt', typeof K.pcManagerVerknuepfung === 'function' && K.pcManagerVerknuepfung() === false && /K\.pcManagerVerknuepfung\(log\)/.test(lies(path.join(WURZEL, 'starter/kc-starter.js'))));
+
   // Kassen-Tablets: neue Version übernehmen
   const sw = lies(path.join(WURZEL, 'pos/service-worker.js')), idx = lies(path.join(WURZEL, 'pos/index.html'));
   const pv = lies(path.join(WURZEL, 'pos/kc-programm-version.js'));

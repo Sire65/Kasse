@@ -11,6 +11,7 @@
 // geschlossen, bleibt es zu (sonst käme man nie an den Desktop) – Hinweis im Fenster.
 // Einstellungen: stand-einstellungen.json → { "fernseher": { "aktiv": true, "bildschirm": "auto" } }
 //   bildschirm: "auto" | Nummer (1, 2 …) laut Windows-Anzeigeeinstellungen.
+//   sparmodus: false = alle Effekte (Schnee, Funken, Feuerwerk …) wieder an – Standard: Sparmodus an (Mini-PC entlasten).
 //   einBildschirm: true = Präsentation darf auch laufen, wenn nur EIN Bildschirm da ist (Standard: nein – sonst
 //   landet sie bei ausgeschaltetem Fernseher auf dem kleinen Monitor).
 'use strict';
@@ -99,7 +100,11 @@ class Fernseher {
   // "rand": Sicherheitsrand in Prozent (0-10) gegen Overscan - viele Fernseher schneiden die Bildränder ab.
   get url() {
     const rand = Math.max(0, Math.min(10, Number(this.einstellungen.rand) || 0));
-    return `http://127.0.0.1:${this.webserverPort}/tv-player/fernseher.html${rand ? `?rand=${rand}` : ''}`;
+    // Sparmodus (25.11.2026): Standard an - Dauer-Effekte aus, damit der kleine Mini-PC Luft für Kassen und PC-Manager hat.
+    const teile = [];
+    if (rand) teile.push(`rand=${rand}`);
+    if (this.einstellungen.sparmodus !== false) teile.push('spar=1');
+    return `http://127.0.0.1:${this.webserverPort}/tv-player/fernseher.html${teile.length ? `?${teile.join('&')}` : ''}`;
   }
 
   // Ergebnis: { gestartet, einBildschirm, wartet, meldung }

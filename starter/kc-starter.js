@@ -106,6 +106,7 @@ async function starten(o) {
       'das Programm wird dann automatisch nach C:\\KC-Kasse installiert.']);
     await tasteDruecken(); return 1;
   }
+  try { K.pcManagerVerknuepfung(log); } catch (e) { /* nur Komfort */ }
   // 2) Update
   let upd = { aktualisiert: false, hinweis: 'Update übersprungen' };
   if (!o.ohneUpdate) {

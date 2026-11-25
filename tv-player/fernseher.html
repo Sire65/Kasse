@@ -36,13 +36,54 @@
   var rahmen = [document.getElementById('a'), document.getElementById('b')];
   var aktiv = 0, stand = null, herkunft = null;
 
-  // In der eingebetteten Präsentation: Mauszeiger und Bedienleiste (‹ Pause ›) ausblenden.
+  // SPARMODUS (25.11.2026, Wunsch Betreiber „damit der TV nicht so viel Rechenleistung braucht“ – Mini-PC mit
+  // Celeron N3050 lief bei 100 %): Dauer-Effekte aus (Schnee, Funken, Feuerwerk, Laser, Wetter-Animationen,
+  // Unschärfe-Filter). Folienwechsel, Laufschrift/Ticker und alle Inhalte bleiben. ?spar=0 schaltet ihn ab.
+  var SPAR = q.get('spar') === '1';
+  function sparCss(d) {
+    var weg = [];
+    function regeln(liste) {
+      for (var i = 0; i < liste.length; i++) {
+        var r = liste[i];
+        if (r.cssRules && !r.selectorText) { try { regeln(r.cssRules); } catch (e) { /* */ } continue; }
+        if (!r.style || !r.selectorText) continue;
+        var dauernd = /infinite/.test(r.style.animation || '') || r.style.animationIterationCount === 'infinite';
+        var name = (r.style.animationName || r.style.animation || '');
+        if (dauernd && !/ticker|lauf/i.test(name) && !/ticker|lauf/i.test(r.selectorText)) weg.push(r.selectorText);
+      }
+    }
+    for (var i = 0; i < d.styleSheets.length; i++) { try { regeln(d.styleSheets[i].cssRules); } catch (e) { /* fremdes Stylesheet */ } }
+    return (weg.length ? weg.join(',') + '{animation:none!important}' : '')
+      + '.tvFx,.tvFireworkBurst,.tvRocketTrail,.tvWeatherScene b,.tvWeatherScene i,.tvWeatherScene em,.kcKw b,.kcKw i{display:none!important}';
+  }
+  // Laufschrift/Ticker: 20 Schritte je Sekunde statt 60 Bilder - gut lesbar, ein Drittel der Bildberechnung.
+  // Neue Folien bringen neue Laufschriften mit - darum alle 3 s nachsehen.
+  function laufschriftSparen() {
+    var f = rahmen[aktiv]; if (!SPAR || !f) return;
+    try {
+      var liste = f.contentDocument && f.contentDocument.getAnimations ? f.contentDocument.getAnimations() : [];
+      for (var i = 0; i < liste.length; i++) {
+        var a = liste[i], name = a.animationName || '';
+        if (a.kcSpar || !/ticker|lauf/i.test(name) || !a.effect) continue;
+        var dauer = Number(a.effect.getTiming().duration) || 0;
+        if (dauer > 0) a.effect.updateTiming({ easing: 'steps(' + Math.max(10, Math.round(dauer / 1000 * 20)) + ')' });
+        a.kcSpar = true;
+      }
+    } catch (e) { /* fremde Herkunft */ }
+  }
+  if (SPAR) setInterval(laufschriftSparen, 3000);
+
+  // In der eingebetteten Präsentation: Mauszeiger und Bedienleiste (‹ Pause ›) ausblenden, im Sparmodus Effekte aus.
   function aufraeumen(f) {
     try {
       var d = f.contentDocument; if (!d || !d.head) return;
       var s = d.createElement('style');
       s.textContent = '*{cursor:none!important}.controls,#control,#tvControls,#tvBigDone,#kcBuildLabel{display:none!important}';
       d.head.appendChild(s);
+      if (SPAR) {
+        var sp = d.createElement('style'); sp.id = 'kcSparmodus'; sp.textContent = sparCss(d); d.head.appendChild(sp);
+        document.documentElement.dataset.spar = '1';
+      }
     } catch (e) { /* fremde Herkunft - nichts zu tun */ }
   }
 

@@ -374,6 +374,19 @@ function verknuepfungenEinrichten(R, modus, log = () => {}) {
   return { ok };
 }
 
+// Desktop-Verknüpfung „KC PC-Manager“ (Internet-Verknüpfung, 25.11.2026): öffnet den PC-Manager immer -
+// auch wenn er beim Start nicht von selbst aufgeht. Wird bei jedem Start angelegt, falls sie fehlt.
+function pcManagerVerknuepfung(log = () => {}) {
+  if (process.platform !== 'win32') return false;
+  const r = powershell('[Environment]::GetFolderPath("Desktop")');
+  const desk = String(r.stdout || '').trim();
+  if (!desk || !fs.existsSync(desk)) return false;
+  const datei = path.join(desk, 'KC PC-Manager.url');
+  if (fs.existsSync(datei)) return true;
+  try { fs.writeFileSync(datei, '[InternetShortcut]\r\nURL=http://127.0.0.1:8090/pc-manager/index.html\r\n'); log('Verknüpfung „KC PC-Manager“ auf dem Desktop angelegt.'); return true; }
+  catch (e) { return false; }
+}
+
 // ---------- Programm starten, auf "bereit" achten ----------
 function programmUmgebung(R, modus) {
   const P = pfade(R), daten = datenWurzel(), liste = lokaleListe(R) || {};
@@ -411,6 +424,6 @@ function programmStarten({ R, modus, args = [], node = process.execPath, bereitZ
   return { kind, bereit: versprechen, ende };
 }
 
-module.exports = { installiereAusNetz, platzPruefen, freieBytes, umbenennen, QUELLE_STANDARD, datenWurzel, pfade, datenDatei, leseJson, schreibeJson, laden, fernListe, lokaleListe, pruefeListe,
+module.exports = { pcManagerVerknuepfung, installiereAusNetz, platzPruefen, freieBytes, umbenennen, QUELLE_STANDARD, datenWurzel, pfade, datenDatei, leseJson, schreibeJson, laden, fernListe, lokaleListe, pruefeListe,
   baueNeu, tausche, zurueckfallen, updateErlaubt, updateRegeln, aktualisieren, installiereAus, alteAnordnungAufraeumen, datenUmziehen,
   verknuepfungenEinrichten, programmStarten, programmUmgebung, normiert, fuerPlatte, heuteIso, starterUndStartdateienErneuern };
