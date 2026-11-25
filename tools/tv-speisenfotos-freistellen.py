@@ -6,6 +6,7 @@
 # wird als Ellipse an die Aussenkante des Tellers angepasst (Teller darf seitlich aus dem Bild ragen).
 # Mit --schale fuer eine Schuessel, deren graue Aussenwand dem Hintergrund aehnelt: die Unterkante wird spaltenweise von
 # unten gesucht (Kante hell oben / dunkel unten) und in den Umriss aufgenommen.
+# Mit --glatt wird der Umriss geglaettet (Ecken der konvexen Huelle werden rund).
 # Aufruf: python3 tools/tv-speisenfotos-freistellen.py pos/assets/gruenkohl_version_3.png media/speisen/gruenkohl.webp
 #   gruenkohl -> gruenkohl, gruenkohl_wurst -> gruenkohl-mettendchen, sauerkraut -> sauerkraut,
 #   sauerkraut_wurst -> sauerkraut-mettendchen, creme_kartoffeln -> kartoffeln-kartoffelcreme, hering_kartoffeln -> kartoffeln-heringsstipp
@@ -90,6 +91,8 @@ else:
   pkt = np.argwhere(kern)[:, ::-1]
   huelle = pkt[ConvexHull(pkt).vertices]
   m = Image.new('L', (W, H), 0); ImageDraw.Draw(m).polygon([tuple(map(float, q)) for q in huelle], fill=255)
+  if '--glatt' in sys.argv:  # Ecken runden: stark weichzeichnen, wieder scharf schneiden
+      m = m.filter(ImageFilter.GaussianBlur(18)).point(lambda v: 255 if v >= 128 else 0)
   alpha = np.asarray(m.filter(ImageFilter.GaussianBlur(1.5))).astype(np.float64) / 255
 rgb = a
 A = Image.fromarray((alpha * 255).astype(np.uint8))

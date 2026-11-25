@@ -143,6 +143,8 @@ function nachbauStarter() {
       p('A2: Laufschrift auf allen Folien höher (y=652, unten 28 px Rand), kein Inhalt ragt hinein',
         tickerAlle.length > 0 && tickerAlle.every((i) => i.y === 652 && i.y + i.h <= 692)
         && projekt.slides.every((s) => s.items.every((i) => i.type === 'ticker' || i.y >= 652 || i.y + i.h <= 644)));
+      p('A2: Speisenfolien: beide Fotos gleich breit und unten auf einer Linie', speisen.every((s) => { const f = s && s.items.filter((i) => i.type === 'image');
+        return f && f.length === 2 && f[0].w === f[1].w && f[0].y + f[0].h === f[1].y + f[1].h; }));
       const links = (s) => s.items.filter((i) => i.type === 'image').sort((x, y) => x.x - y.x)[0].name;
       p('A2: Speisenfolien: links „mit“ (Mettendchen / Heringsstipp), rechts „ohne“', speisen.every(Boolean) && /Mettendchen/.test(links(speisen[0])) && /Mettendchen/.test(links(speisen[1])) && /Heringsstipp/.test(links(speisen[2])));
       const namen = mitglieder.filter((s) => s.rotation && s.rotation.enabled !== false).map((s) => (s.items.find((i) => i.originalRole === 'memberName') || {}).text);

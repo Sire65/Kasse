@@ -46,9 +46,31 @@ const TYPEN = { '.webp': 'image/webp', '.png': 'image/png', '.jpg': 'image/jpeg'
 function fotoLaden(name, ordner = path.join(WURZEL, 'media', 'speisen')) {
   for (const endung of Object.keys(TYPEN)) {
     const datei = path.join(ordner, name + endung);
-    if (fs.existsSync(datei)) return { src: `data:${TYPEN[endung]};base64,${fs.readFileSync(datei).toString('base64')}`, frei: endung !== '.jpg' && endung !== '.jpeg', datei };
+    if (!fs.existsSync(datei)) continue;
+    const daten = fs.readFileSync(datei);
+    return { src: `data:${TYPEN[endung]};base64,${daten.toString('base64')}`, frei: endung !== '.jpg' && endung !== '.jpeg', datei, ...bildGroesse(daten) };
   }
   throw new Error(`Foto für die Speisenfolie fehlt: media/speisen/${name}.webp`);
+}
+
+// Breite/Höhe eines Bildes aus dem Dateikopf (WebP, PNG, JPEG) – damit beide Fotos einer Folie gleich groß erscheinen
+function bildGroesse(b) {
+  if (b.toString('ascii', 0, 4) === 'RIFF' && b.toString('ascii', 8, 12) === 'WEBP') {
+    const art = b.toString('ascii', 12, 16);
+    if (art === 'VP8X') return { breite: 1 + b.readUIntLE(24, 3), hoehe: 1 + b.readUIntLE(27, 3) };
+    if (art === 'VP8 ') return { breite: b.readUInt16LE(26) & 0x3fff, hoehe: b.readUInt16LE(28) & 0x3fff };
+    if (art === 'VP8L') { const n = b.readUInt32LE(21); return { breite: 1 + (n & 0x3fff), hoehe: 1 + ((n >> 14) & 0x3fff) }; }
+  }
+  if (b.readUInt32BE(0) === 0x89504e47) return { breite: b.readUInt32BE(16), hoehe: b.readUInt32BE(20) };
+  if (b[0] === 0xff && b[1] === 0xd8) {
+    for (let i = 2; i < b.length - 9;) {
+      if (b[i] !== 0xff) { i++; continue; }
+      const m = b[i + 1];
+      if (m >= 0xc0 && m <= 0xcf && m !== 0xc4 && m !== 0xc8 && m !== 0xcc) return { breite: b.readUInt16BE(i + 7), hoehe: b.readUInt16BE(i + 5) };
+      i += 2 + b.readUInt16BE(i + 2);
+    }
+  }
+  throw new Error('Bildgröße nicht lesbar (WebP, PNG oder JPEG erwartet).');
 }
 
 // ---- Raster (Folie 1280×720, Laufschrift ab y=652, Inhalt endet spätestens bei y=644) ----
@@ -80,12 +102,16 @@ function folienEinbauen(projekt, log, { preise = kassenPreise(), foto = fotoLade
     laufschrift.id = `${folie.id}-laufschrift`;
     const basis = { ...titel };
     const items = [titel];
+    // beide Fotos gleich breit (Betreiber 25.11.2026: „Größe angleichen“), unten auf einer Linie, je Spalte mittig
+    const bilder = { links: foto(f.links.foto), rechts: foto(f.rechts.foto) };
+    const fotoBreite = Math.floor(Math.min(...Object.values(bilder).map((b) => Math.min(BREITE, FOTO_H * b.breite / b.hoehe))));
     for (const seite of ['links', 'rechts']) {
       const g = f[seite], x = SPALTE[seite];
       if (preise[g.artikel] == null) throw new Error(`Preis für Kassenartikel „${g.artikel}“ nicht gefunden (pos/app.js).`);
-      const bild = foto(g.foto);
+      const bild = bilder[seite];
+      const fotoHoehe = Math.round(fotoBreite * bild.hoehe / bild.breite);
       items.push({ ...basis, id: `${folie.id}-${seite}-foto`, name: `Foto ${g.name}`, type: 'image', originalRole: 'image', text: '', src: bild.src,
-        x, y: FOTO_Y, w: BREITE, h: FOTO_H, fit: 'contain', bg: 'transparent', fill: 'transparent', shadowEnabled: false,
+        x: x + Math.round((BREITE - fotoBreite) / 2), y: FOTO_Y + FOTO_H - fotoHoehe, w: fotoBreite, h: fotoHoehe, fit: 'contain', bg: 'transparent', fill: 'transparent', shadowEnabled: false,
         ...(bild.frei ? { radius: 0, stroke: 'transparent', strokeWidth: 0 } : { radius: 18, stroke: '#d8b25a', strokeWidth: 3, strokeStyle: 'solid' }) });
       items.push(textItem(basis, { id: `${folie.id}-${seite}-name`, name: `Name ${g.name}`, text: g.name, x, y: NAME_Y, w: BREITE, h: NAME_H,
         font: 30, bold: true, bg: 'rgba(14,9,7,.82)', fill: 'rgba(14,9,7,.82)', radius: 12, stroke: 'rgba(217,170,58,.7)', strokeWidth: 2 }));
@@ -104,4 +130,4 @@ function folienEinbauen(projekt, log, { preise = kassenPreise(), foto = fotoLade
   }
 }
 
-module.exports = { folienEinbauen, kassenPreise, fotoLaden, FOLIEN, HINWEIS };
+module.exports = { folienEinbauen, kassenPreise, fotoLaden, bildGroesse, FOLIEN, HINWEIS };

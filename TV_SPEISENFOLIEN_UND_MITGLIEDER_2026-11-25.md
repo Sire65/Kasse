@@ -72,3 +72,10 @@ auf allen Folien bei y=652 und ist 40 px hoch, das lässt 28 px bis zum unteren 
 reichten (Preistafeln, Programmtafeln, Bildunterschriften, Wetterhinweis, QR-Fußzeilen, „Auf Wiedersehen 2027“), werden
 im Bauwerkzeug automatisch angepasst (`laufschriftHoeher`). Große Flächen werden dabei unten gekürzt, kleine Felder etwas
 niedriger gesetzt und nach oben gerückt. Ein Test prüft, dass nichts mehr in die Laufschrift ragt.
+
+## Fotos gleich groß, Rand geglättet (25.11.2026)
+
+- Auf jeder Speisenfolie erscheinen beide Fotos gleich breit, unten auf einer Linie und je Spalte mittig. Die Bildgröße
+  liest `tools/tv-speisenfolien.cjs` aus dem Dateikopf (WebP, PNG, JPEG).
+- Kartoffeln mit Kartoffelcreme neu freigestellt mit `--schale --glatt`. Die Schüssel hat jetzt einen vollständigen,
+  runden Boden statt einer Ecke unten links. `--glatt` rundet die Ecken des Umrisses ab.
