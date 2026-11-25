@@ -121,7 +121,63 @@ function nachbauStarter() {
       const projekt = JSON.parse(a.slice(a.indexOf('window.KC_DESIGNER_MARKET_PRESENTATION=') + 39, a.indexOf('};', a.indexOf('window.KC_DESIGNER_MARKET_PRESENTATION=')) + 1).replace(/\bB\[(\d+)\]/g, '0'));
       const mitglieder = projekt.slides.filter((s) => s.memberMeta);
       const sichtbar = mitglieder.filter((s) => s.rotation && s.rotation.enabled !== false).map((s) => s.memberMeta.name);
-      p('A2: Endversion: nur Mitglieder mit Zustimmung sichtbar (Klaus Zander, Steven Linley nicht)', sichtbar.length === 9 && !sichtbar.includes('Klaus Zander') && !sichtbar.includes('Steven Linley'), sichtbar.join(', '));
+      // 25.11.2026: Klaus (zugestimmt), Reinhilde, Marianne und Karla mit Spruch dazu
+      p('A2: Endversion: nur Mitglieder mit Zustimmung sichtbar (Steven Linley nicht; Klaus, Reinhilde, Marianne, Karla seit 25.11.)', sichtbar.length === 13 && !sichtbar.includes('Steven Linley')
+        && ['Klaus Zander', 'Reinhilde Eggenstein', 'Marianne Bierkämper', 'Karla Kazik'].every((n) => sichtbar.includes(n)), sichtbar.join(', '));
+      const sprueche = mitglieder.filter((s) => s.rotation && s.rotation.enabled !== false).map((s) => (s.items.find((i) => i.originalRole === 'memberQuote') || {}).text);
+      p('A2: jeder sichtbare Spruch nur einmal vergeben', sprueche.every(Boolean) && new Set(sprueche).size === sprueche.length);
+      // 25.11.2026: Speisenfolien „Lust auf …?“ – links mit, rechts ohne, Preise aus der Kasse, Hinweis Serviervorschlag
+      const speisen = ['Lust auf Grünkohl?', 'Lust auf Sauerkraut?', 'Lust auf Kartoffeln?'].map((n) => projekt.slides.find((s) => s.name === n));
+      const texte = (s) => s.items.filter((i) => i.type === 'text').map((i) => i.text);
+      p('A2: Speisenfolien Grünkohl, Sauerkraut, Kartoffeln mit zwei Fotos, Preisen der Kasse und „Serviervorschlag“',
+        speisen.every((s) => s && s.rotation.enabled !== false && s.items.filter((i) => i.type === 'image' && /^data:image\//.test(i.src)).length === 2 && texte(s).includes('Serviervorschlag'))
+        && ['Grünkohl mit Mettendchen', '7,00 €', 'Grünkohl', '5,50 €'].every((t) => texte(speisen[0]).includes(t))
+        && ['Sauerkrauteintopf mit Mettendchen', '7,00 €', 'Sauerkrauteintopf', '5,50 €'].every((t) => texte(speisen[1]).includes(t))
+        && ['Kartoffeln mit Heringsstipp', '4,50 €', 'Kartoffeln mit Kartoffelcreme', '3,50 €'].every((t) => texte(speisen[2]).includes(t)),
+        speisen.map((s) => s ? texte(s).join('/') : '–').join(' | '));
+      const deckt = (a, b) => a.x < b.x + b.w && b.x < a.x + a.w && a.y < b.y + b.h && b.y < a.y + a.h;
+      p('A2: Speisenfolien: „Serviervorschlag“ überdeckt weder Preisschild noch Namen oder Foto',
+        speisen.every((s) => { const h = s && s.items.find((i) => i.text === 'Serviervorschlag'); return h && !s.items.some((i) => i !== h && i.type !== 'ticker' && i.originalRole !== 'title' && deckt(h, i)); }));
+      // 25.11.2026: Laufschrift höher (nicht zu nah am unteren TV-Rand), nichts ragt in sie hinein
+      const tickerAlle = projekt.slides.flatMap((s) => s.items.filter((i) => i.type === 'ticker'));
+      p('A2: Laufschrift auf allen Folien höher (y=652, unten 28 px Rand), kein Inhalt ragt hinein',
+        tickerAlle.length > 0 && tickerAlle.every((i) => i.y === 652 && i.y + i.h <= 692)
+        && projekt.slides.every((s) => s.items.every((i) => i.type === 'ticker' || i.y >= 652 || i.y + i.h <= 644)));
+      p('A2: Speisenfolien: beide Fotos gleich breit und unten auf einer Linie', speisen.every((s) => { const f = s && s.items.filter((i) => i.type === 'image');
+        return f && f.length === 2 && f[0].w === f[1].w && f[0].y + f[0].h === f[1].y + f[1].h; }));
+      // 25.11.2026: Durchgänge – mit der Auswahllogik der Präsentation selbst (cycleQueue) über einen ganzen Umlauf geprüft
+      {
+        const qi = a.indexOf('function cycleQueue('), qj = a.indexOf('function loadCycle(');
+        const cycleQueue = new Function('project', 'location', 'localStorage', 'return (' + a.slice(qi, qj) + ')')(projekt, { search: '' }, { getItem: () => null });
+        const N = projekt.playback.cycles, zaehl = {}; let ok = N > 0, wetterTakt = true;
+        const speiseFolge = ['Lust auf Grünkohl?', 'Lust auf Sauerkraut?', 'Lust auf Kartoffeln?'];
+        for (let n = 1; n <= N; n++) {
+          const q = cycleQueue(n).map((k) => projekt.slides[k]);
+          const sp = q.filter((x) => /^Lust auf/.test(x.name)).map((x) => x.name);
+          if (sp.length !== 1 || sp[0] !== speiseFolge[(n - 1) % 3]) ok = false;
+          if (q.some((x) => x.name === 'Wetteraussichten') !== (n % 2 === 1)) wetterTakt = false;
+          const m = q.filter((x) => x.memberMeta); if (m.length !== 2) ok = false;
+          m.forEach((x) => { zaehl[x.memberMeta.name] = (zaehl[x.memberMeta.name] || 0) + 1; });
+        }
+        const werte = Object.values(zaehl);
+        p('A2: Durchgänge: je genau eine Speisenfolie (Grünkohl, Sauerkraut, Kartoffeln im Wechsel) und 2 Mitglieder', ok && N % 6 === 0, `Umlauf ${N}`);
+        p('A2: Durchgänge: Wetteraussichten nur in jedem zweiten Durchgang, auch über den Neustart hinweg', wetterTakt && N % 2 === 0);
+        p('A2: Durchgänge: alle sichtbaren Mitglieder im Umlauf gleich oft', werte.length === 13 && werte.every((w) => w === werte[0]), JSON.stringify(zaehl));
+        // 25.11.2026: wechselnde Sprüche – erster Auftritt eigener Spruch, danach jedes Mal ein anderer, nie doppelt im Durchgang
+        const plan = projekt.kcSpruchPlan || {}, je = {}; let planOk = !!projekt.kcSpruchPlan;
+        for (let n = 1; n <= N; n++) {
+          const m = cycleQueue(n).map((k) => projekt.slides[k]).filter((x) => x.memberMeta);
+          const t = m.map((x) => (plan[n] || {})[x.id]);
+          if (t.some((x) => !x) || new Set(t).size !== t.length) planOk = false;
+          m.forEach((x, i) => { (je[x.id] = je[x.id] || []).push(t[i]); });
+        }
+        const eigen = (id) => (projekt.slides.find((x) => x.id === id).items.find((i) => i.originalRole === 'memberQuote') || {}).text;
+        p('A2: Sprüche: je Auftritt laut Plan, im Durchgang nie doppelt, je Person im Umlauf nie wiederholt, erster Auftritt eigener Spruch',
+          planOk && Object.entries(je).every(([id, l]) => new Set(l).size === l.length && l[0] === eigen(id)) && Object.keys(je).length === 13);
+        p('A2: Sprüche: Präsentation setzt den Spruch je Durchgang aus dem Plan', a.includes("if(project.kcSpruchPlan){const kp=project.kcSpruchPlan[cycle]"));
+      }
+      const links = (s) => s.items.filter((i) => i.type === 'image').sort((x, y) => x.x - y.x)[0].name;
+      p('A2: Speisenfolien: links „mit“ (Mettendchen / Heringsstipp), rechts „ohne“', speisen.every(Boolean) && /Mettendchen/.test(links(speisen[0])) && /Mettendchen/.test(links(speisen[1])) && /Heringsstipp/.test(links(speisen[2])));
       const namen = mitglieder.filter((s) => s.rotation && s.rotation.enabled !== false).map((s) => (s.items.find((i) => i.originalRole === 'memberName') || {}).text);
       p('A2: ohne Fotos (18.11.2026): Mitglieder nur mit Vornamen, keine Fotos', namen.every((n) => n && !/\s/.test(n.replace('Hans-Joachim', 'X'))) && mitglieder.every((s) => !s.items.some((i) => i.originalRole === 'photo')), namen.join(', '));
       const mannschaft = projekt.slides.find((s) => s.name === 'Unsere Mannschaft');
@@ -136,7 +192,7 @@ function nachbauStarter() {
       p('A2: Wetterfolien: Regen/Schnee nur in den Kacheln, nicht über die ganze Folie', kachelFolien.length === 2 && kachelFolien.every((s) => !s.effectLayer.weatherAuto && ['type', 'type2', 'type3'].every((k) => s.effectLayer[k] === 'none')));
       p('A2: Regen dezent (nur jeder dritte Tropfen, schwach)', a.includes('.tvFx.rain{opacity:.32!important}.tvFx.rain i:not(:nth-child(3n)){display:none}') && !a.includes('.tvFx.rain i,.tvFx.storm i{zoom:1.7}'));
       const andere = projekt.slides.filter((s) => s !== schluss && !kachelFolien.includes(s) && !(s.effectLayer && s.effectLayer.weatherAuto && ['type', 'type2', 'type3'].every((k) => s.effectLayer[k] === 'none'))).map((s) => s.name);
-      p('A2: Effekte nur Schnee, Regen, Sonne nach echtem Wetter (alle Folien außer Schluss), Schlussfolie Feuerwerk', andere.length === 0 && schluss.effectLayer.type === 'fireworks' && !schluss.effectLayer.weatherAuto && a.includes("fx.weatherAuto?[kcWetterEffekt()]") && a.includes("a==='sun'?'sun':'none'") && !/function kcWetterEffekt\(\)\{[^}]*glitter/.test(a), andere.join(', '));
+      p('A2: Effekte nur Schnee oder Regen nach echtem Wetter, keine Sonne vor dem Abend-Rathaus (alle Folien außer Schluss), Schlussfolie Feuerwerk', andere.length === 0 && schluss.effectLayer.type === 'fireworks' && !schluss.effectLayer.weatherAuto && a.includes("fx.weatherAuto?[kcWetterEffekt()]") && a.includes("a==='rain'||a==='storm'?'rain':'none'}") && !/function kcWetterEffekt\(\)\{[^}]*'sun'/.test(a) && !/function kcWetterEffekt\(\)\{[^}]*glitter/.test(a), andere.join(', '));
       p('A2: Wetterkacheln zeigen das Wetter ihres Tages', a.includes('"originalRole":"wetter-tomorrow"') && a.includes('"originalRole":"wetter-day4"') && a.includes('kind:kcKachelArt(data.daily.weather_code[n])') && a.includes('.kcKw'));
       const ohneFotoNamen = mitglieder.filter((s) => s.rotation && s.rotation.enabled !== false).map((s) => { const n = s.items.find((i) => i.originalRole === 'memberName'), q = s.items.find((i) => i.originalRole === 'memberQuote'); return n.x === q.x && n.w === q.w; });
       p('A2: Vornamen-Feld genau so breit wie der Spruch', ohneFotoNamen.every(Boolean));
