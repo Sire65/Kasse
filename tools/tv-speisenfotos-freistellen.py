@@ -7,6 +7,7 @@
 # Mit --schale fuer eine Schuessel, deren graue Aussenwand dem Hintergrund aehnelt: die Unterkante wird spaltenweise von
 # unten gesucht (Kante hell oben / dunkel unten) und in den Umriss aufgenommen.
 # Mit --glatt wird der Umriss geglaettet (Ecken der konvexen Huelle werden rund).
+# Mit --bis-balken (Kassenfotos) wird erst direkt ueber dem Namensbalken abgeschnitten statt bei y=1010.
 # Aufruf: python3 tools/tv-speisenfotos-freistellen.py pos/assets/gruenkohl_version_3.png media/speisen/gruenkohl.webp
 #   gruenkohl -> gruenkohl, gruenkohl_wurst -> gruenkohl-mettendchen, sauerkraut -> sauerkraut,
 #   sauerkraut_wurst -> sauerkraut-mettendchen, creme_kartoffeln -> kartoffeln-kartoffelcreme, hering_kartoffeln -> kartoffeln-heringsstipp
@@ -16,7 +17,12 @@ args = [x for x in sys.argv[1:] if not x.startswith('--')]
 kassenrahmen = '--ohne-kassenrahmen' not in sys.argv
 src, dst = args[0], args[1]
 img = Image.open(src).convert('RGB')
-if kassenrahmen: img = img.crop((0, 0, 1254, 1010))   # Namensbalken (ab y=1014) weg
+if kassenrahmen:
+    if '--bis-balken' in sys.argv:  # genau bis zum braunen Namensbalken (Schuessel reicht tiefer als y=1010)
+        balken = next(y for y in range(900, img.height) if img.getpixel((40, y))[0] - img.getpixel((40, y))[2] > 60)
+        img = img.crop((0, 0, 1254, balken - 2))
+    else:
+        img = img.crop((0, 0, 1254, 1010))   # Namensbalken (ab y=1014) weg
 if '--teller' in sys.argv:  # ragt der Teller aus dem Bild, Rand um 40 px fortsetzen, damit der Umriss rund schliesst
     img = Image.fromarray(np.pad(np.asarray(img), ((40, 40), (40, 40), (0, 0)), mode='edge'))
 elif '--schale' in sys.argv and not kassenrahmen:  # Schuessel darf unten aus dem Bild ragen: unten 60 px fortsetzen

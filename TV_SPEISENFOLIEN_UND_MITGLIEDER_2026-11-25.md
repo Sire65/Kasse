@@ -82,3 +82,11 @@ niedriger gesetzt und nach oben gerückt. Ein Test prüft, dass nichts mehr in d
 - Kartoffeln mit Heringsstipp: Die Schüssel ragt im Original unten aus dem Bild. `--schale` ergänzt bei neu gelieferten
   Fotos die fehlende Unterkante als Bogen durch die sichtbaren Kantenpunkte (Bild unten um 60 px fortgesetzt), `--glatt`
   rundet den Umriss ab. Die Kassenfotos werden weiter unverändert erzeugt.
+
+## Schüsselböden vollständig (25.11.2026)
+
+Bei den Kassenfotos liegt der Schüsselboden zum Teil tiefer als y=1010, bisher wurde dort abgeschnitten. Deshalb war
+z. B. die Kartoffelcreme-Schüssel unten gerade abgeschnitten. Mit `--bis-balken` wird jetzt erst direkt über dem
+braunen Namensbalken abgeschnitten (dessen Lage wird je Foto erkannt). Alle Freisteller entstehen mit
+`bash tools/tv-speisenfotos-alle.sh`. Das Skript enthält die geprüften Einstellungen je Foto; beim Sauerkraut ohne Wurst
+reicht `--schale --glatt`, mit `--bis-balken` entstünde dort ein grauer Keil aus dem Schatten.
