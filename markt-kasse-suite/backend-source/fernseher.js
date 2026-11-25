@@ -63,7 +63,9 @@ function findeBrowser(env = process.env) {
 }
 
 function browserArgumente({ url, profil, bildschirm }) {
-  const a = ['--kiosk', url, '--edge-kiosk-type=fullscreen', '--no-first-run', '--no-default-browser-check',
+  // --disable-search-engine-choice-screen (25.11.2026): Chrome zeigt in einem neuen Profil sonst die Suchmaschinen-Auswahl
+  // (chrome://settings/search) vor der Präsentation; Edge ignoriert den Schalter.
+  const a = ['--kiosk', url, '--edge-kiosk-type=fullscreen', '--no-first-run', '--no-default-browser-check', '--disable-search-engine-choice-screen',
     '--disable-features=Translate,msEdgeSidebarV2', '--autoplay-policy=no-user-gesture-required',
     '--disable-session-crashed-bubble', '--hide-crash-restore-bubble', `--user-data-dir=${profil}`];
   if (bildschirm) a.push(`--window-position=${bildschirm.x + 20},${bildschirm.y + 20}`);
@@ -72,7 +74,13 @@ function browserArgumente({ url, profil, bildschirm }) {
 
 class Fernseher {
   constructor({ einstellungsDatei, datenOrdner, webserverPort, log = console.log, fehlerLog = console.error,
-    plattform = process.platform, bildschirmeErmitteln = bildschirmeWindows, browserFinden = findeBrowser, starter = spawn, wachTakt = 20000, bildschirmeErmittelnAsync = null } = {}) {
+    plattform = process.platform, bildschirmeErmitteln = bildschirmeWindows, browserFinden = findeBrowser, starter = spawn, wachTakt = 20000, bildschirmeErmittelnAsync = null, ausNachPruefungen = 3 } = {}) {
+    // 25.11.2026 (Betreiber-Protokoll am Stand: „Fernseher ist aus“ / „Fernseher erkannt“ im 20-s-Wechsel): EINE Abfrage mit
+    // weniger Bildschirmen schloss die Präsentation sofort – auch eine gescheiterte PowerShell-Abfrage (0 Bildschirme) oder
+    // ein kurzer HDMI-Aussetzer. Jetzt: 0 Bildschirme = Abfrage unklar, nichts tun; geschlossen wird erst, wenn der
+    // Fernseher bei ausNachPruefungen Prüfungen hintereinander fehlt (Standard 3 = rund eine Minute).
+    this.ausNachPruefungen = Math.max(1, ausNachPruefungen);
+    this._fehltSeit = 0;
     this.einstellungen = leseEinstellungen(einstellungsDatei);
     this.datenOrdner = datenOrdner;
     this.webserverPort = webserverPort;
@@ -143,10 +151,13 @@ class Fernseher {
     this.zustand.bildschirme = n;
     if (!this._erlaubt(n)) {
       if (this.zustand.laeuft && this._kind) {
+        if (n === 0) return n;   // Abfrage gescheitert – kein Beleg, dass der Fernseher aus ist
+        if (++this._fehltSeit < this.ausNachPruefungen) return n;   // kurzer Aussetzer? erst bei wiederholtem Fehlen schließen
+        this._fehltSeit = 0;
         this._absichtlichZu = true;
         try { this._kind.kill(); } catch (e) { /* weg */ }
         this.zustand.laeuft = false;
-        this.log('[Fernseher] Fernseher ist aus – Präsentation geschlossen (sie soll nicht auf dem kleinen Monitor laufen). Sie startet wieder, sobald der Fernseher an ist.');
+        this.log(`[Fernseher] Fernseher ist aus (Windows meldet ${n} Bildschirm${n === 1 ? '' : 'e'}, ${this.ausNachPruefungen}× hintereinander) – Präsentation geschlossen (sie soll nicht auf dem kleinen Monitor laufen). Sie startet wieder, sobald der Fernseher an ist.`);
       } else if (!this.zustand.wartet) {
         this.log(n === 0
           ? '[Fernseher] Bildschirme nicht erkennbar – Präsentation wartet (nicht auf dem kleinen Monitor). Fernseher einschalten, sie startet dann von selbst.'
@@ -155,6 +166,7 @@ class Fernseher {
       this.zustand.wartet = true;
       return n;
     }
+    this._fehltSeit = 0;
     const warteteVorher = !!this.zustand.wartet;
     this.zustand.wartet = false;
     if (!this.zustand.laeuft && !this._vomNutzerGeschlossen && !this._stopp) {

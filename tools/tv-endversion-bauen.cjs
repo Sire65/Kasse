@@ -34,6 +34,21 @@ const path = require('path');
 const PROGRAMM = require('./tv-programm-folien.cjs');
 const PREISE = require('./tv-preisfolien.cjs');
 const SPEISEN = require('./tv-speisenfolien.cjs');
+const QR = require('../pc-manager/vendor/qrcode-generator.js');
+
+// QR-Code „Lust, dabei zu sein?“ (Betreiber 25.11.2026): Mail an die Vereinsadresse statt der privaten Adresse des
+// Clubsprechers; die Adresse steht zusätzlich in Klarschrift unter dem Code.
+const CLUBSPRECHER_MAIL = 'Koecheclub-Werne@web.de';
+const CLUBSPRECHER_BETREFF = 'Interesse am Köcheclub Werne';
+function mailQr() {
+  const qr = QR(0, 'M');
+  qr.addData(`mailto:${CLUBSPRECHER_MAIL}?subject=${encodeURIComponent(CLUBSPRECHER_BETREFF)}`);
+  qr.make();
+  // feste Größe (nicht „scalable“): sonst hat das SVG keine Eigengröße und wird als Hintergrundbild verzerrt/abgeschnitten;
+  // 4 Module weißer Rand (Ruhezone), damit Handys den Code sicher erkennen
+  const svg = qr.createSvgTag(8, 32);
+  return 'data:image/svg+xml;base64,' + Buffer.from(svg).toString('base64');
+}
 
 const MIT_FOTOS = process.env.KC_TV_MIT_FOTOS === '1';
 const STAND = MIT_FOTOS ? '2026-11-17' : '2026-11-25';
@@ -219,12 +234,33 @@ function bearbeite(projekt, log, extras = {}) {
       if (item.name === 'official-qr-label') item.text = 'QR-Code scannen\nfür das Gesamtprogramm\nim Internet';
       if (item.name === 'join-copy') item.text = 'QR-Code scannen\nund dem Clubsprecher\neine E-Mail senden';
     }
+    if (folie.name === 'Mitmachen · QR-Code') {
+      const code = folie.items.find((i) => i.originalRole === 'photo');
+      // Code etwas kleiner, darunter die Adresse in Klarschrift (über der Fußzeile „Wir freuen uns …“ ab y=584)
+      setze(code, { src: mailQr(), fit: 'contain', x: 180, y: 160, w: 340, h: 340 });
+      folie.items.splice(folie.items.indexOf(code) + 1, 0, { ...folie.items.find((i) => i.name === 'join-copy'), id: `${folie.id}-mail`,
+        name: 'Clubsprecher-Mail', originalRole: 'text', text: CLUBSPRECHER_MAIL, x: 100, y: 508, w: 500, h: 52, font: 26, bold: true,
+        color: '#fff8e8', bg: 'rgba(10,5,4,.80)', fill: 'rgba(10,5,4,.80)', radius: 12, align: 'center', textScaleMode: 'fit' });
+      log.push(`„Lust, dabei zu sein?“: QR-Code an ${CLUBSPRECHER_MAIL}, Adresse in Klarschrift darunter`);
+    }
 
     // Rückblick: die Fotos sind vom Weihnachtsmarkt 2025
     if (/^Rückblick 2024/.test(folie.name)) {
       folie.name = folie.name.replace('2024', '2025');
       for (const item of folie.items) if (item.text) item.text = item.text.replace(/2024/g, '2025');
       log.push(`„${folie.name}“: Jahr 2025`);
+    }
+    // 25.11.2026: weitere Rückblick-Fotos vom Betreiber (media/rueckblick-2025/*.jpg) als eigene Folien nach Bild 3
+    if (folie.id === 'v4-old-photo-3' && extras.rueckblick && extras.rueckblick.length) {
+      const neu = extras.rueckblick.map((foto, k) => {
+        const f = JSON.parse(JSON.stringify(folie));
+        f.id = `kc-rueckblick-2025-${k + 4}`; f.name = `Rückblick 2025 - ${foto.name}`;
+        f.items.forEach((i, n) => { i.id = `${f.id}-${n}`; });
+        f.items.find((i) => i.name === 'Rückblickfoto').src = foto.src;
+        return f;
+      });
+      projekt.slides.splice(projekt.slides.indexOf(folie) + 1, 0, ...neu);
+      log.push(`Rückblick 2025: ${neu.length} weitere Fotos (${extras.rueckblick.map((x) => x.name).join(', ')})`);
     }
     // Impressionen ohne Foto vorerst ausblenden (nicht gelöscht)
     if (/^Impressionen \d/.test(folie.name) && !folie.items.some((i) => i.type === 'image' && i.src && !ZIER[i.name])) {
@@ -333,6 +369,7 @@ function bearbeite(projekt, log, extras = {}) {
 // Wetteraussichten in Durchgang 9 und gleich wieder in 1), ist die Zahl der Durchgänge das kleinste gemeinsame
 // Vielfache aller Takte: Speisen 3, Wetter 2, Mitglieder (Anzahl ÷ ggT(Anzahl, 2)).
 const MITGLIEDER_JE_DURCHGANG = 2;
+const FOTOS_JE_DURCHGANG = 2;
 
 // Wechselnde Sprüche (Betreiber 25.11.2026: „bei jedem Auftritt ein anderer Spruch, für alle Mitglieder“ – ausdrücklich
 // auch für die 9, die ihren Spruch im September selbst gewählt haben). Topf: alle 20 Sprüche der Spruch-Auswahl
@@ -388,6 +425,9 @@ function spruchPlan(projekt, log) {
 const SPEISEN_TAKT = ['Lust auf Grünkohl?', 'Lust auf Sauerkraut?', 'Lust auf Kartoffeln?'];
 const JEDER_ZWEITE = ['Wetteraussichten'];
 function durchgaengeFestlegen(projekt, log) {
+  // Rückblick-Fotos: Beschriftung „Bild n von N“ und 2 Fotos je Durchgang im Wechsel (Betreiber 25.11.2026)
+  const fotos = projekt.slides.filter((s) => /^Rückblick 2025/.test(s.name) && !(s.rotation && s.rotation.enabled === false));
+  fotos.forEach((f, k) => { const c = f.items.find((i) => i.name === 'group-caption'); if (c) c.text = `Weihnachtsmarkt 2025 · Bild ${k + 1} von ${fotos.length}`; });
   const ggt = (a, b) => (b ? ggt(b, a % b) : a), kgv = (a, b) => (a / ggt(a, b)) * b;
   const takt = (folie, jeX, ab) => { folie.rotation = { ...(folie.rotation || {}), everyX: jeX, skipCycles: jeX - 1, firstCycle: ab, exactCycles: '' }; };
   SPEISEN_TAKT.forEach((name, n) => { const f = projekt.slides.find((s) => s.name === name); if (f) takt(f, SPEISEN_TAKT.length, n + 1); });
@@ -396,9 +436,16 @@ function durchgaengeFestlegen(projekt, log) {
   const mitglieder = projekt.slides.filter((s) => (s.memberMeta || (s.rotation && s.rotation.member)) && !(s.rotation && s.rotation.enabled === false)).length;
   const takte = [SPEISEN_TAKT.length, 2, ...projekt.slides.map((s) => Number((s.rotation || {}).everyX) || 1)];
   if (mitglieder) takte.push(mitglieder / ggt(mitglieder, MITGLIEDER_JE_DURCHGANG));
+  const fotoJe = Math.min(FOTOS_JE_DURCHGANG, fotos.length);
+  if (fotos.length > fotoJe) takte.push(fotos.length / ggt(fotos.length, fotoJe));
   projekt.playback = { ...(projekt.playback || {}), cycles: takte.reduce(kgv, 1), loop: true };
+  if (fotos.length > fotoJe) {   // Durchgang n zeigt die Fotos (n-1)·2 und (n-1)·2+1 (reihum); als feste Durchgangsliste
+    const N = projekt.playback.cycles, liste = fotos.map(() => []);
+    for (let n = 1; n <= N; n++) for (let i = 0; i < fotoJe; i++) liste[((n - 1) * fotoJe + i) % fotos.length].push(n);
+    fotos.forEach((f, k) => { f.rotation = { ...(f.rotation || {}), everyX: 1, skipCycles: 0, firstCycle: 1, exactCycles: liste[k].join(',') }; });
+  }
   spruchPlan(projekt, log);
-  log.push(`Durchgänge: je eine Speisenfolie im Wechsel, Wetteraussichten jeder 2., ${MITGLIEDER_JE_DURCHGANG} von ${mitglieder} Mitgliedern je Durchgang, Umlauf ${projekt.playback.cycles} Durchgänge`);
+  log.push(`Durchgänge: je eine Speisenfolie im Wechsel, Wetteraussichten jeder 2., ${MITGLIEDER_JE_DURCHGANG} von ${mitglieder} Mitgliedern und ${fotoJe} von ${fotos.length} Rückblick-Fotos je Durchgang, Umlauf ${projekt.playback.cycles} Durchgänge`);
 }
 
 // Laufschrift auf allen Folien höher setzen; was bis in ihren Bereich reicht, wird angepasst:
@@ -605,6 +652,11 @@ if (require.main === module) {
   const extras = fs.existsSync(freisteller)
     ? { eierpunschFoto: `data:image/png;base64,${fs.readFileSync(freisteller).toString('base64')}`, eierpunschFreisteller: true }
     : fs.existsSync(foto) ? { eierpunschFoto: `data:image/jpeg;base64,${fs.readFileSync(foto).toString('base64')}` } : {};
+  // weitere Rückblick-Fotos 2025 (Dateiname „<Nr>-<name>.jpg“, Reihenfolge nach Nummer)
+  const rueckOrdner = path.join(__dirname, '..', 'media', 'rueckblick-2025');
+  if (fs.existsSync(rueckOrdner)) extras.rueckblick = fs.readdirSync(rueckOrdner).filter((d) => /\.jpe?g$/i.test(d)).sort((a, b) => parseInt(a) - parseInt(b))
+    .map((d) => ({ name: d.replace(/^\d+-/, '').replace(/\.jpe?g$/i, '').replace(/-/g, ' ').replace(/^./, (c) => c.toUpperCase()),
+      src: `data:image/jpeg;base64,${fs.readFileSync(path.join(rueckOrdner, d)).toString('base64')}` }));
   if (fs.existsSync(logoDatei)) extras.logoWeiss = `data:image/webp;base64,${fs.readFileSync(logoDatei).toString('base64')}`;
   const { html, log } = bauen(fs.readFileSync(quelle, 'utf8'), daten, extras);
   fs.writeFileSync(ziel, html);
