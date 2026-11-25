@@ -124,3 +124,34 @@ Der Rathaus-Hintergrund zeigt den Weihnachtsmarkt am Abend. Bei klarem Wetter er
 Wettereffekt; die gibt es jetzt nicht mehr. Über den Folien erscheinen nur noch Schnee oder Regen (nach dem echten Wetter
 in Werne), die Schlussfolie behält Feuerwerk. Die Wetterkacheln (heute, morgen, Aussichten) zeigen weiter die
 Tagesvorhersage, also auch eine Sonne.
+
+## Gesamtprüfung nach dem Merge (25.11.2026)
+
+Alle Folien bei 1920×1080 im Fernsehmodus durchgeklickt und automatisch vermessen: Ragt etwas aus der Folie, läuft Text
+über, überdecken sich Textfelder? Gefunden und behoben:
+
+- Speisenfolien: Preis- und Namensfelder liefen um 3 px über. Felder und Schrift neu bemessen, Preisschild ohne Innenabstand.
+- **Speisenfolien ohne Allergen-Kennzeichnung**, obwohl sie Preise zeigen. Jetzt steht unter jedem Preis die Kennzeichnung
+  wie auf den Preislisten und darunter eine Legende der Kennzeichen dieser Folie, auf dunklen Tafeln, damit sie vor dem
+  Pflaster lesbar sind. Quelle ist `tools/tv-preisfolien.cjs` (KENNZEICHEN, LEGENDE).
+- „Lust, dabei zu sein?“: Die zweizeilige Fußzeile war durch das Höhersetzen der Laufschrift gekürzt worden und lief über.
+  `laufschriftHoeher` kürzt kleine Felder jetzt nicht mehr, sondern rückt sie nach oben, höchstens bis zum nächsten
+  Textfeld darüber (sonst hätte „So können Sie … Kontakt aufnehmen“ auf „Spenden“ die QR-Beschriftungen überdeckt).
+- Titelfelder 110 statt 120 px hoch, damit sie nicht in die Tafeln darunter reichen (unsichtbar, aber sauber).
+- „Roter Feger mit Schuß“ → „Schuss“.
+
+Neuer Test `tests/tv-allergene-abgleich.test.cjs`: Er gleicht die Kennzeichen jedes Artikels auf Preis- und Speisenfolien
+gegen die Kasse ab (`etiketten/artikel.json`; enthaltene Allergene und Zusatzstoffe 1/2/3, Spuren stehen am Aushang).
+Alles stimmt überein.
+
+Live-Wetter (Open-Meteo) mit Netz geprüft: echte Werte für Werne in Kacheln und Laufschrift, keine Sonne über den Folien.
+
+Offen, nur mit Etikett oder Betreiberangabe zu klären (in Kasse und TV gleich):
+- Feuerzangenbowle ist nur mit L (Sulfite) gekennzeichnet. Laut Rezept besteht sie aus Glühwein, und der Glühwein trägt
+  L, 2, 3 (Kaliumsorbat). Vermutlich fehlen 2 und 3.
+- Eierlikörpunsch mit Weißwein: Ist es derselbe Glühwein weiß (dann ebenfalls 2, 3)?
+- Schuss Rum / Amaretto: In der Kasse ohne Angaben. Rum und Amaretto enthalten oft Zuckerkulör, das wäre „1 mit Farbstoff“.
+- Heringsstipp: Zusatzstoffe noch offen (Etiketten Hering, Mayonnaise, Gurken).
+- Kassler, Speck und Mettendchen: Die Konservierungsstoffe sind in der Kasse als „übliche Angabe, am Etikett prüfen“ vermerkt.
+- Grafik „Tipp vom Küchenchef“: Im Bild steht „Bringt Bitte eure …“ mit großem „B“. Das ist Text im Bild und nur mit
+  einer neuen Grafik zu ändern.
