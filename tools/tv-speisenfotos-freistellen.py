@@ -4,6 +4,8 @@
 # Mit --ohne-kassenrahmen fuer Fotos ohne Info-Symbol und Namensbalken (z. B. neu gelieferte Fotos, grauer Hintergrund).
 # Mit --teller fuer einen flachen weissen Teller auf hellem Grund (Rand kaum vom Hintergrund zu unterscheiden): der Umriss
 # wird als Ellipse an die Aussenkante des Tellers angepasst (Teller darf seitlich aus dem Bild ragen).
+# Mit --schale fuer eine Schuessel, deren graue Aussenwand dem Hintergrund aehnelt: die Unterkante wird spaltenweise von
+# unten gesucht (Kante hell oben / dunkel unten) und in den Umriss aufgenommen.
 # Aufruf: python3 tools/tv-speisenfotos-freistellen.py pos/assets/gruenkohl_version_3.png media/speisen/gruenkohl.webp
 #   gruenkohl -> gruenkohl, gruenkohl_wurst -> gruenkohl-mettendchen, sauerkraut -> sauerkraut,
 #   sauerkraut_wurst -> sauerkraut-mettendchen, creme_kartoffeln -> kartoffeln-kartoffelcreme, hering_kartoffeln -> kartoffeln-heringsstipp
@@ -21,6 +23,8 @@ yy, xx = np.mgrid[0:H, 0:W]
 icon = ((xx - 107) ** 2 + (yy - 107) ** 2 <= 94 ** 2) if kassenrahmen else np.zeros((H, W), bool)
 # Hintergrund-Modell: quadratische Flaeche aus dem Randstreifen (ohne Symbol)
 rand = np.zeros((H, W), bool); rand[:24] = rand[:, :24] = rand[:, -24:] = True; rand[-8:] = True; rand &= ~icon
+if not kassenrahmen:  # neu gelieferte Fotos: Randstreifen ohne Ausreisser (Schatten am Bildrand, angeschnittene Schuessel)
+    hel = a.mean(2); rand &= np.abs(hel - np.median(hel[rand])) < 20
 X = np.stack([np.ones(H * W), xx.ravel(), yy.ravel(), xx.ravel() ** 2, yy.ravel() ** 2, (xx * yy).ravel()], 1) / np.array([1, W, H, W * W, H * H, W * H])
 hg = np.zeros_like(a)
 for c in range(3):
@@ -73,6 +77,13 @@ else:
   lab, n = ndimage.label(hart)
   groesse = ndimage.sum(hart, lab, range(1, n + 1))
   kern = lab == (1 + int(np.argmax(groesse)))
+  if '--schale' in sys.argv:
+      Lb = np.asarray(img.convert('L').filter(ImageFilter.GaussianBlur(2))).astype(np.float64)
+      spalten = np.where(kern.any(0))[0]
+      for x in range(spalten.min(), spalten.max() + 1, 4):
+          oben = np.argmax(kern[:, x]) if kern[:, x].any() else H
+          for y in range(H - 20, oben, -1):
+              if Lb[y - 4, x] - Lb[y + 4, x] > 10: kern[oben:y, x] = True; break
   # Schuessel und Teller sind von aussen konvex: Umriss = konvexe Huelle (schliesst graue Randstellen, die dem Hintergrund aehneln)
   from scipy.spatial import ConvexHull
   from PIL import ImageDraw

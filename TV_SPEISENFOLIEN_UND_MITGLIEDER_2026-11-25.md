@@ -19,10 +19,10 @@ Gebaut mit `tools/tv-endversion-bauen.cjs` → `tv-player/weihnachtsmarkt-2026-v
 
 ### Fotos
 
-- **Kartoffeln mit Heringsstipp:** neues Foto vom Betreiber (25.11.2026), Heringsstipp über den Kartoffeln, kein ganzer
-  Fisch. Das Original liegt unter `media/speisen/quelle/kartoffeln-heringsstipp.png`, freigestellt mit
-  `python3 tools/tv-speisenfotos-freistellen.py media/speisen/quelle/kartoffeln-heringsstipp.png media/speisen/kartoffeln-heringsstipp.webp --ohne-kassenrahmen --teller`.
-  Der Teller ragt im Original links aus dem Bild. Der Rand wird deshalb fortgesetzt und der Umriss als Ellipse angepasst.
+- **Kartoffeln mit Heringsstipp:** neues Foto vom Betreiber (25.11.2026, zweite Fassung in der Schüssel), Heringsstipp
+  über den Kartoffeln, kein ganzer Fisch. Das Original liegt unter `media/speisen/quelle/kartoffeln-heringsstipp.png`, freigestellt mit
+  `python3 tools/tv-speisenfotos-freistellen.py media/speisen/quelle/kartoffeln-heringsstipp.png media/speisen/kartoffeln-heringsstipp.webp --ohne-kassenrahmen --schale`
+  (`--schale` nimmt die graue Außenwand der Schüssel mit; `--teller` ist für flache Teller auf hellem Grund).
 - **Grünkohl und Sauerkraut mit Mettendchen:** Hier bleiben die Kassenfotos mit ganzer Mettwurst (Betreiber 25.11.2026).
 - Ein Foto tauschst du aus, indem du es unter dem gleichen Namen in `media/speisen/` ablegst (`.webp` oder `.png` mit
   durchsichtigem Hintergrund; ein `.jpg` wird mit Goldrahmen gezeigt) und die Präsentation neu baust.
