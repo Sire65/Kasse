@@ -49,11 +49,11 @@ const MITGLIEDER = {
   'Christina Brösel': { vorname: 'Christina', name: 'Christina', foto: false, spruch: 'Ich engagiere mich gerne, weil unsere Arbeit nicht nur Freude macht, sondern auch einem guten Zweck dient.' },
   'Leon Wördemann': { vorname: 'Leon', name: 'Leon', foto: false, spruch: 'Besonders der Weihnachtsmarkt zeigt, was wir als Mannschaft gemeinsam leisten können.' },
   'Wilfried Wittwer': { vorname: 'Wilfried', name: 'Wilfried', foto: false, spruch: 'Für mich ist der Köcheclub ein Ort, an dem aus Berufskollegen echte Freunde geworden sind.' },
-  // Betreiber 25.11.2026: aufnehmen, Sprüche aus den noch freien der Spruch-Auswahl (Nr. 4, 6, 11, 13); Klaus hat zugestimmt
+  // Betreiber 25.11.2026: aufnehmen, Sprüche aus den noch freien der Spruch-Auswahl (Nr. 4, 6, 11, Karla Nr. 1); Klaus hat zugestimmt
   'Klaus Zander': { vorname: 'Klaus', name: 'Klaus', foto: false, spruch: 'Beim Köcheclub bin ich dabei, weil aus guten Ideen immer wieder tolle Aktionen entstehen.' },
   'Reinhilde Eggenstein': { vorname: 'Reinhilde', name: 'Reinhilde', foto: false, spruch: 'Unsere Treffen sind für mich eine gute Mischung aus Fachgesprächen, Freundschaft und Geselligkeit.' },
   'Marianne Bierkämper': { vorname: 'Marianne', name: 'Marianne', foto: false, spruch: 'Mir gefallen die freundschaftliche Atmosphäre und der offene Austausch innerhalb des Clubs.' },
-  'Karla Kazik': { vorname: 'Karla', name: 'Karla', foto: false, spruch: 'Gemeinsam planen, anpacken und anschließend zusammen feiern – genau das gefällt mir.' },
+  'Karla Kazik': { vorname: 'Karla', name: 'Karla', foto: false, spruch: 'Ich mache gerne mit, weil wir gemeinsam viel bewegen und dabei immer Spaß haben.' }, // Betreiber 25.11.2026: anderer Spruch (Nr. 1)
 };
 
 // ---- Allergene und Zusatzstoffe laut Kasse (etiketten/artikel.json, Stand 16.11.2026) ----

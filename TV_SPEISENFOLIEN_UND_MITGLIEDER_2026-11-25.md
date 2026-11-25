@@ -31,14 +31,14 @@ Gebaut mit `tools/tv-endversion-bauen.cjs` → `tv-player/weihnachtsmarkt-2026-v
 
 Seit dem 25.11.2026 sind auch Klaus (hat zugestimmt), Reinhilde, Marianne und Karla zu sehen: nur Vorname und Spruch, ohne
 Foto, wie bei allen anderen. Die Sprüche hat der Betreiber zuordnen lassen, jeweils ein in der Spruch-Auswahl noch freier
-Spruch (Nr. 4, 6, 11, 13). In Supabase (`kc_wm_spruch_zuordnung`) wurde dafür nichts geändert.
+Spruch (Nr. 4, 6, 11, 1). In Supabase (`kc_wm_spruch_zuordnung`) wurde dafür nichts geändert.
 
 | Mitglied | Spruch |
 |---|---|
 | Klaus | „Beim Köcheclub bin ich dabei, weil aus guten Ideen immer wieder tolle Aktionen entstehen.“ |
 | Reinhilde | „Unsere Treffen sind für mich eine gute Mischung aus Fachgesprächen, Freundschaft und Geselligkeit.“ |
 | Marianne | „Mir gefallen die freundschaftliche Atmosphäre und der offene Austausch innerhalb des Clubs.“ |
-| Karla | „Gemeinsam planen, anpacken und anschließend zusammen feiern – genau das gefällt mir.“ |
+| Karla | „Ich mache gerne mit, weil wir gemeinsam viel bewegen und dabei immer Spaß haben.“ |
 
 ## Nachgezogen
 
