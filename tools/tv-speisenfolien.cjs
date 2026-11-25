@@ -92,8 +92,8 @@ function folienEinbauen(projekt, log, { preise = kassenPreise(), foto = fotoLade
       items.push(textItem(basis, { id: `${folie.id}-${seite}-preis`, name: `Preis ${g.name}`, text: euro(preise[g.artikel]), x: x + 140, y: PREIS_Y, w: BREITE - 280, h: PREIS_H,
         font: 44, bold: true, color: '#ffd76a', bg: 'rgba(116,21,33,.92)', fill: 'rgba(116,21,33,.92)', radius: 28, stroke: '#d9aa3a', strokeWidth: 2 }));
     }
-    items.push(textItem(basis, { id: `${folie.id}-hinweis`, name: 'Hinweis Serviervorschlag', text: HINWEIS, x: 1020, y: 617, w: 190, h: 34,
-      font: 20, align: 'center', color: '#f3e9dc', textScaleMode: 'fixed', bg: 'rgba(14,9,7,.82)', fill: 'rgba(14,9,7,.82)', radius: 17,
+    items.push(textItem(basis, { id: `${folie.id}-hinweis`, name: 'Hinweis Serviervorschlag', text: HINWEIS, x: 1062, y: 618, w: 150, h: 30,
+      font: 17, align: 'center', color: '#f3e9dc', textScaleMode: 'fixed', bg: 'rgba(14,9,7,.82)', fill: 'rgba(14,9,7,.82)', radius: 17,
       stroke: 'rgba(217,170,58,.55)', strokeWidth: 1 }));
     // Laufschrift zuletzt (liegt oben)
     items.push(laufschrift);

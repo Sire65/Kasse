@@ -135,6 +135,9 @@ function nachbauStarter() {
         && ['Sauerkrauteintopf mit Mettendchen', '7,00 €', 'Sauerkrauteintopf', '5,50 €'].every((t) => texte(speisen[1]).includes(t))
         && ['Kartoffeln mit Heringsstipp', '4,50 €', 'Kartoffeln mit Kartoffelcreme', '3,50 €'].every((t) => texte(speisen[2]).includes(t)),
         speisen.map((s) => s ? texte(s).join('/') : '–').join(' | '));
+      const deckt = (a, b) => a.x < b.x + b.w && b.x < a.x + a.w && a.y < b.y + b.h && b.y < a.y + a.h;
+      p('A2: Speisenfolien: „Serviervorschlag“ überdeckt weder Preisschild noch Namen oder Foto',
+        speisen.every((s) => { const h = s && s.items.find((i) => i.text === 'Serviervorschlag'); return h && !s.items.some((i) => i !== h && i.type !== 'ticker' && i.originalRole !== 'title' && deckt(h, i)); }));
       const links = (s) => s.items.filter((i) => i.type === 'image').sort((x, y) => x.x - y.x)[0].name;
       p('A2: Speisenfolien: links „mit“ (Mettendchen / Heringsstipp), rechts „ohne“', speisen.every(Boolean) && /Mettendchen/.test(links(speisen[0])) && /Mettendchen/.test(links(speisen[1])) && /Heringsstipp/.test(links(speisen[2])));
       const namen = mitglieder.filter((s) => s.rotation && s.rotation.enabled !== false).map((s) => (s.items.find((i) => i.originalRole === 'memberName') || {}).text);
