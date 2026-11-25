@@ -19,7 +19,7 @@ Gebaut mit `tools/tv-endversion-bauen.cjs` → `tv-player/weihnachtsmarkt-2026-v
 
 ### Fotos
 
-- **Kartoffeln mit Heringsstipp:** neues Foto vom Betreiber (25.11.2026, zweite Fassung in der Schüssel), Heringsstipp
+- **Kartoffeln mit Heringsstipp:** neues Foto vom Betreiber (25.11.2026, dritte Fassung: Schüssel mit kleinen Kartoffeln), Heringsstipp
   über den Kartoffeln, kein ganzer Fisch. Das Original liegt unter `media/speisen/quelle/kartoffeln-heringsstipp.png`, freigestellt mit
   `python3 tools/tv-speisenfotos-freistellen.py media/speisen/quelle/kartoffeln-heringsstipp.png media/speisen/kartoffeln-heringsstipp.webp --ohne-kassenrahmen --schale`
   (`--schale` nimmt die graue Außenwand der Schüssel mit; `--teller` ist für flache Teller auf hellem Grund).
@@ -64,3 +64,11 @@ cp ende.html <WM-Pr-s.>/index.html                         # GitHub-Pages-Fassun
   `tv-designer-konsolidierung` grün, `tv-musik` ohne Beanstandung
 - `tests/allergene-weihnachtsmarkt-2026.test.cjs`: 4 Fehler (Info-Fenster Grünkohl in der Kasse), laut Commit vom 20.11.2026 schon vorher vorhanden,
   unabhängig von dieser Änderung
+
+## Laufschrift höher (25.11.2026)
+
+Die Laufschrift saß bei y=665 und war 48 px hoch. Damit endete sie nur 7 px über dem unteren Bildrand. Jetzt sitzt sie
+auf allen Folien bei y=652 und ist 40 px hoch, das lässt 28 px bis zum unteren Rand. Inhalte, die bis in diesen Bereich
+reichten (Preistafeln, Programmtafeln, Bildunterschriften, Wetterhinweis, QR-Fußzeilen, „Auf Wiedersehen 2027“), werden
+im Bauwerkzeug automatisch angepasst (`laufschriftHoeher`). Große Flächen werden dabei unten gekürzt, kleine Felder etwas
+niedriger gesetzt und nach oben gerückt. Ein Test prüft, dass nichts mehr in die Laufschrift ragt.

@@ -138,6 +138,11 @@ function nachbauStarter() {
       const deckt = (a, b) => a.x < b.x + b.w && b.x < a.x + a.w && a.y < b.y + b.h && b.y < a.y + a.h;
       p('A2: Speisenfolien: „Serviervorschlag“ überdeckt weder Preisschild noch Namen oder Foto',
         speisen.every((s) => { const h = s && s.items.find((i) => i.text === 'Serviervorschlag'); return h && !s.items.some((i) => i !== h && i.type !== 'ticker' && i.originalRole !== 'title' && deckt(h, i)); }));
+      // 25.11.2026: Laufschrift höher (nicht zu nah am unteren TV-Rand), nichts ragt in sie hinein
+      const tickerAlle = projekt.slides.flatMap((s) => s.items.filter((i) => i.type === 'ticker'));
+      p('A2: Laufschrift auf allen Folien höher (y=652, unten 28 px Rand), kein Inhalt ragt hinein',
+        tickerAlle.length > 0 && tickerAlle.every((i) => i.y === 652 && i.y + i.h <= 692)
+        && projekt.slides.every((s) => s.items.every((i) => i.type === 'ticker' || i.y >= 652 || i.y + i.h <= 644)));
       const links = (s) => s.items.filter((i) => i.type === 'image').sort((x, y) => x.x - y.x)[0].name;
       p('A2: Speisenfolien: links „mit“ (Mettendchen / Heringsstipp), rechts „ohne“', speisen.every(Boolean) && /Mettendchen/.test(links(speisen[0])) && /Mettendchen/.test(links(speisen[1])) && /Heringsstipp/.test(links(speisen[2])));
       const namen = mitglieder.filter((s) => s.rotation && s.rotation.enabled !== false).map((s) => (s.items.find((i) => i.originalRole === 'memberName') || {}).text);

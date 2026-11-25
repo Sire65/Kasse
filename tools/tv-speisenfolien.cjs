@@ -51,12 +51,12 @@ function fotoLaden(name, ordner = path.join(WURZEL, 'media', 'speisen')) {
   throw new Error(`Foto für die Speisenfolie fehlt: media/speisen/${name}.webp`);
 }
 
-// ---- Raster (Folie 1280×720, Laufschrift ab y=665) ----
+// ---- Raster (Folie 1280×720, Laufschrift ab y=652, Inhalt endet spätestens bei y=644) ----
 const SPALTE = { links: 95, rechts: 685 }; // Breite je Spalte 500
 const BREITE = 500;
-const FOTO_Y = 150, FOTO_H = 380;
-const NAME_Y = 538, NAME_H = 50;
-const PREIS_Y = 590, PREIS_H = 56;
+const FOTO_Y = 148, FOTO_H = 372;
+const NAME_Y = 526, NAME_H = 50;
+const PREIS_Y = 582, PREIS_H = 56;
 
 function textItem(basis, werte) {
   return { ...basis, type: 'text', originalRole: 'text', src: '', opacity: 100, rotation: 0, wrap: true, locked: false, hidden: false,
@@ -92,7 +92,7 @@ function folienEinbauen(projekt, log, { preise = kassenPreise(), foto = fotoLade
       items.push(textItem(basis, { id: `${folie.id}-${seite}-preis`, name: `Preis ${g.name}`, text: euro(preise[g.artikel]), x: x + 140, y: PREIS_Y, w: BREITE - 280, h: PREIS_H,
         font: 44, bold: true, color: '#ffd76a', bg: 'rgba(116,21,33,.92)', fill: 'rgba(116,21,33,.92)', radius: 28, stroke: '#d9aa3a', strokeWidth: 2 }));
     }
-    items.push(textItem(basis, { id: `${folie.id}-hinweis`, name: 'Hinweis Serviervorschlag', text: HINWEIS, x: 1062, y: 618, w: 150, h: 30,
+    items.push(textItem(basis, { id: `${folie.id}-hinweis`, name: 'Hinweis Serviervorschlag', text: HINWEIS, x: 1062, y: 610, w: 150, h: 30,
       font: 17, align: 'center', color: '#f3e9dc', textScaleMode: 'fixed', bg: 'rgba(14,9,7,.82)', fill: 'rgba(14,9,7,.82)', radius: 17,
       stroke: 'rgba(217,170,58,.55)', strokeWidth: 1 }));
     // Laufschrift zuletzt (liegt oben)

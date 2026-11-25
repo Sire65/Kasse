@@ -103,7 +103,10 @@ const WETTER = {
 const TITEL = { x: 80, y: 25, w: 1120, h: 120, font: 66 };
 const ZIER = { 'Grafik 12': { x: 1155, y: 0, w: 71, h: 71 }, 'Grafik 14': { x: 1168, y: 90, w: 46, h: 46 } };
 const FOTO = { x: 105, y: 165, w: 450, h: 470 };
-const UNTEN = 655; // Oberkante Laufschrift (665) minus Abstand
+// Laufschrift höher (Betreiber 25.11.2026: „nicht zu nah am unteren TV-Rand“): vorher y=665, 48 hoch (7 px Rand),
+// jetzt y=652, 40 hoch – 28 px bis zum unteren Rand. Inhalte enden spätestens 8 px darüber (UNTEN).
+const LAUFSCHRIFT = { y: 652, h: 40 };
+const UNTEN = LAUFSCHRIFT.y - 8; // Oberkante Laufschrift minus Abstand
 
 // ---- Wetter als Effekt: siehe bearbeite() (18.11.2026: auf allen Folien nur Schnee, Regen oder Sonne, Schlussfolie Feuerwerk) ----
 // Wetterkacheln: welcher Tag gehört zu welcher Kachel
@@ -313,7 +316,26 @@ function bearbeite(projekt, log, extras = {}) {
       log.push(`Mitglied ${name}: „${m.name}“, ${m.foto && foto ? 'mit' : 'ohne'} Foto, Spruch aus der Auswahl`);
     }
   }
+  laufschriftHoeher(projekt, log);
   return projekt;
+}
+
+// Laufschrift auf allen Folien höher setzen; was bis in ihren Bereich reicht, wird angepasst:
+// große Flächen (Tafeln, Bilder ab 200 px Höhe) werden unten gekürzt, kleine Felder bis zu einem Viertel niedriger
+// und der Rest nach oben gerückt.
+function laufschriftHoeher(projekt, log) {
+  let angepasst = 0;
+  for (const folie of projekt.slides) {
+    for (const item of folie.items) {
+      if (item.type === 'ticker') { setze(item, LAUFSCHRIFT); continue; }
+      const ueber = item.y + item.h - UNTEN;
+      if (ueber <= 0 || item.y >= LAUFSCHRIFT.y) continue;
+      if (item.h >= 200) item.h -= ueber;
+      else { const kuerzer = Math.min(ueber, Math.floor(item.h / 4)); item.h -= kuerzer; item.y -= ueber - kuerzer; }
+      angepasst++;
+    }
+  }
+  log.push(`Laufschrift höher (y=${LAUFSCHRIFT.y}, Höhe ${LAUFSCHRIFT.h}), ${angepasst} Felder darüber angepasst`);
 }
 
 // Wetterkacheln: Regen/Schnee/Sonne/Wolken/Gewitter des jeweiligen Tages als Bewegung hinter dem Text.
