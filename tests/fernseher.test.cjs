@@ -145,6 +145,25 @@ function nachbauStarter() {
         && projekt.slides.every((s) => s.items.every((i) => i.type === 'ticker' || i.y >= 652 || i.y + i.h <= 644)));
       p('A2: Speisenfolien: beide Fotos gleich breit und unten auf einer Linie', speisen.every((s) => { const f = s && s.items.filter((i) => i.type === 'image');
         return f && f.length === 2 && f[0].w === f[1].w && f[0].y + f[0].h === f[1].y + f[1].h; }));
+      // 25.11.2026: Durchgänge – mit der Auswahllogik der Präsentation selbst (cycleQueue) über einen ganzen Umlauf geprüft
+      {
+        const qi = a.indexOf('function cycleQueue('), qj = a.indexOf('function loadCycle(');
+        const cycleQueue = new Function('project', 'location', 'localStorage', 'return (' + a.slice(qi, qj) + ')')(projekt, { search: '' }, { getItem: () => null });
+        const N = projekt.playback.cycles, zaehl = {}; let ok = N > 0, wetterTakt = true;
+        const speiseFolge = ['Lust auf Grünkohl?', 'Lust auf Sauerkraut?', 'Lust auf Kartoffeln?'];
+        for (let n = 1; n <= N; n++) {
+          const q = cycleQueue(n).map((k) => projekt.slides[k]);
+          const sp = q.filter((x) => /^Lust auf/.test(x.name)).map((x) => x.name);
+          if (sp.length !== 1 || sp[0] !== speiseFolge[(n - 1) % 3]) ok = false;
+          if (q.some((x) => x.name === 'Wetteraussichten') !== (n % 2 === 1)) wetterTakt = false;
+          const m = q.filter((x) => x.memberMeta); if (m.length !== 2) ok = false;
+          m.forEach((x) => { zaehl[x.memberMeta.name] = (zaehl[x.memberMeta.name] || 0) + 1; });
+        }
+        const werte = Object.values(zaehl);
+        p('A2: Durchgänge: je genau eine Speisenfolie (Grünkohl, Sauerkraut, Kartoffeln im Wechsel) und 2 Mitglieder', ok && N % 6 === 0, `Umlauf ${N}`);
+        p('A2: Durchgänge: Wetteraussichten nur in jedem zweiten Durchgang, auch über den Neustart hinweg', wetterTakt && N % 2 === 0);
+        p('A2: Durchgänge: alle sichtbaren Mitglieder im Umlauf gleich oft', werte.length === 13 && werte.every((w) => w === werte[0]), JSON.stringify(zaehl));
+      }
       const links = (s) => s.items.filter((i) => i.type === 'image').sort((x, y) => x.x - y.x)[0].name;
       p('A2: Speisenfolien: links „mit“ (Mettendchen / Heringsstipp), rechts „ohne“', speisen.every(Boolean) && /Mettendchen/.test(links(speisen[0])) && /Mettendchen/.test(links(speisen[1])) && /Heringsstipp/.test(links(speisen[2])));
       const namen = mitglieder.filter((s) => s.rotation && s.rotation.enabled !== false).map((s) => (s.items.find((i) => i.originalRole === 'memberName') || {}).text);

@@ -317,7 +317,29 @@ function bearbeite(projekt, log, extras = {}) {
     }
   }
   laufschriftHoeher(projekt, log);
+  durchgaengeFestlegen(projekt, log);
   return projekt;
+}
+
+// Durchgänge (Betreiber 25.11.2026): je Durchgang genau eine Speisenfolie (1 Grünkohl, 2 Sauerkraut, 3 Kartoffeln, dann
+// wieder von vorn), Wetteraussichten nur in jedem zweiten Durchgang, Mitglieder nur 2 je Durchgang (der Reihe nach).
+// Die Präsentation beginnt nach playback.cycles Durchgängen von vorn. Damit an dieser Stelle kein Takt bricht (z. B.
+// Wetteraussichten in Durchgang 9 und gleich wieder in 1), ist die Zahl der Durchgänge das kleinste gemeinsame
+// Vielfache aller Takte: Speisen 3, Wetter 2, Mitglieder (Anzahl ÷ ggT(Anzahl, 2)).
+const MITGLIEDER_JE_DURCHGANG = 2;
+const SPEISEN_TAKT = ['Lust auf Grünkohl?', 'Lust auf Sauerkraut?', 'Lust auf Kartoffeln?'];
+const JEDER_ZWEITE = ['Wetteraussichten'];
+function durchgaengeFestlegen(projekt, log) {
+  const ggt = (a, b) => (b ? ggt(b, a % b) : a), kgv = (a, b) => (a / ggt(a, b)) * b;
+  const takt = (folie, jeX, ab) => { folie.rotation = { ...(folie.rotation || {}), everyX: jeX, skipCycles: jeX - 1, firstCycle: ab, exactCycles: '' }; };
+  SPEISEN_TAKT.forEach((name, n) => { const f = projekt.slides.find((s) => s.name === name); if (f) takt(f, SPEISEN_TAKT.length, n + 1); });
+  for (const name of JEDER_ZWEITE) { const f = projekt.slides.find((s) => s.name === name); if (f) takt(f, 2, 1); }
+  projekt.rotationSettings = { ...(projekt.rotationSettings || {}), memberMode: 'rotation', memberBatchSize: MITGLIEDER_JE_DURCHGANG };
+  const mitglieder = projekt.slides.filter((s) => (s.memberMeta || (s.rotation && s.rotation.member)) && !(s.rotation && s.rotation.enabled === false)).length;
+  const takte = [SPEISEN_TAKT.length, 2, ...projekt.slides.map((s) => Number((s.rotation || {}).everyX) || 1)];
+  if (mitglieder) takte.push(mitglieder / ggt(mitglieder, MITGLIEDER_JE_DURCHGANG));
+  projekt.playback = { ...(projekt.playback || {}), cycles: takte.reduce(kgv, 1), loop: true };
+  log.push(`Durchgänge: je eine Speisenfolie im Wechsel, Wetteraussichten jeder 2., ${MITGLIEDER_JE_DURCHGANG} von ${mitglieder} Mitgliedern je Durchgang, Umlauf ${projekt.playback.cycles} Durchgänge`);
 }
 
 // Laufschrift auf allen Folien höher setzen; was bis in ihren Bereich reicht, wird angepasst:

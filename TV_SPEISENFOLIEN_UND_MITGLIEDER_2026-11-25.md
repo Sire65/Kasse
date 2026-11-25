@@ -90,3 +90,16 @@ z. B. die Kartoffelcreme-Schüssel unten gerade abgeschnitten. Mit `--bis-balken
 braunen Namensbalken abgeschnitten (dessen Lage wird je Foto erkannt). Alle Freisteller entstehen mit
 `bash tools/tv-speisenfotos-alle.sh`. Das Skript enthält die geprüften Einstellungen je Foto; beim Sauerkraut ohne Wurst
 reicht `--schale --glatt`, mit `--bis-balken` entstünde dort ein grauer Keil aus dem Schatten.
+
+## Durchgänge (25.11.2026)
+
+Festgelegt im Bauwerkzeug (`durchgaengeFestlegen`):
+
+- In jedem Durchgang läuft genau eine Speisenfolie: Durchgang 1 Grünkohl, 2 Sauerkraut, 3 Kartoffeln, dann wieder von vorn.
+- „Wetteraussichten“ läuft nur in jedem zweiten Durchgang (1, 3, 5 …).
+- Mitglieder: 2 je Durchgang, der Reihe nach (vorher liefen alle 13 in jedem Durchgang).
+- Nach 78 Durchgängen beginnt die Präsentation von vorn. 78 ist das kleinste gemeinsame Vielfache der Takte (Speisen 3,
+  Wetter 2, Mitglieder 13), daher bricht beim Neustart kein Takt und jedes Mitglied kommt im Umlauf gleich oft (12-mal).
+  Vorher waren es 9 Durchgänge; dabei liefen die Wetteraussichten in Durchgang 9 und gleich wieder in Durchgang 1.
+
+Ein Test prüft das mit der Auswahllogik der Präsentation selbst über einen ganzen Umlauf.
