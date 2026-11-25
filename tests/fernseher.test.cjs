@@ -36,7 +36,7 @@ function nachbauStarter() {
       bildschirmeErmitteln: () => [MONITOR, TV], browserFinden: () => 'C:\\Edge\\msedge.exe', starter: s.starter, log: (x) => log.push(x), fehlerLog: (x) => log.push(x) });
     const r = f.start();
     const a = s.aufrufe[0] && s.aufrufe[0].args;
-    p('A: Fernseher + Monitor: Edge startet im Kiosk-Vollbild mit der Präsentation', r.gestartet && a.includes('--kiosk') && a.includes('http://127.0.0.1:8090/tv-player/fernseher.html') && a.includes('--edge-kiosk-type=fullscreen'));
+    p('A: Fernseher + Monitor: Edge startet im Kiosk-Vollbild mit der Präsentation', r.gestartet && a.includes('--kiosk') && a.includes('http://127.0.0.1:8090/tv-player/fernseher.html?spar=1') && a.includes('--edge-kiosk-type=fullscreen'));
     p('A: … auf dem Fernseher (nicht Hauptanzeige), nicht auf dem Monitor', a.includes('--window-position=1300,20'), a.find((x) => x.startsWith('--window-position')));
     p('A: … ohne Erststart-Dialoge (keine Suchmaschinen-Auswahl chrome://settings/search, kein Standardbrowser-Hinweis)', ['--no-first-run', '--no-default-browser-check', '--disable-search-engine-choice-screen'].every((x) => a.includes(x)));
     p('A: … mit eigenem Browser-Profil im Datenordner (Einstellungen greifen sicher)', a.some((x) => x === `--user-data-dir=${path.join(ARBEIT, 'fernseher-browser')}`));
@@ -88,6 +88,15 @@ function nachbauStarter() {
     const r = f.start();
     p('A: „einBildschirm“: true -> Präsentation auf dem einzigen Bildschirm, PC-Manager nicht davor', r.gestartet && r.einBildschirm && log.some((x) => /PC-Manager wird nicht davor geöffnet/.test(x)));
     f.stop();
+  }
+  {
+    // Sparmodus (25.11.2026): Standard an, abschaltbar; Hülle schaltet Dauer-Effekte ab und drosselt die Laufschrift
+    const an = new Fernseher({ einstellungsDatei: einst({ aktiv: true }), datenOrdner: ARBEIT, webserverPort: 8090 });
+    const aus = new Fernseher({ einstellungsDatei: einst({ aktiv: true, sparmodus: false, rand: 3 }), datenOrdner: ARBEIT, webserverPort: 8090 });
+    p('A: Sparmodus ist Standard (?spar=1), „sparmodus“: false schaltet ihn ab', /\?spar=1$/.test(an.url) && /\?rand=3$/.test(aus.url), `${an.url} | ${aus.url}`);
+    const huelle = fs.readFileSync(path.join(WURZEL, 'tv-player', 'fernseher.html'), 'utf8');
+    p('A: Sparmodus: Dauer-Effekte aus (Schnee, Funken, Feuerwerk …), Laufschrift bleibt', /var SPAR = q\.get\('spar'\) === '1'/.test(huelle) && /\{animation:none!important\}/.test(huelle) && /ticker\|lauf/.test(huelle) && /\.tvFx,\.tvFireworkBurst/.test(huelle));
+    p('A: Sparmodus: Laufschrift mit 20 Schritten je Sekunde statt 60 Bildern', /dauer \/ 1000 \* 20/.test(huelle) && /updateTiming\(\{ easing: 'steps\('/.test(huelle));
   }
   {
     const s = nachbauStarter();
