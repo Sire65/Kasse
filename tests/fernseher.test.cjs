@@ -163,6 +163,18 @@ function nachbauStarter() {
         p('A2: Durchgänge: je genau eine Speisenfolie (Grünkohl, Sauerkraut, Kartoffeln im Wechsel) und 2 Mitglieder', ok && N % 6 === 0, `Umlauf ${N}`);
         p('A2: Durchgänge: Wetteraussichten nur in jedem zweiten Durchgang, auch über den Neustart hinweg', wetterTakt && N % 2 === 0);
         p('A2: Durchgänge: alle sichtbaren Mitglieder im Umlauf gleich oft', werte.length === 13 && werte.every((w) => w === werte[0]), JSON.stringify(zaehl));
+        // 25.11.2026: wechselnde Sprüche – erster Auftritt eigener Spruch, danach jedes Mal ein anderer, nie doppelt im Durchgang
+        const plan = projekt.kcSpruchPlan || {}, je = {}; let planOk = !!projekt.kcSpruchPlan;
+        for (let n = 1; n <= N; n++) {
+          const m = cycleQueue(n).map((k) => projekt.slides[k]).filter((x) => x.memberMeta);
+          const t = m.map((x) => (plan[n] || {})[x.id]);
+          if (t.some((x) => !x) || new Set(t).size !== t.length) planOk = false;
+          m.forEach((x, i) => { (je[x.id] = je[x.id] || []).push(t[i]); });
+        }
+        const eigen = (id) => (projekt.slides.find((x) => x.id === id).items.find((i) => i.originalRole === 'memberQuote') || {}).text;
+        p('A2: Sprüche: je Auftritt laut Plan, im Durchgang nie doppelt, je Person im Umlauf nie wiederholt, erster Auftritt eigener Spruch',
+          planOk && Object.entries(je).every(([id, l]) => new Set(l).size === l.length && l[0] === eigen(id)) && Object.keys(je).length === 13);
+        p('A2: Sprüche: Präsentation setzt den Spruch je Durchgang aus dem Plan', a.includes("if(project.kcSpruchPlan){const kp=project.kcSpruchPlan[cycle]"));
       }
       const links = (s) => s.items.filter((i) => i.type === 'image').sort((x, y) => x.x - y.x)[0].name;
       p('A2: Speisenfolien: links „mit“ (Mettendchen / Heringsstipp), rechts „ohne“', speisen.every(Boolean) && /Mettendchen/.test(links(speisen[0])) && /Mettendchen/.test(links(speisen[1])) && /Heringsstipp/.test(links(speisen[2])));

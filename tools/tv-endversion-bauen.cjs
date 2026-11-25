@@ -19,6 +19,9 @@
  *
  * Am 20.11.2026: Laufschrift „Öffnungszeiten Weihnachtsmarkt“ und eigener Block „Öffnungszeiten Köcheclub“, Annes Spruch
  *   (war zuerst nur in tv-player/weihnachtsmarkt-2026-version-a.html eingetragen, jetzt hier an der Quelle).
+ * Am 25.11.2026 (später): Mitglieder zeigen bei jedem Auftritt einen anderen Spruch aus dem ganzen Katalog – ausdrücklich
+ *   auch die, die ihren Spruch selbst gewählt haben (Betreiber: „B, und bei jedem Auftritt“); erster Auftritt bleibt der
+ *   eigene Spruch. Siehe spruchPlan().
  * Am 25.11.2026: Reinhilde, Klaus, Marianne und Karla mit Spruch (Klaus hat zugestimmt; Sprüche vom Betreiber zugeordnet,
  *   je ein noch freier Spruch aus der Spruch-Auswahl). Neue Speisenfolien „Lust auf Grünkohl/Sauerkraut/Kartoffeln?“ –
  *   siehe tools/tv-speisenfolien.cjs.
@@ -327,6 +330,58 @@ function bearbeite(projekt, log, extras = {}) {
 // Wetteraussichten in Durchgang 9 und gleich wieder in 1), ist die Zahl der Durchgänge das kleinste gemeinsame
 // Vielfache aller Takte: Speisen 3, Wetter 2, Mitglieder (Anzahl ÷ ggT(Anzahl, 2)).
 const MITGLIEDER_JE_DURCHGANG = 2;
+
+// Wechselnde Sprüche (Betreiber 25.11.2026: „bei jedem Auftritt ein anderer Spruch, für alle Mitglieder“ – ausdrücklich
+// auch für die 9, die ihren Spruch im September selbst gewählt haben). Topf: alle 20 Sprüche der Spruch-Auswahl
+// (Supabase kc_wm_spruch_katalog, Stand 23.09.2026; Nr. 18 in Annes Fassung vom 20.11.2026).
+const SPRUCH_KATALOG = [
+  'Ich mache gerne mit, weil wir gemeinsam viel bewegen und dabei immer Spaß haben.',
+  'Zu unseren Treffen komme ich gerne, weil der Austausch unter Kollegen einfach wertvoll ist.',
+  'Ich bringe mich gerne ein, weil mir Gemeinschaft und soziales Engagement wichtig sind.',
+  'Beim Köcheclub bin ich dabei, weil aus guten Ideen immer wieder tolle Aktionen entstehen.',
+  'Ich schätze besonders den Zusammenhalt und die vielen schönen gemeinsamen Erlebnisse.',
+  'Unsere Treffen sind für mich eine gute Mischung aus Fachgesprächen, Freundschaft und Geselligkeit.',
+  'Ich helfe gerne mit, wenn wir gemeinsam etwas für andere Menschen erreichen können.',
+  'Der Köcheclub bedeutet für mich Teamgeist, Verlässlichkeit und viel Freude an gemeinsamen Projekten.',
+  'Ich bin gerne dabei, weil jeder seine Erfahrungen, Ideen und persönlichen Stärken einbringen kann.',
+  'Besonders der Weihnachtsmarkt zeigt, was wir als Mannschaft gemeinsam leisten können.',
+  'Mir gefallen die freundschaftliche Atmosphäre und der offene Austausch innerhalb des Clubs.',
+  'Ich unterstütze den Köcheclub gerne, weil Tradition und neue Ideen hier gut zusammenpassen.',
+  'Gemeinsam planen, anpacken und anschließend zusammen feiern – genau das gefällt mir.',
+  'Ich komme gerne zu den Treffen, weil es immer interessante Gespräche und viel zu lachen gibt.',
+  'Für mich ist der Köcheclub ein Ort, an dem aus Berufskollegen echte Freunde geworden sind.',
+  'Ich engagiere mich gerne, weil unsere Arbeit nicht nur Freude macht, sondern auch einem guten Zweck dient.',
+  'Im Köcheclub kann ich meine Erfahrungen weitergeben und gleichzeitig immer wieder Neues lernen.',
+  'Ich bin gerne im Köcheclub, denn helfende Hände werden immer gebraucht.',
+  'Ich bin gerne dabei, weil wir hier mit Herz und Hand für andere kochen.',
+  'Für mich gehört der Köcheclub einfach dazu – gute Leute, gutes Essen und eine gute Sache.',
+];
+
+// Plan je Durchgang: welches Mitglied welchen Spruch zeigt. Erster Auftritt = der bisherige Spruch des Mitglieds, danach
+// der Reihe nach durch den Topf; im Umlauf nie zweimal derselbe Spruch für dieselbe Person, und die zwei Mitglieder eines
+// Durchgangs nie mit demselben Spruch. Auswahl der Mitglieder wie in der Präsentation (cycleQueue, memberMode „rotation“).
+function spruchPlan(projekt, log) {
+  const mitglieder = projekt.slides.filter((s) => (s.memberMeta || (s.rotation && s.rotation.member)) && !(s.rotation && s.rotation.enabled === false));
+  if (!mitglieder.length) return;
+  const zitat = (s) => (s.items.find((i) => i.originalRole === 'memberQuote') || {}).text || '';
+  const roh = (t) => t.replace(/^„|“$/g, '');
+  const N = projekt.playback.cycles, batch = Math.max(1, Math.min(mitglieder.length, MITGLIEDER_JE_DURCHGANG));
+  const plan = {}, benutzt = new Map(mitglieder.map((s) => [s.id, new Set()]));
+  const start = new Map(mitglieder.map((s) => { const i = SPRUCH_KATALOG.indexOf(roh(zitat(s))); if (i < 0) throw new Error(`Spruch von ${s.memberMeta && s.memberMeta.name} nicht im Katalog.`); return [s.id, i]; }));
+  for (let n = 1; n <= N; n++) {
+    const anfang = ((n - 1) * batch) % mitglieder.length, imDurchgang = new Set();
+    plan[n] = {};
+    for (let i = 0; i < batch; i++) {
+      const s = mitglieder[(anfang + i) % mitglieder.length], schon = benutzt.get(s.id);
+      if (schon.size >= SPRUCH_KATALOG.length) schon.clear();
+      let k = start.get(s.id);
+      for (let v = 0; v < SPRUCH_KATALOG.length; v++, k = (k + 1) % SPRUCH_KATALOG.length) if (!schon.has(k) && !imDurchgang.has(k)) break;
+      schon.add(k); imDurchgang.add(k); plan[n][s.id] = `„${SPRUCH_KATALOG[k]}“`;
+    }
+  }
+  projekt.kcSpruchPlan = plan;
+  log.push(`Wechselnde Sprüche: ${mitglieder.length} Mitglieder, ${SPRUCH_KATALOG.length} Sprüche, Plan für ${N} Durchgänge`);
+}
 const SPEISEN_TAKT = ['Lust auf Grünkohl?', 'Lust auf Sauerkraut?', 'Lust auf Kartoffeln?'];
 const JEDER_ZWEITE = ['Wetteraussichten'];
 function durchgaengeFestlegen(projekt, log) {
@@ -339,6 +394,7 @@ function durchgaengeFestlegen(projekt, log) {
   const takte = [SPEISEN_TAKT.length, 2, ...projekt.slides.map((s) => Number((s.rotation || {}).everyX) || 1)];
   if (mitglieder) takte.push(mitglieder / ggt(mitglieder, MITGLIEDER_JE_DURCHGANG));
   projekt.playback = { ...(projekt.playback || {}), cycles: takte.reduce(kgv, 1), loop: true };
+  spruchPlan(projekt, log);
   log.push(`Durchgänge: je eine Speisenfolie im Wechsel, Wetteraussichten jeder 2., ${MITGLIEDER_JE_DURCHGANG} von ${mitglieder} Mitgliedern je Durchgang, Umlauf ${projekt.playback.cycles} Durchgänge`);
 }
 
@@ -467,6 +523,11 @@ const CODE_ERSETZUNGEN = [
     alt: 'new MutationObserver(()=>setTimeout(mount,0)).observe(stage,{childList:true});update();setInterval(update,1800000);',
     neu: '/* ersetzt durch den Wettereffekt je Folie (weatherAuto) */' },
   { name: 'Laufschrift minimal langsamer', alt: 'const TEMPO=36;', neu: 'const TEMPO=30;' },
+  // Wechselnde Sprüche: vor dem Anzeigen eines Durchgangs den Spruch je Mitglied laut Plan (kcSpruchPlan) setzen
+  { name: 'Mitglieder: Spruch je Durchgang laut Plan',
+    alt: 'function loadCycle(number,atEnd=false){cycle=Math.max(1,number);',
+    neu: "function loadCycle(number,atEnd=false){cycle=Math.max(1,number);if(project.kcSpruchPlan){const kp=project.kcSpruchPlan[cycle]||{};"
+      + "for(const s of project.slides){if(!kp[s.id])continue;const q=s.items.find(i=>i.originalRole==='memberQuote');if(q)q.text=kp[s.id]}}" },
   { name: 'Laufschrift: Abstand zwischen den Themenblöcken',
     alt: "stueck.textContent=text+'   ·   ';",
     neu: "text.split(/\\s*•\\s*/).forEach(b=>{const t=document.createElement('span');t.textContent=b;stueck.appendChild(t);const p=document.createElement('span');p.className='kcTickerPause';p.textContent='✦';stueck.appendChild(p)});" },

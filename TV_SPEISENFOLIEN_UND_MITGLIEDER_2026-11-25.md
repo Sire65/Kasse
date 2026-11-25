@@ -103,3 +103,17 @@ Festgelegt im Bauwerkzeug (`durchgaengeFestlegen`):
   Vorher waren es 9 Durchgänge; dabei liefen die Wetteraussichten in Durchgang 9 und gleich wieder in Durchgang 1.
 
 Ein Test prüft das mit der Auswahllogik der Präsentation selbst über einen ganzen Umlauf.
+
+## Wechselnde Sprüche (25.11.2026)
+
+Entscheidung des Betreibers: Alle 13 Mitglieder zeigen bei jedem Auftritt einen anderen Spruch, auch die 9, die ihren
+Spruch im September selbst gewählt haben. Im Topf sind alle 20 Sprüche der Spruch-Auswahl (Nr. 18 in Annes Fassung).
+
+- Erster Auftritt im Umlauf: der bisherige Spruch des Mitglieds, danach der Reihe nach weiter durch den Topf.
+- Im Umlauf (78 Durchgänge, je Mitglied 12 Auftritte) zeigt niemand denselben Spruch zweimal.
+- Die zwei Mitglieder eines Durchgangs haben nie denselben Spruch.
+
+Das Bauwerkzeug legt den Plan fest (`spruchPlan` → `kcSpruchPlan` in den Präsentationsdaten). Die Präsentation setzt den
+Spruch beim Laden eines Durchgangs ein, bevor die Folie gezeichnet wird; die Schriftgröße passt sich also wie gewohnt an.
+Tests prüfen den Plan über den ganzen Umlauf. Im Browser habe ich die Durchgänge 1–9 durchgeklickt: Alle angezeigten
+Sprüche entsprechen dem Plan.
