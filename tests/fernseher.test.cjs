@@ -90,6 +90,32 @@ function nachbauStarter() {
     f.stop();
   }
   {
+    // 26.11.2026: Fernseher kurz aus/an – Windows schiebt die Präsentation auf den Monitor -> zurückholen
+    const s = nachbauStarter(); const log = []; let fenster = { l: 1280, t: 0, r: 3200, b: 1080 };
+    const liste = () => { const l = [MONITOR, TV]; l.fenster = fenster; return l; };
+    const f = new Fernseher({ einstellungsDatei: einst({ aktiv: true }), datenOrdner: ARBEIT, webserverPort: 8090, plattform: 'win32', wachTakt: 100,
+      bildschirmeErmitteln: liste, browserFinden: () => 'C:\\Edge\\msedge.exe', starter: s.starter, log: (x) => log.push(x), fehlerLog: (x) => log.push(x) });
+    f.start(); await warte(250);
+    p('A: Präsentation auf dem Fernseher: bleibt in Ruhe', s.aufrufe.length === 1 && !log.some((x) => /zurückgeholt/.test(x)));
+    fenster = { l: 0, t: 0, r: 1280, b: 1024 }; await warte(250);
+    p('A: Präsentation auf dem Monitor gelandet: wird geschlossen und zurückgeholt', log.some((x) => /stand nicht auf dem Fernseher.*zurückgeholt/.test(x)));
+    fenster = { l: 1280, t: 0, r: 3200, b: 1080 }; await warte(2600);
+    p('A: … und startet neu auf dem Fernseher (nicht als „vom Nutzer geschlossen“)', s.aufrufe.length === 2 && s.aufrufe[1].args.includes('--window-position=1300,20') && !log.some((x) => /wurde geschlossen\. Wieder öffnen/.test(x)), `${s.aufrufe.length} Starts`);
+    f.stop();
+  }
+  {
+    // Dauer-PowerShell: liefert Bildschirme + Fensterlage über eine Zeile „KCJSON…“
+    const { PowerShellDauer, PS_INIT } = require(path.join(BACKEND, 'fernseher.js'));
+    const geschrieben = []; let kind;
+    const starter = () => { kind = new EventEmitter(); kind.stdin = { write: (x) => { geschrieben.push(x); if (/^KcPruefe/.test(x)) setTimeout(() => kind.stdout.emit('data', 'xyz\r\nKCJSON{"schirme":[{"name":"D1","x":0,"y":0,"breite":10,"hoehe":10,"haupt":true}],"fenster":{"l":1,"t":2,"r":3,"b":4}}\r\n'), 5); }, on() {} };
+      kind.stdout = new EventEmitter(); kind.stdout.setEncoding = () => {}; kind.kill = () => kind.emit('exit', 0); return kind; };
+    const ps = new PowerShellDauer(starter);
+    const r1 = await ps.frage(4711); const r2 = await ps.frage(0);
+    p('A: Dauer-PowerShell: einmal gestartet, je Prüfung nur eine Zeile, Antwort mit Bildschirmen und Fensterlage', r1 && r1.fenster.l === 1 && r1.schirme[0].name === 'D1' && r2 && geschrieben[0] === PS_INIT + '\r\n' && geschrieben.filter((x) => /^KcPruefe/.test(x)).length === 2 && geschrieben[1] === 'KcPruefe 4711\r\n');
+    p('A: Dauer-PowerShell: Fensterlage per Windows-Funktion, Fenster über Prozess oder Titel „KC Fernseher“', /GetWindowRect/.test(PS_INIT) && /MainWindowTitle -like '\*KC Fernseher\*'/.test(PS_INIT));
+    ps.stop();
+  }
+  {
     // Sparmodus (25.11.2026): Standard an, abschaltbar; Hülle schaltet Dauer-Effekte ab und drosselt die Laufschrift
     const an = new Fernseher({ einstellungsDatei: einst({ aktiv: true }), datenOrdner: ARBEIT, webserverPort: 8090 });
     const aus = new Fernseher({ einstellungsDatei: einst({ aktiv: true, sparmodus: false, rand: 3 }), datenOrdner: ARBEIT, webserverPort: 8090 });
