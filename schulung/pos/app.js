@@ -1997,6 +1997,7 @@ function saveTipRecord(amount,source,bonNumber=null,note=""){
   const list=tipRecords();
   list.push(record);
   localStorage.setItem("kc_tip_records",JSON.stringify(list));
+  kcSicherMeldenBeleg("trinkgeld",record);
   return record;
 }
 
@@ -2104,7 +2105,7 @@ async function completeSale(method,{type="sale",silent=false,changeTarget=null,d
     // Duplikatschutz) - das war die eigentliche Lücke, die dazu führte, dass die Aktivitäts-LED
     // bei echten Verkäufen nie reagierte. Ebenfalls NICHT awaited, aber anders als der
     // Live-Monitor-Kanal mit echter Wiederholungslogik bei Fehlschlag (siehe kc-sync-live-event.js).
-    sicher(()=>{if(!training&&window.KCSyncLiveEvent)window.KCSyncLiveEvent.recordReliable("sale",rec)},"Nachreichen");
+    sicher(()=>{if(!training)kcSicherMelden(rec)},"Nachreichen");
     sicher(()=>playCompletedSaleSound(),"Ton");
     if(training)sicher(()=>localStorage.setItem("kc_training_next_bon_v018",String(trainingCounter+1)),"Trainingsnummer");else{state.master.nextBon++;sicher(()=>saveMaster(),"Bonnummer speichern")}
     resetDiscount();state.cart=[];state.cartStartedAt=null;state.lastAdded=null;state.selectedCartKey=null;state.given=0;state.cashSelections=[];state.keypadBuffer="";quantityUndoStack.length=0;updateQuantityUndoButton();if(state.master.requireOperatorConfirmation===true)state.operatorConfirmedForSale=false;
@@ -3442,7 +3443,21 @@ el("bonSearchBtn").onclick=()=>{const n=el("bonSearchInput").value.trim(),t=allT
 // 26.11.2026 KC-MANAGER-VERKAEUFE-ABHOLEN: Storno- und Reklamations-Bons gehen wie jeder Verkauf ueber den sicheren Weg
 // (Mini-PC -> Manager-Dienst), damit die Auswertung im PC-Manager sie automatisch mitzaehlt. Erst NACH dem Speichern, Fehler
 // werden nur protokolliert - die Buchung selbst ist davon nie betroffen.
-function kcSicherMelden(rec){try{if(rec&&!rec.training&&window.KCSyncLiveEvent?.recordReliable)Promise.resolve(window.KCSyncLiveEvent.recordReliable("sale",rec)).catch(err=>console.error("Nachreichen",err))}catch(err){console.error("Nachreichen",err)}}
+// 26.11.2026 KC-BON-SCHLANK: Der Manager-Dienst nimmt je Meldung höchstens 8 KB an, sonst lehnt er sie DAUERHAFT ab. Ein Bon mit mehr als
+// etwa 16 Artikelzeilen ist größer und fehlte dann im PC-Manager. Nur dann wird eine schlanke Fassung geschickt - genau die Felder,
+// die der PC-Manager übernimmt (KCSalesImportCore.transaction/item); auf dem Tablet bleibt der vollständige Bon.
+function kcSchlankerBon(rec){const o={kcSchlank:true};for(const k of ["transactionId","bon","bonNumber","time","endTime","startTime","registerId","registerName","operator","type","training","method","payment","helperGroup","due","total","grossDue","originalTransactionId","originalBon"])if(rec[k]!==undefined&&rec[k]!==null)o[k]=rec[k];
+  o.items=(Array.isArray(rec.items)?rec.items:[]).map(i=>{const x={id:i.id,name:i.name,qty:i.qty,price:i.price};if(i.category)x.category=i.category;const leih=Array.isArray(i.leihPfand)?i.leihPfand.length:Number(i.leih||0);if(leih)x.leih=leih;if(i.discountLine)x.discountLine=true;return x});return o}
+function kcSicherMelden(rec){try{if(rec&&!rec.training&&window.KCSyncLiveEvent?.recordReliable){const p=!rec.kcArt&&JSON.stringify(rec).length>7500?kcSchlankerBon(rec):rec;Promise.resolve(window.KCSyncLiveEvent.recordReliable("sale",p)).catch(err=>console.error("Nachreichen",err))}}catch(err){console.error("Nachreichen",err)}}
+// 26.11.2026 KC-MANAGER-TRINKGELD-ENTNAHME (Betreiber: „Ja aber vorsichtig“): Trinkgeld und Entnahmen ebenfalls über den sicheren Weg.
+// Bewusst als bekannte Meldungsart "sale" mit Kennzeichen kcArt - jeder Manager-Dienst nimmt sie an (unbekannte Arten lehnt er
+// dauerhaft ab), der Mini-PC braucht kein Update. Ältere PC-Manager übergehen sie (keine Bon-Positionen). Belegfoto nie mitsenden
+// (Grenze 8 KB je Meldung); "id" = eigene Kennung, damit die Warteschlange des Tablets sie nie mit einem Bon verwechselt.
+function kcSicherMeldenBeleg(art,record){try{if(!record||record.training)return;const p={...cloneData(record),kcArt:art};delete p.receiptAttachment;
+  if(art==="entnahme")p.id=record.withdrawalId;if(!p.id)return;
+  if(JSON.stringify(p).length>7000){p.note=String(p.note||"").slice(0,80);if(p.complaint)p.complaint={...p.complaint,articles:(p.complaint.articles||[]).slice(0,10)};}
+  if(JSON.stringify(p).length>7800)return console.error("Nachreichen: Beleg zu groß",art,p.id);
+  kcSicherMelden(p)}catch(err){console.error("Nachreichen",err)}}
 async function reverseCompletedTransaction(original,reason){
   await _txHydrated;
   const rows=readTransactions();if(rows.some(row=>row.type==="reversal"&&row.originalTransactionId===original.transactionId))throw new Error("Dieser Bon wurde bereits vollständig storniert.");
@@ -3476,7 +3491,7 @@ async function reverseCompletedTransaction(original,reason){
   if(originalBon){
     const tips=tipRecords(),linkedTips=tips.filter(t=>String(t.bonNumber||"")===originalBon&&Number(t.amount||0)>0&&!t.reversalOf);
     for(const t of linkedTips)tips.push({...cloneData(t),id:crypto.randomUUID(),time:endTime,amount:-Math.abs(Number(t.amount||0)),source:`${t.source}-storno`,bonNumber:rec.bon,reversalOf:t.id,originalBon,note:`Storno zu ${originalBon}: ${reason}`});
-    if(linkedTips.length)localStorage.setItem("kc_tip_records",JSON.stringify(tips));
+    if(linkedTips.length){localStorage.setItem("kc_tip_records",JSON.stringify(tips));tips.slice(-linkedTips.length).forEach(t=>kcSicherMeldenBeleg("trinkgeld",t));}
     const donations=donationRecords(),linkedDonations=donations.filter(d=>String(d.bonNumber||"")===originalBon&&Number(d.amount||0)>0&&!d.reversalOf);
     for(const d of linkedDonations)donations.push({...cloneData(d),id:crypto.randomUUID(),time:endTime,amount:-Math.abs(Number(d.amount||0)),source:`${d.source}-storno`,bonNumber:rec.bon,reversalOf:d.id,originalBon,note:`Storno zu ${originalBon}: ${reason}`});
     if(linkedDonations.length)localStorage.setItem("kc_donation_records",JSON.stringify(donations));
@@ -3499,7 +3514,7 @@ async function reverseCompletedTransaction(original,reason){
       originalBon,
       note:`Storno zu Reklamationsbon ${originalBon}: ${reason}`
     });
-    if(linkedWithdrawals.length)localStorage.setItem(WITHDRAWAL_KEY,JSON.stringify(withdrawals));
+    if(linkedWithdrawals.length){localStorage.setItem(WITHDRAWAL_KEY,JSON.stringify(withdrawals));withdrawals.slice(-linkedWithdrawals.length).forEach(w=>kcSicherMeldenBeleg("entnahme",w));}
     if(linkedAccountEvent){
       const accountEvents=kcEvents();
       const accountIndex=accountEvents.findIndex(e=>e.eventId===linkedAccountEvent.eventId);
@@ -4216,7 +4231,7 @@ async function kcReklamationBuchenPosten(posten,grund,ergebnis,bonReferenz){
   const articleTotal=+articles.reduce((s,a)=>s+a.total,0).toFixed(2);
   const rows=safeArray(WITHDRAWAL_KEY);
   const eintrag={withdrawalId:crypto.randomUUID(),time:new Date().toISOString(),registerId:state.master.registerId,registerName:state.master.registerName,operator:state.master.operatorName,amount:0,amountCents:0,erstattungImBon:+betrag.toFixed(2),reason:"Reklamation",note:"",receiptAvailable:false,receiptAttachment:null,training:!!state.master.trainingMode,complaint:{reason:grund,outcome:ergebnis,reference:bonReferenz||null,articles,articleTotal,adjustment:0,refundTransactionId:transactionId,refundBon:bon}};
-  rows.push(eintrag);localStorage.setItem(WITHDRAWAL_KEY,JSON.stringify(rows));
+  rows.push(eintrag);localStorage.setItem(WITHDRAWAL_KEY,JSON.stringify(rows));kcSicherMeldenBeleg("entnahme",eintrag);
   return eintrag;
 }
 async function kcReklamationBuchen(produktId,grund,ergebnis,bonReferenz){
@@ -4255,7 +4270,7 @@ async function kcReklamationBuchen(produktId,grund,ergebnis,bonReferenz){
   // es dieselbe Auswertung findet wie die bisherigen Reklamationsauszahlungen.
   const rows=safeArray(WITHDRAWAL_KEY);
   const eintrag={withdrawalId:crypto.randomUUID(),time:new Date().toISOString(),registerId:state.master.registerId,registerName:state.master.registerName,operator:state.master.operatorName,amount:0,amountCents:0,erstattungImBon:+betrag.toFixed(2),reason:"Reklamation",note:"",receiptAvailable:false,receiptAttachment:null,training:!!state.master.trainingMode,complaint:{reason:grund,outcome:ergebnis,reference:bonReferenz||null,articles:[{id:produkt.id,name:produkt.name,qty:1,unitPrice:preis,total:preis}],articleTotal:preis,adjustment:0,refundTransactionId:transactionId,refundBon:bon}};
-  rows.push(eintrag);localStorage.setItem(WITHDRAWAL_KEY,JSON.stringify(rows));
+  rows.push(eintrag);localStorage.setItem(WITHDRAWAL_KEY,JSON.stringify(rows));kcSicherMeldenBeleg("entnahme",eintrag);
   return eintrag;
 }
 function addComplaintToCurrentCart(amount){
@@ -4307,6 +4322,7 @@ el("saveWithdrawal").onclick=async()=>{
     };
     rows.push(record);
     localStorage.setItem(WITHDRAWAL_KEY,JSON.stringify(rows));
+    kcSicherMeldenBeleg("entnahme",record);
     el("withdrawDialog").close();
     if(withdrawalReason==="Reklamation")resetComplaint();
     setSystemHint(`${money(record.amount)} ${record.reason==="Reklamation"?`Reklamationsauszahlung · ${record.complaint.reason}`:`Entnahme · ${record.reason}`} gespeichert`,record.reason==="Reklamation"?"error":"ok"); // KC-KASSE-AUSZAHLUNG-ROT

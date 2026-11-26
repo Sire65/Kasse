@@ -1784,18 +1784,32 @@ window.KCClosingCore={ingestClosingPayload,ingestCashCountPayload,rows:closingRo
 // übersprungen, vorhandene Buchungen nie überschrieben. Keine Trainingsbons, nur Buchungen ab dem eingestellten Datum (ab).
 function uebernehmeAbgeholteVerkaeufe(rows,ab){
   const grenze=ab?new Date(`${ab}T00:00:00`).getTime():NaN;
-  const passend=(Array.isArray(rows)?rows:[]).filter(r=>r&&typeof r==="object"&&typeof r.transactionId==="string"&&r.transactionId&&Array.isArray(r.items)&&!r.training
-    &&(!Number.isFinite(grenze)||new Date(r.time||r.endTime||r.startTime||0).getTime()>=grenze));
+  const imZeitraum=r=>!Number.isFinite(grenze)||new Date(r.time||r.endTime||r.startTime||0).getTime()>=grenze;
+  const liste=(Array.isArray(rows)?rows:[]).filter(r=>r&&typeof r==="object");
+  // 26.11.2026 KC-MANAGER-TRINKGELD-ENTNAHME: Trinkgeld und Entnahmen kommen auf demselben Weg (Kennzeichen kcArt) und landen
+  // in denselben Listen wie beim Datei-Import (managerTips / cashWithdrawals), gleiche Kennung -> nie doppelt.
+  const tipps=liste.filter(r=>r.kcArt==="trinkgeld"&&typeof r.id==="string"&&r.id&&!r.training&&imZeitraum(r));
+  const entnahmen=liste.filter(r=>r.kcArt==="entnahme"&&typeof r.withdrawalId==="string"&&r.withdrawalId&&!r.training&&imZeitraum(r));
+  const passend=liste.filter(r=>!r.kcArt&&typeof r.transactionId==="string"&&r.transactionId&&Array.isArray(r.items)&&!r.training&&imZeitraum(r));
+  const ohneKennzeichen=r=>{const x={...r};delete x.kcArt;return x};
+  const tippIds=new Set(managerTips.map(t=>t.id)),neueTipps=[];
+  for(const t of tipps){if(tippIds.has(t.id))continue;tippIds.add(t.id);neueTipps.push(ohneKennzeichen(t))}
+  const entnahmeIds=new Set(cashWithdrawals.map(w=>w.withdrawalId)),neueEntnahmen=[];
+  for(const w of entnahmen){if(entnahmeIds.has(w.withdrawalId))continue;entnahmeIds.add(w.withdrawalId);const x=ohneKennzeichen(w);delete x.id;neueEntnahmen.push(x)}
   const vorher=new Set(sales.map(x=>x.transactionId));const neu=passend.filter(r=>!vorher.has(r.transactionId));
-  if(!neu.length)return{neu:0,vorhanden:passend.length,ausserhalb:(rows||[]).length-passend.length};
-  const merged=window.KCSalesImportCore?.merge?.(sales,neu);
-  if(!merged||!Array.isArray(merged.transactions))throw new Error("Umsatz-Modul fehlt - bitte PC-Manager neu laden");
-  sales=merged.transactions;saveAll();
-  try{renderDashboard();renderReport()}catch(err){console.error("Verkäufe abholen: Anzeige",err)}
+  let merged=null;
+  if(neu.length){merged=window.KCSalesImportCore?.merge?.(sales,neu);if(!merged||!Array.isArray(merged.transactions))throw new Error("Umsatz-Modul fehlt - bitte PC-Manager neu laden");}
+  const ergebnis={neu:merged?merged.added:0,vorhanden:passend.length-(merged?merged.added:0),trinkgeld:neueTipps.length,entnahmen:neueEntnahmen.length,ausserhalb:liste.length-passend.length-tipps.length-entnahmen.length};
+  if(!merged&&!neueTipps.length&&!neueEntnahmen.length)return ergebnis;
+  if(merged)sales=merged.transactions;
+  if(neueTipps.length)managerTips=managerTips.concat(neueTipps);
+  if(neueEntnahmen.length)cashWithdrawals=cashWithdrawals.concat(neueEntnahmen);
+  saveAll();
+  try{renderDashboard();renderReport();if(typeof renderCashMovementsOverview==="function")renderCashMovementsOverview()}catch(err){console.error("Verkäufe abholen: Anzeige",err)}
   try{window.KCManagerSalesInventoryDashboard?.renderAnalysis?.();window.KCManagerSalesInventoryDashboard?.renderInventory?.()}catch(err){console.error("Verkäufe abholen: Auswertung",err)}
-  return{neu:merged.added,vorhanden:passend.length-merged.added,ausserhalb:(rows||[]).length-passend.length};
+  return ergebnis;
 }
-window.KCManagerVerkaeufe={uebernehmen:uebernehmeAbgeholteVerkaeufe,anzahl:()=>sales.length};
+window.KCManagerVerkaeufe={uebernehmen:uebernehmeAbgeholteVerkaeufe,anzahl:()=>sales.length,trinkgeld:()=>managerTips.length,entnahmen:()=>cashWithdrawals.length};
 function renderClosings(){
   const rows=closingRows();
   el("closingBody").innerHTML=rows.map(r=>{const methode=r.count?(r.count.inputMode==="weigh"?"Gewogen":r.count.inputMode==="notes"?"Nur Scheine":"Gezählt"):"",countStatus=!r.count?"Zählung fehlt":r.nurScheine?"Nur Scheine gezählt · Münzen/Rollen offen":`${r.count.countKind==="late"?"Nachzählung · ":""}${methode} · ${r.diff===0?"Stimmt":"Differenz"}`;return `<tr><td>${r.closing.registerName||r.closing.registerId}</td><td>${r.businessDate||String(r.closing.createdAt).slice(0,10)}</td><td>${money(r.closing.expectedCash)}</td><td>${r.actual===null?"—":(r.nurScheine?"Scheine ":"")+money(r.actual)}</td><td class="${r.diff===0?"diff-ok":"diff-warn"}">${r.diff===null?"—":money(r.diff)}</td><td>${Number(r.closing.staffTotal||0)?`${money(r.closing.staffTotal)} (${r.closing.staffCount||0})`:"—"}</td><td>${countStatus}</td></tr>`}).join("");
