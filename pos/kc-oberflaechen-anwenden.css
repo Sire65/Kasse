@@ -580,6 +580,11 @@ body.kc-aufbau .kc-bereich.kopf .header-status > #timeClockBtn { order: 97; } /*
 body.kc-aufbau .kc-bereich.kopf .header-status > #kcKopfUhr { display: none; }
 body.kc-aufbau .kc-bereich.kopf .header-status > #cashSoundBtn { order: 96; }
 body.kc-aufbau .kc-bereich.kopf .header-status > #screenLockBtn { order: 95; }
+/* 26.11.2026 (Betreiber: „Auf Kasse 3 fehlt oben in der Kopfzeile der Knopf für den Dienstplan“ – iPad): der Kopf ist rechtsbündig und
+   schneidet links ab, wenn er zu schmal ist. Der 📅 hatte keinen festen Platz (order 50) und fiel als erster heraus – jetzt fest
+   direkt links neben dem Menü, bei den Knöpfen, die immer zu sehen sind (Spiegeln rückt dafür nach links). */
+body.kc-aufbau .kc-bereich.kopf .header-status > #dienstplanBtn { order: 98; }
+body.kc-aufbau .kc-bereich.kopf .header-status > #mirrorLayoutBtn { order: 94; } /* Spiegeln braucht man selten – rückt dafür nach links */
 body.kc-aufbau .kc-bereich.kopf .header-status > #kcProgramStatusBtn { order: 94; }
 body.kc-aufbau .kc-bereich.kopf .header-status > #kcLedBlock, body.kc-aufbau .kc-bereich.kopf .header-status > .supabase-led-group { order: 93; }
 body.kc-aufbau .kc-bereich.kopf .header-status > #kcHerz { order: 92; }
