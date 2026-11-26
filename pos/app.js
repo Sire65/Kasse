@@ -3306,6 +3306,10 @@ el("productInfoDetailsBtn").onclick=openFullProductInfo;
 
 el("printBonBtn").onclick=()=>{renderRecentBons();el("bonSearchResult").innerHTML="";el("bonPrintDialog").showModal()};
 el("bonSearchBtn").onclick=()=>{const n=el("bonSearchInput").value.trim(),t=allTransactions().find(x=>String(x.bon||x.bonNumber).padStart(6,"0")===n.padStart(6,"0"));el("bonSearchResult").innerHTML=t?`<div class="recent-bon"><span class="recent-bon-view" id="foundBonView" role="button" tabindex="0" title="Bon ansehen">Bon ${n.padStart(6,"0")} · ${money(t.due||t.total||0)}</span><button type="button" id="printFoundBon">Drucken</button>${t.type!=="reversal"?'<button type="button" id="reverseFoundBon" class="superadmin-only">Stornieren</button>':""}</div>`:"<p>Bon nicht gefunden.</p>";if(t){const oeffnen=()=>openBonView(t.bon||t.bonNumber);el("foundBonView").onclick=oeffnen;el("foundBonView").onkeydown=e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();oeffnen()}};el("printFoundBon").onclick=()=>printBonByNumber(t.bon||t.bonNumber);if(el("reverseFoundBon"))el("reverseFoundBon").onclick=()=>requestCompletedReversal(t.bon||t.bonNumber)}};
+// 26.11.2026 KC-MANAGER-VERKAEUFE-ABHOLEN: Storno- und Reklamations-Bons gehen wie jeder Verkauf ueber den sicheren Weg
+// (Mini-PC -> Manager-Dienst), damit die Auswertung im PC-Manager sie automatisch mitzaehlt. Erst NACH dem Speichern, Fehler
+// werden nur protokolliert - die Buchung selbst ist davon nie betroffen.
+function kcSicherMelden(rec){try{if(rec&&!rec.training&&window.KCSyncLiveEvent?.recordReliable)Promise.resolve(window.KCSyncLiveEvent.recordReliable("sale",rec)).catch(err=>console.error("Nachreichen",err))}catch(err){console.error("Nachreichen",err)}}
 async function reverseCompletedTransaction(original,reason){
   await _txHydrated;
   const rows=readTransactions();if(rows.some(row=>row.type==="reversal"&&row.originalTransactionId===original.transactionId))throw new Error("Dieser Bon wurde bereits vollständig storniert.");
@@ -3372,7 +3376,7 @@ async function reverseCompletedTransaction(original,reason){
       }
     }
   }
-  state.master.nextBon++;saveMaster();recordAdminChange("transaction","reversal",rec.transactionId,original,rec);renderHeader();return rec;
+  state.master.nextBon++;saveMaster();recordAdminChange("transaction","reversal",rec.transactionId,original,rec);renderHeader();if(!original.training)kcSicherMelden(rec);return rec;
 }
 function requestCompletedReversal(no){
   if(state.role!=="superadmin"||!adminSession)return showMessage("Nicht erlaubt","!","Gebuchte Bons dürfen nur im Superadmin-Bereich storniert werden.");
@@ -3922,7 +3926,7 @@ async function recordComplaintRefund(amount){
     // Erst die lokale, dauerhafte Speicherung bestätigen. Kein Warten auf Netz/Manager.
     if(!window.KCTransactionStore)throw new Error("Dauerhafter Umsatzspeicher fehlt");
     await window.KCTransactionStore.replaceAll(training?window.KCTransactionStore.STORE_TRAINING:window.KCTransactionStore.STORE_SALES,rows,{verbindlich:true});
-    if(training)_trainingTxCache=rows;else _txCache=rows;if(!training){state.master.nextBon++;saveMaster()}return rec;
+    if(training)_trainingTxCache=rows;else _txCache=rows;if(!training){state.master.nextBon++;saveMaster();kcSicherMelden(rec)}return rec;
 }
 // 09.10.2026 (Betreiber: "unter Reklamation die Warengruppen wie auf der Kassenseite, darunter die Bilder
 // der Artikel mit einer Anzahl - z. B. 3 kalte Glühwein, die zusammen bestellt wurden; Schuss Rum und

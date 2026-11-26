@@ -1778,6 +1778,24 @@ function closingRows(){
   });
 }
 window.KCClosingCore={ingestClosingPayload,ingestCashCountPayload,rows:closingRows,businessDate:closingBusinessDate};
+// 26.11.2026 KC-MANAGER-VERKAEUFE-ABHOLEN (Betreiber: „Ja bau das ein, aber super vorsichtig“): Verkäufe, die über den sicheren
+// Weg (Tablet -> Mini-PC -> Manager-Dienst) schon angekommen sind, automatisch in die Auswertungen übernehmen - genau wie der
+// Datei-Import („Umsätze importieren“): dieselbe Zusammenführung (KCSalesImportCore.merge), doppelte transactionId werden
+// übersprungen, vorhandene Buchungen nie überschrieben. Keine Trainingsbons, nur Buchungen ab dem eingestellten Datum (ab).
+function uebernehmeAbgeholteVerkaeufe(rows,ab){
+  const grenze=ab?new Date(`${ab}T00:00:00`).getTime():NaN;
+  const passend=(Array.isArray(rows)?rows:[]).filter(r=>r&&typeof r==="object"&&typeof r.transactionId==="string"&&r.transactionId&&Array.isArray(r.items)&&!r.training
+    &&(!Number.isFinite(grenze)||new Date(r.time||r.endTime||r.startTime||0).getTime()>=grenze));
+  const vorher=new Set(sales.map(x=>x.transactionId));const neu=passend.filter(r=>!vorher.has(r.transactionId));
+  if(!neu.length)return{neu:0,vorhanden:passend.length,ausserhalb:(rows||[]).length-passend.length};
+  const merged=window.KCSalesImportCore?.merge?.(sales,neu);
+  if(!merged||!Array.isArray(merged.transactions))throw new Error("Umsatz-Modul fehlt - bitte PC-Manager neu laden");
+  sales=merged.transactions;saveAll();
+  try{renderDashboard();renderReport()}catch(err){console.error("Verkäufe abholen: Anzeige",err)}
+  try{window.KCManagerSalesInventoryDashboard?.renderAnalysis?.();window.KCManagerSalesInventoryDashboard?.renderInventory?.()}catch(err){console.error("Verkäufe abholen: Auswertung",err)}
+  return{neu:merged.added,vorhanden:passend.length-merged.added,ausserhalb:(rows||[]).length-passend.length};
+}
+window.KCManagerVerkaeufe={uebernehmen:uebernehmeAbgeholteVerkaeufe,anzahl:()=>sales.length};
 function renderClosings(){
   const rows=closingRows();
   el("closingBody").innerHTML=rows.map(r=>{const methode=r.count?(r.count.inputMode==="weigh"?"Gewogen":r.count.inputMode==="notes"?"Nur Scheine":"Gezählt"):"",countStatus=!r.count?"Zählung fehlt":r.nurScheine?"Nur Scheine gezählt · Münzen/Rollen offen":`${r.count.countKind==="late"?"Nachzählung · ":""}${methode} · ${r.diff===0?"Stimmt":"Differenz"}`;return `<tr><td>${r.closing.registerName||r.closing.registerId}</td><td>${r.businessDate||String(r.closing.createdAt).slice(0,10)}</td><td>${money(r.closing.expectedCash)}</td><td>${r.actual===null?"—":(r.nurScheine?"Scheine ":"")+money(r.actual)}</td><td class="${r.diff===0?"diff-ok":"diff-warn"}">${r.diff===null?"—":money(r.diff)}</td><td>${Number(r.closing.staffTotal||0)?`${money(r.closing.staffTotal)} (${r.closing.staffCount||0})`:"—"}</td><td>${countStatus}</td></tr>`}).join("");
