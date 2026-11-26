@@ -9,10 +9,11 @@ let f = 0; const pr = (n, b, z = '') => { console.log(`${b ? '  OK  ' : 'FEHLER'
 (async () => {
   const PORT = Number(process.env.P || 8991); await new Promise((r) => s.listen(PORT, r));
   const b = await pw.chromium.launch({ args: OHNE_ECHTSERVER });
-  const oeffnen = async (seite, zeit, paket) => {
+  const oeffnen = async (seite, zeit, paket, dienstplan) => {
     const c = await b.newContext({ serviceWorkers: 'block', viewport: { width: 1280, height: 800 } });
     await c.route('**/*', (r) => (r.request().url().startsWith(`http://127.0.0.1:${PORT}/`) ? r.continue() : r.abort()));
     await c.routeWebSocket(/.*/, (ws) => ws.close());
+    if (dienstplan) await c.route(/kc-sync-dienstplan/, (r) => r.fulfill({ status: 200, contentType: 'application/json', headers: { 'Access-Control-Allow-Origin': '*' }, body: JSON.stringify(dienstplan) }));
     const p = await c.newPage(); const js = []; p.on('pageerror', (e) => js.push(e.message));
     await p.clock.install({ time: new Date(zeit) }); await p.clock.pauseAt(new Date(new Date(zeit).getTime() + 10));
     await p.addInitScript((paket) => { if (sessionStorage.getItem('x')) return; sessionStorage.setItem('x', '1');
@@ -51,6 +52,19 @@ let f = 0; const pr = (n, b, z = '') => { console.log(`${b ? '  OK  ' : 'FEHLER'
     pr(`${seite}: keine JS-Fehler`, js.length === 0, js.join(' | '));
     await c.close();
   }
+  // 26.11.2026 (Betreiber: „bau das ein mit dem nächsten Tag“): vor dem Markt öffnet der Dienstplan beim ersten Tag mit Schichten
+  { const plan = { schichten: [['2026-12-02', 'Anna'], ['2026-12-02', 'Bernd'], ['2026-12-04', 'Anna']].map(([date, pseudonym]) => ({ date, pseudonym, start: '15:00', end: '21:00' })), sourceUpdatedAt: '2026-11-25T19:15:00Z', revision: 3 };
+    const { c, p, js } = await oeffnen('pos', '2026-11-26T12:00:00+01:00', null, plan);
+    await p.evaluate(() => window.KCDienstplanKasse.oeffnen()); await p.clock.runFor(800);
+    const t0 = await p.textContent('#dienstplanDatumText');
+    pr('pos Dienstplan: heute ohne Schichten → öffnet beim nächsten Tag mit Dienstplan (02.12.)', /02\.12\./.test(t0) && !/Heute/.test(t0), t0);
+    await p.click('#dienstplanHeuteBtn'); const t1 = await p.textContent('#dienstplanDatumText');
+    pr('pos Dienstplan: „Heute“ führt weiter zum heutigen Tag', /Heute/.test(t1), t1);
+    await p.evaluate(() => document.getElementById('dienstplanDialog').close());
+    await p.clock.setFixedTime(new Date('2026-12-02T12:00:00+01:00')); await p.evaluate(() => window.KCDienstplanKasse.oeffnen()); await p.clock.runFor(800);
+    const t2 = await p.textContent('#dienstplanDatumText');
+    pr('pos Dienstplan: an einem Diensttag bleibt es bei „Heute“', /Heute/.test(t2), t2);
+    pr('pos (26.11.): keine JS-Fehler', js.length === 0, js.join(' | ')); await c.close(); }
   await b.close(); s.close();
   console.log(f ? `\n${f} FEHLER` : '\nAlles OK'); process.exit(f ? 1 : 0);
 })().catch((e) => { console.error(e); process.exit(1); });
