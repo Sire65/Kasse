@@ -117,8 +117,11 @@ function planFuerJetzt(minutenNochGueltig) {
   });
   const normalPreis = await kasse.evaluate(() => window.__hhNormal);
   const alsText = (n) => n.toFixed(2).replace('.', ',');
+  // 26.11.2026 (KC-KASSE-KACHEL-INKL-PFAND): die Kachel zeigt den Preis MIT Glaspfand (2,00 €) – Bon und Warenkorb weiter netto + Pfand extra
+  const PFAND = 2;
   const HH = alsText(Math.round((normalPreis - 0.5) * 100) / 100);
   const NORMAL = alsText(normalPreis);
+  const HH_KACHEL = alsText(Math.round((normalPreis - 0.5 + PFAND) * 100) / 100), NORMAL_KACHEL = alsText(Math.round((normalPreis + PFAND) * 100) / 100);
   await kasse.reload();
   await kasse.waitForTimeout(2200);
   await kasse.evaluate(() => { const k = [...document.querySelectorAll('button')].find((x) => /KASSE STARTEN/i.test(x.textContent)); if (k) k.click(); });
@@ -136,7 +139,7 @@ function planFuerJetzt(minutenNochGueltig) {
     const t = document.querySelector('.product-tile[data-id="grot"]');
     return t ? t.innerText.replace(/\s+/g, ' ') : 'keine Kachel';
   });
-  pruefe(`Die Kachel zeigt den Happy-Hour-Preis (${HH} €)`, kachel.includes(HH), kachel.slice(0, 60));
+  pruefe(`Die Kachel zeigt den Happy-Hour-Preis inkl. Pfand (${HH_KACHEL} €)`, kachel.includes(HH_KACHEL), kachel.slice(0, 60));
 
   // ================= Teil 3: der Preis im Bon bleibt eingefroren =================
   console.log('\n--- Ist die Zeit abgelaufen, gilt wieder der alte Preis ---');
@@ -169,7 +172,7 @@ function planFuerJetzt(minutenNochGueltig) {
   pruefe('DER ARTIKEL IM BON BEHÄLT SEINEN HAPPY-HOUR-PREIS',
     new RegExp(HH.replace(',', '[.,]') + '\\s*€\\s*/\\s*Stk').test(nachher.zeile), nachher.zeile.slice(0, 70));
   pruefe('Die Bonsumme ändert sich dadurch nicht', nachher.gesamt === imBon.gesamt, `vorher ${imBon.gesamt}, nachher ${nachher.gesamt}`);
-  pruefe('Ein NEU angetippter Artikel bekommt wieder den alten Preis', nachher.kachel.includes(NORMAL), nachher.kachel.slice(0, 60));
+  pruefe('Ein NEU angetippter Artikel bekommt wieder den alten Preis', nachher.kachel.includes(NORMAL_KACHEL), nachher.kachel.slice(0, 60));
 
   await kasse.evaluate(() => document.querySelector('.product-tile[data-id="grot"]').click());
   await kasse.waitForTimeout(500);

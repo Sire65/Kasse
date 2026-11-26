@@ -53,6 +53,12 @@ for(const [mgr,kasse] of [['pc-manager','pos'],['schulung/pc-manager','schulung/
  // bringt sein Pfand mit - Glühwein rot im Bon = 3,70 + 2,00 Glaspfand, Feuerzangenbowle = 5,00 + 2,00 Glas + 2,00 Zange
  const pfand=await p.evaluate(()=>{const r={};for(const id of ['grot','gweiss','eier','apfel','roterfeger','feuer']){state.cart=[];const pr=PRODUCTS.find(x=>x.id===id);if(!pr){r[id]='fehlt';continue}addConfiguredProduct(pr,null);r[id]=+(grossTotal()-pr.price).toFixed(2)}state.cart=[];renderCart();return r});
  pr(`${n}: Pfand wird beim Buchen sofort draufgerechnet (Glas 2,00, Feuerzangenbowle 4,00)`,['grot','gweiss','eier','apfel','roterfeger'].every(id=>pfand[id]===2)&&pfand.feuer===4,JSON.stringify(pfand));
+ // 26.11.2026 (KC-KASSE-KACHEL-INKL-PFAND): Kachel zeigt den Preis MIT Pfand, Warenkorb netto + Pfand extra, Summe gesamt
+ const kachel=await p.evaluate(async()=>{document.querySelectorAll('dialog[open]').forEach(d=>d.close());document.querySelector('#categories button[data-cat="Getränke"]')?.click();await new Promise(r=>setTimeout(r,300));
+   const t=id=>{const b=document.querySelector(`#productGrid .product-tile[data-id="${id}"]`);return b?b.querySelector('.product-price-tag').textContent.trim()+' | '+(b.querySelector('.deposit-tag')?.textContent||''):'fehlt'};
+   state.cart=[];addConfiguredProduct(PRODUCTS.find(x=>x.id==='grot'),null);const netto=lineUnit(state.cart[0]),summe=grossTotal();state.cart=[];renderCart();
+   return {grot:t('grot'),feuer:t('feuer'),netto,summe}});
+ pr(`${n}: Kachel Glühwein rot 5,70 inkl. Pfand, Feuerzangenbowle 9,00; Warenkorb netto 3,70, Summe 5,70`,(kachel.feuer.startsWith('9,00')&&(kasse==='pos'?/^5,70 \| inkl\. Pfand/:/^5,70/).test(kachel.grot)&&kachel.netto===3.7&&kachel.summe===5.7),JSON.stringify(kachel));
  pr(`${n}: im Manager geänderter Preis kommt an (3,70)`,preis===3.7,String(preis));
  pr(`${n}: keine JS-Fehler`,!ohneLaerm(js).length,js.join('|').slice(0,200));
  await kctx.close()}
