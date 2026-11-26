@@ -126,10 +126,20 @@
   }
   function springe(art) { const z = zielTag(art); if (z) { gewaehltesDatum = z; rendere(); } }
 
-  function oeffne() {
-    gewaehltesDatum = heuteIso();
+  // 26.11.2026 (Betreiber: „bau das ein mit dem nächsten Tag“): Ist heute niemand eingeplant (z. B. vor dem Markt), öffnet das Fenster
+  // gleich beim nächsten Tag mit Dienstplan - wie die Programm-Anzeige. „Heute“ führt weiterhin zum heutigen Tag.
+  function naechsterDiensttag(ab = heuteIso()) {
+    const t = eintragTage();
+    if (!t.length || t.includes(ab)) return ab;
+    return t.find((d) => d > ab) || ab;
+  }
+  async function oeffne() {
+    gewaehltesDatum = naechsterDiensttag();
     document.getElementById('dienstplanDialog')?.showModal();
-    aktualisiere();
+    const vorher = gewaehltesDatum;
+    await aktualisiere();
+    // erst nach dem Abruf ist der Plan da (oder neu) - noch einmal springen, solange niemand selbst geblättert hat
+    if (gewaehltesDatum === vorher) { const z = naechsterDiensttag(); if (z !== gewaehltesDatum) { gewaehltesDatum = z; rendere(); } }
   }
 
   function verdrahte() {
