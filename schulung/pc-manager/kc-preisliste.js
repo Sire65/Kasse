@@ -23,6 +23,14 @@
   // automatisch dazukommt.
   function pfandBetrag(artikel) {
     if (!artikel || artikel.category === 'Pfand') return 0;
+    // 26.11.2026 (KC-KASSE-PFAND-GLAS): zuerst das Pfand, mit dem auch die Kasse rechnet (Pfandteile des Artikels, bzw.
+    // Pfandgruppen wie beim Senden an die Kassen) - nur wenn der Artikel gar keins hat, die alte Erkennung am Namen.
+    const kasse = typeof global.KCKassenArtikel === 'function' ? global.KCKassenArtikel().find((a) => a.id === artikel.id) : null;
+    const teile = ((kasse || artikel).depositComponents || []).reduce((s, k) => s + (Number(k && k.price) || 0), 0);
+    // Hat der Artikel Pfand-Angaben (auch leer = kein Pfand, z. B. Schuss Rum), gelten nur diese – wie an der Kasse.
+    // Mit dem neuen Manager (KCKassenArtikel) gilt nur das eingetragene Pfand – ohne Eintrag kein Pfand (z. B. Schuss Rum/Amaretto,
+    // die kommen ins Glas des Getränks). Die alte Erkennung am Namen nur noch für einen alten Stand ohne diese Funktion.
+    if (kasse || teile > 0) return Math.round(teile * 100) / 100;
     const regel = artikel.depositRule;
     if (regel === 'none') return 0;
     const pfandartikel = artikelListe().filter((a) => a.category === 'Pfand' && Number(a.price) > 0);
@@ -53,13 +61,12 @@
   // Aus einem Artikel werden bis zu zwei Zeilen: der Artikel selbst und - wenn gewuenscht und
   // Pfand anfaellt - eine zweite Zeile mit Pfand. So steht der Betrag da, den der Kunde
   // wirklich zahlt, ohne dass jemand im Kopf addieren muss.
+  // 26.11.2026 (Betreiber: „Preisliste quer, die die Mengenpreise anzeigt … ist intern. Die muss inklusive Pfand angezeigt werden“):
+  // EINE Zeile je Artikel, die Beträge schon mit Pfand – genau das, was die Kasse kassiert (Eierlikörpunsch 1 = 6,50, 2 = 13,00 …).
+  // Ohne Haken „mit Pfand“ wie früher der reine Artikelpreis.
   function zeilenFuer(artikel, mitPfand) {
-    const zeilen = [{name: artikel.name, preis: Number(artikel.price) || 0, pfandzeile: false}];
     const pfand = mitPfand ? pfandBetrag(artikel) : 0;
-    if (pfand > 0) {
-      zeilen.push({name: `${artikel.name} + Pfand`, preis: (Number(artikel.price) || 0) + pfand, pfandzeile: true});
-    }
-    return zeilen;
+    return [{name: artikel.name, preis: Math.round(((Number(artikel.price) || 0) + pfand) * 100) / 100, pfandzeile: pfand > 0, pfand}];
   }
 
   function zeichnen() {
@@ -98,7 +105,7 @@
       zeilenZahl += zeilen.length;
       return `<tr class="pl-gruppenzeile" style="--pl-farbe:${esc(farbe)}"><th colspan="11">${esc(gruppe)}</th></tr>`
         + zeilen.map((z) => `<tr class="${z.pfandzeile ? 'pl-pfand' : ''}">
-            <td class="pl-name">${esc(z.name)}</td>
+            <td class="pl-name">${esc(z.name)}${z.pfandzeile ? ` <small>inkl. ${geld(z.pfand)} Pfand</small>` : ''}</td>
             ${Array.from({length: 10}, (_, i) => `<td>${geld(z.preis * (i + 1))}</td>`).join('')}
           </tr>`).join('');
     }).join('');
@@ -107,7 +114,7 @@
       <div class="pl-blatt" id="plBlatt" data-tablecore="off">
         <header class="pl-kopf">
           <h2>${esc(titel)} ${esc(jahr)}</h2>
-          <span class="pl-nurintern">Nur für Mitarbeiter · nicht für Kunden</span>
+          <span class="pl-nurintern">${mitPfand ? 'Preise inkl. Pfand · ' : ''}Nur für Mitarbeiter · nicht für Kunden</span>
         </header>
         <table class="pl-tabelle">
           <thead><tr><th class="pl-name">Artikel</th>${kopfSpalten}</tr></thead>
