@@ -1990,7 +1990,7 @@ async function completeSale(method,{type="sale",silent=false,changeTarget=null,d
     if(silent)setSystemHint(`${training?"Training":"Verkauf"} abgeschlossen · bereit für den nächsten Verkauf`);
     else if(type==="personal")showMessageAuto("Personalverbrauch",money(due),`${training?"Trainingsvorgang":"Vorgang"} ${current} wurde protokolliert.`);
     else if(type==="helfer")showMessageAuto("Helfer-Verpflegung",money(due),`${training?"Trainingsvorgang":"Vorgang"} ${current} für ${helperGroup||"Helfer"} wurde protokolliert.`);
-    else if(isPayout)showMessage(training?"Training abgeschlossen":"Auszahlung",money(payout),`${training?"Trainingsbon":"Bon"} ${current} gespeichert. Betrag an den Kunden auszahlen.`);
+    else if(isPayout){showMessage(training?"Training abgeschlossen – Auszahlung":"Auszahlung",money(payout),`${training?"Trainingsbon":"Bon"} ${current} gespeichert. Betrag an den Kunden auszahlen.`,"auszahlung");setSystemHint(`AUSZAHLEN: ${money(payout)} an den Kunden · Bon ${current}`,"error");}
     else if(state.master.requireChangeFlow===true)showMessageAuto(training?"Training abgeschlossen":"Rückgeld",money(change),`${training?"Trainingsbon":"Bon"} ${current} gespeichert.`);
     else showMessageAuto(training?"Training abgeschlossen":"Verkauf abgeschlossen","✓",`${training?"Trainingsbon":"Bon"} ${current} gespeichert.`);
     // Bondruck nach dem Verkauf.
@@ -2046,8 +2046,17 @@ function kcBonDruckAnbieten(bonNummer){
 // HTML-Druckvorlage, weil ein QR-Code mit möglichst wenig Zeichen auskommen soll.
 function digitalBonText(rec){
   const zeilen=[rec.registerName||state.master.clubName||"",`Bon ${rec.bon}`,new Date(rec.time).toLocaleString("de-DE")];
-  rec.items.filter(i=>!i.discountLine).forEach(i=>zeilen.push(`${i.qty}x ${i.name} ${money(i.lineTotal)}`));
-  if(rec.discount&&rec.discount.amount>0)zeilen.push(`Rabatt -${money(rec.discount.amount)}`);
+  // KC-KASSE-BON-PFAND (26.11.2026): wie der gedruckte Bon – Artikelpreis, darunter das Pfand, unten Waren/Pfand; geht die Aufteilung
+  // nicht genau auf, wie bisher eine Zeile je Artikel
+  const cent=v=>Math.round(Number(v||0)*100),z=[];let waren=0,pfand=0;
+  for(const i of rec.items.filter(x=>!x.discountLine)){const qty=Number(i.qty||0),line=cent(i.lineTotal),teile=(Array.isArray(i.deposits)?i.deposits:[]).filter(d=>cent(d?.price));
+    const pj=teile.reduce((s,d)=>s+cent(d.price),0)*qty;
+    if(String(i.category||"")==="Pfand"&&!teile.length){pfand+=line;z.push(`${qty}x ${i.name} ${money(line/100)}`);continue;}
+    waren+=line-pj;pfand+=pj;z.push(`${qty}x ${i.name} ${money((line-pj)/100)}`);teile.forEach(d=>z.push(`   + ${d.name||"Pfand"}${qty>1?` ${qty} x ${money(cent(d.price)/100)}`:""} ${money(cent(d.price)*qty/100)}`));}
+  const rab=cent(rec.discount&&rec.discount.amount);
+  if(pfand!==0&&Math.abs(waren+pfand-rab-cent(rec.due))<=1){zeilen.push(...z,`Waren ${money(waren/100)}`);if(rab>0)zeilen.push(`Rabatt -${money(rab/100)}`);zeilen.push(`Pfand ${money(pfand/100)}`);}
+  else{rec.items.filter(i=>!i.discountLine).forEach(i=>zeilen.push(`${i.qty}x ${i.name} ${money(i.lineTotal)}`));
+  if(rec.discount&&rec.discount.amount>0)zeilen.push(`Rabatt -${money(rec.discount.amount)}`);}
   zeilen.push(`SUMME ${money(rec.due)}`);
   return zeilen.join("\n");
 }
@@ -2084,7 +2093,7 @@ function zeigeDigitalenBon(rec){
 // Erfolgreiche Buchungen unterbrechen keine weitere Bedienung. Fehler bleiben als Dialog sichtbar.
 function showMessageAuto(t,v,txt){setSystemHint(`${t}${v&&v!=="✓"?` · ${v}`:""} · ${txt}`,"ok");}
 
-function showMessage(t,v,txt){{const d=el("messageDialog");if(d){d._kcAuto=null;d.querySelectorAll(".kc-auto-zu").forEach(x=>x.remove())}}el("messageTitle").textContent=t;el("messageValue").textContent=v;el("messageText").textContent=txt;el("messageDialog").showModal()}
+function showMessage(t,v,txt,art){{const d=el("messageDialog");if(d){d._kcAuto=null;d.querySelectorAll(".kc-auto-zu").forEach(x=>x.remove());d.classList.toggle("kc-auszahlung",art==="auszahlung")}}el("messageTitle").textContent=t;el("messageValue").textContent=v;el("messageText").textContent=txt;el("messageDialog").showModal()} // KC-KASSE-AUSZAHLUNG-ROT (26.11.2026, Betreiber: „Auszahlungen sollen immer in Rot sein“): art "auszahlung" färbt das Fenster rot
 // Betreiber: bei "Freie Zahlung" mitten in der Eingabe (Betrag getippt, aber OK noch nicht
 // gedrueckt) zeigte ein Tipp auf BAR/PERSONAL/etc. das allgemeine "Bitte zuerst Artikel
 // wählen" - fachlich richtig (der Warenkorb ist ja noch leer), aber irrefuehrend in genau
@@ -3202,6 +3211,21 @@ function bonSeite(t,autoPrint){
     const line=Number(item.lineTotal??Number(item.price||0)*qty);
     return `<tr><td class="qty">${esc(qty)}×</td><td class="name">${esc(item.name||"Artikel")}</td><td class="sum">${money(line)}</td></tr>`;
   }).join("");
+  // 26.11.2026 (Betreiber: „auf dem Kundenbon Artikelpreis und Pfandpreis extra ausweisen … mit Zwischensummen“, KC-KASSE-BON-PFAND):
+  // Jede Zeile zeigt den reinen Artikelpreis, darunter eingerückt das Pfand (aus item.deposits, so wie gebucht). Unten „Waren“, „Pfand“
+  // (inkl. Pfand-Artikel und Rückgaben) und die SUMME. Gerechnet wird NUR aus den gespeicherten Beträgen; geht die Aufteilung nicht
+  // genau auf (alter Bon, unbekannte Daten), druckt der Bon wie bisher – die SUMME ist immer der gebuchte Betrag.
+  const cent=v=>Math.round(Number(v||0)*100);
+  const pfandTeile=item=>{const m=new Map();for(const d of (Array.isArray(item.deposits)?item.deposits:[])){const p=cent(d?.price);if(!p)continue;const k=`${d?.name||"Pfand"}|${p}`;m.set(k,{name:d?.name||"Pfand",cent:p,anzahl:(m.get(k)?.anzahl||0)+1});}return [...m.values()];};
+  let warenCent=0,pfandCent=0;
+  const geteilteRows=items.map(item=>{
+    const qty=Number(item.qty||0),lineCent=cent(item.lineTotal??Number(item.price||0)*qty);
+    const teile=pfandTeile(item),pfandJe=teile.reduce((s,t)=>s+t.cent*t.anzahl,0),pfandZeile=pfandJe*qty;
+    if(String(item.category||"")==="Pfand"&&!teile.length){pfandCent+=lineCent;return `<tr><td class="qty">${esc(qty)}×</td><td class="name">${esc(item.name||"Pfand")}</td><td class="sum">${money(lineCent/100)}</td></tr>`;}
+    warenCent+=lineCent-pfandZeile;pfandCent+=pfandZeile;
+    return `<tr><td class="qty">${esc(qty)}×</td><td class="name">${esc(item.name||"Artikel")}</td><td class="sum">${money((lineCent-pfandZeile)/100)}</td></tr>`
+      +teile.map(t=>{const n=t.anzahl*qty;return `<tr class="pfand"><td></td><td class="name">+ ${esc(t.name)}${n>1?` <small>${esc(n)} × ${money(t.cent/100)}</small>`:""}</td><td class="sum">${money(t.cent*n/100)}</td></tr>`;}).join("");
+  }).join("");
   const discountRows=(t.items||[]).filter(item=>item.discountLine).map(item=>
     `<tr class="discount"><td></td><td>${esc(item.name||"Rabatt")}</td><td class="sum">${money(Number(item.lineTotal??item.price??0))}</td></tr>`
   ).join("");
@@ -3212,6 +3236,8 @@ function bonSeite(t,autoPrint){
   const given=Number(t.given||0);
   const change=Number(t.change||0);
   const date=new Date(t.time||t.endTime||Date.now());
+  // nur wenn Waren + Pfand genau den gebuchten Betrag vor Rabatt ergeben, wird geteilt gedruckt
+  const geteilt=pfandCent!==0&&Math.abs(warenCent+pfandCent-cent(discount)-cent(due))<=1;
 
   const page=`<!doctype html><html lang="de"><head><meta charset="utf-8"><title>Bon ${esc(t.bon||t.bonNumber)}</title>
   <style>
@@ -3233,6 +3259,7 @@ function bonSeite(t,autoPrint){
     td{padding:.7mm 0;vertical-align:top}
     .qty{width:10mm}.name{padding-right:2mm;overflow-wrap:anywhere}.sum{width:22mm;text-align:right;white-space:nowrap}
     .discount td{font-size:8.8pt}
+    .pfand td{font-size:8.8pt;padding-top:0}.pfand .name{padding-left:3mm}.pfand small{display:block;white-space:nowrap;font-size:8pt;margin-left:1.6em}
     .line{display:flex;justify-content:space-between;gap:3mm;margin:.7mm 0}
     .total strong{font-size:13pt}
     footer{text-align:center;margin-top:4mm;font-size:9pt}
@@ -3252,9 +3279,10 @@ function bonSeite(t,autoPrint){
       <div>Bediener: ${esc(belegBediener(t))}</div>
     </section>
     <div class="rule"></div>
-    <table><tbody>${normalRows}${discountRows}</tbody></table>
+    <table><tbody>${geteilt?geteilteRows:normalRows}${discountRows}</tbody></table>
     <div class="rule"></div>
-    ${discount>0?`<div class="line"><span>Zwischensumme</span><span>${money(gross)}</span></div><div class="line"><span>Rabatt</span><span>− ${money(discount)}</span></div>`:""}
+    ${geteilt?`<div class="line"><span>Waren</span><span>${money(warenCent/100)}</span></div>${discount>0?`<div class="line"><span>Rabatt</span><span>− ${money(discount)}</span></div>`:""}<div class="line"><span>Pfand</span><span>${money(pfandCent/100)}</span></div>`
+      :discount>0?`<div class="line"><span>Zwischensumme</span><span>${money(gross)}</span></div><div class="line"><span>Rabatt</span><span>− ${money(discount)}</span></div>`:""}
     <div class="line total"><strong>SUMME</strong><strong>${money(due)}</strong></div>
     <div class="line"><span>Zahlart</span><span>${esc(zahlartLabel(t.method||t.payment))}</span></div>
     ${given>0?`<div class="line"><span>Gegeben</span><span>${money(given)}</span></div>`:""}
@@ -4027,7 +4055,7 @@ el("saveWithdrawal").onclick=async()=>{
     localStorage.setItem(WITHDRAWAL_KEY,JSON.stringify(rows));
     el("withdrawDialog").close();
     if(withdrawalReason==="Reklamation")resetComplaint();
-    setSystemHint(`${money(record.amount)} ${record.reason==="Reklamation"?`Reklamationsauszahlung · ${record.complaint.reason}`:`Entnahme · ${record.reason}`} gespeichert`,"ok");
+    setSystemHint(`${money(record.amount)} ${record.reason==="Reklamation"?`Reklamationsauszahlung · ${record.complaint.reason}`:`Entnahme · ${record.reason}`} gespeichert`,record.reason==="Reklamation"?"error":"ok"); // KC-KASSE-AUSZAHLUNG-ROT
   }catch(err){
     console.error(err);
     setSystemHint(err?.message||"Entnahme konnte nicht gespeichert werden","error");
