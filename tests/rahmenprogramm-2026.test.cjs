@@ -1,8 +1,8 @@
 /* Rahmenprogramm Weihnachtsmarkt 2026 (Betreiber 18.11.2026: Rohprogramm – Bühnenauftritte und Öffnungszeiten in TV, PC-Manager, DP2).
    Eine Quelle: shared/kc-wm2026-programm.js. Geprüft (ohne echten Server, Netzsperre):
-   - Daten: 28 Programmpunkte 04.–13.12., keine „Musik vom Band“, Öffnungszeiten Mo–Do 15–21, Fr 15–22:30, Sa 12–22:30, So 12–20
+   - Daten: 29 Programmpunkte 04.–13.12., keine „Musik vom Band“, Öffnungszeiten Mo–Do 15–21, Fr 15–22:30, Sa 12–22:30, So 12–20
    - PC-Manager + Schulung: Programm einmalig in settings.eventProgram, alte Punkte im Zeitraum nur ausgeschaltet, zweiter Start ändert nichts,
-     DP2-Übergabe (KCDP2ProgramPublication.normalize) nimmt alle 28 an
+     DP2-Übergabe (KCDP2ProgramPublication.normalize) nimmt alle 29 an
    - TV: Folien Öffnungszeiten / Auf der Bühne (heute, morgen) / Bühnenprogramm 1+2 mit den echten Daten; am 09.12. 17:10 ist
      „Simon Gerundt“ als JETZT markiert; im Video (?aufnahme=1) entfallen heute/morgen; keine Beispieldaten mehr („Kleine Löwen“) */
 const pw = require('playwright'); const http = require('http'), fs = require('fs'), path = require('path');
@@ -13,7 +13,7 @@ const s = http.createServer((q, r) => { const p = path.join(W, decodeURIComponen
 let f = 0; const pr = (n, b, z = '') => { console.log(`${b ? '  OK  ' : 'FEHLER'}  ${n}${z ? '  [' + z + ']' : ''}`); if (!b) f++; };
 
 const D = require(path.join(W, 'shared', 'kc-wm2026-programm.js'));
-pr('Daten: 28 Programmpunkte 04.–13.12., ohne „Musik vom Band“', D.PROGRAMM.length === 28 && D.PROGRAMM.every((p) => p.datum >= '2026-12-04' && p.datum <= '2026-12-13') && !D.PROGRAMM.some((p) => /band\b/i.test(p.titel) && /musik/i.test(p.titel)));
+pr('Daten: 29 Programmpunkte 04.–13.12., ohne „Musik vom Band“', D.PROGRAMM.length === 29 && D.PROGRAMM.every((p) => p.datum >= '2026-12-04' && p.datum <= '2026-12-13') && !D.PROGRAMM.some((p) => /band\b/i.test(p.titel) && /musik/i.test(p.titel)));
 pr('Daten: Öffnungszeiten laut Rohprogramm', JSON.stringify(D.OEFFNUNG.map((o) => [o.kurz, o.von, o.bis])) === JSON.stringify([['Mo.–Do.', '15:00', '21:00'], ['Fr.', '15:00', '22:30'], ['Sa.', '12:00', '22:30'], ['So.', '12:00', '20:00']]));
 pr('Daten: Schulungskopie gleich', fs.readFileSync(path.join(W, 'shared', 'kc-wm2026-programm.js'), 'utf8') === fs.readFileSync(path.join(W, 'schulung', 'shared', 'kc-wm2026-programm.js'), 'utf8'));
 pr('Daten: Ende nach Beginn, keine Überschneidung je Tag', D.PROGRAMM.every((p) => p.bis > p.von) && D.PROGRAMM.every((p) => !D.PROGRAMM.some((q) => q !== p && q.datum === p.datum && q.von < p.bis && p.von < q.bis)));
@@ -41,12 +41,12 @@ pr('Daten: Ende nach Beginn, keine Überschneidung je Tag', D.PROGRAMM.every((p)
       const e = await p.evaluate(() => { const l = (settings.eventProgram || []); return { aktiv: l.filter((x) => x.active !== false && x.date >= '2026-12-04' && x.date <= '2026-12-13').length,
         alt1: (l.find((x) => x.id === 'alt-1') || {}).active, alt2: (l.find((x) => x.id === 'alt-2') || {}).active, oe: settings.officialMarketHours,
         dp2: window.KCDP2ProgramPublication ? window.KCDP2ProgramPublication.normalize(l).length : -1 }; });
-      pr(`${n}: 28 Programmpunkte im Tagesprogramm, Öffnungszeiten hinterlegt`, e.aktiv === 28 && e.oe && e.oe.hours.length === 4, `${e.aktiv}`);
-      pr(`${n}: DP2-Übergabe nimmt alle 28 Punkte an`, e.dp2 === 28, String(e.dp2));
+      pr(`${n}: 29 Programmpunkte im Tagesprogramm, Öffnungszeiten hinterlegt`, e.aktiv === 29 && e.oe && e.oe.hours.length === 4, `${e.aktiv}`);
+      pr(`${n}: DP2-Übergabe nimmt alle 29 Punkte an`, e.dp2 === 29, String(e.dp2));
       if (alt) pr(`${n}: alter Punkt im Zeitraum ausgeschaltet (nicht gelöscht), Archiv 2025 unberührt`, e.alt1 === false && e.alt2 === true);
       await p.reload(); await p.waitForTimeout(1500);
       const zweimal = await p.evaluate(() => (settings.eventProgram || []).filter((x) => x.date >= '2026-12-04' && x.date <= '2026-12-13').length);
-      pr(`${n}: zweiter Start legt nichts doppelt an`, zweimal === (alt ? 29 : 28), String(zweimal));
+      pr(`${n}: zweiter Start legt nichts doppelt an`, zweimal === (alt ? 30 : 29), String(zweimal));
       pr(`${n}: keine JS-Fehler`, !js.filter((x) => !/Failed to fetch|Load failed|access control|net::ERR|4739/.test(x)).length, js.join('|').slice(0, 200));
       await c.close();
     }
@@ -66,10 +66,10 @@ pr('Daten: Ende nach Beginn, keine Überschneidung je Tag', D.PROGRAMM.every((p)
       if (!video) {
         pr(`${n}: alle fünf Tafeln`, ['oeffnung', 'heute', 'morgen', 'gesamt:1', 'gesamt:2'].every((k) => tafeln[k]), Object.keys(tafeln).join(','));
         pr(`${n}: heute = Mittwoch, Simon Gerundt läuft (JETZT), danach Smooth Invaders`, /Heute · Mittwoch, 9\. Dezember/.test(tafeln.heute) && /Simon Gerundt jetzt/i.test(tafeln.heute) && /Smooth Invaders/.test(tafeln.heute), (tafeln.heute || '').slice(0, 120));
-        pr(`${n}: morgen = Donnerstag mit Shanty Chor und Fragile Matt`, /Morgen · Donnerstag, 10\. Dezember/.test(tafeln.morgen) && /Shanty Chor/.test(tafeln.morgen) && /Fragile Matt/.test(tafeln.morgen));
+        pr(`${n}: morgen = Donnerstag mit Shantychor und Fragile Matt`, /Morgen · Donnerstag, 10\. Dezember/.test(tafeln.morgen) && /Shantychor/.test(tafeln.morgen) && /Fragile Matt/.test(tafeln.morgen));
         pr(`${n}: Öffnungszeiten, heute Mo–Do markiert`, /Montag – Donnerstag 15:00 – 21:00 Uhr heute/i.test(tafeln.oeffnung) && /Sonntag 12:00 – 20:00 Uhr/.test(tafeln.oeffnung), (tafeln.oeffnung || '').slice(0, 140));
         const alle = (tafeln['gesamt:1'] || '') + ' ' + (tafeln['gesamt:2'] || '');
-        pr(`${n}: Bühnenprogramm 1+2 enthält alle 28 Punkte chronologisch`, D.PROGRAMM.every((x) => alle.includes(x.von + ' ' + x.titel)) && alle.indexOf('Motherfunkers') < alle.indexOf('Weihnachtsquiz'));
+        pr(`${n}: Bühnenprogramm 1+2 enthält alle 29 Punkte chronologisch`, D.PROGRAMM.every((x) => alle.includes(x.von + ' ' + x.titel)) && alle.indexOf('Motherfunkers') < alle.indexOf('Weihnachtsquiz'));
         pr(`${n}: Laufschrift kündigt das heutige Programm an`, await p.evaluate(() => /Heute auf der Bühne: 16:30 Simon Gerundt · 19:00 Smooth Invaders/.test(window.KC_PROGRAMM_LAUFSCHRIFT())));
       } else {
         pr(`${n}: heute/morgen entfallen, Öffnungszeiten und Bühnenprogramm bleiben`, !tafeln.heute && !tafeln.morgen && tafeln.oeffnung && tafeln['gesamt:1'] && tafeln['gesamt:2'], Object.keys(tafeln).join(','));

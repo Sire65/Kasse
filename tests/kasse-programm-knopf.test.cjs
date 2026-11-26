@@ -2,8 +2,8 @@
    einen Button Programm, dort müsste eigentlich das Programm abrufbar sein“). Kasse und Schulungskasse, ohne echten Server:
    - 09.12. 17:10: Knopf zeigt 16:30, Fenster „Aktuell und anschließend“ mit Simon Gerundt (markiert) und Smooth Invaders,
      „Weihnachtsmarkt heute offiziell 15:00 – 21:00 Uhr“, keine „mittel“-Bewertung
-   - 18.11.: „Nächster Programmtag: Freitag, 4. Dezember“ mit Eröffnung + Bläsercorps
-   - „Ganzes Programm“: 10 Tage, 28 Punkte
+   - 18.11.: „Nächster Programmtag: Freitag, 4. Dezember“ mit Bläsercorps Werne + Eröffnung (laut Flyer 26.11.)
+   - „Ganzes Programm“: 10 Tage, 29 Punkte
    - alte Programmdatei (vor dem Rahmenprogramm) wird nicht genommen, eine neuere hat Vorrang */
 const pw = require('playwright'); const http = require('http'), fs = require('fs'), path = require('path');
 const W = path.join(__dirname, '..');
@@ -40,19 +40,19 @@ let f = 0; const pr = (n, b, z = '') => { console.log(`${b ? '  OK  ' : 'FEHLER'
       pr(`${seite} 09.12. 17:10: aktuell Simon Gerundt, danach Smooth Invaders`, e.titel === 'Aktuell und anschließend' && e.aktiv === 'Simon Gerundt' && /Smooth Invaders/.test(e.text) && e.zeilen === 2, e.text.slice(0, 140));
       pr(`${seite} 09.12.: Öffnungszeiten heute`, /Weihnachtsmarkt heute offiziell 15:00 – 21:00 Uhr \(Stand-Zeiten: DP2\)/.test(e.text) && /eingebaut/.test(e.quelle));
       e = await lesen(p, 'alle');
-      pr(`${seite}: Ganzes Programm mit 10 Tagen und 28 Punkten, heute markiert`, e.tage === 10 && e.zeilen === 28 && /Mittwoch, 9\. Dezember · heute/.test(e.text), `${e.tage} Tage, ${e.zeilen} Punkte`);
+      pr(`${seite}: Ganzes Programm mit 10 Tagen und 29 Punkten, heute markiert`, e.tage === 10 && e.zeilen === 29 && /Mittwoch, 9\. Dezember · heute/.test(e.text), `${e.tage} Tage, ${e.zeilen} Punkte`);
       pr(`${seite}: keine JS-Fehler`, !js.filter((x) => !/Failed to fetch|Load failed|access control|net::ERR|kc-sync/.test(x)).length, js.join('|').slice(0, 200));
       await c.close();
       ({ c, p, js } = await oeffnen(seite, '2026-11-18T15:00:00+01:00'));
       e = await lesen(p, false);
-      pr(`${seite} 18.11.: nächster Programmtag Freitag, 4. Dezember`, e.titel === 'Nächster Programmtag: Freitag, 4. Dezember' && /Eröffnung \+ Bläsercorps/.test(e.text) && /Motherfunkers/.test(e.text), e.titel);
+      pr(`${seite} 18.11.: nächster Programmtag Freitag, 4. Dezember`, e.titel === 'Nächster Programmtag: Freitag, 4. Dezember' && /Bläsercorps Werne \+ Eröffnung/.test(e.text) && /Motherfunkers/.test(e.text), e.titel);
       // alte und neue Programmdatei
       const pakete = await p.evaluate(() => { const core = window.KCEventProgramExchangeCore, mk = (createdAt, title) => { const x = core.create({ program: [{ id: 'x', date: '2026-11-18', time: '16:00', title, impact: 'high' }] }); const body = { ...x, createdAt }; delete body.checksum; return JSON.stringify({ ...body, checksum: core.checksum(body) }); };
         return { alt: mk('2026-10-01T10:00:00.000Z', 'Altes Testprogramm'), neu: mk('2026-11-20T10:00:00.000Z', 'Neue Programmdatei') }; });
       await c.close();
       ({ c, p, js } = await oeffnen(seite, '2026-11-18T15:00:00+01:00', pakete.alt));
       e = await lesen(p, 'alle');
-      pr(`${seite}: alte Programmdatei wird nicht genommen (Rahmenprogramm gilt)`, e.zeilen === 28 && !/Altes Testprogramm/.test(e.text), `${e.zeilen}`);
+      pr(`${seite}: alte Programmdatei wird nicht genommen (Rahmenprogramm gilt)`, e.zeilen === 29 && !/Altes Testprogramm/.test(e.text), `${e.zeilen}`);
       await c.close();
       ({ c, p, js } = await oeffnen(seite, '2026-11-18T15:00:00+01:00', pakete.neu));
       e = await lesen(p, false);
