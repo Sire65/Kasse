@@ -228,7 +228,8 @@
 
       <section id="tcPosSchritt1" class="tc-schritt">
         <p class="tc-anleitung">Ausweis scannen.<br><span class="tc-klein">Ausweis vergessen? Geburtstag als sechsstellige Zahl eingeben (TTMMJJ).</span></p>
-        <input id="tcPosCredential" class="tc-eingabe" autocomplete="off" inputmode="text" placeholder="Ausweis scannen oder TTMMJJ">
+        <input id="tcPosCredential" class="tc-eingabe" autocomplete="off" inputmode="none" placeholder="Ausweis scannen oder TTMMJJ">
+        <div id="tcPosZiffern" class="tc-ziffern" aria-label="Zahlenfeld für den Geburtstag (TTMMJJ)">${[1, 2, 3, 4, 5, 6, 7, 8, 9].map(z => `<button type="button" data-ziffer="${z}">${z}</button>`).join('')}<button type="button" data-ziffer="weg" aria-label="Letzte Ziffer löschen">⌫</button><button type="button" data-ziffer="0">0</button><button type="button" data-ziffer="tastatur" aria-label="Tastatur einblenden" title="Tastatur einblenden">⌨️</button></div>
         <button type="button" id="tcPosIdentify" class="tc-knopf-gross">Weiter</button>
       </section>
 
@@ -257,6 +258,24 @@
 
     button.onclick = () => { zurueckZuSchritt1(); dialog.showModal(); setTimeout(() => el('tcPosCredential').focus(), 50); };
     el('tcPosCredential').onkeydown = event => { if (event.key === 'Enter') { event.preventDefault(); identify(); } };
+    // 26.11.2026 (Wunsch Betreiber: „wenn die Stechuhr gedrückt wird, wartet das Programm auf den Scan des QR-Codes – es könnte schon ein
+    // Zahlenfeld eingeblendet werden, um bei Bedarf das Geburtsdatum einzugeben“): Zahlenfeld direkt unter dem Eingabefeld.
+    // Der Scanner ist eine Tastatur und schreibt in das Feld, das gerade den Fokus hat. Darum nimmt das Zahlenfeld dem Eingabefeld
+    // den Fokus NIE weg (pointerdown ohne Fokuswechsel) – der QR-Code klappt weiter jederzeit. inputmode="none": die Bildschirm-
+    // tastatur verdeckt das Zahlenfeld nicht; ⌨️ blendet sie bei Bedarf ein (z. B. Mitgliedsnummer von Hand).
+    // Sechs Ziffern über das Zahlenfeld = Geburtstag TTMMJJ → gleich weiter (wie „Weiter“).
+    const ziffern = el('tcPosZiffern');
+    ziffern.addEventListener('pointerdown', event => { if (event.target.closest('button')) event.preventDefault(); });
+    ziffern.addEventListener('click', event => {
+      const knopf = event.target.closest('button[data-ziffer]'); if (!knopf) return;
+      const feld = el('tcPosCredential'), z = knopf.dataset.ziffer;
+      if (z === 'tastatur') { feld.setAttribute('inputmode', 'text'); feld.blur(); setTimeout(() => feld.focus(), 30); return; }
+      if (!/^\d*$/.test(feld.value)) feld.value = '';
+      if (z === 'weg') feld.value = feld.value.slice(0, -1);
+      else if (feld.value.length < 6) feld.value += z;
+      feld.focus();
+      if (z !== 'weg' && feld.value.length === 6) identify();
+    });
     el('tcPosIdentify').onclick = identify;
     el('tcPosZurueck').onclick = zurueckZuSchritt1;
     el('tcPosCommit').onclick = commit;
@@ -292,7 +311,7 @@
     selected = null; erfasstAm = null; vorschlag = null; gerundeterVorschlag = null; schichtgrund = '';
     if (el('tcPosSchritt1')) el('tcPosSchritt1').hidden = false;
     if (el('tcPosSchritt2')) el('tcPosSchritt2').hidden = true;
-    if (el('tcPosCredential')) { el('tcPosCredential').value = ''; el('tcPosCredential').focus(); }
+    if (el('tcPosCredential')) { el('tcPosCredential').value = ''; el('tcPosCredential').setAttribute('inputmode', 'none'); el('tcPosCredential').focus(); }
     if (el('tcPosCommit')) el('tcPosCommit').disabled = false;
     message('Bereit.');
   }
@@ -308,6 +327,7 @@
   function applyConfig() {
     const button = el('timeClockBtn');
     if (button) button.hidden = !config.enabled && !(Array.isArray(people) && people.length);
+    if (el('tcPosZiffern')) el('tcPosZiffern').hidden = config.allowBirthCode === false; // Zahlenfeld nur, wenn der Geburtstag hier erlaubt ist
   }
 
   // Personenliste uebernehmen. Ein mitgelieferter Klarname wird hier bewusst NICHT gespeichert -
