@@ -45,6 +45,52 @@ function bildschirmeWindowsAsync() {
   });
 }
 
+// 26.11.2026 (Befund Stand: Fernseher kurz aus und wieder an – Windows hatte die Präsentation auf den kleinen
+// Monitor geschoben, und dort blieb sie): Ein dauerhaft geöffnetes PowerShell liefert alle 20 s die Bildschirme UND
+// die Lage des Fernseh-Fensters. Steht das Fenster nicht auf dem Fernseher, wird es zurückgeholt. Dauerhaft statt
+// je Prüfung neu gestartet: spart auf dem Celeron spürbar Rechenzeit. Klappt das nicht, gilt der alte Weg (nur Bildschirme).
+const PS_INIT = [
+  "$ProgressPreference = 'SilentlyContinue'",
+  'Add-Type -AssemblyName System.Windows.Forms',
+  "Add-Type -TypeDefinition 'using System; using System.Runtime.InteropServices; public static class KcFen { [StructLayout(LayoutKind.Sequential)] public struct R { public int L; public int T; public int Ri; public int B; } [DllImport(\"user32.dll\")] public static extern bool GetWindowRect(IntPtr h, out R r); }'",
+  "function KcPruefe([int]$kid) { $s = @([System.Windows.Forms.Screen]::AllScreens | ForEach-Object { [pscustomobject]@{ name=$_.DeviceName; x=$_.Bounds.X; y=$_.Bounds.Y; breite=$_.Bounds.Width; hoehe=$_.Bounds.Height; haupt=$_.Primary } }); $f = $null; $p = $null; if ($kid -gt 0) { $p = Get-Process -Id $kid -ErrorAction SilentlyContinue }; if (-not $p -or $p.MainWindowHandle -eq 0) { $p = Get-Process msedge,chrome -ErrorAction SilentlyContinue | Where-Object { $_.MainWindowTitle -like '*KC Fernseher*' } | Select-Object -First 1 }; if ($p -and $p.MainWindowHandle -ne 0) { $r = New-Object KcFen+R; [void][KcFen]::GetWindowRect($p.MainWindowHandle, [ref]$r); $f = [pscustomobject]@{ l=$r.L; t=$r.T; r=$r.Ri; b=$r.B } }; Write-Output ('KCJSON' + (ConvertTo-Json -Compress -Depth 4 ([pscustomobject]@{ schirme=$s; fenster=$f }))) }",
+  '',
+].join('\r\n');
+
+class PowerShellDauer {
+  constructor(starter = spawn) { this.starter = starter; this.kind = null; this.puffer = ''; this.warten = null; }
+  _start() {
+    const k = this.starter('powershell.exe', ['-NoProfile', '-NonInteractive', '-ExecutionPolicy', 'Bypass', '-Command', '-'], { stdio: ['pipe', 'pipe', 'ignore'], windowsHide: true });
+    this.kind = k; this.puffer = '';
+    k.on('error', () => { if (this.kind === k) this.kind = null; this._fertig(null); });
+    k.on('exit', () => { if (this.kind === k) this.kind = null; this._fertig(null); });
+    if (k.stdin) { k.stdin.on('error', () => {}); k.stdin.write(PS_INIT + '\r\n'); }
+    if (k.stdout) {
+      k.stdout.setEncoding('utf8');
+      k.stdout.on('data', (d) => {
+        this.puffer = (this.puffer + d).slice(-200000);
+        let i;
+        while ((i = this.puffer.indexOf('\n')) >= 0) {
+          const zeile = this.puffer.slice(0, i).trim(); this.puffer = this.puffer.slice(i + 1);
+          if (zeile.startsWith('KCJSON')) { let v = null; try { v = JSON.parse(zeile.slice(6)); } catch (e) { v = null; } this._fertig(v); }
+        }
+      });
+    }
+  }
+  _fertig(v) { const w = this.warten; this.warten = null; if (w) w(v); }
+  frage(pid) {
+    return new Promise((ok) => {
+      if (this.warten) { ok(null); return; }
+      if (!this.kind) this._start();
+      if (!this.kind || !this.kind.stdin) { ok(null); return; }
+      const t = setTimeout(() => { if (this.warten) { this.warten = null; this.stop(); ok(null); } }, 20000); if (t.unref) t.unref();
+      this.warten = (v) => { clearTimeout(t); ok(v); };
+      try { this.kind.stdin.write(`KcPruefe ${Number(pid) || 0}\r\n`); } catch (e) { this._fertig(null); }
+    });
+  }
+  stop() { try { if (this.kind) this.kind.kill(); } catch (e) { /* weg */ } this.kind = null; }
+}
+
 function waehleBildschirm(bildschirme, einstellung) {
   if (!bildschirme.length) return null;
   const nr = Number(einstellung);
@@ -81,7 +127,7 @@ class Fernseher {
     // ein kurzer HDMI-Aussetzer. Jetzt: 0 Bildschirme = Abfrage unklar, nichts tun; geschlossen wird erst, wenn der
     // Fernseher bei ausNachPruefungen Prüfungen hintereinander fehlt (Standard 3 = rund eine Minute).
     this.ausNachPruefungen = Math.max(1, ausNachPruefungen);
-    this._fehltSeit = 0;
+    this._fehltSeit = 0; this._psFehler = 0;
     this.einstellungen = leseEinstellungen(einstellungsDatei);
     this.datenOrdner = datenOrdner;
     this.webserverPort = webserverPort;
@@ -94,7 +140,7 @@ class Fernseher {
     this._stopp = false;
     this.wachTakt = wachTakt;
     this.bildschirmeErmittelnAsync = bildschirmeErmittelnAsync
-      || (bildschirmeErmitteln === bildschirmeWindows ? bildschirmeWindowsAsync : async () => bildschirmeErmitteln());
+      || (bildschirmeErmitteln === bildschirmeWindows ? (pid) => this._windowsAbfrage(pid) : async () => bildschirmeErmitteln());
   }
 
   // "rand": Sicherheitsrand in Prozent (0-10) gegen Overscan - viele Fernseher schneiden die Bildränder ab.
@@ -133,7 +179,7 @@ class Fernseher {
       this._wache = setInterval(async () => {
         if (this._prueftGerade || this._stopp) return;
         this._prueftGerade = true;
-        try { this._pruefen(await this.bildschirmeErmittelnAsync()); } catch (e) { /* nächster Takt */ } finally { this._prueftGerade = false; }
+        try { this._pruefen(await this.bildschirmeErmittelnAsync(this._kind && this.zustand.laeuft ? this._kind.pid : 0)); } catch (e) { /* nächster Takt */ } finally { this._prueftGerade = false; }
       }, this.wachTakt);
       if (this._wache.unref) this._wache.unref();
     }
@@ -143,6 +189,33 @@ class Fernseher {
         : `[Fernseher] Präsentation läuft auf ${this.zustand.ziel}. PC-Manager und dieses Fenster bleiben auf der Hauptanzeige.`);
     }
     return { gestartet: this.zustand.laeuft, einBildschirm: n <= 1, wartet: !!this.zustand.wartet, meldung: null };
+  }
+
+  // Dauer-PowerShell (Bildschirme + Fensterlage); nach 2 Fehlschlägen dauerhaft der alte Weg (nur Bildschirme).
+  async _windowsAbfrage(pid) {
+    if (!this._psKaputt) {
+      if (!this._ps) this._ps = new PowerShellDauer();
+      const r = await this._ps.frage(pid);
+      if (r && r.schirme) {
+        this._psFehler = 0;
+        const liste = Array.isArray(r.schirme) ? r.schirme : [r.schirme];
+        liste.fenster = r.fenster || null;
+        return liste;
+      }
+      if (++this._psFehler >= 2) { this._psKaputt = true; this._ps.stop(); }
+    }
+    return bildschirmeWindowsAsync();
+  }
+
+  // Präsentation steht auf dem falschen Bildschirm (Windows hat sie beim Aus/Ein des Fernsehers verschoben): schließen
+  // und nach dem Beenden auf dem Fernseher neu starten.
+  _zurueckHolen(grund) {
+    if (!this._kind || !this.zustand.laeuft) return;
+    this.log(`[Fernseher] ${grund} – Präsentation wird auf den Fernseher zurückgeholt.`);
+    this._absichtlichZu = true; this._danachStarten = true;
+    try { this._kind.kill(); } catch (e) { /* weg */ }
+    this.zustand.laeuft = false;
+    this.zustand.zurueckgeholt = (this.zustand.zurueckgeholt || 0) + 1;
   }
 
   _erlaubt(n) { return n >= 2 || this.einstellungen.einBildschirm === true; }
@@ -172,6 +245,13 @@ class Fernseher {
       return n;
     }
     this._fehltSeit = 0;
+    // Läuft die Präsentation, aber ihr Fenster steht nicht auf dem Fernseher? Dann zurückholen.
+    if (this.zustand.laeuft && liste && liste.fenster && this._ziel) {
+      const tv = bildschirme.find((b) => b.name === this._ziel.name) || waehleBildschirm(bildschirme, this.einstellungen.bildschirm);
+      const f = liste.fenster, mx = (Number(f.l) + Number(f.r)) / 2, my = (Number(f.t) + Number(f.b)) / 2;
+      const drauf = tv && mx >= tv.x && mx < tv.x + tv.breite && my >= tv.y && my < tv.y + tv.hoehe;
+      if (!drauf) { this._ziel = tv || this._ziel; this._zurueckHolen('Präsentation stand nicht auf dem Fernseher (Fernseher war kurz aus?)'); return n; }
+    }
     const warteteVorher = !!this.zustand.wartet;
     this.zustand.wartet = false;
     if (!this.zustand.laeuft && !this._vomNutzerGeschlossen && !this._stopp) {
@@ -195,7 +275,11 @@ class Fernseher {
     kind.on('exit', (code) => {
       if (this._kind === kind) this.zustand.laeuft = false;
       if (this._stopp) return;
-      if (this._absichtlichZu) { this._absichtlichZu = false; return; }   // Fernseher aus - wir haben selbst geschlossen
+      if (this._absichtlichZu) {   // Fernseher aus bzw. falscher Bildschirm - wir haben selbst geschlossen
+        this._absichtlichZu = false;
+        if (this._danachStarten) { this._danachStarten = false; const t = setTimeout(() => { if (!this._stopp && !this.zustand.laeuft) this._pruefen(); }, 2000); if (t.unref) t.unref(); }
+        return;
+      }
       if (code === 0) {
         this._vomNutzerGeschlossen = true;
         this.log('[Fernseher] Fernsehbild wurde geschlossen. Wieder öffnen: schwarzes Fenster neu starten oder im PC-Manager „📺 An den Fernseher senden“.');
@@ -221,8 +305,9 @@ class Fernseher {
   stop() {
     this._stopp = true;
     if (this._wache) clearInterval(this._wache);
+    if (this._ps) this._ps.stop();
     try { if (this._kind && this.zustand.laeuft) this._kind.kill(); } catch (e) { /* weg */ }
   }
 }
 
-module.exports = { Fernseher, leseEinstellungen, waehleBildschirm, browserArgumente, findeBrowser, bildschirmeWindowsAsync };
+module.exports = { Fernseher, leseEinstellungen, waehleBildschirm, browserArgumente, findeBrowser, bildschirmeWindowsAsync, PowerShellDauer, PS_INIT };
