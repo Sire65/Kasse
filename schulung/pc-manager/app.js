@@ -184,6 +184,22 @@ const managerArtikelGespeichert=!!localStorage.getItem("kcm_articles"),managerGr
   a.info={...alt,allergens:{...al,sulphites:"contained"},additives:Z,contents:Z,source:[alt.source,"Allergen-Nachtrag 25.11.2026 (Betreiber: aus dem Glühwein rot)"].filter(Boolean).join("; ")};
   localStorage.setItem("kcm_articles",JSON.stringify(articles))}
  localStorage.setItem(MERK,"1")}}
+// 26.11.2026 (Betreiber: „Großer Fehler. Auf den Kassen wird das Pfand nicht sofort draufgerechnet“, KC-KASSE-PFAND-GLAS):
+// Glühwein rot/weiß, Eierlikörpunsch, Apfelpunsch und Roter Feger hatten hier kein Pfand – „Stammdaten senden“ nahm den
+// Kassen damit das Glaspfand. Jedes Getränk im Glas bekommt das Glaspfand (2,00 €, wie die Feuerzangenbowle), solange der
+// Artikel gar kein Pfand hat (weder Pfandteile noch Pfandgruppen). Einmal je Gerät; danach gilt, was hier eingetragen wird.
+{const MERK="kcm_pfand_glas_v1";if(!localStorage.getItem(MERK)){const GLAS=["grot","gweiss","eier","apfel","roterfeger"];let neu=false;
+ for(const a of articles){if(!GLAS.includes(a.id))continue;if((a.depositComponents||[]).some(k=>Number(k?.price)>0)||(a.depositGroupIds||[]).length)continue;
+  a.depositComponents=[{id:"glass",name:"Glaspfand",price:2}];neu=true}
+ if(neu)localStorage.setItem("kcm_articles",JSON.stringify(articles));localStorage.setItem(MERK,"1")}}
+// Artikel so, wie die Kasse sie braucht: Die Kasse rechnet Pfand NUR aus depositComponents. Pfandgruppen (Häkchen „Glas“,
+// „Feuerzange“ …) kannte sie nicht – ein Artikel nur mit Pfandgruppe kam an der Kasse ohne Pfand an. Darum werden beim Senden
+// (und für die Preisetiketten der Club-App) die Pfandgruppen als Pfandteile mitgegeben, wenn der Artikel keine eigenen hat.
+function kassenArtikel(liste){return (liste||[]).map(a=>{const eigene=(a.depositComponents||[]).filter(k=>Number(k?.price)>0);if(eigene.length||!(a.depositGroupIds||[]).length)return a;
+  const aus=(a.depositGroupIds||[]).map(id=>depositGroups.find(g=>g.id===id)).filter(g=>g&&Number(g.amount)>0)
+    .map(g=>({id:g.id,name:/pfand$/i.test(g.name||"")?g.name:`${g.name||"Glas"}pfand`,price:Number(g.amount)}));
+  return aus.length?{...a,depositComponents:aus}:a})}
+window.KCKassenArtikel=()=>kassenArtikel(articles);
 // Artikelnummern aus derselben Tabelle wie die Kasse (shared/kc-artikelnummern-core.js).
 // Dadurch traegt ein Artikel im Manager, in der Kasse und auf dem gedruckten Etikett
 // dieselbe Nummer - sonst zeigt ein Etikett spaeter auf einen Artikel, den die Kasse
@@ -2216,7 +2232,7 @@ document.getElementById('masterDataPushBtn')?.addEventListener('click', () => re
       // Bedienerliste, Vereins- und Veranstaltungsname. Was am Gerät hängt oder während der
       // Schicht persönlich gewählt wird (Kassennummer, Ansicht), filtert der Manager-Dienst
       // ausdrücklich heraus - siehe VERBOTEN dort.
-      body: JSON.stringify({ groups, articles, packages: [], accounts, settings }),
+      body: JSON.stringify({ groups, articles: kassenArtikel(articles), packages: [], accounts, settings }), // KC-KASSE-PFAND-GLAS: Pfandgruppen als Pfandteile
     });
     if (!antwort.ok) throw new Error('Manager antwortete mit ' + antwort.status);
     const daten = await antwort.json();

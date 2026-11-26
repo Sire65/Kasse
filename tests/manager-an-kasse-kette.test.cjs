@@ -28,6 +28,8 @@ for(const [mgr,kasse] of [['pc-manager','pos'],['schulung/pc-manager','schulung/
  const n0=`${ENGINE} ${mgr}`;
  pr(`${n0}: „Stammdaten senden“ liefert ein Paket`,!!paket&&Array.isArray(paket.articles)&&paket.articles.length>10,paket?paket.articles.length+' Artikel':'kein Paket');
  pr(`${n0}: keine JS-Fehler`,!ohneLaerm(mjs).length,mjs.join('|').slice(0,200));
+ const glas=paket?['grot','gweiss','eier','apfel','roterfeger'].map(id=>(paket.articles.find(x=>x.id===id)||{}).depositComponents||[]).map(d=>d.reduce((s,k)=>s+Number(k.price||0),0)):[];
+ pr(`${n0}: gesendetes Paket: Glas-Getränke mit 2,00 € Glaspfand (KC-KASSE-PFAND-GLAS)`,glas.length===5&&glas.every(x=>x===2),glas.join(','));
  await mctx.close();
  if(!paket)continue;
  // 2. Kasse startet und gleicht mit genau diesem Paket ab
@@ -47,6 +49,10 @@ for(const [mgr,kasse] of [['pc-manager','pos'],['schulung/pc-manager','schulung/
  // 10.10.2026 (Betreiber: "jede Kombi nur einmal"): vier Kombis, je Getraenk mit und ohne Wurst
  pr(`${n}: alle 4 Kombis bleiben (Manager sendet keine)`,ko.length===4&&['Grünkohl + Glühwein rot','Grünkohl + Eierlikörpunsch','Grünkohl-Wurst + Glühwein rot','Grünkohl-Wurst + Eierlikörpunsch'].every(x=>ko.includes(x)),ko.join(' | '));
  const preis=await p.evaluate(()=>(PRODUCTS.find(x=>x.id==='grot')||{}).price);
+ // 26.11.2026 (Betreiber: „Großer Fehler. Auf den Kassen wird das Pfand nicht sofort draufgerechnet“): jedes Getränk im Glas
+ // bringt sein Pfand mit - Glühwein rot im Bon = 3,70 + 2,00 Glaspfand, Feuerzangenbowle = 5,00 + 2,00 Glas + 2,00 Zange
+ const pfand=await p.evaluate(()=>{const r={};for(const id of ['grot','gweiss','eier','apfel','roterfeger','feuer']){state.cart=[];const pr=PRODUCTS.find(x=>x.id===id);if(!pr){r[id]='fehlt';continue}addConfiguredProduct(pr,null);r[id]=+(grossTotal()-pr.price).toFixed(2)}state.cart=[];renderCart();return r});
+ pr(`${n}: Pfand wird beim Buchen sofort draufgerechnet (Glas 2,00, Feuerzangenbowle 4,00)`,['grot','gweiss','eier','apfel','roterfeger'].every(id=>pfand[id]===2)&&pfand.feuer===4,JSON.stringify(pfand));
  pr(`${n}: im Manager geänderter Preis kommt an (3,70)`,preis===3.7,String(preis));
  pr(`${n}: keine JS-Fehler`,!ohneLaerm(js).length,js.join('|').slice(0,200));
  await kctx.close()}
@@ -59,6 +65,8 @@ for(const [mgr,kasse] of [['pc-manager','pos'],['schulung/pc-manager','schulung/
   await kctx.route(u=>/\/kc-sync-master-data(\?|$)/.test(u.pathname+(u.search?'?':'')),route=>route.fulfill({status:200,contentType:'application/json',headers:{'Access-Control-Allow-Origin':'*'},body:JSON.stringify(daten)}));
   await p.addInitScript(()=>{if(!localStorage.getItem('kc_master_v040'))localStorage.setItem('kc_master_v040',JSON.stringify({registerId:'KASSE-01',pinLockEnabled:false}));localStorage.setItem('kc_preis_hering_creme_v1','1')});
   await p.goto(`http://127.0.0.1:${PORT}/Kasse/${kasse}/index.html`);await p.waitForTimeout(3000);
+  const pf=await p.evaluate(()=>{state.cart=[];addConfiguredProduct(PRODUCTS.find(x=>x.id==='grot'),null);const d=+(grossTotal()-PRODUCTS.find(x=>x.id==='grot').price).toFixed(2);state.cart=[];return d});
+  pr(`${kasse}: alter Manager-Stand ohne Pfand – Kasse rechnet trotzdem 2,00 € Glaspfand`,pf===2,String(pf));
   const r=await p.evaluate(()=>{const g=id=>PRODUCTS.find(x=>x.id===id)||{};return {grot:g('grot').price,apfel:[g('apfel').price,g('apfel').optionGroup],hering:g('hering').price}});
   const n=`${ENGINE} alter Manager-Stand -> ${kasse}`;
   pr(`${n}: falscher Preis mit Pfand 5,50 wird zu 3,50`,r.grot===3.5,JSON.stringify(r));

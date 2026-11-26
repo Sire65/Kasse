@@ -204,6 +204,15 @@ const REQUIRED_DEPOSIT_RETURNS=[
 let depositReturnMigration=false;
 for(const required of REQUIRED_DEPOSIT_RETURNS){const existing=PRODUCTS.find(p=>p.id===required.id);if(!existing){PRODUCTS.push(required);depositReturnMigration=true}else if(required.id!=="glasminus"&&String(existing.image||"").includes("amaretto_auth")){existing.image=required.image;existing.info=required.info;depositReturnMigration=true}}
 if(depositReturnMigration)localStorage.setItem("kc_products_v050",JSON.stringify(PRODUCTS));
+// 26.11.2026 (Betreiber: „Großer Fehler. Auf den Kassen wird das Pfand nicht sofort draufgerechnet“, KC-KASSE-PFAND-GLAS):
+// Im PC-Manager fehlte bei Glühwein rot/weiß, Eierlikörpunsch, Apfelpunsch und Roter Feger das Pfand – „Stammdaten senden“
+// ersetzte die Artikel der Kasse und damit auch ihr Glaspfand durch „keins“. Die Kasse rechnete nur noch den Getränkepreis.
+// Sicherheitsnetz bei JEDEM Start: Ein Getränk, das laut Grundstand im Glas ausgegeben wird (Pfand in DEFAULT_PRODUCTS) und
+// überhaupt kein Pfand mehr hat, bekommt das Pfand aus dem Grundstand zurück. Ein vom Manager gesendetes Pfand (anderer Betrag,
+// weitere Teile) bleibt unangetastet.
+{let pfandNeu=false;for(const p of PRODUCTS){const grund=DEFAULT_PRODUCTS.find(d=>d.id===p.id);const soll=(grund?.depositComponents||[]).filter(d=>Number(d.price)>0);
+  if(!soll.length||(p.depositComponents||[]).some(d=>Number(d?.price)>0))continue;p.depositComponents=soll.map(d=>({...d}));pfandNeu=true}
+ if(pfandNeu)localStorage.setItem("kc_products_v050",JSON.stringify(PRODUCTS))}
 
 // Freigegebene Speisenbilder und Preise auf bereits gespeicherte Artikel anwenden.
 // Ohne das behielte eine Kasse, die den Artikel schon im Speicher hat, das alte
