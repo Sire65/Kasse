@@ -253,6 +253,15 @@ const REQUIRED_DEPOSIT_RETURNS=[
 let depositReturnMigration=false;
 for(const required of REQUIRED_DEPOSIT_RETURNS){const existing=PRODUCTS.find(p=>p.id===required.id);if(!existing){PRODUCTS.push(required);depositReturnMigration=true}else if(required.id!=="glasminus"&&String(existing.image||"").includes("amaretto_auth")){existing.image=required.image;existing.info=required.info;depositReturnMigration=true}}
 if(depositReturnMigration)localStorage.setItem("kc_products_v050",JSON.stringify(PRODUCTS));
+// 26.11.2026 (Betreiber: „Großer Fehler. Auf den Kassen wird das Pfand nicht sofort draufgerechnet“, KC-KASSE-PFAND-GLAS):
+// Im PC-Manager fehlte bei Glühwein rot/weiß, Eierlikörpunsch, Apfelpunsch und Roter Feger das Pfand – „Stammdaten senden“
+// ersetzte die Artikel der Kasse und damit auch ihr Glaspfand durch „keins“. Die Kasse rechnete nur noch den Getränkepreis.
+// Sicherheitsnetz bei JEDEM Start: Ein Getränk, das laut Grundstand im Glas ausgegeben wird (Pfand in DEFAULT_PRODUCTS) und
+// überhaupt kein Pfand mehr hat, bekommt das Pfand aus dem Grundstand zurück. Ein vom Manager gesendetes Pfand (anderer Betrag,
+// weitere Teile) bleibt unangetastet.
+{let pfandNeu=false;for(const p of PRODUCTS){const grund=DEFAULT_PRODUCTS.find(d=>d.id===p.id);const soll=(grund?.depositComponents||[]).filter(d=>Number(d.price)>0);
+  if(!soll.length||(p.depositComponents||[]).some(d=>Number(d?.price)>0))continue;p.depositComponents=soll.map(d=>({...d}));pfandNeu=true}
+ if(pfandNeu)localStorage.setItem("kc_products_v050",JSON.stringify(PRODUCTS))}
 
 // Freigegebene Speisenbilder und Preise auf bereits gespeicherte Artikel anwenden.
 // Ohne das behielte eine Kasse, die den Artikel schon im Speicher hat, das alte
@@ -1152,10 +1161,15 @@ function renderProductPager(){
   }else if(leiste){leiste.hidden=false;}
 }
 function hasInfo(p){return !!p; /* Jeder Artikel erhält eine transparente Produktinfo. Fehlende Angaben bleiben ausdrücklich „nicht geprüft“. */}
+// 26.11.2026 (Betreiber: „besser die Kacheln inkl. Pfand anzeigen. Auf dem Bon sollte allerdings Pfand extra ausgewiesen werden“,
+// KC-KASSE-KACHEL-INKL-PFAND): Die Kachel zeigt den Preis MIT Pfand (Glühwein 5,50), auch bei „Pfand automatisch“ – das ist, was
+// der Gast zahlt. Warenkorb und Bon bleiben: Artikel netto, darunter kleiner das Pfand, Summe und Zahlbetrag gesamt.
+// Nur bei „Pfand manuell“ steht der reine Artikelpreis (dann bucht das Team das Pfand selbst).
+function pfandSumme(p){return Array.isArray(p?.depositComponents)?p.depositComponents.reduce((sum,item)=>sum+Number(item?.price||0),0):0}
 function displayPrice(p){
   const base=Number(p?.price||0);
-  if(state.master.depositRule!=="included"||!Array.isArray(p?.depositComponents))return base;
-  return base+p.depositComponents.reduce((sum,item)=>sum+Number(item.price||0),0);
+  if(state.master.depositRule==="manual")return base;
+  return +(base+pfandSumme(p)).toFixed(2);
 }
 // 11.09.2026 (Betreiber: "Der Preis muss in der Kasse inkl. Pfand ausgegeben werden - Artikel
 // 3,50 und Pfand 2,00 macht 5,50 als Preis"): NUR fuer die Anzeige auf der Kachel selbst -
@@ -1184,7 +1198,7 @@ function renderProducts(){
           <img class="kombi-unten" src="${p.kombiBilder.unten}" alt="">
           <svg class="kombi-linie" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"><line x1="0" y1="100" x2="100" y2="0" vector-effect="non-scaling-stroke"/></svg>${p.kombiBilder.vorne?`<span class="kombi-vorne"><img src="${p.kombiBilder.vorne}" alt=""></span>`:""}
         </span>`:`<img src="${p.image}" alt="">`}
-        <span class="product-price-tag ${p.isOffer?"offer-price-line":""}">${p.isOffer?`<small class="offer-old-price">${money(p.originalPrice)}</small>`:""}${p.isFreieZahlung?"Betrag frei":money(kachelPreis(p)).replace(/\s?€/,"")}</span>
+        <span class="product-price-tag ${p.isOffer?"offer-price-line":""}">${p.isOffer?`<small class="offer-old-price">${money(state.master.depositRule==="manual"?p.originalPrice:+(Number(p.originalPrice||0)+pfandSumme(p)).toFixed(2))}</small>`:""}${p.isFreieZahlung?"Betrag frei":money(kachelPreis(p)).replace(/\s?€/,"")}</span>
         <span class="product-label"><strong>${p.name}</strong></span>
       </button>
       ${p.optionGroup?`<button class="product-variant-button" data-variant-id="${p.id}" title="Varianten zu ${p.name}" aria-label="Varianten zu ${p.name} öffnen">+</button>`:""}
@@ -1300,8 +1314,8 @@ function passeArtikelgroesseAn(){
 /* Auf der Kachel ist nur wenig Platz. "zzgl. Pfand automatisch" passte nicht hinein und
    wurde mitten im Wort abgeschnitten ("zzgl. Pfand automatis"). Die Kachel zeigt deshalb
    die kurze Form, der vollstaendige Text steht als Tooltip daran. */
-function depositKurz(p){if(state.master.depositRule==="automatic")return "zzgl. Pfand";if(state.master.depositRule==="included")return "inkl. Pfand";return "Pfand manuell"}
-function depositHint(p){if(state.master.depositRule==="automatic")return "zzgl. Pfand automatisch";if(state.master.depositRule==="included")return "inkl. Pfand";return "Pfand manuell"}
+function depositKurz(p){if(state.master.depositRule==="automatic")return "inkl. Pfand";/* KC-KASSE-KACHEL-INKL-PFAND */if(state.master.depositRule==="included")return "inkl. Pfand";return "Pfand manuell"}
+function depositHint(p){if(state.master.depositRule==="automatic")return `Preis inkl. ${money(pfandSumme(p))} Pfand – im Bon steht das Pfand extra`;if(state.master.depositRule==="included")return "inkl. Pfand";return "Pfand manuell"}
 
 const ALLERGEN_LABELS={gluten:'Glutenhaltiges Getreide',crustaceans:'Krebstiere',eggs:'Eier',fish:'Fisch',peanuts:'Erdnüsse',soy:'Soja',milk:'Milch',nuts:'Schalenfrüchte',celery:'Sellerie',mustard:'Senf',sesame:'Sesam',sulphites:'Schwefeldioxid / Sulfite',lupin:'Lupinen',molluscs:'Weichtiere'};
 const ALLERGEN_STATUS={contained:'Enthalten',traces:'Spuren möglich','not-contained':'Nicht enthalten','not-checked':'Nicht geprüft'};

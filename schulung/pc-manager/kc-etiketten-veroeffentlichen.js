@@ -48,7 +48,8 @@
   async function veroeffentlichen() {
     if (SCHULUNG) return {ok: false, grund: 'Schulung – es wird nichts veröffentlicht'};
     if (!global.KCSupabase?.istAngemeldet?.()) return {ok: false, grund: 'nicht bei Supabase angemeldet'};
-    const liste = artikelListe(global.articles || []);
+    // KC-KASSE-PFAND-GLAS (26.11.2026): dieselben Artikel wie an die Kassen (Pfandgruppen als Pfandteile)
+    const liste = artikelListe(global.KCKassenArtikel ? global.KCKassenArtikel() : (global.articles || []));
     if (!liste.length) return {ok: false, grund: 'keine verkaufbaren Artikel'};
     try {
       const r = await global.KCSupabase.rufeFunktionAuf(FUNKTION, {p_org_id: ORG_ID, p_artikel: liste});
