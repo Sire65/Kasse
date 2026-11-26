@@ -39,6 +39,7 @@ jobs:
           node tests/verkaufskurve-prognose.test.cjs
           node tests/scanner-status.test.cjs
           node tests/stand-kassen-qr.test.cjs
+          node tests/mengenpreisliste-pfand.test.cjs
       - name: Geldwege und ruhige Abschlussmeldungen
         run: |
           node tests/kassen-programmverbund.test.cjs
