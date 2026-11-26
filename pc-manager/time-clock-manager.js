@@ -50,10 +50,23 @@
   let teilnahme = read(TEILNAHME_KEY, {});
   const speichereTeilnahme = () => { try { localStorage.setItem(TEILNAHME_KEY, JSON.stringify(teilnahme)); } catch (e) {} };
   const veranstaltung = () => String(config.eventId || 'ohne-veranstaltung');
-  const teilnahmeVon = (person) => teilnahme[veranstaltung()]?.[schluessel(person)]?.status || 'ja';
-  const bemerkungVon = (person) => teilnahme[veranstaltung()]?.[schluessel(person)]?.note || '';
+  // 26.11.2026 (Betreiber: „im PC-Manager fest eintragen, wer für diesen Weihnachtsmarkt nicht verfügbar ist – wenn
+  // neue Version, will ich das nicht neu einstellen müssen“): feste Vorgaben je Veranstaltung und
+  // Mitgliedsnummer. Sie stehen im Programm selbst (nicht im Browser-Speicher) und gelten deshalb auch nach jedem Update
+  // und auf jedem Gerät. Eine feste Vorgabe geht vor der Auswahl im Browser; in der Liste ist sie gesperrt und markiert.
+  // Veranstaltung: „WM-2026“ (Standard im Manager) und „KC-WM-2026“ (Kennung im Dienstplan) gelten als dieselbe.
+  const TEILNAHME_FEST = {
+    'WM-2026': {
+      'KC-0004': {status: 'nein', note: 'Für diesen Weihnachtsmarkt nicht verfügbar'},
+      'KC-0013': {status: 'nein', note: 'Für diesen Weihnachtsmarkt nicht verfügbar'},
+    },
+  };
+  const festVon = (person) => TEILNAHME_FEST[veranstaltung().replace(/^KC-/i, '').toUpperCase()]?.[schluessel(person)] || null;
+  const teilnahmeVon = (person) => festVon(person)?.status || teilnahme[veranstaltung()]?.[schluessel(person)]?.status || 'ja';
+  const bemerkungVon = (person) => teilnahme[veranstaltung()]?.[schluessel(person)]?.note || festVon(person)?.note || '';
   function setzeTeilnahme(person, status, note) {
     const v = veranstaltung(), k = schluessel(person);
+    if (festVon(person)) status = festVon(person).status; // feste Vorgabe bleibt – nur die Bemerkung ist änderbar
     teilnahme[v] = teilnahme[v] || {};
     teilnahme[v][k] = {status, note: note ?? bemerkungVon(person), updatedAt: new Date().toISOString()};
     speichereTeilnahme();
@@ -526,9 +539,9 @@
     $('tcEnabled').checked = config.enabled; $('tcEventId').value = config.eventId; $('tcBirthEnabled').checked = config.allowBirthCode; $('tcManualEnabled').checked = config.allowManualTime;
     $('tcPeopleBody').innerHTML = people.map(person => `<tr><td>${esc(person.displayName)}</td><td><input class="tc-pseudo-feld" data-pseudo-fuer="${esc(schluessel(person))}" value="${esc(pseudonymVon(person))}" placeholder="${esc(schluessel(person))}" maxlength="60"></td><td>${person.type === 'helper' ? 'Aushilfe' : 'Mitglied'}${person.active ? '' : ' · gesperrt'}</td><td>${person.validUntil ? `${new Date(person.validFrom).toLocaleString('de-DE')} – ${new Date(person.validUntil).toLocaleString('de-DE')}` : 'dauerhaft'}</td><td class="tc-code">${esc(person.credential)}</td>
       <td class="tc-teilnahme">
-        <select data-teilnahme-fuer="${esc(person.id)}" title="Gilt nur für die aktuelle Veranstaltung – die Vereinsmitgliedschaft bleibt unberührt">
+        <select data-teilnahme-fuer="${esc(person.id)}" ${festVon(person) ? 'disabled title="Fest eingetragen – gilt auch nach jedem Update"' : 'title="Gilt nur für die aktuelle Veranstaltung – die Vereinsmitgliedschaft bleibt unberührt"'}>
           ${TEILNAHME.map((t) => `<option value="${t.wert}" ${teilnahmeVon(person) === t.wert ? 'selected' : ''}>${t.text}</option>`).join('')}
-        </select>
+        </select>${festVon(person) ? '<span class="tc-fest" title="Fest im Programm eingetragen">🔒 fest</span>' : ''}
         <input type="text" data-teilnahme-notiz="${esc(person.id)}" value="${esc(bemerkungVon(person))}"
                placeholder="Bemerkung, z. B. weggezogen" maxlength="80">
       </td><td class="tc-aktionen">${person.active
