@@ -25,6 +25,7 @@ jobs:
           node tests/rezepte-supabase-anmeldung.test.cjs
           node tests/feuerzange-ausgabeteil.test.cjs
           node tests/ausgabe-fest.test.cjs
+          node tests/aufbau-check-tv.test.cjs
           node tests/rahmenprogramm-2026.test.cjs
           node tests/kasse-programm-knopf.test.cjs
           node tests/time-clock-auth-relay.test.cjs

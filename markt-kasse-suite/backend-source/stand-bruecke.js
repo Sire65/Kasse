@@ -293,8 +293,10 @@ class StandBruecke {
     try { for (const [kasse, ms] of (this.manager._kassenLetzteAktivitaet || new Map())) aktivitaet[kasse] = new Date(ms).toISOString(); } catch (e) { /* */ }
     let router = null; try { router = this.routerZaehler ? this.routerZaehler.kurz() : null; } catch (e) { router = null; }
     let update = null; try { update = updateInfo.updateInfo(); if (!update.verwaltet) update = null; } catch (e) { update = null; }
+    // 26.11.2026 KC-CLUB-AUFBAU-CHECK: wann der Fernseher zuletzt die Präsentation abgefragt hat (serve-frontend.js schreibt tv-abruf.json)
+    let tv = null; try { const t = JSON.parse(fs.readFileSync(path.join(this.datenOrdner, 'tv-abruf.json'), 'utf8')); if (t && typeof t.zuletzt === 'string' && !Number.isNaN(Date.parse(t.zuletzt))) tv = { zuletzt: t.zuletzt }; } catch (e) { tv = null; }
     return { version: this.version, letzteAktivitaet: aktivitaet, gemeldetUm: new Date().toISOString(), rueckstand: this.zustand.rueckstand,
-      ...(router ? { router } : {}), ...(update ? { update } : {}) };
+      ...(router ? { router } : {}), ...(update ? { update } : {}), ...(tv ? { tv } : {}) };
   }
 
   async _runde() {

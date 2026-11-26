@@ -103,9 +103,17 @@ function behandleTvProgramm(req, res) {
     json(res, 200, { gespeichert: true, groesse: html.length });
   });
 }
+// 26.11.2026 KC-CLUB-AUFBAU-CHECK: jeder Abruf des Fernsehers wird mit Uhrzeit gemerkt (höchstens alle 5 Minuten geschrieben – die Datenbank bekommt so nur selten eine neue Angabe) – die Stand-Brücke
+// meldet ihn in info.tv mit, die Club-App zeigt im Aufbau-Check „Fernseher holt die Präsentation“. Nur die Uhrzeit, sonst nichts.
+let tvAbrufGemerkt = 0;
+function tvAbrufMerken() {
+  const jetztMs = Date.now(); if (jetztMs - tvAbrufGemerkt < 300000) return; tvAbrufGemerkt = jetztMs;
+  try { fs.writeFileSync(path.join(path.dirname(TV_PAKET_DATEI), 'tv-abruf.json'), JSON.stringify({ zuletzt: new Date(jetztMs).toISOString() })); } catch (e) { /* nie den Fernseher stören */ }
+}
 function behandleTvPaket(req, res) {
   if (!TV_PAKET_DATEI) { json(res, 404, { fehler: 'kein_tv_paket_ort' }); return; }
   if (req.method === 'GET') {
+    tvAbrufMerken();
     let st = null; try { st = fs.statSync(TV_PAKET_DATEI); } catch (e) { /* noch keins */ }
     if (!st) { json(res, 404, { fehler: 'noch_kein_tv_paket' }); return; }
     if (/[?&]nurStand=1/.test(req.url)) { json(res, 200, { stand: st.mtimeMs, groesse: st.size }); return; }
