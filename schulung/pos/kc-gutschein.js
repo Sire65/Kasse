@@ -254,7 +254,17 @@
         .klein{font-size:.68rem;line-height:1.5}
         .fuss{border-top:1px dashed #000;margin-top:8px;padding-top:6px;text-align:center}
         .dank{text-align:center;font-size:.8rem;font-weight:700;margin-top:8px}
+        /* 26.11.2026 (Betreiber: "Wenn man den drueckt, kommt kein Button, um dort wieder rauszukommen"):
+           derselbe Zurueck-Knopf wie beim Kassenbon (app.js, Bon ansehen 02.10.2026). Steht ueber dem
+           Beleg, beim Ausdruck unsichtbar. */
+        body{padding-top:58px}
+        .kc-bon-zurueck{position:fixed;top:8px;left:8px;padding:10px 16px;font-size:14px;font-weight:800;border:2px solid #334155;border-radius:8px;background:#fff;color:#111;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,.3);font-family:Arial,sans-serif}
+        .kc-bon-hinweis{position:fixed;top:58px;left:8px;right:8px;padding:8px 12px;border-radius:8px;background:#fef3c7;color:#78350f;font:700 13px Arial,sans-serif}
+        @media print{body{padding-top:6px}.kc-bon-zurueck,.kc-bon-hinweis{display:none!important}}
       </style></head><body>
+      <button type="button" class="kc-bon-zurueck" onclick="kcBonZurueck()">\u2190 Zurück zur Kasse</button>
+      <div class="kc-bon-hinweis" id="kcBonHinweis" hidden>Bitte dieses Fenster schließen (oben \u2715), dann ist die Kasse wieder da.</div>
+      <script>function kcBonZurueck(){try{if(window.opener&&!window.opener.closed)window.opener.focus()}catch(e){}try{window.close()}catch(e){}setTimeout(function(){if(!window.closed){if(history.length>1)history.back();else document.getElementById("kcBonHinweis").hidden=false}},300)}<\/script>
       <div class="kopf">
         ${logo ? `<img src="${esc(logo)}" alt="">` : ''}
         <div class="verein">${esc(verein)}</div>

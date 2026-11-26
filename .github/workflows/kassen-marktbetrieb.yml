@@ -48,4 +48,5 @@ jobs:
           node tests/tagesabschluss-system.test.cjs
           node tests/kasse-pruefung-08-10.test.cjs
           node tests/gutschein-teilzahlung.test.cjs
+          node tests/gutschein-zurueck.test.cjs
           node tests/meldung-schliesst-selbst.test.cjs
