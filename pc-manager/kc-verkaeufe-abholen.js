@@ -4,6 +4,7 @@
 // (received_events, Endpunkt /verkaeufe-abholen seit 10.09.2026) - der PC-Manager hat sie nur nie abgeholt. Die Auswertungen
 // (Dashboard, Umsatz- und Kundenanalyse, Mengen und Bestand) füllten sich deshalb nur per Datei-Import (.kcsales).
 //
+// 26.11.2026 KC-MANAGER-TRINKGELD-ENTNAHME: Trinkgeld und Entnahmen kommen auf demselben Weg mit (Kennzeichen kcArt).
 // Hier: beim Öffnen und dann jede Minute abholen, plus Knopf „Jetzt holen“. Übernommen wird über
 // KCManagerVerkaeufe.uebernehmen (app.js) - dieselbe Zusammenführung wie der Datei-Import, doppelte werden übersprungen.
 // VORSICHT:
@@ -49,9 +50,9 @@
       const ab = abDatum();
       const r = global.KCManagerVerkaeufe.uebernehmen(daten.verkaeufe, ab);
       if (daten.abgefragtUm) letzteAbfrage = daten.abgefragtUm;
-      const text = `Verkäufe von den Kassen: zuletzt geholt ${uhr(new Date())} · ${r.neu} neu` + (manuell ? ` · ${r.vorhanden} schon vorhanden` : '') + ` · gezählt ab ${datumDe(ab)}`;
+      const text = `Verkäufe von den Kassen: zuletzt geholt ${uhr(new Date())} · ${r.neu} neu` + (r.trinkgeld ? ` · ${r.trinkgeld} Trinkgeld` : '') + (r.entnahmen ? ` · ${r.entnahmen} Entnahme(n)` : '') + (manuell ? ` · ${r.vorhanden} schon vorhanden` : '') + ` · gezählt ab ${datumDe(ab)}`;
       zeige(text, 'ok');
-      if (manuell) global.KCManagerMessages?.[r.neu ? 'success' : 'info']?.(r.neu ? `${r.neu} neue Verkäufe übernommen.` : 'Keine neuen Verkäufe - alles ist schon im PC-Manager.');
+      if (manuell) { const neuGesamt = r.neu + (r.trinkgeld || 0) + (r.entnahmen || 0); global.KCManagerMessages?.[neuGesamt ? 'success' : 'info']?.(neuGesamt ? `Übernommen: ${r.neu} Verkäufe, ${r.trinkgeld || 0} Trinkgeld, ${r.entnahmen || 0} Entnahme(n).` : 'Nichts Neues - alles ist schon im PC-Manager.'); }
       return r;
     } catch (err) {
       const text = `Verkäufe von den Kassen: Manager-Dienst nicht erreichbar (${uhr(new Date())}) – läuft das schwarze Fenster? Neuer Versuch in 1 Minute.`;
