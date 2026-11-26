@@ -80,7 +80,7 @@ function warteAufHttp(url, timeoutMs = 12000) {
   });
 }
 
-function browserOeffnen(url) {
+function browserOeffnen(url, pos = null) {
   try {
     let command, args;
     if (process.platform === 'win32') {
@@ -89,7 +89,9 @@ function browserOeffnen(url) {
       // (oben links = kleiner Monitor, nicht der Fernseher). Nur ohne Edge/Chrome der alte Weg.
       const browser = findeBrowser();
       if (browser) {
-        const kind = spawn(browser, ['--new-window', '--window-position=40,40', '--window-size=1280,900', url], { detached: true, stdio: 'ignore' });
+        // 26.11.2026: auf dem Bildschirm OHNE Präsentation (auch wenn Windows den Fernseher zur Hauptanzeige gemacht hat)
+        const x = pos ? pos.x + 40 : 40, y = pos ? pos.y + 40 : 40;
+        const kind = spawn(browser, ['--new-window', `--window-position=${x},${y}`, '--window-size=1280,900', url], { detached: true, stdio: 'ignore' });
         kind.on('error', () => { try { spawn('cmd.exe', ['/d', '/c', 'start', '""', url], { detached: true, stdio: 'ignore', windowsVerbatimArguments: true }).unref(); } catch (e) { /* */ } });
         kind.unref();
         return true;
@@ -353,7 +355,7 @@ async function main() {
     if (args.openManager && tv.gestartet && tv.einBildschirm) {
       console.log('[KC Start] PC-Manager wird NICHT automatisch geöffnet (nur ein Bildschirm, dort läuft die Präsentation). Von Hand: ' + managerUrl);
     } else if (args.openManager) {
-      const ok = browserOeffnen(managerUrl);
+      const ok = browserOeffnen(managerUrl, fernseher && fernseher.bedienBildschirm ? fernseher.bedienBildschirm() : null);
       console.log(ok ? '[KC Start] PC-Manager wird im Standardbrowser geöffnet.' : '[KC Start] Browser konnte nicht automatisch geöffnet werden.');
     }
   }

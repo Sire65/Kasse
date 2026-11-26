@@ -41,6 +41,7 @@ function nachbauStarter() {
     p('A: … ohne Erststart-Dialoge (keine Suchmaschinen-Auswahl chrome://settings/search, kein Standardbrowser-Hinweis)', ['--no-first-run', '--no-default-browser-check', '--disable-search-engine-choice-screen'].every((x) => a.includes(x)));
     p('A: … mit eigenem Browser-Profil im Datenordner (Einstellungen greifen sicher)', a.some((x) => x === `--user-data-dir=${path.join(ARBEIT, 'fernseher-browser')}`));
     p('A: zwei Bildschirme -> PC-Manager darf normal geöffnet werden', r.einBildschirm === false && log.some((x) => /PC-Manager und dieses Fenster bleiben auf der Hauptanzeige/.test(x)));
+    f._startZeit = Date.now() - 60000;   // läuft schon eine Weile, dann vom Nutzer geschlossen
     s.aufrufe[0].kind.emit('exit', 0);
     await warte(50);
     p('A: Fernsehbild bewusst geschlossen -> bleibt zu, mit Hinweis wie man es wieder öffnet', s.aufrufe.length === 1 && log.some((x) => /wurde geschlossen\. Wieder öffnen/.test(x)));
@@ -114,6 +115,30 @@ function nachbauStarter() {
     p('A: Dauer-PowerShell: einmal gestartet, je Prüfung nur eine Zeile, Antwort mit Bildschirmen und Fensterlage', r1 && r1.fenster.l === 1 && r1.schirme[0].name === 'D1' && r2 && geschrieben[0] === PS_INIT + '\r\n' && geschrieben.filter((x) => /^KcPruefe/.test(x)).length === 2 && geschrieben[1] === 'KcPruefe 4711\r\n');
     p('A: Dauer-PowerShell: Fensterlage per Windows-Funktion, Fenster über Prozess oder Titel „KC Fernseher“', /GetWindowRect/.test(PS_INIT) && /MainWindowTitle -like '\*KC Fernseher\*'/.test(PS_INIT));
     ps.stop();
+  }
+  {
+    // 26.11.2026 Eventualitäten: Fernseher wird Hauptanzeige / Nummern wechseln; Edge schließt sofort; Schleifen-Bremse
+    const { waehleBildschirm } = require(path.join(BACKEND, 'fernseher.js'));
+    const tvHaupt = { ...TV, name: '\\\\.\\DISPLAY3', haupt: true }, monNeben = { ...MONITOR, haupt: false };
+    p('A: Fernseher ist Hauptanzeige geworden: Präsentation trotzdem auf dem Fernseher (größter Bildschirm)', waehleBildschirm([monNeben, tvHaupt], 'auto') === tvHaupt);
+    {
+      const fb = new Fernseher({ einstellungsDatei: einst({ aktiv: true }), datenOrdner: ARBEIT, webserverPort: 8090, plattform: 'win32', wachTakt: 100000,
+        bildschirmeErmitteln: () => [monNeben, tvHaupt], browserFinden: () => 'C:\\Edge\\msedge.exe', starter: nachbauStarter().starter, log: () => {} });
+      fb.start();
+      p('A: PC-Manager öffnet auf dem Bildschirm OHNE Präsentation (auch wenn der Fernseher Hauptanzeige ist)', fb.bedienBildschirm() === monNeben);
+      fb.stop();
+    }
+    p('A: gleich große Bildschirme: der, der nicht Hauptanzeige ist', waehleBildschirm([{ ...TV, haupt: true, name: 'A' }, { ...TV, x: 1920, haupt: false, name: 'B' }], 'auto').name === 'B');
+    const s = nachbauStarter(); const log = [];
+    const f = new Fernseher({ einstellungsDatei: einst({ aktiv: true }), datenOrdner: ARBEIT, webserverPort: 8090, plattform: 'win32', wachTakt: 100000,
+      bildschirmeErmitteln: () => [MONITOR, TV], browserFinden: () => 'C:\\Edge\\msedge.exe', starter: s.starter, log: (x) => log.push(x), fehlerLog: (x) => log.push(x) });
+    f.start(); s.aufrufe[0].kind.emit('exit', 0);
+    p('A: Edge schließt sofort nach dem Start (alter Rest): kein „vom Nutzer geschlossen“, neuer Versuch', log.some((x) => /sofort wieder geschlossen.*neuer Versuch in 10 s/.test(x)) && !log.some((x) => /wurde geschlossen\. Wieder öffnen/.test(x)));
+    await warte(10300);
+    p('A: … und nach 10 s läuft die Präsentation wieder', s.aufrufe.length === 2 && f.status().laeuft === true);
+    for (let i = 0; i < 7; i++) { f._startZeit = Date.now() - 60000; f.zustand.laeuft = true; f._kind = s.aufrufe[s.aufrufe.length - 1].kind; f._zurueckHolen('Test'); f._absichtlichZu = false; f._danachStarten = false; }
+    p('A: Schleifen-Bremse: höchstens 6× je Stunde zurückholen, dann Hinweis mit Lösung', (f.zustand.zurueckgeholt || 0) === 6 && log.some((x) => /6× zurückgeholt.*Hauptanzeige festlegen/.test(x)));
+    f.stop();
   }
   {
     // Sparmodus (25.11.2026): Standard an, abschaltbar; Hülle schaltet Dauer-Effekte ab und drosselt die Laufschrift
