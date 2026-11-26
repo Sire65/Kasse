@@ -91,11 +91,15 @@ class PowerShellDauer {
   stop() { try { if (this.kind) this.kind.kill(); } catch (e) { /* weg */ } this.kind = null; }
 }
 
+// Welcher Bildschirm ist der Fernseher? 26.11.2026: nicht mehr nur „nicht die Hauptanzeige“ – nach dem Aus/Ein des
+// Fernsehers macht Windows ihn manchmal zur Hauptanzeige oder nummeriert neu. Darum bei "auto": der GRÖSSTE Bildschirm
+// (Fernseher 1920×1080 > kleiner Monitor); bei gleicher Größe der, der nicht Hauptanzeige ist.
 function waehleBildschirm(bildschirme, einstellung) {
   if (!bildschirme.length) return null;
   const nr = Number(einstellung);
   if (Number.isInteger(nr) && nr >= 1 && nr <= bildschirme.length) return bildschirme[nr - 1];
-  return bildschirme.find((b) => !b.haupt) || bildschirme[0];
+  const flaeche = (b) => (Number(b.breite) || 0) * (Number(b.hoehe) || 0);
+  return [...bildschirme].sort((a, b) => (flaeche(b) - flaeche(a)) || ((a.haupt ? 1 : 0) - (b.haupt ? 1 : 0)))[0];
 }
 
 function findeBrowser(env = process.env) {
@@ -211,6 +215,15 @@ class Fernseher {
   // und nach dem Beenden auf dem Fernseher neu starten.
   _zurueckHolen(grund) {
     if (!this._kind || !this.zustand.laeuft) return;
+    // Bremse: höchstens 6× je Stunde - sonst (Windows schiebt immer wieder) nur noch melden, nicht dauernd neu starten.
+    const jetzt = Date.now();
+    this._zurueckZeiten = (this._zurueckZeiten || []).filter((t) => jetzt - t < 3600000);
+    if (this._zurueckZeiten.length >= 6) {
+      if (!this._zurueckGebremst) { this._zurueckGebremst = true; this.fehlerLog('[Fernseher] Präsentation wurde in der letzten Stunde 6× zurückgeholt – Windows verschiebt sie immer wieder. Lösung: Windows-Taste + Shift + Pfeil, oder Einstellungen → System → Bildschirm: den kleinen Monitor als Hauptanzeige festlegen.'); }
+      return;
+    }
+    this._zurueckGebremst = false;
+    this._zurueckZeiten.push(jetzt);
     this.log(`[Fernseher] ${grund} – Präsentation wird auf den Fernseher zurückgeholt.`);
     this._absichtlichZu = true; this._danachStarten = true;
     try { this._kind.kill(); } catch (e) { /* weg */ }
@@ -227,6 +240,7 @@ class Fernseher {
     else { try { bildschirme = this.bildschirmeErmitteln() || []; } catch (e) { bildschirme = []; } }
     const n = bildschirme.length;
     this.zustand.bildschirme = n;
+    if (n) this._letzteListe = bildschirme;
     if (!this._erlaubt(n)) {
       if (this.zustand.laeuft && this._kind) {
         if (n === 0) return n;   // Abfrage gescheitert – kein Beleg, dass der Fernseher aus ist
@@ -266,6 +280,7 @@ class Fernseher {
 
   _starteBrowser() {
     this._gestartetMal = true;
+    this._startZeit = Date.now();
     const profil = path.join(this.datenOrdner, 'fernseher-browser');
     try { fs.mkdirSync(profil, { recursive: true }); } catch (e) { /* Browser legt es selbst an */ }
     const kind = this.starter(this._browser, browserArgumente({ url: this.url, profil, bildschirm: this._ziel }), { stdio: 'ignore', windowsHide: false, detached: false });
@@ -278,6 +293,15 @@ class Fernseher {
       if (this._absichtlichZu) {   // Fernseher aus bzw. falscher Bildschirm - wir haben selbst geschlossen
         this._absichtlichZu = false;
         if (this._danachStarten) { this._danachStarten = false; const t = setTimeout(() => { if (!this._stopp && !this.zustand.laeuft) this._pruefen(); }, 2000); if (t.unref) t.unref(); }
+        return;
+      }
+      // Sofort nach dem Start wieder zu (unter 8 s): kein Nutzer - meist hängt noch ein alter Edge-Prozess mit diesem Profil.
+      // Dann wie einen Absturz behandeln und neu versuchen, statt die Präsentation für immer aus zu lassen.
+      if (code === 0 && Date.now() - (this._startZeit || 0) < 8000) {
+        this.zustand.neustarts++;
+        if (this.zustand.neustarts > 5) { this.fehlerLog('[Fernseher] Präsentation schließt sich sofort wieder – kein weiterer Versuch. Lösung: PC neu starten.'); return; }
+        this.fehlerLog('[Fernseher] Präsentation hat sich sofort wieder geschlossen (alter Edge-Rest?) – neuer Versuch in 10 s.');
+        const t0 = setTimeout(() => { if (!this._stopp && !this.zustand.laeuft) this._pruefen(); }, 10000); if (t0.unref) t0.unref();
         return;
       }
       if (code === 0) {
@@ -298,6 +322,15 @@ class Fernseher {
     this._vomNutzerGeschlossen = false;
     this._pruefen();
     return this.zustand.laeuft;
+  }
+
+  // Bildschirm für PC-Manager und schwarzes Fenster: der, auf dem die Präsentation NICHT läuft (sonst die Hauptanzeige).
+  bedienBildschirm() {
+    const liste = this._letzteListe || [];
+    if (liste.length < 2) return null;
+    const tv = this._ziel || waehleBildschirm(liste, this.einstellungen.bildschirm);
+    const rest = liste.filter((b) => !tv || b.name !== tv.name || b.x !== tv.x || b.y !== tv.y);
+    return rest.find((b) => b.haupt) || rest[0] || null;
   }
 
   status() { return { ...this.zustand, url: this.url }; }

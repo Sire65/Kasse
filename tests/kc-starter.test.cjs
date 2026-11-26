@@ -290,7 +290,7 @@ const BACKEND = 'markt-kasse-suite/backend-source';
 
   // PC-Manager öffnet sich sicher (25.11.2026): Edge/Chrome direkt auf dem Hauptbildschirm, dazu Desktop-Verknüpfung
   const rms = lies(path.join(WURZEL, BACKEND, 'run-manager-service.js'));
-  p('PC-Manager: wird mit Edge/Chrome direkt geöffnet (neues Fenster, Hauptbildschirm), „start“ nur als Rückfall', /const browser = findeBrowser\(\);[\s\S]{0,200}'--new-window', '--window-position=40,40'/.test(rms));
+  p('PC-Manager: wird mit Edge/Chrome direkt geöffnet (neues Fenster, Bildschirm ohne Präsentation), „start“ nur als Rückfall', /const browser = findeBrowser\(\);[\s\S]{0,400}'--new-window', `--window-position=\$\{x\},\$\{y\}`/.test(rms) && /browserOeffnen\(managerUrl, fernseher && fernseher\.bedienBildschirm/.test(rms));
   p('PC-Manager: Desktop-Verknüpfung „KC PC-Manager“ wird bei jedem Start angelegt, falls sie fehlt', typeof K.pcManagerVerknuepfung === 'function' && K.pcManagerVerknuepfung() === false && /K\.pcManagerVerknuepfung\(log\)/.test(lies(path.join(WURZEL, 'starter/kc-starter.js'))));
 
   // Kassen-Tablets: neue Version übernehmen
