@@ -2,7 +2,7 @@
    Supabase ist führend; localStorage bleibt Offline-Cache. */
 (function(global){
   'use strict';
-  const VERSION='1.0.0';
+  const VERSION='1.0.1';
   const ORG_ID='KC_WERNE';
   const MATERIAL_STORE='kcm_consumables_v1';
   const ASSIGN_STORE='kcm_recipe_serving_materials_v1';
@@ -80,7 +80,9 @@
       const ids=(Array.isArray(rows)?rows:[]).map(x=>x&&x.materialId).filter(Boolean);if(!ids.length)continue;
       await request(`/rest/v1/kc_manager_recipe_serving_materials?org_id=eq.${encodeURIComponent(ORG_ID)}&product_code=eq.${encodeURIComponent(productCode)}&material_id=not.in.(${ids.map(x=>'"'+String(x).replace(/"/g,'')+'"').map(encodeURIComponent).join(',')})`,{method:'DELETE',headers:{Prefer:'return=minimal'}});
     }
-    lastSnapshot=snapshot();
+    // 26.11.2026 KC-AUSGABE-FEST: feste Ausgabegefäße überspringt die Datenbank still – danach den festen Stand zurückholen,
+    // damit der PC-Manager nicht einen anderen Stand anzeigt als gespeichert ist.
+    await pull();
     global.dispatchEvent(new CustomEvent('kc-serving-materials-synced',{detail:{direction:'push'}}));
   }
   async function pushPending(){
