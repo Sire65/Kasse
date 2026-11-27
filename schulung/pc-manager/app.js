@@ -184,6 +184,16 @@ const managerArtikelGespeichert=!!localStorage.getItem("kcm_articles"),managerGr
   a.info={...alt,allergens:{...al,sulphites:"contained"},additives:Z,contents:Z,source:[alt.source,"Allergen-Nachtrag 25.11.2026 (Betreiber: aus dem Glühwein rot)"].filter(Boolean).join("; ")};
   localStorage.setItem("kcm_articles",JSON.stringify(articles))}
  localStorage.setItem(MERK,"1")}}
+// 27.11.2026 (Betreiber: „bei Eierlikörpunsch enthält Alkohol eintragen“, KC-ARTIKELINFO-ALKOHOL): EINMALIG je Gerät.
+// Eierlikörpunsch (Wein + Eierlikör) und Feuerzangenbowle (Glühwein rot + Rum 54 %) sind alkoholhaltig. Bei der Feuerzangenbowle
+// fehlte der Hinweis ganz - Etiketten/Kundenliste der Club-App zeigten „kein Alkohol“ (alkohol = /alkohol(?!fre)/ in „Wichtiger Hinweis“).
+// Ergänzt wird nur, wenn der Hinweis fehlt; ein vorhandener Text bleibt erhalten und bekommt „Alkoholhaltig.“ vorangestellt.
+{const MERK="kcm_artikelinfo_alkohol_v1";if(!localStorage.getItem(MERK)){let geaendert=false;
+ for(const a of articles){if(a.id!=="eier"&&a.id!=="feuer")continue;const i=(a.info&&typeof a.info==="object"&&!Array.isArray(a.info))?a.info:{};
+  if(/alkohol(?!fre)/i.test(String(i.important||"")+" "+String(i.shortDescription||"")))continue;
+  a.info={...i,important:["Alkoholhaltig.",String(i.important||"").trim()].filter(Boolean).join(" ")};geaendert=true}
+ if(geaendert)localStorage.setItem("kcm_articles",JSON.stringify(articles));
+ localStorage.setItem(MERK,"1")}}
 // 26.11.2026 (Betreiber: „Großer Fehler. Auf den Kassen wird das Pfand nicht sofort draufgerechnet“, KC-KASSE-PFAND-GLAS):
 // Glühwein rot/weiß, Eierlikörpunsch, Apfelpunsch und Roter Feger hatten hier kein Pfand – „Stammdaten senden“ nahm den
 // Kassen damit das Glaspfand. Jedes Getränk im Glas bekommt das Glaspfand (2,00 €, wie die Feuerzangenbowle), solange der
