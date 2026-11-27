@@ -164,6 +164,19 @@
 #withdrawDialog .kc-bon-wahl > #withdrawReceiptToggle { flex: 2 1 0; min-width: 0; }
 #withdrawDialog.kc-modus-entnahme #kcKeinBonKnopf { flex: 1 1 0; min-width: 0; height: 72px !important; font-size: 18px !important; font-weight: 900 !important; border: 3px solid #94a3b8 !important; border-radius: 12px !important; background: #f8fafc !important; color: #1f2937 !important; }
 #withdrawDialog.kc-modus-entnahme #kcKeinBonKnopf.active { background: #fef3c7 !important; border-color: #d97706 !important; color: #78350f !important; }
+/* 0.4.0 (Betreiber 27.11.2026: "Laufrand ueber die Gruende, dann ueber Scheine und Muenzen, dann Bon ja / Bon nein,
+   zum Schluss soll die gruene Taste pulsieren und Laufrand"): der Bereich, der JETZT dran ist, bekommt einen
+   laufenden Rahmen (wie die aktive Warengruppe). Keine CSS-Variablen (alte Tablet-Browser). */
+@keyframes kcSchrittLauf { from { background-position: 0 0, 0 100%, 0 0, 100% 0; } to { background-position: 18px 0, -18px 100%, 0 -18px, 100% 18px; } }
+@keyframes kcSchrittPuls { 0%, 100% { box-shadow: 0 0 0 0 rgba(22, 163, 74, .75); -webkit-filter: brightness(1); filter: brightness(1); } 50% { box-shadow: 0 0 0 14px rgba(22, 163, 74, 0); -webkit-filter: brightness(1.18); filter: brightness(1.18); } }
+#withdrawDialog .kc-laufrand { position: relative !important; }
+#withdrawDialog .kc-laufrand::after { content: ""; position: absolute; top: -3px; right: -3px; bottom: -3px; left: -3px; z-index: 3; pointer-events: none; border-radius: 12px;
+  background-image: linear-gradient(90deg, #16a34a 50%, transparent 50%), linear-gradient(90deg, #16a34a 50%, transparent 50%), linear-gradient(0deg, #16a34a 50%, transparent 50%), linear-gradient(0deg, #16a34a 50%, transparent 50%);
+  background-repeat: repeat-x, repeat-x, repeat-y, repeat-y; background-size: 18px 4px, 18px 4px, 4px 18px, 4px 18px; background-position: 0 0, 0 100%, 0 0, 100% 0;
+  -webkit-animation: kcSchrittLauf .9s linear infinite; animation: kcSchrittLauf .9s linear infinite; }
+#withdrawDialog fieldset.kc-laufrand { padding-top: 6px !important; }
+#withdrawDialog #saveWithdrawal.kc-laufrand::after { background-image: linear-gradient(90deg, #fde047 50%, transparent 50%), linear-gradient(90deg, #fde047 50%, transparent 50%), linear-gradient(0deg, #fde047 50%, transparent 50%), linear-gradient(0deg, #fde047 50%, transparent 50%); }
+#withdrawDialog #saveWithdrawal.kc-schritt-puls { position: relative !important; overflow: visible !important; -webkit-animation: kcSchrittPuls 1.1s ease-in-out infinite; animation: kcSchrittPuls 1.1s ease-in-out infinite; }
 `;
   function stilEinbauen() {
     if (el('kcGeldStil')) return;
@@ -400,6 +413,22 @@
       sperren(titel('kcSchrittBon', '3. Bon / Quittung vorhanden?', wahl), !schritt3);
     }
   }
+  // 0.4.0: laufender Rahmen um den Bereich, der jetzt dran ist (1 Gruende, 2 Muenzen/Scheine, 3 Bon ja/nein),
+  // bei Schritt 4 pulsiert die gruene Taste mit Laufrand. 0 = alles aus (Reklamation, Fenster zu).
+  function laufrandSetzen(schritt) {
+    const dlg = el('withdrawDialog');
+    if (!dlg) return;
+    const toggle = el('withdrawReceiptToggle');
+    const ziele = {
+      1: dlg.querySelector('.withdraw-reason-field'),
+      2: el('kcBetragBlock'),
+      3: toggle?.parentElement?.classList.contains('kc-bon-wahl') ? toggle.parentElement : toggle,
+      4: el('saveWithdrawal')
+    };
+    dlg.querySelectorAll('.kc-laufrand').forEach(k => { if (k !== ziele[schritt]) k.classList.remove('kc-laufrand'); });
+    if (ziele[schritt]) ziele[schritt].classList.add('kc-laufrand');
+    if (ziele[4]) ziele[4].classList.toggle('kc-schritt-puls', schritt === 4);
+  }
   function speichernPruefen() {
     const dlg = el('withdrawDialog'), knopf = el('saveWithdrawal');
     if (!dlg || !knopf) return;
@@ -410,7 +439,7 @@
     const betrag = Number(el('withdrawAmount')?.value) || 0;
     dlg.classList.toggle('kc-grund-gewaehlt', !!grund && entnahme);
     schritteAnwenden(entnahme, grund, betrag);
-    if (!entnahme) { if (hinweis) hinweis.hidden = true; return; }
+    if (!entnahme) { laufrandSetzen(0); if (hinweis) hinweis.hidden = true; return; }
     if (!hinweis) {
       hinweis = document.createElement('p');
       hinweis.id = 'kcSpeichernHinweis';
@@ -421,6 +450,7 @@
     if (bon) keinBon = false;
     const schritt = !grund ? 1 : !(betrag > 0) ? 2 : !(bon || keinBon) ? 3 : 4;
     if (knopf.textContent !== 'WIRD GESPEICHERT \u2026') knopf.disabled = schritt < 4;
+    laufrandSetzen(schritt);
     hinweis.hidden = false;
     hinweis.classList.toggle('kc-bereit', schritt === 4);
     hinweis.textContent = schritt === 1 ? 'Schritt 1: Zuerst den Grund w\u00e4hlen (z. B. Essen Personal).'
@@ -479,6 +509,7 @@
       const dlg = el('withdrawDialog');
       dlg.classList.remove('kc-modus-entnahme', 'kc-modus-reklamation', 'kc-grund-gewaehlt');
       keinBon = false;
+      laufrandSetzen(0);
       schritteAnwenden(false, null, 0);   // andere Nutzer des Fensters (Reklamation) sehen alles frei
       el('kcVerrechnungHinweis')?.remove();
       if (el('kcSpeichernHinweis')) el('kcSpeichernHinweis').hidden = true;
@@ -488,5 +519,5 @@
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', verdrahten);
   else verdrahten();
-  global.KCErfassungGetrennt = {modusSetzen, zifferblockAnpassen, speichernPruefen};
+  global.KCErfassungGetrennt = {modusSetzen, zifferblockAnpassen, speichernPruefen, laufrandSetzen, version: '0.4.0'};
 })(window);
