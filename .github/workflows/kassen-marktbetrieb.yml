@@ -41,6 +41,7 @@ jobs:
           node tests/haendlerausweis.test.cjs
           node tests/verkaufskurve-prognose.test.cjs
           node tests/scanner-status.test.cjs
+          node tests/bildschirm-reinigen.test.cjs
           node tests/stand-kassen-qr.test.cjs
           node tests/mengenpreisliste-pfand.test.cjs
           node tests/kopf-dienstplan-ipad.test.cjs
