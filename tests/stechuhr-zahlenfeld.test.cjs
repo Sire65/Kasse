@@ -9,6 +9,10 @@ assert.ok(/if \(z !== 'weg' && feld\.value\.length === 6\) identify\(\);/.test(s
 assert.ok(/if \(!\/\^\\\\d\*\$\/\.test\(feld\.value\)\) feld\.value = '';/.test(s) || s.includes("if (!/^\\d*$/.test(feld.value)) feld.value = '';"), 'angefangener Scan wird beim Tippen verworfen');
 assert.ok(/el\('tcPosZiffern'\)\.hidden = config\.allowBirthCode === false/.test(s), 'nur wenn Geburtstag erlaubt');
 assert.ok(/setAttribute\('inputmode', 'none'\); el\('tcPosCredential'\)\.focus\(\)/.test(s), 'beim Zurück wieder ohne Bildschirmtastatur, Fokus für den Scanner');
-const html = fs.readFileSync('pos/index.html', 'utf8'), sw = fs.readFileSync('pos/service-worker.js', 'utf8');
-assert.ok(html.includes('time-clock-pos.js?build=stempel-v3') && html.includes('time-clock-pos.css?build=2') && sw.includes('"./time-clock-pos.js?build=stempel-v3"') && sw.includes('"./time-clock-pos.css?build=2"'), 'neue Fassung wird geladen und offline gespeichert');
+// 28.11.2026: auch die Schulung hat das Zahlenfeld (gleiche Datei wie die Kasse), neue Fassung stempel-v4 / css 3
+for (const ort of ['pos', 'schulung/pos']) {
+  const html = fs.readFileSync(`${ort}/index.html`, 'utf8'), sw = fs.readFileSync(`${ort}/service-worker.js`, 'utf8');
+  assert.ok(html.includes('time-clock-pos.js?build=stempel-v4') && html.includes('time-clock-pos.css?build=3') && sw.includes('"./time-clock-pos.js?build=stempel-v4"') && sw.includes('"./time-clock-pos.css?build=3"'), `${ort}: neue Fassung wird geladen und offline gespeichert`);
+}
+assert.strictEqual(fs.readFileSync('schulung/pos/time-clock-pos.js', 'utf8'), s, 'Schulung hat dieselbe Stechuhr wie die Kasse');
 console.log('stechuhr-zahlenfeld: ok');

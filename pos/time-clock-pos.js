@@ -273,9 +273,17 @@
       if (!/^\d*$/.test(feld.value)) feld.value = '';
       if (z === 'weg') feld.value = feld.value.slice(0, -1);
       else if (feld.value.length < 6) feld.value += z;
+      feld.dataset.zahlenfeld = feld.value ? '1' : '';
       feld.focus();
       if (z !== 'weg' && feld.value.length === 6) identify();
     });
+    // 28.11.2026 (Betreiber: „trotzdem muss der QR-Scan vom Barcode-Scanner erkannt werden“): Wurden schon Ziffern angetippt und
+    // dann doch der Ausweis gescannt, stand vorher „1KC|0007|…“ im Feld – der Scan wurde nicht erkannt. Jetzt verwirft das erste
+    // Zeichen vom Scanner (Tastatur) die angetippten Ziffern.
+    el('tcPosCredential').addEventListener('keydown', event => {
+      const feld = event.currentTarget;
+      if (feld.dataset.zahlenfeld === '1' && event.key && event.key.length === 1 && !event.ctrlKey && !event.altKey && !event.metaKey) { feld.value = ''; feld.dataset.zahlenfeld = ''; }
+    }, true);
     el('tcPosIdentify').onclick = identify;
     el('tcPosZurueck').onclick = zurueckZuSchritt1;
     el('tcPosCommit').onclick = commit;
