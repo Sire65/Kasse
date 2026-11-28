@@ -1,4 +1,4 @@
-// KC Kasse – Mengenfenster neben den Kacheln.                                                        Build 1.0.0
+// KC Kasse – Mengenfenster neben den Kacheln.                                                        Build 1.2.0
 // 28.11.2026 (Betreiber: „wenn ich z. B. Kachel Eierpunsch anklicke, soll daneben ein großes Eingabefeld über dem Warenkorb
 // aufgehen mit Buttons für die Menge, dass ich sofort 3 wählen kann. Wähle ich in der Zeit schon einen anderen Artikel, muss das
 // Mengenfenster schon für den nächsten offen sein – das soll nicht irritieren, sondern die Bedienung einfacher und schneller
@@ -9,7 +9,14 @@
 // Ablauf: Kachel/Scan → Artikel wie bisher mit Menge 1 in den Bon (nichts ändert sich an der Buchung) → Fenster zeigt diesen
 // Artikel. Erste Mengentaste ersetzt die 1 („3“ → 3 Stück), jede weitere zählt dazu („5“, „5“ → 10). − / + korrigieren.
 // Nächste Kachel → neuer Artikel, das Fenster wechselt an Ort und Stelle (gleiche Größe und Lage, kurzes Aufleuchten).
-// Zu: rotes ✕, 25 s ohne Antippen, Bon leer/kassiert, Artikel aus dem Bon gelöscht. GESAMT/BAR/KONTO bleiben immer frei.
+// 1.1.0 (Betreiber 28.11.2026: „anstatt eines roten X eine Ausgangstür wie oben zum Verlassen; die Auswahlzahl in einer anderen
+// Farbe markieren – die 1 muss immer schön farbig markiert sein, drücke ich die 2, muss die 2 markiert sein“): Tür 🚪 wie in der
+// Kopfzeile; die zuletzt gewählte Zahl ist grün gefüllt (beim Öffnen die 1).
+// 1.2.0 (Betreiber 28.11.2026: „die Artikel, die sich im Warenkorb befinden, sollen markiert sein“ → Vorschlag A ohne Rahmen;
+// „im Warenkorb war der Mülleimer in den Zeilen weiß, der soll rot sein“): grünes Abzeichen „✓ Menge“ oben rechts auf jeder
+// Kachel, deren Artikel im Bon ist (geht nach Kassieren/Löschen sofort weg, fängt keine Berührung ab). Mülleimer in den
+// Bon-Zeilen als rotes Bild statt Emoji (das Emoji wird auf den Tablets grau/weiß gezeichnet und lässt sich nicht färben).
+// Zu: Tür 🚪, 25 s ohne Antippen, Bon leer/kassiert, Artikel aus dem Bon gelöscht. GESAMT/BAR/KONTO bleiben immer frei.
 (function (global) {
   'use strict';
   if (global.KCMengenfenster) return;
@@ -34,10 +41,11 @@
 #kcMenge .km-preis{font-size:14px;font-weight:700;color:#475569}
 #kcMenge .km-rund{flex:none;width:62px;height:62px;border:0;border-radius:50%;background:#0f3e75;color:#fff;font:900 34px Georgia,serif;cursor:pointer}
 #kcMenge .km-plus{flex:none;width:62px;height:62px;border:0;border-radius:14px;background:#1d5fa8;color:#fff;font:900 38px system-ui;cursor:pointer}
-#kcMenge .km-zu{flex:none;width:62px;height:62px;border:0;border-radius:14px;background:#dc2626;color:#fff;font:900 34px system-ui;cursor:pointer}
+#kcMenge .km-zu{flex:none;width:62px;height:62px;border:2px solid #ef9a9a;border-radius:14px;background:#7f1d1d;color:#fff;font:400 32px system-ui,'KC Emoji',sans-serif;cursor:pointer;line-height:1}
 #kcMenge .km-zahlen{flex:1;min-height:0;display:grid;grid-template-columns:repeat(3,1fr);grid-auto-rows:1fr;gap:10px}
 #kcMenge .km-zahl{border:2px solid #cbd5e1;border-radius:16px;background:#f8fafc;color:#0f172a;font:900 46px system-ui;cursor:pointer;touch-action:manipulation;min-height:0}
 #kcMenge .km-zahl:active{background:#dbeafe}
+#kcMenge .km-zahl.km-gewaehlt{background:#16a34a;border:4px solid #14532d;color:#fff;box-shadow:0 0 0 3px #bbf7d0 inset}
 #kcMenge .km-fuss{display:flex;align-items:center;gap:10px}
 #kcMenge .km-pm{width:84px;height:54px;flex:none;border:2px solid #cbd5e1;border-radius:12px;background:#f1f5f9;font:900 30px system-ui;cursor:pointer;touch-action:manipulation}
 #kcMenge .km-summe{flex:1;text-align:center;font-size:21px;font-weight:900;color:#15803d;line-height:1.15}
@@ -47,6 +55,10 @@
 @keyframes kmNeu{0%{box-shadow:0 0 0 0 rgba(29,78,216,.75)}100%{box-shadow:0 0 0 16px rgba(29,78,216,0),0 10px 30px rgba(0,0,0,.28)}}
 #kcMenge .km-zeit{height:4px;border-radius:2px;background:#e2e8f0;overflow:hidden}
 #kcMenge .km-zeit i{display:block;height:100%;background:#93c5fd;width:100%}
+#productGrid .product-tile-wrap .kc-im-bon{position:absolute;top:6px;right:6px;z-index:6;min-width:54px;height:42px;padding:0 10px;box-sizing:border-box;
+  border-radius:21px;background:#16a34a;color:#fff;font:900 22px/1 system-ui,Segoe UI,Arial,sans-serif;display:flex;align-items:center;justify-content:center;
+  gap:3px;border:3px solid #fff;box-shadow:0 2px 8px rgba(0,0,0,.45);pointer-events:none}
+.cart-row .delete-row{font-size:0!important;color:transparent!important;background:#fef2f2 url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%23dc2626' d='M9 3h6l1 2h4v2H4V5h4l1-2zm-3 6h12l-1 12H7L6 9zm4 2v8h1.6v-8H10zm2.4 0v8H14v-8h-1.6z'/%3E%3C/svg%3E") center/22px 22px no-repeat!important;border-color:#fca5a5!important}
 `;
   function stil() {
     if (doc.getElementById('kcMengeStil')) return;
@@ -62,7 +74,7 @@
     w.innerHTML = '<div class="km-kopf"><img class="km-bild" alt=""><div class="km-text"><div class="km-name"></div><div class="km-preis"></div></div>'
       + '<button type="button" class="km-rund" data-km="info" aria-label="Artikelinformationen">i</button>'
       + '<button type="button" class="km-plus" data-km="variante" aria-label="Varianten (z. B. Schuss)">+</button>'
-      + '<button type="button" class="km-zu" data-km="zu" aria-label="Mengenfenster schließen">✕</button></div>'
+      + '<button type="button" class="km-zu" data-km="zu" title="Mengenfenster verlassen" aria-label="Mengenfenster verlassen">🚪</button></div>'
       + '<div class="km-zahlen">' + [1, 2, 3, 4, 5, 6].map((z) => `<button type="button" class="km-zahl" data-km-zahl="${z}">${z}</button>`).join('') + '</div>'
       + '<div class="km-fuss"><button type="button" class="km-pm" data-km="minus" aria-label="eins weniger">−</button><div class="km-summe"></div>'
       + '<button type="button" class="km-pm" data-km="plus" aria-label="eins mehr">+</button></div><div class="km-zeit"><i></i></div>';
@@ -113,6 +125,7 @@
     const produkt = (typeof PRODUCTS !== 'undefined' ? PRODUCTS : []).find((p) => p.id === x.id); // eslint-disable-line no-undef
     w.querySelector('[data-km="variante"]').hidden = !(produkt && produkt.optionGroup);
     w.querySelector('[data-km="info"]').hidden = !produkt;
+    w.querySelectorAll('[data-km-zahl]').forEach((b) => b.classList.toggle('km-gewaehlt', !zu1 && Number(b.dataset.kmZahl) === offen.gewaehlt));
     w.querySelector('.km-summe').innerHTML = `${esc(x.qty)} × ${esc(x.name)} = ${esc(eu(preis * x.qty))}`
       + `<small>${zu1 ? 'Menge steht fest' : offen.getippt ? 'Nochmal tippen zählt dazu (5 + 5 = 10)' : 'Nächsten Artikel antippen – das Fenster wechselt mit'}</small>`;
   }
@@ -129,7 +142,7 @@
     const x = s.cart.find((y) => y.key === key); if (!x) return;
     const w = fenster();
     const wechsel = !w.hidden && offen && offen.key !== key;
-    offen = { key, basis: Math.max(0, Number(basis) || 0), getippt: false };
+    offen = { key, basis: Math.max(0, Number(basis) || 0), getippt: false, gewaehlt: 1 };
     w.hidden = false; lage(); zeichnen(); zeitNeu();
     if (wechsel || w.dataset.einmal !== '1') { w.classList.remove('km-neu'); void w.offsetWidth; w.classList.add('km-neu'); w.dataset.einmal = '1'; }
     clearInterval(lageTimer); lageTimer = setInterval(() => { lage(); if (!zeile()) zu(); }, 700);
@@ -154,9 +167,11 @@
     if (z) {
       // Erster Tipp ersetzt die automatisch gebuchte 1 (bzw. das +1 bei einem schon vorhandenen Artikel), jeder weitere zählt dazu.
       mengeSetzen(offen.getippt ? Number(x.qty) + z : offen.basis + z);
-      offen.getippt = true;
-    } else if (b.dataset.km === 'minus') { mengeSetzen(Number(x.qty) - 1); offen.getippt = true; }
-    else if (b.dataset.km === 'plus') { mengeSetzen(Number(x.qty) + 1); offen.getippt = true; }
+      offen.getippt = true; offen.gewaehlt = z;
+    } else if (b.dataset.km === 'minus' || b.dataset.km === 'plus') {
+      mengeSetzen(Number(x.qty) + (b.dataset.km === 'plus' ? 1 : -1)); offen.getippt = true;
+      const neu = Number(zeile()?.qty) || 0; offen.gewaehlt = neu >= 1 && neu <= 6 ? neu : 0;   // − / +: markiert die Menge, solange es 1–6 ist
+    }
     else if (b.dataset.km === 'zu') { zu(); return; }
     else if (b.dataset.km === 'info') { if (typeof global.openProductInfo === 'function') global.openProductInfo(x.id); }
     else if (b.dataset.km === 'variante') { if (typeof global.openProductVariants === 'function') global.openProductVariants(x.id); }
@@ -193,6 +208,40 @@
     return true;
   }
 
+  // Abzeichen „✓ Menge“ auf den Kacheln der Artikel im Bon
+  let abzGeplant = false;
+  function abzeichen() {
+    abzGeplant = false;
+    const grid = doc.getElementById('productGrid'), s = S(); if (!grid || !s) return;
+    stil();
+    const m = {};
+    s.cart.forEach((x) => { if (x && x.id && Number(x.qty) > 0) m[x.id] = (m[x.id] || 0) + Number(x.qty); });
+    grid.querySelectorAll('.product-tile-wrap').forEach((w) => {
+      const id = w.querySelector('.product-tile')?.dataset.id;
+      let a = w.querySelector('.kc-im-bon');
+      const menge = id ? m[id] : 0;
+      if (!menge) { if (a) a.remove(); return; }
+      if (!a) { a = doc.createElement('span'); a.className = 'kc-im-bon'; a.setAttribute('aria-hidden', 'true'); w.appendChild(a); }
+      const text = '✓ ' + (Number.isInteger(menge) ? menge : String(menge).replace('.', ','));
+      if (a.textContent !== text) a.textContent = text;
+    });
+  }
+  function abzeichenPlanen() { if (abzGeplant) return; abzGeplant = true; (global.requestAnimationFrame || setTimeout)(abzeichen); }
+  function abzeichenEinhaengen() {
+    let ok = true;
+    for (const name of ['renderCart', 'renderProducts']) {
+      const f = global[name];
+      if (typeof f !== 'function') { ok = false; continue; }
+      if (f.kcAbz) continue;
+      const neu = function () { const r = f.apply(this, arguments); try { abzeichenPlanen(); } catch (e) { /* */ } return r; };
+      neu.kcAbz = true; global[name] = neu;
+    }
+    const grid = doc.getElementById('productGrid');
+    if (grid && !grid.dataset.kcAbz && global.MutationObserver) { grid.dataset.kcAbz = '1'; new MutationObserver((l) => { if (l.some((x) => [...x.addedNodes].some((k) => k.nodeType === 1 && !k.classList?.contains('kc-im-bon')))) abzeichenPlanen(); }).observe(grid, { childList: true, subtree: true }); }
+    abzeichenPlanen();
+    return ok && !!grid;
+  }
+
   // Schalter unter „Mehr“
   function schalter() {
     const grid = doc.querySelector('.more-grid'); if (!grid) return false;
@@ -223,11 +272,12 @@
 
   function los() {
     let n = 0;
-    const versuch = () => { const a = einhaengen(), b = schalter(); if ((a && b) || ++n > 60) return; setTimeout(versuch, 500); };
+    const versuch = () => { const a = einhaengen(), b = schalter(), c = abzeichenEinhaengen(); if ((a && b && c) || ++n > 60) return; setTimeout(versuch, 500); };
+    setInterval(abzeichenPlanen, 1500);   // Sicherheitsnetz (z. B. Bon von anderer Stelle geleert)
     versuch();
     global.addEventListener('resize', lage);
     global.addEventListener('adaptive-layout-change', lage);
   }
   if (doc.readyState === 'loading') doc.addEventListener('DOMContentLoaded', los); else los();
-  global.KCMengenfenster = { oeffnen, zu, an, offen: () => (offen ? { ...offen } : null), version: '1.0.0' };
+  global.KCMengenfenster = { oeffnen, zu, an, offen: () => (offen ? { ...offen } : null), abzeichen, version: '1.2.0' };
 })(window);
