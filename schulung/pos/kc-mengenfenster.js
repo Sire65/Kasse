@@ -1,4 +1,4 @@
-// KC Kasse – Mengenfenster neben den Kacheln.                                                        Build 1.1.0
+// KC Kasse – Mengenfenster neben den Kacheln.                                                        Build 1.2.0
 // 28.11.2026 (Betreiber: „wenn ich z. B. Kachel Eierpunsch anklicke, soll daneben ein großes Eingabefeld über dem Warenkorb
 // aufgehen mit Buttons für die Menge, dass ich sofort 3 wählen kann. Wähle ich in der Zeit schon einen anderen Artikel, muss das
 // Mengenfenster schon für den nächsten offen sein – das soll nicht irritieren, sondern die Bedienung einfacher und schneller
@@ -12,6 +12,10 @@
 // 1.1.0 (Betreiber 28.11.2026: „anstatt eines roten X eine Ausgangstür wie oben zum Verlassen; die Auswahlzahl in einer anderen
 // Farbe markieren – die 1 muss immer schön farbig markiert sein, drücke ich die 2, muss die 2 markiert sein“): Tür 🚪 wie in der
 // Kopfzeile; die zuletzt gewählte Zahl ist grün gefüllt (beim Öffnen die 1).
+// 1.2.0 (Betreiber 28.11.2026: „die Artikel, die sich im Warenkorb befinden, sollen markiert sein“ → Vorschlag A ohne Rahmen;
+// „im Warenkorb war der Mülleimer in den Zeilen weiß, der soll rot sein“): grünes Abzeichen „✓ Menge“ oben rechts auf jeder
+// Kachel, deren Artikel im Bon ist (geht nach Kassieren/Löschen sofort weg, fängt keine Berührung ab). Mülleimer in den
+// Bon-Zeilen als rotes Bild statt Emoji (das Emoji wird auf den Tablets grau/weiß gezeichnet und lässt sich nicht färben).
 // Zu: Tür 🚪, 25 s ohne Antippen, Bon leer/kassiert, Artikel aus dem Bon gelöscht. GESAMT/BAR/KONTO bleiben immer frei.
 (function (global) {
   'use strict';
@@ -51,6 +55,10 @@
 @keyframes kmNeu{0%{box-shadow:0 0 0 0 rgba(29,78,216,.75)}100%{box-shadow:0 0 0 16px rgba(29,78,216,0),0 10px 30px rgba(0,0,0,.28)}}
 #kcMenge .km-zeit{height:4px;border-radius:2px;background:#e2e8f0;overflow:hidden}
 #kcMenge .km-zeit i{display:block;height:100%;background:#93c5fd;width:100%}
+#productGrid .product-tile-wrap .kc-im-bon{position:absolute;top:6px;right:6px;z-index:6;min-width:54px;height:42px;padding:0 10px;box-sizing:border-box;
+  border-radius:21px;background:#16a34a;color:#fff;font:900 22px/1 system-ui,Segoe UI,Arial,sans-serif;display:flex;align-items:center;justify-content:center;
+  gap:3px;border:3px solid #fff;box-shadow:0 2px 8px rgba(0,0,0,.45);pointer-events:none}
+.cart-row .delete-row{font-size:0!important;color:transparent!important;background:#fef2f2 url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%23dc2626' d='M9 3h6l1 2h4v2H4V5h4l1-2zm-3 6h12l-1 12H7L6 9zm4 2v8h1.6v-8H10zm2.4 0v8H14v-8h-1.6z'/%3E%3C/svg%3E") center/22px 22px no-repeat!important;border-color:#fca5a5!important}
 `;
   function stil() {
     if (doc.getElementById('kcMengeStil')) return;
@@ -200,6 +208,40 @@
     return true;
   }
 
+  // Abzeichen „✓ Menge“ auf den Kacheln der Artikel im Bon
+  let abzGeplant = false;
+  function abzeichen() {
+    abzGeplant = false;
+    const grid = doc.getElementById('productGrid'), s = S(); if (!grid || !s) return;
+    stil();
+    const m = {};
+    s.cart.forEach((x) => { if (x && x.id && Number(x.qty) > 0) m[x.id] = (m[x.id] || 0) + Number(x.qty); });
+    grid.querySelectorAll('.product-tile-wrap').forEach((w) => {
+      const id = w.querySelector('.product-tile')?.dataset.id;
+      let a = w.querySelector('.kc-im-bon');
+      const menge = id ? m[id] : 0;
+      if (!menge) { if (a) a.remove(); return; }
+      if (!a) { a = doc.createElement('span'); a.className = 'kc-im-bon'; a.setAttribute('aria-hidden', 'true'); w.appendChild(a); }
+      const text = '✓ ' + (Number.isInteger(menge) ? menge : String(menge).replace('.', ','));
+      if (a.textContent !== text) a.textContent = text;
+    });
+  }
+  function abzeichenPlanen() { if (abzGeplant) return; abzGeplant = true; (global.requestAnimationFrame || setTimeout)(abzeichen); }
+  function abzeichenEinhaengen() {
+    let ok = true;
+    for (const name of ['renderCart', 'renderProducts']) {
+      const f = global[name];
+      if (typeof f !== 'function') { ok = false; continue; }
+      if (f.kcAbz) continue;
+      const neu = function () { const r = f.apply(this, arguments); try { abzeichenPlanen(); } catch (e) { /* */ } return r; };
+      neu.kcAbz = true; global[name] = neu;
+    }
+    const grid = doc.getElementById('productGrid');
+    if (grid && !grid.dataset.kcAbz && global.MutationObserver) { grid.dataset.kcAbz = '1'; new MutationObserver((l) => { if (l.some((x) => [...x.addedNodes].some((k) => k.nodeType === 1 && !k.classList?.contains('kc-im-bon')))) abzeichenPlanen(); }).observe(grid, { childList: true, subtree: true }); }
+    abzeichenPlanen();
+    return ok && !!grid;
+  }
+
   // Schalter unter „Mehr“
   function schalter() {
     const grid = doc.querySelector('.more-grid'); if (!grid) return false;
@@ -230,11 +272,12 @@
 
   function los() {
     let n = 0;
-    const versuch = () => { const a = einhaengen(), b = schalter(); if ((a && b) || ++n > 60) return; setTimeout(versuch, 500); };
+    const versuch = () => { const a = einhaengen(), b = schalter(), c = abzeichenEinhaengen(); if ((a && b && c) || ++n > 60) return; setTimeout(versuch, 500); };
+    setInterval(abzeichenPlanen, 1500);   // Sicherheitsnetz (z. B. Bon von anderer Stelle geleert)
     versuch();
     global.addEventListener('resize', lage);
     global.addEventListener('adaptive-layout-change', lage);
   }
   if (doc.readyState === 'loading') doc.addEventListener('DOMContentLoaded', los); else los();
-  global.KCMengenfenster = { oeffnen, zu, an, offen: () => (offen ? { ...offen } : null), version: '1.1.0' };
+  global.KCMengenfenster = { oeffnen, zu, an, offen: () => (offen ? { ...offen } : null), abzeichen, version: '1.2.0' };
 })(window);

@@ -40,6 +40,13 @@ async function seite(b, basis, ort, groesse) {
   await s.tap('#kcMenge [data-km-zahl="5"]'); await s.tap('#kcMenge [data-km-zahl="5"]'); await s.waitForTimeout(150);
   p(`${tag}: „5“ + „5“ = 10, die 5 bleibt markiert`, await menge(ids.b) === 10 && await markiert() === '5');
   p(`${tag}: blaues + im Fenster bei Artikeln mit Varianten`, await s.evaluate((id) => !!PRODUCTS.find((q) => q.id === id)?.optionGroup, ids.b) ? f.plus : !f.plus);
+  // Abzeichen „✓ Menge“ auf den Kacheln im Bon, Mülleimer rot
+  await s.waitForTimeout(250);
+  const abz = (id) => s.evaluate((id) => { const w = document.querySelector(`#productGrid .product-tile[data-id="${id}"]`)?.closest('.product-tile-wrap'); const a = w && w.querySelector('.kc-im-bon'); return a ? a.textContent : null; }, id);
+  const andere = await s.evaluate((ids) => [...document.querySelectorAll('#productGrid .product-tile[data-id]')].map((x) => x.dataset.id).find((i) => i !== ids.a && i !== ids.b), ids);
+  p(`${tag}: Kacheln im Bon tragen „✓ Menge“, andere nicht`, await abz(ids.a) === '✓ 7' && await abz(ids.b) === '✓ 10' && await abz(andere) === null, JSON.stringify([await abz(ids.a), await abz(ids.b), await abz(andere)]));
+  p(`${tag}: Abzeichen fängt keine Berührung ab`, await s.evaluate(() => getComputedStyle(document.querySelector('.kc-im-bon')).pointerEvents) === 'none');
+  p(`${tag}: Mülleimer in den Bon-Zeilen rot`, await s.evaluate(() => { const d = document.querySelector('.cart-row .delete-row'); const st = getComputedStyle(d); return /dc2626/.test(st.backgroundImage) && st.fontSize === '0px'; }));
   // Info
   await s.tap('#kcMenge [data-km="info"]'); await s.waitForTimeout(400);
   p(`${tag}: ⓘ öffnet die Artikelinfo`, await s.evaluate(() => !!document.querySelector('dialog[open]')));
@@ -62,6 +69,8 @@ async function seite(b, basis, ort, groesse) {
   await s.tap(`#productGrid .product-tile[data-id="${ids.a}"]`); await s.waitForTimeout(200);
   await s.evaluate(() => completeSale('cash', { silent: true }).catch(() => {})); await s.waitForTimeout(800);
   p(`${tag}: Kassieren schließt das Fenster`, !(await fenster()));
+  await s.waitForTimeout(400);
+  p(`${tag}: nach dem Kassieren keine Abzeichen mehr`, await s.evaluate(() => document.querySelectorAll('.kc-im-bon').length) === 0);
   // Abschalten unter Mehr
   await frei();
   const schalter = await s.evaluate(() => { const k = document.getElementById('kcMengeSchalter'); return k && k.closest('.more-grid') ? k.textContent : null; });
