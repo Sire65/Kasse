@@ -24,8 +24,10 @@ async function seite(b, basis, ort, groesse) {
   let f = await fenster();
   p(`${tag}: Kachel → Artikel mit 1 im Bon, Mengenfenster über dem Warenkorb, BAR frei`, await menge(ids.a) === 1 && !!f && f.barFrei && f.info, JSON.stringify(f));
   p(`${tag}: Mengentasten 1–6 groß (mind. 70 px)`, f && f.zahl >= 70, String(f && f.zahl));
+  const markiert = () => s.evaluate(() => [...document.querySelectorAll('#kcMenge .km-zahl.km-gewaehlt')].map((x) => x.dataset.kmZahl).join(','));
+  p(`${tag}: beim Öffnen ist die 1 farbig markiert, Tür 🚪 statt rotem X`, await markiert() === '1' && await s.evaluate(() => { const t = document.querySelector('#kcMenge [data-km="zu"]'); return t.textContent.trim() === '🚪' && getComputedStyle(t).backgroundColor === 'rgb(127, 29, 29)'; }) && await s.evaluate(() => getComputedStyle(document.querySelector('#kcMenge .km-gewaehlt')).backgroundColor) === 'rgb(22, 163, 74)');
   await s.tap('#kcMenge [data-km-zahl="3"]'); await s.waitForTimeout(150);
-  p(`${tag}: „3“ → 3 Stück (ersetzt die 1)`, await menge(ids.a) === 3);
+  p(`${tag}: „3“ → 3 Stück (ersetzt die 1), die 3 ist markiert`, await menge(ids.a) === 3 && await markiert() === '3');
   await s.tap('#kcMenge [data-km-zahl="3"]'); await s.waitForTimeout(150);
   p(`${tag}: nochmal „3“ → 6 (zählt dazu)`, await menge(ids.a) === 6);
   await s.tap('#kcMenge [data-km="minus"]'); await s.tap('#kcMenge [data-km="plus"]'); await s.tap('#kcMenge [data-km="plus"]'); await s.waitForTimeout(150);
@@ -36,7 +38,7 @@ async function seite(b, basis, ort, groesse) {
   f = await fenster();
   p(`${tag}: nächste Kachel → Fenster wechselt an Ort und Stelle, voriger Artikel bleibt bei 7`, !!f && f.top === vorLage.top && f.h === vorLage.h && f.l === vorLage.l && f.name !== vorLage.name && await menge(ids.a) === 7 && await menge(ids.b) === 1, JSON.stringify([vorLage.name, f && f.name]));
   await s.tap('#kcMenge [data-km-zahl="5"]'); await s.tap('#kcMenge [data-km-zahl="5"]'); await s.waitForTimeout(150);
-  p(`${tag}: „5“ + „5“ = 10`, await menge(ids.b) === 10);
+  p(`${tag}: „5“ + „5“ = 10, die 5 bleibt markiert`, await menge(ids.b) === 10 && await markiert() === '5');
   p(`${tag}: blaues + im Fenster bei Artikeln mit Varianten`, await s.evaluate((id) => !!PRODUCTS.find((q) => q.id === id)?.optionGroup, ids.b) ? f.plus : !f.plus);
   // Info
   await s.tap('#kcMenge [data-km="info"]'); await s.waitForTimeout(400);
