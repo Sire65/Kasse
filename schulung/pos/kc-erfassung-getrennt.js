@@ -175,6 +175,16 @@
   background-repeat: repeat-x, repeat-x, repeat-y, repeat-y; background-size: 18px 4px, 18px 4px, 4px 18px, 4px 18px; background-position: 0 0, 0 100%, 0 0, 100% 0;
   -webkit-animation: kcSchrittLauf .9s linear infinite; animation: kcSchrittLauf .9s linear infinite; }
 #withdrawDialog fieldset.kc-laufrand { padding-top: 6px !important; }
+/* 0.5.0 (Betreiber 28.11.2026: „unten ist was weg, irgendwas mit Bon scannen passt nicht mehr drauf“): nach „Bon vorhanden“
+   war das Fenster 59 px zu hoch und liess sich nicht scrollen. Jetzt kompakter, notfalls scrollbar, Speichern-Leiste bleibt unten. */
+html body #withdrawDialog.kc-modus-entnahme form.withdraw-card { overflow-y: auto !important; -webkit-overflow-scrolling: touch; }
+html body #withdrawDialog.kc-modus-entnahme form.withdraw-card > .dialog-actions { position: -webkit-sticky; position: sticky; bottom: 0; z-index: 5; background: #fff; }
+#withdrawDialog.kc-modus-entnahme.kc-ab-schritt3 #kcBetragBlock .kc-geld-hinweis { display: none !important; }
+#withdrawDialog.kc-modus-entnahme #withdrawNote { min-height: 0 !important; height: 40px !important; }
+#withdrawDialog.kc-modus-entnahme.kc-bon-ja .kc-bon-wahl > #withdrawReceiptToggle, #withdrawDialog.kc-modus-entnahme.kc-bon-ja #kcKeinBonKnopf { height: 54px !important; min-height: 0 !important; }
+#withdrawDialog.kc-modus-entnahme.kc-bon-ja .withdraw-card > p:first-of-type { display: none !important; }
+#withdrawDialog.kc-modus-entnahme #withdrawReceiptActions:not([hidden]) { margin-top: 4px !important; margin-bottom: 4px !important; }
+#withdrawDialog [data-ziffern-ok].kc-schritt-puls { -webkit-animation: kcSchrittPuls 1.1s ease-in-out infinite; animation: kcSchrittPuls 1.1s ease-in-out infinite; }
 #withdrawDialog #saveWithdrawal.kc-laufrand::after { background-image: linear-gradient(90deg, #fde047 50%, transparent 50%), linear-gradient(90deg, #fde047 50%, transparent 50%), linear-gradient(0deg, #fde047 50%, transparent 50%), linear-gradient(0deg, #fde047 50%, transparent 50%); }
 #withdrawDialog #saveWithdrawal.kc-schritt-puls { position: relative !important; overflow: visible !important; -webkit-animation: kcSchrittPuls 1.1s ease-in-out infinite; animation: kcSchrittPuls 1.1s ease-in-out infinite; }
 `;
@@ -387,10 +397,11 @@
     knoten.classList.toggle('kc-schritt-gesperrt', gesperrt);
     knoten.setAttribute('aria-disabled', String(gesperrt));
   }
-  function schritteAnwenden(entnahme, grund, betrag) {
+  function schritteAnwenden(entnahme, grund, betrag, zfOffen) {
     const block = el('kcBetragBlock'), notiz = el('withdrawNote'), toggle = el('withdrawReceiptToggle'), kein = el('kcKeinBonKnopf');
     const wahl = toggle?.parentElement?.classList.contains('kc-bon-wahl') ? toggle.parentElement : toggle;
-    const schritt2 = !entnahme || !!grund, schritt3 = !entnahme || (!!grund && betrag > 0);
+    // 0.5.0: Solange das Ziffernfeld offen ist (z. B. 3,95 wird gerade eingetippt), bleibt Schritt 2 dran – erst OK gibt die Bon-Frage frei.
+    const schritt2 = !entnahme || !!grund, schritt3 = !entnahme || (!!grund && betrag > 0 && !zfOffen);
     if (block) {
       sperren(block, !schritt2);
       block.querySelectorAll('button').forEach(b => {
@@ -438,7 +449,8 @@
     const entnahme = dlg.classList.contains('kc-modus-entnahme');
     const betrag = Number(el('withdrawAmount')?.value) || 0;
     dlg.classList.toggle('kc-grund-gewaehlt', !!grund && entnahme);
-    schritteAnwenden(entnahme, grund, betrag);
+    const zfOffen = entnahme && !!el('kcZiffernFeld') && !el('kcZiffernFeld').hidden;
+    schritteAnwenden(entnahme, grund, betrag, zfOffen);
     if (!entnahme) { laufrandSetzen(0); if (hinweis) hinweis.hidden = true; return; }
     if (!hinweis) {
       hinweis = document.createElement('p');
@@ -448,13 +460,17 @@
     }
     const bon = !!el('withdrawReceiptToggle')?.classList.contains('active');
     if (bon) keinBon = false;
-    const schritt = !grund ? 1 : !(betrag > 0) ? 2 : !(bon || keinBon) ? 3 : 4;
+    const schritt = !grund ? 1 : (!(betrag > 0) || zfOffen) ? 2 : !(bon || keinBon) ? 3 : 4;
+    dlg.classList.toggle('kc-ab-schritt3', schritt >= 3);
+    dlg.classList.toggle('kc-bon-ja', bon);
+    const okTaste = dlg.querySelector('[data-ziffern-ok]');
+    if (okTaste) okTaste.classList.toggle('kc-schritt-puls', zfOffen && betrag > 0);
     if (knopf.textContent !== 'WIRD GESPEICHERT \u2026') knopf.disabled = schritt < 4;
     laufrandSetzen(schritt);
     hinweis.hidden = false;
     hinweis.classList.toggle('kc-bereit', schritt === 4);
     hinweis.textContent = schritt === 1 ? 'Schritt 1: Zuerst den Grund w\u00e4hlen (z. B. Essen Personal).'
-      : schritt === 2 ? 'Schritt 2: Betrag \u2013 M\u00fcnzen und Scheine antippen oder \u201e\u2328 Anderer Betrag\u201c.'
+      : schritt === 2 ? (zfOffen ? 'Schritt 2: Betrag eintippen (z. B. 3,95) und mit OK best\u00e4tigen.' : 'Schritt 2: Betrag \u2013 M\u00fcnzen und Scheine antippen oder \u201e\u2328 Anderer Betrag\u201c.')
       : schritt === 3 ? 'Schritt 3: Ist ein Bon / eine Quittung da? \u201eBon vorhanden\u201c oder \u201eKein Bon\u201c antippen.'
       : `\u2713 ${euro(betrag)} \u00b7 ${grund.dataset.withdrawReason} \u00b7 ${bon ? 'mit Bon' : 'ohne Bon'} \u2013 bereit zum Speichern`;
   }
@@ -486,7 +502,11 @@
     });
     // Grund / Bon gewaehlt -> Speichern-Knopf und Hinweis nachziehen (nach dem Klick in app.js).
     document.querySelectorAll('[data-withdraw-reason]').forEach(b => b.addEventListener('click', () => setTimeout(speichernPruefen, 80)));
-    el('withdrawReceiptToggle')?.addEventListener('click', () => setTimeout(speichernPruefen, 0));
+    el('withdrawReceiptToggle')?.addEventListener('click', () => setTimeout(() => {
+      speichernPruefen();
+      const scan = el('scanWithdrawalReceipt');
+      if (scan && !el('withdrawReceiptActions')?.hidden) try { scan.scrollIntoView({block: 'nearest'}); } catch (e) { /* alt */ }
+    }, 0));
     // 0.2.3 (Betreiber 06.10.2026: "heute wurde der gruene Knopf nicht aktiv"): nach JEDEM Tipp im
     // Entnahmefenster und bei jeder Betragsaenderung neu pruefen - egal ueber welchen Weg der Betrag
     // kam (Muenzen, Ziffernfeld, Schnelltasten). Nur Bedienung; app.js prueft beim Speichern selbst.
@@ -507,7 +527,7 @@
     }
     el('withdrawDialog')?.addEventListener('close', () => {
       const dlg = el('withdrawDialog');
-      dlg.classList.remove('kc-modus-entnahme', 'kc-modus-reklamation', 'kc-grund-gewaehlt');
+      dlg.classList.remove('kc-modus-entnahme', 'kc-modus-reklamation', 'kc-grund-gewaehlt', 'kc-ab-schritt3', 'kc-bon-ja');
       keinBon = false;
       laufrandSetzen(0);
       schritteAnwenden(false, null, 0);   // andere Nutzer des Fensters (Reklamation) sehen alles frei
@@ -519,5 +539,5 @@
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', verdrahten);
   else verdrahten();
-  global.KCErfassungGetrennt = {modusSetzen, zifferblockAnpassen, speichernPruefen, laufrandSetzen, version: '0.4.0'};
+  global.KCErfassungGetrennt = {modusSetzen, zifferblockAnpassen, speichernPruefen, laufrandSetzen, version: '0.5.0'};
 })(window);
