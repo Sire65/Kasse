@@ -28,6 +28,11 @@ async function pruefeSeite(b, basis, seite) {
   await s.click('#kcReinigenKnopf'); await s.waitForTimeout(200);
   const lage = await s.evaluate(() => ({ an: KCBildschirmReinigen.aktiv(), rest: KCBildschirmReinigen.restMs(), schwarz: getComputedStyle(document.getElementById('kcReinigen')).backgroundColor, voll: (() => { const r = document.getElementById('kcReinigen').getBoundingClientRect(); return r.width >= innerWidth && r.height >= innerHeight; })() }));
   p(`${seite}: Knopf startet schwarze Putz-Sperre über den ganzen Bildschirm (20 s)`, lage.an && lage.rest > 18000 && lage.rest <= 20000 && lage.schwarz === 'rgb(0, 0, 0)' && lage.voll, JSON.stringify(lage));
+  // Fensterputzer: groß, bewegt sich (fährt, wischt), fängt selbst keine Berührung ab
+  const putzer = async () => s.evaluate(() => { const b = document.querySelector('#kcReinigen .kc-rn-buehne'), a = document.querySelector('#kcReinigen .kc-rn-arm'); const r = b.getBoundingClientRect(); return { h: r.height, x: Math.round(r.left), arm: getComputedStyle(a).transform, pe: getComputedStyle(b).pointerEvents, leiter: !!document.querySelector('#kcReinigen .kc-rn-leiter'), lappen: !!document.querySelector('#kcReinigen .kc-rn-lappen') }; });
+  const f1 = await putzer(); await s.waitForTimeout(450); const f2 = await putzer();
+  p(`${seite}: Fensterputzer mit Leiter und Lappen, groß (mind. 60 % Höhe)`, f1.leiter && f1.lappen && f1.h >= 0.6 * 800 && f1.pe === 'none', JSON.stringify(f1));
+  p(`${seite}: Fensterputzer fährt und wischt (bewegt sich)`, f1.x !== f2.x && f1.arm !== f2.arm, JSON.stringify([f1.x, f2.x]));
   // Wischen überall: Maus quer drüber, Klicks, Tasten (auch ein Scan)
   for (const [x, y] of [[200, 300], [700, 400], [1200, 700], [60, 40], [1300, 760]]) { await s.mouse.click(x, y); }
   await s.mouse.move(100, 100); await s.mouse.down(); await s.mouse.move(1200, 700, { steps: 12 }); await s.mouse.up();
@@ -74,6 +79,22 @@ async function pruefeSeite(b, basis, seite) {
   await s.click('#kcBetragBlock [data-geld]'); await s.waitForTimeout(300);
   r = await rand();
   p(`${seite}: Schritt 3: Laufrand um Bon ja / Kein Bon`, r.l.length === 1 && r.l[0] === 'kc-bon-wahl', JSON.stringify(r));
+  // Betrag von Hand (Anderer Betrag): 3,95 – solange getippt wird, bleibt Schritt 2 dran
+  await s.click('[data-geld-leeren]'); await s.waitForTimeout(200);
+  await s.evaluate(() => document.querySelector('#kcBetragBlock [data-geld-anders]').click()); await s.waitForTimeout(250);
+  const tipp = async (z) => { await s.evaluate((z) => [...document.querySelectorAll('#kcZiffernFeld button')].find((x) => x.textContent.trim() === z).click(), z); await s.waitForTimeout(180); };
+  let zwischen = [];
+  for (const z of ['3', ',', '9', '5']) { await tipp(z); zwischen.push(JSON.stringify(await rand())); }
+  const bonGrau = await s.evaluate(() => document.getElementById('withdrawReceiptToggle').disabled && document.getElementById('kcKeinBonKnopf').disabled && document.getElementById('saveWithdrawal').disabled);
+  p(`${seite}: 3,95 eintippen – Laufrand bleibt am Betrag, Bon-Frage grau, OK pulsiert`, zwischen.every((z) => /kcBetragBlock/.test(z)) && bonGrau && await s.evaluate(() => document.querySelector('[data-ziffern-ok]').classList.contains('kc-schritt-puls')), zwischen.join(' '));
+  await s.evaluate(() => document.querySelector('[data-ziffern-ok]').click()); await s.waitForTimeout(300);
+  r = await rand();
+  p(`${seite}: nach OK: 3,95 € übernommen, Laufrand bei Bon ja / Kein Bon`, await s.inputValue('#withdrawAmount') === '3.95' && r.l.length === 1 && r.l[0] === 'kc-bon-wahl', JSON.stringify(r));
+  // Bon vorhanden: „Bon scannen“ und Speichern passen aufs Fenster und überdecken sich nicht
+  await s.click('#withdrawReceiptToggle'); await s.waitForTimeout(350);
+  const platz = await s.evaluate(() => { const q = (id) => document.getElementById(id).getBoundingClientRect(); const scan = q('scanWithdrawalReceipt'), save = q('saveWithdrawal'), c = document.querySelector('#withdrawDialog .withdraw-card'); const cr = c.getBoundingClientRect(); return { scanUnten: Math.round(scan.bottom), saveOben: Math.round(save.top), sichtbar: scan.top >= cr.top && scan.bottom <= save.top, passt: c.scrollHeight <= c.clientHeight + 1, scrollbar: getComputedStyle(c).overflowY }; });
+  p(`${seite}: Bon vorhanden: „Bon scannen“ sichtbar über „Speichern“, Fenster passt (sonst scrollbar)`, platz.sichtbar && (platz.passt || platz.scrollbar === 'auto'), JSON.stringify(platz));
+  await s.click('#withdrawReceiptToggle'); await s.waitForTimeout(250);
   await s.click('#kcKeinBonKnopf'); await s.waitForTimeout(300);
   r = await rand();
   const knopf = await s.evaluate(() => { const k = document.getElementById('saveWithdrawal'); return { an: !k.disabled, anim: getComputedStyle(k).animationName }; });
