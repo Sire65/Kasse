@@ -61,6 +61,10 @@ async function seite(b, basis, ort, groesse) {
   p(`${tag}: Kacheln im Bon tragen „✓ Menge“, andere nicht`, await abz(ids.a) === '✓ 7' && await abz(ids.b) === '✓ 10' && await abz(andere) === null, JSON.stringify([await abz(ids.a), await abz(ids.b), await abz(andere)]));
   p(`${tag}: Abzeichen fängt keine Berührung ab`, await s.evaluate(() => getComputedStyle(document.querySelector('.kc-im-bon')).pointerEvents) === 'none');
   p(`${tag}: Mülleimer in den Bon-Zeilen rot`, await s.evaluate(() => { const d = document.querySelector('.cart-row .delete-row'); const st = getComputedStyle(d); return /dc2626/.test(st.backgroundImage) && st.fontSize === '0px'; }));
+  // alle i-Knöpfe gleich (Ø 40 px, Farbe wie im Roter-Feger-Bild), Meldungs-Pfeil und Bon-Mülleimer als Grafik
+  const iKnoepfe = await s.evaluate(() => [...document.querySelectorAll('#productGrid .product-info-button')].map((b) => { const r = b.getBoundingClientRect(), t = b.closest('.product-tile-wrap').getBoundingClientRect(), st = getComputedStyle(b); return [Math.round(r.width), Math.round(r.height), Math.round(r.left - t.left), Math.round(r.top - t.top), st.backgroundColor, st.borderRadius].join('|'); }));
+  p(`${tag}: alle i-Knöpfe gleich groß, gleiche Lage und Farbe`, iKnoepfe.length >= 6 && new Set(iKnoepfe).size === 1 && /^40\|40\|/.test(iKnoepfe[0]) && /rgb\(18, 58, 104\)/.test(iKnoepfe[0]), [...new Set(iKnoepfe)].join(' / '));
+  p(`${tag}: Meldungs-Pfeil als mittige Grafik, Bon-Mülleimer rot wie in den Zeilen`, await s.evaluate(() => { const m = getComputedStyle(document.getElementById('messageHistoryBtn')), mb = getComputedStyle(document.getElementById('messageHistoryBtn'), '::before'), v = getComputedStyle(document.getElementById('voidBonBtn')); return /svg/.test(m.backgroundImage) && /center/.test(m.backgroundPosition + ' center') && mb.content === 'none' && /dc2626/.test(v.backgroundImage) && v.backgroundColor === 'rgb(254, 242, 242)'; }));
   // Info
   await s.tap('#kcMenge [data-km="info"]'); await s.waitForTimeout(400);
   p(`${tag}: ⓘ öffnet die Artikelinfo`, await s.evaluate(() => !!document.querySelector('dialog[open]')));

@@ -1,4 +1,4 @@
-// KC Kasse – Mengenfenster neben den Kacheln.                                                        Build 1.4.0
+// KC Kasse – Mengenfenster neben den Kacheln.                                                        Build 1.5.0
 // 28.11.2026 (Betreiber: „wenn ich z. B. Kachel Eierpunsch anklicke, soll daneben ein großes Eingabefeld über dem Warenkorb
 // aufgehen mit Buttons für die Menge, dass ich sofort 3 wählen kann. Wähle ich in der Zeit schon einen anderen Artikel, muss das
 // Mengenfenster schon für den nächsten offen sein – das soll nicht irritieren, sondern die Bedienung einfacher und schneller
@@ -21,6 +21,12 @@
 // eigene Grafiken (SVG) genau in der Mitte – unabhängig von Schrift/Emoji des Tablets; Tür weiß mit Pfeil (Ausgang) auf dunkelrot.
 // Erneutes Antippen derselben Kachel zählt im Fenster mit: Markierung = Menge (1–6), große Mengenanzeige.
 // 1.4.0 (Betreiber: „oben die Tür muss gleich sein“): Tür in der Kopfzeile (#headerExitBtn) mit derselben Grafik und Farbe.
+// 1.5.0 (Betreiber 28.11.2026: „den blauen Pfeil-Button unter der oberen Tür – Icon passt nicht und ist nicht mittig; der
+// Gesamt-Mülleimer soll aussehen wie die anderen Mülleimer; alle i-Buttons nachmessen, teilweise verschiedene Größen – alle wie
+// das i beim Roter Feger“). Gemessen: die Info-Knöpfe sind alle 43 × 43 px, aber unsichtbar – das sichtbare „i“ ist in die
+// Artikelbilder eingemalt, in verschiedenen Größen. Jetzt zeichnet der Knopf selbst ein einheitliches i (Ø 40 px, Farbe und
+// weißer Rand wie das „i“ im Roter-Feger-Bild) und überdeckt das eingemalte. Meldungs-Pfeil (#messageHistoryBtn) als mittige
+// Grafik; „Bon verwerfen“ (#voidBonBtn) mit demselben roten Mülleimer wie in den Bon-Zeilen.
 // Zu: Tür 🚪, 25 s ohne Antippen, Bon leer/kassiert, Artikel aus dem Bon gelöscht. GESAMT/BAR/KONTO bleiben immer frei.
 (function (global) {
   'use strict';
@@ -70,6 +76,13 @@
 #productGrid .product-tile-wrap .kc-im-bon{position:absolute;top:6px;right:6px;z-index:6;min-width:54px;height:42px;padding:0 10px;box-sizing:border-box;
   border-radius:21px;background:#16a34a;color:#fff;font:900 22px/1 system-ui,Segoe UI,Arial,sans-serif;display:flex;align-items:center;justify-content:center;
   gap:3px;border:3px solid #fff;box-shadow:0 2px 8px rgba(0,0,0,.45);pointer-events:none}
+#productGrid .product-tile-wrap .product-info-button{left:min(6px,3%)!important;top:min(6px,3%)!important;right:auto!important;bottom:auto!important;width:min(40px,28%)!important;height:auto!important;aspect-ratio:1/1!important;min-width:0!important;min-height:0!important;padding:0!important;margin:0!important;
+  border-radius:50%!important;border:2.5px solid #fff!important;box-sizing:border-box!important;background:#123a68 url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Ccircle cx='12' cy='5.2' r='2.4' fill='%23fff'/%3E%3Crect x='9.8' y='9' width='4.4' height='12' rx='1.2' fill='%23fff'/%3E%3C/svg%3E") center/52% 52% no-repeat!important;box-shadow:0 1px 4px rgba(0,0,0,.35)!important;font-size:0!important;color:transparent!important;z-index:4!important}
+#productGrid .product-tile-wrap .product-info-button::before,#productGrid .product-tile-wrap .product-info-button::after{content:none!important;display:none!important}
+#messageHistoryBtn.message-history-button{background:#1d4ed8 url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M9 7L4 12l5 5' fill='none' stroke='%23fff' stroke-width='2.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3Cpath d='M4.8 12H14a5.5 5.5 0 0 1 0 11h-2' fill='none' stroke='%23fff' stroke-width='2.8' stroke-linecap='round'/%3E%3C/svg%3E") center/22px 22px no-repeat!important;font-size:0!important;color:transparent!important;padding:0!important}
+#messageHistoryBtn.message-history-button::before,#messageHistoryBtn.message-history-button::after{content:none!important;display:none!important}
+#voidBonBtn.void-bon{background:#fef2f2 url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%23dc2626' d='M9 3h6l1 2h4v2H4V5h4l1-2zm-3 6h12l-1 12H7L6 9zm4 2v8h1.6v-8H10zm2.4 0v8H14v-8h-1.6z'/%3E%3C/svg%3E") center/26px 26px no-repeat!important;border:2px solid #fca5a5!important;color:transparent!important;font-size:0!important;text-shadow:none!important}
+#voidBonBtn.void-bon > *{visibility:hidden!important}
 .cart-row .delete-row{font-size:0!important;color:transparent!important;background:#fef2f2 url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%23dc2626' d='M9 3h6l1 2h4v2H4V5h4l1-2zm-3 6h12l-1 12H7L6 9zm4 2v8h1.6v-8H10zm2.4 0v8H14v-8h-1.6z'/%3E%3C/svg%3E") center/22px 22px no-repeat!important;border-color:#fca5a5!important}
 `;
   function stil() {
@@ -296,5 +309,5 @@
     global.addEventListener('adaptive-layout-change', lage);
   }
   if (doc.readyState === 'loading') doc.addEventListener('DOMContentLoaded', los); else los();
-  global.KCMengenfenster = { oeffnen, zu, an, offen: () => (offen ? { ...offen } : null), abzeichen, version: '1.4.0' };
+  global.KCMengenfenster = { oeffnen, zu, an, offen: () => (offen ? { ...offen } : null), abzeichen, version: '1.5.0' };
 })(window);
