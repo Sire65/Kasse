@@ -25,7 +25,21 @@ async function seite(b, basis, ort, groesse) {
   p(`${tag}: Kachel → Artikel mit 1 im Bon, Mengenfenster über dem Warenkorb, BAR frei`, await menge(ids.a) === 1 && !!f && f.barFrei && f.info, JSON.stringify(f));
   p(`${tag}: Mengentasten 1–6 groß (mind. 70 px)`, f && f.zahl >= 70, String(f && f.zahl));
   const markiert = () => s.evaluate(() => [...document.querySelectorAll('#kcMenge .km-zahl.km-gewaehlt')].map((x) => x.dataset.kmZahl).join(','));
-  p(`${tag}: beim Öffnen ist die 1 farbig markiert, Tür 🚪 statt rotem X`, await markiert() === '1' && await s.evaluate(() => { const t = document.querySelector('#kcMenge [data-km="zu"]'); return t.textContent.trim() === '🚪' && getComputedStyle(t).backgroundColor === 'rgb(127, 29, 29)'; }) && await s.evaluate(() => getComputedStyle(document.querySelector('#kcMenge .km-gewaehlt')).backgroundColor) === 'rgb(22, 163, 74)');
+  p(`${tag}: beim Öffnen ist die 1 farbig markiert, Tür (weiß auf rot, kontrastreich) statt rotem X`, await markiert() === '1' && await s.evaluate(() => { const t = document.querySelector('#kcMenge [data-km="zu"]'); return !!t.querySelector('svg') && getComputedStyle(t).backgroundColor === 'rgb(185, 28, 28)' && getComputedStyle(t).borderTopColor === 'rgb(255, 255, 255)'; }) && await s.evaluate(() => getComputedStyle(document.querySelector('#kcMenge .km-gewaehlt')).backgroundColor) === 'rgb(22, 163, 74)');
+  // Symbole i, +, Tür: Grafik genau in der Mitte des Knopfs (unabhängig von der Schrift des Tablets)
+  const mitte = await s.evaluate(() => [...document.querySelectorAll('#kcMenge .km-kopf button')].filter((b) => !b.hidden).map((b) => { const r = b.getBoundingClientRect(), g = b.querySelector('svg')?.getBoundingClientRect(); return g ? Math.max(Math.abs(g.left + g.width / 2 - (r.left + r.width / 2)), Math.abs(g.top + g.height / 2 - (r.top + r.height / 2))) : 99; }));
+  p(`${tag}: i, + und Tür als Grafik genau mittig (≤ 1 px)`, mitte.length >= 2 && mitte.every((d) => d <= 1), JSON.stringify(mitte));
+  // dieselbe Kachel mehrmals: das Fenster zählt mit (Markierung = Menge)
+  await s.tap(`#productGrid .product-tile[data-id="${ids.a}"]`); await s.waitForTimeout(150);
+  await s.tap(`#productGrid .product-tile[data-id="${ids.a}"]`); await s.waitForTimeout(150);
+  p(`${tag}: Kachel 3× angetippt → im Fenster 3, die 3 markiert`, await menge(ids.a) === 3 && await markiert() === '3' && /^3×/.test(await s.evaluate(() => document.querySelector('#kcMenge .km-summe').textContent)), await s.evaluate(() => document.querySelector('#kcMenge .km-summe').textContent));
+  await s.tap('#kcMenge [data-km="minus"]'); await s.tap('#kcMenge [data-km="minus"]'); await s.waitForTimeout(150);
+  p(`${tag}: zurück auf 1, die 1 markiert`, await menge(ids.a) === 1 && await markiert() === '1');
+  await s.evaluate(() => { KCMengenfenster.zu(); }); await s.tap(`#productGrid .product-tile[data-id="${ids.a}"]`); await s.waitForTimeout(150);
+  await s.tap('#kcMenge [data-km="minus"]'); await s.waitForTimeout(150);
+  p(`${tag}: Fenster neu geöffnet, Menge 1`, await menge(ids.a) === 1 && await markiert() === '1');
+  await s.evaluate(() => { state.cart = []; renderCart(); KCMengenfenster.zu(); });
+  await s.tap(`#productGrid .product-tile[data-id="${ids.a}"]`); await s.waitForTimeout(200);
   await s.tap('#kcMenge [data-km-zahl="3"]'); await s.waitForTimeout(150);
   p(`${tag}: „3“ → 3 Stück (ersetzt die 1), die 3 ist markiert`, await menge(ids.a) === 3 && await markiert() === '3');
   await s.tap('#kcMenge [data-km-zahl="3"]'); await s.waitForTimeout(150);
@@ -57,7 +71,7 @@ async function seite(b, basis, ort, groesse) {
   p(`${tag}: vorhandener Artikel nochmal + „2“ → 7 + 2 = 9`, await menge(ids.a) === 9);
   // ✕
   await s.tap('#kcMenge [data-km="zu"]'); await s.waitForTimeout(150);
-  p(`${tag}: rotes ✕ schließt, Bon bleibt`, !(await fenster()) && await menge(ids.a) === 9 && await menge(ids.b) === 10);
+  p(`${tag}: Tür schließt, Bon bleibt`, !(await fenster()) && await menge(ids.a) === 9 && await menge(ids.b) === 10);
   // 25 s
   await s.tap(`#productGrid .product-tile[data-id="${ids.a}"]`); await s.waitForTimeout(200);
   p(`${tag}: wieder offen nach Kachel`, !!(await fenster()));

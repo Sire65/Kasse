@@ -1,4 +1,4 @@
-// KC Kasse – Mengenfenster neben den Kacheln.                                                        Build 1.2.0
+// KC Kasse – Mengenfenster neben den Kacheln.                                                        Build 1.3.0
 // 28.11.2026 (Betreiber: „wenn ich z. B. Kachel Eierpunsch anklicke, soll daneben ein großes Eingabefeld über dem Warenkorb
 // aufgehen mit Buttons für die Menge, dass ich sofort 3 wählen kann. Wähle ich in der Zeit schon einen anderen Artikel, muss das
 // Mengenfenster schon für den nächsten offen sein – das soll nicht irritieren, sondern die Bedienung einfacher und schneller
@@ -16,6 +16,10 @@
 // „im Warenkorb war der Mülleimer in den Zeilen weiß, der soll rot sein“): grünes Abzeichen „✓ Menge“ oben rechts auf jeder
 // Kachel, deren Artikel im Bon ist (geht nach Kassieren/Löschen sofort weg, fängt keine Berührung ab). Mülleimer in den
 // Bon-Zeilen als rotes Bild statt Emoji (das Emoji wird auf den Tablets grau/weiß gezeichnet und lässt sich nicht färben).
+// 1.3.0 (Betreiber 28.11.2026: „Icons in den Buttons nicht mittig – das blaue i, das Plus, die Tür; die Tür erkennt man vom
+// Kontrast schlecht; tippe ich mehrmals auf eine Kachel, zählt der grüne Haken hoch, im Fenster aber nicht“): i, + und Tür als
+// eigene Grafiken (SVG) genau in der Mitte – unabhängig von Schrift/Emoji des Tablets; Tür weiß mit Pfeil (Ausgang) auf dunkelrot.
+// Erneutes Antippen derselben Kachel zählt im Fenster mit: Markierung = Menge (1–6), große Mengenanzeige.
 // Zu: Tür 🚪, 25 s ohne Antippen, Bon leer/kassiert, Artikel aus dem Bon gelöscht. GESAMT/BAR/KONTO bleiben immer frei.
 (function (global) {
   'use strict';
@@ -39,9 +43,13 @@
 #kcMenge .km-text{flex:1;min-width:0}
 #kcMenge .km-name{font-size:22px;font-weight:900;line-height:1.15;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 #kcMenge .km-preis{font-size:14px;font-weight:700;color:#475569}
-#kcMenge .km-rund{flex:none;width:62px;height:62px;border:0;border-radius:50%;background:#0f3e75;color:#fff;font:900 34px Georgia,serif;cursor:pointer}
-#kcMenge .km-plus{flex:none;width:62px;height:62px;border:0;border-radius:14px;background:#1d5fa8;color:#fff;font:900 38px system-ui;cursor:pointer}
-#kcMenge .km-zu{flex:none;width:62px;height:62px;border:2px solid #ef9a9a;border-radius:14px;background:#7f1d1d;color:#fff;font:400 32px system-ui,'KC Emoji',sans-serif;cursor:pointer;line-height:1}
+#kcMenge .km-kopf button,#kcMenge .km-zahl,#kcMenge .km-pm{display:flex;align-items:center;justify-content:center;padding:0!important;line-height:1}
+#kcMenge .km-kopf svg{display:block;width:34px;height:34px;pointer-events:none}
+#kcMenge .km-rund{flex:none;width:62px;height:62px;border:0;border-radius:50%;background:#0f3e75;color:#fff;cursor:pointer}
+#kcMenge .km-plus{flex:none;width:62px;height:62px;border:0;border-radius:14px;background:#1d5fa8;color:#fff;cursor:pointer}
+#kcMenge .km-plus[hidden],#kcMenge .km-rund[hidden]{display:none!important}
+#kcMenge .km-zu{flex:none;width:62px;height:62px;border:3px solid #fff;border-radius:14px;background:#b91c1c;color:#fff;cursor:pointer;box-shadow:0 0 0 2px #7f1d1d}
+#kcMenge .km-zu svg{width:38px;height:38px}
 #kcMenge .km-zahlen{flex:1;min-height:0;display:grid;grid-template-columns:repeat(3,1fr);grid-auto-rows:1fr;gap:10px}
 #kcMenge .km-zahl{border:2px solid #cbd5e1;border-radius:16px;background:#f8fafc;color:#0f172a;font:900 46px system-ui;cursor:pointer;touch-action:manipulation;min-height:0}
 #kcMenge .km-zahl:active{background:#dbeafe}
@@ -49,6 +57,7 @@
 #kcMenge .km-fuss{display:flex;align-items:center;gap:10px}
 #kcMenge .km-pm{width:84px;height:54px;flex:none;border:2px solid #cbd5e1;border-radius:12px;background:#f1f5f9;font:900 30px system-ui;cursor:pointer;touch-action:manipulation}
 #kcMenge .km-summe{flex:1;text-align:center;font-size:21px;font-weight:900;color:#15803d;line-height:1.15}
+#kcMenge .km-summe .km-anzahl{display:inline-block;min-width:44px;padding:0 8px;margin-right:4px;border-radius:10px;background:#16a34a;color:#fff;font-size:26px}
 #kcMenge .km-summe small{display:block;font-size:12.5px;font-weight:600;color:#64748b}
 #kcMenge button:disabled{opacity:.35;cursor:default}
 #kcMenge.km-neu{animation:kmNeu .55s ease-out}
@@ -72,9 +81,9 @@
     w = doc.createElement('div');
     w.id = 'kcMenge'; w.hidden = true; w.setAttribute('role', 'dialog'); w.setAttribute('aria-label', 'Menge wählen');
     w.innerHTML = '<div class="km-kopf"><img class="km-bild" alt=""><div class="km-text"><div class="km-name"></div><div class="km-preis"></div></div>'
-      + '<button type="button" class="km-rund" data-km="info" aria-label="Artikelinformationen">i</button>'
-      + '<button type="button" class="km-plus" data-km="variante" aria-label="Varianten (z. B. Schuss)">+</button>'
-      + '<button type="button" class="km-zu" data-km="zu" title="Mengenfenster verlassen" aria-label="Mengenfenster verlassen">🚪</button></div>'
+      + '<button type="button" class="km-rund" data-km="info" aria-label="Artikelinformationen"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="5.2" r="2.3" fill="currentColor"/><rect x="9.9" y="9" width="4.2" height="12" rx="1.2" fill="currentColor"/></svg></button>'
+      + '<button type="button" class="km-plus" data-km="variante" aria-label="Varianten (z. B. Schuss)"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="10" y="3" width="4" height="18" rx="1.2" fill="currentColor"/><rect x="3" y="10" width="18" height="4" rx="1.2" fill="currentColor"/></svg></button>'
+      + '<button type="button" class="km-zu" data-km="zu" title="Mengenfenster verlassen" aria-label="Mengenfenster verlassen"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 2.5h9.5v19H4z" fill="none" stroke="currentColor" stroke-width="2"/><path d="M4.6 3.2l6.6 1.6v17L4.6 21z" fill="currentColor"/><circle cx="9.4" cy="12.6" r="1" fill="#b91c1c"/><path d="M15.5 12h6m-2.6-3l3 3-3 3" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></button></div>'
       + '<div class="km-zahlen">' + [1, 2, 3, 4, 5, 6].map((z) => `<button type="button" class="km-zahl" data-km-zahl="${z}">${z}</button>`).join('') + '</div>'
       + '<div class="km-fuss"><button type="button" class="km-pm" data-km="minus" aria-label="eins weniger">−</button><div class="km-summe"></div>'
       + '<button type="button" class="km-pm" data-km="plus" aria-label="eins mehr">+</button></div><div class="km-zeit"><i></i></div>';
@@ -125,8 +134,9 @@
     const produkt = (typeof PRODUCTS !== 'undefined' ? PRODUCTS : []).find((p) => p.id === x.id); // eslint-disable-line no-undef
     w.querySelector('[data-km="variante"]').hidden = !(produkt && produkt.optionGroup);
     w.querySelector('[data-km="info"]').hidden = !produkt;
-    w.querySelectorAll('[data-km-zahl]').forEach((b) => b.classList.toggle('km-gewaehlt', !zu1 && Number(b.dataset.kmZahl) === offen.gewaehlt));
-    w.querySelector('.km-summe').innerHTML = `${esc(x.qty)} × ${esc(x.name)} = ${esc(eu(preis * x.qty))}`
+    const q = Number(x.qty), mark = q >= 1 && q <= 6 && Number.isInteger(q) ? q : offen.gewaehlt;   // Markierung zeigt die Menge (1–6), darüber die zuletzt getippte Zahl
+    w.querySelectorAll('[data-km-zahl]').forEach((b) => b.classList.toggle('km-gewaehlt', !zu1 && Number(b.dataset.kmZahl) === mark));
+    w.querySelector('.km-summe').innerHTML = `<span class="km-anzahl">${esc(String(x.qty).replace('.', ','))}</span>× ${esc(x.name)} = ${esc(eu(preis * x.qty))}`
       + `<small>${zu1 ? 'Menge steht fest' : offen.getippt ? 'Nochmal tippen zählt dazu (5 + 5 = 10)' : 'Nächsten Artikel antippen – das Fenster wechselt mit'}</small>`;
   }
 
@@ -142,7 +152,10 @@
     const x = s.cart.find((y) => y.key === key); if (!x) return;
     const w = fenster();
     const wechsel = !w.hidden && offen && offen.key !== key;
-    offen = { key, basis: Math.max(0, Number(basis) || 0), getippt: false, gewaehlt: 1 };
+    if (!w.hidden && offen && offen.key === key) {
+      // Dieselbe Kachel nochmal angetippt, Fenster offen: +1 zählt im Fenster mit, die nächste Zahl kommt dazu.
+      offen.getippt = true; offen.gewaehlt = 0;
+    } else offen = { key, basis: Math.max(0, Number(basis) || 0), getippt: false, gewaehlt: 0 };
     w.hidden = false; lage(); zeichnen(); zeitNeu();
     if (wechsel || w.dataset.einmal !== '1') { w.classList.remove('km-neu'); void w.offsetWidth; w.classList.add('km-neu'); w.dataset.einmal = '1'; }
     clearInterval(lageTimer); lageTimer = setInterval(() => { lage(); if (!zeile()) zu(); }, 700);
@@ -279,5 +292,5 @@
     global.addEventListener('adaptive-layout-change', lage);
   }
   if (doc.readyState === 'loading') doc.addEventListener('DOMContentLoaded', los); else los();
-  global.KCMengenfenster = { oeffnen, zu, an, offen: () => (offen ? { ...offen } : null), abzeichen, version: '1.2.0' };
+  global.KCMengenfenster = { oeffnen, zu, an, offen: () => (offen ? { ...offen } : null), abzeichen, version: '1.3.0' };
 })(window);
