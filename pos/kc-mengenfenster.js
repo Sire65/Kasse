@@ -1,4 +1,4 @@
-// KC Kasse – Mengenfenster neben den Kacheln.                                                        Build 1.3.0
+// KC Kasse – Mengenfenster neben den Kacheln.                                                        Build 1.4.0
 // 28.11.2026 (Betreiber: „wenn ich z. B. Kachel Eierpunsch anklicke, soll daneben ein großes Eingabefeld über dem Warenkorb
 // aufgehen mit Buttons für die Menge, dass ich sofort 3 wählen kann. Wähle ich in der Zeit schon einen anderen Artikel, muss das
 // Mengenfenster schon für den nächsten offen sein – das soll nicht irritieren, sondern die Bedienung einfacher und schneller
@@ -20,6 +20,7 @@
 // Kontrast schlecht; tippe ich mehrmals auf eine Kachel, zählt der grüne Haken hoch, im Fenster aber nicht“): i, + und Tür als
 // eigene Grafiken (SVG) genau in der Mitte – unabhängig von Schrift/Emoji des Tablets; Tür weiß mit Pfeil (Ausgang) auf dunkelrot.
 // Erneutes Antippen derselben Kachel zählt im Fenster mit: Markierung = Menge (1–6), große Mengenanzeige.
+// 1.4.0 (Betreiber: „oben die Tür muss gleich sein“): Tür in der Kopfzeile (#headerExitBtn) mit derselben Grafik und Farbe.
 // Zu: Tür 🚪, 25 s ohne Antippen, Bon leer/kassiert, Artikel aus dem Bon gelöscht. GESAMT/BAR/KONTO bleiben immer frei.
 (function (global) {
   'use strict';
@@ -50,6 +51,8 @@
 #kcMenge .km-plus[hidden],#kcMenge .km-rund[hidden]{display:none!important}
 #kcMenge .km-zu{flex:none;width:62px;height:62px;border:3px solid #fff;border-radius:14px;background:#b91c1c;color:#fff;cursor:pointer;box-shadow:0 0 0 2px #7f1d1d}
 #kcMenge .km-zu svg{width:38px;height:38px}
+#headerExitBtn.header-exit-button{background:#b91c1c!important;color:#fff!important;border:2px solid #fff!important;box-shadow:none!important;outline:2px solid #7f1d1d;outline-offset:-4px;display:inline-flex!important;align-items:center!important;justify-content:center!important;padding:0!important;line-height:1!important}
+#headerExitBtn.header-exit-button svg{display:block;width:64%;height:64%;max-width:30px;max-height:30px;pointer-events:none}
 #kcMenge .km-zahlen{flex:1;min-height:0;display:grid;grid-template-columns:repeat(3,1fr);grid-auto-rows:1fr;gap:10px}
 #kcMenge .km-zahl{border:2px solid #cbd5e1;border-radius:16px;background:#f8fafc;color:#0f172a;font:900 46px system-ui;cursor:pointer;touch-action:manipulation;min-height:0}
 #kcMenge .km-zahl:active{background:#dbeafe}
@@ -284,6 +287,7 @@
   }
 
   function los() {
+    stil();   // Tür in der Kopfzeile sofort im neuen Aussehen
     let n = 0;
     const versuch = () => { const a = einhaengen(), b = schalter(), c = abzeichenEinhaengen(); if ((a && b && c) || ++n > 60) return; setTimeout(versuch, 500); };
     setInterval(abzeichenPlanen, 1500);   // Sicherheitsnetz (z. B. Bon von anderer Stelle geleert)
@@ -292,5 +296,5 @@
     global.addEventListener('adaptive-layout-change', lage);
   }
   if (doc.readyState === 'loading') doc.addEventListener('DOMContentLoaded', los); else los();
-  global.KCMengenfenster = { oeffnen, zu, an, offen: () => (offen ? { ...offen } : null), abzeichen, version: '1.3.0' };
+  global.KCMengenfenster = { oeffnen, zu, an, offen: () => (offen ? { ...offen } : null), abzeichen, version: '1.4.0' };
 })(window);
